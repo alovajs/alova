@@ -1,0 +1,27 @@
+{
+  "check-coverage": true,
+  "lines": 75,
+  "statements": 75,
+  "functions": 0,
+  "branches": 75,
+  "require": [
+    "ts-node/register",
+    "source-map-support/register"
+  ],
+  "reporter": [
+    "lcov",
+    "text"
+  ],
+  "extension": [
+    ".ts"
+  ],
+  "include": [
+    "src/**.ts"
+  ],
+  "exclude": [
+    "**/*.d.ts"
+  ],
+  "sourceMap": true,
+  "instrument": true,
+  "all": true
+}
