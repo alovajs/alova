@@ -1,10 +1,10 @@
 {
-  "name": "apoly",
+  "name": "alova",
   "version": "0.0.1",
   "description": "New request library for MVVM such as Vue.js and React.js",
-  "main": "dist/apoly.umd.min.js",
-  "jsnext:main": "dist/apoly.esm.js",
-  "module": "dist/apoly.esm.js",
+  "main": "dist/alova.umd.min.js",
+  "jsnext:main": "dist/alova.esm.js",
+  "module": "dist/alova.esm.js",
   "types": "typings/index.d.ts",
   "sideEffects": false,
   "scripts": {
@@ -24,10 +24,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/JOU-amjs/apoly.git"
+    "url": "git://github.com/JOU-amjs/alova.git"
   },
   "bugs": {
-    "url": "https://github.com/JOU-amjs/apoly/issues"
+    "url": "https://github.com/JOU-amjs/alova/issues"
   },
   "files": [
     "/dist",
