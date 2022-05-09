@@ -1,9 +1,9 @@
-import { StatesHookCreator, StatesHookUpdater } from '../../typings';
+import { RequestState } from '../../typings';
 import { Alova } from '../Alova';
 
-export default class Method<C extends StatesHookCreator, U extends StatesHookUpdater> {
+export default class Method<S extends RequestState> {
   private type: string;
-  public context: Alova<C, U>;
+  public context: Alova<S>;
   constructor(type: string) {
     this.type = type;
   }

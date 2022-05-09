@@ -8,15 +8,15 @@ function create() {
     progress: ref<number>(0),
   };
 }
-type createRequestState = ReturnType<typeof create>;
-type updateRequestState = {
-  [x in keyof createRequestState]: createRequestState[x]['value'];
+type CreateRequestState = ReturnType<typeof create>;
+type UpdateRequestState = {
+  [x in keyof CreateRequestState]: CreateRequestState[x]['value'];
 };
 
 // Vue的预定义hooks
 export default {
   create,
-  update(newVal: updateRequestState, state: createRequestState) {
+  update(newVal: UpdateRequestState, state: CreateRequestState) {
     state.loading.value = newVal.loading;
     state.data.value = newVal.data;
     state.error.value = newVal.error;

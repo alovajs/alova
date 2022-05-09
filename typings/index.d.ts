@@ -6,9 +6,6 @@ type RequestState = {
   error: any,
   progress: any,
 };
-// states hook
-export type StatesHookCreator<R = any> = () => R;
-export type StatesHookUpdater = (newVal: RequestState, state: RequestState) => void;
 // silent config
 export interface SilentConfig {
   push(key: string, config: unknown): void;
@@ -20,15 +17,15 @@ type PersistResponse = {
   get: (key: string) => unknown,
 };
 
-export interface AlovaOptions<C extends StatesHookCreator, U extends StatesHookUpdater> {
+export interface AlovaOptions<S extends RequestState> {
 
   // base地址
   baseURL: string,
 
   // 状态hook函数，用于定义和更新指定MVVM库的状态
   statesHook: {
-    create: C,
-    update: U,
+    create: () => S,
+    update: (newVal: RequestState, state: RequestState) => void,
   },
 
   // 请求超时时间

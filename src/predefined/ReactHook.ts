@@ -1,27 +1,26 @@
-import { useState, Dispatch, SetStateAction } from 'react';
-import { StatesHook } from '../../typings';
+import { useState } from 'react';
 
-type ReactState<T> = [T, Dispatch<SetStateAction<T>>];
-type ReactStatesHook = StatesHook<
-  ReactState<boolean>,
-  ReactState<unknown>,
-  ReactState<Error | null>,
-  ReactState<number>
->;
+
+function create() {
+  return {
+    loading: useState<boolean>(false),
+    data: useState<unknown | null>(null),
+    error: useState<Error | null>(null),
+    progress: useState<number>(0),
+  };
+}
+type CreateRequestState = ReturnType<typeof create>;
+type UpdateRequestState = {
+  [x in keyof CreateRequestState]: CreateRequestState[x][0];
+};
+
 // React的预定义hooks
 export default {
-  create() {
-    return {
-      loading: useState(false),
-      data: useState(null),
-      error: useState(null),
-      progress: useState(0),
-    };
-  },
-  update(newVal, state) {
+  create,
+  update(newVal: UpdateRequestState, state: CreateRequestState) {
     state.loading[1](newVal.loading);
     state.data[1](newVal.data);
     state.error[1](newVal.error);
     state.progress[1](newVal.progress);
   },
-} as ReactStatesHook;
+};

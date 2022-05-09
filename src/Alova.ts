@@ -1,8 +1,7 @@
 import {
   AlovaOptions,
   RequestAdapter,
-  StatesHookCreator,
-  StatesHookUpdater
+  RequestState,
 } from '../typings';
 import Connect from './methods/Connect';
 import Delete from './methods/Delete';
@@ -16,10 +15,10 @@ import Put from './methods/Put';
 import Trace from './methods/Trace';
 import requestAdapter from './predefined/requestAdapter';
 
-export class Alova<C extends StatesHookCreator, U extends StatesHookUpdater> {
+export class Alova<S extends RequestState> {
   private requestAdapter: RequestAdapter<any> = requestAdapter;
-  public options: AlovaOptions<C, U>;
-  constructor(options: AlovaOptions<C, U>) {
+  public options: AlovaOptions<S>;
+  constructor(options: AlovaOptions<S>) {
     this.options = options;
   }
 
@@ -31,7 +30,7 @@ export class Alova<C extends StatesHookCreator, U extends StatesHookUpdater> {
   }
 
   Get(url: string) {
-    const get = new Get<C, U>(url);
+    const get = new Get<S>(url);
     get.context = this;
     return get;
   }
@@ -64,19 +63,19 @@ export class Alova<C extends StatesHookCreator, U extends StatesHookUpdater> {
 
   }
   
-  invalidate(methodInstance: Method<C, U>) {
+  invalidate(methodInstance: Method<S>) {
 
   }
 
-  update(methodInstance: Method<C, U>, handleUpdate: (data: unknown) => unknown) {
+  update(methodInstance: Method<S>, handleUpdate: (data: unknown) => unknown) {
 
   }
   
-  fetch(methodInstance: Method<C, U>) {
+  fetch(methodInstance: Method<S>) {
 
   }
 }
 
-export default function createAlova<C extends StatesHookCreator, U extends StatesHookUpdater>(options: AlovaOptions<C, U>) {
-  return new Alova<C, U>(options);
+export default function createAlova<S extends RequestState>(options: AlovaOptions<S>) {
+  return new Alova<S>(options);
 }

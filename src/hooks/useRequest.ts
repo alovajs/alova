@@ -1,18 +1,17 @@
 import {
-  StatesHookCreator,
-  StatesHookUpdater
+  RequestState,
 } from '../../typings';
 import Method from '../methods/Method';
 import { noop } from '../utils/helper';
 
-export default function useRequest<C extends StatesHookCreator, U extends StatesHookUpdater>(methodInstance: Method<C, U>) {
+export default function useRequest<S extends RequestState>(methodInstance: Method<S>) {
   const state = methodInstance.context.options.statesHook.create();
   let successHandler = noop;
   methodInstance.send().then(() => {
     successHandler();
   });
   return {
-    state,
+    ...state,
     onSuccess(handleSuccess: () => void) {
       successHandler = handleSuccess;
     },
