@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2020-04-10 15:04:50
+ * @LastEditTime: 2022-05-10 21:34:27
  */
 // rollup.config.js
 // ES output
@@ -17,6 +17,7 @@ module.exports = {
         // legacy: true,
         banner: common.banner,
     },
+    external: common.external,
     plugins: [
         common.getCompiler()
     ]

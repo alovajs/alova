@@ -1,5 +1,5 @@
+import { Ref } from 'vue';
 import {
-  AlovaOptions,
   RequestState,
 } from '../../typings';
 import Method from '../methods/Method';
@@ -25,8 +25,12 @@ export default function useRequest<S extends RequestState, E extends RequestStat
     }, originalState);
     successHandler();
   });
+
   return {
     ...exportedState,
+
+    // 以支持React和Vue的方式写法
+    data: exportedState.data as E['data'] extends Ref ? Ref<R> : R,
     onSuccess(handler: () => void) {
       successHandler = handler;
     },

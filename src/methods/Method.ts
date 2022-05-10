@@ -1,5 +1,5 @@
 import { RequestState } from '../../typings';
-import { Alova } from '../Alova';
+import Alova from '../Alova';
 
 export default class Method<S extends RequestState, E extends RequestState, R> {
   private type: string;

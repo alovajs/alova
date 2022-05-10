@@ -15,7 +15,7 @@ import Get from './methods/Get';
 // import Trace from './methods/Trace';
 import requestAdapter from './predefined/requestAdapter';
 
-export class Alova<S extends RequestState, E extends RequestState> {
+export default class Alova<S extends RequestState, E extends RequestState> {
   public requestAdapter: RequestAdapter<any> = requestAdapter;
   public options: AlovaOptions<S, E>;
   constructor(options: AlovaOptions<S, E>) {
@@ -74,8 +74,4 @@ export class Alova<S extends RequestState, E extends RequestState> {
   // fetch(methodInstance: Method<S, E, unknown>) {
 
   // }
-}
-
-export default function createAlova<S extends RequestState, E extends RequestState>(options: AlovaOptions<S, E>) {
-  return new Alova<S, E>(options);
 }

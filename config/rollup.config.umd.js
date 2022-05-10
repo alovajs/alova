@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2020-07-20 20:06:51
+ * @LastEditTime: 2022-05-10 21:51:27
  */ 
 // rollup.config.js
 // umd
@@ -16,6 +16,9 @@ var common = require('./rollup.js');
 
 var prod = process.env.NODE_ENV === 'production';
 
+const globals = {};
+// 将externals中的内容放到globals对象中
+common.external.forEach(key => globals[key] = key);
 module.exports = {
   input: 'src/index.ts',
   output: {
@@ -24,8 +27,10 @@ module.exports = {
     // When export and export default are not used at the same time, set legacy to true.
     // legacy: true,
     name: common.name,
+    globals,
     banner: common.banner,
   },
+  external: common.external,
   plugins: [
     nodeResolve({
       browser: true,
@@ -36,6 +41,7 @@ module.exports = {
     json(),   // 可允许import json文件
     replace({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      preventAssignment: true,
     }),
     (prod && terser()),
   ]

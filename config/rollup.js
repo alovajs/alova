@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-02-12 11:21:49
+ * @LastEditTime: 2022-05-10 21:34:07
  */
 var typescript = require('rollup-plugin-typescript2');
 var pkg = require('../package.json');
@@ -31,3 +31,4 @@ function getCompiler(opt) {
 exports.name = pkg.name;
 exports.banner = banner;
 exports.getCompiler = getCompiler;
+exports.external = ['vue', 'react'];
