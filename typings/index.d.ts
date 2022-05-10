@@ -1,15 +1,15 @@
 export type RequestAdapter<D> = (source, data, config) => Promise<D>;
 
-type RequestState = {
+type RequestState<R = unknown> = {
   loading: any,
-  data: any,
+  data: R,
   error: any,
   progress: any,
 };
 // silent config
 export interface SilentConfig {
-  push(key: string, config: unknown): void;
-  pop(): unknown;
+  push(key: string, config: unknown): void,
+  pop(): unknown,
 }
 // 数据持久化配置
 type PersistResponse = {
@@ -17,15 +17,15 @@ type PersistResponse = {
   get: (key: string) => unknown,
 };
 
-export interface AlovaOptions<S extends RequestState> {
-
+export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   // base地址
   baseURL: string,
 
   // 状态hook函数，用于定义和更新指定MVVM库的状态
   statesHook: {
     create: () => S,
-    update: (newVal: RequestState, state: RequestState) => void,
+    export: (state: S) => E,
+    update: (newVal: Partial<RequestState>, state: S) => void,
   },
 
   // 请求超时时间

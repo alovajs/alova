@@ -19,6 +19,7 @@ const alova = createAlova({
         progress,
       };
     },
+
     update(newVal, state) {
       state.loading.value = newVal.loading;
       state.data.value = newVal.data;
@@ -38,6 +39,13 @@ const alova = createAlova({
     //     error,
     //     progress,
     //   };
+    // },
+    // export(state) {
+    //   const exp = {};
+    //   Object.keys(state).forEach(key => {
+    //     exp[key] = state[key][0];
+    //   });
+    //   return exp;
     // },
     // update(newVal, state) {
     //   state.loading[1](newVal.loading);
