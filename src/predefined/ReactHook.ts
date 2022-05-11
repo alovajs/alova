@@ -1,5 +1,4 @@
-import { useState } from 'react';
-
+import { useEffect, useRef, useState } from 'react';
 
 function create<D>() {
   return {
@@ -30,5 +29,15 @@ export default {
     Object.keys(newVal).forEach(key => {
       state[key as Keys][1](newVal[key as Keys] as any);
     });
+  },
+  watch(args: any[], handler: () => void) {
+    const mountedRef = useRef(false);
+    useEffect(() => {
+      if (mountedRef.current) {
+        mountedRef.current = true;
+        return;
+      }
+      handler();
+    }, args);
   },
 };
