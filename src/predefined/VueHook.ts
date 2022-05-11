@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 function create<R>() {
   return {
@@ -22,5 +22,8 @@ export default {
     Object.keys(newVal).forEach(key => {
       state[key as Keys].value = newVal[key as Keys];
     });
-  }
+  },
+  watch(args: any[], handler: () => void) {
+    watch(args, handler);
+  },
 };

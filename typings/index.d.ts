@@ -26,6 +26,7 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
     create: () => S,
     export: (state: S) => E,
     update: (newVal: Partial<RequestState>, state: S) => void,
+    watch: (args: any[], handler: () => void) => void,
   },
 
   // 请求超时时间

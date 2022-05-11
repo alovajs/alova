@@ -17,7 +17,7 @@ export default class Method<S extends RequestState, E extends RequestState, R> {
     if (response) {
       return response;
     }
-
+    
     // 请求数据
     const rawData = await this.context.requestAdapter(1, 2, 3);
     console.log(this.type, rawData);
