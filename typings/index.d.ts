@@ -1,4 +1,4 @@
-export type RequestAdapter<D> = (source, data, config) => Promise<D>;
+export type RequestAdapter<RC extends Object, R> = (source: string, data: Record<string, any> | FormData, config: RC) => Promise<R>;
 
 type RequestState<R = unknown> = {
   loading: any,
@@ -48,3 +48,13 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   // 如果需要修改请求载体，可以实现该函数
   requestAdapter?: RequestAdapter,
 }
+
+export type MethodConfig<R> = {
+  params?: Record<string, any>,
+  headers?: Record<string, any>,
+  silent?: boolean,
+  timeout?: number,    // 当前中断时间
+  cache?: boolean,     // 设置不缓存，这样每次都能获取最新数据
+  // persist?: boolean,    // 是否持久化响应数据？？？是否参考react-query的initData，
+  transformResponse?: <T>(data: R, headers: Record<string, any>) => T
+};

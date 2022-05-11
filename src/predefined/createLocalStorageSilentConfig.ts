@@ -1,6 +1,6 @@
 export default function createLocalStorageSilentConfig() {
   return {
-    push: (key: string, config: unknown) => {
+    push: (key: string, config: Object) => {
       const silentRequestStorageKey = '__$$silentRequestStorageKey$$__';
       localStorage.setItem(key, JSON.stringify(config));
       const storageKeys = JSON.parse(localStorage.getItem(silentRequestStorageKey) || '[]');

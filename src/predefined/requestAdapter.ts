@@ -1,6 +1,6 @@
 export default function requestAdapter(
   source: string,
-  data: Record<string, any>,
+  data: Record<string, any> | FormData,
   config: Record<string, any>
 ) {
   return fetch(source, {

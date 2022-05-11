@@ -15,12 +15,3 @@ export function createAlova<S extends RequestState,
   E extends RequestState>(options: AlovaOptions<S, E>) {
   return new Alova<S, E>(options);
 }
-
-// const alova = createAlova({
-//   baseURL: '',
-//   statesHook: VueHook,
-//   // statesHook: ReactHook,
-// });
-// const Get = alova.Get<{str: number, name: string}>('', {});
-// const dd = useRequest(Get);
-// dd.data.value.name;
