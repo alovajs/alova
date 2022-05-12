@@ -8,6 +8,9 @@ const alova = createAlova({
   baseURL: '',
   statesHook: VueHook,
   // statesHook: ReactHook,
+  requestAdapter(source, data, config) {
+    return Promise.resolve(123);
+  }
 });
 alova.setRequestInterceptor(config => {
   // config.
@@ -16,7 +19,7 @@ alova.setRequestInterceptor(config => {
   const dd = await response.json();
   return dd;
 });
-
+// alova.requestAdapter();
 
 const Get = alova.Get<{str: number, name: string}>('', {});
 const dd = useRequest(Get);

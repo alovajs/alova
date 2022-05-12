@@ -26,16 +26,21 @@ export default class Method<S extends RequestState, E extends RequestState, R> {
     }
     
     const {
-      options,
-      // reqInter,
-      // resInter,
-    } = this.context;
-    const {
       requestAdapter,
-    } = options;
+      reqInter,
+      resInter,
+    } = this.context;
+    
+    // 发送请求前调用钩子函数
+    const newConfig = reqInter({
+      url: this.url,
+      method: this.type,
+      data: this.data,
+      ...this.config,
+    });
 
     // 请求数据
-    return requestAdapter(1, 2, 3).then((rawData: any) => {
+    return requestAdapter().then((rawData: any) => {
       console.log(this.type, this.url, this.config, rawData);
       return rawData;
     });

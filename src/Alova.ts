@@ -32,12 +32,13 @@ type CommonMethodParameters = {
 }
 
 export default class Alova<S extends RequestState, E extends RequestState> {
-  public requestAdapter: RequestAdapter<any, any> = requestAdapter;
+  public requestAdapter = requestAdapter;
   public options: AlovaOptions<S, E>;
   public reqInter: RequestInterceptor<any>;
   public resInter: ResponseInterceptor<any, any>;
   constructor(options: AlovaOptions<S, E>) {
     this.options = options;
+    this.requestAdapter = options.requestAdapter || requestAdapter;
   }
   
   setRequestInterceptor<RC = RequestInit>(handleRequest: RequestInterceptor<RC & CommonMethodParameters & MethodConfig<Record<string, any>>>) {

@@ -1,4 +1,4 @@
-export type RequestAdapter<RC extends Object, R> = (source: string, data: Record<string, any> | FormData, config: RC) => Promise<R>;
+export type RequestAdapter = (source: string, data: Record<string, any> | FormData | string, config: Record<string, any>) => Promise<any>;
 
 type RequestState<R = unknown> = {
   loading: any,
