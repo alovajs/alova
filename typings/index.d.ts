@@ -49,7 +49,7 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   requestAdapter?: RequestAdapter,
 }
 
-export type MethodConfig<R> = {
+export type MethodConfig<R, RC extends Record<string, any>> = {
   params?: Record<string, any>,
   headers?: Record<string, any>,
   silent?: boolean,
@@ -57,4 +57,4 @@ export type MethodConfig<R> = {
   cache?: boolean,     // 设置不缓存，这样每次都能获取最新数据
   // persist?: boolean,    // 是否持久化响应数据？？？是否参考react-query的initData，
   transformResponse?: <T>(data: R, headers: Record<string, any>) => T
-};
+} & RC;

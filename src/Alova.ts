@@ -41,7 +41,7 @@ export default class Alova<S extends RequestState, E extends RequestState> {
     this.requestAdapter = options.requestAdapter || requestAdapter;
   }
   
-  setRequestInterceptor<RC = RequestInit>(handleRequest: RequestInterceptor<RC & CommonMethodParameters & MethodConfig<Record<string, any>>>) {
+  setRequestInterceptor<RC = RequestInit>(handleRequest: RequestInterceptor<CommonMethodParameters & MethodConfig<Record<string, any>, RC>>) {
     this.reqInter = handleRequest;
     return this;
   }

@@ -11,7 +11,9 @@ export { default as ReactHook } from './predefined/ReactHook';
 export { default as VueHook } from './predefined/VueHook';
 export { default as createLocalStorageSilentConfig } from './predefined/createLocalStorageSilentConfig';
 
-export function createAlova<S extends RequestState,
-  E extends RequestState>(options: AlovaOptions<S, E>) {
+export function createAlova<
+  S extends RequestState,
+  E extends RequestState
+>(options: AlovaOptions<S, E>) {
   return new Alova<S, E>(options);
 }

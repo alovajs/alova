@@ -13,7 +13,6 @@ const alova = createAlova({
   }
 });
 alova.setRequestInterceptor(config => {
-  // config.
   return config;
 }).setResponseInterceptor(async response => {
   const dd = await response.json();
@@ -21,6 +20,8 @@ alova.setRequestInterceptor(config => {
 });
 // alova.requestAdapter();
 
-const Get = alova.Get<{str: number, name: string}>('', {});
+const Get = alova.Get<{str: number, name: string}>('', {
+  
+});
 const dd = useRequest(Get);
 dd.data.value.name;
