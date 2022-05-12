@@ -28,6 +28,9 @@ export function createRequestState<S extends RequestState, E extends RequestStat
   const originalState = create();
   const successHandlers = [] as SuccessHandler[];
 
+  // type fn = NonNullable<typeof method.config.transformResponse>;
+  // type aa = ReturnType<fn>;
+
   // 调用请求处理回调函数
   handleRequest(originalState, successHandlers);
   const exportedState = stateExport(originalState);

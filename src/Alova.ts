@@ -1,57 +1,34 @@
 import {
   AlovaOptions,
   MethodConfig,
-  RequestAdapter,
   RequestState,
 } from '../typings';
 import Delete from './methods/Delete';
 import Get from './methods/Get';
 import Head from './methods/Head';
-import Method, { MethodType } from './methods/Method';
+import Method from './methods/Method';
 import Options from './methods/Options';
 import Patch from './methods/Patch';
 import Post from './methods/Post';
 import Put from './methods/Put';
 import Trace from './methods/Trace';
-import requestAdapter from './predefined/requestAdapter';
 import {
   getCache,
   removeCache,
   setCache,
 } from './cache';
 
-// 获取fetch的第二个参数类型
-type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
-type RequestInterceptor<RC> = (config: RC) => RC|void;
-type ResponseInterceptor<R, D> = (response: R) => Promise<D>;
-export type Data = Record<string, any> | FormData | string;
-type CommonMethodParameters = {
-  url: string,
-  readonly method: MethodType,
-  data?: Data,
-}
 
+export type Data = Record<string, any> | FormData | string;
 export default class Alova<S extends RequestState, E extends RequestState> {
-  public requestAdapter = requestAdapter;
   public options: AlovaOptions<S, E>;
-  public reqInter: RequestInterceptor<any>;
-  public resInter: ResponseInterceptor<any, any>;
   constructor(options: AlovaOptions<S, E>) {
     this.options = options;
-    this.requestAdapter = options.requestAdapter || requestAdapter;
   }
-  
-  setRequestInterceptor<RC = RequestInit>(handleRequest: RequestInterceptor<CommonMethodParameters & MethodConfig<Record<string, any>, RC>>) {
-    this.reqInter = handleRequest;
-    return this;
-  }
-  setResponseInterceptor<R = Response, D = any>(handleResponse: ResponseInterceptor<R, D>) {
-    this.resInter = handleResponse;
-    return this;
-  }
-  Get<R>(url: string, config: MethodConfig<R> = {}) {
+  Get<R>(url: string, config?: MethodConfig<R>) {
     const get = new Get<S, E, R>(url, config);
     get.context = this;
+    // get.send();
     return get;
   }
   Post<R>(url: string, data: Data = {}, config: MethodConfig<R> = {}) {

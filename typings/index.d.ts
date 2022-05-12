@@ -1,5 +1,3 @@
-export type RequestAdapter = (source: string, data: Record<string, any> | FormData | string, config: Record<string, any>) => Promise<any>;
-
 type RequestState<R = unknown> = {
   loading: any,
   data: R,
@@ -17,10 +15,31 @@ type PersistResponse = {
   get: (key: string) => unknown,
 };
 
+type CommonMethodParameters = {
+  url: string,
+  readonly method: MethodType,
+  data?: Data,
+}
+export type MethodConfig<R> = {
+  params?: Record<string, any>,
+  headers?: RequestInit['headers'],
+  silent?: boolean,
+  timeout?: number,    // 当前中断时间
+  cache?: boolean,     // 设置不缓存，这样每次都能获取最新数据
+  // persist?: boolean,    // 是否持久化响应数据？？？是否参考react-query的initData，
+  transformResponse?: <T>(data: R, headers: Record<string, any>) => T
+};
+
+// 获取fetch的第二个参数类型
+type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
+type RequestConfig = CommonMethodParameters & MethodConfig<Record<string, any>> & RequestInit;
+// 泛型类型解释：
+// S: create函数创建的状态组的类型
+// E: export函数返回的状态组的类型
 export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   // base地址
   baseURL: string,
-
+  
   // 状态hook函数，用于定义和更新指定MVVM库的状态
   statesHook: {
     create: () => S,
@@ -44,17 +63,9 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   // 具体持久化方案需自定义，如使用localStorage
   persistResponse?: PersistResponse,
 
-  // 请求适配器，用于定义真实请求发出的载体，默认使用fetch
-  // 如果需要修改请求载体，可以实现该函数
-  requestAdapter?: RequestAdapter,
-}
+  // 全局的请求前置钩子
+  beforeRequest?: (config: RequestConfig) => RequestConfig | void,
 
-export type MethodConfig<R, RC extends Record<string, any>> = {
-  params?: Record<string, any>,
-  headers?: Record<string, any>,
-  silent?: boolean,
-  timeout?: number,    // 当前中断时间
-  cache?: boolean,     // 设置不缓存，这样每次都能获取最新数据
-  // persist?: boolean,    // 是否持久化响应数据？？？是否参考react-query的initData，
-  transformResponse?: <T>(data: R, headers: Record<string, any>) => T
-} & RC;
+  // 全局的响应钩子
+  responsed?: (response: Response) => Promise<any>,
+}
