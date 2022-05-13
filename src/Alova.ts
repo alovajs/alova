@@ -17,51 +17,52 @@ import {
   removeCache,
   setCache,
 } from './cache';
+import { key, sendRequest } from './utils/helper';
 
 
-export type Data = Record<string, any> | FormData | string;
+export type RequestBody = Record<string, any> | FormData | string;
 export default class Alova<S extends RequestState, E extends RequestState> {
   public options: AlovaOptions<S, E>;
   constructor(options: AlovaOptions<S, E>) {
     this.options = options;
   }
-  Get<R>(url: string, config?: MethodConfig<R>) {
-    const get = new Get<S, E, R>(url, config);
+  Get<R, T = any>(url: string, config?: MethodConfig<R, T>) {
+    const get = new Get<S, E, R, T>(url, config);
     get.context = this;
     return get;
   }
-  Post<R>(url: string, data: Data = {}, config: MethodConfig<R> = {}) {
-    const post = new Post<S, E, R>(url, data, config);
+  Post<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
+    const post = new Post<S, E, R, T>(url, data, config);
     post.context = this;
     return post;
   }
-  Delete<R>(url: string, data: Data = {}, config: MethodConfig<R> = {}) {
-    const del = new Delete<S, E, R>(url, data, config);
+  Delete<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
+    const del = new Delete<S, E, R, T>(url, data, config);
     del.context = this;
     return del;
   }
-  Put<R>(url: string, data: Data = {}, config: MethodConfig<R> = {}) {
-    const put = new Put<S, E, R>(url, data, config);
+  Put<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
+    const put = new Put<S, E, R, T>(url, data, config);
     put.context = this;
     return put;
   }
-  Head<R>(url: string, config: MethodConfig<R> = {}) {
-    const head = new Head<S, E, R>(url, config);
+  Head<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
+    const head = new Head<S, E, R, T>(url, config);
     head.context = this;
     return head;
   }
-  Patch<R>(url: string, config: MethodConfig<R> = {}) {
-    const patch = new Patch<S, E, R>(url, config);
+  Patch<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
+    const patch = new Patch<S, E, R, T>(url, config);
     patch.context = this;
     return patch;
   }
-  Options<R>(url: string, config: MethodConfig<R> = {}) {
-    const options = new Options<S, E, R>(url, config);
+  Options<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
+    const options = new Options<S, E, R, T>(url, config);
     options.context = this;
     return options;
   }
-  Trace<R>(url: string, config: MethodConfig<R> = {}) {
-    const trace = new Trace<S, E, R>(url, config);
+  Trace<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
+    const trace = new Trace<S, E, R, T>(url, config);
     trace.context = this;
     return trace;
   }
@@ -74,8 +75,8 @@ export default class Alova<S extends RequestState, E extends RequestState> {
    * 让对应的缓存失效
    * @param method 请求方法对象
    */
-  invalidate(method: Method<S, E, unknown>) {
-    removeCache(this.options.baseURL, method.key());
+  invalidate(method: Method<S, E, unknown, unknown>) {
+    removeCache(this.options.baseURL, key(method));
   }
 
   /**
@@ -83,9 +84,9 @@ export default class Alova<S extends RequestState, E extends RequestState> {
    * @param method 请求方法对象
    * @param handleUpdate 更新回调
    */
-  update(method: Method<S, E, unknown>, handleUpdate: (data: unknown) => unknown) {
+  update(method: Method<S, E, unknown, unknown>, handleUpdate: (data: unknown) => unknown) {
     const { baseURL } = this.options;
-    const methodKey = method.key();
+    const methodKey = key(method);
     const data = getCache(baseURL, methodKey);
     if (data) {
       const newData = handleUpdate(data);
@@ -97,10 +98,10 @@ export default class Alova<S extends RequestState, E extends RequestState> {
    * 获取请求数据并缓存
    * @param method 请求方法对象
    */
-  fetch(method: Method<S, E, unknown>) {
+  fetch(method: Method<S, E, unknown, unknown>) {
     // 调用请求函数
-    method.send().then((data: any) => {
-      data && setCache(this.options.baseURL, method.key(), data);
+    sendRequest(method).then((data: any) => {
+      data && setCache(this.options.baseURL, key(method), data);
     });
   }
 }

@@ -1,8 +1,8 @@
 import { RequestState } from '../../typings';
 import Method from '../methods/Method';
-import { createRequestState } from '../utils/helper';
+import { createRequestState, sendRequest } from '../utils/helper';
 
-export default function useEffectWatcher<S extends RequestState, E extends RequestState, R>(handler: () => Method<S, E, R>, ...watchingValues: any[]) {
+export default function useEffectWatcher<S extends RequestState, E extends RequestState, R, T>(handler: () => Method<S, E, R, T>, ...watchingValues: any[]) {
   const method = handler();
   return createRequestState(method, (originalState, successHandlers) => {
     const {
@@ -15,7 +15,7 @@ export default function useEffectWatcher<S extends RequestState, E extends Reque
       update({
         loading: true,
       }, originalState);
-      method.send().then(data => {
+      sendRequest(method).then(data => {
         update({
           loading: false,
           data,

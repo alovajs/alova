@@ -1,9 +1,9 @@
 import { MethodConfig, RequestState } from '../../typings';
-import { Data } from '../Alova';
+import { RequestBody } from '../Alova';
 import Method from './Method';
 
-export default class Delete<S extends RequestState, E extends RequestState, R> extends Method<S, E, R> {
-  constructor(url: string, data: Data, config: MethodConfig<R>) {
-    super('DELETE', url, config, data);
+export default class Delete<S extends RequestState, E extends RequestState, R, T> extends Method<S, E, R, T> {
+  constructor(url: string, requestBody: RequestBody, config: MethodConfig<R, T>) {
+    super('DELETE', url, config, requestBody);
   }
 }

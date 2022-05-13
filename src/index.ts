@@ -4,6 +4,7 @@ import {
 } from '../typings';
 import Alova from './Alova';
 export { default as useRequest } from './hooks/useRequest';
+export { default as useManual } from './hooks/useManual';
 export { default as useWatcher } from './hooks/useWatcher';
 export { default as useEffectWatcher } from './hooks/useEffectWatcher';
 

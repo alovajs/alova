@@ -2,7 +2,8 @@ import {
   createAlova,
   VueHook,
   useRequest,
-  ReactHook
+  ReactHook,
+  useManual
 } from '../../../src';
 
 const alova = createAlova({
@@ -22,14 +23,20 @@ const alova = createAlova({
   }
 });
 
-const Get = alova.Get<{str: number, name: string}>('', {
+const Get = alova.Get<{str: number, name: string}, { SSS: string }>('', {
   params: {},
   headers: {
     'Content-Type': 'application/json'
   },
-  responsed(data: number, headers) {
+  responsed(data, headers) {
     return data;
+  },
+  staleTime(s, b, m) {
+    return 1;
   }
 });
 const dd = useRequest(Get);
 dd.data.value.str;
+
+const mm = useManual(Get);
+mm.run();
