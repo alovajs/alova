@@ -1,7 +1,8 @@
 import {
   createAlova,
   VueHook,
-  useRequest
+  useRequest,
+  ReactHook
 } from '../../../src';
 
 const alova = createAlova({
@@ -20,19 +21,14 @@ const alova = createAlova({
     // return Promise.resolve('abc');
   }
 });
-// .setResponseInterceptor(async response => {
-//   const dd = await response.json();
-//   return dd;
-// });
-// alova.requestAdapter();
 
 const Get = alova.Get<{str: number, name: string}>('', {
   params: {},
   headers: {
     'Content-Type': 'application/json'
   },
-  transformResponse(data, headers) {
-    return '';
+  responsed(data: number, headers) {
+    return data;
   }
 });
 const dd = useRequest(Get);

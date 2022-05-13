@@ -20,14 +20,19 @@ type CommonMethodParameters = {
   readonly method: MethodType,
   data?: Data,
 }
+
+// 局部的请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
+// 时间为秒，小于等于0不缓存，Infinity为永不过期
+// 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存时间
+type StaleTime = number | ((data: any, headers: Record<string, any>) => number);
 export type MethodConfig<R> = {
   params?: Record<string, any>,
   headers?: RequestInit['headers'],
   silent?: boolean,
   timeout?: number,    // 当前中断时间
-  cache?: boolean,     // 设置不缓存，这样每次都能获取最新数据
+  staleTime?: StaleTime,
   // persist?: boolean,    // 是否持久化响应数据？？？是否参考react-query的initData，
-  transformResponse?: <T>(data: R, headers: Record<string, any>) => T
+  responsed?: (data: any, headers: Record<string, any>) => any,
 };
 
 // 获取fetch的第二个参数类型
@@ -52,8 +57,9 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   timeout?: number,
 
   // 请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
-  // 时间为毫秒，小于等于0不缓存，Infinity为永不过期
-  staleTime?: number,
+  // 时间为秒，小于等于0不缓存，Infinity为永不过期
+  // 也可以设置函数，参数为responsed转化后的返回数据和headers对象，返回缓存时间
+  staleTime?: StaleTime,
 
   // 静默请求配置
   // 以下的key都是自动拼接了对应前缀的key

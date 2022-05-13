@@ -28,7 +28,6 @@ export default class Alova<S extends RequestState, E extends RequestState> {
   Get<R>(url: string, config?: MethodConfig<R>) {
     const get = new Get<S, E, R>(url, config);
     get.context = this;
-    // get.send();
     return get;
   }
   Post<R>(url: string, data: Data = {}, config: MethodConfig<R> = {}) {
