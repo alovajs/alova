@@ -18,6 +18,7 @@ const alova = createAlova({
     return config;
   },
   responsed(data) {
+    console.log(123);
     return data.json();
     // return Promise.resolve('abc');
   }
