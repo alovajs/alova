@@ -7,7 +7,7 @@ import {
   sendRequest
 } from '../utils/helper';
 
-export default function useManual<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
+export default function useController<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
   let originalState: S;
   let successHandlers: Function[];
   let errorHandlers: Function[];
@@ -17,9 +17,9 @@ export default function useManual<S extends RequestState, E extends RequestState
       successHandlers = successHandlersRaw;
       errorHandlers = errorHandlersRaw;
     }),
-
+    
     // 通过执行该方法来手动发起请求
-    run() {
+    send() {
       const { update } = method.context.options.statesHook;
       update({
         loading: true,

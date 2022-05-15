@@ -173,7 +173,7 @@ const {
 // 监听某个值变化，变化则重新请求
 const page = ref(1);
 const searchText = ref('');
-useWatcher(() => getter(page.value, searchText.value), page, searchText);
+useWatcher(() => getter(page.value, searchText.value), [page, searchText]);
 
 
 // 发起普通get请求，返回Promise

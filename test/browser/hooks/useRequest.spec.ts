@@ -3,7 +3,8 @@ import {
   VueHook,
   useRequest,
   ReactHook,
-  useManual
+  useController,
+  useWatcher,
 } from '../../../src';
 
 const alova = createAlova({
@@ -39,5 +40,10 @@ const Get = alova.Get<{str: number, name: string}, { SSS: string }>('', {
 const dd = useRequest(Get);
 dd.data.value.str;
 
-const mm = useManual(Get);
-mm.run();
+const mm = useController(Get);
+mm.send();
+
+const ww = useWatcher(() => Get, [], {
+  effect: true
+});
+ww.progress.value;
