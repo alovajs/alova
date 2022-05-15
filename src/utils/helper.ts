@@ -3,7 +3,6 @@ import {
   RequestState
 } from '../../typings';
 import Method from '../methods/Method';
-import requestAdapter from '../predefined/requestAdapter';
 
 /**
  * 空函数，做兼容处理
@@ -75,7 +74,8 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     
     const {
       beforeRequest = noop,
-      responsed = noop
+      responsed = noop,
+      requestAdapter,
     } = method.context.options;
 
     // 发送请求前调用钩子函数
@@ -86,17 +86,29 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
       ...config,
     });
 
+    // 将params对象转换为get字符串
+    const {
+      url: newUrl,
+      params,
+      data,
+    } = newConfig;
+    let paramsStr = params ? Object.keys(params).map(key => `${key}=${params[key]}`).join('&') : '';
+
+    // 将get参数拼接到url后面，注意url可能已存在参数
+    const urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
+    
     // 请求数据
-    return requestAdapter('', '', {}).then((rawData: any) => {
-      console.log(type, url, config, rawData);
-      return rawData;
-    });
+    return requestAdapter(urlWithParams, data, newConfig)
+      .then((rawData: any) => {
+        console.log(type, url, config, rawData);
+        return responsed(rawData);
+      });
 }
 
 /**
-   * 获取请求方式的key值
-   * @returns {string} 此请求方式的key值
-   */
+ * 获取请求方式的key值
+ * @returns {string} 此请求方式的key值
+ */
 export function key<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
   return JSON.stringify([
     method.type,
@@ -105,4 +117,23 @@ export function key<S extends RequestState, E extends RequestState, R, T>(method
     method.requestBody,
     method.config.headers,
   ]);
+}
+
+
+/**
+ * 创建节流函数
+ * @param fn 回调函数
+ * @param delay 延迟描述
+ * @returns 延迟后的回调函数
+ */
+export function debounce(fn: Function, delay: number) {
+  let timer: any = null;
+  return function(this: any, ...args: any[]) {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
+  };
 }

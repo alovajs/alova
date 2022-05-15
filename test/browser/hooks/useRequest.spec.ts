@@ -5,11 +5,13 @@ import {
   ReactHook,
   useController,
   useWatcher,
+  GlobalFetch,
 } from '../../../src';
 
 const alova = createAlova({
   baseURL: '',
   statesHook: VueHook,
+  requestAdapter: GlobalFetch,
   // statesHook: ReactHook,
   beforeRequest(config) {
     config.url

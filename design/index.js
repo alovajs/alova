@@ -165,10 +165,15 @@ const {
   error,
   progress,
   onSuccess,
+  onError,
+  abort
 } = useRequest(getter(1, 2));
 const {
   // ...
 } = useRequest(poster(1, 2));
+
+// 手动中断请求
+abort();
 
 // 监听某个值变化，变化则重新请求
 const page = ref(1);
@@ -180,12 +185,6 @@ useWatcher(() => getter(page.value, searchText.value), [page, searchText]);
 const getData = await getter(1, 2).send();
 // 发起普通post请求，返回Promise
 const postData = await poster(3, 4).send();
-
-// 手动中断请求
-const abort = new Alova.Abort();
-const getData2 = await getter(1, 2).setAbort(abort).send();
-abort.do();
-
 
 // 让一个key失效
 onSuccess(() => {

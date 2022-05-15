@@ -1,3 +1,14 @@
+type RequestAdapter<R, T> = (
+  source: string,
+  data: RequestBody,
+  config: RequestInit,
+  options?: MethodConfig<R, T>
+) => {
+  response: () => Promise<Response>,
+  progress: () => Promise<number>,
+  abort: () => void,
+};
+
 type RequestState<R = unknown> = {
   loading: any,
   data: R,
@@ -23,7 +34,7 @@ type CommonMethodParameters = {
 }
 
 // 局部的请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
-// 时间为秒，小于等于0不缓存，Infinity为永不过期
+// 时间为毫秒，小于等于0不缓存，Infinity为永不过期
 // 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存时间
 type StaleTime<T> = number | ((data: T, headers: Record<string, any>, method: MethodType) => number);
 export type MethodConfig<R, T> = {
@@ -34,7 +45,7 @@ export type MethodConfig<R, T> = {
   staleTime?: StaleTime<T>,   // get、head请求默认缓存5分钟（300秒），其他请求默认不缓存
   persist?: boolean,    // 持久化响应数据
   responsed?: (data: T, headers: Record<string, any>) => any,
-} & RequestInit;
+};
 
 // 获取fetch的第二个参数类型
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
@@ -53,6 +64,9 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
     update: (newVal: Partial<RequestState>, state: S) => void,
     watch: (args: any[], handler: () => void) => void,
   },
+
+  // 请求适配器
+  requestAdapter: RequestAdapter,
 
   // 请求超时时间
   timeout?: number,
