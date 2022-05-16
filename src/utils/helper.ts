@@ -3,7 +3,7 @@ import {
   RequestAdapter,
   RequestState
 } from '../../typings';
-import { setStateCache } from '../cache';
+import { getResponseCache, setResponseCache, setStateCache } from '../cache';
 import Method from '../methods/Method';
 
 /**
@@ -71,54 +71,85 @@ export function createRequestState<S extends RequestState, E extends RequestStat
  */
 export function sendRequest<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
   const {
-    response,
     type,
     url,
     config,
     requestBody
   } = method;
-    if (response) {
-      return {
-        response: () => Promise.resolve(response),
-        progress: () => {},
-        abort: noop,
-      };
-    }
-    
-    const {
-      beforeRequest = noop,
-      responsed = noop,
-      requestAdapter,
-    } = method.context.options;
+  const {
+    baseURL,
+    beforeRequest = noop,
+    responsed: alovaResponsed = noop,
+    requestAdapter,
+    staleTime = 0,
+  } = method.context.options;
+  const responsed = config.responsed || alovaResponsed;
+  const methodKey = key(method);
 
-    // 发送请求前调用钩子函数
-    const newConfig = beforeRequest({
-      url,
-      method: type,
-      data: requestBody,
-      ...config,
-    });
-
-    // 将params对象转换为get字符串
-    const {
-      url: newUrl,
-      params,
-      data,
-    } = newConfig;
-    let paramsStr = params ? Object.keys(params).map(key => `${key}=${params[key]}`).join('&') : '';
-
-    // 将get参数拼接到url后面，注意url可能已存在参数
-    const urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
-    
-    // 请求数据
-    const ctrls = requestAdapter(urlWithParams, data, newConfig);
+  const response = getResponseCache(baseURL, methodKey);
+  if (response) {
     return {
-      ...ctrls,
-      response: () => ctrls.response().then(rawData => responsed(rawData)),
-    }
+      response: () => Promise.resolve(response),
+      headers: () => Promise.resolve({} as Headers),
+      progress: () => {},
+      abort: noop,
+    };
+  }
+
+  // 发送请求前调用钩子函数
+  const newConfig = beforeRequest({
+    url,
+    method: type,
+    data: requestBody,
+    ...config,
+  });
+
+  // 将params对象转换为get字符串
+  const {
+    url: newUrl,
+    params,
+    data,
+  } = newConfig;
+  let paramsStr = params ? Object.keys(params).map(key => `${key}=${params[key]}`).join('&') : '';
+
+  // 将get参数拼接到url后面，注意url可能已存在参数
+  const urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
+  
+  // 请求数据
+  const ctrls = requestAdapter(urlWithParams, data, newConfig);
+  return {
+    ...ctrls,
+    response: () => Promise.all([
+      ctrls.response(),
+      ctrls.headers(),
+    ]).then(([rawResponse, headers]) => {
+      // 将响应数据存入缓存，以便后续调用
+      const responsedData = responsed(rawResponse, headers);
+      let ret = responsedData;
+      if (responsedData instanceof Promise) {
+        ret = responsedData.then(data => {
+          const expireMilliseconds = typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
+          setResponseCache(baseURL, methodKey, data, expireMilliseconds);
+          return data;
+        });
+      } else {
+        const expireMilliseconds = typeof staleTime === 'function' ? staleTime(responsedData, headers, type) : staleTime;
+        setResponseCache(baseURL, methodKey, responsedData, expireMilliseconds);
+      }
+      return ret;
+    }),
+  }
 }
 
 
+/**
+ * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
+ * @param method 请求方法对象
+ * @param originalState 原始状态
+ * @param successHandlers 成功回调函数数组
+ * @param errorHandlers 失败回调函数数组
+ * @returns 请求状态
+ */
 export function useHookRequest<S extends RequestState, E extends RequestState, R, T>(
   method: Method<S, E, R, T>,
   originalState: S,

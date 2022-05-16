@@ -5,6 +5,7 @@ type RequestAdapter<R, T> = (
   options?: MethodConfig<R, T>
 ) => {
   response: () => Promise<Response>,
+  headers: () => Promise<Headers>,
   progress: (callback: (value: number) => void) => void,
   abort: () => void,
 };
@@ -36,13 +37,13 @@ type CommonMethodParameters = {
 // 局部的请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
 // 时间为毫秒，小于等于0不缓存，Infinity为永不过期
 // 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存时间
-type StaleTime<T> = number | ((data: T, headers: Record<string, any>, method: MethodType) => number);
+type StaleTime<R> = number | ((data: R, headers: Record<string, any>, method: MethodType) => number);
 export type MethodConfig<R, T> = {
   params?: Record<string, any>,
   headers?: RequestInit['headers'],
   silent?: boolean,
   timeout?: number,    // 当前中断时间
-  staleTime?: StaleTime<T>,   // get、head请求默认缓存5分钟（300秒），其他请求默认不缓存
+  staleTime?: StaleTime<R>,   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
   enableProgress?: boolean,   // 是否启用进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   persist?: boolean,    // 持久化响应数据
   responsed?: (data: T, headers: Record<string, any>) => R,
@@ -74,9 +75,9 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
 
   // 请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
   // 时间为秒，小于等于0不缓存，Infinity为永不过期
-  // get、head请求默认缓存5分钟（300秒），其他请求默认不缓存
+  // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
   // 也可以设置函数，参数为responsed转化后的返回数据和headers对象，返回缓存时间
-  staleTime?: StaleTime,
+  staleTime?: StaleTime<any>,
 
   // 静默请求配置
   // 以下的key都是自动拼接了对应前缀的key

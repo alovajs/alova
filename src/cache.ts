@@ -33,11 +33,11 @@ export function getResponseCache(baseURL: string, key: string) {
  * @param key 请求key值
  * @param data 缓存数据
  */
-export function setResponseCache(baseURL: string, key: string, data: unknown) {
+export function setResponseCache(baseURL: string, key: string, data: unknown, expireMilliseconds: number) {
   const cachedResponse = responseCache[baseURL] = responseCache[baseURL] || {};
   cachedResponse[key] = {
     data,
-    expireTime: new Date(),
+    expireTime: new Date(Date.now() + expireMilliseconds),
   };
 }
 

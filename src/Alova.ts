@@ -19,10 +19,11 @@ import {
 } from './cache';
 import { key, sendRequest } from './utils/helper';
 
-
+let idCounter = 0;
 export type RequestBody = Record<string, any> | FormData | string;
 export default class Alova<S extends RequestState, E extends RequestState> {
   public options: AlovaOptions<S, E>;
+  public id = `alova-${++idCounter}`;
   constructor(options: AlovaOptions<S, E>) {
     this.options = options;
   }
@@ -96,13 +97,41 @@ export default class Alova<S extends RequestState, E extends RequestState> {
    * @param method 请求方法对象
    */
   fetch(method: Method<S, E, unknown, unknown>) {
+    const {
+      baseURL,
+      staleTime,
+      responsed,
+    } = this.options;
     // 调用请求函数
     const {
-      response
+      response,
+      headers,
     } = sendRequest(method);
-    response().then(data => {
-      // TODO: 是否需要同步更新到data状态中？？？
-      data && setResponseCache(this.options.baseURL, key(method), data);
+    // Promise.all([response(), headers()]).then(([data, headers]) => {
+    //   // TODO: 是否需要同步更新到data状态中？？？
+    //   if (data && )
+    //   const expireMilliseconds = typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
+    //    && setResponseCache(baseURL, key(method), data, expireMilliseconds);
+    // });
+
+    Promise.all([
+      response(),
+      headers(),
+    ]).then(([rawResponse, headers]) => {
+      // 将响应数据存入缓存，以便后续调用
+      const responsedData = responsed(rawResponse);
+      let ret = responsedData;
+      if (responsedData instanceof Promise) {
+        ret = responsedData.then(data => {
+          const expireMilliseconds = typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
+          setResponseCache(baseURL, methodKey, data, expireMilliseconds);
+          return data;
+        });
+      } else {
+        const expireMilliseconds = typeof staleTime === 'function' ? staleTime(responsedData, headers, type) : staleTime;
+        setResponseCache(baseURL, methodKey, responsedData, expireMilliseconds);
+      }
+      return ret;
     });
   }
 }

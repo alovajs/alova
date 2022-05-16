@@ -24,6 +24,7 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
     
     return {
       response: () => fetchPromise,
+      headers: () => fetchPromise.then(({ headers }) => headers),
       progress: (cb: (value: number) => void) => {
         fetchPromise.then(response => {
           const contentLength = Number(response.headers.get('Content-Length')) || 1;
