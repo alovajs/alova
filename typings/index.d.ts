@@ -5,7 +5,7 @@ type RequestAdapter<R, T> = (
   options?: MethodConfig<R, T>
 ) => {
   response: () => Promise<Response>,
-  progress: () => Promise<number>,
+  progress: (callback: (value: number) => void) => void,
   abort: () => void,
 };
 
@@ -43,8 +43,9 @@ export type MethodConfig<R, T> = {
   silent?: boolean,
   timeout?: number,    // 当前中断时间
   staleTime?: StaleTime<T>,   // get、head请求默认缓存5分钟（300秒），其他请求默认不缓存
+  enableProgress?: boolean,   // 是否启用进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   persist?: boolean,    // 持久化响应数据
-  responsed?: (data: T, headers: Record<string, any>) => any,
+  responsed?: (data: T, headers: Record<string, any>) => R,
 };
 
 // 获取fetch的第二个参数类型
@@ -66,7 +67,7 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   },
 
   // 请求适配器
-  requestAdapter: RequestAdapter,
+  requestAdapter: RequestAdapter<unknown, unknown>,
 
   // 请求超时时间
   timeout?: number,

@@ -181,10 +181,10 @@ const searchText = ref('');
 useWatcher(() => getter(page.value, searchText.value), [page, searchText]);
 
 
-// 发起普通get请求，返回Promise
-const getData = await getter(1, 2).send();
-// 发起普通post请求，返回Promise
-const postData = await poster(3, 4).send();
+// // 发起普通get请求，返回Promise
+// const getData = await getter(1, 2).send();
+// // 发起普通post请求，返回Promise
+// const postData = await poster(3, 4).send();
 
 // 让一个key失效
 onSuccess(() => {

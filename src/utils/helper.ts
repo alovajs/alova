@@ -1,7 +1,9 @@
 import { Ref } from 'vue';
 import {
+  RequestAdapter,
   RequestState
 } from '../../typings';
+import { setStateCache } from '../cache';
 import Method from '../methods/Method';
 
 /**
@@ -9,8 +11,9 @@ import Method from '../methods/Method';
  */
 export function noop() {}
 
-type SuccessHandler = () => void;
-type ErrorHandler = (error: Error) => void;
+export type SuccessHandler = () => void;
+export type ErrorHandler = (error: Error) => void;
+export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -21,25 +24,26 @@ type ErrorHandler = (error: Error) => void;
 type HandleRequest<S> = (
   originalState: S,
   successHandlers: SuccessHandler[],
-  errorHandlers: ErrorHandler[]
+  errorHandlers: ErrorHandler[],
+  setCtrl: (ctrl: ConnectController) => void,
 ) => void;
 export function createRequestState<S extends RequestState, E extends RequestState, R, T>(
   method: Method<S, E, R, T>, 
   handleRequest: HandleRequest<S>
 ) {
+  const options = method.context.options;
   const {
     create,
     export: stateExport,
-  } = method.context.options.statesHook;
+  } = options.statesHook;
   const originalState = create();
+  setStateCache(options.baseURL, key(method), originalState);   // 将初始状态存入缓存以便后续更新
   const successHandlers = [] as SuccessHandler[];
   const errorHandlers = [] as ErrorHandler[];
-
-  // type fn = NonNullable<typeof method.config.transformResponse>;
-  // type aa = ReturnType<fn>;
+  let ctrl: ConnectController;
 
   // 调用请求处理回调函数
-  handleRequest(originalState, successHandlers, errorHandlers);
+  handleRequest(originalState, successHandlers, errorHandlers, newCtrl => ctrl = newCtrl);
   const exportedState = stateExport(originalState);
   return {
     ...exportedState,
@@ -51,6 +55,11 @@ export function createRequestState<S extends RequestState, E extends RequestStat
     onError(handler: ErrorHandler) {
       errorHandlers.push(handler);
     },
+    abort() {
+      if (ctrl) {
+        ctrl.abort();
+      }
+    }
   };
 }
 
@@ -69,7 +78,11 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     requestBody
   } = method;
     if (response) {
-      return Promise.resolve(response);
+      return {
+        response: () => Promise.resolve(response),
+        progress: () => {},
+        abort: noop,
+      };
     }
     
     const {
@@ -98,12 +111,44 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     const urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
     
     // 请求数据
-    return requestAdapter(urlWithParams, data, newConfig)
-      .then((rawData: any) => {
-        console.log(type, url, config, rawData);
-        return responsed(rawData);
-      });
+    const ctrls = requestAdapter(urlWithParams, data, newConfig);
+    return {
+      ...ctrls,
+      response: () => ctrls.response().then(rawData => responsed(rawData)),
+    }
 }
+
+
+export function useHookRequest<S extends RequestState, E extends RequestState, R, T>(
+  method: Method<S, E, R, T>,
+  originalState: S,
+  successHandlers: SuccessHandler[],
+  errorHandlers: ErrorHandler[],
+) {
+  const { update } = method.context.options.statesHook;
+  update({
+    loading: true,
+  }, originalState);
+  const ctrl = sendRequest(method);
+  const {
+    response,
+    progress,
+  } = ctrl;
+
+  response().then(data => {
+    update({ data }, originalState);
+    successHandlers.forEach(handler => handler());
+  }).catch((error: Error) => errorHandlers.forEach(handler => handler(error)))
+  .finally(() => update({
+    loading: false,
+  }, originalState));
+
+  if (method.config.enableProgress) {
+    progress(value => update({ progress: value }, originalState));
+  }
+  return ctrl;
+}
+
 
 /**
  * 获取请求方式的key值

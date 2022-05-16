@@ -1,6 +1,10 @@
 import { RequestState } from '../../typings';
 import Method from '../methods/Method';
-import { createRequestState, debounce, sendRequest } from '../utils/helper';
+import {
+  createRequestState,
+  debounce,
+  useHookRequest
+} from '../utils/helper';
 
 interface WatcherConfig {
   effect?: boolean,  // 开启effect后，useWatcher初始化时会自动发起一次请求
@@ -8,24 +12,15 @@ interface WatcherConfig {
 }
 export default function useWatcher<S extends RequestState, E extends RequestState, R, T>(handler: () => Method<S, E, R, T>, watchingStates: any[], { effect, debounce: debounceDelay }: WatcherConfig = {}) {
   const method = handler();
-  return createRequestState(method, (originalState, successHandlers) => {
+  return createRequestState(method, (originalState, successHandlers, errorHandlers, setCtrl) => {
     const {
-      update,
-      watch
+      watch,
     } = method.context.options.statesHook;
-
+    
     const handleWatch = () => {
       const method = handler();
-      update({
-        loading: true,
-      }, originalState);
-      sendRequest(method).then(data => {
-        update({
-          loading: false,
-          data,
-        }, originalState);
-        successHandlers.forEach(handler => handler());
-      });
+      const ctrl = useHookRequest(method, originalState, successHandlers, errorHandlers);
+      setCtrl(ctrl);    // 将控制器传出去供使用者调用
     };
     // 如果需要节流，则使用节流函数外封装一层
     debounceDelay = debounceDelay || 0;

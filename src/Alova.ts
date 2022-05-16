@@ -13,9 +13,9 @@ import Post from './methods/Post';
 import Put from './methods/Put';
 import Trace from './methods/Trace';
 import {
-  getCache,
-  removeCache,
-  setCache,
+  getStateCache,
+  removeResponseCache,
+  setResponseCache,
 } from './cache';
 import { key, sendRequest } from './utils/helper';
 
@@ -72,11 +72,11 @@ export default class Alova<S extends RequestState, E extends RequestState> {
   // }
   
   /**
-   * 让对应的缓存失效
+   * 让对应的返回数据缓存失效
    * @param method 请求方法对象
    */
   invalidate(method: Method<S, E, unknown, unknown>) {
-    removeCache(this.options.baseURL, key(method));
+    removeResponseCache(this.options.baseURL, key(method));
   }
 
   /**
@@ -87,11 +87,8 @@ export default class Alova<S extends RequestState, E extends RequestState> {
   update(method: Method<S, E, unknown, unknown>, handleUpdate: (data: unknown) => unknown) {
     const { baseURL } = this.options;
     const methodKey = key(method);
-    const data = getCache(baseURL, methodKey);
-    if (data) {
-      const newData = handleUpdate(data);
-      newData && setCache(baseURL, methodKey, newData);
-    }
+    const states = getStateCache(baseURL, methodKey);
+    states && handleUpdate(states.data);
   }
   
   /**
@@ -100,8 +97,12 @@ export default class Alova<S extends RequestState, E extends RequestState> {
    */
   fetch(method: Method<S, E, unknown, unknown>) {
     // 调用请求函数
-    sendRequest(method).then((data: any) => {
-      data && setCache(this.options.baseURL, key(method), data);
+    const {
+      response
+    } = sendRequest(method);
+    response().then(data => {
+      // TODO: 是否需要同步更新到data状态中？？？
+      data && setResponseCache(this.options.baseURL, key(method), data);
     });
   }
 }
