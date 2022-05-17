@@ -180,6 +180,17 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
     myAssert(!!silentConfig, 'silentConfig is required when silent is true');
     methodKey = key(method);
     successHandlers.forEach(handler => handler());
+    
+    // silent模式下，如果网络离线的话就不再实际请求了
+    if (!window.navigator.onLine) {
+      silentConfig?.push(methodKey, serializeMethod(method));
+      return {
+        response: () => Promise.resolve(null),
+        headers: () => Promise.resolve({} as Headers),
+        progress: () => {},
+        abort: noop,
+      };
+    }
   }
 
   update({
