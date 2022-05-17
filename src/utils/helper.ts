@@ -1,15 +1,20 @@
 import { Ref } from 'vue';
 import {
   RequestAdapter,
+  RequestConfig,
   RequestState
 } from '../../typings';
 import { getResponseCache, setResponseCache, setStateCache } from '../cache';
 import Method from '../methods/Method';
+import myAssert from './myAssert';
 
 /**
  * 空函数，做兼容处理
  */
 export function noop() {}
+
+// 返回自身函数，做兼容处理
+export const self = <T>(arg: T) => arg;
 
 export type SuccessHandler = () => void;
 export type ErrorHandler = (error: Error) => void;
@@ -67,56 +72,61 @@ export function createRequestState<S extends RequestState, E extends RequestStat
 /**
  * 实际的请求函数
  * @param method 请求方法对象
+ * @param forceRequest 忽略缓存
  * @returns 响应数据
  */
-export function sendRequest<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
+export function sendRequest<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>, forceRequest: boolean) {
   const {
     type,
     url,
     config,
-    requestBody
+    requestBody,
   } = method;
   const {
     baseURL,
     beforeRequest = noop,
-    responsed: alovaResponsed = noop,
+    responsed = self,
     requestAdapter,
     staleTime = 0,
   } = method.context.options;
-  const responsed = config.responsed || alovaResponsed;
   const methodKey = key(method);
 
-  const response = getResponseCache(baseURL, methodKey);
-  if (response) {
-    return {
-      response: () => Promise.resolve(response),
-      headers: () => Promise.resolve({} as Headers),
-      progress: () => {},
-      abort: noop,
-    };
+  // 如果是强制请求的，则跳过从缓存中获取的步骤
+  if (!forceRequest) {
+    const response = getResponseCache(baseURL, methodKey);
+    if (response) {
+      return {
+        response: () => Promise.resolve(response),
+        headers: () => Promise.resolve({} as Headers),
+        progress: () => {},
+        abort: noop,
+      };
+    }
   }
-
+  
   // 发送请求前调用钩子函数
-  const newConfig = beforeRequest({
+  let requestConfig: RequestConfig<R, T> = {
     url,
     method: type,
     data: requestBody,
     ...config,
-  });
+  };
+  requestConfig = beforeRequest(requestConfig) || requestConfig;
 
   // 将params对象转换为get字符串
   const {
     url: newUrl,
     params,
     data,
-  } = newConfig;
+    transformData = self,
+  } = requestConfig;
   let paramsStr = params ? Object.keys(params).map(key => `${key}=${params[key]}`).join('&') : '';
 
   // 将get参数拼接到url后面，注意url可能已存在参数
   const urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
   
   // 请求数据
-  const ctrls = requestAdapter(urlWithParams, data, newConfig);
+  const ctrls = requestAdapter(urlWithParams, data, requestConfig);
   return {
     ...ctrls,
     response: () => Promise.all([
@@ -124,17 +134,20 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
       ctrls.headers(),
     ]).then(([rawResponse, headers]) => {
       // 将响应数据存入缓存，以便后续调用
-      const responsedData = responsed(rawResponse, headers);
+      let responsedData = responsed(rawResponse);
       let ret = responsedData;
+      const getStaleTime = (data: any) => typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
       if (responsedData instanceof Promise) {
         ret = responsedData.then(data => {
-          const expireMilliseconds = typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
-          setResponseCache(baseURL, methodKey, data, expireMilliseconds);
+          const staleMilliseconds = getStaleTime(data);
+          data = transformData(data, headers);
+          setResponseCache(baseURL, methodKey, data, staleMilliseconds);
           return data;
         });
       } else {
-        const expireMilliseconds = typeof staleTime === 'function' ? staleTime(responsedData, headers, type) : staleTime;
-        setResponseCache(baseURL, methodKey, responsedData, expireMilliseconds);
+        const staleMilliseconds = getStaleTime(responsedData);
+        ret = responsedData = transformData(responsedData, headers);
+        setResponseCache(baseURL, methodKey, responsedData, staleMilliseconds);
       }
       return ret;
     }),
@@ -155,26 +168,51 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
   originalState: S,
   successHandlers: SuccessHandler[],
   errorHandlers: ErrorHandler[],
+  forceRequest = false
 ) {
-  const { update } = method.context.options.statesHook;
+  const { options } = method.context;
+  const { silentConfig } = options;
+  const { update } = options.statesHook;
+  // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
+  const { silent } = method.config;
+  let methodKey = '';
+  if (silent) {
+    myAssert(!!silentConfig, 'silentConfig is required when silent is true');
+    methodKey = key(method);
+    successHandlers.forEach(handler => handler());
+  }
+
   update({
     loading: true,
   }, originalState);
-  const ctrl = sendRequest(method);
+  const ctrl = sendRequest(method, forceRequest);
   const {
     response,
     progress,
   } = ctrl;
-
-  response().then(data => {
-    update({ data }, originalState);
-    successHandlers.forEach(handler => handler());
-  }).catch((error: Error) => errorHandlers.forEach(handler => handler(error)))
-  .finally(() => update({
-    loading: false,
-  }, originalState));
-
-  if (method.config.enableProgress) {
+  
+  response()
+    .then(data => {
+      update({ data }, originalState);
+      if (silent) {
+        // 移除静默请求的成功回调函数
+      } else {
+        successHandlers.forEach(handler => handler());
+      }
+    })
+    .catch((error: Error) => {
+      if (silent) {
+        // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
+        silentConfig?.push(methodKey, serializeMethod(method));
+      } else {
+        errorHandlers.forEach(handler => handler(error));
+      }
+    })
+    .finally(() => update({
+      loading: false,
+    }, originalState));
+  
+  if (method.config.enableProgress && !silent) {
     progress(value => update({ progress: value }, originalState));
   }
   return ctrl;
@@ -193,6 +231,12 @@ export function key<S extends RequestState, E extends RequestState, R, T>(method
     method.requestBody,
     method.config.headers,
   ]);
+}
+
+
+export function serializeMethod<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
+
+  return '';
 }
 
 

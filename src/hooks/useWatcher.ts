@@ -5,12 +5,13 @@ import {
   debounce,
   useHookRequest
 } from '../utils/helper';
+import { UseHookConfig } from './useRequest';
 
-interface WatcherConfig {
+interface WatcherConfig extends UseHookConfig {
   effect?: boolean,  // 开启effect后，useWatcher初始化时会自动发起一次请求
   debounce?: number, // 延迟多少毫秒后再发起请求
 }
-export default function useWatcher<S extends RequestState, E extends RequestState, R, T>(handler: () => Method<S, E, R, T>, watchingStates: any[], { effect, debounce: debounceDelay }: WatcherConfig = {}) {
+export default function useWatcher<S extends RequestState, E extends RequestState, R, T>(handler: () => Method<S, E, R, T>, watchingStates: any[], { effect, debounce: debounceDelay, force }: WatcherConfig = {}) {
   const method = handler();
   return createRequestState(method, (originalState, successHandlers, errorHandlers, setCtrl) => {
     const {
@@ -19,7 +20,7 @@ export default function useWatcher<S extends RequestState, E extends RequestStat
     
     const handleWatch = () => {
       const method = handler();
-      const ctrl = useHookRequest(method, originalState, successHandlers, errorHandlers);
+      const ctrl = useHookRequest(method, originalState, successHandlers, errorHandlers, force);
       setCtrl(ctrl);    // 将控制器传出去供使用者调用
     };
     // 如果需要节流，则使用节流函数外封装一层

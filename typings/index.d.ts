@@ -19,8 +19,9 @@ type RequestState<R = unknown> = {
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'TRACE';
 // silent config
 export interface SilentConfig {
-  push(key: string, config: unknown): void,
-  pop(): unknown,
+  push(key: string, config: any): void,
+  get(): any,
+  remove(key: string): void,
 }
 // 数据持久化配置
 type PersistResponse = {
@@ -29,7 +30,7 @@ type PersistResponse = {
 };
 
 type CommonMethodParameters = {
-  url: string,
+  readonly url: string,
   readonly method: MethodType,
   data?: Data,
 }
@@ -41,17 +42,17 @@ type StaleTime<R> = number | ((data: R, headers: Record<string, any>, method: Me
 export type MethodConfig<R, T> = {
   params?: Record<string, any>,
   headers?: RequestInit['headers'],
-  silent?: boolean,
+  silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
   timeout?: number,    // 当前中断时间
   staleTime?: StaleTime<R>,   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
   enableProgress?: boolean,   // 是否启用进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   persist?: boolean,    // 持久化响应数据
-  responsed?: (data: T, headers: Record<string, any>) => R,
+  transformData?: (data: T, headers: Record<string, any>) => R,
 };
 
 // 获取fetch的第二个参数类型
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
-type RequestConfig = CommonMethodParameters & MethodConfig<Record<string, any>> & RequestInit;
+type RequestConfig<R, T> = CommonMethodParameters & MethodConfig<R, T> & RequestInit;
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
 // E: export函数返回的状态组的类型
@@ -88,8 +89,8 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   persistResponse?: PersistResponse,
 
   // 全局的请求前置钩子
-  beforeRequest?: (config: RequestConfig) => RequestConfig | void,
+  beforeRequest?: (config: RequestConfig<any, any>) => RequestConfig<any, any> | void,
 
   // 全局的响应钩子
-  responsed?: (response: Response) => Promise<any>,
+  responsed?: (response: Response) => any,
 }

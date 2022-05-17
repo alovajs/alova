@@ -32,12 +32,17 @@ export function getResponseCache(baseURL: string, key: string) {
  * @param baseURL 基础URL
  * @param key 请求key值
  * @param data 缓存数据
+ * @param staleMilliseconds 过期时间，单位毫秒
  */
-export function setResponseCache(baseURL: string, key: string, data: unknown, expireMilliseconds: number) {
+export function setResponseCache(baseURL: string, key: string, data: unknown, staleMilliseconds = 0) {
+  // 小于0则不缓存了
+  if (staleMilliseconds <= 0) {
+    return;
+  }
   const cachedResponse = responseCache[baseURL] = responseCache[baseURL] || {};
   cachedResponse[key] = {
     data,
-    expireTime: new Date(Date.now() + expireMilliseconds),
+    expireTime: new Date(Date.now() + staleMilliseconds),
   };
 }
 

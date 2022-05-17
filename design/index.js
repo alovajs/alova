@@ -104,7 +104,7 @@ const alova = createAlova({
   baseURL: '...',   // base地址
   timeout: 2000,    // 请求超时时间
   staleTime: 60000,
-  silentRequest: createLocalStorageSilentConfig(),
+  silentConfig: createLocalStorageSilentConfig(),
   statesHook: VueHook,
 });
 
@@ -123,7 +123,7 @@ function getter(a, b, h) {
     }
     silent: true,
     timeout: 3000,    // 当前中断时间
-    cache: false,     // 设置不缓存，这样每次都能获取最新数据
+    staleTime: 0,     // 设置不缓存，这样每次都能获取最新数据
     // persist: true,    // 是否持久化响应数据？？？是否参考react-query的initData，
     transformResponse(data, headers) {
 

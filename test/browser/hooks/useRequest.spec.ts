@@ -11,7 +11,7 @@ import {
 const alova = createAlova({
   baseURL: '',
   statesHook: VueHook,
-  requestAdapter: GlobalFetch,
+  requestAdapter: GlobalFetch(),
   // statesHook: ReactHook,
   beforeRequest(config) {
     config.url
@@ -32,8 +32,11 @@ const Get = alova.Get<{str: number, name: string}, { SSS: string }>('', {
   headers: {
     'Content-Type': 'application/json'
   },
-  responsed(data, headers) {
-    return data;
+  transformData(data, _) {
+    return {
+      str: 1,
+      name: data.SSS,
+    };
   },
   staleTime(s, b, m) {
     return 1;
