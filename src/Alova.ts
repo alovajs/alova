@@ -26,7 +26,7 @@ export type RequestBody = Record<string, any> | FormData | string;
 export default class Alova<S extends RequestState, E extends RequestState> {
   public options: AlovaOptions<S, E>;
   public id = `alova-${++idCounter}`;
-  public events: Record<string, Function[]> = {};
+  // public events: Record<string, Function[]> = {};
   constructor(options: AlovaOptions<S, E>) {
     this.options = options;
   }

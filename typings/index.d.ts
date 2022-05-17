@@ -18,10 +18,22 @@ type RequestState<R = unknown> = {
 };
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'TRACE';
 // silent config
+export type SerializedMethod = {
+  type: MethodType,
+  url: string,
+  config?: {
+    params?: Record<string, any>,
+    headers?: Record<string, any>,
+    timeout?: number,
+  },
+  requestBody?: RequestBody
+};
 export interface SilentConfig {
-  push(key: string, config: any): void,
-  get(): any,
-  remove(key: string): void,
+  push(namespace: string, key: string, config: SerializedMethod): void,
+  get(namespace: string): {
+    serializedMethod: SerializedMethod,
+    remove: () => void,
+  },
 }
 // 数据持久化配置
 type PersistResponse = {

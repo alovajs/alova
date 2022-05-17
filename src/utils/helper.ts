@@ -2,8 +2,10 @@ import { Ref } from 'vue';
 import {
   RequestAdapter,
   RequestConfig,
-  RequestState
+  RequestState,
+  SerializedMethod
 } from '../../typings';
+import Alova from '../Alova';
 import { getResponseCache, setResponseCache, setStateCache } from '../cache';
 import Method from '../methods/Method';
 import myAssert from './myAssert';
@@ -18,6 +20,7 @@ export const self = <T>(arg: T) => arg;
 
 export type SuccessHandler = () => void;
 export type ErrorHandler = (error: Error) => void;
+export type CompleteHandler = () => void;
 export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
@@ -30,6 +33,7 @@ type HandleRequest<S> = (
   originalState: S,
   successHandlers: SuccessHandler[],
   errorHandlers: ErrorHandler[],
+  completeHandlers: CompleteHandler[],
   setCtrl: (ctrl: ConnectController) => void,
 ) => void;
 export function createRequestState<S extends RequestState, E extends RequestState, R, T>(
@@ -45,10 +49,17 @@ export function createRequestState<S extends RequestState, E extends RequestStat
   setStateCache(options.baseURL, key(method), originalState);   // 将初始状态存入缓存以便后续更新
   const successHandlers = [] as SuccessHandler[];
   const errorHandlers = [] as ErrorHandler[];
+  const completeHandlers = [] as CompleteHandler[];
   let ctrl: ConnectController;
 
   // 调用请求处理回调函数
-  handleRequest(originalState, successHandlers, errorHandlers, newCtrl => ctrl = newCtrl);
+  handleRequest(
+    originalState,
+    successHandlers,
+    errorHandlers,
+    completeHandlers,
+    newCtrl => ctrl = newCtrl
+  );
   const exportedState = stateExport(originalState);
   return {
     ...exportedState,
@@ -59,6 +70,9 @@ export function createRequestState<S extends RequestState, E extends RequestStat
     },
     onError(handler: ErrorHandler) {
       errorHandlers.push(handler);
+    },
+    onComplete(handler: CompleteHandler) {
+      completeHandlers.push(handler);
     },
     abort() {
       if (ctrl) {
@@ -168,22 +182,29 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
   originalState: S,
   successHandlers: SuccessHandler[],
   errorHandlers: ErrorHandler[],
+  completeHandlers: CompleteHandler[],
   forceRequest = false
 ) {
-  const { options } = method.context;
+  const { context } = method;
+  const { options } = context;
   const { silentConfig } = options;
   const { update } = options.statesHook;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const { silent } = method.config;
   let methodKey = '';
+  const runHandlers = (handlers: Function[], ...args: any[]) => handlers.forEach(handler => handler(...args));
   if (silent) {
     myAssert(!!silentConfig, 'silentConfig is required when silent is true');
+    myAssert(!(method.requestBody instanceof FormData), 'FormData is not supported when silent is true');
     methodKey = key(method);
-    successHandlers.forEach(handler => handler());
+    runHandlers([
+      ...successHandlers,
+      ...completeHandlers
+    ]);
     
     // silent模式下，如果网络离线的话就不再实际请求了
-    if (!window.navigator.onLine) {
-      silentConfig?.push(methodKey, serializeMethod(method));
+    if (!navigator.onLine && silentConfig) {
+      silentConfig.push(context.id, methodKey, serializeMethod(method));
       return {
         response: () => Promise.resolve(null),
         headers: () => Promise.resolve({} as Headers),
@@ -205,23 +226,21 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
   response()
     .then(data => {
       update({ data }, originalState);
-      if (silent) {
-        // 移除静默请求的成功回调函数
-      } else {
-        successHandlers.forEach(handler => handler());
-      }
+      // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
+      !silent && runHandlers(successHandlers);
     })
     .catch((error: Error) => {
-      if (silent) {
-        // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
-        silentConfig?.push(methodKey, serializeMethod(method));
-      } else {
-        errorHandlers.forEach(handler => handler(error));
-      }
+      // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
+      silent && silentConfig ? 
+        silentConfig.push(context.id, methodKey, serializeMethod(method)) :
+        runHandlers(errorHandlers, error);
     })
-    .finally(() => update({
-      loading: false,
-    }, originalState));
+    .finally(() => {
+      update({
+        loading: false,
+      }, originalState);
+      !silent && runHandlers(completeHandlers);
+    });
   
   if (method.config.enableProgress && !silent) {
     progress(value => update({ progress: value }, originalState));
@@ -245,9 +264,49 @@ export function key<S extends RequestState, E extends RequestState, R, T>(method
 }
 
 
+/**
+ * 序列化请求方法对象
+ * @param method 请求方法对象
+ * @returns 请求方法的序列化对象
+ */
 export function serializeMethod<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
+  const {
+    type,
+    url,
+    config,
+    requestBody
+  } = method;
+  const {
+    params,
+    headers,
+    timeout,
+  } = config;
 
-  return '';
+  return {
+    type,
+    url,
+    config: {
+      params,
+      headers,
+      timeout,
+    },
+    requestBody
+  };
+}
+
+
+/**
+ * 反序列化请求方法对象
+ * @param method 请求方法对象
+ * @returns 请求方法对象
+ */
+export function deserializeMethod<S extends RequestState, E extends RequestState>({
+  type,
+  url,
+  config,
+  requestBody
+}: SerializedMethod, alova: Alova<S, E>) {
+  return new Method(type, alova, url, config, requestBody);
 }
 
 

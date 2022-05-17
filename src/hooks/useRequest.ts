@@ -12,8 +12,8 @@ export interface UseHookConfig {
   force?: boolean,   // 强制请求
 };
 export default function useRequest<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>, { force }: UseHookConfig = {}) {
-  return createRequestState(method, (originalState, successHandlers, errorHandlers, setCtrl) => {
-    const ctrl = useHookRequest(method, originalState, successHandlers, errorHandlers, force);
+  return createRequestState(method, (originalState, successHandlers, errorHandlers, completeHandlers, setCtrl) => {
+    const ctrl = useHookRequest(method, originalState, successHandlers, errorHandlers, completeHandlers, force);
     setCtrl(ctrl);    // 将控制器传出去供使用者调用
   });
 }

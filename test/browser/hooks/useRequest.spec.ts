@@ -6,6 +6,7 @@ import {
   useController,
   useWatcher,
   GlobalFetch,
+  createLocalStorageSilentConfig,
 } from '../../../src';
 
 const alova = createAlova({
@@ -20,6 +21,7 @@ const alova = createAlova({
     config.credentials
     return config;
   },
+  silentConfig: createLocalStorageSilentConfig(),
   responsed(data) {
     console.log(123);
     return data.json();

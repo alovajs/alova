@@ -13,14 +13,27 @@ interface WatcherConfig extends UseHookConfig {
 }
 export default function useWatcher<S extends RequestState, E extends RequestState, R, T>(handler: () => Method<S, E, R, T>, watchingStates: any[], { effect, debounce: debounceDelay, force }: WatcherConfig = {}) {
   const method = handler();
-  return createRequestState(method, (originalState, successHandlers, errorHandlers, setCtrl) => {
+  return createRequestState(method, (
+    originalState,
+    successHandlers,
+    errorHandlers,
+    completeHandlers,
+    setCtrl
+  ) => {
     const {
       watch,
     } = method.context.options.statesHook;
     
     const handleWatch = () => {
       const method = handler();
-      const ctrl = useHookRequest(method, originalState, successHandlers, errorHandlers, force);
+      const ctrl = useHookRequest(
+        method,
+        originalState,
+        successHandlers,
+        errorHandlers,
+        completeHandlers,
+        force
+      );
       setCtrl(ctrl);    // 将控制器传出去供使用者调用
     };
     // 如果需要节流，则使用节流函数外封装一层

@@ -3,7 +3,7 @@ import {
   RequestState
 } from '../typings';
 import Alova from './Alova';
-import { addAlova } from './network';
+import listenNetwork, { addAlova } from './network';
 export { default as useRequest } from './hooks/useRequest';
 export { default as useController } from './hooks/useController';
 export { default as useWatcher } from './hooks/useWatcher';
@@ -13,6 +13,9 @@ export { default as VueHook } from './predefined/VueHook';
 export { default as GlobalFetch } from './predefined/GlobalFetch';
 export { default as createLocalStorageSilentConfig } from './predefined/createLocalStorageSilentConfig';
 
+
+// 监听网络变化
+listenNetwork();
 
 /**
  * 创建Alova实例
