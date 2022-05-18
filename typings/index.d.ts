@@ -1,8 +1,7 @@
 type RequestAdapter<R, T> = (
   source: string,
   data: RequestBody,
-  config: RequestInit,
-  options?: MethodConfig<R, T>
+  config: RequestConfig<R, T>,
 ) => {
   response: () => Promise<Response>,
   headers: () => Promise<Headers>,

@@ -11,8 +11,8 @@ import {
 const alova = createAlova({
   baseURL: '',
   statesHook: VueHook,
-  requestAdapter: GlobalFetch(),
   // statesHook: ReactHook,
+  requestAdapter: GlobalFetch(),
   beforeRequest(config) {
     config.url
     config.data
