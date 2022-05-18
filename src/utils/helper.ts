@@ -8,6 +8,8 @@ import {
 import Alova from '../Alova';
 import { getResponseCache, setResponseCache, setStateCache } from '../cache';
 import Method from '../methods/Method';
+import { getResponse, saveResponse } from '../storage/responseStorage';
+import { pushSilentRequest } from '../storage/silentStorage';
 import myAssert from './myAssert';
 
 /**
@@ -40,12 +42,23 @@ export function createRequestState<S extends RequestState, E extends RequestStat
   method: Method<S, E, R, T>, 
   handleRequest: HandleRequest<S>
 ) {
-  const options = method.context.options;
+  const {
+    id,
+    options,
+    storage,
+  } = method.context;
   const {
     create,
     export: stateExport,
   } = options.statesHook;
-  const originalState = create();
+
+  // 如果有持久化数据则先使用它
+  let initialData: R | null = null;
+  if (method.config.persist) {
+    initialData = getResponse(id, key(method), storage) || initialData;
+  }
+
+  const originalState = create(initialData);
   setStateCache(options.baseURL, key(method), originalState);   // 将初始状态存入缓存以便后续更新
   const successHandlers = [] as SuccessHandler[];
   const errorHandlers = [] as ErrorHandler[];
@@ -63,7 +76,8 @@ export function createRequestState<S extends RequestState, E extends RequestStat
   const exportedState = stateExport(originalState);
   return {
     ...exportedState,
-    // 以支持React和Vue的方式写法
+
+    // 以支持React和Vue的方式定义类型
     data: exportedState.data as E['data'] extends Ref ? Ref<R> : R,
     onSuccess(handler: SuccessHandler) {
       successHandlers.push(handler);
@@ -103,6 +117,7 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     requestAdapter,
     staleTime = 0,
   } = method.context.options;
+  const { id, storage } = method.context;
   const methodKey = key(method);
 
   // 如果是强制请求的，则跳过从缓存中获取的步骤
@@ -141,12 +156,14 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
   
   // 请求数据
   const ctrls = requestAdapter(urlWithParams, data, requestConfig);
+  const persist = (data: any) => saveResponse(id, methodKey, data, storage);
   return {
     ...ctrls,
     response: () => Promise.all([
       ctrls.response(),
       ctrls.headers(),
     ]).then(([rawResponse, headers]) => {
+      
       // 将响应数据存入缓存，以便后续调用
       let responsedData = responsed(rawResponse);
       let ret = responsedData;
@@ -156,12 +173,14 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
           const staleMilliseconds = getStaleTime(data);
           data = transformData(data, headers);
           setResponseCache(baseURL, methodKey, data, staleMilliseconds);
+          persist(data);
           return data;
         });
       } else {
         const staleMilliseconds = getStaleTime(responsedData);
         ret = responsedData = transformData(responsedData, headers);
         setResponseCache(baseURL, methodKey, responsedData, staleMilliseconds);
+        persist(responsedData);
       }
       return ret;
     }),
@@ -186,15 +205,13 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
   forceRequest = false
 ) {
   const { context } = method;
-  const { options } = context;
-  const { silentConfig } = options;
+  const { options, storage } = context;
   const { update } = options.statesHook;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const { silent } = method.config;
   let methodKey = '';
   const runHandlers = (handlers: Function[], ...args: any[]) => handlers.forEach(handler => handler(...args));
   if (silent) {
-    myAssert(!!silentConfig, 'silentConfig is required when silent is true');
     myAssert(!(method.requestBody instanceof FormData), 'FormData is not supported when silent is true');
     methodKey = key(method);
     runHandlers([
@@ -203,8 +220,8 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
     ]);
     
     // silent模式下，如果网络离线的话就不再实际请求了
-    if (!navigator.onLine && silentConfig) {
-      silentConfig.push(context.id, methodKey, serializeMethod(method));
+    if (!navigator.onLine) {
+      pushSilentRequest(context.id, methodKey, serializeMethod(method), storage);
       return {
         response: () => Promise.resolve(null),
         headers: () => Promise.resolve({} as Headers),
@@ -231,8 +248,8 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
     })
     .catch((error: Error) => {
       // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
-      silent && silentConfig ? 
-        silentConfig.push(context.id, methodKey, serializeMethod(method)) :
+      silent ? 
+        pushSilentRequest(context.id, methodKey, serializeMethod(method), storage) :
         runHandlers(errorHandlers, error);
     })
     .finally(() => {

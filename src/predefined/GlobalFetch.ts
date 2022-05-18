@@ -1,11 +1,12 @@
-import { MethodConfig } from '../../typings';
+import { RequestConfig } from '../../typings';
 import { RequestBody } from '../Alova';
 
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 export default function GlobalFetch(requestInit: RequestInit = {}) {
-  return function<R, T>(source: string, data: RequestBody, config: RequestInit, options: MethodConfig<R, T> = {}) {
+  return function<R, T>(source: string, data: RequestBody, config: RequestConfig<R, T>) {
+    
     // 设置了中断时间，则在指定时间后中断请求
-    const timeout = options.timeout || 0;
+    const timeout = config.timeout || 0;
     const ctrl = new AbortController();
     let abortTimer: NodeJS.Timeout;
     if (timeout > 0) {

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
-function create<D>() {
+function create<R>(initialData: R | null = null) {
   return {
     loading: useState<boolean>(false),
-    data: useState<D | null>(null),
+    data: useState<R | null>(initialData),
     error: useState<Error | null>(null),
     progress: useState<number>(0),
   };

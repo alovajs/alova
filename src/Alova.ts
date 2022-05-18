@@ -2,6 +2,7 @@ import {
   AlovaOptions,
   MethodConfig,
   RequestState,
+  Storage,
 } from '../typings';
 import Delete from './methods/Delete';
 import Get from './methods/Get';
@@ -26,8 +27,10 @@ export type RequestBody = Record<string, any> | FormData | string;
 export default class Alova<S extends RequestState, E extends RequestState> {
   public options: AlovaOptions<S, E>;
   public id = `alova-${++idCounter}`;
-  // public events: Record<string, Function[]> = {};
+  public storage: Storage;
   constructor(options: AlovaOptions<S, E>) {
+    // 如果storage未指定，则默认使用localStorage
+    this.storage = options.storage || localStorage;
     this.options = options;
   }
   Get<R, T = any>(url: string, config?: MethodConfig<R, T>) {

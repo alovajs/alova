@@ -1,9 +1,9 @@
 import { ref, watch } from 'vue';
 
-function create<R>() {
+function create<R>(initialData: R | null = null) {
   return {
     loading: ref<boolean>(false),
-    data: ref<R | null>(null),
+    data: ref<R | null>(initialData),
     error: ref<Error | null>(null),
     progress: ref<number>(0),
   };

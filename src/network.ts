@@ -1,5 +1,6 @@
 import { RequestState } from '../typings';
 import Alova from './Alova';
+import { getSilentRequest } from './storage/silentStorage';
 import { deserializeMethod, sendRequest } from './utils/helper';
 
 const alovas = [] as Alova<any, any>[];
@@ -17,24 +18,23 @@ export function addAlova<S extends RequestState, E extends RequestState>(instanc
  * @param activeIndex 当前激活的alova实例索引
  */
 function runSilentRequest(activeIndex: number) {
-  if (window.navigator.onLine) {
-    // 如果达到了数组长度，则重新从0开始获取
-    activeIndex = activeIndex >= alovas.length ? 0 : activeIndex;
-    const alova = alovas[activeIndex];
-    if (alova) {
-      const { silentConfig } = alova.options;
-      if (!silentConfig) {
-        return;
-      }
-      const { serializedMethod, remove } = silentConfig.get(alova.id);
-      if (serializedMethod) {
-        const { response } = sendRequest(deserializeMethod(serializedMethod, alova), true);
-        response()
-          .then(() => remove())
-          .finally(() => runSilentRequest(activeIndex + 1));
-      } else {
-        setTimeout(() => runSilentRequest(activeIndex + 1), 2000);
-      }
+  // 如果网络异常，则不继续轮询请求了
+  if (!window.navigator.onLine) {
+    return;
+  }
+
+  // 如果达到了数组长度，则重新从0开始获取
+  activeIndex = activeIndex >= alovas.length ? 0 : activeIndex;
+  const alova = alovas[activeIndex];
+  if (alova) {
+    const { serializedMethod, remove } = getSilentRequest(alova.id, alova.storage);
+    if (serializedMethod) {
+      const { response } = sendRequest(deserializeMethod(serializedMethod, alova), true);
+      response()
+        .then(() => remove())
+        .finally(() => runSilentRequest(activeIndex + 1));
+    } else {
+      setTimeout(() => runSilentRequest(activeIndex + 1), 2000);
     }
   }
 }

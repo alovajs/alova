@@ -17,7 +17,7 @@ type RequestState<R = unknown> = {
   progress: any,
 };
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'TRACE';
-// silent config
+
 export type SerializedMethod = {
   type: MethodType,
   url: string,
@@ -28,18 +28,11 @@ export type SerializedMethod = {
   },
   requestBody?: RequestBody
 };
-export interface SilentConfig {
-  push(namespace: string, key: string, config: SerializedMethod): void,
-  get(namespace: string): {
-    serializedMethod: SerializedMethod,
-    remove: () => void,
-  },
+export interface Storage {
+  setItem: (key: string, value: string) => void,
+  getItem(key: string): string | null,
+  removeItem(key: string): void,
 }
-// 数据持久化配置
-type PersistResponse = {
-  set: (key: string, response: unknown) => void,
-  get: (key: string) => unknown,
-};
 
 type CommonMethodParameters = {
   readonly url: string,
@@ -74,7 +67,7 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   
   // 状态hook函数，用于定义和更新指定MVVM库的状态
   statesHook: {
-    create: () => S,
+    create: (initialData: any = null) => S,
     export: (state: S) => E,
     update: (newVal: Partial<RequestState>, state: S) => void,
     watch: (args: any[], handler: () => void) => void,
@@ -92,13 +85,8 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   // 也可以设置函数，参数为responsed转化后的返回数据和headers对象，返回缓存时间
   staleTime?: StaleTime<any>,
 
-  // 静默请求配置
-  // 以下的key都是自动拼接了对应前缀的key
-  silentConfig?: SilentConfig,
-
-  // 响应数据持久化配置，如果设置了且某些请求也设置了持久化参数，则会将请求结果持久化
-  // 具体持久化方案需自定义，如使用localStorage
-  persistResponse?: PersistResponse,
+  // 持久化缓存接口，用于静默请求、响应数据持久化等
+  storage?: Storage,
 
   // 全局的请求前置钩子
   beforeRequest?: (config: RequestConfig<any, any>) => RequestConfig<any, any> | void,
