@@ -3,6 +3,8 @@ import {
   RequestAdapter,
   RequestConfig,
   RequestState,
+  ResponsedHandler,
+  ResponseErrorHandler,
   SerializedMethod
 } from '../../typings';
 import Alova from '../Alova';
@@ -156,34 +158,50 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
   
   // 请求数据
   const ctrls = requestAdapter(urlWithParams, data, requestConfig);
-  const persist = (data: any) => saveResponse(id, methodKey, data, storage);
+  const persistResponse = (data: any) => saveResponse(id, methodKey, data, storage);
+
+  const isFn = (fn: any) => typeof fn === 'function';
+  let responsedHandler: ResponsedHandler = noop;
+  let responseErrorHandler: ResponseErrorHandler = noop;
+  if (isFn(responsed)) {
+    responsedHandler = responsed as ResponsedHandler;
+  } else if (Array.isArray(responsed)) {
+    responsedHandler = isFn(responsed[0]) ? responsed[0] : responsedHandler;
+    responseErrorHandler = isFn(responsed[1]) ? responsed[1] : responseErrorHandler;
+  }
   return {
     ...ctrls,
     response: () => Promise.all([
       ctrls.response(),
       ctrls.headers(),
-    ]).then(([rawResponse, headers]) => {
-      
+    ])
+    .then(([rawResponse, headers]) => {
       // 将响应数据存入缓存，以便后续调用
-      let responsedData = responsed(rawResponse);
-      let ret = responsedData;
-      const getStaleTime = (data: any) => typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
-      if (responsedData instanceof Promise) {
-        ret = responsedData.then(data => {
-          const staleMilliseconds = getStaleTime(data);
-          data = transformData(data, headers);
-          setResponseCache(baseURL, methodKey, data, staleMilliseconds);
-          persist(data);
-          return data;
-        });
-      } else {
-        const staleMilliseconds = getStaleTime(responsedData);
-        ret = responsedData = transformData(responsedData, headers);
-        setResponseCache(baseURL, methodKey, responsedData, staleMilliseconds);
-        persist(responsedData);
+      try {
+        let responsedData = responsedHandler(rawResponse);
+        let ret = responsedData;
+        const getStaleTime = (data: any) => typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
+        if (responsedData instanceof Promise) {
+          ret = responsedData.then(data => {
+            const staleMilliseconds = getStaleTime(data);
+            data = transformData(data, headers);
+            setResponseCache(baseURL, methodKey, data, staleMilliseconds);
+            persistResponse(data);
+            return data;
+          });
+        } else {
+          const staleMilliseconds = getStaleTime(responsedData);
+          ret = responsedData = transformData(responsedData, headers);
+          setResponseCache(baseURL, methodKey, responsedData, staleMilliseconds);
+          persistResponse(responsedData);
+        }
+        return ret; 
+      } catch (error: any) {
+        responseErrorHandler(error);
+        throw error;
       }
-      return ret;
-    }),
+    })
+    .catch((error: any) => responseErrorHandler(error)),
   }
 }
 

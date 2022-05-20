@@ -9,7 +9,7 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "nyc mocha test/**/*.ts",
+    "test": "nyc mocha test/**/*.ts -r jsdom-global/register",
     "release": "npm test && npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags",
     "lint": "eslint -c .eslintrc.js 'src/**/*.ts'",
     "lint:fix": "eslint -c .eslintrc.js 'src/**/*.ts' --fix",
@@ -53,6 +53,8 @@
     "es5-shim": "4.5.10",
     "eslint": "^5.15.1",
     "expect.js": "0.3.1",
+    "jsdom": "19.0.0",
+    "jsdom-global": "3.0.2",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
     "react": "^18.1.0",

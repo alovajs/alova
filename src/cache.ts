@@ -23,6 +23,9 @@ export function getResponseCache(baseURL: string, key: string) {
     const { data, expireTime } = cachedItem;
     if (expireTime.getTime() > Date.now()) {
       return data;
+    } else {
+      // 如果过期，则删除缓存
+      delete cachedResponse[key];
     }
   }
 }

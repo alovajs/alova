@@ -13,6 +13,7 @@ export interface UseHookConfig {
 };
 export default function useRequest<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>, { force }: UseHookConfig = {}) {
   return createRequestState(method, (originalState, successHandlers, errorHandlers, completeHandlers, setCtrl) => {
+    console.log(method);
     const ctrl = useHookRequest(method, originalState, successHandlers, errorHandlers, completeHandlers, force);
     setCtrl(ctrl);    // 将控制器传出去供使用者调用
   });

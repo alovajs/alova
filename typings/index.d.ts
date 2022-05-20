@@ -57,6 +57,9 @@ export type MethodConfig<R, T> = {
 // 获取fetch的第二个参数类型
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 type RequestConfig<R, T> = CommonMethodParameters & MethodConfig<R, T> & RequestInit;
+
+type ResponsedHandler = (response: Response) => any;
+type ResponseErrorHandler = (error: any) => void;
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
 // E: export函数返回的状态组的类型
@@ -73,7 +76,7 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   },
 
   // 请求适配器
-  requestAdapter: RequestAdapter<unknown, unknown>,
+  requestAdapter: RequestAdapter<any, any>,
 
   // 请求超时时间
   timeout?: number,
@@ -90,6 +93,7 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   // 全局的请求前置钩子
   beforeRequest?: (config: RequestConfig<any, any>) => RequestConfig<any, any> | void,
 
-  // 全局的响应钩子
-  responsed?: (response: Response) => any,
+  // 全局的响应钩子，可传一个数组表示正常响应和响应出错的钩子
+  // 如果正常响应的钩子抛出错误也将进入响应失败的钩子函数
+  responsed?: ResponsedHandler | [ResponsedHandler, ResponseErrorHandler],
 }

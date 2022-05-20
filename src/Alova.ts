@@ -30,7 +30,7 @@ export default class Alova<S extends RequestState, E extends RequestState> {
   public storage: Storage;
   constructor(options: AlovaOptions<S, E>) {
     // 如果storage未指定，则默认使用localStorage
-    this.storage = options.storage || localStorage;
+    this.storage = options.storage || window.localStorage;
     this.options = options;
   }
   Get<R, T = any>(url: string, config?: MethodConfig<R, T>) {
