@@ -6,7 +6,6 @@ import {
   GlobalFetch,
 } from '../../../src';
 
-
 function getInstance() {
   return createAlova({
     baseURL: '',

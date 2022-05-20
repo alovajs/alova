@@ -12,7 +12,7 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
     if (timeout > 0) {
       abortTimer = setTimeout(ctrl.abort, timeout);
     }
-    const fetchPromise = fetch(source, {
+    const fetchPromise = window.fetch(source, {
       ...requestInit,
       ...config,
       signal: ctrl.signal,
