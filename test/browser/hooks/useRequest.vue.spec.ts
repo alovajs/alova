@@ -8,7 +8,7 @@ import {
 
 function getInstance() {
   return createAlova({
-    baseURL: '',
+    baseURL: 'http://localhost:3000',
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
     beforeRequest(config) {
@@ -22,16 +22,16 @@ function getInstance() {
   });
 }
 
-const baseURL = 'http://localhost:5000';
 describe('useRequet hook with vue', () => {
-  it('init data', () => {
+  it('init data', done => {
     const alova = getInstance();
-    const Get = alova.Get<{str: number, name: string}, { SSS: string }>(baseURL, {
+    const Get = alova.Get<{str: number, name: string}, { SSS: string }>('/video/recommend', {
       params: { a: 1, b: 'str' },
       headers: {
         'Content-Type': 'application/json'
       },
       transformData(data, _) {
+        console.log(data);
         return {
           str: 1,
           name: data.SSS,
@@ -41,8 +41,14 @@ describe('useRequet hook with vue', () => {
         return 1000;
       },
     });
-    const states = useRequest(Get);
-    console.log(states);
-    expect(1).to.equal(1);
+    const {
+      data,
+      onSuccess,
+    } = useRequest(Get);
+    onSuccess(() => {
+      console.log(data);
+      expect(1).to.equal(1);
+      done();
+    });
   });
 });
