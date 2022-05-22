@@ -14,9 +14,7 @@
       },
       "runtimeArgs": [
         "run",
-        "test",
-        "-g",
-        "useRequest"
+        "test"
       ],
       "console": "integratedTerminal",
       "cwd": "${workspaceRoot}",

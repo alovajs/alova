@@ -10,7 +10,10 @@ import {
 import Alova from '../Alova';
 import { getResponseCache, setResponseCache, setStateCache } from '../cache';
 import Method from '../methods/Method';
-import { getResponse, saveResponse } from '../storage/responseStorage';
+import {
+  getPersistentResponse,
+  persistResponse
+} from '../storage/responseStorage';
 import { pushSilentRequest } from '../storage/silentStorage';
 import myAssert from './myAssert';
 
@@ -57,7 +60,7 @@ export function createRequestState<S extends RequestState, E extends RequestStat
   // 如果有持久化数据则先使用它
   let initialData: R | null = null;
   if (method.config.persist) {
-    initialData = getResponse(id, key(method), storage) || initialData;
+    initialData = getPersistentResponse(id, key(method), storage) || initialData;
   }
 
   const originalState = create(initialData);
@@ -143,6 +146,10 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     ...config,
   };
   requestConfig = beforeRequest(requestConfig) || requestConfig;
+  const {
+    staleTime: staleTimeFinal = staleTime,
+    persist,
+  } = requestConfig;
 
   // 将params对象转换为get字符串
   const {
@@ -154,11 +161,15 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
   let paramsStr = params ? Object.keys(params).map(key => `${key}=${params[key]}`).join('&') : '';
 
   // 将get参数拼接到url后面，注意url可能已存在参数
-  const urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
+  let urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
+  // 如果不是/开头的，则需要添加/
+  urlWithParams = urlWithParams.indexOf('/') !== 0 ? `/${urlWithParams}` : urlWithParams;
+  // baseURL如果以/结尾，则去掉/
+  const baseURLWithSlash = baseURL.indexOf('/') === baseURL.length - 1 ? baseURL.slice(0, -1) : baseURL;
   
   // 请求数据
-  const ctrls = requestAdapter(urlWithParams, data, requestConfig);
-  const persistResponse = (data: any) => saveResponse(id, methodKey, data, storage);
+  const ctrls = requestAdapter(baseURLWithSlash + urlWithParams, data, requestConfig);
+  const saveResponse = (data: any) => persist && persistResponse(id, methodKey, data, storage);
 
   const isFn = (fn: any) => typeof fn === 'function';
   let responsedHandler: ResponsedHandler = noop;
@@ -169,6 +180,7 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     responsedHandler = isFn(responsed[0]) ? responsed[0] : responsedHandler;
     responseErrorHandler = isFn(responsed[1]) ? responsed[1] : responseErrorHandler;
   }
+
   return {
     ...ctrls,
     response: () => Promise.all([
@@ -180,20 +192,20 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
       try {
         let responsedData = responsedHandler(rawResponse);
         let ret = responsedData;
-        const getStaleTime = (data: any) => typeof staleTime === 'function' ? staleTime(data, headers, type) : staleTime;
+        const getStaleTime = (data: any) => typeof staleTimeFinal === 'function' ? staleTimeFinal(data, headers, type) : staleTimeFinal;
         if (responsedData instanceof Promise) {
           ret = responsedData.then(data => {
             const staleMilliseconds = getStaleTime(data);
             data = transformData(data, headers);
             setResponseCache(baseURL, methodKey, data, staleMilliseconds);
-            persistResponse(data);
+            saveResponse(data);
             return data;
           });
         } else {
           const staleMilliseconds = getStaleTime(responsedData);
           ret = responsedData = transformData(responsedData, headers);
           setResponseCache(baseURL, methodKey, responsedData, staleMilliseconds);
-          persistResponse(responsedData);
+          saveResponse(responsedData);
         }
         return ret; 
       } catch (error: any) {
