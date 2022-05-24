@@ -1,5 +1,6 @@
 import { RequestConfig } from '../../typings';
 import { RequestBody } from '../Alova';
+import alovaError from '../utils/alovaError';
 
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 export default function GlobalFetch(requestInit: RequestInit = {}) {
@@ -24,7 +25,9 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
     });
     
     return {
-      response: () => fetchPromise,
+      response: () => fetchPromise.then(response => 
+        /^[4|5]/.test(response.status.toString()) ? Promise.reject(alovaError(response.statusText)) : response
+      ),
       headers: () => fetchPromise.then(({ headers }) => headers),
       progress: (cb: (value: number) => void) => {
         fetchPromise.then(response => {

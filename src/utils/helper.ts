@@ -94,9 +94,7 @@ export function createRequestState<S extends RequestState, E extends RequestStat
       completeHandlers.push(handler);
     },
     abort() {
-      if (ctrl) {
-        ctrl.abort();
-      }
+      ctrl && ctrl.abort();
     }
   };
 }
@@ -161,7 +159,9 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
   let paramsStr = params ? Object.keys(params).map(key => `${key}=${params[key]}`).join('&') : '';
 
   // 将get参数拼接到url后面，注意url可能已存在参数
-  let urlWithParams = newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`;
+  let urlWithParams = paramsStr ? 
+    (newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`)
+    : '';
   // 如果不是/开头的，则需要添加/
   urlWithParams = urlWithParams.indexOf('/') !== 0 ? `/${urlWithParams}` : urlWithParams;
   // baseURL如果以/结尾，则去掉/
@@ -181,15 +181,19 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     responseErrorHandler = isFn(responsed[1]) ? responsed[1] : responseErrorHandler;
   }
 
+  const errorCatcher = (error: any) => {
+    responseErrorHandler(error);
+    return Promise.reject(error);
+  }
   return {
     ...ctrls,
     response: () => Promise.all([
       ctrls.response(),
       ctrls.headers(),
     ]).then(([rawResponse, headers]) => {
-      console.log('promise all');
       try {
         let responsedHandlePayload = responsedHandler(rawResponse);
+        console.log('promise all', responsedHandlePayload);
         const getStaleTime = (data: any) => typeof staleTimeFinal === 'function' ? staleTimeFinal(data, headers, type) : staleTimeFinal;
         if (responsedHandlePayload instanceof Promise) {
           return responsedHandlePayload.then(data => {
@@ -209,10 +213,12 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
           return responsedHandlePayload;
         }
       } catch (error: any) {
-        responseErrorHandler(error);
-        throw error;
+        return errorCatcher(error);
       }
-    }).catch((error: any) => responseErrorHandler(error)),
+    }, (error: any) => {
+      console.log('handle error', error);
+      return errorCatcher(error);
+    }),
   }
 }
 
@@ -268,25 +274,33 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
     response,
     progress,
   } = ctrl;
-  
+
   response()
     .then(data => {
-      console.log('outer promise');
-      update({ data }, originalState);
+      console.log('outer promise', data);
+      update({
+        data,
+        loading: false,
+      }, originalState);
       // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
-      !silent && runHandlers(successHandlers);
+      if (!silent) {
+        runHandlers(successHandlers);
+        runHandlers(completeHandlers);
+      }
     })
     .catch((error: Error) => {
       // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
-      silent ? 
-        pushSilentRequest(context.id, methodKey, serializeMethod(method), storage) :
-        runHandlers(errorHandlers, error);
-    })
-    .finally(() => { 
+      console.log('outer error', error);
       update({
+        error,
         loading: false,
       }, originalState);
-      !silent && runHandlers(completeHandlers);
+      if (silent) {
+        pushSilentRequest(context.id, methodKey, serializeMethod(method), storage)
+      } else {
+        runHandlers(errorHandlers, error);
+        runHandlers(completeHandlers);
+      }
     });
   
   if (method.config.enableProgress && !silent) {
