@@ -186,34 +186,33 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     response: () => Promise.all([
       ctrls.response(),
       ctrls.headers(),
-    ])
-    .then(([rawResponse, headers]) => {
-      // 将响应数据存入缓存，以便后续调用
+    ]).then(([rawResponse, headers]) => {
+      console.log('promise all');
       try {
-        let responsedData = responsedHandler(rawResponse);
-        let ret = responsedData;
+        let responsedHandlePayload = responsedHandler(rawResponse);
         const getStaleTime = (data: any) => typeof staleTimeFinal === 'function' ? staleTimeFinal(data, headers, type) : staleTimeFinal;
-        if (responsedData instanceof Promise) {
-          ret = responsedData.then(data => {
+        if (responsedHandlePayload instanceof Promise) {
+          return responsedHandlePayload.then(data => {
+            console.log('inner promise', data);
             const staleMilliseconds = getStaleTime(data);
             data = transformData(data, headers);
             setResponseCache(baseURL, methodKey, data, staleMilliseconds);
+            // 当persist开启时将响应数据存入缓存，以便后续调用（已在saveResponse中判断）
             saveResponse(data);
             return data;
           });
         } else {
-          const staleMilliseconds = getStaleTime(responsedData);
-          ret = responsedData = transformData(responsedData, headers);
-          setResponseCache(baseURL, methodKey, responsedData, staleMilliseconds);
-          saveResponse(responsedData);
+          const staleMilliseconds = getStaleTime(responsedHandlePayload);
+          responsedHandlePayload = transformData(responsedHandlePayload, headers);
+          setResponseCache(baseURL, methodKey, responsedHandlePayload, staleMilliseconds);
+          saveResponse(responsedHandlePayload);
+          return responsedHandlePayload;
         }
-        return ret; 
       } catch (error: any) {
         responseErrorHandler(error);
         throw error;
       }
-    })
-    .catch((error: any) => responseErrorHandler(error)),
+    }).catch((error: any) => responseErrorHandler(error)),
   }
 }
 
@@ -272,6 +271,7 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
   
   response()
     .then(data => {
+      console.log('outer promise');
       update({ data }, originalState);
       // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
       !silent && runHandlers(successHandlers);
@@ -282,7 +282,7 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
         pushSilentRequest(context.id, methodKey, serializeMethod(method), storage) :
         runHandlers(errorHandlers, error);
     })
-    .finally(() => {
+    .finally(() => { 
       update({
         loading: false,
       }, originalState);

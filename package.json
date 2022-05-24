@@ -9,7 +9,7 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "nyc mocha test/**/*.spec.ts -r ./test/browser/jsdom-register.js",
+    "test": "nyc mocha test/**/*.spec.ts -r ./test/jsdom-register.js",
     "release": "npm test && npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags",
     "lint": "eslint -c .eslintrc.js 'src/**/*.ts'",
     "lint:fix": "eslint -c .eslintrc.js 'src/**/*.ts' --fix",
@@ -18,7 +18,8 @@
     "build:umd": "cross-env NODE_ENV=development rollup -c config/rollup.config.umd.js",
     "build:umd.min": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.js",
     "build": "npm run clean && npm run build:self && npm run build:esm && npm run build:umd && npm run build:umd.min",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls"
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "server": "node ./test/server.js"
   },
   "author": "JOU-amjs",
   "license": "MIT",
@@ -54,6 +55,7 @@
     "es5-shim": "4.5.10",
     "eslint": "^5.15.1",
     "expect.js": "0.3.1",
+    "express": "^4.18.1",
     "jsdom": "19.0.0",
     "jsdom-global": "3.0.2",
     "mocha": "^10.0.0",

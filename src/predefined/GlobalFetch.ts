@@ -39,7 +39,7 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
               const percent = (receivedLength / contentLength).toFixed(4);
               cb(Number(percent));
             });
-          });
+          }, 100);
         });
       },
       abort: () => ctrl.abort(),

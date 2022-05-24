@@ -6,6 +6,11 @@ import {
   GlobalFetch,
 } from '../../../src';
 import { RequestConfig } from '../../../typings';
+import { Result } from '../result.type';
+// import { exec } from 'child_process';
+
+// 先启动测试服务，后续才可以调用
+// exec('npm run server');
 
 function getInstance(
   beforeRequestExpect: (config: RequestConfig<any, any>) => void,
@@ -27,35 +32,37 @@ function getInstance(
   });
 }
 
-describe('useRequet hook with vue', () => {
-  it.only('init data', done => {
+describe('useRequet hook with vue', function() {
+  it.only('init data and get', done => {
     const alova = getInstance(
       config => {
-        expect(config.url).to.be('/video/recommend');
+        expect(config.url).to.be('/unit-test');
         // expect(config.params).to.equal({ a: 1, b: 'str' });
         expect(config.params).to.eql({ a: 1, b: 'str' });
         expect(config.headers).to.eql({
           'Content-Type': 'application/json'
         });
       },
-      response => {
+      async response => {
         expect(response.status).to.be(200);
-        // expect(response.json())(200);
+        const result = await response.json();
+        console.log(result);
+        expect(result.data).to.be('Hello World Get');
       }
     );
 
-    const Get = alova.Get<{str: string, code: number}>('/video/recommend', {
+    const Get = alova.Get<string, Result<string>>('/unit-test', {
       params: { a: 1, b: 'str' },
       headers: {
         'Content-Type': 'application/json'
       },
       transformData(data, _) {
-        return {
-          str: 'string',
-          code: data.code,
-        };
+        return data.data;
       },
-      staleTime: (s, b, m) => 1000000,
+      staleTime: (s, b, m) => {
+        console.log('staleTime', s, b, m);
+        return 100 * 1000;
+      },
     });
     const {
       data,
@@ -63,7 +70,7 @@ describe('useRequet hook with vue', () => {
     } = useRequest(Get);
     onSuccess(() => {
       console.log('success', data.value);
-      expect(1).to.equal(1);
+      expect(data.value).to.be('Hello World Get');
       done();
     });
   });
