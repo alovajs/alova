@@ -4,7 +4,7 @@ type RequestAdapter<R, T> = (
   config: RequestConfig<R, T>,
 ) => {
   response: () => Promise<Response>,
-  headers: () => Promise<Headers>,
+  headers: () => Promise<Headers | void>,
   progress: (callback: (value: number) => void) => void,
   abort: () => void,
 };

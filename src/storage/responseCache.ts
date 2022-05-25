@@ -1,4 +1,4 @@
-import { RequestState } from '../typings';
+import { RequestState } from '../../typings';
 
 // 响应数据缓存
 const responseCache: Record<string, Record<string, {

@@ -31,11 +31,11 @@ function globalJsdom (options) {
   })
 
   var fetch = require('node-fetch');
-
   global.document = window.document
   global.window = window
+  global.fetch = window.fetch = fetch
+  global.ReadableStream = window.ReadableStream = class ReadableStream {}
   window.console = global.console
-  window.fetch = fetch
   document.destroy = cleanup
 
   function cleanup () {

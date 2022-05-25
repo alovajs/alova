@@ -1,34 +1,46 @@
 import { RequestConfig } from '../../typings';
-import { RequestBody } from '../Alova';
 import alovaError from '../utils/alovaError';
+import { noop } from '../utils/helper';
 
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
+const isBodyData = (data: any) => {
+  const isTyped = (typed: any) => data instanceof typed;
+  return isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
+}
 export default function GlobalFetch(requestInit: RequestInit = {}) {
-  return function<R, T>(source: string, data: RequestBody, config: RequestConfig<R, T>) {
+  return function<R, T>(source: string, data: any, config: RequestConfig<R, T>) {
     
     // 设置了中断时间，则在指定时间后中断请求
     const timeout = config.timeout || 0;
     const ctrl = new AbortController();
     let abortTimer: NodeJS.Timeout;
+    let isTimeout = false;
     if (timeout > 0) {
-      abortTimer = setTimeout(ctrl.abort, timeout);
+      abortTimer = setTimeout(() => {
+        isTimeout = true;
+        ctrl.abort();
+      }, timeout);
     }
-    const fetchPromise = window.fetch(source, {
+
+    const fetchPromise = fetch(source, {
       ...requestInit,
       ...config,
       signal: ctrl.signal,
-      body: data instanceof FormData ? data : JSON.stringify(data),
-    }).then(resp => {
-      // 请求成功后清除中断处理
-      clearTimeout(abortTimer);
-      return resp;
+      body: isBodyData(data) ? data : JSON.stringify(data),
     });
     
+    const clearTimeoutTimer = () => clearTimeout(abortTimer);
     return {
-      response: () => fetchPromise.then(response => 
-        /^[4|5]/.test(response.status.toString()) ? Promise.reject(alovaError(response.statusText)) : response
-      ),
-      headers: () => fetchPromise.then(({ headers }) => headers),
+      response: () => fetchPromise.then(response => {
+        // 请求成功后清除中断处理
+        clearTimeoutTimer();
+        return /^[2|3]/.test(response.status.toString()) ? response : Promise.reject(alovaError(response.statusText));
+      }, err => Promise.reject(
+        alovaError(isTimeout ? 'fetchError: network timeout' : err.message)
+      )),
+
+      // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
+      headers: () => fetchPromise.then(({ headers }) => headers, noop),
       progress: (cb: (value: number) => void) => {
         fetchPromise.then(response => {
           const contentLength = Number(response.headers.get('Content-Length')) || 1;
@@ -45,7 +57,10 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
           }, 100);
         });
       },
-      abort: () => ctrl.abort(),
+      abort: () => {
+        ctrl.abort();
+        clearTimeoutTimer();
+      },
     };
   };
 }

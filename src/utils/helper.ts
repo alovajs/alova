@@ -8,11 +8,11 @@ import {
   SerializedMethod
 } from '../../typings';
 import Alova from '../Alova';
-import { getResponseCache, setResponseCache, setStateCache } from '../cache';
+import { getResponseCache, setResponseCache, setStateCache } from '../storage/responseCache';
 import Method from '../methods/Method';
 import {
   getPersistentResponse,
-  persistResponse
+  persistResponse,
 } from '../storage/responseStorage';
 import { pushSilentRequest } from '../storage/silentStorage';
 import myAssert from './myAssert';
@@ -161,7 +161,7 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
   // 将get参数拼接到url后面，注意url可能已存在参数
   let urlWithParams = paramsStr ? 
     (newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`)
-    : '';
+    : newUrl;
   // 如果不是/开头的，则需要添加/
   urlWithParams = urlWithParams.indexOf('/') !== 0 ? `/${urlWithParams}` : urlWithParams;
   // baseURL如果以/结尾，则去掉/
@@ -190,14 +190,12 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
     response: () => Promise.all([
       ctrls.response(),
       ctrls.headers(),
-    ]).then(([rawResponse, headers]) => {
+    ]).then(([rawResponse, headers = {}]) => {
       try {
-        let responsedHandlePayload = responsedHandler(rawResponse);
-        console.log('promise all', responsedHandlePayload);
+        let responsedHandlePayload = responsedHandler(rawResponse as any);
         const getStaleTime = (data: any) => typeof staleTimeFinal === 'function' ? staleTimeFinal(data, headers, type) : staleTimeFinal;
         if (responsedHandlePayload instanceof Promise) {
           return responsedHandlePayload.then(data => {
-            console.log('inner promise', data);
             const staleMilliseconds = getStaleTime(data);
             data = transformData(data, headers);
             setResponseCache(baseURL, methodKey, data, staleMilliseconds);
@@ -215,10 +213,7 @@ export function sendRequest<S extends RequestState, E extends RequestState, R, T
       } catch (error: any) {
         return errorCatcher(error);
       }
-    }, (error: any) => {
-      console.log('handle error', error);
-      return errorCatcher(error);
-    }),
+    }, (error: any) => errorCatcher(error)),
   }
 }
 
@@ -277,7 +272,6 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
 
   response()
     .then(data => {
-      console.log('outer promise', data);
       update({
         data,
         loading: false,
@@ -290,7 +284,6 @@ export function useHookRequest<S extends RequestState, E extends RequestState, R
     })
     .catch((error: Error) => {
       // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
-      console.log('outer error', error);
       update({
         error,
         loading: false,

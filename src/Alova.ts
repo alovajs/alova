@@ -16,7 +16,7 @@ import Trace from './methods/Trace';
 import {
   getStateCache,
   removeResponseCache,
-} from './cache';
+} from './storage/responseCache';
 import {
   key,
   sendRequest

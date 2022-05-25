@@ -26,10 +26,33 @@ app.all('*', (req, res, next) => {
 		next();
 });
 
-app.get('/unit-test', (_, res) => result(200, 'Hello World Get', res));
-app.post('/unit-test', (_, res) => result(200, 'Hello World Post', res));
-app.delete('unit-test', (_, res) => result(200, 'Hello World Delete', res));
-app.put('/unit-test', (_, res) => result(200, 'Hello World Put', res));
-
+app.get('/unit-test', (req, res) => result(200, {
+  path: req._parsedUrl.pathname,
+  method: req.method,
+  params: req.query,
+}, res));
+app.get('/unit-test-10s', (req, res) => setTimeout(() => result(200, {
+  path: req._parsedUrl.pathname,
+  method: req.method,
+  params: req.query,
+}, res), 10000));
+app.post('/unit-test', (req, res) => result(200, {
+  path: req._parsedUrl.pathname,
+  method: req.method,
+  params: req.query,
+  data: req.body,
+}, res));
+app.delete('unit-test', (req, res) => result(200, {
+  path: req._parsedUrl.pathname,
+  method: req.method,
+  params: req.query,
+  data: req.body,
+}, res));
+app.put('/unit-test', (req, res) => result(200, {
+  path: req._parsedUrl.pathname,
+  method: req.method,
+  params: req.query,
+  data: req.body,
+}, res));
 const port = 3000;
 app.listen(port, () => console.log('服务器已启动, http://localhost:' + port));
