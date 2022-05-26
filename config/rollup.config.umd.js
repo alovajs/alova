@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-05-10 21:51:27
+ * @LastEditTime: 2022-05-26 21:49:42
  */ 
 // rollup.config.js
 // umd
@@ -34,7 +34,7 @@ module.exports = {
   plugins: [
     nodeResolve({
       browser: true,
-      extensions: ['.ts', '.js']
+      extensions: ['.ts', '.js', 'tsx', 'jsx']
     }),
     commonjs(),
     common.getCompiler(),

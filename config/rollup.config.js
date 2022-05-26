@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-05-10 21:34:23
+ * @LastEditTime: 2022-05-26 21:53:24
  */
 // rollup.config.js
 // commonjs
@@ -20,7 +20,12 @@ module.exports = {
     external: common.external,
     plugins: [
         common.getCompiler({
-            tsconfigOverride: { compilerOptions : { declaration: true, module: 'ES2015' } },
+            tsconfigOverride: {
+                compilerOptions: {
+                    declaration: true,
+                    module: 'ES2015'
+                }
+            },
             useTsconfigDeclarationDir: true
         })
     ]

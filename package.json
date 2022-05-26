@@ -37,6 +37,7 @@
     "node": ">= 0.12.0"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.17.12",
     "@rollup/plugin-babel": "^5.0.2",
     "@rollup/plugin-commonjs": "^12.0.0",
     "@rollup/plugin-json": "^4.0.3",
@@ -55,7 +56,6 @@
     "es5-shim": "4.5.10",
     "eslint": "^5.15.1",
     "expect.js": "0.3.1",
-    "express": "^4.18.1",
     "jsdom": "19.0.0",
     "jsdom-global": "3.0.2",
     "mocha": "^10.0.0",
