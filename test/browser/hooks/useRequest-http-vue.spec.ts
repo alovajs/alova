@@ -9,12 +9,12 @@ import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
 import { GetData, PostData, Result } from '../result.type';
-// import { exec } from 'child_process';
+import server from '../../server';
+import { after, before, afterEach } from 'mocha';
 
-
-// 先启动测试服务，后续才可以调用
-// exec('npm run server');
-
+before(() => server.listen());
+afterEach(() => server.resetHandlers());
+after(() => server.close());
 function getInstance(
   beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
   responseExpect?: (jsonPromise: Promise<any>) => void,
@@ -228,7 +228,8 @@ describe('use useRequet hook to send GET with vue', function() {
 
 // 其他请求方式测试
 describe('Test other methods without GET', function() {
-  it.only('send POST', done => {
+  this.timeout(5000);
+  it('send POST', done => {
     const alova = getInstance(
       config => {
         expect(config.url).to.be('/unit-test');
@@ -247,7 +248,7 @@ describe('Test other methods without GET', function() {
         expect(data.params).to.eql({ a: 1, b: 'str' });
       }
     );
-    const Get = alova.Post<PostData, Result<true>>('/unit-test', { post1: 'a' }, {
+    const Post = alova.Post<PostData, Result<true>>('/unit-test', { post1: 'a' }, {
       params: { a: 1, b: 'str' },
       timeout: 10000,
       headers: {
@@ -266,7 +267,7 @@ describe('Test other methods without GET', function() {
         expect(data.params).to.eql({ a: 1, b: 'str' });
         expect(data.data).to.eql({ post1: 'a', post2: 'b' });
         expect(headers).an('object');
-        expect(method).to.be('GET');
+        expect(method).to.be('POST');
         return 100 * 1000;
       },
     });
@@ -276,7 +277,7 @@ describe('Test other methods without GET', function() {
       progress,
       error,
       onSuccess,
-    } = useRequest(Get);
+    } = useRequest(Post);
     expect(loading.value).to.be(true);
     expect(data.value).to.be(null);
     expect(progress.value).to.be(0);
@@ -291,7 +292,147 @@ describe('Test other methods without GET', function() {
         expect(error.value).to.be(null);
 
         // 缓存有值
-        const cacheData = getResponseCache('http://localhost:3000', key(Get));
+        const cacheData = getResponseCache('http://localhost:3000', key(Post));
+        expect(cacheData).to.be(undefined);
+      } catch (error) {}
+      done();
+    });
+  });
+
+  it('send DELETE', done => {
+    const alova = getInstance(
+      config => {
+        expect(config.url).to.be('/unit-test');
+        expect(config.params).to.eql({ a: 1, b: 'str' });
+        expect(config.data).to.eql({ post1: 'a' });
+        config.data.post2 = 'b';
+        expect(config.headers).to.eql({
+          'Content-Type': 'application/json'
+        });
+        expect(config.timeout).to.be(10000);
+      },
+      async jsonPromise => {
+        const { data } = await jsonPromise;
+        expect(data.path).to.be('/unit-test');
+        expect(data.data).to.eql({ post1: 'a', post2: 'b' });
+        expect(data.params).to.eql({ a: 1, b: 'str' });
+      }
+    );
+    const Delete = alova.Delete<PostData, Result<true>>('/unit-test', { post1: 'a' }, {
+      params: { a: 1, b: 'str' },
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      transformData({ code, data }, _) {
+        expect(code).to.be(200);
+        expect(data.path).to.be('/unit-test');
+        expect(data.params).to.eql({ a: 1, b: 'str' });
+        expect(data.data).to.eql({ post1: 'a', post2: 'b' });
+        return data;
+      },
+      staleTime: ({ code, data }, headers, method) => {
+        expect(code).to.be(200);
+        expect(data.path).to.be('/unit-test');
+        expect(data.params).to.eql({ a: 1, b: 'str' });
+        expect(data.data).to.eql({ post1: 'a', post2: 'b' });
+        expect(headers).an('object');
+        expect(method).to.be('DELETE');
+        return 100 * 1000;
+      },
+    });
+    const {
+      loading,
+      data,
+      progress,
+      error,
+      onSuccess,
+    } = useRequest(Delete);
+    expect(loading.value).to.be(true);
+    expect(data.value).to.be(null);
+    expect(progress.value).to.be(0);
+    expect(error.value).to.be(null);
+    onSuccess(() => {
+      try {
+        expect(loading.value).to.be(false);
+        expect(data.value.path).to.be('/unit-test');
+        expect(data.value.params).to.eql({ a: 1, b: 'str' });
+        expect(data.value.data).to.eql({ post1: 'a', post2: 'b' });
+        expect(progress.value).to.be(0);
+        expect(error.value).to.be(null);
+
+        // 缓存有值
+        const cacheData = getResponseCache('http://localhost:3000', key(Delete));
+        expect(cacheData).to.be(undefined);
+      } catch (error) {}
+      done();
+    });
+  });
+
+  it('send PUT', done => {
+    const alova = getInstance(
+      config => {
+        expect(config.url).to.be('/unit-test');
+        expect(config.params).to.eql({ a: 1, b: 'str' });
+        expect(config.data).to.eql({ post1: 'a' });
+        config.data.post2 = 'b';
+        expect(config.headers).to.eql({
+          'Content-Type': 'application/json'
+        });
+        expect(config.timeout).to.be(10000);
+      },
+      async jsonPromise => {
+        const { data } = await jsonPromise;
+        expect(data.path).to.be('/unit-test');
+        expect(data.data).to.eql({ post1: 'a', post2: 'b' });
+        expect(data.params).to.eql({ a: 1, b: 'str' });
+      }
+    );
+    const Put = alova.Put<PostData, Result<true>>('/unit-test', { post1: 'a' }, {
+      params: { a: 1, b: 'str' },
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      transformData({ code, data }, _) {
+        expect(code).to.be(200);
+        expect(data.path).to.be('/unit-test');
+        expect(data.params).to.eql({ a: 1, b: 'str' });
+        expect(data.data).to.eql({ post1: 'a', post2: 'b' });
+        return data;
+      },
+      staleTime: ({ code, data }, headers, method) => {
+        expect(code).to.be(200);
+        expect(data.path).to.be('/unit-test');
+        expect(data.params).to.eql({ a: 1, b: 'str' });
+        expect(data.data).to.eql({ post1: 'a', post2: 'b' });
+        expect(headers).an('object');
+        expect(method).to.be('PUT');
+        return 100 * 1000;
+      },
+    });
+    const {
+      loading,
+      data,
+      progress,
+      error,
+      onSuccess,
+    } = useRequest(Put);
+    expect(loading.value).to.be(true);
+    expect(data.value).to.be(null);
+    expect(progress.value).to.be(0);
+    expect(error.value).to.be(null);
+    onSuccess(() => {
+      try {
+        expect(loading.value).to.be(false);
+        expect(data.value.path).to.be('/unit-test');
+        expect(data.value.params).to.eql({ a: 1, b: 'str' });
+        expect(data.value.data).to.eql({ post1: 'a', post2: 'b' });
+        expect(progress.value).to.be(0);
+        expect(error.value).to.be(null);
+
+        // 缓存有值
+        const cacheData = getResponseCache('http://localhost:3000', key(Put));
         expect(cacheData).to.be(undefined);
       } catch (error) {}
       done();

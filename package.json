@@ -18,8 +18,7 @@
     "build:umd": "cross-env NODE_ENV=development rollup -c config/rollup.config.umd.js",
     "build:umd.min": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.js",
     "build": "npm run clean && npm run build:self && npm run build:esm && npm run build:umd && npm run build:umd.min",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "server": "node ./test/server.js"
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "author": "JOU-amjs",
   "license": "MIT",
@@ -43,6 +42,7 @@
     "@rollup/plugin-json": "^4.0.3",
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-replace": "^2.3.2",
+    "@testing-library/react": "^13.2.0",
     "@types/expect.js": "^0.3.29",
     "@types/jsdom-global": "^3.0.2",
     "@types/mocha": "^7.0.2",
@@ -59,6 +59,7 @@
     "jsdom": "19.0.0",
     "jsdom-global": "3.0.2",
     "mocha": "^10.0.0",
+    "msw": "^0.41.0",
     "node-fetch": "^2",
     "nyc": "^15.1.0",
     "react": "^18.1.0",
