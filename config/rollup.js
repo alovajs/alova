@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-05-10 21:34:07
+ * @LastEditTime: 2022-05-26 21:54:35
  */
 var typescript = require('rollup-plugin-typescript2');
 var pkg = require('../package.json');
@@ -18,16 +18,15 @@ var banner =
   */
 `;
 
-function getCompiler(opt) {
-  opt = opt || {
-    // objectHashIgnoreUnknownHack: true,
-    // clean: true,
-    tsconfigOverride: { compilerOptions: { module: 'ES2015' } }
+const getCompiler = (opt = {
+  // objectHashIgnoreUnknownHack: true,
+  // clean: true,
+  tsconfigOverride: {
+    compilerOptions: {
+      module: 'ES2015'
+    }
   }
-
-  return typescript(opt);
-}
-
+}) => typescript(opt);
 exports.name = pkg.name;
 exports.banner = banner;
 exports.getCompiler = getCompiler;
