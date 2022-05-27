@@ -20,7 +20,8 @@
     "inlineSourceMap": false,
     "importHelpers": true,
     "removeComments": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "jsx": "react"
   },
   "paths": {
     "@/*": [

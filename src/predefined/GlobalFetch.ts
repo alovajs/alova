@@ -22,7 +22,7 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
       }, timeout);
     }
 
-    const fetchPromise = fetch(source, {
+    const fetchPromise = window.fetch(source, {
       ...requestInit,
       ...config,
       signal: ctrl.signal,
