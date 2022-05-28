@@ -30,7 +30,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "typings/*.d.ts"
+    "typings/*.d.ts",
+    "./jest-setup.ts"
   ],
   "exclude": [
     "node_modules",

@@ -7,3 +7,4 @@ New request library for MVVM such as Vue.js and React.js
 3. 离线提交
 4. typescript支持
 5. gzip 2kb
+6. 与Axios相似的使用方法，学习成本低

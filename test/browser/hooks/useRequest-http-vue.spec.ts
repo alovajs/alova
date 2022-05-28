@@ -9,7 +9,6 @@ import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
 import { GetData, PostData, Result } from '../result.type';
 import server from '../../server';
-import 'web-streams-polyfill';
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
@@ -38,9 +37,9 @@ function getInstance(
   });
 }
 
-describe.skip('use useRequet hook to send GET with vue', function() {
+describe('use useRequet hook to send GET with vue', function() {
   // this.timeout(5000);
-  it('init data and get', done => {
+  test('init data and get', done => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test');
@@ -85,16 +84,16 @@ describe.skip('use useRequet hook to send GET with vue', function() {
       onSuccess,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     onSuccess(() => {
       try {
         expect(loading.value).toBeFalsy();
         expect(data.value.path).toBe('/unit-test');
         expect(data.value.params).toEqual({ a: 'a', b: 'str' });
         expect(progress.value).toBe(0);
-        expect(error.value).toBeNull();
+        expect(error.value).toBeUndefined();
 
         // 缓存有值
         const cacheData = getResponseCache('http://localhost:3000', key(Get));
@@ -105,7 +104,7 @@ describe.skip('use useRequet hook to send GET with vue', function() {
     });
   });
 
-  it('send get with request error', done => {
+  test('send get with request error', done => {
     const alova = getInstance(undefined, undefined, error => {
       console.log('error callback', error.message);
       expect(error.message).toMatch(/Not Found/);
@@ -121,12 +120,12 @@ describe.skip('use useRequet hook to send GET with vue', function() {
       onError,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     onError(err => {
       expect(loading.value).toBeFalsy();
-      expect(data.value).toBeNull();
+      expect(data.value).toBeUndefined();
       expect(progress.value).toBe(0);
       expect(error.value).toBeInstanceOf(Object);
       expect(error.value).toBe(err);
@@ -138,7 +137,7 @@ describe.skip('use useRequet hook to send GET with vue', function() {
     });
   });
 
-  it('send get with responseCallback error', done => {
+  test('send get with responseCallback error', done => {
     const alova = getInstance(undefined, jsonPromise => {
       throw new Error('responseCallback error');
     }, error => {
@@ -154,12 +153,12 @@ describe.skip('use useRequet hook to send GET with vue', function() {
       onError,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     onError(err => {
       expect(loading.value).toBeFalsy();
-      expect(data.value).toBeNull();
+      expect(data.value).toBeUndefined();
       expect(progress.value).toBe(0);
       expect(error.value).toBeInstanceOf(Object);
       expect(error.value).toBe(err);
@@ -167,7 +166,7 @@ describe.skip('use useRequet hook to send GET with vue', function() {
     });
   });
 
-  it('abort request when timeout', done => {
+  test('abort request when timeout', done => {
     const alova = getInstance(undefined, undefined, error => {
       console.log('error timeout', error.message);
       expect(error.message).toMatch(/network timeout/);
@@ -181,12 +180,12 @@ describe.skip('use useRequet hook to send GET with vue', function() {
       onError,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     onError(err => {
       expect(loading.value).toBeFalsy();
-      expect(data.value).toBeNull();
+      expect(data.value).toBeUndefined();
       expect(progress.value).toBe(0);
       expect(error.value).toBeInstanceOf(Object);
       expect(error.value).toBe(err);
@@ -194,7 +193,7 @@ describe.skip('use useRequet hook to send GET with vue', function() {
     });
   });
 
-  it('manual abort request', done => {
+  test('manual abort request', done => {
     const alova = getInstance(undefined, undefined, error => {
       console.log('manual abort', error.message);
       expect(error.message).toMatch(/user aborted a request/);
@@ -209,13 +208,13 @@ describe.skip('use useRequet hook to send GET with vue', function() {
       abort
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     setTimeout(abort, 100);
     onError(err => {
       expect(loading.value).toBeFalsy();
-      expect(data.value).toBeNull();
+      expect(data.value).toBeUndefined();
       expect(progress.value).toBe(0);
       expect(error.value).toBeInstanceOf(Object);
       expect(error.value).toBe(err);
@@ -226,9 +225,9 @@ describe.skip('use useRequet hook to send GET with vue', function() {
 
 
 // 其他请求方式测试
-describe.skip('Test other methods without GET', function() {
+describe('Test other methods without GET', function() {
   // this.timeout(5000);
-  it('send POST', done => {
+  test('send POST', done => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test');
@@ -278,9 +277,9 @@ describe.skip('Test other methods without GET', function() {
       onSuccess,
     } = useRequest(Post);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     onSuccess(() => {
       try {
         expect(loading.value).toBeFalsy();
@@ -288,7 +287,7 @@ describe.skip('Test other methods without GET', function() {
         expect(data.value.params).toEqual({ a: 'a', b: 'str' });
         expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
         expect(progress.value).toBe(0);
-        expect(error.value).toBeNull();
+        expect(error.value).toBeUndefined();
 
         // 缓存有值
         const cacheData = getResponseCache('http://localhost:3000', key(Post));
@@ -298,7 +297,7 @@ describe.skip('Test other methods without GET', function() {
     });
   });
 
-  it('send DELETE', done => {
+  test('send DELETE', done => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test');
@@ -348,9 +347,9 @@ describe.skip('Test other methods without GET', function() {
       onSuccess,
     } = useRequest(Delete);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     onSuccess(() => {
       try {
         expect(loading.value).toBeFalsy();
@@ -358,7 +357,7 @@ describe.skip('Test other methods without GET', function() {
         expect(data.value.params).toEqual({ a: 'a', b: 'str' });
         expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
         expect(progress.value).toBe(0);
-        expect(error.value).toBeNull();
+        expect(error.value).toBeUndefined();
 
         // 缓存有值
         const cacheData = getResponseCache('http://localhost:3000', key(Delete));
@@ -368,7 +367,7 @@ describe.skip('Test other methods without GET', function() {
     });
   });
 
-  it('send PUT', done => {
+  test('send PUT', done => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test');
@@ -418,9 +417,9 @@ describe.skip('Test other methods without GET', function() {
       onSuccess,
     } = useRequest(Put);
     expect(loading.value).toBeTruthy();
-    expect(data.value).toBeNull();
+    expect(data.value).toBeUndefined();
     expect(progress.value).toBe(0);
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     onSuccess(() => {
       try {
         expect(loading.value).toBeFalsy();
@@ -428,7 +427,7 @@ describe.skip('Test other methods without GET', function() {
         expect(data.value.params).toEqual({ a: 'a', b: 'str' });
         expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
         expect(progress.value).toBe(0);
-        expect(error.value).toBeNull();
+        expect(error.value).toBeUndefined();
 
         // 缓存有值
         const cacheData = getResponseCache('http://localhost:3000', key(Put));

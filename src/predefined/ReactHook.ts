@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
-function create<R>(initialData: R | null = null) {
+function create<R>(initialData?: R) {
   return {
     loading: useState<boolean>(false),
-    data: useState<R | null>(initialData),
-    error: useState<Error | null>(null),
+    data: useState<R | undefined>(initialData),
+    error: useState<Error | undefined>(undefined),
     progress: useState<number>(0),
   };
 }
@@ -30,14 +30,14 @@ export default {
       state[key as Keys][1](newVal[key as Keys] as any);
     });
   },
-  watch(args: any[], handler: () => void) {
+  effectRequest(handler: () => void, watchedStates: any[], immediate: boolean) {
     const mountedRef = useRef(false);
     useEffect(() => {
-      if (mountedRef.current) {
+      if (!immediate && !mountedRef.current) {
         mountedRef.current = true;
         return;
       }
       handler();
-    }, args);
+    }, watchedStates);
   },
 };

@@ -19,8 +19,8 @@ import {
 } from './storage/responseCache';
 import {
   key,
-  sendRequest
 } from './utils/helper';
+import sendRequest from './utils/sendRequest';
 
 let idCounter = 0;
 export type RequestBody = Record<string, any> | FormData | string;

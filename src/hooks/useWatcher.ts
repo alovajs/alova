@@ -1,48 +1,31 @@
 import { RequestState } from '../../typings';
 import Method from '../methods/Method';
-import {
-  createRequestState,
-  debounce,
-  useHookRequest
-} from '../utils/helper';
+import createRequestState from '../utils/createRequestState';
+import useHookRequest from '../utils/useHookRequest';
 import { UseHookConfig } from './useRequest';
 
 interface WatcherConfig extends UseHookConfig {
-  effect?: boolean,  // 开启effect后，useWatcher初始化时会自动发起一次请求
+  immediate?: boolean,  // 开启immediate后，useWatcher初始化时会自动发起一次请求
   debounce?: number, // 延迟多少毫秒后再发起请求
 }
-export default function useWatcher<S extends RequestState, E extends RequestState, R, T>(handler: () => Method<S, E, R, T>, watchingStates: any[], { effect, debounce: debounceDelay, force }: WatcherConfig = {}) {
-  const method = handler();
-  return createRequestState(method, (
+export default function useWatcher<S extends RequestState, E extends RequestState, R, T>(handler: () => Method<S, E, R, T>, watchingStates: any[] = [], { immediate, debounce, force }: WatcherConfig = {}) {
+  return createRequestState(handler(), (
     originalState,
     successHandlers,
     errorHandlers,
     completeHandlers,
     setCtrl
   ) => {
-    const {
-      watch,
-    } = method.context.options.statesHook;
-    
-    const handleWatch = () => {
-      const method = handler();
-      const ctrl = useHookRequest(
-        method,
-        originalState,
-        successHandlers,
-        errorHandlers,
-        completeHandlers,
-        force
-      );
-      setCtrl(ctrl);    // 将控制器传出去供使用者调用
-    };
-    // 如果需要节流，则使用节流函数外封装一层
-    debounceDelay = debounceDelay || 0;
-    watch(watchingStates, debounceDelay > 0 ? debounce(handleWatch, debounceDelay) : handleWatch);
+    const ctrl = useHookRequest(
+      handler(),
+      originalState,
+      successHandlers,
+      errorHandlers,
+      completeHandlers,
+      force
+    );
+    setCtrl(ctrl);    // 将控制器传出去供使用者调用
 
-    // 如果effect为true，监听前先执行一次
-    if (effect) {
-      handleWatch();
-    }
-  });
+    // !!immediate可以使immediate为falsy值时传入false
+  }, watchingStates, !!immediate, debounce);
 }

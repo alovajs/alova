@@ -72,7 +72,13 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
     create: (initialData: any = null) => S,
     export: (state: S) => E,
     update: (newVal: Partial<RequestState>, state: S) => void,
-    watch: (args: any[], handler: () => void) => void,
+
+    // 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
+    // 但在useController中不会被调用
+    // 当watchedStates为空数组时，执行一次handleRequest函数
+    // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
+    // 在vue中直接执行即可，而在react中需要在useEffect中执行
+    effectRequest: (handleRequest: () => void, watchedStates: any[], immediate: boolean) => void,
   },
 
   // 请求适配器

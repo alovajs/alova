@@ -1,10 +1,10 @@
 import { ref, watch } from 'vue';
 
-function create<R>(initialData: R | null = null) {
+function create<R>(initialData?: R) {
   return {
     loading: ref<boolean>(false),
-    data: ref<R | null>(initialData),
-    error: ref<Error | null>(null),
+    data: ref<R | undefined>(initialData),
+    error: ref<Error | undefined>(undefined),
     progress: ref<number>(0),
   };
 }
@@ -23,7 +23,11 @@ export default {
       state[key as Keys].value = newVal[key as Keys];
     });
   },
-  watch(args: any[], handler: () => void) {
-    watch(args, handler);
+  effectRequest(handler: () => void, watchedStates: any[], immediate: boolean) {
+    if (watchedStates.length <= 0) {
+      handler();
+      return;
+    }
+    watch(watchedStates, handler, { immediate });
   },
 };

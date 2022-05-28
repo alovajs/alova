@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   createAlova,
   ReactHook,
-  useRequest,
   GlobalFetch,
+  useRequest,
 } from '../../../src';
 import { RequestConfig } from '../../../typings';
 import { GetData, Result } from '../result.type';
 import server from '../../server';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 
 function getInstance(
@@ -35,36 +36,37 @@ function getInstance(
   });
 }
 
+
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
-describe.only('useRequet hook with react', function() {
+describe('useRequet hook with react', function() {
   test('send GET', async () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result<true>>('/unit-test', {
       timeout: 10000,
-      transformData({ data }) {
-        return data;
-      },
+      transformData: ({ data }) => data,
       staleTime: 100 * 1000,
     });
-
-    const Page = () => {
+    function Page() {
       const {
         loading,
-        data,
+        data = { path: '', method: '' },
       } = useRequest(Get);
       return (
-        <div>
-          <>
-            <span role="loading">{ loading ? 'loading' : 'loaded' }</span>
-            <span role="data">{ JSON.stringify(data) }</span>
-          </>
+        <div role="wrap">
+          <span role="status">{ loading ? 'loading' : 'loaded' }</span>
+          <span role="path">{ data.path }</span>
+          <span role="method">{ data.method }</span>
         </div>
       );
     }
-    const rendered = render(<Page />);
-    await waitFor(() => rendered.getByRole('loading'));
-    expect(rendered.getByRole('loading').textContent).toBe('loading');
+
+    render(<Page /> as ReactElement<any, any>);
+    expect(screen.getByRole('status')).toHaveTextContent('loading');
+    const loadingEl = await screen.findByText(/loaded/);
+    expect(loadingEl).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('method')).toHaveTextContent('GET');
   });
 });

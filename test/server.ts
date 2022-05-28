@@ -1,6 +1,7 @@
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import fetch from 'node-fetch';
+import 'web-streams-polyfill';
 
 (global as any).fetch = (window as any).fetch = fetch;
 
