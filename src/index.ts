@@ -7,9 +7,9 @@ import listenNetwork, { addAlova } from './network';
 export { default as useRequest } from './hooks/useRequest';
 export { default as useController } from './hooks/useController';
 export { default as useWatcher } from './hooks/useWatcher';
-export { default as ReactHook } from './predefined/ReactHook';
-export { default as VueHook } from './predefined/VueHook';
-export { default as GlobalFetch } from './predefined/GlobalFetch';
+export { default as ReactHook } from './predefine/ReactHook';
+export { default as VueHook } from './predefine/VueHook';
+export { default as GlobalFetch } from './predefine/GlobalFetch';
 
 
 // 监听网络变化

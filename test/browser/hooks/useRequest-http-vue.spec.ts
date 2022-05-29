@@ -38,7 +38,6 @@ function getInstance(
 }
 
 describe('use useRequet hook to send GET with vue', function() {
-  // this.timeout(5000);
   test('init data and get', done => {
     const alova = getInstance(
       config => {
@@ -96,7 +95,7 @@ describe('use useRequet hook to send GET with vue', function() {
         expect(error.value).toBeUndefined();
 
         // 缓存有值
-        const cacheData = getResponseCache('http://localhost:3000', key(Get));
+        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
         expect(cacheData.path).toBe('/unit-test');
         expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
       } catch (error) {}
@@ -127,11 +126,11 @@ describe('use useRequet hook to send GET with vue', function() {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(progress.value).toBe(0);
-      expect(error.value).toBeInstanceOf(Object);
+      expect(error.value).toBeInstanceOf(Error);
       expect(error.value).toBe(err);
 
       // 请求错误无缓存
-      const cacheData = getResponseCache('http://localhost:3000', key(Get));
+      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
       expect(cacheData).toBeUndefined();
       done();
     });
@@ -290,7 +289,7 @@ describe('Test other methods without GET', function() {
         expect(error.value).toBeUndefined();
 
         // 缓存有值
-        const cacheData = getResponseCache('http://localhost:3000', key(Post));
+        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
         expect(cacheData).toBeUndefined();
       } catch (error) {}
       done();
@@ -360,7 +359,7 @@ describe('Test other methods without GET', function() {
         expect(error.value).toBeUndefined();
 
         // 缓存有值
-        const cacheData = getResponseCache('http://localhost:3000', key(Delete));
+        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Delete));
         expect(cacheData).toBeUndefined();
       } catch (error) {}
       done();
@@ -430,7 +429,7 @@ describe('Test other methods without GET', function() {
         expect(error.value).toBeUndefined();
 
         // 缓存有值
-        const cacheData = getResponseCache('http://localhost:3000', key(Put));
+        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Put));
         expect(cacheData).toBeUndefined();
       } catch (error) {}
       done();

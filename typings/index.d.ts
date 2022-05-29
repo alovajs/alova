@@ -42,15 +42,15 @@ type CommonMethodParameters = {
 // 局部的请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
 // 时间为毫秒，小于等于0不缓存，Infinity为永不过期
 // 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存时间
-type StaleTime<T> = number | ((data: T, headers: Record<string, any>, method: MethodType) => number);
+type DurationSetter<T> = number | ((data: T, headers: Record<string, any>, method: MethodType) => number);
 export type MethodConfig<R, T> = {
   params?: Record<string, any>,
   headers?: RequestInit['headers'],
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
   timeout?: number,    // 当前中断时间
-  staleTime?: StaleTime<T>,   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+  staleTime?: DurationSetter<T>,   // 响应数据在保鲜时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不保鲜
   enableProgress?: boolean,   // 是否启用进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
-  persist?: boolean,    // 持久化响应数据
+  persistTime?: DurationSetter<T>,      // 持久化响应数据的时间，有持久化数据时会先把这些数据赋值给data，再进行请求
   transformData?: (data: T, headers: Record<string, any>) => R,
 };
 
@@ -92,6 +92,9 @@ export interface AlovaOptions<S extends RequestState, E extends RequestState> {
   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
   // 也可以设置函数，参数为responsed转化后的返回数据和headers对象，返回缓存时间
   staleTime?: StaleTime<any>,
+
+  // 持久化响应数据的时间，有持久化数据时会先把这些数据赋值给data，再进行请求
+  persistTime?: DurationSetter<T>,
 
   // 持久化缓存接口，用于静默请求、响应数据持久化等
   storage?: Storage,

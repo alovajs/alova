@@ -2,8 +2,8 @@ import { RequestState } from '../../typings';
 import Method from '../methods/Method';
 import { pushSilentRequest } from '../storage/silentStorage';
 import { CompleteHandler, ErrorHandler, SuccessHandler } from './createRequestState';
-import { key, noop, serializeMethod } from './helper';
-import myAssert from './myAssert';
+import { key, noop, promiseResolve, serializeMethod } from '../utils/helper';
+import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
 
 /**
@@ -41,8 +41,8 @@ import sendRequest from './sendRequest';
     if (!navigator.onLine) {
       pushSilentRequest(context.id, methodKey, serializeMethod(method), storage);
       return {
-        response: () => Promise.resolve(null),
-        headers: () => Promise.resolve({} as Headers),
+        response: () => promiseResolve(null),
+        headers: () => promiseResolve({} as Headers),
         progress: () => {},
         abort: noop,
       };

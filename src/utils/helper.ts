@@ -97,3 +97,9 @@ export function debounce(fn: Function, delay: number, enable: () => boolean) {
     }, delay);
   };
 }
+
+
+// 以下为减少编译代码量而添加的统一处理函数
+export const getTime = (date?: Date) => date ? date.getTime() : Date.now();
+export const promiseResolve = <T>(value: T) => Promise.resolve(value);
+export const promiseReject = <T>(value: T) => Promise.reject(value);

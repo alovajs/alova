@@ -84,7 +84,7 @@ describe('use useController hook to send GET with vue', function() {
         expect(progress.value).toBe(0);
         expect(error.value).toBeUndefined();
         // 缓存有值
-        const cacheData = getResponseCache('http://localhost:3000', key(Get));
+        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
         expect(cacheData.path).toBe('/unit-test');
         expect(cacheData.params).toEqual({ firstArg: 'arg', a: 'a', b: 'str' });
       } catch (error) {}

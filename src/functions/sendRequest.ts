@@ -2,7 +2,7 @@ import { RequestConfig, RequestState, ResponsedHandler, ResponseErrorHandler } f
 import Method from '../methods/Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { key, noop, self } from './helper';
+import { key, noop, promiseReject, promiseResolve, self } from '../utils/helper';
 
 
 /**
@@ -24,17 +24,18 @@ import { key, noop, self } from './helper';
     responsed = self,
     requestAdapter,
     staleTime = 0,
+    persistTime = 0,
   } = method.context.options;
   const { id, storage } = method.context;
   const methodKey = key(method);
 
   // 如果是强制请求的，则跳过从缓存中获取的步骤
   if (!forceRequest) {
-    const response = getResponseCache(baseURL, methodKey);
+    const response = getResponseCache(id, baseURL, methodKey);
     if (response) {
       return {
-        response: () => Promise.resolve(response),
-        headers: () => Promise.resolve({} as Headers),
+        response: () => promiseResolve(response),
+        headers: () => promiseResolve({} as Headers),
         progress: () => {},
         abort: noop,
       };
@@ -51,7 +52,7 @@ import { key, noop, self } from './helper';
   requestConfig = beforeRequest(requestConfig) || requestConfig;
   const {
     staleTime: staleTimeFinal = staleTime,
-    persist,
+    persistTime: persistTimeFinal = persistTime,
   } = requestConfig;
 
   // 将params对象转换为get字符串
@@ -74,7 +75,6 @@ import { key, noop, self } from './helper';
   
   // 请求数据
   const ctrls = requestAdapter(baseURLWithSlash + urlWithParams, data, requestConfig);
-  const saveResponse = (data: any) => persist && persistResponse(id, methodKey, data, storage);
 
   const isFn = (fn: any) => typeof fn === 'function';
   let responsedHandler: ResponsedHandler = noop;
@@ -88,7 +88,7 @@ import { key, noop, self } from './helper';
 
   const errorCatcher = (error: any) => {
     responseErrorHandler(error);
-    return Promise.reject(error);
+    return promiseReject(error);
   }
   return {
     ...ctrls,
@@ -99,20 +99,23 @@ import { key, noop, self } from './helper';
       try {
         let responsedHandlePayload = responsedHandler(rawResponse as any);
         const getStaleTime = (data: any) => typeof staleTimeFinal === 'function' ? staleTimeFinal(data, headers, type) : staleTimeFinal;
+        const getPersistTime = (data: any) => typeof persistTimeFinal === 'function' ? persistTimeFinal(data, headers, type) : persistTimeFinal;
         if (responsedHandlePayload instanceof Promise) {
           return responsedHandlePayload.then(data => {
             const staleMilliseconds = getStaleTime(data);
             data = transformData(data, headers);
-            setResponseCache(baseURL, methodKey, data, staleMilliseconds);
+            setResponseCache(id, baseURL, methodKey, data, staleMilliseconds);
             // 当persist开启时将响应数据存入缓存，以便后续调用（已在saveResponse中判断）
-            saveResponse(data);
+            const persistMilliseconds = getPersistTime(data);
+            persistResponse(id, methodKey, data, persistMilliseconds, storage);
             return data;
           });
         } else {
           const staleMilliseconds = getStaleTime(responsedHandlePayload);
           responsedHandlePayload = transformData(responsedHandlePayload, headers);
-          setResponseCache(baseURL, methodKey, responsedHandlePayload, staleMilliseconds);
-          saveResponse(responsedHandlePayload);
+          setResponseCache(id, baseURL, methodKey, responsedHandlePayload, staleMilliseconds);
+          const persistMilliseconds = getPersistTime(data);
+          persistResponse(id, methodKey, responsedHandlePayload, persistMilliseconds, storage);
           return responsedHandlePayload;
         }
       } catch (error: any) {

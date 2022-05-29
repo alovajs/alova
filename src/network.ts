@@ -2,7 +2,7 @@ import { RequestState } from '../typings';
 import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
 import { deserializeMethod } from './utils/helper';
-import sendRequest from './utils/sendRequest';
+import sendRequest from './functions/sendRequest';
 
 const alovas = [] as Alova<any, any>[];
 /**

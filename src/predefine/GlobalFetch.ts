@@ -1,6 +1,6 @@
 import { RequestConfig } from '../../typings';
 import alovaError from '../utils/alovaError';
-import { noop } from '../utils/helper';
+import { noop, promiseReject } from '../utils/helper';
 
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 const isBodyData = (data: any) => {
@@ -34,8 +34,8 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
       response: () => fetchPromise.then(response => {
         // 请求成功后清除中断处理
         clearTimeoutTimer();
-        return /^[2|3]/.test(response.status.toString()) ? response : Promise.reject(alovaError(response.statusText));
-      }, err => Promise.reject(
+        return /^[2|3]/.test(response.status.toString()) ? response : promiseReject(alovaError(response.statusText));
+      }, err => promiseReject(
         alovaError(isTimeout ? 'fetchError: network timeout' : err.message)
       )),
 

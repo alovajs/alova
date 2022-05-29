@@ -1,7 +1,7 @@
 import { RequestState } from '../../typings';
 import Method from '../methods/Method';
-import createRequestState from '../utils/createRequestState';
-import useHookRequest from '../utils/useHookRequest';
+import createRequestState from '../functions/createRequestState';
+import useHookRequest from '../functions/useHookRequest';
 import { UseHookConfig } from './useRequest';
 
 interface WatcherConfig extends UseHookConfig {

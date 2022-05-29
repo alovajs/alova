@@ -3,7 +3,7 @@ import { RequestAdapter, RequestState } from '../../typings';
 import Method from '../methods/Method';
 import { setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
-import { debounce, key } from './helper';
+import { debounce, key } from '../utils/helper';
 
 export type SuccessHandler = () => void;
 export type ErrorHandler = (error: Error) => void;
@@ -44,11 +44,7 @@ export default function createRequestState<S extends RequestState, E extends Req
   } = options.statesHook;
 
   // 如果有持久化数据则先使用它
-  let initialData: R | undefined;
-  if (method.config.persist) {
-    initialData = getPersistentResponse(id, key(method), storage) || initialData;
-  }
-
+  const initialData: R | undefined = getPersistentResponse(id, key(method), storage);
   const originalState = create(initialData);
   setStateCache(options.baseURL, key(method), originalState);   // 将初始状态存入缓存以便后续更新
   const successHandlers = [] as SuccessHandler[];

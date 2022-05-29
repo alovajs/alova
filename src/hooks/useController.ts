@@ -2,9 +2,9 @@ import {
   RequestState,
 } from '../../typings';
 import Method from '../methods/Method';
-import createRequestState, { CompleteHandler, ErrorHandler, SuccessHandler } from '../utils/createRequestState';
+import createRequestState, { CompleteHandler, ErrorHandler, SuccessHandler } from '../functions/createRequestState';
 import { noop } from '../utils/helper';
-import useHookRequest from '../utils/useHookRequest';
+import useHookRequest from '../functions/useHookRequest';
 import { UseHookConfig } from './useRequest';
 
 export default function useController<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>, { force }: UseHookConfig = {}) {
