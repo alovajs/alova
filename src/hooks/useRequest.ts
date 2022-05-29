@@ -1,6 +1,3 @@
-import {
-  RequestState,
-} from '../../typings';
 import Method from '../methods/Method';
 import createRequestState from '../functions/createRequestState';
 import useHookRequest from '../functions/useHookRequest';
@@ -9,7 +6,7 @@ import useHookRequest from '../functions/useHookRequest';
 export interface UseHookConfig {
   force?: boolean,   // 强制请求
 };
-export default function useRequest<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>, { force }: UseHookConfig = {}) {
+export default function useRequest<S, E, R, T>(method: Method<S, E, R, T>, { force }: UseHookConfig = {}) {
   return createRequestState(method, (
     originalState,
     successHandlers,

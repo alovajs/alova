@@ -69,7 +69,7 @@ export function deserializeMethod<S extends RequestState, E extends RequestState
   url,
   config,
   requestBody
-}: SerializedMethod, alova: Alova<S, E>) {
+}: SerializedMethod, alova: Alova) {
   return new Method(type, alova, url, config, requestBody);
 }
 

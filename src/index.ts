@@ -1,6 +1,5 @@
 import {
   AlovaOptions,
-  RequestState
 } from '../typings';
 import Alova from './Alova';
 import listenNetwork, { addAlova } from './network';
@@ -20,8 +19,8 @@ listenNetwork();
  * @param options alova配置参数
  * @returns Alova实例
  */
-export function createAlova<S extends RequestState, E extends RequestState>(options: AlovaOptions<S, E>) {
-  const alova = new Alova<S, E>(options);
+export function createAlova<S, E>(options: AlovaOptions<S, E>) {
+  const alova = new Alova(options);
   addAlova(alova);
   return alova;
 }

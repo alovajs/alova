@@ -1,4 +1,4 @@
-import { MethodConfig, MethodType, RequestState } from '../../typings';
+import { MethodConfig, MethodType } from '../../typings';
 import Alova, { RequestBody } from '../Alova';
 
 const defaultConfig = [{
@@ -10,7 +10,7 @@ const defaultConfig = [{
   method: ['POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'TRACE'],
   config: {}
 }];
-export default class Method<S extends RequestState, E extends RequestState, R, T> {
+export default class Method<S, E, R, T> {
   public type: MethodType;
   public url: string;
   public config: MethodConfig<R, T>;

@@ -9,12 +9,12 @@ type RequestAdapter<R, T> = (
   abort: () => void,
 };
 
-type RequestState<R = unknown> = {
-  loading: any,
-  data: R,
-  error: any,
-  progress: any,
-};
+// type RequestState<R = unknown> = {
+//   loading: any,
+//   data: R,
+//   error: any,
+//   progress: any,
+// };
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'TRACE';
 
 export type SerializedMethod = {
@@ -63,15 +63,15 @@ type ResponseErrorHandler = (error: any) => void;
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
 // E: export函数返回的状态组的类型
-export interface AlovaOptions<S extends RequestState, E extends RequestState> {
+export interface AlovaOptions<S, E> {
   // base地址
   baseURL: string,
   
   // 状态hook函数，用于定义和更新指定MVVM库的状态
   statesHook: {
-    create: (initialData: any = null) => S,
+    create: <D>(state: D) => S,
     export: (state: S) => E,
-    update: (newVal: Partial<RequestState>, state: S) => void,
+    update: <D>(newVal: Record<string, D>, state: Record<string, S>) => void,
 
     // 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
     // 但在useController中不会被调用

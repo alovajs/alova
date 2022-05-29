@@ -9,7 +9,7 @@ const alovas = [] as Alova<any, any>[];
  * 收集Alova实例
  * @param instance alova实例
  */
-export function addAlova<S extends RequestState, E extends RequestState>(instance: Alova<S, E>) {
+export function addAlova<S extends RequestState, E extends RequestState>(instance: Alova) {
   alovas.push(instance);
 }
 

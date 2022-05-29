@@ -1,5 +1,5 @@
 import { Ref } from 'vue';
-import { RequestAdapter, RequestState } from '../../typings';
+import { RequestAdapter } from '../../typings';
 import Method from '../methods/Method';
 import { setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
@@ -18,16 +18,23 @@ export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
  * @param immediate 是否立即发起请求
  * @returns 当前的请求状态
  */
- type HandleRequest<S> = (
-  originalState: S,
+
+type RequestState<R = unknown> = {
+  loading: any,
+  data: R,
+  error: any,
+  progress: any,
+};
+type HandleRequest<R> = (
+  originalState: RequestState<R>,
   successHandlers: SuccessHandler[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
   setCtrl: (ctrl: ConnectController) => void,
 ) => void;
-export default function createRequestState<S extends RequestState, E extends RequestState, R, T>(
+export default function createRequestState<S, E, R, T>(
   method: Method<S, E, R, T>, 
-  handleRequest: HandleRequest<S>,
+  handleRequest: HandleRequest<R>,
   watchedStates?: any[],
   immediate = true,
   debounceDelay = 0
@@ -44,8 +51,16 @@ export default function createRequestState<S extends RequestState, E extends Req
   } = options.statesHook;
 
   // 如果有持久化数据则先使用它
+  const loading: boolean = false;
   const initialData: R | undefined = getPersistentResponse(id, key(method), storage);
-  const originalState = create(initialData);
+  const error: Error | undefined = undefined;
+  const progress: number = 0;
+  const originalState = {
+    loading: create(loading),
+    data: create(initialData),
+    error: create(error),
+    progress: create(progress),
+  };
   setStateCache(options.baseURL, key(method), originalState);   // 将初始状态存入缓存以便后续更新
   const successHandlers = [] as SuccessHandler[];
   const errorHandlers = [] as ErrorHandler[];
@@ -71,7 +86,12 @@ export default function createRequestState<S extends RequestState, E extends Req
     watchedStates,
     immediate
   ) : wrapEffectRequest();
-  const exportedState = stateExport(originalState);
+  const exportedState = {
+    loading: stateExport(originalState.loading),
+    data: stateExport(originalState.data),
+    error: stateExport(originalState.error),
+    progress: stateExport(originalState.progress),
+  };
   return {
     ...exportedState,
 
