@@ -17,28 +17,30 @@ export const self = <T>(arg: T) => arg;
  * 获取请求方式的key值
  * @returns {string} 此请求方式的key值
  */
-export function key<S, E, R, T>(method: Method<S, E, R, T>) {
-  return JSON.stringify([
-    method.type,
-    method.url,
-    method.config.params,
-    method.requestBody,
-    method.config.headers,
+export function key<S, E, R, T>(methodInstance: Method<S, E, R, T>) {
+  const { type, url, requestBody } = methodInstance;
+  const { params, headers } = methodInstance.config
+  return JSONStringify([
+    type,
+    url,
+    params,
+    requestBody,
+    headers,
   ]);
 }
 
 /**
  * 序列化请求方法对象
- * @param method 请求方法对象
+ * @param methodInstance 请求方法对象
  * @returns 请求方法的序列化对象
  */
-export function serializeMethod<S, E, R, T>(method: Method<S, E, R, T>) {
+export function serializeMethod<S, E, R, T>(methodInstance: Method<S, E, R, T>) {
   const {
     type,
     url,
     config,
     requestBody
-  } = method;
+  } = methodInstance;
   const {
     params,
     headers,
@@ -60,7 +62,7 @@ export function serializeMethod<S, E, R, T>(method: Method<S, E, R, T>) {
 
 /**
  * 反序列化请求方法对象
- * @param method 请求方法对象
+ * @param methodInstance 请求方法对象
  * @returns 请求方法对象
  */
 export function deserializeMethod<S, E>({
@@ -103,3 +105,7 @@ export const getTime = (date?: Date) => date ? date.getTime() : Date.now();
 export const promiseResolve = <T>(value: T) => Promise.resolve(value);
 export const promiseReject = <T>(value: T) => Promise.reject(value);
 export const undefinedValue = undefined;
+export const getContext = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => methodInstance.context;
+export const getOptions = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => getContext(methodInstance).options;
+export const JSONStringify = <T>(value: T) => JSON.stringify(value);
+export const JSONParse = (value: string) => JSON.parse(value);

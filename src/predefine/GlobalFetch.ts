@@ -1,6 +1,6 @@
 import { RequestConfig } from '../../typings';
 import alovaError from '../utils/alovaError';
-import { noop, promiseReject } from '../utils/helper';
+import { JSONStringify, noop, promiseReject } from '../utils/helper';
 
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 const isBodyData = (data: any) => {
@@ -26,7 +26,7 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
       ...requestInit,
       ...config,
       signal: ctrl.signal,
-      body: isBodyData(data) ? data : JSON.stringify(data),
+      body: isBodyData(data) ? data : JSONStringify(data),
     });
     
     const clearTimeoutTimer = () => clearTimeout(abortTimer);

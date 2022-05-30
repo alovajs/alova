@@ -2,7 +2,7 @@ import { RequestConfig, ResponsedHandler, ResponseErrorHandler } from '../../typ
 import Method from '../methods/Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { key, noop, promiseReject, promiseResolve, self } from '../utils/helper';
+import { getContext, getOptions, key, noop, promiseReject, promiseResolve, self } from '../utils/helper';
 
 
 /**
@@ -11,13 +11,13 @@ import { key, noop, promiseReject, promiseResolve, self } from '../utils/helper'
  * @param forceRequest 忽略缓存
  * @returns 响应数据
  */
- export default function sendRequest<S, E, R, T>(method: Method<S, E, R, T>, forceRequest: boolean) {
+ export default function sendRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean) {
   const {
     type,
     url,
     config,
     requestBody,
-  } = method;
+  } = methodInstance;
   const {
     baseURL,
     beforeRequest = noop,
@@ -25,9 +25,9 @@ import { key, noop, promiseReject, promiseResolve, self } from '../utils/helper'
     requestAdapter,
     staleTime = 0,
     persistTime = 0,
-  } = method.context.options;
-  const { id, storage } = method.context;
-  const methodKey = key(method);
+  } = getOptions(methodInstance);
+  const { id, storage } = getContext(methodInstance);
+  const methodKey = key(methodInstance);
 
   // 如果是强制请求的，则跳过从缓存中获取的步骤
   if (!forceRequest) {

@@ -7,6 +7,7 @@ const responseCache: Record<string, Record<string, [
   expireTime?: Date,
 ]>> = {};
 
+const namespacedBaseURL = (namespace: string, baseURL: string) => namespace + baseURL;
 /**
  * @description 获取Response缓存数据
  * @param baseURL 基础URL
@@ -14,7 +15,7 @@ const responseCache: Record<string, Record<string, [
  * @returns 缓存的响应数据，如果没有则返回undefined
  */
 export function getResponseCache(namespace: string, baseURL: string, key: string) {
-  const cachedResponse = responseCache[namespace + baseURL];
+  const cachedResponse = responseCache[namespacedBaseURL(namespace, baseURL)];
   if (!cachedResponse) {
     return;
   }
@@ -42,7 +43,7 @@ export function setResponseCache(namespace: string, baseURL: string, key: string
   if (staleMilliseconds <= 0) {
     return;
   }
-  const parentKey = namespace + baseURL;
+  const parentKey = namespacedBaseURL(namespace, baseURL);
   const cachedResponse = responseCache[parentKey] = responseCache[parentKey] || {};
   cachedResponse[key] = [
     data,
@@ -56,7 +57,7 @@ export function setResponseCache(namespace: string, baseURL: string, key: string
  * @param key 请求key值
  */
 export function removeResponseCache(namespace: string, baseURL: string, key: string) {
-  const cachedResponse = responseCache[namespace + baseURL];
+  const cachedResponse = responseCache[namespacedBaseURL(namespace, baseURL)];
   if (cachedResponse) {
     delete cachedResponse[key];
   }
@@ -73,8 +74,8 @@ const stateCache: Record<string, Record<string, RequestState>> = {};
  * @param key 请求key值
  * @returns 缓存的响应数据，如果没有则返回undefined
  */
-export function getStateCache(baseURL: string, key: string) {
-  const cachedState = stateCache[baseURL];
+export function getStateCache(namespace: string, baseURL: string, key: string) {
+  const cachedState = stateCache[namespacedBaseURL(namespace, baseURL)];
   if (!cachedState) {
     return;
   }
@@ -87,8 +88,9 @@ export function getStateCache(baseURL: string, key: string) {
  * @param key 请求key值
  * @param data 缓存数据
  */
-export function setStateCache(baseURL: string, key: string, data: RequestState) {
-  const cachedState = stateCache[baseURL] = stateCache[baseURL] || {};
+export function setStateCache(namespace: string, baseURL: string, key: string, data: RequestState) {
+  const parentKey = namespacedBaseURL(namespace, baseURL);
+  const cachedState = stateCache[parentKey] = stateCache[parentKey] || {};
   cachedState[key] = data;
 }
 
@@ -97,8 +99,8 @@ export function setStateCache(baseURL: string, key: string, data: RequestState) 
  * @param baseURL 基础URL
  * @param key 请求key值
  */
-export function removeStateCache(baseURL: string, key: string) {
-  const cachedState = stateCache[baseURL];
+export function removeStateCache(namespace: string, baseURL: string, key: string) {
+  const cachedState = stateCache[namespacedBaseURL(namespace, baseURL)];
   if (cachedState) {
     delete cachedState[key];
   }

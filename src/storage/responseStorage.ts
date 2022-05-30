@@ -1,5 +1,5 @@
 import { Storage } from '../../typings';
-import { getTime } from '../utils/helper';
+import { getTime, JSONParse, JSONStringify } from '../utils/helper';
 
 const responseStorageKey = '__$$AlovaResp$$__';
 /**
@@ -16,7 +16,7 @@ export function persistResponse(namespace: string, key: string, response: Record
     return;
   }
   const namespacedResponseStorageKey = responseStorageKey + namespace + key;
-  storage.setItem(namespacedResponseStorageKey, JSON.stringify([
+  storage.setItem(namespacedResponseStorageKey, JSONStringify([
     response,
     persistMilliseconds === Infinity ? null : new Date(getTime() + persistMilliseconds)
   ]));
@@ -33,7 +33,7 @@ export function getPersistentResponse(namespace: string, key: string, storage: S
   const namespacedResponseStorageKey = responseStorageKey + namespace + key;
   const storageStr = storage.getItem(namespacedResponseStorageKey);
   if (storageStr) {
-    const [ response, expireTimestamp ] = JSON.parse(storageStr) as [ any, number | null ];
+    const [ response, expireTimestamp ] = JSONParse(storageStr) as [ any, number | null ];
     // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
     if (!expireTimestamp || expireTimestamp > getTime()) {
       return response;

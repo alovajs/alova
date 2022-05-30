@@ -85,9 +85,9 @@ const alova = createAlova({
       return response ? JSON.parse(response) : undefined;
     }
   },
-  // requestAdapter(source, data, config) {
-  //   return fetch(source, { data, ...config });
-  // },
+  requestAdapter(source, data, config) {
+    return fetch(source, { body: data, ...config });
+  },
 });
 
 

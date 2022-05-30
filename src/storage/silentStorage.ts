@@ -1,5 +1,5 @@
 import { SerializedMethod, Storage } from '../../typings';
-import { undefinedValue } from '../utils/helper';
+import { JSONParse, JSONStringify, undefinedValue } from '../utils/helper';
 
 
 const silentRequestStorageKey = '__$$AlovaSilentRequestStorageKeys$$__';
@@ -14,10 +14,10 @@ const silentRequestStorageKey = '__$$AlovaSilentRequestStorageKeys$$__';
 export function pushSilentRequest(namespace: string, key: string, config: Record<string, any>, storage: Storage) {
   const namespacedSilentStorageKey = silentRequestStorageKey + namespace;
   key = '__$$SilentRequest$$__' + namespace + key;
-  storage.setItem(key, JSON.stringify(config));
-  const storageKeys = JSON.parse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
+  storage.setItem(key, JSONStringify(config));
+  const storageKeys = JSONParse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
   storageKeys[key] = null;
-  storage.setItem(namespacedSilentStorageKey, JSON.stringify(storageKeys));
+  storage.setItem(namespacedSilentStorageKey, JSONStringify(storageKeys));
 }
 
 
@@ -28,17 +28,17 @@ export function pushSilentRequest(namespace: string, key: string, config: Record
  */
 export function getSilentRequest(namespace: string, storage: Storage) {
   const namespacedSilentStorageKey = silentRequestStorageKey + namespace;
-  const storageKeys = JSON.parse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
+  const storageKeys = JSONParse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
   let serializedMethod = undefinedValue as SerializedMethod | undefined;
   let remove = () => {};
   const keys = Object.keys(storageKeys);
   if (keys.length > 0) {
     const key = keys[0];
     const reqConfig = storage.getItem(key);
-    serializedMethod = reqConfig ? JSON.parse(reqConfig) : undefinedValue;
+    serializedMethod = reqConfig ? JSONParse(reqConfig) : undefinedValue;
     remove = () => {
       delete storageKeys[key];
-      storage.setItem(namespacedSilentStorageKey, JSON.stringify(storageKeys));
+      storage.setItem(namespacedSilentStorageKey, JSONStringify(storageKeys));
       storage.removeItem(key);
     };
   }
