@@ -41,6 +41,10 @@ function getInstance(
 }
 
 describe('use useController hook to send GET with vue', function() {
+  test('should specify at least one watching state', () => {
+    const alova = getInstance();
+    expect(() => useWatcher(() => alova.Get<GetData, Result>('/unit-test'), [])).toThrowError();
+  });
   test('should send request when change value', done => {
     const alova = getInstance();
     const mutateNum = ref(0);
@@ -53,7 +57,7 @@ describe('use useController hook to send GET with vue', function() {
       error,
       onSuccess,
     } = useWatcher(() => {
-      currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
@@ -62,7 +66,7 @@ describe('use useController hook to send GET with vue', function() {
         transformData: result => result.data,
         staleTime: 100 * 1000,
       });
-      return currentGet;
+      return get;
     }, [mutateNum, mutateStr]);
     const initialData = () => {
       expect(loading.value).toBeFalsy();
@@ -124,7 +128,7 @@ describe('use useController hook to send GET with vue', function() {
       error,
       onSuccess,
     } = useWatcher(() => {
-      currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
@@ -133,7 +137,7 @@ describe('use useController hook to send GET with vue', function() {
         transformData: result => result.data,
         staleTime: 100 * 1000,
       });
-      return currentGet;
+      return get;
     }, [mutateNum, mutateStr], { debounce: 2000 });
 
     // 在两秒内重新改变状态值，只会触发一次请求
@@ -183,7 +187,7 @@ describe('use useController hook to send GET with vue', function() {
       error,
       onSuccess,
     } = useWatcher(() => {
-      currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
@@ -192,7 +196,7 @@ describe('use useController hook to send GET with vue', function() {
         transformData: result => result.data,
         staleTime: 0,
       });
-      return currentGet;
+      return get;
     }, [mutateNum, mutateStr], { immediate: true });
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
@@ -242,7 +246,7 @@ describe('use useController hook to send GET with vue', function() {
       error,
       onSuccess,
     } = useWatcher(() => {
-      currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
@@ -251,7 +255,7 @@ describe('use useController hook to send GET with vue', function() {
         transformData: result => result.data,
         staleTime: 0,
       });
-      return currentGet;
+      return get;
     }, [mutateNum, mutateStr], { immediate: true, debounce: 1000 });
 
     // 监听时立即出发一次请求，因此loading的值为true

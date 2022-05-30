@@ -1,5 +1,5 @@
 import { RequestState } from '../../typings';
-import { getTime } from '../utils/helper';
+import { getTime, undefinedValue } from '../utils/helper';
 
 // 响应数据缓存
 const responseCache: Record<string, Record<string, [
@@ -16,7 +16,7 @@ const responseCache: Record<string, Record<string, [
 export function getResponseCache(namespace: string, baseURL: string, key: string) {
   const cachedResponse = responseCache[namespace + baseURL];
   if (!cachedResponse) {
-    return undefined;
+    return;
   }
   const cachedItem = cachedResponse[key];
   if (cachedItem) {
@@ -46,7 +46,7 @@ export function setResponseCache(namespace: string, baseURL: string, key: string
   const cachedResponse = responseCache[parentKey] = responseCache[parentKey] || {};
   cachedResponse[key] = [
     data,
-    staleMilliseconds === Infinity ? undefined : new Date(getTime() + staleMilliseconds),
+    staleMilliseconds === Infinity ? undefinedValue : new Date(getTime() + staleMilliseconds),
   ];
 }
 
@@ -65,7 +65,7 @@ export function removeResponseCache(namespace: string, baseURL: string, key: str
 
 
 // 状态数据缓存
-const stateCache: Record<string, Record<string, RequestState<any>>> = {};
+const stateCache: Record<string, Record<string, RequestState>> = {};
 
 /**
  * @description 获取State缓存数据
@@ -76,7 +76,7 @@ const stateCache: Record<string, Record<string, RequestState<any>>> = {};
 export function getStateCache(baseURL: string, key: string) {
   const cachedState = stateCache[baseURL];
   if (!cachedState) {
-    return undefined;
+    return;
   }
   return cachedState[key];
 }
@@ -87,7 +87,7 @@ export function getStateCache(baseURL: string, key: string) {
  * @param key 请求key值
  * @param data 缓存数据
  */
-export function setStateCache(baseURL: string, key: string, data: RequestState<any>) {
+export function setStateCache(baseURL: string, key: string, data: RequestState) {
   const cachedState = stateCache[baseURL] = stateCache[baseURL] || {};
   cachedState[key] = data;
 }

@@ -1,5 +1,4 @@
 import {
-  RequestState,
   SerializedMethod
 } from '../../typings';
 import Alova from '../Alova';
@@ -18,7 +17,7 @@ export const self = <T>(arg: T) => arg;
  * 获取请求方式的key值
  * @returns {string} 此请求方式的key值
  */
-export function key<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
+export function key<S, E, R, T>(method: Method<S, E, R, T>) {
   return JSON.stringify([
     method.type,
     method.url,
@@ -33,7 +32,7 @@ export function key<S extends RequestState, E extends RequestState, R, T>(method
  * @param method 请求方法对象
  * @returns 请求方法的序列化对象
  */
-export function serializeMethod<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>) {
+export function serializeMethod<S, E, R, T>(method: Method<S, E, R, T>) {
   const {
     type,
     url,
@@ -64,12 +63,12 @@ export function serializeMethod<S extends RequestState, E extends RequestState, 
  * @param method 请求方法对象
  * @returns 请求方法对象
  */
-export function deserializeMethod<S extends RequestState, E extends RequestState>({
+export function deserializeMethod<S, E>({
   type,
   url,
   config,
   requestBody
-}: SerializedMethod, alova: Alova) {
+}: SerializedMethod, alova: Alova<S, E>) {
   return new Method(type, alova, url, config, requestBody);
 }
 
@@ -103,3 +102,4 @@ export function debounce(fn: Function, delay: number, enable: () => boolean) {
 export const getTime = (date?: Date) => date ? date.getTime() : Date.now();
 export const promiseResolve = <T>(value: T) => Promise.resolve(value);
 export const promiseReject = <T>(value: T) => Promise.reject(value);
+export const undefinedValue = undefined;

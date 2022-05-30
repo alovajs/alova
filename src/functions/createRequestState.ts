@@ -1,14 +1,15 @@
 import { Ref } from 'vue';
-import { RequestAdapter } from '../../typings';
+import { RequestAdapter, RequestState } from '../../typings';
 import Method from '../methods/Method';
 import { setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
-import { debounce, key } from '../utils/helper';
+import { debounce, key, undefinedValue } from '../utils/helper';
 
 export type SuccessHandler = () => void;
 export type ErrorHandler = (error: Error) => void;
 export type CompleteHandler = () => void;
 export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
+export type ExportedType<E> = E extends Ref ? Ref<E> : E;    // 以支持React和Vue的方式定义类型
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -19,23 +20,17 @@ export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
  * @returns 当前的请求状态
  */
 
-type RequestState<R = unknown> = {
-  loading: any,
-  data: R,
-  error: any,
-  progress: any,
-};
-type HandleRequest<R> = (
-  originalState: RequestState<R>,
+type HandleRequest = (
+  originalState: RequestState,
   successHandlers: SuccessHandler[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
   setCtrl: (ctrl: ConnectController) => void,
 ) => void;
 export default function createRequestState<S, E, R, T>(
-  method: Method<S, E, R, T>, 
-  handleRequest: HandleRequest<R>,
-  watchedStates?: any[],
+  method: Method<S, E, R, T>,
+  handleRequest: HandleRequest,
+  watchedStates?: E[],
   immediate = true,
   debounceDelay = 0
 ) {
@@ -50,18 +45,16 @@ export default function createRequestState<S, E, R, T>(
     effectRequest,
   } = options.statesHook;
 
+  const methodKey = key(method);
   // 如果有持久化数据则先使用它
-  const loading: boolean = false;
-  const initialData: R | undefined = getPersistentResponse(id, key(method), storage);
-  const error: Error | undefined = undefined;
-  const progress: number = 0;
+  const initialData: R | undefined = getPersistentResponse(id, methodKey, storage);
   const originalState = {
-    loading: create(loading),
+    loading: create(false),
     data: create(initialData),
-    error: create(error),
-    progress: create(progress),
+    error: create(undefinedValue as Error | undefined),
+    progress: create(0),
   };
-  setStateCache(options.baseURL, key(method), originalState);   // 将初始状态存入缓存以便后续更新
+  setStateCache(options.baseURL, methodKey, originalState);   // 将初始状态存入缓存以便后续更新
   const successHandlers = [] as SuccessHandler[];
   const errorHandlers = [] as ErrorHandler[];
   const completeHandlers = [] as CompleteHandler[];
@@ -79,24 +72,22 @@ export default function createRequestState<S, E, R, T>(
     );
     handleRequestCalled = true;
   };
-  watchedStates ? effectRequest(
+
+  watchedStates !== undefinedValue ? effectRequest(
     debounceDelay > 0 ? 
       debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled) :
       wrapEffectRequest,
     watchedStates,
     immediate
-  ) : wrapEffectRequest();
-  const exportedState = {
-    loading: stateExport(originalState.loading),
-    data: stateExport(originalState.data),
-    error: stateExport(originalState.error),
-    progress: stateExport(originalState.progress),
-  };
+  ) : effectRequest(wrapEffectRequest);
+  
   return {
-    ...exportedState,
-
-    // 以支持React和Vue的方式定义类型
-    data: exportedState.data as E['data'] extends Ref ? Ref<R> : R,
+    ...{
+      loading: stateExport(originalState.loading) as unknown as ExportedType<boolean>,
+      data: stateExport(originalState.data) as unknown as ExportedType<R>,
+      error: stateExport(originalState.error) as unknown as ExportedType<Error|undefined>,
+      progress: stateExport(originalState.progress) as unknown as ExportedType<number>,
+    },
     onSuccess(handler: SuccessHandler) {
       successHandlers.push(handler);
     },

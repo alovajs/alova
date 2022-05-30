@@ -6,10 +6,11 @@ New request library for MVVM such as Vue.js and React.js
 2. 静默请求
 3. 离线提交
 4. typescript支持
-5. gzip 2kb
+5. 轻量化gzip 3kb
 6. 与Axios相似的使用方法，学习成本低
-7. 预先拉取数据
+7. 数据预拉取
 8. 请求缓存
+9. 状态统一管理
 
 ## 抽象
 请求分为: 

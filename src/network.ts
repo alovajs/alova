@@ -1,4 +1,3 @@
-import { RequestState } from '../typings';
 import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
 import { deserializeMethod } from './utils/helper';
@@ -9,7 +8,7 @@ const alovas = [] as Alova<any, any>[];
  * 收集Alova实例
  * @param instance alova实例
  */
-export function addAlova<S extends RequestState, E extends RequestState>(instance: Alova) {
+export function addAlova<S, E>(instance: Alova<S, E>) {
   alovas.push(instance);
 }
 

@@ -1,4 +1,5 @@
 import { SerializedMethod, Storage } from '../../typings';
+import { undefinedValue } from '../utils/helper';
 
 
 const silentRequestStorageKey = '__$$AlovaSilentRequestStorageKeys$$__';
@@ -28,13 +29,13 @@ export function pushSilentRequest(namespace: string, key: string, config: Record
 export function getSilentRequest(namespace: string, storage: Storage) {
   const namespacedSilentStorageKey = silentRequestStorageKey + namespace;
   const storageKeys = JSON.parse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
-  let serializedMethod = undefined as SerializedMethod | undefined;
+  let serializedMethod = undefinedValue as SerializedMethod | undefined;
   let remove = () => {};
   const keys = Object.keys(storageKeys);
   if (keys.length > 0) {
     const key = keys[0];
     const reqConfig = storage.getItem(key);
-    serializedMethod = reqConfig ? JSON.parse(reqConfig) : undefined;
+    serializedMethod = reqConfig ? JSON.parse(reqConfig) : undefinedValue;
     remove = () => {
       delete storageKeys[key];
       storage.setItem(namespacedSilentStorageKey, JSON.stringify(storageKeys));

@@ -188,19 +188,31 @@ useWatcher(() => getter(page.value, searchText.value), [page, searchText]);
 
 // 让一个key失效
 onSuccess(() => {
-  alova.invalidate(getter(1, 2));
+  invalidate(getter(1, 2));
 });
 // 更新缓存
 onSuccess(() => {
-  alova.update(getter(1, 2), data => {
+  update(getter(1, 2), data => {
     const d = { ...data.value };
     d.a = 1;
     data.value = d;
   });
 });
-// 重新获取数据并缓存
+
+
+// 重新获取数据并缓存，fetch一定会发送请求。且如果当前请求的数据有管理对应的状态，则会更新这个状态
+const {
+  fetching,
+  error,
+  progress,
+  fetch,
+  onSuccess,
+  onError,
+  onComplete,
+  abort
+} = useFether(alova);
 onSuccess(() => {
-  alova.fetch(getter(1, 2));
+  fetch(getter(1, 2));
 });
 
 // 增加机制

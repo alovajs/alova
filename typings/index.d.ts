@@ -9,12 +9,12 @@ type RequestAdapter<R, T> = (
   abort: () => void,
 };
 
-// type RequestState<R = unknown> = {
-//   loading: any,
-//   data: R,
-//   error: any,
-//   progress: any,
-// };
+type RequestState<S = any> = {
+  loading: S,
+  data: S,
+  error: S,
+  progress: S,
+};
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'TRACE';
 
 export type SerializedMethod = {
@@ -71,14 +71,14 @@ export interface AlovaOptions<S, E> {
   statesHook: {
     create: <D>(state: D) => S,
     export: (state: S) => E,
-    update: <D>(newVal: Record<string, D>, state: Record<string, S>) => void,
+    update: (newVal: Partial<RequestState>, state: RequestState) => void,
 
     // 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
     // 但在useController中不会被调用
     // 当watchedStates为空数组时，执行一次handleRequest函数
     // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
     // 在vue中直接执行即可，而在react中需要在useEffect中执行
-    effectRequest: (handleRequest: () => void, watchedStates: any[], immediate: boolean) => void,
+    effectRequest: (handleRequest: () => void, watchedStates?: any[], immediate = true) => void,
   },
 
   // 请求适配器

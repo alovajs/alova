@@ -1,4 +1,4 @@
-import { RequestConfig, RequestState, ResponsedHandler, ResponseErrorHandler } from '../../typings';
+import { RequestConfig, ResponsedHandler, ResponseErrorHandler } from '../../typings';
 import Method from '../methods/Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
@@ -11,7 +11,7 @@ import { key, noop, promiseReject, promiseResolve, self } from '../utils/helper'
  * @param forceRequest 忽略缓存
  * @returns 响应数据
  */
- export default function sendRequest<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>, forceRequest: boolean) {
+ export default function sendRequest<S, E, R, T>(method: Method<S, E, R, T>, forceRequest: boolean) {
   const {
     type,
     url,

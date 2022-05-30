@@ -1,16 +1,16 @@
 import { Ref, ref, watch } from 'vue';
+import { RequestState } from '../../typings';
 
 // Vue的预定义hooks
 export default {
-  create: <D>(state: D) => ref<D>(state),
+  create: <D>(data: D) => ref(data),
   export: <D>(state: Ref<D>) => state,
-  update<D>(newVal: Record<string, D>, state: Record<string, Ref<D>>) {
-    Object.keys(newVal).forEach(key => {
-      state[key].value = newVal[key];
-    });
-  },
-  effectRequest(handler: () => void, watchedStates: any[], immediate: boolean) {
-    if (watchedStates.length <= 0) {
+  update: (newVal: Partial<RequestState>, state: RequestState<Ref<unknown>>) => Object.keys(newVal).forEach(key => {
+    type Keys = keyof RequestState;
+    state[key as Keys].value = newVal[key as Keys];
+  }),
+  effectRequest(handler: () => void, watchedStates?: any[], immediate = true) {
+    if (!watchedStates) {
       handler();
       return;
     }

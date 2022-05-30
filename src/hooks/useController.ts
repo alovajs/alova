@@ -1,14 +1,12 @@
-import {
-  RequestState,
-} from '../../typings';
+import { RequestState } from '../../typings';
 import Method from '../methods/Method';
 import createRequestState, { CompleteHandler, ErrorHandler, SuccessHandler } from '../functions/createRequestState';
 import { noop } from '../utils/helper';
-import useHookRequest from '../functions/useHookRequest';
+import useHookToSendRequest from '../functions/useHookToSendRequest';
 import { UseHookConfig } from './useRequest';
 
-export default function useController<S extends RequestState, E extends RequestState, R, T>(method: Method<S, E, R, T>, { force }: UseHookConfig = {}) {
-  let originalState: S;
+export default function useController<S, E, R, T>(method: Method<S, E, R, T>, { force }: UseHookConfig = {}) {
+  let originalState: RequestState;
   let successHandlers: SuccessHandler[];
   let errorHandlers: ErrorHandler[];
   let completeHandlers: CompleteHandler[];
@@ -30,7 +28,7 @@ export default function useController<S extends RequestState, E extends RequestS
     
     // 通过执行该方法来手动发起请求
     send() {
-      const ctrl = useHookRequest(
+      const ctrl = useHookToSendRequest(
         method,
         originalState,
         successHandlers,

@@ -1,36 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
+import { RequestState } from '../../typings';
 
-function create<R>(initialData?: R) {
-  return {
-    loading: useState<boolean>(false),
-    data: useState<R | undefined>(initialData),
-    error: useState<Error | undefined>(undefined),
-    progress: useState<number>(0),
-  };
-}
-type CreateRequestState = ReturnType<typeof create>;
-type UpdateRequestState = {
-  [x in keyof CreateRequestState]?: CreateRequestState[x][0];
-};
+const create = (data: any) => useState(data);
+type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 
 // React的预定义hooks
 export default {
   create,
-  export(state: CreateRequestState) {
-    return {
-      loading: state.loading[0],
-      data: state.data[0],
-      error: state.error[0],
-      progress: state.progress[0],
-    };
-  },
-  update(newVal: UpdateRequestState, state: CreateRequestState) {
-    type Keys = keyof UpdateRequestState;
-    Object.keys(newVal).forEach(key => {
-      state[key as Keys][1](newVal[key as Keys] as any);
-    });
-  },
-  effectRequest(handler: () => void, watchedStates: any[], immediate: boolean) {
+  export: <D>(state: ReactState<D>) => state[0],
+  update: (newVal: Partial<RequestState>, state: RequestState<ReactState<unknown>>) => Object.keys(newVal).forEach(key => {
+    type Keys = keyof RequestState;
+    state[key as Keys][1](newVal[key as Keys] as any);
+  }),
+  effectRequest(handler: () => void, watchedStates: any[] = [], immediate = true) {
     const mountedRef = useRef(false);
     useEffect(() => {
       if (!immediate && !mountedRef.current) {

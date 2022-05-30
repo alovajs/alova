@@ -1,6 +1,6 @@
 import Method from '../methods/Method';
 import createRequestState from '../functions/createRequestState';
-import useHookRequest from '../functions/useHookRequest';
+import useHookToSendRequest from '../functions/useHookToSendRequest';
 
 // hook通用配置
 export interface UseHookConfig {
@@ -14,7 +14,7 @@ export default function useRequest<S, E, R, T>(method: Method<S, E, R, T>, { for
     completeHandlers,
     setCtrl
   ) => {
-    const ctrl = useHookRequest(
+    const ctrl = useHookToSendRequest(
       method,
       originalState,
       successHandlers,
@@ -23,5 +23,5 @@ export default function useRequest<S, E, R, T>(method: Method<S, E, R, T>, { for
       force
     );
     setCtrl(ctrl);    // 将控制器传出去供使用者调用
-  }, [], true);
+  });
 }

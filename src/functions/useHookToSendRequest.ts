@@ -1,10 +1,10 @@
-import { RequestState } from '../../typings';
 import Method from '../methods/Method';
 import { pushSilentRequest } from '../storage/silentStorage';
 import { CompleteHandler, ErrorHandler, SuccessHandler } from './createRequestState';
 import { key, noop, promiseResolve, serializeMethod } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
+import { RequestState } from '../../typings';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
@@ -14,9 +14,9 @@ import sendRequest from './sendRequest';
  * @param errorHandlers 失败回调函数数组
  * @returns 请求状态
  */
- export default function useHookRequest<S extends RequestState, E extends RequestState, R, T>(
+ export default function useHookToSendRequest<S, E, R, T>(
   method: Method<S, E, R, T>,
-  originalState: S,
+  originalState: RequestState,
   successHandlers: SuccessHandler[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
@@ -37,13 +37,13 @@ import sendRequest from './sendRequest';
       ...completeHandlers
     ]);
     
-    // silent模式下，如果网络离线的话就不再实际请求了
+    // silent模式下，如果网络离线的话就不再实际请求了，而是将请求信息存入缓存
     if (!navigator.onLine) {
       pushSilentRequest(context.id, methodKey, serializeMethod(method), storage);
       return {
         response: () => promiseResolve(null),
         headers: () => promiseResolve({} as Headers),
-        progress: () => {},
+        progress: noop,
         abort: noop,
       };
     }
