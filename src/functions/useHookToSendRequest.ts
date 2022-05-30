@@ -32,15 +32,15 @@ import { getStateCache } from '../storage/responseCache';
   const { update } = options.statesHook;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const silent = methodInstance.config.silent && !updateCacheState;   // 在fetch数据时不能静默请求
-  let methodKey = '';
+  const methodKey = key(methodInstance);
   const runHandlers = (handlers: Function[], ...args: any[]) => handlers.forEach(handler => handler(...args));
   if (silent) {
     myAssert(!(methodInstance.requestBody instanceof FormData), 'FormData is not supported when silent is true');
-    methodKey = key(methodInstance);
-    runHandlers([
+    // 需要异步执行，同步执行会导致无法收集各类回调函数
+    setTimeout(() => runHandlers([
       ...successHandlers,
       ...completeHandlers
-    ]);
+    ]), 0);
     
     // silent模式下，如果网络离线的话就不再实际请求了，而是将请求信息存入缓存
     if (!navigator.onLine) {
@@ -66,15 +66,14 @@ import { getStateCache } from '../storage/responseCache';
   response()
     .then(data => {
       if (!updateCacheState) {
-        update({
-          data,
-          loading: false,
-        }, originalState);
+        update({ data }, originalState);
       } else {
         // 更新缓存内的状态，一般为useFetcher中进入
         const cachedState = getStateCache(id, baseURL, methodKey);
         cachedState && update({ data }, cachedState);
       }
+      update({ loading: false }, originalState);
+
       // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
       if (!silent) {
         runHandlers(successHandlers);

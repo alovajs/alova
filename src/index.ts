@@ -6,6 +6,10 @@ import listenNetwork, { addAlova } from './network';
 export { default as useRequest } from './hooks/useRequest';
 export { default as useController } from './hooks/useController';
 export { default as useWatcher } from './hooks/useWatcher';
+export { default as useFetcher } from './hooks/useFetcher';
+export { default as invalidate } from './functions/invalidate';
+export { default as update } from './functions/update';
+
 export { default as ReactHook } from './predefine/ReactHook';
 export { default as VueHook } from './predefine/VueHook';
 export { default as GlobalFetch } from './predefine/GlobalFetch';
