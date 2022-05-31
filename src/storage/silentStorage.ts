@@ -1,8 +1,8 @@
 import { SerializedMethod, Storage } from '../../typings';
-import { JSONParse, JSONStringify, undefinedValue } from '../utils/helper';
+import { JSONParse, JSONStringify, noop, undefinedValue } from '../utils/helper';
 
 
-const silentRequestStorageKey = '__$$AlovaSilentRequestStorageKeys$$__';
+const silentRequestStorageKey = '__$$a_sreqssk$$__';
 
 /**
  * 将静默请求的配置信息放入对应storage中
@@ -13,7 +13,7 @@ const silentRequestStorageKey = '__$$AlovaSilentRequestStorageKeys$$__';
  */
 export function pushSilentRequest(namespace: string, key: string, config: Record<string, any>, storage: Storage) {
   const namespacedSilentStorageKey = silentRequestStorageKey + namespace;
-  key = '__$$SilentRequest$$__' + namespace + key;
+  key = '__$$sreq$$__' + namespace + key;
   storage.setItem(key, JSONStringify(config));
   const storageKeys = JSONParse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
   storageKeys[key] = null;
@@ -30,7 +30,7 @@ export function getSilentRequest(namespace: string, storage: Storage) {
   const namespacedSilentStorageKey = silentRequestStorageKey + namespace;
   const storageKeys = JSONParse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
   let serializedMethod = undefinedValue as SerializedMethod | undefined;
-  let remove = () => {};
+  let remove = noop;
   const keys = Object.keys(storageKeys);
   if (keys.length > 0) {
     const key = keys[0];

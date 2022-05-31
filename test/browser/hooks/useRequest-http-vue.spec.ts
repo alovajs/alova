@@ -87,18 +87,16 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(progress.value).toBe(0);
     expect(error.value).toBeUndefined();
     onSuccess(() => {
-      try {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(progress.value).toBe(0);
-        expect(error.value).toBeUndefined();
+      expect(loading.value).toBeFalsy();
+      expect(data.value.path).toBe('/unit-test');
+      expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+      expect(progress.value).toBe(0);
+      expect(error.value).toBeUndefined();
 
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
-        expect(cacheData.path).toBe('/unit-test');
-        expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
-      } catch (error) {}
+      // 缓存有值
+      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
+      expect(cacheData.path).toBe('/unit-test');
+      expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
       done();
     });
   });
@@ -137,7 +135,7 @@ describe('use useRequet hook to send GET with vue', function() {
   });
 
   test('send get with responseCallback error', done => {
-    const alova = getInstance(undefined, jsonPromise => {
+    const alova = getInstance(undefined, () => {
       throw new Error('responseCallback error');
     }, error => {
       console.log('error responseCallback', error.message);
@@ -280,18 +278,16 @@ describe('Test other methods without GET', function() {
     expect(progress.value).toBe(0);
     expect(error.value).toBeUndefined();
     onSuccess(() => {
-      try {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(progress.value).toBe(0);
-        expect(error.value).toBeUndefined();
+      expect(loading.value).toBeFalsy();
+      expect(data.value.path).toBe('/unit-test');
+      expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+      expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
+      expect(progress.value).toBe(0);
+      expect(error.value).toBeUndefined();
 
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
-        expect(cacheData).toBeUndefined();
-      } catch (error) {}
+      // 缓存有值
+      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
+      expect(cacheData).toBeUndefined();
       done();
     });
   });
@@ -350,18 +346,16 @@ describe('Test other methods without GET', function() {
     expect(progress.value).toBe(0);
     expect(error.value).toBeUndefined();
     onSuccess(() => {
-      try {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(progress.value).toBe(0);
-        expect(error.value).toBeUndefined();
+      expect(loading.value).toBeFalsy();
+      expect(data.value.path).toBe('/unit-test');
+      expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+      expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
+      expect(progress.value).toBe(0);
+      expect(error.value).toBeUndefined();
 
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Delete));
-        expect(cacheData).toBeUndefined();
-      } catch (error) {}
+      // 缓存有值
+      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Delete));
+      expect(cacheData).toBeUndefined();
       done();
     });
   });
@@ -420,18 +414,16 @@ describe('Test other methods without GET', function() {
     expect(progress.value).toBe(0);
     expect(error.value).toBeUndefined();
     onSuccess(() => {
-      try {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(progress.value).toBe(0);
-        expect(error.value).toBeUndefined();
+      expect(loading.value).toBeFalsy();
+      expect(data.value.path).toBe('/unit-test');
+      expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+      expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
+      expect(progress.value).toBe(0);
+      expect(error.value).toBeUndefined();
 
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Put));
-        expect(cacheData).toBeUndefined();
-      } catch (error) {}
+      // 缓存有值
+      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Put));
+      expect(cacheData).toBeUndefined();
       done();
     });
   });

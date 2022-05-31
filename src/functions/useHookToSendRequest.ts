@@ -54,7 +54,8 @@ import { getStateCache } from '../storage/responseCache';
     }
   }
 
-  update({
+  // 非静默模式，不需要更新loading状态
+  !silent && update({
     loading: true,
   }, originalState);
   const ctrl = sendRequest(methodInstance, forceRequest);
@@ -72,10 +73,10 @@ import { getStateCache } from '../storage/responseCache';
         const cachedState = getStateCache(id, baseURL, methodKey);
         cachedState && update({ data }, cachedState);
       }
-      update({ loading: false }, originalState);
 
       // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
       if (!silent) {
+        update({ loading: false }, originalState);
         runHandlers(successHandlers);
         runHandlers(completeHandlers);
       }

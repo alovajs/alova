@@ -1,9 +1,11 @@
 import { Ref } from 'vue';
 import { RequestAdapter, RequestState } from '../../typings';
 import Alova from '../Alova';
+import Method from '../methods/Method';
 import { setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { debounce, undefinedValue } from '../utils/helper';
+import useHookToSendRequest from './useHookToSendRequest';
 
 export type SuccessHandler = () => void;
 export type ErrorHandler = (error: Error) => void;
@@ -105,6 +107,19 @@ export default function createRequestState<S, E, R>(
     },
     abort() {
       ctrl && ctrl.abort();
-    }
+    },
+    
+    // 通过执行该方法来手动发起请求
+    send<S, E, R, T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, updateCacheState?: boolean) {
+      ctrl = useHookToSendRequest(
+        methodInstance,
+        originalState,
+        successHandlers,
+        errorHandlers,
+        completeHandlers,
+        forceRequest,
+        updateCacheState
+      );
+    },
   };
 }

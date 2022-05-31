@@ -1,15 +1,22 @@
 import { MethodConfig, MethodType } from '../../typings';
 import Alova, { RequestBody } from '../Alova';
+import { getOptions } from '../utils/helper';
 
-const defaultConfig = [{
-  method: ['GET', 'HEAD'],
-  config: {
-    staleTime: 300000,   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
-  }
-}, {
-  method: ['POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'TRACE'],
-  config: {}
-}];
+// get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+const staledConfig = {
+  staleTime: 300000,
+};
+const submitConfig = {};
+const methodDefaultConfig: Record<MethodType, MethodConfig<any, any>> = {
+  GET: staledConfig,
+  HEAD: staledConfig,
+  POST: submitConfig,
+  PUT: submitConfig,
+  PATCH: submitConfig,
+  DELETE: submitConfig,
+  OPTIONS: submitConfig,
+  TRACE: submitConfig,
+};
 export default class Method<S, E, R, T> {
   public type: MethodType;
   public url: string;
@@ -24,10 +31,10 @@ export default class Method<S, E, R, T> {
     
     const contextConcatConfig: Record<string, any> = {};
     (['timeout', 'staleTime'] as const).forEach(key => {
-      contextConcatConfig[key] = context.options[key];
+      contextConcatConfig[key] = getOptions(this)[key];
     });
     this.config = {
-      ...(defaultConfig.find(({ method }) => method.includes(type))?.config || {}),
+      ...(methodDefaultConfig[type] || {}),
       ...contextConcatConfig,
       ...config,
     };

@@ -8,7 +8,7 @@ import {
 import { RequestConfig } from '../../../typings';
 import { GetData, Result } from '../result.type';
 import server from '../../server';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 
@@ -67,6 +67,39 @@ describe('useRequet hook with react', function() {
     const loadingEl = await screen.findByText(/loaded/);
     expect(loadingEl).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('method')).toHaveTextContent('GET');
+  });
+
+  test('shouldn\'t send request when set `immediate=false`', async () => {
+    const alova = getInstance();
+    const Get = alova.Get<GetData, Result<true>>('/unit-test', {
+      timeout: 10000,
+      transformData: ({ data }) => data,
+      staleTime: 100 * 1000,
+    });
+    function Page() {
+      const {
+        loading,
+        data = { path: '', method: '' },
+        send,
+      } = useRequest(Get, { immediate: false });
+      return (
+        <div role="wrap">
+          <span role="status">{ loading ? 'loading' : 'loaded' }</span>
+          <span role="path">{ data.path }</span>
+          <span role="method">{ data.method }</span>
+          <button role="btn" onClick={send}>send request</button>
+        </div>
+      );
+    }
+
+    render(<Page /> as ReactElement<any, any>);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('');
+    expect(screen.getByRole('method')).toHaveTextContent('');
+    fireEvent.click(screen.getByRole('btn'));
+    await screen.findByText(/unit-test/);
     expect(screen.getByRole('method')).toHaveTextContent('GET');
   });
 });
