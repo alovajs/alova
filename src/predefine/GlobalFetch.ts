@@ -1,6 +1,6 @@
-import { RequestConfig } from '../../typings';
+import { Progress, RequestConfig } from '../../typings';
 import alovaError from '../utils/alovaError';
-import { JSONStringify, noop, promiseReject } from '../utils/helper';
+import { clearTimeoutTimer, JSONStringify, noop, promiseReject, setTimeoutFn } from '../utils/helper';
 
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 const isBodyData = (data: any) => {
@@ -13,10 +13,10 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
     // 设置了中断时间，则在指定时间后中断请求
     const timeout = config.timeout || 0;
     const ctrl = new AbortController();
-    let abortTimer: NodeJS.Timeout;
+    let abortTimer: number;
     let isTimeout = false;
     if (timeout > 0) {
-      abortTimer = setTimeout(() => {
+      abortTimer = setTimeoutFn(() => {
         isTimeout = true;
         ctrl.abort();
       }, timeout);
@@ -29,11 +29,10 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
       body: isBodyData(data) ? data : JSONStringify(data),
     });
     
-    const clearTimeoutTimer = () => clearTimeout(abortTimer);
     return {
       response: () => fetchPromise.then(response => {
         // 请求成功后清除中断处理
-        clearTimeoutTimer();
+        clearTimeoutTimer(abortTimer);
         return /^[2|3]/.test(response.status.toString()) ? response : promiseReject(alovaError(response.statusText));
       }, err => promiseReject(
         alovaError(isTimeout ? 'fetchError: network timeout' : err.message)
@@ -41,27 +40,30 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
 
       // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
       headers: () => fetchPromise.then(({ headers }) => headers, noop),
-      progress: (cb: (value: number) => void) => {
+      downloading: (cb: (progress: Progress) => void) => {
         fetchPromise.then(response => {
-          const contentLength = Number(response.headers.get('Content-Length')) || 1;
-          let receivedLength = 0;
+          const { headers, body } = response;
+          const total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
+          if (total <= 0) {
+            return;
+          }
+          let loaded = 0;
           let progressTimer = setInterval(() => {
-            response.body?.getReader().read().then(({ done, value = new Uint8Array() }) => {
+            body?.getReader().read().then(({ done, value = new Uint8Array() }) => {
               if (done) {
                 clearInterval(progressTimer);
               }
-              receivedLength += value.length;
-              const percent = (receivedLength / contentLength).toFixed(4);
-              console.log(done, value, percent);
-              cb(Number(percent));
+              loaded += value.length;
+              cb({ total, loaded });
             });
-          }, 500);
+          }, 100);
         });
       },
       abort: () => {
         ctrl.abort();
-        clearTimeoutTimer();
+        clearTimeoutTimer(abortTimer);
       },
     };
+
   };
 }

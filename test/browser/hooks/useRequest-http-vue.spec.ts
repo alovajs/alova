@@ -78,19 +78,19 @@ describe('use useRequet hook to send GET with vue', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onSuccess,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onSuccess(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
 
       // 缓存有值
@@ -112,18 +112,18 @@ describe('use useRequet hook to send GET with vue', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onError,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onError(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeInstanceOf(Error);
       expect(error.value).toBe(err);
 
@@ -145,18 +145,18 @@ describe('use useRequet hook to send GET with vue', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onError,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onError(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeInstanceOf(Object);
       expect(error.value).toBe(err);
       done();
@@ -172,18 +172,18 @@ describe('use useRequet hook to send GET with vue', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onError,
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onError(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeInstanceOf(Object);
       expect(error.value).toBe(err);
       done();
@@ -199,20 +199,20 @@ describe('use useRequet hook to send GET with vue', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onError,
       abort
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     setTimeout(abort, 100);
     onError(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeInstanceOf(Object);
       expect(error.value).toBe(err);
       done();
@@ -269,20 +269,20 @@ describe('Test other methods without GET', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onSuccess,
     } = useRequest(Post);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onSuccess(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
       expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
 
       // 缓存有值
@@ -337,20 +337,20 @@ describe('Test other methods without GET', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onSuccess,
     } = useRequest(Delete);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onSuccess(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
       expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
 
       // 缓存有值
@@ -405,20 +405,20 @@ describe('Test other methods without GET', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onSuccess,
     } = useRequest(Put);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onSuccess(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
       expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
 
       // 缓存有值
@@ -446,18 +446,18 @@ describe('Test other methods without GET', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onSuccess,
     } = useRequest(Head);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     await new Promise(resolve => onSuccess(() => resolve(1)));
     expect(loading.value).toBeFalsy();
     expect(data.value).toEqual({});
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Head));
@@ -482,18 +482,18 @@ describe('Test other methods without GET', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onSuccess,
     } = useRequest(Options);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     await new Promise(resolve => onSuccess(() => resolve(1)));
     expect(loading.value).toBeFalsy();
     expect(data.value).toEqual({});
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Options));
@@ -518,20 +518,20 @@ describe('Test other methods without GET', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       onSuccess,
     } = useRequest(Patch);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     await new Promise(resolve => onSuccess(() => resolve(1)));
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params).toEqual({ a: 'a', b: 'str' });
     expect(data.value.data).toEqual({ patch1: 'p' });
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Patch));

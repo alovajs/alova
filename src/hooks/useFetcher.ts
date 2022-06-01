@@ -12,7 +12,8 @@ export default function useFetcher<S, E>(alova: Alova<S, E>) {
   return {
     fetching: props.loading,
     error: props.error,
-    progress: props.progress,
+    download: props.download,
+    upload: props.upload,
     onSuccess: props.onSuccess,
     onError: props.onError,
     onComplete: props.onComplete,

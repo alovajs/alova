@@ -1,3 +1,7 @@
+export type Progress = {
+  total: number,
+  loaded: number,
+};
 type RequestAdapter<R, T> = (
   source: string,
   data: RequestBody,
@@ -5,7 +9,8 @@ type RequestAdapter<R, T> = (
 ) => {
   response: () => Promise<Response>,
   headers: () => Promise<Headers | void>,
-  progress: (callback: (value: number) => void) => void,
+  downloading?: (callback: (progress: Progress) => void) => void,
+  uploading?: (callback: (progress: Progress) => void) => void,
   abort: () => void,
 };
 
@@ -13,7 +18,8 @@ type RequestState<S = any> = {
   loading: S,
   data: S,
   error: S,
-  progress: S,
+  download: S,
+  upload: S,
 };
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
@@ -49,7 +55,8 @@ export type MethodConfig<R, T> = {
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
   timeout?: number,    // 当前中断时间
   staleTime?: DurationSetter<T>,   // 响应数据在保鲜时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不保鲜
-  enableProgress?: boolean,   // 是否启用进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+  enableDownload?: boolean,   // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+  enableUpload?: boolean,   // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   persistTime?: DurationSetter<T>,      // 持久化响应数据的时间，有持久化数据时会先把这些数据赋值给data，再进行请求
   transformData?: (data: T, headers: Headers) => R,
 };

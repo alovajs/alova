@@ -1,7 +1,7 @@
 import Method from '../methods/Method';
 import { pushSilentRequest } from '../storage/silentStorage';
 import { CompleteHandler, ErrorHandler, SuccessHandler } from './createRequestState';
-import { getContext, key, noop, promiseResolve, serializeMethod } from '../utils/helper';
+import { getContext, key, noop, promiseResolve, serializeMethod, setTimeoutFn } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
 import { RequestState } from '../../typings';
@@ -30,19 +30,20 @@ import { getStateCache } from '../storage/responseCache';
   const { id, options, storage } = getContext(methodInstance);
   const { baseURL } = options;
   const { update } = options.statesHook;
+  const { silent, enableDownload, enableUpload } = methodInstance.config;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
-  const silent = methodInstance.config.silent && !updateCacheState;   // 在fetch数据时不能静默请求
+  const silentMode = silent && !updateCacheState;   // 在fetch数据时不能静默请求
   const methodKey = key(methodInstance);
   const runHandlers = (handlers: Function[], ...args: any[]) => handlers.forEach(handler => handler(...args));
-  if (silent) {
+  if (silentMode) {
     myAssert(!(methodInstance.requestBody instanceof FormData), 'FormData is not supported when silent is true');
     // 需要异步执行，同步执行会导致无法收集各类回调函数
-    setTimeout(() => runHandlers([
+    setTimeoutFn(() => runHandlers([
       ...successHandlers,
       ...completeHandlers
     ]), 0);
     
-    // silent模式下，如果网络离线的话就不再实际请求了，而是将请求信息存入缓存
+    // silentMode下，如果网络离线的话就不再实际请求了，而是将请求信息存入缓存
     if (!navigator.onLine) {
       pushSilentRequest(id, methodKey, serializeMethod(methodInstance), storage);
       return {
@@ -58,10 +59,11 @@ import { getStateCache } from '../storage/responseCache';
   const ctrl = sendRequest(methodInstance, forceRequest);
   const {
     response,
-    progress,
+    downloading = noop,
+    uploading = noop,
     useCache,
   } = ctrl;
-  !silent && !useCache && update({
+  !silentMode && !useCache && update({
     loading: true,
   }, originalState);
 
@@ -76,7 +78,7 @@ import { getStateCache } from '../storage/responseCache';
       }
 
       // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
-      if (!silent) {
+      if (!silentMode) {
         update({ loading: false }, originalState);
         runHandlers(successHandlers);
         runHandlers(completeHandlers);
@@ -88,7 +90,7 @@ import { getStateCache } from '../storage/responseCache';
         error,
         loading: false,
       }, originalState);
-      if (silent) {
+      if (silentMode) {
         pushSilentRequest(id, methodKey, serializeMethod(methodInstance), storage)
       } else {
         runHandlers(errorHandlers, error);
@@ -96,8 +98,9 @@ import { getStateCache } from '../storage/responseCache';
       }
     });
   
-  if (methodInstance.config.enableProgress && !silent) {
-    progress(value => update({ progress: value }, originalState));
+  if (!silentMode) {
+    enableDownload && downloading(download => update({ download }, originalState));
+    enableUpload && uploading(upload => update({ upload }, originalState));
   }
   return ctrl;
 }

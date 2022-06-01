@@ -58,21 +58,21 @@ describe('use useFetcher hook to fetch data', function() {
 
     const {
       fetching,
-      progress,
+      download,
       error,
       fetch,
       onSuccess: onFetchSuccess,
     } = useFetcher(alova);
 
     expect(fetching.value).toBeFalsy();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     onSuccess(() => {
       expect(data.value.params.count).toBe(0);
 
       fetch(Get1);
       expect(fetching.value).toBeTruthy();
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get1));
@@ -82,7 +82,7 @@ describe('use useFetcher hook to fetch data', function() {
     onFetchSuccess(() => {
       expect(data.value.params.count).toBe(1);
       expect(fetching.value).toBeFalsy();
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get1));

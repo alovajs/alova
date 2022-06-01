@@ -12,7 +12,10 @@ import server from '../../server';
 import { getSilentRequest } from '../../../src/storage/silentStorage';
 
 beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  localStorage.clear();
+});
 afterAll(() => server.close());
 function getInstance(
   beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
@@ -45,20 +48,18 @@ class NetworkController {
     this.onLine = win.navigator.onLine; 
 
     // Replace the default onLine implementation with our own. 
-    Object.defineProperty(win.navigator.constructor.prototype, 
-      'onLine', {
-        get:() => { 
-          return this.onLine; 
-        }, 
-      }
-    );
+    Object.defineProperty(win.navigator.constructor.prototype, 'onLine', {
+      get:() => {
+        return this.onLine;
+      },
+    });
   }
 
   setOnline() { 
-    const was = this.onLine; 
-    this.onLine = true; 
-    // Fire only on transitions. 
-    if (!was) { 
+    const was = this.onLine;
+    this.onLine = true;
+    // Fire only on transitions.
+    if (!was) {
       this.fire('online'); 
     } 
   } 
@@ -87,7 +88,7 @@ describe('use useRequest to send silent request', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       send,
       onSuccess,
@@ -95,7 +96,7 @@ describe('use useRequest to send silent request', function() {
     } = useRequest(Post, { immediate: false });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     send();
     // 静默请求在发送请求时就会触发onSuccess
@@ -103,7 +104,7 @@ describe('use useRequest to send silent request', function() {
     onSuccess(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(progress.value).toBe(0);
+      expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
       expect(cacheData).toBeUndefined();
@@ -117,7 +118,7 @@ describe('use useRequest to send silent request', function() {
     }, 10);
   });
 
-  test.only('should push to localStorage when silent\'s post is failed', done => {
+  test('should push to localStorage when silent\'s post is failed', done => {
     let throwError = 0;
     const alova = getInstance(undefined, () => {
       throwError++;
@@ -125,7 +126,6 @@ describe('use useRequest to send silent request', function() {
         setTimeout(() => {
           const { serializedMethod } = getSilentRequest(alova.id, alova.storage);
           expect(serializedMethod).not.toBeUndefined();
-          console.log('throwerror', throwError, !!serializedMethod);
         }, 0);
         throw new Error('custom error');
       }
@@ -141,13 +141,13 @@ describe('use useRequest to send silent request', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
       send,
     } = useRequest(Post, { immediate: false });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     send();
   });
@@ -164,12 +164,12 @@ describe('use useRequest to send silent request', function() {
     const {
       loading,
       data,
-      progress,
+      download,
       error,
     } = useRequest(Post);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
+    expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     let persisted = getSilentRequest(alova.id, alova.storage);
     const serializedMethod = persisted.serializedMethod || { url: '', type: '', requestBody: {} };
@@ -181,7 +181,7 @@ describe('use useRequest to send silent request', function() {
 
     // 设置网络正常后将自动启动后台请求服务，把post请求发送出去
     networkCtrl.setOnline();
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 2500));
     persisted = getSilentRequest(alova.id, alova.storage);
     expect(persisted.serializedMethod).toBeUndefined();
     expect(requestHookMock.mock.calls.length).toBe(1);

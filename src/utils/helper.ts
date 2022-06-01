@@ -91,11 +91,9 @@ export function debounce(fn: Function, delay: number, enable: () => boolean) {
       return;
     }
     if (timer) {
-      clearTimeout(timer);
+      clearTimeoutTimer(timer);
     }
-    timer = setTimeout(() => {
-      bindFn();
-    }, delay);
+    timer = setTimeoutFn(bindFn, delay);
   };
 }
 
@@ -109,3 +107,5 @@ export const getContext = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => me
 export const getOptions = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => getContext(methodInstance).options;
 export const JSONStringify = <T>(value: T) => JSON.stringify(value);
 export const JSONParse = (value: string) => JSON.parse(value);
+export const setTimeoutFn = (fn: Function, delay: number) => setTimeout(fn, delay);
+export const clearTimeoutTimer = (timer: number) => clearTimeout(timer);

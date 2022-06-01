@@ -1,5 +1,5 @@
 import { Ref } from 'vue';
-import { RequestAdapter, RequestState } from '../../typings';
+import { Progress, RequestAdapter, RequestState } from '../../typings';
 import Alova from '../Alova';
 import Method from '../methods/Method';
 import { setStateCache } from '../storage/responseCache';
@@ -52,11 +52,16 @@ export default function createRequestState<S, E, R>(
 
   // 如果有持久化数据则先使用它
   const initialData: R | undefined = methodKey ? getPersistentResponse(id, methodKey, storage) : undefinedValue;
+  const progress = {
+    total: 0,
+    loaded: 0,
+  };
   const originalState = {
     loading: create(false),
     data: create(initialData),
     error: create(undefinedValue as Error | undefined),
-    progress: create(0),
+    download: create({ ...progress }),
+    upload: create({ ...progress }),
   };
   if (methodKey) {
     // 如果有methodKey时，将初始状态存入缓存以便后续更新
@@ -92,7 +97,8 @@ export default function createRequestState<S, E, R>(
     loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,
     data: stateExport(originalState.data) as unknown as ExportedType<R, S>,
     error: stateExport(originalState.error) as unknown as ExportedType<Error|undefined, S>,
-    progress: stateExport(originalState.progress) as unknown as ExportedType<number, S>,
+    download: stateExport(originalState.download) as unknown as ExportedType<Progress, S>,
+    upload: stateExport(originalState.upload) as unknown as ExportedType<Progress, S>,
   };
   return {
     ...exportedState,

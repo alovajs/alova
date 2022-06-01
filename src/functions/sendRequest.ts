@@ -36,7 +36,6 @@ import { getContext, getOptions, key, noop, promiseReject, promiseResolve, self 
       return {
         response: () => promiseResolve(response),
         headers: () => promiseResolve({} as Headers),
-        progress: noop,
         abort: noop,
         useCache: true,
       };
