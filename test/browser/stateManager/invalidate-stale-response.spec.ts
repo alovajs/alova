@@ -3,11 +3,12 @@ import {
   VueHook,
   useRequest,
   GlobalFetch,
+  invalidate,
 } from '../../../src';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
-import { GetData, PostData, Result } from '../result.type';
+import { GetData, Result } from '../result.type';
 import server from '../../server';
 
 beforeAll(() => server.listen());
@@ -38,29 +39,19 @@ function getInstance(
 }
 
 describe('invalitate cached response data', function() {
-  test('the cached response data should remove', done => {
-    const alova = getInstance(undefined, undefined, error => {
-      console.log('error timeout', error.message);
-      expect(error.message).toMatch(/network timeout/);
+  test('the cached response data should be removed', done => {
+    const alova = getInstance();
+    const Get = alova.Get<GetData, Result>('/unit-test', {
+      staleTime: 100000,
+      transformData: data => data.data,
     });
-    const Get = alova.Get<string, Result<string>>('/unit-test-10s', {  timeout: 500 });
-    const {
-      loading,
-      data,
-      progress,
-      error,
-      onError,
-    } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(progress.value).toBe(0);
-    expect(error.value).toBeUndefined();
-    onError(err => {
-      expect(loading.value).toBeFalsy();
-      expect(data.value).toBeUndefined();
-      expect(progress.value).toBe(0);
-      expect(error.value).toBeInstanceOf(Object);
-      expect(error.value).toBe(err);
+    const firstState = useRequest(Get);
+    firstState.onSuccess(() => {
+      let cachedData = getResponseCache(alova.id, alova.options.baseURL, key(Get));
+      expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+      invalidate(Get);
+      cachedData = getResponseCache(alova.id, alova.options.baseURL, key(Get));
+      expect(cachedData).toBeUndefined();
       done();
     });
   });

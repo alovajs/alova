@@ -17,9 +17,9 @@ export default function useWatcher<S, E, R, T>(
     successHandlers,
     errorHandlers,
     completeHandlers,
-    setCtrl
+    setAbort
   ) => {
-    const ctrl = useHookToSendRequest(
+    const { abort } = useHookToSendRequest(
       handler(),
       originalState,
       successHandlers,
@@ -27,7 +27,7 @@ export default function useWatcher<S, E, R, T>(
       completeHandlers,
       force
     );
-    setCtrl(ctrl);    // 将控制器传出去供使用者调用
+    setAbort(abort);    // 将控制器传出去供使用者调用
 
     // !!immediate可以使immediate为falsy值时传入false
   }, key(methodInstance), watchingStates, !!immediate, debounce);

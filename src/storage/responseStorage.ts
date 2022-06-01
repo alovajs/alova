@@ -1,7 +1,7 @@
 import { Storage } from '../../typings';
 import { getTime, JSONParse, JSONStringify } from '../utils/helper';
 
-const responseStorageKey = '__$$AlovaResp$$__';
+const responseStorageKey = '__$$aresp$$__';
 /**
  * 持久化响应数据
  * @param namespace 命名空间
@@ -10,15 +10,15 @@ const responseStorageKey = '__$$AlovaResp$$__';
  * @param persistMilliseconds 持久化时间
  * @param storage 存储对象
  */
-export function persistResponse(namespace: string, key: string, response: Record<string, any>, persistMilliseconds: number, storage: Storage) {
+export function persistResponse(namespace: string, key: string, response: any, persistMilliseconds: number, storage: Storage) {
   // 小于0则不持久化了
-  if (persistMilliseconds <= 0) {
+  if (persistMilliseconds <= 0 || !response) {
     return;
   }
   const namespacedResponseStorageKey = responseStorageKey + namespace + key;
   storage.setItem(namespacedResponseStorageKey, JSONStringify([
     response,
-    persistMilliseconds === Infinity ? null : new Date(getTime() + persistMilliseconds)
+    persistMilliseconds === Infinity ? null : (getTime() + persistMilliseconds)
   ]));
 }
 

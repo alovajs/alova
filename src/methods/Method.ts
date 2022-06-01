@@ -9,13 +9,12 @@ const staledConfig = {
 const submitConfig = {};
 const methodDefaultConfig: Record<MethodType, MethodConfig<any, any>> = {
   GET: staledConfig,
-  HEAD: staledConfig,
+  HEAD: submitConfig,
   POST: submitConfig,
   PUT: submitConfig,
   PATCH: submitConfig,
   DELETE: submitConfig,
   OPTIONS: submitConfig,
-  TRACE: submitConfig,
 };
 export default class Method<S, E, R, T> {
   public type: MethodType;

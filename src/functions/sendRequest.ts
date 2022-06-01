@@ -36,8 +36,9 @@ import { getContext, getOptions, key, noop, promiseReject, promiseResolve, self 
       return {
         response: () => promiseResolve(response),
         headers: () => promiseResolve({} as Headers),
-        progress: () => {},
+        progress: noop,
         abort: noop,
+        useCache: true,
       };
     }
   }
@@ -92,10 +93,11 @@ import { getContext, getOptions, key, noop, promiseReject, promiseResolve, self 
   }
   return {
     ...ctrls,
+    useCache: false,
     response: () => Promise.all([
       ctrls.response(),
       ctrls.headers(),
-    ]).then(([rawResponse, headers = {}]) => {
+    ]).then(([rawResponse, headers = {} as Headers]) => {
       try {
         let responsedHandlePayload = responsedHandler(rawResponse as any);
         const getStaleTime = (data: any) => typeof staleTimeFinal === 'function' ? staleTimeFinal(data, headers, type) : staleTimeFinal;

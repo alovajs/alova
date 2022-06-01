@@ -4,14 +4,14 @@ import Alova from '../Alova';
 import Method from '../methods/Method';
 import { setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
-import { debounce, undefinedValue } from '../utils/helper';
+import { debounce, noop, undefinedValue } from '../utils/helper';
 import useHookToSendRequest from './useHookToSendRequest';
 
 export type SuccessHandler = () => void;
 export type ErrorHandler = (error: Error) => void;
 export type CompleteHandler = () => void;
 export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
-export type ExportedType<E, S> = S extends Ref ? Ref<E> : E;    // 以支持React和Vue的方式定义类型
+export type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持React和Vue的方式定义类型
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -30,7 +30,7 @@ type HandleRequest = (
   successHandlers: SuccessHandler[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
-  setCtrl: (ctrl: ConnectController) => void,
+  setAbort: (abort: () => void) => void,
 ) => void;
 export default function createRequestState<S, E, R>(
   {
@@ -65,7 +65,7 @@ export default function createRequestState<S, E, R>(
   const successHandlers = [] as SuccessHandler[];
   const errorHandlers = [] as ErrorHandler[];
   const completeHandlers = [] as CompleteHandler[];
-  let ctrl: ConnectController;
+  let abortFn = noop;
 
   // 调用请求处理回调函数
   let handleRequestCalled = false;
@@ -75,7 +75,7 @@ export default function createRequestState<S, E, R>(
       successHandlers,
       errorHandlers,
       completeHandlers,
-      newCtrl => ctrl = newCtrl
+      abort => abortFn = abort,
     );
     handleRequestCalled = true;
   };
@@ -105,13 +105,11 @@ export default function createRequestState<S, E, R>(
     onComplete(handler: CompleteHandler) {
       completeHandlers.push(handler);
     },
-    abort() {
-      ctrl && ctrl.abort();
-    },
+    abort: () => abortFn(),
     
     // 通过执行该方法来手动发起请求
     send<S, E, R, T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, updateCacheState?: boolean) {
-      ctrl = useHookToSendRequest(
+      abortFn = useHookToSendRequest(
         methodInstance,
         originalState,
         successHandlers,
@@ -119,7 +117,7 @@ export default function createRequestState<S, E, R>(
         completeHandlers,
         forceRequest,
         updateCacheState
-      );
+      ).abort;
     },
   };
 }

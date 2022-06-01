@@ -40,7 +40,7 @@ export function getResponseCache(namespace: string, baseURL: string, key: string
  */
 export function setResponseCache(namespace: string, baseURL: string, key: string, data: any, staleMilliseconds = 0) {
   // 小于0则不缓存了
-  if (staleMilliseconds <= 0) {
+  if (staleMilliseconds <= 0 || !data) {
     return;
   }
   const parentKey = namespacedBaseURL(namespace, baseURL);
@@ -99,9 +99,9 @@ export function setStateCache(namespace: string, baseURL: string, key: string, d
  * @param baseURL 基础URL
  * @param key 请求key值
  */
-export function removeStateCache(namespace: string, baseURL: string, key: string) {
-  const cachedState = stateCache[namespacedBaseURL(namespace, baseURL)];
-  if (cachedState) {
-    delete cachedState[key];
-  }
-}
+// export function removeStateCache(namespace: string, baseURL: string, key: string) {
+//   const cachedState = stateCache[namespacedBaseURL(namespace, baseURL)];
+//   if (cachedState) {
+//     delete cachedState[key];
+//   }
+// }

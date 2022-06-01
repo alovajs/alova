@@ -22,7 +22,7 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
       }, timeout);
     }
 
-    const fetchPromise = window.fetch(source, {
+    const fetchPromise = fetch(source, {
       ...requestInit,
       ...config,
       signal: ctrl.signal,
@@ -46,15 +46,16 @@ export default function GlobalFetch(requestInit: RequestInit = {}) {
           const contentLength = Number(response.headers.get('Content-Length')) || 1;
           let receivedLength = 0;
           let progressTimer = setInterval(() => {
-            response.body?.getReader().read().then(({done, value = new Uint8Array()}) => {
+            response.body?.getReader().read().then(({ done, value = new Uint8Array() }) => {
               if (done) {
                 clearInterval(progressTimer);
               }
               receivedLength += value.length;
               const percent = (receivedLength / contentLength).toFixed(4);
+              console.log(done, value, percent);
               cb(Number(percent));
             });
-          }, 100);
+          }, 500);
         });
       },
       abort: () => {

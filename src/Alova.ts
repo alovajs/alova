@@ -10,7 +10,6 @@ import Options from './methods/Options';
 import Patch from './methods/Patch';
 import Post from './methods/Post';
 import Put from './methods/Put';
-import Trace from './methods/Trace';
 
 let idCounter = 0;
 export type RequestBody = Record<string, any> | FormData | string;
@@ -38,13 +37,10 @@ export default class Alova<S, E> {
   Head<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
     return new Head<S, E, R, T>(this, url, config);
   }
-  Patch<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
-    return new Patch<S, E, R, T>(this, url, config);
+  Patch<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
+    return new Patch<S, E, R, T>(this, url, data, config);
   }
   Options<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
     return new Options<S, E, R, T>(this, url, config);
-  }
-  Trace<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
-    return new Trace<S, E, R, T>(this, url, config);
   }
 }

@@ -54,15 +54,16 @@ import { getStateCache } from '../storage/responseCache';
     }
   }
 
-  // 非静默模式，不需要更新loading状态
-  !silent && update({
-    loading: true,
-  }, originalState);
+  // 非静默模式，且未使用缓存才需要更新loading状态
   const ctrl = sendRequest(methodInstance, forceRequest);
   const {
     response,
     progress,
+    useCache,
   } = ctrl;
+  !silent && !useCache && update({
+    loading: true,
+  }, originalState);
 
   response()
     .then(data => {

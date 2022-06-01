@@ -37,6 +37,46 @@ function getInstance(
     }]
   });
 }
+class NetworkController {
+  private win: Window;
+  private onLine: boolean;
+  constructor(win: Window) { 
+    this.win = win; 
+    this.onLine = win.navigator.onLine; 
+
+    // Replace the default onLine implementation with our own. 
+    Object.defineProperty(win.navigator.constructor.prototype, 
+      'onLine', {
+        get:() => { 
+          return this.onLine; 
+        }, 
+      }
+    );
+  }
+
+  setOnline() { 
+    const was = this.onLine; 
+    this.onLine = true; 
+    // Fire only on transitions. 
+    if (!was) { 
+      this.fire('online'); 
+    } 
+  } 
+
+  setOffline() { 
+    const was = this.onLine; 
+    this.onLine = false; 
+
+    // Fire only on transitions. 
+    if (was) { 
+      this.fire('offline'); 
+    } 
+  }
+
+  fire(event: string) { 
+   this.win.dispatchEvent(new (this.win as any).Event(event));
+  } 
+}
 
 describe('use useRequest to send silent request', function() {
   test('send a silent\'s post', done => {
@@ -77,7 +117,7 @@ describe('use useRequest to send silent request', function() {
     }, 10);
   });
 
-  test('should push localStorage when silent\'s post is failed', done => {
+  test.only('should push to localStorage when silent\'s post is failed', done => {
     let throwError = 0;
     const alova = getInstance(undefined, () => {
       throwError++;
@@ -110,5 +150,41 @@ describe('use useRequest to send silent request', function() {
     expect(progress.value).toBe(0);
     expect(error.value).toBeUndefined();
     send();
+  });
+
+  test('should push to localStorage instead send request when network offline', async () => {
+    const requestHookMock = jest.fn(() => {});
+    const responsedHookMock = jest.fn(() => {});
+    const networkCtrl = new NetworkController(window);
+    networkCtrl.setOffline();
+    const alova = getInstance(requestHookMock, responsedHookMock);
+    const Post = alova.Post<string, Result<string>>('/unit-test', { postData: 'abc' }, {
+      silent: true,
+    });
+    const {
+      loading,
+      data,
+      progress,
+      error,
+    } = useRequest(Post);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(progress.value).toBe(0);
+    expect(error.value).toBeUndefined();
+    let persisted = getSilentRequest(alova.id, alova.storage);
+    const serializedMethod = persisted.serializedMethod || { url: '', type: '', requestBody: {} };
+    expect(serializedMethod.url).toBe('/unit-test');
+    expect(serializedMethod.type).toBe('POST');
+    expect(serializedMethod.requestBody).toEqual({ postData: 'abc' });
+    expect(requestHookMock.mock.calls.length).toBe(0);
+    expect(responsedHookMock.mock.calls.length).toBe(0);
+
+    // 设置网络正常后将自动启动后台请求服务，把post请求发送出去
+    networkCtrl.setOnline();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    persisted = getSilentRequest(alova.id, alova.storage);
+    expect(persisted.serializedMethod).toBeUndefined();
+    expect(requestHookMock.mock.calls.length).toBe(1);
+    expect(responsedHookMock.mock.calls.length).toBe(1);
   });
 });

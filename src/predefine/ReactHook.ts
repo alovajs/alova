@@ -8,7 +8,7 @@ import {
 import { RequestState } from '../../typings';
 
 const create = (data: any) => useState(data);
-type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
+export type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 
 // React的预定义hooks
 export default {

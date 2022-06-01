@@ -10,15 +10,15 @@ export default function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T
     successHandlers,
     errorHandlers,
     completeHandlers,
-    setCtrl
-  ) => immediate && setCtrl(useHookToSendRequest(    // 将控制器传出去供使用者调用
+    setAbort
+  ) => immediate && setAbort(useHookToSendRequest(    // 将控制器传出去供使用者调用
     methodInstance,
     originalState,
     successHandlers,
     errorHandlers,
     completeHandlers,
     force
-  )), key(methodInstance));
+  ).abort), key(methodInstance));
   return {
     ...props,
     send: () => props.send(methodInstance, !!force),

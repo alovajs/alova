@@ -20,7 +20,7 @@ function runSilentRequest(activeIndex: number) {
   activeIndex = activeIndex >= alovas.length ? 0 : activeIndex;
   const alova = alovas[activeIndex];
   // 如果网络异常，则不继续轮询请求了
-  if (!window.navigator.onLine || !alova) {
+  if (!navigator.onLine || !alova) {
     return;
   }
 

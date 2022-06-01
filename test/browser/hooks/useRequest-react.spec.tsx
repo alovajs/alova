@@ -35,6 +35,19 @@ function getInstance(
     }]
   });
 }
+function getInstanceSyncResponsed() {
+  return createAlova({
+    baseURL: 'http://localhost:3000',
+    timeout: 3000,
+    statesHook: ReactHook,
+    requestAdapter: GlobalFetch(),
+    responsed: () => {
+      return {
+        mock: 'mockdata'
+      };
+    }
+  });
+}
 
 
 beforeAll(() => server.listen());
@@ -101,5 +114,32 @@ describe('useRequet hook with react', function() {
     fireEvent.click(screen.getByRole('btn'));
     await screen.findByText(/unit-test/);
     expect(screen.getByRole('method')).toHaveTextContent('GET');
+  });
+
+  test('should return sync mock data from responsed hook', async () => {
+    const alova = getInstanceSyncResponsed();
+    const Get = alova.Get<{mock: string}>('/unit-test');
+    function Page() {
+      const { onSuccess, data } = useRequest(Get);
+      onSuccess(() => {
+        expect(data.mock).toBe('mockdata');
+      });
+      return <div>{data}</div>;
+    }
+    render(<Page /> as ReactElement<any, any>);
+  });
+
+  test('the progress should be increased', done => {
+    // const alova = getInstance();
+    // const Get = alova.Get<GetData>('/unit-test', { enableProgress: true });
+    // function Page() {
+    //   const { onSuccess, progress } = useRequest(Get);
+    //   onSuccess(() => {
+    //     expect(progress).toBe(1);
+        done();
+    //   });
+    //   return <div>{progress}</div>;
+    // }
+    // render(<Page /> as ReactElement<any, any>);
   });
 });

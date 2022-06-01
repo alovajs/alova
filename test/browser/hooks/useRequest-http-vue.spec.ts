@@ -427,4 +427,114 @@ describe('Test other methods without GET', function() {
       done();
     });
   });
+
+  test('send HEAD', async () => {
+    const alova = getInstance(config => {
+      expect(config.method).toBe('HEAD');
+    });
+    const Head = alova.Head<{}, Result>('/unit-test', {
+      params: { a: 'a', b: 'str' },
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      transformData(resp, headers) {
+        expect(headers.get('x-powered-by')).toBe('msw');
+        return resp;
+      },
+    });
+    const {
+      loading,
+      data,
+      progress,
+      error,
+      onSuccess,
+    } = useRequest(Head);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(progress.value).toBe(0);
+    expect(error.value).toBeUndefined();
+    await new Promise(resolve => onSuccess(() => resolve(1)));
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toEqual({});
+    expect(progress.value).toBe(0);
+    expect(error.value).toBeUndefined();
+    // 没有缓存值
+    const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Head));
+    expect(cacheData).toBeUndefined();
+  });
+
+  test('send OPTIONS', async () => {
+    const alova = getInstance(config => {
+      expect(config.method).toBe('OPTIONS');
+    });
+    const Options = alova.Options<{}, Result>('/unit-test', {
+      params: { a: 'a', b: 'str' },
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      transformData(resp, headers) {
+        expect(headers.get('x-powered-by')).toBe('msw');
+        return resp;
+      },
+    });
+    const {
+      loading,
+      data,
+      progress,
+      error,
+      onSuccess,
+    } = useRequest(Options);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(progress.value).toBe(0);
+    expect(error.value).toBeUndefined();
+    await new Promise(resolve => onSuccess(() => resolve(1)));
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toEqual({});
+    expect(progress.value).toBe(0);
+    expect(error.value).toBeUndefined();
+    // 没有缓存值
+    const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Options));
+    expect(cacheData).toBeUndefined();
+  });
+
+  test('send PATCH', async () => {
+    const alova = getInstance(config => {
+      expect(config.method).toBe('PATCH');
+    });
+    const Patch = alova.Patch<PostData, Result<true>>('/unit-test', { patch1: 'p' }, {
+      params: { a: 'a', b: 'str' },
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      transformData(resp, headers) {
+        expect(headers.get('x-powered-by')).toBe('msw');
+        return resp.data;
+      },
+    });
+    const {
+      loading,
+      data,
+      progress,
+      error,
+      onSuccess,
+    } = useRequest(Patch);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(progress.value).toBe(0);
+    expect(error.value).toBeUndefined();
+    await new Promise(resolve => onSuccess(() => resolve(1)));
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+    expect(data.value.data).toEqual({ patch1: 'p' });
+    expect(progress.value).toBe(0);
+    expect(error.value).toBeUndefined();
+    // 没有缓存值
+    const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Patch));
+    expect(cacheData).toBeUndefined();
+  });
 });

@@ -42,4 +42,7 @@ export default setupServer(
   rest.post(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.delete(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.put(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
+  rest.head(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
+  rest.patch(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
+  rest.options(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
 );
