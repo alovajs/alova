@@ -39,7 +39,7 @@ function getInstance(
 }
 
 describe('use useFetcher hook to fetch data', function() {
-  it('should replace cached response when fetch data', done => {
+  test('should replace cached response when fetch data', done => {
     const alova = getInstance();
     const createGet = (params: Record<string, string>) => alova.Get<GetData, Result>('/unit-test-count', {
       params,

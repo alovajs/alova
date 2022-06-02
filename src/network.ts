@@ -1,6 +1,6 @@
 import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
-import { deserializeMethod, noop, setTimeoutFn, undefinedValue } from './utils/helper';
+import { deserializeMethod, noop, setTimeoutFn } from './utils/helper';
 import sendRequest from './functions/sendRequest';
 
 const alovas = [] as Alova<any, any>[];
@@ -20,18 +20,17 @@ function runSilentRequest() {
     return;
   }
 
-  const backgroundStoragedRequests = alovas
-    .map(alova => getSilentRequest(alova.id, alova.storage))
-    .filter(({ serializedMethod }) => serializedMethod !== undefinedValue)
-    .map(({ serializedMethod, remove }, i) => {
-      const { response } = sendRequest(deserializeMethod(serializedMethod!, alovas[i]), true);
-      return response().then(remove, noop);   // 如果请求失败需要捕获错误，否则会导致错误往外抛到控制台
-    });
-  if (backgroundStoragedRequests.length > 0) {
-    Promise.all(backgroundStoragedRequests).finally(runSilentRequest);
-  } else {
-    setTimeoutFn(runSilentRequest, 2000);
+  // 一次同时处理多个alova实例的静默请求
+  const backgroundStoragedRequests = [] as Promise<void>[];
+  for (let i in alovas) {
+    const alova = alovas[i];
+    const { serializedMethod, remove } = getSilentRequest(alova.id, alova.storage);
+    if (serializedMethod) {
+      const { response } = sendRequest(deserializeMethod(serializedMethod, alova), true);
+      backgroundStoragedRequests.push(response().then(remove, noop));   // 如果请求失败需要捕获错误，否则会导致错误往外抛到控制台
+    }
   }
+  backgroundStoragedRequests.length > 0 ? Promise.all(backgroundStoragedRequests).finally(runSilentRequest) : setTimeoutFn(runSilentRequest, 2000);
 }
 
 
