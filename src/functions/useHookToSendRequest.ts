@@ -21,7 +21,7 @@ import { getStateCache } from '../storage/responseCache';
  export default function useHookToSendRequest<S, E, R, T>(
   methodInstance: Method<S, E, R, T>,
   originalState: RequestState,
-  successHandlers: SuccessHandler[],
+  successHandlers: SuccessHandler<R>[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
   forceRequest = false,
@@ -80,7 +80,7 @@ import { getStateCache } from '../storage/responseCache';
       // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
       if (!silentMode) {
         update({ loading: false }, originalState);
-        runHandlers(successHandlers);
+        runHandlers(successHandlers, data);
         runHandlers(completeHandlers);
       }
     })

@@ -3,17 +3,15 @@ Request scene management library for MVVM such as Vue.js and React.js
 > MVVM下的请求场景管理库
 
 ## Features
-1. react/vue hook请求支持
+1. react/vue hook请求支持、请求非异步用法
 2. 静默请求
 3. 离线提交
 4. typescript支持
 5. 轻量化gzip 3kb
-6. 与Axios相似的使用方法，学习成本低
-7. 数据预拉取
-8. 请求缓存
-9. 状态统一管理
-10. 请求非异步用法
-11. 数据预拉取
+6. 数据预拉取
+7. 响应数据缓存
+8. 状态统一管理
+9. 只有6个核心函数，且与Axios相似的使用方法，学习成本低
 
 ## 请求场景管理: 
 1. 请求时机：在什么时候需要发出请求。通过useHook实现

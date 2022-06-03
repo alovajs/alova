@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha-2",
   "description": "New request library for MVVM such as Vue.js and React.js",
   "main": "dist/alova.umd.min.js",
   "jsnext:main": "dist/alova.esm.js",

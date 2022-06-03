@@ -7,7 +7,7 @@ import { getPersistentResponse } from '../storage/responseStorage';
 import { debounce, noop, undefinedValue } from '../utils/helper';
 import useHookToSendRequest from './useHookToSendRequest';
 
-export type SuccessHandler = () => void;
+export type SuccessHandler<R> = (data: R) => void;
 export type ErrorHandler = (error: Error) => void;
 export type CompleteHandler = () => void;
 export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
@@ -25,9 +25,9 @@ export type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持Reac
  * @returns 当前的请求状态
  */
 
-type HandleRequest = (
+type HandleRequest<R> = (
   originalState: RequestState,
-  successHandlers: SuccessHandler[],
+  successHandlers: SuccessHandler<R>[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
   setAbort: (abort: () => void) => void,
@@ -38,7 +38,7 @@ export default function createRequestState<S, E, R>(
     options,
     storage,
   }: Alova<S, E>,
-  handleRequest: HandleRequest,
+  handleRequest: HandleRequest<R>,
   methodKey?: string,
   watchedStates?: E[],
   immediate = true,
@@ -71,7 +71,7 @@ export default function createRequestState<S, E, R>(
     // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
     removeState = () => removeStateCache(id, options.baseURL, methodKey);
   }
-  const successHandlers = [] as SuccessHandler[];
+  const successHandlers = [] as SuccessHandler<R>[];
   const errorHandlers = [] as ErrorHandler[];
   const completeHandlers = [] as CompleteHandler[];
   let abortFn = noop;
@@ -107,7 +107,7 @@ export default function createRequestState<S, E, R>(
   };
   return {
     ...exportedState,
-    onSuccess(handler: SuccessHandler) {
+    onSuccess(handler: SuccessHandler<R>) {
       successHandlers.push(handler);
     },
     onError(handler: ErrorHandler) {
@@ -119,7 +119,7 @@ export default function createRequestState<S, E, R>(
     abort: () => abortFn(),
     
     // 通过执行该方法来手动发起请求
-    send<S, E, R, T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, updateCacheState?: boolean) {
+    send<T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, updateCacheState?: boolean) {
       abortFn = useHookToSendRequest(
         methodInstance,
         originalState,

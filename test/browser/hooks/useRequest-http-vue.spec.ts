@@ -86,10 +86,12 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(data.value).toBeUndefined();
     expect(download.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    onSuccess(() => {
+    onSuccess(rawData => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+      expect(rawData.path).toBe('/unit-test');
+      expect(rawData.params).toEqual({ a: 'a', b: 'str' });
       expect(download.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
 
