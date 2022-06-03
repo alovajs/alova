@@ -81,11 +81,12 @@ export interface AlovaOptions<S, E> {
     update: (newVal: Partial<RequestState>, state: RequestState) => void,
 
     // 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
-    // 但在useController中不会被调用
+    // 在useFetcher中的fetch函数中执行一次
     // 当watchedStates为空数组时，执行一次handleRequest函数
     // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
     // 在vue中直接执行即可，而在react中需要在useEffect中执行
-    effectRequest: (handleRequest: () => void, watchedStates?: any[], immediate = true) => void,
+    // removeStates函数为清除当前状态的函数，应该在组件卸载时调用
+    effectRequest: (handleRequest: () => void, removeStates: () => void, watchedStates?: any[], immediate = true) => void,
   },
 
   // 请求适配器

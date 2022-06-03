@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState } from 'react';
 import {
   createAlova,
   ReactHook,
@@ -10,6 +10,8 @@ import { GetData, Result } from '../result.type';
 import server from '../../server';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { getStateCache } from '../../../src/storage/responseCache';
+import { key } from '../../../src/utils/helper';
 
 
 function getInstance(
@@ -129,17 +131,35 @@ describe('useRequet hook with react', function() {
     render(<Page /> as ReactElement<any, any>);
   });
 
-  test('the progress should be increased', done => {
-    // const alova = getInstance();
-    // const Get = alova.Get<GetData>('/unit-test', { enableProgress: true });
-    // function Page() {
-    //   const { onSuccess, progress } = useRequest(Get);
-    //   onSuccess(() => {
-    //     expect(progress).toBe(1);
-        done();
-    //   });
-    //   return <div>{progress}</div>;
-    // }
-    // render(<Page /> as ReactElement<any, any>);
+  test('states should be remove in cache when component was unmounted', async () => {
+    const alova = getInstance();
+    const Get = alova.Get<GetData>('/unit-test', {
+      transformData: ({ data }) => data,
+    });
+    function DataConsole() {
+      const { data, loading } = useRequest(Get);
+      return <div>{loading ? 'loading...' : JSON.stringify(data)}</div>;
+    }
+    function Page() {
+      const [showData, setShowData] = useState(true);
+      return <div>
+        { showData ? <DataConsole /> : <div>no data</div> }
+        <button
+          role="btn"
+          onClick={() => setShowData(!showData)}
+        >toggle data</button>
+      </div>;
+    }
+    render(<Page /> as ReactElement<any, any>);
+    await screen.findByText(/unit-test/);
+
+    // useRequest内会缓存状态
+    const { data } = getStateCache(alova.id, alova.options.baseURL, key(Get)) || { data: null };
+    expect(data[0].path).toBe('/unit-test');
+    fireEvent.click(screen.getByRole('btn'));
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露
+    expect(getStateCache(alova.id, alova.options.baseURL, key(Get))).toBeUndefined();
   });
 });

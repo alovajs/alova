@@ -18,7 +18,7 @@ export default {
     type Keys = keyof RequestState;
     state[key as Keys][1](newVal[key as Keys] as any);
   }),
-  effectRequest(handler: () => void, watchedStates: any[] = [], immediate = true) {
+  effectRequest(handler: () => void, removeStates: () => void, watchedStates: any[] = [], immediate = true) {
     const mountedRef = useRef(false);
     useEffect(() => {
       if (!immediate && !mountedRef.current) {
@@ -26,6 +26,7 @@ export default {
         return;
       }
       handler();
+      return removeStates;    // 组件卸载时移除对应状态
     }, watchedStates);
   },
 };

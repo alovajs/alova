@@ -1,4 +1,4 @@
-import { Ref, ref, watch } from 'vue';
+import { onUnmounted, Ref, ref, watch } from 'vue';
 import { RequestState } from '../../typings';
 
 // Vue的预定义hooks
@@ -9,7 +9,8 @@ export default {
     type Keys = keyof RequestState;
     state[key as Keys].value = newVal[key as Keys];
   }),
-  effectRequest(handler: () => void, watchedStates?: any[], immediate = true) {
+  effectRequest(handler: () => void, removeStates: () => void, watchedStates?: any[], immediate = true) {
+    onUnmounted(removeStates);    // 组件卸载时移除对应状态
     if (!watchedStates) {
       handler();
       return;

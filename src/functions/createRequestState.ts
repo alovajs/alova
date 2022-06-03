@@ -2,7 +2,7 @@ import { Ref } from 'vue';
 import { Progress, RequestAdapter, RequestState } from '../../typings';
 import Alova from '../Alova';
 import Method from '../methods/Method';
-import { setStateCache } from '../storage/responseCache';
+import { removeStateCache, setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { debounce, noop, undefinedValue } from '../utils/helper';
 import useHookToSendRequest from './useHookToSendRequest';
@@ -63,9 +63,13 @@ export default function createRequestState<S, E, R>(
     download: create({ ...progress }),
     upload: create({ ...progress }),
   };
+  let removeState = noop;
   if (methodKey) {
     // 如果有methodKey时，将初始状态存入缓存以便后续更新
     setStateCache(id, options.baseURL, methodKey, originalState);
+
+    // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
+    removeState = () => removeStateCache(id, options.baseURL, methodKey);
   }
   const successHandlers = [] as SuccessHandler[];
   const errorHandlers = [] as ErrorHandler[];
@@ -89,9 +93,10 @@ export default function createRequestState<S, E, R>(
     debounceDelay > 0 ? 
       debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled) :
       wrapEffectRequest,
+    removeState,
     watchedStates,
     immediate
-  ) : effectRequest(wrapEffectRequest);
+  ) : effectRequest(wrapEffectRequest, removeState);
   
   const exportedState = {
     loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,
