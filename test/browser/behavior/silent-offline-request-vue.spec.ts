@@ -156,11 +156,11 @@ describe('use useRequest to send silent request', function() {
     const requestHookMock = jest.fn(() => {});
     const responsedHookMock = jest.fn(() => {});
     const networkCtrl = new NetworkController(window);
-    networkCtrl.setOffline();
     const alova = getInstance(requestHookMock, responsedHookMock);
     const Post = alova.Post<string, Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,
     });
+    networkCtrl.setOffline();
     const {
       loading,
       data,
