@@ -1,11 +1,8 @@
-import { Ref } from 'vue';
+import { OriginalType } from '../../typings';
 import Method from '../methods/Method';
-import { ReactState } from '../predefine/ReactHook';
 import { getStateCache } from '../storage/responseCache';
-import { getContext, getOptions, key } from '../utils/helper';
-
-// 以支持React和Vue的方式定义类型
-type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
+import { key } from '../utils/helper';
+import { getContext, getOptions } from '../utils/variables';
 
 /**
  * 更新缓存的数据

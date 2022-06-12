@@ -163,9 +163,8 @@ const {
   loading,
   data,
   error,
-  progress,
-  onSuccess,
-  onError,
+  download,
+  responser,
   abort
 } = useRequest(getter(1, 2));
 const {
@@ -187,11 +186,11 @@ useWatcher(() => getter(page.value, searchText.value), [page, searchText]);
 // const postData = await poster(3, 4).send();
 
 // 让一个key失效
-onSuccess(() => {
+responser.success(() => {
   invalidate(getter(1, 2));
 });
 // 更新缓存
-onSuccess(() => {
+responser.success(() => {
   update(getter(1, 2), data => {
     const d = { ...data.value };
     d.a = 1;
@@ -206,14 +205,17 @@ const {
   error,
   progress,
   fetch,
-  onSuccess,
-  onError,
-  onComplete,
+  responser: responser1,
   abort
 } = useFether(alova);
-onSuccess(() => {
+responser.success(() => {
   fetch(getter(1, 2));
 });
+
+all([responser, responser1])
+  .success(([r1, r2]) => {})
+  .error(err => {})
+  .complete(() => {});
 
 // 增加机制
 // 1、持久化缓存数据，下次请求先返回缓存数据，再请求更新数据

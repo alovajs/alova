@@ -60,9 +60,9 @@ describe('update cached response data by user', function() {
     function Page() {
       const {
         data = { path: '' },
-        onSuccess,
+        responser,
       } = useRequest(Get);
-      onSuccess(() => update(Get, ([data, setData]) => {
+      responser.success(() => update(Get, ([data, setData]) => {
         setData({
           ...data,
           path: '/unit-test-updated',
@@ -83,8 +83,8 @@ describe('update cached response data by user', function() {
       staleTime: 100000,
       transformData: data => data.data,
     });
-    const { data, onSuccess } = useRequest(Get);
-    await new Promise(resolve => onSuccess(() => resolve(1)));
+    const { data, responser } = useRequest(Get);
+    await new Promise(resolve => responser.success(() => resolve(1)));
     update(Get, data => {
       data.value.path = '/unit-test-updated';
     });

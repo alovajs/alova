@@ -8,10 +8,9 @@ export { default as useWatcher } from './hooks/useWatcher';
 export { default as useFetcher } from './hooks/useFetcher';
 export { default as invalidate } from './functions/invalidate';
 export { default as update } from './functions/update';
+export { all } from './Responser';
 
 // 预定义的配置
-export { default as ReactHook } from './predefine/ReactHook';
-export { default as VueHook } from './predefine/VueHook';
 export { default as GlobalFetch } from './predefine/GlobalFetch';
 
 

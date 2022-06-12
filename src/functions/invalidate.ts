@@ -1,6 +1,7 @@
 import Method from '../methods/Method';
 import { removeResponseCache } from '../storage/responseCache';
-import { getContext, getOptions, key } from '../utils/helper';
+import { key } from '../utils/helper';
+import { getContext, getOptions } from '../utils/variables';
 
 
 /**

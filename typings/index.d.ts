@@ -1,16 +1,19 @@
+import { R } from "msw/lib/glossary-36cf4e2d";
+
+export type RequestBody = Record<string, any> | FormData | string;
 export type Progress = {
   total: number,
   loaded: number,
 };
 type RequestAdapter<R, T> = (
   source: string,
-  data: RequestBody,
   config: RequestConfig<R, T>,
+  data?: RequestBody,
 ) => {
   response: () => Promise<Response>,
   headers: () => Promise<Headers | void>,
-  downloading?: (callback: (progress: Progress) => void) => void,
-  uploading?: (callback: (progress: Progress) => void) => void,
+  onDownload?: (handler: (progress: Progress) => void) => void,
+  onUpload?: (handler: (progress: Progress) => void) => void,
   abort: () => void,
 };
 
@@ -18,8 +21,8 @@ type RequestState<S = any> = {
   loading: S,
   data: S,
   error: S,
-  download: S,
-  upload: S,
+  downloading: S,
+  uploading: S,
 };
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
@@ -42,7 +45,7 @@ export interface Storage {
 type CommonMethodParameters = {
   readonly url: string,
   readonly method: MethodType,
-  data?: Data,
+  data?: RequestBody,
 }
 
 // 局部的请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
@@ -86,7 +89,7 @@ export interface AlovaOptions<S, E> {
     // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
     // 在vue中直接执行即可，而在react中需要在useEffect中执行
     // removeStates函数为清除当前状态的函数，应该在组件卸载时调用
-    effectRequest: (handleRequest: () => void, removeStates: () => void, watchedStates?: any[], immediate = true) => void,
+    effectRequest: (handleRequest: () => void, removeStates: () => void, watchedStates?: any[], immediate?: boolean) => void,
   },
 
   // 请求适配器
@@ -99,10 +102,10 @@ export interface AlovaOptions<S, E> {
   // 时间为秒，小于等于0不缓存，Infinity为永不过期
   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
   // 也可以设置函数，参数为responsed转化后的返回数据和headers对象，返回缓存时间
-  staleTime?: StaleTime<any>,
+  staleTime?: DurationSetter<any>,
 
   // 持久化响应数据的时间，有持久化数据时会先把这些数据赋值给data，再进行请求
-  persistTime?: DurationSetter<T>,
+  persistTime?: DurationSetter<any>,
 
   // 持久化缓存接口，用于静默请求、响应数据持久化等
   storage?: Storage,
@@ -114,3 +117,94 @@ export interface AlovaOptions<S, E> {
   // 如果正常响应的钩子抛出错误也将进入响应失败的钩子函数
   responsed?: ResponsedHandler | [ResponsedHandler, ResponseErrorHandler],
 }
+
+
+// methods
+export interface Method<S, E, R, T> {
+  type: MethodType;
+  url: string;
+  config: MethodConfig<R, T>;
+  requestBody?: RequestBody;
+  context: Alova<S, E>;
+  response: R;
+}
+export interface Get<S, E, R, T> extends Method<S, E, R, T> {}
+export interface Post<S, E, R, T> extends Method<S, E, R, T> {}
+export interface Put<S, E, R, T> extends Method<S, E, R, T> {}
+export interface Delete<S, E, R, T> extends Method<S, E, R, T> {}
+export interface Head<S, E, R, T> extends Method<S, E, R, T> {}
+export interface Options<S, E, R, T> extends Method<S, E, R, T> {}
+export interface Patch<S, E, R, T> extends Method<S, E, R, T> {}
+
+
+export default class Alova<S, E> {
+  public options: AlovaOptions<S, E>;
+  public id: string;
+  public storage: Storage;
+  Get<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Post<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Put<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Delete<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Head<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Options<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Patch<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+}
+
+// hook通用配置
+export interface UseHookConfig {
+  force?: boolean,   // 强制请求
+};
+// useRequest配置类型
+export interface RequestHookConfig extends UseHookConfig {
+  immediate?: boolean,   // 开启immediate后，useRequest会立即发起一次请求
+}
+// useWatcher配置类型
+export interface WatcherHookConfig extends UseHookConfig {
+  immediate?: boolean,  // 开启immediate后，useWatcher初始化时会自动发起一次请求
+  debounce?: number, // 延迟多少毫秒后再发起请求
+}
+
+// Vue状态类型
+declare const RefSymbol: unique symbol;
+export declare interface Ref<T = any> {
+  value: T;
+  [RefSymbol]: true;
+}
+// react状态类型
+type Dispatch<A> = (value: A) => void;
+type SetStateAction<S> = S | ((prevState: S) => S);
+export type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
+export type SuccessHandler<R> = (data: R, requestId: string) => void;
+export type ErrorHandler = (error: Error, requestId: string) => void;
+export type CompleteHandler = (requestId: string) => void;
+declare interface Responser<R> {
+  successHandlers: SuccessHandler<R>[];
+  errorHandlers: ErrorHandler[];
+  completeHandlers: CompleteHandler[];
+  success(handler: SuccessHandler<R>): Responser<R>;
+  error(handler: ErrorHandler): Responser<R>;
+  complete(handler: CompleteHandler): Responser<R>;
+}
+export type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持React和Vue的方式定义类型
+type UseHookReturnType<R, S> = RequestState<ExportedType<R, S>> & {
+  responser: Responser<R>;
+  abort: () => void;
+  send: () => void;
+}
+
+// 导出类型
+export function createAlova<S, E>(options: AlovaOptions<S, E>): Alova<S, E>;
+export function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, config?: RequestHookConfig): UseHookReturnType<R, S>;
+export function useWatcher<S, E, R, T>(handler: () => Method<S, E, R, T>, watchingStates: E[], config?: WatcherHookConfig): UseHookReturnType<R, S>;
+export function useFetcher<S, E>(alova: Alova<S, E>): Exclude<UseHookReturnType<R, S>, 'loading' | 'send'> & {
+  fetching: ExportedType<R, S>;
+  fetch: <R, T>(methodInstance: Method<S, E, R, T>) => void;
+};
+export function invalidate<S, E, R, T>(methodInstance: Method<S, E, R, T>): void;
+// 以支持React和Vue的方式定义类型
+type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
+export function update<S, E, R, T>(methodInstance: Method<S, E, R, T>, handleUpdate: (data: OriginalType<R, S>) => void): void;
+export function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
+
+// 预定义的配置
+export function GlobalFetch(requestInit?: RequestInit): <R, T>(source: string, config: RequestConfig<R, T>, data: any) => RequestAdapter<R, T>;

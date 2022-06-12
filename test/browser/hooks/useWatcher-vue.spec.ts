@@ -53,9 +53,9 @@ describe('use useController hook to send GET with vue', function() {
     const {
       loading,
       data,
-      download,
+      downloading,
       error,
-      onSuccess,
+      responser,
     } = useWatcher(() => {
       const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -71,7 +71,7 @@ describe('use useController hook to send GET with vue', function() {
     const initialData = () => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
     };
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
@@ -83,14 +83,14 @@ describe('use useController hook to send GET with vue', function() {
       mutateStr.value = 'b';
     }, 1000);
     const mockCallback = jest.fn(() => {});
-    onSuccess(mockCallback);
+    responser.success(mockCallback);
 
     const successTimesFns = [() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params.num).toBe('1');
       expect(data.value.params.str).toBe('b');
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
@@ -110,7 +110,7 @@ describe('use useController hook to send GET with vue', function() {
 
     // 根据触发次数来运行不同回调函数
     let watchTimes = 0;
-    onSuccess(() => {
+    responser.success(() => {
       successTimesFns[watchTimes]();
       watchTimes++;
     });
@@ -124,9 +124,9 @@ describe('use useController hook to send GET with vue', function() {
     const {
       loading,
       data,
-      download,
+      downloading,
       error,
-      onSuccess,
+      responser,
     } = useWatcher(() => {
       const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -146,25 +146,25 @@ describe('use useController hook to send GET with vue', function() {
       mutateStr.value = 'b';
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       setTimeout(() => {
         mutateNum.value = 2;
         mutateStr.value = 'c';
         expect(loading.value).toBeFalsy();
         expect(data.value).toBeUndefined();
-        expect(download.value).toEqual({ total: 0, loaded: 0 });
+        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
         expect(error.value).toBeUndefined();
       }, 500);
     }, 500);
     const mockCallback = jest.fn(() => {});
-    onSuccess(mockCallback);
-    onSuccess(() => {
+    responser.success(mockCallback);
+    responser.success(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params.num).toBe('2');
       expect(data.value.params.str).toBe('c');
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
@@ -183,9 +183,9 @@ describe('use useController hook to send GET with vue', function() {
     const {
       loading,
       data,
-      download,
+      downloading,
       error,
-      onSuccess,
+      responser,
     } = useWatcher(() => {
       const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -200,16 +200,16 @@ describe('use useController hook to send GET with vue', function() {
     }, [mutateNum, mutateStr], { immediate: true });
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(download.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     const mockCallback = jest.fn(() => {});
-    onSuccess(mockCallback);
+    responser.success(mockCallback);
     const successTimesFns = [() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params.num).toBe('0');
       expect(data.value.params.str).toBe('a');
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
@@ -228,7 +228,7 @@ describe('use useController hook to send GET with vue', function() {
 
     // 根据触发次数来运行不同回调函数
     let watchTimes = 0;
-    onSuccess(() => {
+    responser.success(() => {
       successTimesFns[watchTimes]();
       watchTimes++;
     });
@@ -242,9 +242,9 @@ describe('use useController hook to send GET with vue', function() {
     const {
       loading,
       data,
-      download,
+      downloading,
       error,
-      onSuccess,
+      responser,
     } = useWatcher(() => {
       const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -261,16 +261,16 @@ describe('use useController hook to send GET with vue', function() {
     // 监听时立即出发一次请求，因此loading的值为true
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(download.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     const mockCallback = jest.fn(() => {});
-    onSuccess(mockCallback);
+    responser.success(mockCallback);
     const successTimesFns = [() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params.num).toBe('0');
       expect(data.value.params.str).toBe('a');
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
@@ -295,7 +295,7 @@ describe('use useController hook to send GET with vue', function() {
 
     // 根据触发次数来运行不同回调函数
     let watchTimes = 0;
-    onSuccess(() => {
+    responser.success(() => {
       successTimesFns[watchTimes]();
       watchTimes++;
     });

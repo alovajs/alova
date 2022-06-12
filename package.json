@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "0.0.1-alpha-2",
+  "version": "0.0.1-beta.5",
   "description": "New request library for MVVM such as Vue.js and React.js",
   "main": "dist/alova.umd.min.js",
   "jsnext:main": "dist/alova.esm.js",
@@ -17,9 +17,16 @@
     "build:esm": "rollup -c config/rollup.config.esm.js",
     "build:umd": "cross-env NODE_ENV=development rollup -c config/rollup.config.umd.js",
     "build:umd.min": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.js",
-    "build": "npm run clean && npm run build:self && npm run build:esm && npm run build:umd && npm run build:umd.min",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "jest": "jest --init"
+    "build:vuehook:esm": "cross-env MODULE=vue rollup -c config/rollup.config.esm.js",
+    "build:vuehook:umd": "cross-env NODE_ENV=development MODULE=vue rollup -c config/rollup.config.umd.js",
+    "build:vuehook:umd.min": "cross-env NODE_ENV=production MODULE=vue rollup -c config/rollup.config.umd.js",
+    "build:reacthook:esm": "cross-env MODULE=react rollup -c config/rollup.config.esm.js",
+    "build:reacthook:umd": "cross-env NODE_ENV=development MODULE=react rollup -c config/rollup.config.umd.js",
+    "build:reacthook:umd.min": "cross-env NODE_ENV=production MODULE=react rollup -c config/rollup.config.umd.js",
+    "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
+    "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
+    "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook",
+    "coveralls": "jest --coveralls"
   },
   "author": "JOU-amjs",
   "license": "MIT",
@@ -31,11 +38,26 @@
     "url": "https://github.com/JOU-amjs/alova/issues"
   },
   "files": [
-    "/dist",
+    "dist",
     "typings/*.d.ts"
   ],
   "engines": {
     "node": ">= 0.12.0"
+  },
+  "exports": {
+    ".": "./dist/alova.esm.js",
+    "./vue": "./dist/hooks/vuehook.esm.js",
+    "./react": "./dist/hooks/reacthook.esm.js"
+  },
+  "typesVersions": {
+    "*": {
+      "vue": [
+        "typings/vuehook.d.ts"
+      ],
+      "react": [
+        "typings/reacthook.d.ts"
+      ]
+    }
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",
@@ -46,6 +68,7 @@
     "@rollup/plugin-replace": "^4.0.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
+    "@testing-library/vue": "^6.6.0",
     "@types/jest": "^27.5.1",
     "@types/node-fetch": "^2.6.1",
     "@types/react": "^17.0.0",

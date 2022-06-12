@@ -1,17 +1,14 @@
-import { Ref } from 'vue';
-import { Progress, RequestAdapter, RequestState } from '../../typings';
+import { ExportedType, Progress, RequestAdapter, RequestState } from '../../typings';
 import Alova from '../Alova';
 import Method from '../methods/Method';
+import Responser from '../Responser';
 import { removeStateCache, setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
-import { debounce, noop, undefinedValue } from '../utils/helper';
+import { debounce, noop } from '../utils/helper';
+import { undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
-export type SuccessHandler<R> = (data: R) => void;
-export type ErrorHandler = (error: Error) => void;
-export type CompleteHandler = () => void;
 export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
-export type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持React和Vue的方式定义类型
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -27,9 +24,7 @@ export type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持Reac
 
 type HandleRequest<R> = (
   originalState: RequestState,
-  successHandlers: SuccessHandler<R>[],
-  errorHandlers: ErrorHandler[],
-  completeHandlers: CompleteHandler[],
+  responser: Responser<R>,
   setAbort: (abort: () => void) => void,
 ) => void;
 export default function createRequestState<S, E, R>(
@@ -60,8 +55,8 @@ export default function createRequestState<S, E, R>(
     loading: create(false),
     data: create(initialData),
     error: create(undefinedValue as Error | undefined),
-    download: create({ ...progress }),
-    upload: create({ ...progress }),
+    downloading: create({ ...progress }),
+    uploading: create({ ...progress }),
   };
   let removeState = noop;
   if (methodKey) {
@@ -71,9 +66,7 @@ export default function createRequestState<S, E, R>(
     // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
     removeState = () => removeStateCache(id, options.baseURL, methodKey);
   }
-  const successHandlers = [] as SuccessHandler<R>[];
-  const errorHandlers = [] as ErrorHandler[];
-  const completeHandlers = [] as CompleteHandler[];
+  const responser = new Responser<R>();
   let abortFn = noop;
 
   // 调用请求处理回调函数
@@ -81,9 +74,7 @@ export default function createRequestState<S, E, R>(
   const wrapEffectRequest = () => {
     handleRequest(
       originalState,
-      successHandlers,
-      errorHandlers,
-      completeHandlers,
+      responser,
       abort => abortFn = abort,
     );
     handleRequestCalled = true;
@@ -102,20 +93,12 @@ export default function createRequestState<S, E, R>(
     loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,
     data: stateExport(originalState.data) as unknown as ExportedType<R, S>,
     error: stateExport(originalState.error) as unknown as ExportedType<Error|undefined, S>,
-    download: stateExport(originalState.download) as unknown as ExportedType<Progress, S>,
-    upload: stateExport(originalState.upload) as unknown as ExportedType<Progress, S>,
+    downloading: stateExport(originalState.downloading) as unknown as ExportedType<Progress, S>,
+    uploading: stateExport(originalState.uploading) as unknown as ExportedType<Progress, S>,
   };
   return {
     ...exportedState,
-    onSuccess(handler: SuccessHandler<R>) {
-      successHandlers.push(handler);
-    },
-    onError(handler: ErrorHandler) {
-      errorHandlers.push(handler);
-    },
-    onComplete(handler: CompleteHandler) {
-      completeHandlers.push(handler);
-    },
+    responser,
     abort: () => abortFn(),
     
     // 通过执行该方法来手动发起请求
@@ -123,9 +106,7 @@ export default function createRequestState<S, E, R>(
       abortFn = useHookToSendRequest(
         methodInstance,
         originalState,
-        successHandlers,
-        errorHandlers,
-        completeHandlers,
+        responser,
         forceRequest,
         updateCacheState
       ).abort;

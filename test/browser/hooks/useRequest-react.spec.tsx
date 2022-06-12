@@ -122,8 +122,8 @@ describe('useRequet hook with react', function() {
     const alova = getInstanceSyncResponsed();
     const Get = alova.Get<{mock: string}>('/unit-test');
     function Page() {
-      const { onSuccess, data } = useRequest(Get);
-      onSuccess(() => {
+      const { data, responser } = useRequest(Get);
+      responser.success(() => {
         expect(data.mock).toBe('mockdata');
       });
       return <div>{data}</div>;

@@ -43,7 +43,7 @@ describe('stale data', function() {
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);
-    await new Promise(resolve => firstState.onSuccess(() => resolve(1)));
+    await new Promise(resolve => firstState.responser.success(() => resolve(1)));
     const secondState = useRequest(Get);
     expect(secondState.loading.value).toBe(false);    // 因为使用缓存，所以不会发起请求，loading不会改变
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -62,7 +62,7 @@ describe('stale data', function() {
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);
-    await new Promise(resolve => firstState.onSuccess(() => resolve(1)));
+    await new Promise(resolve => firstState.responser.success(() => resolve(1)));
     const secondState = useRequest(Get);
     expect(secondState.loading.value).toBe(false);    // 因为使用缓存，所以不会发起请求，loading不会改变
     await new Promise(resolve => setTimeout(resolve, 0));

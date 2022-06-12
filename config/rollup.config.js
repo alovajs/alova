@@ -1,25 +1,27 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-05-26 21:53:24
+ * @LastEditTime: 2022-06-12 09:51:56
  */
 // rollup.config.js
 // commonjs
-var pkg = require('../package.json');
-var common = require('./rollup.js');
+var config = require('./rollup.js');
+var module = process.argv.pop().replace('--', '') || 'core';
+var paths = config.compilePath;
+var moduleType = 'cjs';
 
 module.exports = {
-    input: 'src/index.ts',
+    input: paths.input,
     output: {
-        file: 'dist/' + pkg.name + '.js',
+        file: paths.output(moduleType),
         format: 'cjs',
         // When export and export default are not used at the same time, set legacy to true.
         // legacy: true,
-        banner: common.banner,
+        banner: config.banner,
     },
-    external: common.external,
+    external: config.external,
     plugins: [
-        common.getCompiler({
+        config.getCompiler({
             tsconfigOverride: {
                 compilerOptions: {
                     declaration: true,

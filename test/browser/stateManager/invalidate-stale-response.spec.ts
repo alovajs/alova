@@ -46,7 +46,7 @@ describe('invalitate cached response data', function() {
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);
-    firstState.onSuccess(() => {
+    firstState.responser.success(() => {
       let cachedData = getResponseCache(alova.id, alova.options.baseURL, key(Get));
       expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
       invalidate(Get);

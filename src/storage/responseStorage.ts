@@ -1,5 +1,5 @@
 import { Storage } from '../../typings';
-import { getTime, JSONParse, JSONStringify } from '../utils/helper';
+import { getTime, JSONParse, JSONStringify } from '../utils/variables';
 
 const responseStorageKey = '__$$aresp$$__';
 /**

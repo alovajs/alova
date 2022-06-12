@@ -1,6 +1,7 @@
 import {
   AlovaOptions,
   MethodConfig,
+  RequestBody,
   Storage,
 } from '../typings';
 import Delete from './methods/Delete';
@@ -12,7 +13,6 @@ import Post from './methods/Post';
 import Put from './methods/Put';
 
 let idCounter = 0;
-export type RequestBody = Record<string, any> | FormData | string;
 export default class Alova<S, E> {
   public options: AlovaOptions<S, E>;
   public id = `alova-${++idCounter}`;

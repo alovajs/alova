@@ -1,6 +1,6 @@
-import { MethodConfig, MethodType } from '../../typings';
-import Alova, { RequestBody } from '../Alova';
-import { getOptions } from '../utils/helper';
+import { MethodConfig, MethodType, RequestBody } from '../../typings';
+import Alova from '../Alova';
+import { getOptions } from '../utils/variables';
 
 // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
 const staledConfig = {

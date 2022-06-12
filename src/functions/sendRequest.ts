@@ -2,7 +2,8 @@ import { RequestConfig, ResponsedHandler, ResponseErrorHandler } from '../../typ
 import Method from '../methods/Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { getContext, getOptions, key, noop, promiseReject, promiseResolve, self } from '../utils/helper';
+import { getContext, getOptions, promiseReject, promiseResolve } from '../utils/variables';
+import { key, noop, self } from '../utils/helper';
 
 
 /**
@@ -74,7 +75,7 @@ import { getContext, getOptions, key, noop, promiseReject, promiseResolve, self 
   const baseURLWithSlash = baseURL.indexOf('/') === baseURL.length - 1 ? baseURL.slice(0, -1) : baseURL;
   
   // 请求数据
-  const ctrls = requestAdapter(baseURLWithSlash + urlWithParams, data, requestConfig);
+  const ctrls = requestAdapter(baseURLWithSlash + urlWithParams, requestConfig, data);
 
   const isFn = (fn: any) => typeof fn === 'function';
   let responsedHandler: ResponsedHandler = noop;

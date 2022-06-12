@@ -54,35 +54,34 @@ describe('use useFetcher hook to fetch data', function() {
     });
 
     const Get1 = createGet({ a: '1', b: '2'});
-    const { data, onSuccess } = useRequest(Get1);
+    const { data, responser } = useRequest(Get1);
 
     const {
       fetching,
-      download,
+      downloading,
       error,
       fetch,
-      onSuccess: onFetchSuccess,
+      responser: fetchResponser,
     } = useFetcher(alova);
 
     expect(fetching.value).toBeFalsy();
-    expect(download.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    onSuccess(() => {
+    responser.success(() => {
       expect(data.value.params.count).toBe(0);
-
       fetch(Get1);
       expect(fetching.value).toBeTruthy();
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get1));
       expect(cacheData.params).toEqual({ a: '1', b: '2', count: 0 });
     });
     
-    onFetchSuccess(() => {
+    fetchResponser.success(() => {
       expect(data.value.params.count).toBe(1);
       expect(fetching.value).toBeFalsy();
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get1));

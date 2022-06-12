@@ -1,5 +1,5 @@
 import { RequestState } from '../../typings';
-import { getTime, undefinedValue } from '../utils/helper';
+import { getTime, undefinedValue } from '../utils/variables';
 
 // 响应数据缓存
 const responseCache: Record<string, Record<string, [

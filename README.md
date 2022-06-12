@@ -12,6 +12,7 @@ Request scene management library for MVVM such as Vue.js and React.js
 7. 响应数据缓存
 8. 状态统一管理
 9. 只有6个核心函数，且与Axios相似的使用方法，学习成本低
+10. 支持tree shaking
 
 ## 请求场景管理: 
 1. 请求时机：在什么时候需要发出请求。通过useHook实现

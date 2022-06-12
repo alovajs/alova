@@ -1,5 +1,5 @@
-import { MethodConfig } from '../../typings';
-import Alova, { RequestBody } from '../Alova';
+import { MethodConfig, RequestBody } from '../../typings';
+import Alova from '../Alova';
 import Method from './Method';
 
 export default class Delete<S, E, R, T> extends Method<S, E, R, T> {

@@ -3,7 +3,7 @@ import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
 import myAssert from '../utils/myAssert';
 import { key } from '../utils/helper';
-import { WatcherHookConfig } from './hookConfig.inter';
+import { WatcherHookConfig } from '../../typings';
 
 export default function useWatcher<S, E, R, T>(
   handler: () => Method<S, E, R, T>, 
@@ -14,17 +14,13 @@ export default function useWatcher<S, E, R, T>(
   const methodInstance = handler();
   const props = createRequestState<S, E, R>(methodInstance.context, (
     originalState,
-    successHandlers,
-    errorHandlers,
-    completeHandlers,
+    responser,
     setAbort
   ) => {
     const { abort } = useHookToSendRequest(
       handler(),
       originalState,
-      successHandlers,
-      errorHandlers,
-      completeHandlers,
+      responser,
       force
     );
     setAbort(abort);    // 将控制器传出去供使用者调用

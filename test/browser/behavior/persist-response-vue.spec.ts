@@ -43,7 +43,7 @@ describe('persist data', function() {
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);
-    await new Promise(resolve => firstState.onSuccess(() => resolve(1)));
+    await new Promise(resolve => firstState.responser.success(() => resolve(1)));
     const secondState = useRequest(Get);
     expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });    // 因为有持久化数据，因此直接带出了持久化的数据
     expect(secondState.loading.value).toBe(true);   // 即使有持久化数据，loading的状态也照样会是true
@@ -60,7 +60,7 @@ describe('persist data', function() {
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);
-    await new Promise(resolve => firstState.onSuccess(() => resolve(1)));
+    await new Promise(resolve => firstState.responser.success(() => resolve(1)));
     const secondState = useRequest(Get);
     expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });    // 因为有持久化数据，因此直接带出了持久化的数据
     expect(secondState.loading.value).toBe(true);   // 即使有持久化数据，loading的状态也照样会是true

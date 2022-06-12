@@ -1,5 +1,6 @@
 import { SerializedMethod, Storage } from '../../typings';
-import { JSONParse, JSONStringify, noop, undefinedValue } from '../utils/helper';
+import { noop } from '../utils/helper';
+import { JSONParse, JSONStringify, undefinedValue } from '../utils/variables';
 
 
 const silentRequestStorageKey = '__$$a_sreqssk$$__';
@@ -19,7 +20,6 @@ export function pushSilentRequest(namespace: string, key: string, config: Record
   storageKeys[key] = null;
   storage.setItem(namespacedSilentStorageKey, JSONStringify(storageKeys));
 }
-
 
 /**
  * 从storage中获取静默请求的配置信息

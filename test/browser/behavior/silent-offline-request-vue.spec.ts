@@ -88,29 +88,28 @@ describe('use useRequest to send silent request', function() {
     const {
       loading,
       data,
-      download,
+      downloading,
       error,
       send,
-      onSuccess,
-      onComplete,
+      responser,
     } = useRequest(Post, { immediate: false });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(download.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     send();
     // 静默请求在发送请求时就会触发onSuccess
     let flag = 0;
-    onSuccess(() => {
+    responser.success(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(download.value).toEqual({ total: 0, loaded: 0 });
+      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
       expect(cacheData).toBeUndefined();
       flag++;
     });
-    onComplete(() => flag++);
+    responser.complete(() => flag++);
     // 确保回调是立即执行的
     setTimeout(() => {
       expect(flag).toBe(2);
@@ -141,13 +140,13 @@ describe('use useRequest to send silent request', function() {
     const {
       loading,
       data,
-      download,
+      downloading,
       error,
       send,
     } = useRequest(Post, { immediate: false });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(download.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     send();
   });
@@ -164,12 +163,12 @@ describe('use useRequest to send silent request', function() {
     const {
       loading,
       data,
-      download,
+      downloading,
       error,
     } = useRequest(Post);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(download.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     let persisted = getSilentRequest(alova.id, alova.storage);
     const serializedMethod = persisted.serializedMethod || { url: '', type: '', requestBody: {} };

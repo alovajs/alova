@@ -1,7 +1,8 @@
 import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
-import { deserializeMethod, noop, setTimeoutFn } from './utils/helper';
+import { deserializeMethod, noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
+import { setTimeoutFn } from './utils/variables';
 
 const alovas = [] as Alova<any, any>[];
 /**
