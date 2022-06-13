@@ -1,6 +1,7 @@
 import { CompleteHandler, ErrorHandler, SuccessHandler } from '../typings';
 
 export default class Responser<R> {
+  public timer = 0;   // 请求计数器，用于记录本hook请求的次数，主要用途是并行请求时判定请求的次数
   public successHandlers: SuccessHandler<R>[] = [];
   public errorHandlers: ErrorHandler[] = [];
   public completeHandlers: CompleteHandler[] = [];
@@ -42,14 +43,13 @@ export function all<T extends unknown[] | []>(responsers: T) {
   } = combinedResponser;
   const responserLen = responsers.length;
   const requestCollections: Record<string, [any[], number]> = {};
-  const dataAry = [] as unknown as DataCollection;
   for (let i = 0; i < responserLen; i++) {
     (responsers as Responser<any>[])[i].success((data, requestId) => {
       const collectionItem = requestCollections[requestId] = requestCollections[requestId] || [[], 0];
       collectionItem[0][i] = data;
       collectionItem[1]++;
       if (collectionItem[1] >= responserLen) {
-        runHandlers(successHandlers, dataAry, requestId);
+        runHandlers(successHandlers, collectionItem[0], requestId);
         runHandlers(completeHandlers, requestId);
       }
     }).error((error, requestId) => {

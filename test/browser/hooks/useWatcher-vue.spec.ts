@@ -1,9 +1,9 @@
 import {
   createAlova,
-  VueHook,
   GlobalFetch,
   useWatcher,
 } from '../../../src';
+import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
@@ -72,7 +72,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
     };
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     initialData();
@@ -91,7 +91,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('1');
       expect(data.value.params.str).toBe('b');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
       expect(cacheData.path).toBe('/unit-test');
@@ -147,14 +147,14 @@ describe('use useController hook to send GET with vue', function() {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       setTimeout(() => {
         mutateNum.value = 2;
         mutateStr.value = 'c';
         expect(loading.value).toBeFalsy();
         expect(data.value).toBeUndefined();
         expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeUndefined();
+        expect(error.value).toBeNull();
       }, 500);
     }, 500);
     const mockCallback = jest.fn(() => {});
@@ -165,7 +165,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('2');
       expect(data.value.params.str).toBe('c');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
       expect(cacheData.path).toBe('/unit-test');
@@ -201,7 +201,7 @@ describe('use useController hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     const mockCallback = jest.fn(() => {});
     responser.success(mockCallback);
     const successTimesFns = [() => {
@@ -210,7 +210,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('0');
       expect(data.value.params.str).toBe('a');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
       expect(cacheData).toBeUndefined();
@@ -262,7 +262,7 @@ describe('use useController hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     const mockCallback = jest.fn(() => {});
     responser.success(mockCallback);
     const successTimesFns = [() => {
@@ -271,7 +271,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('0');
       expect(data.value.params.str).toBe('a');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
       expect(cacheData).toBeUndefined();

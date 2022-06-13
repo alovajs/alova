@@ -6,10 +6,10 @@ import { clearTimeoutTimer, JSONStringify, promiseReject, setTimeoutFn } from '.
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 const isBodyData = (data: any) => {
   const isTyped = (typed: any) => data instanceof typed;
-  return isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
+  return typeof data === 'string' || isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
 }
 export default function GlobalFetch(requestInit: RequestInit = {}) {
-  return function<R, T>(source: string, config: RequestConfig<R, T>, data: any) {
+  return function<R, T>(source: string, config: RequestConfig<R, T>, data?: any) {
     
     // 设置了中断时间，则在指定时间后中断请求
     const timeout = config.timeout || 0;

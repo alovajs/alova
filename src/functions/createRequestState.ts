@@ -1,4 +1,5 @@
-import { ExportedType, Progress, RequestAdapter, RequestState } from '../../typings';
+import { Ref } from 'vue';
+import { Progress, FrontRequestState } from '../../typings';
 import Alova from '../Alova';
 import Method from '../methods/Method';
 import Responser from '../Responser';
@@ -8,7 +9,7 @@ import { debounce, noop } from '../utils/helper';
 import { undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
-export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
+type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持React和Vue的方式定义类型
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -23,7 +24,7 @@ export type ConnectController = ReturnType<RequestAdapter<unknown, unknown>>;
  */
 
 type HandleRequest<R> = (
-  originalState: RequestState,
+  originalState: FrontRequestState,
   responser: Responser<R>,
   setAbort: (abort: () => void) => void,
 ) => void;
@@ -54,7 +55,7 @@ export default function createRequestState<S, E, R>(
   const originalState = {
     loading: create(false),
     data: create(initialData),
-    error: create(undefinedValue as Error | undefined),
+    error: create(null as Error | null),
     downloading: create({ ...progress }),
     uploading: create({ ...progress }),
   };
@@ -92,7 +93,7 @@ export default function createRequestState<S, E, R>(
   const exportedState = {
     loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,
     data: stateExport(originalState.data) as unknown as ExportedType<R, S>,
-    error: stateExport(originalState.error) as unknown as ExportedType<Error|undefined, S>,
+    error: stateExport(originalState.error) as unknown as ExportedType<Error|null, S>,
     downloading: stateExport(originalState.downloading) as unknown as ExportedType<Progress, S>,
     uploading: stateExport(originalState.uploading) as unknown as ExportedType<Progress, S>,
   };

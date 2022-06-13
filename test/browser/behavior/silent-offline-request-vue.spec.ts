@@ -1,9 +1,9 @@
 import {
   createAlova,
-  VueHook,
   useRequest,
   GlobalFetch,
 } from '../../../src';
+import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
@@ -96,7 +96,7 @@ describe('use useRequest to send silent request', function() {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     send();
     // 静默请求在发送请求时就会触发onSuccess
     let flag = 0;
@@ -104,7 +104,7 @@ describe('use useRequest to send silent request', function() {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
       expect(cacheData).toBeUndefined();
       flag++;
@@ -147,7 +147,7 @@ describe('use useRequest to send silent request', function() {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     send();
   });
 
@@ -169,7 +169,7 @@ describe('use useRequest to send silent request', function() {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     let persisted = getSilentRequest(alova.id, alova.storage);
     const serializedMethod = persisted.serializedMethod || { url: '', type: '', requestBody: {} };
     expect(serializedMethod.url).toBe('/unit-test');

@@ -1,10 +1,10 @@
 import React, { ReactElement, useState } from 'react';
 import {
   createAlova,
-  ReactHook,
   GlobalFetch,
   useRequest,
 } from '../../../src';
+import ReactHook from '../../../src/predefine/ReactHook';
 import { RequestConfig } from '../../../typings';
 import { GetData, Result } from '../result.type';
 import server from '../../server';

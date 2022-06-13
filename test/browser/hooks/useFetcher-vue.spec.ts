@@ -1,10 +1,10 @@
 import {
   createAlova,
-  VueHook,
   GlobalFetch,
   useFetcher,
   useRequest,
 } from '../../../src';
+import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
@@ -66,13 +66,13 @@ describe('use useFetcher hook to fetch data', function() {
 
     expect(fetching.value).toBeFalsy();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.success(() => {
       expect(data.value.params.count).toBe(0);
       fetch(Get1);
       expect(fetching.value).toBeTruthy();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get1));
       expect(cacheData.params).toEqual({ a: '1', b: '2', count: 0 });
@@ -82,7 +82,7 @@ describe('use useFetcher hook to fetch data', function() {
       expect(data.value.params.count).toBe(1);
       expect(fetching.value).toBeFalsy();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get1));
       expect(cacheData.params).toEqual({ a: '1', b: '2', count: 1 });

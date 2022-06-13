@@ -156,8 +156,8 @@ export default {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-    // "**/?(*.)+(spec|test).[tj]s?(x)",
-    "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?"
+    "**/?(*.)+(spec|test).[tj]s?(x)",
+    // "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?"
     // "**/test/browser/behavior/silent-offline-request-vue.spec.ts"
   ],
 

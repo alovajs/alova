@@ -1,4 +1,4 @@
-import { RequestState } from '../../typings';
+import { FrontRequestState } from '../../typings';
 import { getTime, undefinedValue } from '../utils/variables';
 
 // 响应数据缓存
@@ -66,7 +66,7 @@ export function removeResponseCache(namespace: string, baseURL: string, key: str
 
 
 // 状态数据缓存
-const stateCache: Record<string, Record<string, RequestState>> = {};
+const stateCache: Record<string, Record<string, FrontRequestState>> = {};
 
 /**
  * @description 获取State缓存数据
@@ -88,7 +88,7 @@ export function getStateCache(namespace: string, baseURL: string, key: string) {
  * @param key 请求key值
  * @param data 缓存数据
  */
-export function setStateCache(namespace: string, baseURL: string, key: string, data: RequestState) {
+export function setStateCache(namespace: string, baseURL: string, key: string, data: FrontRequestState) {
   const parentKey = namespacedBaseURL(namespace, baseURL);
   const cachedState = stateCache[parentKey] = stateCache[parentKey] || {};
   cachedState[key] = data;

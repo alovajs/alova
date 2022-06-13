@@ -1,10 +1,10 @@
 import {
   createAlova,
-  VueHook,
   useRequest,
   GlobalFetch,
   all,
 } from '../../../src';
+import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
@@ -86,7 +86,7 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.success(rawData => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
@@ -94,7 +94,7 @@ describe('use useRequet hook to send GET with vue', function() {
       expect(rawData.path).toBe('/unit-test');
       expect(rawData.params).toEqual({ a: 'a', b: 'str' });
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
 
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
@@ -122,14 +122,14 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.error((err, requestId) => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeInstanceOf(Error);
       expect(error.value).toBe(err);
-      expect(requestId.constructor).toBe(String);
+      expect(requestId.constructor).toBe(Number);
 
       // 请求错误无缓存
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
@@ -156,7 +156,7 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.error(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
@@ -181,7 +181,7 @@ describe('use useRequet hook to send GET with vue', function() {
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.error(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
@@ -206,7 +206,7 @@ describe('use useRequet hook to send GET with vue', function() {
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     setTimeout(abort, 100);
     responser.error(err => {
       expect(loading.value).toBeFalsy();
@@ -228,7 +228,7 @@ describe('Test other methods without GET', function() {
         expect(config.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.data).toEqual({ post1: 'a' });
-        config.data.post2 = 'b';
+        (config.data as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
@@ -272,13 +272,13 @@ describe('Test other methods without GET', function() {
     } = useRequest(Post);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.success(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
       expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
 
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
@@ -293,7 +293,7 @@ describe('Test other methods without GET', function() {
         expect(config.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.data).toEqual({ post1: 'a' });
-        config.data.post2 = 'b';
+        (config.data as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
@@ -339,14 +339,14 @@ describe('Test other methods without GET', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.success(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
       expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
 
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Delete));
@@ -361,7 +361,7 @@ describe('Test other methods without GET', function() {
         expect(config.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.data).toEqual({ post1: 'a' });
-        config.data.post2 = 'b';
+        (config.data as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
@@ -407,14 +407,14 @@ describe('Test other methods without GET', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     responser.success(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params).toEqual({ a: 'a', b: 'str' });
       expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeUndefined();
+      expect(error.value).toBeNull();
 
       // 缓存有值
       const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Put));
@@ -448,12 +448,12 @@ describe('Test other methods without GET', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     await new Promise(resolve => responser.success(() => resolve(1)));
     expect(loading.value).toBeFalsy();
     expect(data.value).toEqual({});
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Head));
     expect(cacheData).toBeUndefined();
@@ -484,12 +484,12 @@ describe('Test other methods without GET', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     await new Promise(resolve => responser.success(() => resolve(1)));
     expect(loading.value).toBeFalsy();
     expect(data.value).toEqual({});
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Options));
     expect(cacheData).toBeUndefined();
@@ -520,40 +520,85 @@ describe('Test other methods without GET', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     await new Promise(resolve => responser.success(() => resolve(1)));
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params).toEqual({ a: 'a', b: 'str' });
     expect(data.value.data).toEqual({ patch1: 'p' });
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    expect(error.value).toBeNull();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Patch));
     expect(cacheData).toBeUndefined();
   });
 
-  test.only('parallel request with `all` function', async () => {
+  test('parallel request with `all` function', done => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test');
-    const Post = alova.Post<PostData, Result>('/unit-test');
+    const Get = alova.Get<Result>('/unit-test');
+    const Post = alova.Post<Result<number>>('/unit-test');
+    const Put = alova.Put<Result<number>>('/unit-test');
     const firstState = useRequest(Get);
     const secondState = useRequest(Post);
-    const thirdState = useRequest(Post);
-    const arr = await new Promise<[GetData, PostData, PostData]>(resolve => {
-      all([
-        firstState.responser,
-        secondState.responser,
-        thirdState.responser
-      ]).success(resolve);
-    });
-    const [first, second, third] = arr;
-    expect(arr.length).toBe(3);
-    expect(first.path).toBe('/unit-test');
-    expect(first.method).toBe('GET');
-    expect(second.path).toBe('/unit-test');
-    expect(second.method).toBe('POST');
-    expect(third.path).toBe('/unit-test');
-    expect(third.method).toBe('POST');
+    const thirdState = useRequest(Put);
+
+    const mockCompleteFn = jest.fn(() => {});
+    let count = 0;
+    all([
+      firstState.responser,
+      secondState.responser,
+      thirdState.responser
+    ]).success(arr => {
+      const [first, second, third] = arr;
+      expect(arr.length).toBe(3);
+      expect(first.data.path).toBe('/unit-test');
+      expect(first.data.method).toBe('GET');
+      expect(second.data.path).toBe('/unit-test');
+      expect(second.data.method).toBe('POST');
+      expect(third.data.path).toBe('/unit-test');
+      expect(third.data.method).toBe('PUT');
+      expect(mockCompleteFn.mock.calls.length).toBe(count);
+      count > 0 && done();
+      count++;
+    }).complete(mockCompleteFn);
+
+    // 即使不需要同步发起请求，只要三个请求有响应即可触发一次success
+    setTimeout(() => {
+      firstState.send();
+      thirdState.send();
+      setTimeout(secondState.send, 500);
+    }, 1000);
+  });
+
+  test('parallel request with `all` function', done => {
+    const alova = getInstance();
+    const Get = alova.Get<Result>('/unit-test-404');
+    const Post = alova.Post<Result<number>>('/unit-test');
+    const Put = alova.Put<Result<number>>('/unit-test');
+    const firstState = useRequest(Put);
+    const secondState = useRequest(Post);
+    const thirdState = useRequest(Get);
+
+    const mockCompleteFn = jest.fn(() => {});
+    const mockSuccessFn = jest.fn(() => {});
+    let count = 0;
+    all([
+      firstState.responser,
+      secondState.responser,
+      thirdState.responser
+    ]).error(err => {
+      expect(err).toBeInstanceOf(Error);
+      expect(mockCompleteFn.mock.calls.length).toBe(count);
+      expect(mockSuccessFn.mock.calls.length).toBe(0);    // 请求错误，不会触发success
+      count > 0 && done();
+      count++;
+    }).success(mockSuccessFn).complete(mockCompleteFn);
+
+    // 即使不需要同步发起请求，只要三个请求有响应即可触发一次success
+    setTimeout(() => {
+      firstState.send();
+      thirdState.send();
+      setTimeout(secondState.send, 500);
+    }, 1000);
   });
 });

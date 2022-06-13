@@ -49,6 +49,8 @@ import { key, noop, self } from '../utils/helper';
     method: type,
     data: requestBody,
     ...config,
+    headers: config.headers || {},
+    params: config.params || {},
   };
   requestConfig = beforeRequest(requestConfig) || requestConfig;
   const {

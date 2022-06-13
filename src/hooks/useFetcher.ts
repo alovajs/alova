@@ -8,7 +8,7 @@ import createRequestState from '../functions/createRequestState';
 * @param method 请求方法对象
 */
 export default function useFetcher<S, E>(alova: Alova<S, E>) {
-  const props = createRequestState(alova, noop);
+  const props = createRequestState<S, E, any>(alova, noop);
   return {
     fetching: props.loading,
     error: props.error,

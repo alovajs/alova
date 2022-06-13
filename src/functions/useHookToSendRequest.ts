@@ -3,7 +3,7 @@ import { pushSilentRequest } from '../storage/silentStorage';
 import { key, noop, serializeMethod } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
-import { RequestState } from '../../typings';
+import { FrontRequestState } from '../../typings';
 import { getStateCache } from '../storage/responseCache';
 import Responser, { runHandlers } from '../Responser';
 import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
@@ -21,12 +21,8 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
  */
  export default function useHookToSendRequest<S, E, R, T>(
   methodInstance: Method<S, E, R, T>,
-  originalState: RequestState,
-  {
-    successHandlers,
-    errorHandlers,
-    completeHandlers,
-  }: Responser<R>,
+  originalState: FrontRequestState,
+  responser: Responser<R>,
   forceRequest = false,
   updateCacheState = false
 ) {
@@ -37,9 +33,14 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const silentMode = silent && !updateCacheState;   // 在fetch数据时不能静默请求
   const methodKey = key(methodInstance);
-
-  // 生成随机的requestId
-  const requestId = Math.random().toString(16).substring(2);
+  responser.timer++;    // 每次请求时+1，并行请求就能知道当前发起的是第几次请求
+  const {
+    successHandlers,
+    errorHandlers,
+    completeHandlers,
+    timer: requestId,
+  } = responser;
+  
   if (silentMode) {
     myAssert(!(methodInstance.requestBody instanceof FormData), 'FormData is not supported when silent is true');
     // 需要异步执行，同步执行会导致无法收集各类回调函数

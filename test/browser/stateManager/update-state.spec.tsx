@@ -2,10 +2,10 @@ import {
   createAlova,
   useRequest,
   GlobalFetch,
-  ReactHook,
   update,
-  VueHook,
 } from '../../../src';
+import VueHook from '../../../src/predefine/VueHook';
+import ReactHook from '../../../src/predefine/ReactHook';
 import { RequestConfig } from '../../../typings';
 import { GetData, Result } from '../result.type';
 import server from '../../server';
