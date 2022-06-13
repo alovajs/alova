@@ -216,4 +216,9 @@ export declare function update<S, E, R, T>(methodInstance: Method<S, E, R, T>, h
 export declare function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
 
 // 预定义的配置
-export declare function GlobalFetch(requestInit?: RequestInit): <R, T>(source: string, config: RequestConfig<R, T>, data: any) => RequestAdapter<R, T>;
+export declare function GlobalFetch(requestInit?: RequestInit): <R, T>(source: string, config: RequestConfig<R, T>, data?: any) => {
+  response: () => Promise<Response>;
+  headers: () => Promise<void | Headers>;
+  onDownload: (handler: (progress: Progress) => void) => void;
+  abort: () => void;
+};
