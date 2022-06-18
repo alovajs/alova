@@ -142,17 +142,18 @@ declare class Alova<S, E> {
   public id: string;
   public storage: Storage;
   Get<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Post<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Put<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Delete<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Post<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Put<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Delete<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
   Head<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
   Options<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Patch<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Patch<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
 }
 
 // hook通用配置
 interface UseHookConfig {
   force?: boolean,   // 强制请求
+  initialData?: any,     // 初始数据
 }
 // useRequest配置类型
 interface RequestHookConfig extends UseHookConfig {

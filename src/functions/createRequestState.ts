@@ -36,6 +36,7 @@ export default function createRequestState<S, E, R>(
   }: Alova<S, E>,
   handleRequest: HandleRequest<R>,
   methodKey?: string,
+  initialData?: any,
   watchedStates?: E[],
   immediate = true,
   debounceDelay = 0
@@ -47,14 +48,15 @@ export default function createRequestState<S, E, R>(
   } = options.statesHook;
 
   // 如果有持久化数据则先使用它
-  const initialData: R | undefined = methodKey ? getPersistentResponse(id, methodKey, storage) : undefinedValue;
+  let rawData = methodKey ? getPersistentResponse(id, methodKey, storage) : undefinedValue;
+  rawData = rawData === undefinedValue ? initialData : rawData;
   const progress = {
     total: 0,
     loaded: 0,
   };
   const originalState = {
     loading: create(false),
-    data: create(initialData),
+    data: create(rawData),
     error: create(null as Error | null),
     downloading: create({ ...progress }),
     uploading: create({ ...progress }),

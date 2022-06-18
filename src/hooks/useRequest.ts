@@ -5,7 +5,11 @@ import { key } from '../utils/helper';
 import { getContext } from '../utils/variables';
 import { RequestHookConfig } from '../../typings';
 
-export default function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, { force, immediate = true }: RequestHookConfig = {}) {
+export default function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, {
+  force,
+  immediate = true,
+  initialData,
+}: RequestHookConfig = {}) {
   const props = createRequestState<S, E, R>(getContext(methodInstance), (
     originalState,
     responser,
@@ -15,7 +19,8 @@ export default function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T
     originalState,
     responser,
     force
-  ).abort), key(methodInstance));
+  ).abort), key(methodInstance), initialData);
+
   return {
     ...props,
     send: () => props.send(methodInstance, !!force),

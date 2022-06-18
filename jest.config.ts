@@ -158,7 +158,7 @@ export default {
   testMatch: [
     "**/?(*.)+(spec|test).[tj]s?(x)",
     // "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?"
-    // "**/test/browser/behavior/silent-offline-request-vue.spec.ts"
+    // "**/test/browser/behavior/initial-data-vue.spec.ts"
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
