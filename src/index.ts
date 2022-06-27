@@ -8,6 +8,7 @@ export { default as useWatcher } from './hooks/useWatcher';
 export { default as useFetcher } from './hooks/useFetcher';
 export { default as invalidate } from './functions/invalidate';
 export { default as update } from './functions/update';
+export { default as set } from './functions/set';
 export { all } from './Responser';
 
 // 预定义的配置

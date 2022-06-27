@@ -27,7 +27,6 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
   updateCacheState = false
 ) {
   const { id, options, storage } = getContext(methodInstance);
-  const { baseURL } = options;
   const { update } = options.statesHook;
   const { silent, enableDownload, enableUpload } = methodInstance.config;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
@@ -79,7 +78,7 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
         update({ data }, originalState);
       } else {
         // 更新缓存内的状态，一般为useFetcher中进入
-        const cachedState = getStateCache(id, baseURL, methodKey);
+        const cachedState = getStateCache(id, methodKey);
         cachedState && update({ data }, cachedState);
       }
 

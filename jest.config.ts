@@ -148,18 +148,18 @@ export default {
   // The test environment that will be used for testing
   testEnvironment: "jsdom",
 
-  // Options that will be passed to the testEnvironment
-  // testEnvironmentOptions: {},
-
-  // Adds a location field to test results
-  // testLocationInResults: false,
-
-  // The glob patterns Jest uses to detect test files
-  testMatch: [
+  _testMatch: [
     "**/?(*.)+(spec|test).[tj]s?(x)",
-    // "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?"
+    // "**/test/browser/hooks/useRequest-react.spec.ts(x)?"
     // "**/test/browser/behavior/initial-data-vue.spec.ts"
+    // "**/test/browser/stateManager/invalidate-stale-response.spec.ts(x)?"
   ],
+  get testMatch() {
+    return this._testMatch;
+  },
+  set testMatch(value) {
+    this._testMatch = value;
+  },
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [

@@ -96,7 +96,7 @@ describe('use useRequet hook to send GET with vue', function() {
       expect(error.value).toBeNull();
 
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
+      const cacheData = getResponseCache(alova.id, key(Get));
       expect(cacheData.path).toBe('/unit-test');
       expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
       done();
@@ -131,7 +131,7 @@ describe('use useRequet hook to send GET with vue', function() {
       expect(requestId.constructor).toBe(Number);
 
       // 请求错误无缓存
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Get));
+      const cacheData = getResponseCache(alova.id, key(Get));
       expect(cacheData).toBeUndefined();
       done();
     });
@@ -280,7 +280,7 @@ describe('Test other methods without GET', function() {
       expect(error.value).toBeNull();
 
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
+      const cacheData = getResponseCache(alova.id, key(Post));
       expect(cacheData).toBeUndefined();
       done();
     });
@@ -348,7 +348,7 @@ describe('Test other methods without GET', function() {
       expect(error.value).toBeNull();
 
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Delete));
+      const cacheData = getResponseCache(alova.id, key(Delete));
       expect(cacheData).toBeUndefined();
       done();
     });
@@ -357,7 +357,7 @@ describe('Test other methods without GET', function() {
   test('send PUT', done => {
     const alova = getInstance(
       config => {
-        expect(config.url).toBe('/unit-test');
+        expect(config.url).toBe('/unit-test?c=3');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.data).toEqual({ post1: 'a' });
         (config.data as Record<string, any>).post2 = 'b';
@@ -370,10 +370,10 @@ describe('Test other methods without GET', function() {
         const { data } = await jsonPromise;
         expect(data.path).toBe('/unit-test');
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(data.params).toEqual({ a: 'a', b: 'str' });
+        expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
       }
     );
-    const Put = alova.Put<PostData, Result<true>>('/unit-test', { post1: 'a' }, {
+    const Put = alova.Put<PostData, Result<true>>('/unit-test?c=3', { post1: 'a' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
@@ -382,14 +382,14 @@ describe('Test other methods without GET', function() {
       transformData({ code, data }, _) {
         expect(code).toBe(200);
         expect(data.path).toBe('/unit-test');
-        expect(data.params).toEqual({ a: 'a', b: 'str' });
+        expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         return data;
       },
       staleTime: ({ code, data }, headers, method) => {
         expect(code).toBe(200);
         expect(data.path).toBe('/unit-test');
-        expect(data.params).toEqual({ a: 'a', b: 'str' });
+        expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         expect(headers).toBeInstanceOf(Object);
         expect(method).toBe('PUT');
@@ -410,13 +410,13 @@ describe('Test other methods without GET', function() {
     responser.success(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
-      expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+      expect(data.value.params).toEqual({ a: 'a', b: 'str', c: '3' });
       expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeNull();
 
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Put));
+      const cacheData = getResponseCache(alova.id, key(Put));
       expect(cacheData).toBeUndefined();
       done();
     });
@@ -454,7 +454,7 @@ describe('Test other methods without GET', function() {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeNull();
     // 没有缓存值
-    const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Head));
+    const cacheData = getResponseCache(alova.id, key(Head));
     expect(cacheData).toBeUndefined();
   });
 
@@ -490,7 +490,7 @@ describe('Test other methods without GET', function() {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeNull();
     // 没有缓存值
-    const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Options));
+    const cacheData = getResponseCache(alova.id, key(Options));
     expect(cacheData).toBeUndefined();
   });
 
@@ -528,7 +528,7 @@ describe('Test other methods without GET', function() {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeNull();
     // 没有缓存值
-    const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Patch));
+    const cacheData = getResponseCache(alova.id, key(Patch));
     expect(cacheData).toBeUndefined();
   });
 });

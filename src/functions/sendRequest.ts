@@ -32,11 +32,11 @@ import { key, noop, self } from '../utils/helper';
 
   // 如果是强制请求的，则跳过从缓存中获取的步骤
   if (!forceRequest) {
-    const response = getResponseCache(id, baseURL, methodKey);
+    const response = getResponseCache(id, methodKey);
     if (response) {
       return {
         response: () => promiseResolve(response),
-        headers: () => promiseResolve({} as Headers),
+        headers: () => promiseResolve(undefined),
         abort: noop,
         useCache: true,
       };
@@ -65,7 +65,7 @@ import { key, noop, self } from '../utils/helper';
     data,
     transformData = self,
   } = requestConfig;
-  let paramsStr = params ? Object.keys(params).map(key => `${key}=${params[key]}`).join('&') : '';
+  let paramsStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&');
 
   // 将get参数拼接到url后面，注意url可能已存在参数
   let urlWithParams = paramsStr ? 
@@ -74,7 +74,7 @@ import { key, noop, self } from '../utils/helper';
   // 如果不是/开头的，则需要添加/
   urlWithParams = urlWithParams.indexOf('/') !== 0 ? `/${urlWithParams}` : urlWithParams;
   // baseURL如果以/结尾，则去掉/
-  const baseURLWithSlash = baseURL.indexOf('/') === baseURL.length - 1 ? baseURL.slice(0, -1) : baseURL;
+  const baseURLWithSlash = baseURL.lastIndexOf('/') === baseURL.length - 1 ? baseURL.slice(0, -1) : baseURL;
   
   // 请求数据
   const ctrls = requestAdapter(baseURLWithSlash + urlWithParams, requestConfig, data);
@@ -99,27 +99,38 @@ import { key, noop, self } from '../utils/helper';
     response: () => Promise.all([
       ctrls.response(),
       ctrls.headers(),
-    ]).then(([rawResponse, headers = {} as Headers]) => {
+    ]).then(([rawResponse, headers]) => {
       try {
         let responsedHandlePayload = responsedHandler(rawResponse as any);
-        const getStaleTime = (data: any) => typeof staleTimeFinal === 'function' ? staleTimeFinal(data, headers, type) : staleTimeFinal;
-        const getPersistTime = (data: any) => typeof persistTimeFinal === 'function' ? persistTimeFinal(data, headers, type) : persistTimeFinal;
+        type NonVoidable<T> = T extends void ? never : T;
+        const getStaleTime = (data: any, h: NonVoidable<typeof headers>) => 
+          typeof staleTimeFinal === 'function' 
+          ? staleTimeFinal(data, h, type) 
+          : staleTimeFinal;
+        const getPersistTime = (data: any, h: NonVoidable<typeof headers>) => 
+          typeof persistTimeFinal === 'function' 
+          ? persistTimeFinal(data, h, type) 
+          : persistTimeFinal;
         if (responsedHandlePayload instanceof Promise) {
           return responsedHandlePayload.then(data => {
-            const staleMilliseconds = getStaleTime(data);
-            data = transformData(data, headers);
-            setResponseCache(id, baseURL, methodKey, data, staleMilliseconds);
-            // 当persist开启时将响应数据存入缓存，以便后续调用（已在saveResponse中判断）
-            const persistMilliseconds = getPersistTime(data);
-            persistResponse(id, methodKey, data, persistMilliseconds, storage);
+            if (headers) {
+              const staleMilliseconds = getStaleTime(data, headers);
+              data = transformData(data, headers);
+              setResponseCache(id, methodKey, data, staleMilliseconds);
+              // 当persist开启时将响应数据存入缓存，以便后续调用（已在saveResponse中判断）
+              const persistMilliseconds = getPersistTime(data, headers);
+              persistResponse(id, methodKey, data, persistMilliseconds, storage);
+            }
             return data;
           });
         } else {
-          const staleMilliseconds = getStaleTime(responsedHandlePayload);
-          responsedHandlePayload = transformData(responsedHandlePayload, headers);
-          setResponseCache(id, baseURL, methodKey, responsedHandlePayload, staleMilliseconds);
-          const persistMilliseconds = getPersistTime(data);
-          persistResponse(id, methodKey, responsedHandlePayload, persistMilliseconds, storage);
+          if (headers) {
+            const staleMilliseconds = getStaleTime(responsedHandlePayload, headers);
+            responsedHandlePayload = transformData(responsedHandlePayload, headers);
+            setResponseCache(id, methodKey, responsedHandlePayload, staleMilliseconds);
+            const persistMilliseconds = getPersistTime(data, headers);
+            persistResponse(id, methodKey, responsedHandlePayload, persistMilliseconds, storage);
+          }
           return responsedHandlePayload;
         }
       } catch (error: any) {

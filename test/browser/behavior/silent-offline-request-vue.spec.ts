@@ -105,7 +105,7 @@ describe('use useRequest to send silent request', function() {
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeNull();
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(Post));
+      const cacheData = getResponseCache(alova.id, key(Post));
       expect(cacheData).toBeUndefined();
       flag++;
     });

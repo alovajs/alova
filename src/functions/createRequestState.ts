@@ -64,10 +64,10 @@ export default function createRequestState<S, E, R>(
   let removeState = noop;
   if (methodKey) {
     // 如果有methodKey时，将初始状态存入缓存以便后续更新
-    setStateCache(id, options.baseURL, methodKey, originalState);
+    setStateCache(id, methodKey, originalState);
 
     // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
-    removeState = () => removeStateCache(id, options.baseURL, methodKey);
+    removeState = () => removeStateCache(id, methodKey);
   }
   const responser = new Responser<R>();
   let abortFn = noop;

@@ -1,8 +1,7 @@
 import {
   createAlova,
-  useRequest,
   GlobalFetch,
-  invalidate,
+  set,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
@@ -20,7 +19,7 @@ function getInstance(
   resErrorExpect?: (err: Error) => void,
 ) {
   return createAlova({
-    baseURL: 'http://localhost:3000/',
+    baseURL: 'http://localhost:3000',
     timeout: 3000,
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
@@ -38,21 +37,26 @@ function getInstance(
   });
 }
 
-describe('invalitate cached response data', function() {
-  test.only('the cached response data should be removed', done => {
+describe('manual set cache response data', function() {
+  test('the cache response data should be saved', () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
       staleTime: 100000,
       transformData: data => data.data,
     });
-    const firstState = useRequest(Get);
-    firstState.responser.success(() => {
-      let cachedData = getResponseCache(alova.id, key(Get));
-      expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-      invalidate(Get);
-      cachedData = getResponseCache(alova.id, key(Get));
-      expect(cachedData).toBeUndefined();
-      done();
+    set(Get, {
+      path: '/unit-test',
+      method: 'GET',
+      params: {
+        manual: '1'
+      },
+    });
+    expect(getResponseCache(alova.id, key(Get))).toEqual({
+      path: '/unit-test',
+      method: 'GET',
+      params: {
+        manual: '1'
+      },
     });
   });
 });

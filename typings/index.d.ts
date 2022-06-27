@@ -214,6 +214,11 @@ export declare function invalidate<S, E, R, T>(methodInstance: Method<S, E, R, T
 // 以支持React和Vue的方式定义类型
 type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
 export declare function update<S, E, R, T>(methodInstance: Method<S, E, R, T>, handleUpdate: (data: OriginalType<R, S>) => void): void;
+// 手动设置缓存响应数据
+export declare function set<S, E, R, T>(methodInstance: Method<S, E, R, T>, data: R): void;
+
+// 混合多个响应器，并在这些响应器都成功时调用成功回调，如果其中一个错误则调用失败回调
+// 类似Promise.all
 export declare function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
 
 // 预定义的配置

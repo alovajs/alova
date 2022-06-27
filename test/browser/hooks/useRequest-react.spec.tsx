@@ -133,7 +133,7 @@ describe('useRequet hook with react', function() {
 
   test('states should be remove in cache when component was unmounted', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData>('/unit-test', {
+    const Get = alova.Get<GetData>('unit-test', {
       transformData: ({ data }) => data,
     });
     function DataConsole() {
@@ -154,12 +154,12 @@ describe('useRequet hook with react', function() {
     await screen.findByText(/unit-test/);
 
     // useRequest内会缓存状态
-    const { data } = getStateCache(alova.id, alova.options.baseURL, key(Get)) || { data: null };
+    const { data } = getStateCache(alova.id, key(Get)) || { data: null };
     expect(data[0].path).toBe('/unit-test');
     fireEvent.click(screen.getByRole('btn'));
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露
-    expect(getStateCache(alova.id, alova.options.baseURL, key(Get))).toBeUndefined();
+    expect(getStateCache(alova.id, key(Get))).toBeUndefined();
   });
 });

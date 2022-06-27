@@ -93,7 +93,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeNull();
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
+      const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData.path).toBe('/unit-test');
       expect(cacheData.params).toEqual({ num: '1', str: 'b' });
       expect(mockCallback.mock.calls.length).toBe(1);
@@ -102,7 +102,7 @@ describe('use useController hook to send GET with vue', function() {
     }, () => {
       expect(data.value.params.num).toBe('2');
       expect(data.value.params.str).toBe('c');
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
+      const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData.params).toEqual({ num: '2', str: 'c' });
       expect(mockCallback.mock.calls.length).toBe(2);
       done();
@@ -167,7 +167,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeNull();
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
+      const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData.path).toBe('/unit-test');
       expect(cacheData.params).toEqual({ num: '2', str: 'c' });
       expect(mockCallback.mock.calls.length).toBe(1);
@@ -212,7 +212,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeNull();
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
+      const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData).toBeUndefined();
       expect(mockCallback.mock.calls.length).toBe(1);
       mutateNum.value = 2;
@@ -220,7 +220,7 @@ describe('use useController hook to send GET with vue', function() {
     }, () => {
       expect(data.value.params.num).toBe('2');
       expect(data.value.params.str).toBe('c');
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
+      const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData).toBeUndefined();
       expect(mockCallback.mock.calls.length).toBe(2);
       done();
@@ -273,7 +273,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeNull();
       // 缓存有值
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
+      const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData).toBeUndefined();
       expect(mockCallback.mock.calls.length).toBe(1);
       mutateNum.value = 2;
@@ -287,7 +287,7 @@ describe('use useController hook to send GET with vue', function() {
     }, () => {
       expect(data.value.params.num).toBe('2');
       expect(data.value.params.str).toBe('c');
-      const cacheData = getResponseCache(alova.id, 'http://localhost:3000', key(currentGet));
+      const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData).toBeUndefined();
       expect(mockCallback.mock.calls.length).toBe(2);
       done();
