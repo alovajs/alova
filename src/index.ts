@@ -6,9 +6,9 @@ import listenNetwork, { addAlova } from './network';
 export { default as useRequest } from './hooks/useRequest';
 export { default as useWatcher } from './hooks/useWatcher';
 export { default as useFetcher } from './hooks/useFetcher';
-export { default as invalidate } from './functions/invalidate';
-export { default as update } from './functions/update';
-export { default as set } from './functions/set';
+export { default as staleData } from './functions/staleData';
+export { default as updateState } from './functions/updateState';
+export { default as setFreshData } from './functions/setFreshData';
 export { all } from './Responser';
 
 // 预定义的配置

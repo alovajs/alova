@@ -1,7 +1,8 @@
 import {
   createAlova,
+  useRequest,
   GlobalFetch,
-  set,
+  staleData,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
@@ -19,7 +20,7 @@ function getInstance(
   resErrorExpect?: (err: Error) => void,
 ) {
   return createAlova({
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3000/',
     timeout: 3000,
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
@@ -37,26 +38,30 @@ function getInstance(
   });
 }
 
-describe('manual set cache response data', function() {
-  test('the cache response data should be saved', () => {
+describe('invalitate cached response data', () => {
+  test('It will use the default stale time when not set the stale time with `GET`', async () => {
+    const alova = getInstance();
+    const Get = alova.Get<GetData, Result>('/unit-test', {
+      transformData: data => data.data,
+    });
+    const firstState = useRequest(Get);
+    await new Promise(resolve => firstState.responser.success(resolve));
+    const cachedData = getResponseCache(alova.id, key(Get));
+    expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+  });
+
+  test('the cached response data should be removed', async () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
       staleTime: 100000,
       transformData: data => data.data,
     });
-    set(Get, {
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        manual: '1'
-      },
-    });
-    expect(getResponseCache(alova.id, key(Get))).toEqual({
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        manual: '1'
-      },
-    });
+    const firstState = useRequest(Get);
+    await new Promise(resolve => firstState.responser.success(resolve));
+    let cachedData = getResponseCache(alova.id, key(Get));
+    expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+    staleData(Get);
+    cachedData = getResponseCache(alova.id, key(Get));
+    expect(cachedData).toBeUndefined();
   });
 });

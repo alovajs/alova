@@ -9,7 +9,7 @@ type SetStateAction<S> = S | ((prevState: S) => S);
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
 /**
- * 更新缓存的数据
+ * 更新对应method的状态
  * @param method 请求方法对象
  * @param handleUpdate 更新回调
  */

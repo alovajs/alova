@@ -210,12 +210,12 @@ export declare function createAlova<S, E>(options: AlovaOptions<S, E>): Alova<S,
 export declare  function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, config?: RequestHookConfig): UseHookReturnType<R, S>;
 export declare function useWatcher<S, E, R, T>(handler: () => Method<S, E, R, T>, watchingStates: E[], config?: WatcherHookConfig): UseHookReturnType<R, S>;
 export declare function useFetcher<S, E>(alova: Alova<S, E>): UseFetchHookReturnType<S, E>;
-export declare function invalidate<S, E, R, T>(methodInstance: Method<S, E, R, T>): void;
+export declare function staleData<S, E, R, T>(methodInstance: Method<S, E, R, T>): void;
 // 以支持React和Vue的方式定义类型
 type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
-export declare function update<S, E, R, T>(methodInstance: Method<S, E, R, T>, handleUpdate: (data: OriginalType<R, S>) => void): void;
+export declare function updateState<S, E, R, T>(methodInstance: Method<S, E, R, T>, handleUpdate: (data: OriginalType<R, S>) => void): void;
 // 手动设置缓存响应数据
-export declare function set<S, E, R, T>(methodInstance: Method<S, E, R, T>, data: R): void;
+export declare function setFreshData<S, E, R, T>(methodInstance: Method<S, E, R, T>, data: R): void;
 
 // 混合多个响应器，并在这些响应器都成功时调用成功回调，如果其中一个错误则调用失败回调
 // 类似Promise.all

@@ -2,7 +2,7 @@ import {
   createAlova,
   useRequest,
   GlobalFetch,
-  update,
+  updateState,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import ReactHook from '../../../src/predefine/ReactHook';
@@ -62,7 +62,7 @@ describe('update cached response data by user', function() {
         data = { path: '' },
         responser,
       } = useRequest(Get);
-      responser.success(() => update(Get, ([data, setData]) => {
+      responser.success(() => updateState(Get, ([data, setData]) => {
         setData({
           ...data,
           path: '/unit-test-updated',
@@ -85,7 +85,7 @@ describe('update cached response data by user', function() {
     });
     const { data, responser } = useRequest(Get);
     await new Promise(resolve => responser.success(() => resolve(1)));
-    update(Get, data => {
+    updateState(Get, data => {
       data.value.path = '/unit-test-updated';
     });
     expect(data.value.path).toBe('/unit-test-updated');
