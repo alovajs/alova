@@ -19,6 +19,7 @@ function getInstance(
   return createAlova({
     baseURL: 'http://localhost:3000',
     timeout: 3000,
+    staleTime: 0,   // 设置为0，才能发起数据请求
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
     beforeRequest(config) {

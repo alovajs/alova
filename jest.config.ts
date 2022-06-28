@@ -151,7 +151,7 @@ export default {
   _testMatch: [
     "**/?(*.)+(spec|test).[tj]s?(x)",
     // "**/test/browser/hooks/useRequest-react.spec.ts(x)?"
-    // "**/test/browser/behavior/initial-data-vue.spec.ts"
+    // "**/test/browser/behavior/persist-response-vue.spec.ts"
     // "**/test/browser/stateManager/invalidate-stale-response.spec.ts(x)?"
   ],
   get testMatch() {

@@ -1,6 +1,6 @@
 import { MethodConfig, MethodType, RequestBody } from '../../typings';
 import Alova from '../Alova';
-import { getOptions } from '../utils/variables';
+import { getOptions, undefinedValue } from '../utils/variables';
 
 // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
 const staledConfig = {
@@ -28,9 +28,13 @@ export default class Method<S, E, R, T> {
     this.url = url;
     this.context = context;
     
+    // 将请求相关的全局配置合并到Method对象中
     const contextConcatConfig: Record<string, any> = {};
     (['timeout', 'staleTime'] as const).forEach(key => {
-      contextConcatConfig[key] = getOptions(this)[key];
+      const contextOptions = getOptions(this);
+      if (contextOptions[key] !== undefinedValue) {
+        contextConcatConfig[key] = contextOptions[key];
+      }
     });
     this.config = {
       ...(methodDefaultConfig[type] || {}),

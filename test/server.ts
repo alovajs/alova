@@ -5,6 +5,15 @@ import 'web-streams-polyfill';
 
 (global as any).fetch = (window as any).fetch = fetch;
 
+// 防止Vue warn打印
+const warn = console.warn;
+console.warn = (...args: any[]) => {
+  args = args.filter((a: any) => !/vue warn/i.test(a));
+  if (args.length > 0) {
+    warn.apply(console, args);
+  }
+};
+
 const result = (code: number, req: any, res: any, ctx: any, hasBody = false, extraParams = {}) => {
   const ret = {
     code,
