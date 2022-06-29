@@ -9,7 +9,7 @@ import { getContext } from '../utils/variables';
 * @param methodInstance 请求方法对象
 * @param data 缓存数据
 */
-export default function set<S, E, R, T>(methodInstance: Method<S, E, R, T>, data: R) {
+export default function setFreshData<S, E, R, T>(methodInstance: Method<S, E, R, T>, data: R) {
   const {
     staleTime = 0
   } = methodInstance.config;

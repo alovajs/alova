@@ -95,12 +95,89 @@ const alova = createAlova({
 });
 ```
 
+### 设置请求超时时间
+以下为全局设置请求超时的方法，所有由`alova`创建的`Method`对象都会继承该设置。
+```javascript
+const alova = createAlova({
+  // 省略其他参数...
+
+  // 请求超时时间，单位为毫秒，默认为0，表示永不超时
+  timeout: 50000,
+});
+```
+
+如果需要请求级别的请求超时时间，你也可以在创建请求方法对象时覆盖全局`timeout`参数。
+```javascript
+const todoListGetter = alova.Get('/todo-list', {
+  // 省略其他参数...
+
+  // 请求级别的请求超时时间
+  timeout: 10000,
+});
+```
+
+
+### 设置全局请求拦截器
+有时候我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，我们可以设置在创建`Alova`实例时指定全局的请求拦截器，这也与`Axios`相似。
+```javascript
+const alova = createAlova({
+  // 省略其他参数...
+
+  // 函数参数config内包含了url、params、data、headers等请求的所有配置
+  beforeRequest(config) {
+    // 假设我们需要添加token到请求头
+    config.headers.token = 'token';
+  },
+});
+```
+
+### 设置全局响应拦截器
+当我们希望统一解析响应数据、统一处理错误时，此时可以在创建`Alova`实例时指定全局的响应拦截器，这同样与`Axios`相似。响应拦截器包括请求成功的拦截器和请求失败的拦截器。
+```javascript
+const alova = createAlova({
+  // 省略其他参数...
+
+  // 使用数组的两个项，分别指定请求成功的拦截器和请求失败的拦截器
+  responsed: [
+
+    // 请求成功的拦截器，可以是普通函数和异步函数
+    // 当使用GlobalFetch请求适配器时，它将接收Response对象。
+    async response => {
+      const json = await response.json();
+      if (json.code !== 200) {
+        // 这边抛出错误时，将会进入请求失败拦截器内
+        throw new Error(json.message);
+      }
+      
+      // 解析的响应数据将传给staleTime、persistTime、transformData三个钩子函数，这些函数将在后续讲解
+      return json.data;
+    },
+
+    // 请求失败的拦截器
+    // 请求抛出错误时，或请求成功拦截器抛出错误时，将会进入该拦截器。
+    error => {
+      alert(error.message);
+    }
+  ]
+});
+```
+如果不需要设置请求失败的拦截器，可以直接传入请求成功的拦截器函数。
+```javascript
+const alova = createAlova({
+  // 省略其他参数...
+
+  // 直接设置请求成功的拦截器
+  async responsed(response) {
+    // ...
+  },
+});
+```
 
 ### 创建请求方法对象
 在`Alova`中，每个请求都对应一个method对象，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据、请求节流等请求行为参数。`Method`对象的创建也类似`Axios`的请求发送函数。
 ```javascript
 // 创建一个Get对象，描述一次Get请求的信息
-const Getter = alova.Get('/todo-list', {
+const todoListGetter = alova.Get('/todo-list', {
   headers: {
     'Content-Type': 'application/json;charset=UTF-8'
   },
@@ -111,7 +188,7 @@ const Getter = alova.Get('/todo-list', {
 });
 
 // 创建Post对象
-const Poster = alova.Post('/create-todo', 
+const createTodoPoster = alova.Post('/create-todo', 
   // http body数据
   {
     title: 'test todo',
@@ -129,13 +206,62 @@ const Poster = alova.Post('/create-todo',
 );
 ```
 
+### 请求方法类型
+`Alova`提供了包括GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH七种请求方法的抽象对象，具体的使用方式可以阅读[进阶-请求方法详解](#请求方法详解)。
+
+### 为响应数据设置保鲜时间
+有些接口在短时间内可能会频繁重复请求，我们可以为它们的响应数据设置保鲜来重复利用之前请求的数据，即内存临时缓存响应数据，这样做既减少了服务器压力，又可以省去用户等待的时间。默认只有`alova.Get`会带有300000ms(5分钟)的响应数据保鲜时间，开发者也可以自定义设置响应保鲜时间。
+
+> 响应数据缓存的key是由这次请求的method、url、headers参数、params参数、requestBody参数作为唯一标识。
+
+```javascript
+
+以下为全局设置响应保鲜时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。
+```javascript
+// 为所有请求设置固定的响应保鲜时间
+const alova = createAlova({
+  // 省略其他参数...
+
+  // 单位为毫秒
+  // 当设置为`Infinity`，表示数据永不过期，设置为0或负数时表示不保鲜
+  staleTime: 60 * 10 * 1000
+});
+
+// 通过钩子函数设置动态的响应保鲜时间
+const alova = createAlova({
+  // 省略其他参数...
+
+  // 函数参数为响应拦截器处理后的响应数据、响应头对象、请求方法
+  // 函数要求返回保鲜时间，单位是毫秒
+  staleTime(rawData, headers, method) {
+
+    // 设置GET和POST请求方法具有10分钟的保鲜时间
+    if (['GET', 'POST'].includes(method)) {
+      return 10 * 60 * 1000;
+    }
+    return 0;
+  }
+});
+```
+
+如果需要请求级别的保鲜时间，你也可以在创建请求方法对象时覆盖全局`staleTime`参数。
+```javascript
+const todoListGetter = alova.Get('/todo-list', {
+  // 省略其他参数...
+
+  // 参数用法与全局相同，也可以使用固定值和函数动态设置保鲜时间
+  staleTime: 60 * 10 * 1000,
+});
+```
+> 注意：缓存的响应数据是保存在内存中的，当页面刷新时缓存的数据将会丢失。
+
 ## 在正确的时机发送请求
 在`Alova`中提供了`useRequest`、`useWatcher`、`useFetcher`三种`use hook`实现请求时机，由它们控制何时应该发出请求，同时将会为我们创建和维护状态化的请求相关数据，省去了开发者自主维护这些状态的麻烦，下面我们来了解下它们。
 
 ### useRequest
 它侧重于表示一次请求的发送，执行`useRequest`时默认会发送一次请求，在页面获取初始化数据时很有用。同时我们也可以关闭它的默认发送请求，这在例如提交数据等手动触发的场景下很有用。
 ```javascript
-// 这里我们使用上一步创建的Getter对象获取todo list数据
+// 这里我们使用上一步创建的todoListGetter对象获取todo list数据
 const {
   // 加载中状态，当加载时它的值为true，结束后自动更新为false
   // 在Vue3环境下（使用VueHook），它通过ref函数创建，你可以通过loading.value访问它，或直接绑定到界面中
@@ -147,7 +273,7 @@ const {
 
   // 请求错误对象，请求错误时有值，否则为null
   error
-} = useRequest(Getter);
+} = useRequest(todoListGetter);
 ```
 展示todo list数据到界面
 ```html
@@ -173,7 +299,7 @@ const {
 
   // 响应处理对象
   responser,
-} = useRequest(Poster, {
+} = useRequest(createTodoPoster, {
   // 当immediate为false时，默认不发出
   immediate: false
 });
@@ -309,11 +435,59 @@ const handleSubmit = () => {
 ## 响应数据管理
 响应数据状态化并统一管理，我们可以在任意位置访问任意的响应数据，并对它们进行操作。
 
-### 加工响应数据（beta）
-...
+### 转换响应数据（beta）
+当响应数据结构不能直接满足前端需求时，我们可以为method实例设置`transformData`钩子函数将响应数据转换成需要的结构，转换后的数据会赋值给`data`状态。
+
+```javascript
+const todoListGetter = alova.Get('/tood-list', {
+  params: {
+    page: 1,
+    userId: 1,
+  },
+
+  // 函数接受未加工的数据和响应头对象，并要求将转换后的数据返回，它将会被赋值给data状态。
+  // 注意：rawData一般是响应拦截器过滤后的数据，响应拦截器的配置可以参考[设置全局响应拦截器]章节。
+  transformData(rawData, headers) {
+    return rawData.list.map(item => {
+      return {
+        ...item,
+        statusText: item.status === 1 ? '已完成' : '进行中',
+      };
+    });
+  }
+});
+```
 
 ### 让响应缓存腐化
-... 
+当某个响应缓存还在保鲜时间内的时候，我们对它执行了更改操作，此时我们希望对应的缓存也进行更新，`Alova`提供了3种方式达到这个目的：
+1. 使用`useFetcher`立即重新请求最新的数据，它类似于懒加载的饿汉模式；
+2. 手动更新缓存，这种方式将在下一个小节详细讲解；
+3. 让这个响应缓存腐化，即缓存失效，当再次请求时将不会命中缓存，它类似于懒加载的懒汉模式。这也是本小节所要讲的内容。
+
+假设使用上面创建的`todoListGetter`和`createTodoPoster`，调用`odo/create-todo`创建t项时让`/todo-list`接口对应的缓存腐化。
+```javascript
+import { staleData } from 'alova';
+
+const {
+  // ...
+  send,
+  responser
+} = useRequest(createTodoPoster, { immediate: false });
+
+// 提交成功后腐化todo list响应缓存
+responser.success(() => {
+  staleData(todoListGetter);
+});
+
+// todo创建提交回调函数
+const handleSubmit = () => {
+  send();
+};
+```
+```html
+<!-- 省略todo参数设置相关的html -->
+<button @click="handleSubmit">创建todo</button>
+```
 
 
 ### 跨页面/模块更新响应数据
@@ -321,32 +495,18 @@ const handleSubmit = () => {
 
 
 ### 自定义设置缓存数据
-...
+有些服务接口支持批量请求数据，它意味着总是由不确定的若干组响应数据组成，例如我们想要在初始化页面时批量请求数据，然后在交互中只请求单条数据的情况下，会造成一个缓存穿透的问题，即在交互时，请求单条出现在初始化的批量数据中时，因为请求参数不同的缘故，无法命中那条已存在于批量响应数据的缓存中，此时我们就可以为批量数据一一创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
 
+```javascript
+setFreshData
+```
 
 ## 进阶
-
-### 设置请求超时时间
-...
-
-
-### 设置全局请求拦截器
-...
-
-
-### 设置全局响应拦截器
-...
-
-
-### 请求方法类型
+### 请求方法详解
 ...
 
 
 ### 初始化响应数据
-...
-
-
-### 为响应数据设置保鲜时间
 ...
 
 
@@ -384,7 +544,7 @@ const handleSubmit = () => {
 ### 持久化响应数据
 ...
 
-### 重复请求
+### 重复请求（计划中）
 ...
 
 
@@ -401,5 +561,5 @@ const handleSubmit = () => {
 ...
 
 
-## 插件编写（plan）
+## 插件编写（计划中）
 ...

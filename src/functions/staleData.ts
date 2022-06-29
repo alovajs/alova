@@ -8,6 +8,6 @@ import { getContext } from '../utils/variables';
 * 让对应的返回数据缓存失效
 * @param methodInstance 请求方法对象
 */
-export default function invalidate<S, E, R, T>(methodInstance: Method<S, E, R, T>) {
+export default function staleData<S, E, R, T>(methodInstance: Method<S, E, R, T>) {
   removeResponseCache(getContext(methodInstance).id, key(methodInstance));
 }
