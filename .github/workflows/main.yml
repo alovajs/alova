@@ -16,20 +16,14 @@ jobs:
   Publish:
     # 服务器环境：最新版 Ubuntu
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: 
-          - 16.x
-          - 14.x
-          - 12.x
     steps:
       # 拉取代码
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.14.x
           cache: 'npm'
 
       # 执行测试和打包操作
