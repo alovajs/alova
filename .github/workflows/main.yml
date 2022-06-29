@@ -24,6 +24,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.14.x
+          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
       # 执行测试和打包操作
