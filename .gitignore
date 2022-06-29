@@ -10,6 +10,7 @@
 # misc
 .DS_Store
 .idea
+.coveralls.yml
 
 npm-debug.log*
 yarn-debug.log*

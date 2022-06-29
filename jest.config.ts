@@ -17,7 +17,7 @@ export default {
   // clearMocks: false,
 
   // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: true,
+  collectCoverage: false,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: undefined,
@@ -152,7 +152,7 @@ export default {
     "**/?(*.)+(spec|test).[tj]s?(x)",
     // "**/test/browser/hooks/useRequest-react.spec.ts(x)?"
     // "**/test/browser/behavior/persist-response-vue.spec.ts"
-    // "**/test/browser/stateManager/invalidate-stale-response.spec.ts(x)?"
+    // "**/test/browser/stateManager/stale-data.spec.ts(x)?"
   ],
   get testMatch() {
     return this._testMatch;
