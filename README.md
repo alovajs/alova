@@ -1,6 +1,7 @@
 # [Alova](https://github.com/JOU-amjs/alova)
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
+[![ci](https://github.com/JOU-amjs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/JOU-amjs/alova/actions/workflows/main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/JOU-amjs/alova/badge.svg?branch=main)](https://coveralls.io/github/JOU-amjs/alova?branch=main)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
@@ -214,9 +215,7 @@ const createTodoPoster = alova.Post('/create-todo',
 
 > 响应数据缓存的key是由这次请求的method、url、headers参数、params参数、requestBody参数作为唯一标识。
 
-```javascript
-
-以下为全局设置响应保鲜时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。
+以下是全局设置响应保鲜时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。
 ```javascript
 // 为所有请求设置固定的响应保鲜时间
 const alova = createAlova({
@@ -263,7 +262,7 @@ const todoListGetter = alova.Get('/todo-list', {
 ```javascript
 // 这里我们使用上一步创建的todoListGetter对象获取todo list数据
 const {
-  // 加载中状态，当加载时它的值为true，结束后自动更新为false
+  // loading是加载状态值，当加载时它的值为true，结束后自动更新为false
   // 在Vue3环境下（使用VueHook），它通过ref函数创建，你可以通过loading.value访问它，或直接绑定到界面中
   // 在React16环境下（使用ReactHook），它的值为普通的boolean值，请求状态变化时内部将调用setLoading函数更新它的值
   loading,
@@ -430,6 +429,8 @@ const handleSubmit = () => {
 ```
 ```html
 <div v-if="fetching">{{ 正在后台拉取数据... }}</div>
+<!-- 省略todo参数设置相关的html -->
+<button @click="handleSubmit">创建todo</button>
 ```
 
 ## 响应数据管理
@@ -495,8 +496,9 @@ const handleSubmit = () => {
 
 
 ### 自定义设置缓存数据
-有些服务接口支持批量请求数据，它意味着总是由不确定的若干组响应数据组成，例如我们想要在初始化页面时批量请求数据，然后在交互中只请求单条数据的情况下，会造成一个缓存穿透的问题，即在交互时，请求单条出现在初始化的批量数据中时，因为请求参数不同的缘故，无法命中那条已存在于批量响应数据的缓存中，此时我们就可以为批量数据一一创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
+有些服务接口支持批量请求数据，它意味着总是由不确定的若干组响应数据组成，当我们想要在初始化页面时批量请求数据，然后在交互中只请求单条数据的情况下，会造成一个缓存穿透的问题，就是在交互时，请求单条出现在初始化的批量数据中时，因为请求参数不同的缘故，无法命中那条已存在于批量响应数据的缓存中，此时我们就可以为批量数据一一创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
 
+举例：
 ```javascript
 setFreshData
 ```

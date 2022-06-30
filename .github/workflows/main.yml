@@ -1,4 +1,4 @@
-name: Publish Alova
+name: publish
 
 # 触发条件：在 push或合并请求 到 master 或 realease开头的分支后
 on:

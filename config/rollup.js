@@ -10,7 +10,7 @@ var name = pkg.name;
 var author = pkg.author;
 
 var banner =
-  `/*!
+  `/**
   * ${pkg.name} ${version} (https://github.com/${author}/${name})
   * API https://github.com/${author}/${name}/blob/master/doc/api.md
   * Copyright ${(new Date).getFullYear()} ${author}. All Rights Reserved
