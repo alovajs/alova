@@ -76,11 +76,11 @@ export function deserializeMethod<S, E>({
 }
 
 /**
- * 创建节流函数，只有enable为true时会进入节流环节，否则将立即触发此函数
+ * 创建防抖函数，只有enable为true时会进入防抖环节，否则将立即触发此函数
  * 场景：在调用useWatcher并设置了immediate为true时，首次调用需立即执行，否则会造成延迟调用
  * @param fn 回调函数
  * @param delay 延迟描述
- * @param enable 是否启用节流
+ * @param enable 是否启用防抖
  * @returns 延迟后的回调函数
  */
 export function debounce(fn: Function, delay: number, enable: () => boolean) {

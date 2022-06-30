@@ -39,7 +39,7 @@ MVVM库的请求场景管理库。
 - 占位请求，请求时展示loading、骨架图、或者是上次使用的真实数据；
 - 缓存高频响应，多次执行请求会使用保鲜数据；
 - 多请求串行与并行；
-- 对频繁的请求进行节流，避免前端数据闪动，以及降低服务端压力；
+- 对频繁的请求进行防抖，避免前端数据闪动，以及降低服务端压力；
 - 重要接口重试机制，降低网络不稳定造成的请求失败概率；
 - 静默提交，当只关心提交数据时，提交请求后直接响应成功事件，后台保证请求成功；
 - 离线提交，离线时将提交数据暂存到本地，网络连接后再提交；
@@ -59,13 +59,13 @@ MVVM库的请求场景管理库。
 
 ## 特性
 1. React/Vue请求非异步用法
-2. 学习成本低，与Axios相似的API
+2. 学习成本低，与axios相似的API
 3. 响应数据状态化
 4. 响应数据缓存
 5. 数据预拉取
 6. 静默提交
 7. 离线提交
-8. 请求节流
+8. 请求防抖
 9. Gzip 3kb轻量级
 10. typescript支持
 11. 支持tree shaking
@@ -96,10 +96,10 @@ yarn add alova
 ## 入门指南
 
 ### 创建Alova实例
-一个`Alova`实例是使用的开端，它的写法类似`Axios`，以下是一个最简单的`Alova`实例的创建方法。
+一个`Alova`实例是使用的开端，它的写法类似`axios`，以下是一个最简单的`Alova`实例的创建方法。
 ```javascript
 import { createAlova, VueHook, GlobalFetch } from 'alova';
-const alova = createAlova({
+const alovaInstance = createAlova({
   // 假设我们需要与这个域名的服务器交互
   baseURL: 'http://api.alovajs.org',
 
@@ -115,7 +115,7 @@ const alova = createAlova({
 ### 设置请求超时时间
 以下为全局设置请求超时的方法，所有由`alova`创建的`Method`对象都会继承该设置。
 ```javascript
-const alova = createAlova({
+const alovaInstance = createAlova({
   // 省略其他参数...
 
   // 请求超时时间，单位为毫秒，默认为0，表示永不超时
@@ -135,9 +135,9 @@ const todoListGetter = alova.Get('/todo-list', {
 
 
 ### 设置全局请求拦截器
-有时候我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，我们可以设置在创建`Alova`实例时指定全局的请求拦截器，这也与`Axios`相似。
+有时候我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，我们可以设置在创建`Alova`实例时指定全局的请求拦截器，这也与`axios`相似。
 ```javascript
-const alova = createAlova({
+const alovaInstance = createAlova({
   // 省略其他参数...
 
   // 函数参数config内包含了url、params、data、headers等请求的所有配置
@@ -149,9 +149,9 @@ const alova = createAlova({
 ```
 
 ### 设置全局响应拦截器
-当我们希望统一解析响应数据、统一处理错误时，此时可以在创建`Alova`实例时指定全局的响应拦截器，这同样与`Axios`相似。响应拦截器包括请求成功的拦截器和请求失败的拦截器。
+当我们希望统一解析响应数据、统一处理错误时，此时可以在创建`Alova`实例时指定全局的响应拦截器，这同样与`axios`相似。响应拦截器包括请求成功的拦截器和请求失败的拦截器。
 ```javascript
-const alova = createAlova({
+const alovaInstance = createAlova({
   // 省略其他参数...
 
   // 使用数组的两个项，分别指定请求成功的拦截器和请求失败的拦截器
@@ -180,7 +180,7 @@ const alova = createAlova({
 ```
 如果不需要设置请求失败的拦截器，可以直接传入请求成功的拦截器函数。
 ```javascript
-const alova = createAlova({
+const alovaInstance = createAlova({
   // 省略其他参数...
 
   // 直接设置请求成功的拦截器
@@ -191,7 +191,7 @@ const alova = createAlova({
 ```
 
 ### 创建请求方法对象
-在`Alova`中，每个请求都对应一个method对象，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据、请求节流等请求行为参数。`Method`对象的创建也类似`Axios`的请求发送函数。
+在`Alova`中，每个请求都对应一个method对象，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据、请求防抖等请求行为参数。`Method`对象的创建也类似`axios`的请求发送函数。
 ```javascript
 // 创建一个Get对象，描述一次Get请求的信息
 const todoListGetter = alova.Get('/todo-list', {
@@ -235,7 +235,7 @@ const createTodoPoster = alova.Post('/create-todo',
 以下是全局设置响应保鲜时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。
 ```javascript
 // 为所有请求设置固定的响应保鲜时间
-const alova = createAlova({
+const alovaInstance = createAlova({
   // 省略其他参数...
 
   // 单位为毫秒
@@ -244,7 +244,7 @@ const alova = createAlova({
 });
 
 // 通过钩子函数设置动态的响应保鲜时间
-const alova = createAlova({
+const alovaInstance = createAlova({
   // 省略其他参数...
 
   // 函数参数为响应拦截器处理后的响应数据、响应头对象、请求方法
@@ -370,7 +370,7 @@ const {
 } = useWatcher(() => filterTodoList(searchText.value), 
   // 被监听的状态数组，这些状态变化将会触发一次请求
   [searchText], {
-    // 设置500ms节流
+    // 设置500ms防抖
     debounce: 500,
   }
 );
@@ -648,8 +648,8 @@ const handleCancel = () => {
 };
 ```
 
-### 频繁请求节流
-通常我们都会在频繁触发的事件层面编写节流代码，这次我们在请求层面实现了节流功能。
+### 频繁请求防抖
+通常我们都会在频繁触发的事件层面编写防抖代码，这次我们在请求层面实现了防抖功能。
 
 
 ### 下载进度
