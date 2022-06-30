@@ -12,6 +12,7 @@ var moduleType = 'esm';
 module.exports = {
     input: paths.input,
     output: {
+        name: paths.packageName,
         file: paths.output(moduleType),
         format: 'es',
         // When export and export default are not used at the same time, set legacy to true.

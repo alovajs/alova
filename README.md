@@ -1,11 +1,14 @@
-# [Alova](https://github.com/JOU-amjs/alova)
+# [alova](https://github.com/JOU-amjs/alova)
+
+MVVM库的请求场景管理库。
+
+它是对请求库的一种补充而非替代品✔️
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![ci](https://github.com/JOU-amjs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/JOU-amjs/alova/actions/workflows/main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/JOU-amjs/alova/badge.svg?branch=main)](https://coveralls.io/github/JOU-amjs/alova?branch=main)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-> MVVM库的请求场景管理库（Request scene management library for MVVM libraries such as Vue.js and React.js）
 ## 什么是请求场景管理
 我们在进行一次请求时总是要思考以下问题，
 1. 什么时候发出请求；
@@ -17,7 +20,7 @@
 7. 离线了还能提交数据吗；
 8. ...
 
-`fetch`或`axios`往往更专注于如何与服务端交互，但对于上面的问题我们总是需要自己处理，这些有利于应用性能和稳定性的功能，总会让程序员们编写出低维护性的代码。请求场景管理就是从准备请求到响应数据加工完毕的所有环节进行抽象，从而覆盖以前端为视角的，整个CS交互生命周期的模型。`Alova`就是一个以请求场景模型的请求场景管理库。
+`fetch`或`axios`往往更专注于如何与服务端交互，但对于上面的问题我们总是需要自己处理，这些有利于应用性能和稳定性的功能，总会让程序员们编写出低维护性的代码。请求场景管理就是从准备请求到响应数据加工完毕的所有环节进行抽象，从而覆盖以前端为视角的，整个CS交互生命周期的模型。`Alova`就是一个以请求场景模型的请求场景管理库，它是对`axios`等请求库的一种补充，而非替代品。
 > CS交互：泛指所有客户端类型和服务端的数据交互
 
 ## 请求场景模型
@@ -42,7 +45,7 @@
 - 离线提交，离线时将提交数据暂存到本地，网络连接后再提交；
 
 ### 请求事件
-表示携带请求参数发送请求，获得响应，`Alova`可以与`axios`、`fetch`、`XMLHttpRequest`等任意请求库协作。
+表示携带请求参数发送请求，获得响应，`Alova`可以与`axios`、`fetch`、`XMLHttpRequest`等任意请求库或原生方案共同协作。
 
 ### 响应数据管理
 `Alova`将响应数据状态化，并统一管理，任何位置都可以对响应数据进行操作，并利用MVVM库的特性自动更新对应的视图。
@@ -63,18 +66,31 @@
 6. 静默提交
 7. 离线提交
 8. 请求节流
-9. 轻量化gzip 3kb
+9. Gzip 3kb轻量级
 10. typescript支持
 11. 支持tree shaking
 
 
 ## 安装
+### NPM
 ```bash
 # 使用npm
 npm install alova --save
 
 # 使用yarn
 yarn add alova
+```
+
+### CDN
+```html
+<!-- 核心代码，全局变量为alova -->
+<script src="https://unpkg.com/alova/dist/alova.umd.min.js"></script>
+
+<!-- vue states hook，全局变量为VueHook -->
+<script src="https://unpkg.com/alova/dist/hooks/vuehook.umd.min.js"></script>
+
+<!-- react states hook，全局变量为ReactHook -->
+<script src="https://unpkg.com/alova/dist/hooks/reacthook.umd.min.js"></script>
 ```
 
 ## 入门指南
@@ -213,7 +229,8 @@ const createTodoPoster = alova.Post('/create-todo',
 ### 为响应数据设置保鲜时间
 有些接口在短时间内可能会频繁重复请求，我们可以为它们的响应数据设置保鲜来重复利用之前请求的数据，即内存临时缓存响应数据，这样做既减少了服务器压力，又可以省去用户等待的时间。默认只有`alova.Get`会带有300000ms(5分钟)的响应数据保鲜时间，开发者也可以自定义设置响应保鲜时间。
 
-> 响应数据缓存的key是由这次请求的method、url、headers参数、params参数、requestBody参数作为唯一标识。
+> ⚠️⚠️⚠️响应数据缓存的key：是由method实例的请求方法(method)、请求地址(url)、请求头参数(headers)、url参数(params)、请求体参数(requestBody)组合作为唯一标识，任意一个位置不同都将被当做不同的key。
+
 
 以下是全局设置响应保鲜时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。
 ```javascript
@@ -460,7 +477,7 @@ const todoListGetter = alova.Get('/tood-list', {
 ```
 
 ### 让响应缓存腐化
-当某个响应缓存还在保鲜时间内的时候，我们对它执行了更改操作，此时我们希望对应的缓存也进行更新，`Alova`提供了3种方式达到这个目的：
+有这样一个场景，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，普通做法是通过事件来触发上一页的内容更新，增加了事件维护的成本。`Alova`提供了3种方式达到这个目的：
 1. 使用`useFetcher`立即重新请求最新的数据，它类似于懒加载的饿汉模式；
 2. 手动更新缓存，这种方式将在下一个小节详细讲解；
 3. 让这个响应缓存腐化，即缓存失效，当再次请求时将不会命中缓存，它类似于懒加载的懒汉模式。这也是本小节所要讲的内容。
@@ -492,29 +509,144 @@ const handleSubmit = () => {
 
 
 ### 跨页面/模块更新响应数据
-...
+我们继续以上一小节[让响应缓存腐化](#让响应缓存腐化)中提到的例子说起，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，上一小节提到的懒汉模式和饿汉模式都会重新发起请求，但这节我们使用一种不需要重新请求的方法，即手动更改被编辑的项。
+```javascript
+import { updateState } from 'alova';
+// 省略其他代码
+
+const editingTodo = { /* ... */ };
+// 提交成功后手动修改todo list的响应状态
+responser.success(() => {
+  
+  // 调用updateState并传入对应的method对象获取todo列表的响应状态
+  //  
+  // Vue3
+  updateState(todoListGetter, todoList => {
+    todoList.value = todoList.value.map(item => {
+      if (item.id === editingTodo.id) {
+        return {
+          ...item,
+          ...editingTodo,
+        };
+      }
+      return item;
+    });
+  });
+
+
+  // React16
+  updateState(todoListGetter, ([todoList, setTodoList]) => {
+    todoList = todoList.map(item => {
+      if (item.id === editingTodo.id) {
+        return {
+          ...item,
+          ...editingTodo,
+        };
+      }
+      return item;
+    });
+    setTodoList(todoList);
+  });
+});
+```
 
 
 ### 自定义设置缓存数据
-有些服务接口支持批量请求数据，它意味着总是由不确定的若干组响应数据组成，当我们想要在初始化页面时批量请求数据，然后在交互中只请求单条数据的情况下，会造成一个缓存穿透的问题，就是在交互时，请求单条出现在初始化的批量数据中时，因为请求参数不同的缘故，无法命中那条已存在于批量响应数据的缓存中，此时我们就可以为批量数据一一创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
+有些服务接口支持批量请求数据，它意味着总是由不确定的若干组响应数据组成，当我们想要在初始化页面时批量请求数据，然后在交互中只请求单条数据的情况下，会造成缓存穿透的问题。
 
-举例：
+例如我们在todo列表页初始化时获取了5月1日到5日，5天的数据，然后用户在操作时又获取了一次5月1日的数据，此时不会命中初始化时的5月1日数据，因为初始化的5天数据是存放在一起的，而没有剥离开，此时我们就可以为这5天的数据一一手动创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
+
 ```javascript
-setFreshData
+import { setFreshData } from 'alova';
+
+const getTodoListByDate = dateList => alova.Get('/todo-list-dates', {
+  params: { dateList }
+});
+// 初始化时批量获取5天的数据
+const dates = ref([
+  '2022-05-01',
+  '2022-05-02',
+  '2022-05-03',
+  '2022-05-04',
+  '2022-05-05',
+]);
+const {
+  // ...
+  responser
+} = useWatcher(() => getTodoListByDate(dates.value.join()), [dates], { immediate: true });
+responser.success(todoListDates => {
+  if (todoListDates.length <= 1) {
+    return;
+  }
+
+  // 默认情况下，这5天的数据会一起缓存到一个key中
+  // 为了让后续请求某一天的数据时也能命中缓存，我们可以将5天的数据拆解为按天，并通过setFreshData一一手动设置响应缓存
+  // setFreshData的第一个参数为method实例对象，作为缓存key
+  // 第二个参数为缓存数据
+  todoListDates.forEach(todoDate => {
+    setFreshData(getTodoListByDate(todoDate.date), [ todoDate ]);
+  });
+});
+```
+交互时，用户因某些情况再次发起了5月1日的数据请求，那它将会命中我们手动设置的响应缓存。
+```javascript
+const handleTodolistToggle = () => {
+  // 改变监听值dates可以自动触发请求
+  dates.value = ['2022-05-01'];
+}
 ```
 
 ## 进阶
 ### 请求方法详解
-...
+`Alova`实例对象提供了七种请求方法的抽象对象，包括GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH。
+- GET: `alova.Get(url[, config])`;
+- POST: `alova.Post(url[, data[, config]])`;
+- PUT: `alova.Put(url[, data[, config]])`;
+- DELETE: `alova.Delete(url[, data[, config]])`;
+- HEAD: `alova.Head(url[, config])`;
+- OPTIONS: `alova.Options(url[, config])`;
+- PATCH: `alova.Patch(url[, data[, config]])`;
 
+参数说明：
+- `url`是请求路径，它将会与`createAlova`中的`baseURL`拼接成完整的url进行请求；
+- `data`为请求体数据对象；
+- `config`为请求配置对象，其中包含了请求头、params参数等、请求行为参数等配置；
 
-### 初始化响应数据
-...
+### 设置初始化响应数据
+一个页面在获取到初始数据前，不可避免地需要等待服务端响应，在Vue或React中一般会先将状态初始化为一个空数组或空对象，以免造成页面报错。在`Alova`中我们可以通过以下方式设置初始数据。
+```javascript
+// 在useRequest中设置初始数据
+const {
+  // 响应前data的初始值为[]，而不是undefined
+  data
+} = useRequest(todoListGetter, {
+  initialData: []
+});
+
+// 在useWatcher中设置的方法相同
+const {
+  // 响应前data的初始值为[]，而不是undefined
+  data
+} = useWatcher(() => getTodoList(/* 参数 */), [/* 监听状态 */], {
+  initialData: []
+});
+```
 
 
 ### 手动中断请求
-...
+未设置`timeout`参数时请求是永不超时的，如果需要手动中断请求，可以在`useRequest`、`useWatcher`函数被调用时接收`abort`方法。
+```javascript
+const {
+  // 省略其他参数
 
+  abort
+} = useRequest(todoListGetter);
+
+// 调用abort即可中断请求
+const handleCancel = () => {
+  abort();
+};
+```
 
 ### 频繁请求节流
 通常我们都会在频繁触发的事件层面编写节流代码，这次我们在请求层面实现了节流功能。
@@ -560,6 +692,10 @@ setFreshData
 。。。
 
 ### 编写存储适配器
+...
+
+
+### 响应状态编辑追踪（计划中）
 ...
 
 

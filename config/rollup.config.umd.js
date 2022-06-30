@@ -21,11 +21,11 @@ config.external.forEach(key => globals[key] = key);
 module.exports = {
   input: paths.input,
   output: {
+    name: paths.packageName,
     file: paths.output(moduleType),
     format: 'umd',
     // When export and export default are not used at the same time, set legacy to true.
     // legacy: true,
-    name: config.name,
     globals,
     banner: config.banner,
   },

@@ -27,20 +27,22 @@ const getCompiler = (opt = {
     }
   }
 }) => typescript(opt);
-exports.name = pkg.name;
 exports.banner = banner;
 exports.getCompiler = getCompiler;
 exports.external = ['vue', 'react'];
 const compilePaths = {
   core: {
+    packageName: pkg.name,
     input: 'src/index.ts',
     output: suffix => `dist/${pkg.name}.${suffix}.js`,
   },
   vue: {
+    packageName: 'VueHook',
     input: 'src/predefine/VueHook.ts',
     output: suffix => `dist/hooks/vuehook.${suffix}.js`,
   },
   react: {
+    packageName: 'ReactHook',
     input: 'src/predefine/ReactHook.ts',
     output: suffix => `dist/hooks/reacthook.${suffix}.js`,
   }
