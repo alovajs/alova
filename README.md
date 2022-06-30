@@ -192,6 +192,7 @@ const alovaInstance = createAlova({
 
 ### 创建请求方法对象
 在`Alova`中，每个请求都对应一个method对象，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据、请求防抖等请求行为参数。`Method`对象的创建也类似`axios`的请求发送函数。
+
 ```javascript
 // 创建一个Get对象，描述一次Get请求的信息
 const todoListGetter = alova.Get('/todo-list', {
@@ -222,6 +223,7 @@ const createTodoPoster = alova.Post('/create-todo',
   }
 );
 ```
+> ⚠️⚠️⚠️注意：`Method`对象里只是保存了请求所需要的信息，但它不会发出请求，而是需要通过`use hook`发送请求，这点与`axios`的方法不同。
 
 ### 请求方法类型
 `Alova`提供了包括GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH七种请求方法的抽象对象，具体的使用方式可以阅读[进阶-请求方法详解](#请求方法详解)。
