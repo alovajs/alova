@@ -112,27 +112,6 @@ const alovaInstance = createAlova({
 });
 ```
 
-### 设置请求超时时间
-以下为全局设置请求超时的方法，所有由`alova`创建的`Method`对象都会继承该设置。
-```javascript
-const alovaInstance = createAlova({
-  // 省略其他参数...
-
-  // 请求超时时间，单位为毫秒，默认为0，表示永不超时
-  timeout: 50000,
-});
-```
-
-如果需要请求级别的请求超时时间，你也可以在创建请求方法对象时覆盖全局`timeout`参数。
-```javascript
-const todoListGetter = alova.Get('/todo-list', {
-  // 省略其他参数...
-
-  // 请求级别的请求超时时间
-  timeout: 10000,
-});
-```
-
 
 ### 设置全局请求拦截器
 有时候我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，我们可以设置在创建`Alova`实例时指定全局的请求拦截器，这也与`axios`相似。
@@ -228,11 +207,32 @@ const createTodoPoster = alova.Post('/create-todo',
 ### 请求方法类型
 `Alova`提供了包括GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH七种请求方法的抽象对象，具体的使用方式可以阅读[进阶-请求方法详解](#请求方法详解)。
 
+### 设置请求超时时间
+`alova`提供了全局和请求级的超时时间设置，全局设置请求超时后，所有由`alova`创建的`Method`对象都会继承该设置。
+```javascript
+// 全局设置请求超时时间
+const alovaInstance = createAlova({
+  // 省略其他参数...
+
+  // 请求超时时间，单位为毫秒，默认为0，表示永不超时
+  timeout: 50000,
+});
+```
+
+在创建请求方法对象时设置请求级别的请求超时时间，它将覆盖全局的`timeout`参数。
+```javascript
+// 请求级别的请求超时时间
+const todoListGetter = alova.Get('/todo-list', {
+  // 省略其他参数...
+
+  timeout: 10000,
+});
+```
+
 ### 为响应数据设置保鲜时间
 有些接口在短时间内可能会频繁重复请求，我们可以为它们的响应数据设置保鲜来重复利用之前请求的数据，即内存临时缓存响应数据，这样做既减少了服务器压力，又可以省去用户等待的时间。默认只有`alova.Get`会带有300000ms(5分钟)的响应数据保鲜时间，开发者也可以自定义设置响应保鲜时间。
 
 > ⚠️⚠️⚠️响应数据缓存的key：是由method实例的请求方法(method)、请求地址(url)、请求头参数(headers)、url参数(params)、请求体参数(requestBody)组合作为唯一标识，任意一个位置不同都将被当做不同的key。
-
 
 以下是全局设置响应保鲜时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。
 ```javascript
