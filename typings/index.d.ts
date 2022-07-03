@@ -46,19 +46,25 @@ type CommonMethodParameters = {
   data?: RequestBody,
 }
 
-// 局部的请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
-// 时间为毫秒，小于等于0不缓存，Infinity为永不过期
-// 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存时间
-type DurationSetter<T> = number | ((data: T, headers: Headers, method: MethodType) => number);
+type CacheMode = 0 | 1 | 2;
+
+// 请求缓存设置
+// expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
+// mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
+// 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存设置
+type CacheConfigParam = number | {
+  expire: number,
+  mode: CacheMode,
+}
+type CacheConfigSetting<T> = CacheConfigParam | ((data: T, headers: Headers, method: MethodType) => CacheConfigParam);
 export type MethodConfig<R, T> = {
   params?: Record<string, any>,
   headers?: Record<string, any>,
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
   timeout?: number,    // 当前中断时间
-  staleTime?: DurationSetter<T>,   // 响应数据在保鲜时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不保鲜
+  cache?: CacheConfigSetting<T>,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不保鲜
   enableDownload?: boolean,   // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   enableUpload?: boolean,   // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
-  persistTime?: DurationSetter<T>,      // 持久化响应数据的时间，有持久化数据时会先把这些数据赋值给data，再进行请求
   transformData?: (data: T, headers: Headers) => R,
 };
 
@@ -97,18 +103,16 @@ export interface AlovaOptions<S, E> {
 
   // 请求超时时间
   timeout?: number,
-
-  // 请求缓存时间，如缓存时间大于0则使用url+参数的请求将首先返回缓存数据
-  // 时间为秒，小于等于0不缓存，Infinity为永不过期
+  
+  // 全局的请求缓存设置
+  // expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
+  // mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
+  // 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存设置
   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
-  // 也可以设置函数，参数为responsed转化后的返回数据和headers对象，返回缓存时间
-  staleTime?: DurationSetter<any>,
-
-  // 持久化响应数据的时间，有持久化数据时会先把这些数据赋值给data，再进行请求
-  persistTime?: DurationSetter<any>,
+  cache?: CacheConfigSetting<any>,
 
   // 持久化缓存接口，用于静默请求、响应数据持久化等
-  storage?: Storage,
+  storageAdapter?: Storage,
 
   // 全局的请求前置钩子
   beforeRequest?: (config: RequestConfig<any, any>) => RequestConfig<any, any> | void,
@@ -117,6 +121,14 @@ export interface AlovaOptions<S, E> {
   // 如果正常响应的钩子抛出错误也将进入响应失败的钩子函数
   responsed?: ResponsedHandler | [ResponsedHandler, ResponseErrorHandler],
 }
+
+/** 三种缓存模式 */
+// 只在内存中缓存
+export declare const MEMORY: number;
+// 缓存会持久化，但当内存中没有缓存时，持久化缓存只会作为响应数据的占位符，且还会发送请求更新缓存
+export declare const STORAGE_PLACEHOLDER: number;
+// 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
+export declare const STORAGE_RESTORE: number;
 
 
 // methods

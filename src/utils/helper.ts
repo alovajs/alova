@@ -20,7 +20,7 @@ export const self = <T>(arg: T) => arg;
  */
 export function key<S, E, R, T>(methodInstance: Method<S, E, R, T>) {
   const { type, url, requestBody } = methodInstance;
-  const { params, headers } = methodInstance.config
+  const { params, headers } = methodInstance.config;
   return JSONStringify([
     type,
     url,
