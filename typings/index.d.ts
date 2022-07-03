@@ -54,7 +54,7 @@ type CacheMode = 0 | 1 | 2;
 // 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存设置
 type CacheConfigParam = number | {
   expire: number,
-  mode: CacheMode,
+  mode?: CacheMode,
 }
 type CacheConfigSetting<T> = CacheConfigParam | ((data: T, headers: Headers, method: MethodType) => CacheConfigParam);
 export type MethodConfig<R, T> = {
