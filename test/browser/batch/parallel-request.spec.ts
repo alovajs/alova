@@ -75,7 +75,7 @@ describe('ParallelRequest', () => {
     }, 1000);
   });
 
-  test('parallel request with `all` function', done => {
+  test('parallel request with `all` function but one of them throws error', done => {
     const alova = getInstance();
     const Get = alova.Get<Result>('/unit-test-404');
     const Post = alova.Post<Result<number>>('/unit-test');
@@ -101,8 +101,8 @@ describe('ParallelRequest', () => {
 
     // 即使不需要同步发起请求，只要三个请求有响应即可触发一次success
     setTimeout(() => {
-      firstState.send();
-      thirdState.send();
+      firstState.send().catch(() => {});
+      thirdState.send().catch(() => {});
       setTimeout(secondState.send, 500);
     }, 1000);
   });

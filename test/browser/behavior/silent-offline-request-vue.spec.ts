@@ -148,7 +148,7 @@ describe('use useRequest to send silent request', function() {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeNull();
-    send();
+    send().catch(() => {});
   });
 
   test('should push to localStorage instead send request when network offline', async () => {

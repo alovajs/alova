@@ -1,7 +1,7 @@
 import Method from '../methods/Method';
 import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
-import { isFn } from '../utils/helper';
+import { isFn, noop } from '../utils/helper';
 import { getContext } from '../utils/variables';
 import { RequestHookConfig } from '../../typings';
 
@@ -18,13 +18,14 @@ export default function useRequest<S, E, R, T>(methodHandler: Method<S, E, R, T>
     originalState,
     responser,
     setAbort
-  ) => immediate && setAbort(useHookToSendRequest(    // 将控制器传出去供使用者调用
-    methodInstance,
-    originalState,
-    responser,
-    [],   // 只有调用send的时候才会有参数传入
-    !!force
-  ).abort), methodInstance, initialData);
+  ) => {
+    if (immediate) {
+      const { abort, responseHandlePromise } = useHookToSendRequest(methodInstance, originalState, responser, [], !!force);
+      // 将控制器传出去供使用者调用
+      setAbort(abort);
+      responseHandlePromise.catch(noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
+    }
+  }, methodInstance, initialData);
   
   return {
     ...props,
