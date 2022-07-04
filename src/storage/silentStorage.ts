@@ -1,6 +1,6 @@
 import { SerializedMethod, Storage } from '../../typings';
 import { noop } from '../utils/helper';
-import { JSONParse, JSONStringify, undefinedValue } from '../utils/variables';
+import { JSONParse, JSONStringify, nullValue, undefinedValue } from '../utils/variables';
 
 
 const silentRequestStorageKey = '__$$a_sreqssk$$__';
@@ -17,7 +17,7 @@ export function pushSilentRequest(namespace: string, key: string, config: Record
   key = '__$$sreq$$__' + namespace + key;
   storage.setItem(key, JSONStringify(config));
   const storageKeys = JSONParse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
-  storageKeys[key] = null;
+  storageKeys[key] = nullValue;
   storage.setItem(namespacedSilentStorageKey, JSONStringify(storageKeys));
 }
 

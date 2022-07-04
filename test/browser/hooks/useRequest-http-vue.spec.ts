@@ -2,6 +2,7 @@ import {
   createAlova,
   useRequest,
   GlobalFetch,
+  cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
@@ -66,14 +67,7 @@ describe('use useRequet hook to send GET with vue', function() {
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });
         return result.data;
       },
-      staleTime: (result, headers, method) => {
-        expect(result.code).toBe(200);
-        expect(result.data.path).toBe('/unit-test');
-        expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-        expect(headers).toBeInstanceOf(Object);
-        expect(method).toBe('GET');
-        return 100 * 1000;
-      },
+      localCache: 100 * 1000,
     });
     const {
       loading,
@@ -100,16 +94,18 @@ describe('use useRequet hook to send GET with vue', function() {
       expect(cacheData.path).toBe('/unit-test');
       expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
       done();
-    }).error(err => {}).complete(() => {});
+    }).error(() => {}).complete(() => {});
   });
 
   test('send get with request error', done => {
     const alova = getInstance(undefined, undefined, error => {
       console.log('error callback', error.message);
-      expect(error.message).toMatch(/Not Found/);
+      expect(error.message).toMatch(/404/);
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-404', {
-      staleTime: 100000
+      localCache: {
+        expire: 100 * 1000,
+      }
     });
     const {
       loading,
@@ -215,12 +211,85 @@ describe('use useRequet hook to send GET with vue', function() {
       done();
     });
   });
+
+  test('it can pass custom params when call `send` function, and the function will return a Promise instance', async () => {
+    const alova = getInstance();
+    const getGetter = (index: number) => alova.Get<GetData, Result<true>>('/unit-test', {
+      timeout: 10000,
+      transformData: ({ data }) => data,
+      params: {
+        index,
+      }
+    });
+
+    const {
+      data,
+      send,
+      responser
+    } = useRequest((index: number) => getGetter(index), {
+      immediate: false,
+    });
+    responser.success((data, index) => {
+      console.log('success passed params', index);
+      expect(data.path).toBe('/unit-test');
+      expect(index.toString()).toMatch(/3|5/);
+    }).complete((index) => {
+      console.log('complete passed params', index);
+      expect(index.toString()).toMatch(/3|5/);
+    });
+
+    // 延迟一会儿发送请求
+    await new Promise(resolve => setTimeout(resolve, 500));
+    let rawData = await send(3);
+    expect(rawData.path).toBe('/unit-test');
+    expect(rawData.params.index).toEqual('3');
+    await new Promise(resolve => setTimeout(resolve, 500)); // 等待响应
+    expect(data.value.params.index).toBe('3');
+    
+    rawData = await send(5);
+    expect(rawData.params.index).toEqual('5');
+    await new Promise(resolve => setTimeout(resolve, 500)); // 等待响应
+    expect(data.value.params.index).toBe('5');
+  });
+
+  test('should throw a request error when request error at calling `send` function', async () => {
+    const alova = getInstance();
+    const getGetter = (index: number) => alova.Get<GetData, Result<true>>('/unit-test-404', {
+      transformData: ({ data }) => data,
+      params: {
+        index,
+      }
+    });
+
+    const {
+      send,
+      responser
+    } = useRequest((index: number) => getGetter(index), {
+      immediate: false,
+    });
+    responser.error((err, index) => {
+      console.log('error passed params', index);
+      expect(err.message).toMatch(/404/);
+      expect(index.toString()).toMatch(/3|5/);
+    }).complete((index) => {
+      expect(index.toString()).toMatch(/3|5/);
+    });
+
+    // 延迟一会儿发送请求
+    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const data = await send(3);
+      expect(data.path).toBe('/unit-test');
+      expect(data.params.index).toEqual('3');
+    } catch (err: any) {
+      expect(err.message).toMatch(/404/);
+    }
+  });
 });
 
 
 // 其他请求方式测试
 describe('Test other methods without GET', function() {
-  // this.timeout(5000);
   test('send POST', done => {
     const alova = getInstance(
       config => {
@@ -253,15 +322,10 @@ describe('Test other methods without GET', function() {
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         return data;
       },
-      staleTime: ({ code, data }, headers, method) => {
-        expect(code).toBe(200);
-        expect(data.path).toBe('/unit-test');
-        expect(data.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(headers).toBeInstanceOf(Object);
-        expect(method).toBe('POST');
-        return 100 * 1000;
-      },
+      localCache: {
+        expire: 100 * 1000,
+        mode: cacheMode.MEMORY,
+      }
     });
     const {
       loading,
@@ -318,15 +382,7 @@ describe('Test other methods without GET', function() {
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         return data;
       },
-      staleTime: ({ code, data }, headers, method) => {
-        expect(code).toBe(200);
-        expect(data.path).toBe('/unit-test');
-        expect(data.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(headers).toBeInstanceOf(Object);
-        expect(method).toBe('DELETE');
-        return 100 * 1000;
-      },
+      localCache: 100 * 1000,
     });
     const {
       loading,
@@ -386,15 +442,7 @@ describe('Test other methods without GET', function() {
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         return data;
       },
-      staleTime: ({ code, data }, headers, method) => {
-        expect(code).toBe(200);
-        expect(data.path).toBe('/unit-test');
-        expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
-        expect(data.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(headers).toBeInstanceOf(Object);
-        expect(method).toBe('PUT');
-        return 100 * 1000;
-      },
+      localCache: 100 * 1000,
     });
     const {
       loading,

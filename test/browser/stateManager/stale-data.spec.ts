@@ -2,7 +2,7 @@ import {
   createAlova,
   useRequest,
   GlobalFetch,
-  staleData,
+  invalidateCache,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
@@ -39,7 +39,7 @@ function getInstance(
 }
 
 describe('invalitate cached response data', () => {
-  test('It will use the default stale time when not set the stale time with `GET`', async () => {
+  test('It will use the default cache time when not set the cache time with `GET`', async () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
       transformData: data => data.data,
@@ -53,14 +53,14 @@ describe('invalitate cached response data', () => {
   test('the cached response data should be removed', async () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
-      staleTime: 100000,
+      localCache: 100000,
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);
     await new Promise(resolve => firstState.responser.success(resolve));
     let cachedData = getResponseCache(alova.id, key(Get));
     expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    staleData(Get);
+    invalidateCache(Get);
     cachedData = getResponseCache(alova.id, key(Get));
     expect(cachedData).toBeUndefined();
   });

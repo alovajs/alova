@@ -61,7 +61,7 @@ describe('useRequet hook with react', function() {
     const Get = alova.Get<GetData, Result<true>>('/unit-test', {
       timeout: 10000,
       transformData: ({ data }) => data,
-      staleTime: 100 * 1000,
+      localCache: 100 * 1000,
     });
     function Page() {
       const {
@@ -90,7 +90,7 @@ describe('useRequet hook with react', function() {
     const Get = alova.Get<GetData, Result<true>>('/unit-test', {
       timeout: 10000,
       transformData: ({ data }) => data,
-      staleTime: 100 * 1000,
+      localCache: 100 * 1000,
     });
     function Page() {
       const {

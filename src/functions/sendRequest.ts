@@ -2,8 +2,8 @@ import { RequestConfig, ResponsedHandler, ResponseErrorHandler } from '../../typ
 import Method from '../methods/Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { getContext, getOptions, promiseReject, promiseResolve } from '../utils/variables';
-import { key, noop, self } from '../utils/helper';
+import { getContext, getOptions, promiseReject, promiseResolve, undefinedValue } from '../utils/variables';
+import { getLocalCacheConfigParam, isFn, key, noop, self } from '../utils/helper';
 
 
 /**
@@ -24,8 +24,7 @@ import { key, noop, self } from '../utils/helper';
     beforeRequest = noop,
     responsed = self,
     requestAdapter,
-    staleTime = 0,
-    persistTime = 0,
+    localCache = 0,
   } = getOptions(methodInstance);
   const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
@@ -54,9 +53,9 @@ import { key, noop, self } from '../utils/helper';
   };
   requestConfig = beforeRequest(requestConfig) || requestConfig;
   const {
-    staleTime: staleTimeFinal = staleTime,
-    persistTime: persistTimeFinal = persistTime,
-  } = requestConfig;
+    e: expireMilliseconds, 
+    s: toStorage
+  } = getLocalCacheConfigParam(undefinedValue, requestConfig.localCache ?? localCache);
 
   // 将params对象转换为get字符串
   const {
@@ -79,7 +78,6 @@ import { key, noop, self } from '../utils/helper';
   // 请求数据
   const ctrls = requestAdapter(baseURLWithSlash + urlWithParams, requestConfig, data);
 
-  const isFn = (fn: any) => typeof fn === 'function';
   let responsedHandler: ResponsedHandler = noop;
   let responseErrorHandler: ResponseErrorHandler = noop;
   if (isFn(responsed)) {
@@ -102,34 +100,21 @@ import { key, noop, self } from '../utils/helper';
     ]).then(([rawResponse, headers]) => {
       try {
         let responsedHandlePayload = responsedHandler(rawResponse as any);
-        type NonVoidable<T> = T extends void ? never : T;
-        const getStaleTime = (data: any, h: NonVoidable<typeof headers>) => 
-          typeof staleTimeFinal === 'function' 
-          ? staleTimeFinal(data, h, type) 
-          : staleTimeFinal;
-        const getPersistTime = (data: any, h: NonVoidable<typeof headers>) => 
-          typeof persistTimeFinal === 'function' 
-          ? persistTimeFinal(data, h, type) 
-          : persistTimeFinal;
+        
         if (responsedHandlePayload instanceof Promise) {
           return responsedHandlePayload.then(data => {
             if (headers) {
-              const staleMilliseconds = getStaleTime(data, headers);
               data = transformData(data, headers);
-              setResponseCache(id, methodKey, data, staleMilliseconds);
-              // 当persist开启时将响应数据存入缓存，以便后续调用（已在saveResponse中判断）
-              const persistMilliseconds = getPersistTime(data, headers);
-              persistResponse(id, methodKey, data, persistMilliseconds, storage);
+              setResponseCache(id, methodKey, data, expireMilliseconds);
+              toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage);
             }
             return data;
           });
         } else {
           if (headers) {
-            const staleMilliseconds = getStaleTime(responsedHandlePayload, headers);
             responsedHandlePayload = transformData(responsedHandlePayload, headers);
-            setResponseCache(id, methodKey, responsedHandlePayload, staleMilliseconds);
-            const persistMilliseconds = getPersistTime(data, headers);
-            persistResponse(id, methodKey, responsedHandlePayload, persistMilliseconds, storage);
+            setResponseCache(id, methodKey, responsedHandlePayload, expireMilliseconds);
+            toStorage && persistResponse(id, methodKey, responsedHandlePayload, expireMilliseconds, storage);
           }
           return responsedHandlePayload;
         }

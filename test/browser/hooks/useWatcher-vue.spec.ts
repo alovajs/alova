@@ -25,7 +25,7 @@ function getInstance(
     timeout: 3000,
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
-    storage: localStorage,
+    storageAdapter: localStorage,
     beforeRequest(config) {
       beforeRequestExpect && beforeRequestExpect(config);
       return config;
@@ -64,7 +64,7 @@ describe('use useController hook to send GET with vue', function() {
           'Content-Type': 'application/json',
         },
         transformData: result => result.data,
-        staleTime: 100 * 1000,
+        localCache: 100 * 1000,
       });
       return get;
     }, [mutateNum, mutateStr]);
@@ -135,7 +135,7 @@ describe('use useController hook to send GET with vue', function() {
           'Content-Type': 'application/json',
         },
         transformData: result => result.data,
-        staleTime: 100 * 1000,
+        localCache: 100 * 1000,
       });
       return get;
     }, [mutateNum, mutateStr], { debounce: 2000 });
@@ -194,7 +194,7 @@ describe('use useController hook to send GET with vue', function() {
           'Content-Type': 'application/json',
         },
         transformData: result => result.data,
-        staleTime: 0,
+        localCache: 0,
       });
       return get;
     }, [mutateNum, mutateStr], { immediate: true });
@@ -253,7 +253,7 @@ describe('use useController hook to send GET with vue', function() {
           'Content-Type': 'application/json',
         },
         transformData: result => result.data,
-        staleTime: 0,
+        localCache: 0,
       });
       return get;
     }, [mutateNum, mutateStr], { immediate: true, debounce: 1000 });

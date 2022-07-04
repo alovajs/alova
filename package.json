@@ -10,7 +10,7 @@
   "homepage": "https://github.com/JOU-amjs/alova",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest --coverage",
+    "test": "jest",
     "release": "npm test && npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags",
     "lint": "eslint -c .eslintrc.js 'src/**/*.ts'",
     "lint:fix": "eslint -c .eslintrc.js 'src/**/*.ts' --fix",

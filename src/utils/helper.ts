@@ -1,9 +1,11 @@
 import {
+  LocalCacheConfig,
+  LocalCacheConfigParam,
   SerializedMethod
 } from '../../typings';
 import Alova from '../Alova';
 import Method from '../methods/Method';
-import { clearTimeoutTimer, JSONStringify, setTimeoutFn } from './variables';
+import { clearTimeoutTimer, getConfig, getOptions, JSONStringify, MEMORY, nullValue, setTimeoutFn, STORAGE_PLACEHOLDER, STORAGE_RESTORE, undefinedValue } from './variables';
 
 /**
  * 空函数，做兼容处理
@@ -13,6 +15,20 @@ export function noop() {}
 // 返回自身函数，做兼容处理
 export const self = <T>(arg: T) => arg;
 
+/**
+ * 判断参数是否为函数
+ * @param fn 任意参数
+ * @returns 该参数是否为函数
+ */
+export const isFn = (arg: any) => typeof arg === 'function';
+
+/**
+ * 判断参数是否为数字
+ * @param arg 任意参数
+ * @returns 该参数是否为数字
+ */
+export const isNumber = (arg: any) => typeof arg === 'number' && !isNaN(arg);
+
 
 /**
  * 获取请求方式的key值
@@ -20,7 +36,7 @@ export const self = <T>(arg: T) => arg;
  */
 export function key<S, E, R, T>(methodInstance: Method<S, E, R, T>) {
   const { type, url, requestBody } = methodInstance;
-  const { params, headers } = methodInstance.config;
+  const { params, headers } = getConfig(methodInstance);
   return JSONStringify([
     type,
     url,
@@ -42,20 +58,20 @@ export function serializeMethod<S, E, R, T>(methodInstance: Method<S, E, R, T>) 
     config,
     requestBody
   } = methodInstance;
-  const {
-    params,
-    headers,
-    timeout,
-  } = config;
+
+  const serializingConfig: Record<string, any> = {};
+  const serializingConfigKeys = ['params', 'headers', 'timeout', 'localCache'] as const;
+  type SerializingConfigKey = typeof serializingConfigKeys[number];
+  Object.keys(config).forEach(key => {
+    if (serializingConfigKeys.includes(key as SerializingConfigKey)) {
+      serializingConfig[key] = config[key as SerializingConfigKey];
+    }
+  });
 
   return {
     type,
     url,
-    config: {
-      params,
-      headers,
-      timeout,
-    },
+    config: serializingConfig,
     requestBody
   };
 }
@@ -84,7 +100,7 @@ export function deserializeMethod<S, E>({
  * @returns 延迟后的回调函数
  */
 export function debounce(fn: Function, delay: number, enable: () => boolean) {
-  let timer: any = null;
+  let timer: any = nullValue;
   return function(this: any, ...args: any[]) {
     const bindFn = fn.bind(this, ...args);
     if (!enable()) {
@@ -95,5 +111,35 @@ export function debounce(fn: Function, delay: number, enable: () => boolean) {
       clearTimeoutTimer(timer);
     }
     timer = setTimeoutFn(bindFn, delay);
+  };
+}
+
+
+/**
+ * 获取缓存的配置参数，固定返回{ e: number, s: boolean }格式的对象
+ * e为expire缩写，表示缓存失效时间，单位为毫秒
+ * s为storage缩写，是否存储到本地
+ * @param localCache 本地缓存参数
+ * @returns 统一的缓存参数对象
+ */
+export function getLocalCacheConfigParam<S, E, R, T>(methodInstance?: Method<S, E, R, T>, localCache?: LocalCacheConfigParam) {
+  const _localCache = localCache !== undefinedValue
+    ? localCache 
+    : methodInstance 
+      ? (getOptions(methodInstance).localCache || getConfig(methodInstance).localCache) 
+      : undefinedValue;
+  const defaultCacheMode = MEMORY;
+  if (isNumber(_localCache)) {
+    return {
+      e: _localCache as number,
+      m: defaultCacheMode,
+      s: false,
+    }
+  }
+  const mode = (_localCache as LocalCacheConfig).mode || defaultCacheMode;
+  return {
+    e: (_localCache as LocalCacheConfig).expire || 0,
+    m: mode,
+    s: [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode),
   };
 }

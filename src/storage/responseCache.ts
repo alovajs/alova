@@ -36,17 +36,17 @@ export function getResponseCache(namespace: string, key: string) {
  * @param baseURL 基础URL
  * @param key 请求key值
  * @param data 缓存数据
- * @param staleMilliseconds 过期时间，单位毫秒
+ * @param cacheMilliseconds 过期时间，单位毫秒
  */
-export function setResponseCache(namespace: string, key: string, data: any, staleMilliseconds = 0) {
+export function setResponseCache(namespace: string, key: string, data: any, cacheMilliseconds = 0) {
   // 小于0则不缓存了
-  if (staleMilliseconds <= 0 || !data) {
+  if (cacheMilliseconds <= 0 || !data) {
     return;
   }
   const cachedResponse = responseCache[namespace] = responseCache[namespace] || {};
   cachedResponse[key] = [
     data,
-    staleMilliseconds === Infinity ? undefinedValue : new Date(getTime() + staleMilliseconds),
+    cacheMilliseconds === Infinity ? undefinedValue : new Date(getTime() + cacheMilliseconds),
   ];
 }
 

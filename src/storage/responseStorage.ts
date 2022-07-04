@@ -1,7 +1,8 @@
 import { Storage } from '../../typings';
-import { getTime, JSONParse, JSONStringify } from '../utils/variables';
+import { getTime, JSONParse, JSONStringify, nullValue } from '../utils/variables';
 
 const responseStorageKey = '__$$aresp$$__';
+const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKey + namespace + key;
 /**
  * 持久化响应数据
  * @param namespace 命名空间
@@ -15,10 +16,9 @@ export function persistResponse(namespace: string, key: string, response: any, p
   if (persistMilliseconds <= 0 || !response) {
     return;
   }
-  const namespacedResponseStorageKey = responseStorageKey + namespace + key;
-  storage.setItem(namespacedResponseStorageKey, JSONStringify([
+  storage.setItem(buildNamespacedStorageKey(namespace, key), JSONStringify([
     response,
-    persistMilliseconds === Infinity ? null : (getTime() + persistMilliseconds)
+    persistMilliseconds === Infinity ? nullValue : (getTime() + persistMilliseconds)
   ]));
 }
 
@@ -30,7 +30,7 @@ export function persistResponse(namespace: string, key: string, response: any, p
  * @param storage 存储对象
  */
 export function getPersistentResponse(namespace: string, key: string, storage: Storage) {
-  const namespacedResponseStorageKey = responseStorageKey + namespace + key;
+  const namespacedResponseStorageKey = buildNamespacedStorageKey(namespace, key);
   const storageStr = storage.getItem(namespacedResponseStorageKey);
   if (storageStr) {
     const [ response, expireTimestamp ] = JSONParse(storageStr) as [ any, number | null ];
@@ -41,4 +41,14 @@ export function getPersistentResponse(namespace: string, key: string, storage: S
     // 如果过期，则删除缓存
     storage.removeItem(namespacedResponseStorageKey);
   }
+}
+
+/**
+ * 删除存储的响应数据
+ * @param namespace 命名空间
+ * @param key 存储的key
+ * @param storage 存储对象
+ */
+export function removePersistentResponse(namespace: string, key: string, storage: Storage) {
+  storage.removeItem(buildNamespacedStorageKey(namespace, key));
 }

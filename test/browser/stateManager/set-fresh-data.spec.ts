@@ -1,7 +1,7 @@
 import {
   createAlova,
   GlobalFetch,
-  setFreshData,
+  setCacheData,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
@@ -41,10 +41,10 @@ describe('manual set cache response data', function() {
   test('the cache response data should be saved', () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
-      staleTime: 100000,
+      localCache: 100 * 1000,
       transformData: data => data.data,
     });
-    setFreshData(Get, {
+    setCacheData(Get, {
       path: '/unit-test',
       method: 'GET',
       params: {

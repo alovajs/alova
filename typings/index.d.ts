@@ -46,23 +46,21 @@ type CommonMethodParameters = {
   data?: RequestBody,
 }
 
-type CacheMode = 0 | 1 | 2;
 
 // 请求缓存设置
 // expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
 // mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
-// 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存设置
-type CacheConfigParam = number | {
+type LocalCacheConfig = {
   expire: number,
-  mode?: CacheMode,
-}
-type CacheConfigSetting<T> = CacheConfigParam | ((data: T, headers: Headers, method: MethodType) => CacheConfigParam);
+  mode?: number,
+};
+type LocalCacheConfigParam = number | LocalCacheConfig;
 export type MethodConfig<R, T> = {
   params?: Record<string, any>,
   headers?: Record<string, any>,
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
   timeout?: number,    // 当前中断时间
-  cache?: CacheConfigSetting<T>,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不保鲜
+  localCache?: LocalCacheConfigParam,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
   enableDownload?: boolean,   // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   enableUpload?: boolean,   // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   transformData?: (data: T, headers: Headers) => R,
@@ -104,12 +102,11 @@ export interface AlovaOptions<S, E> {
   // 请求超时时间
   timeout?: number,
   
-  // 全局的请求缓存设置
+  // 全局的请求本地缓存设置
   // expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
   // mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
-  // 也可以设置函数，参数为全局responsed转化后的返回数据和headers对象，返回缓存设置
   // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
-  cache?: CacheConfigSetting<any>,
+  localCache?: LocalCacheConfigParam,
 
   // 持久化缓存接口，用于静默请求、响应数据持久化等
   storageAdapter?: Storage,
@@ -123,12 +120,14 @@ export interface AlovaOptions<S, E> {
 }
 
 /** 三种缓存模式 */
-// 只在内存中缓存
-export declare const MEMORY: number;
-// 缓存会持久化，但当内存中没有缓存时，持久化缓存只会作为响应数据的占位符，且还会发送请求更新缓存
-export declare const STORAGE_PLACEHOLDER: number;
-// 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
-export declare const STORAGE_RESTORE: number;
+export declare const cacheMode: {
+  // 只在内存中缓存，默认是此选项
+  MEMORY: number,
+  // 缓存会持久化，但当内存中没有缓存时，持久化缓存只会作为响应数据的占位符，且还会发送请求更新缓存
+  STORAGE_PLACEHOLDER: number,
+  // 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
+  STORAGE_RESTORE: number,
+};
 
 
 // methods
@@ -185,9 +184,9 @@ interface Ref<T = any> {
 type Dispatch<A> = (value: A) => void;
 type SetStateAction<S> = S | ((prevState: S) => S);
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
-type SuccessHandler<R> = (data: R, requestId: number) => void;
-type ErrorHandler = (error: Error, requestId: number) => void;
-type CompleteHandler = (requestId: number) => void;
+type SuccessHandler<R> = (data: R, ...args: any[]) => void;
+type ErrorHandler = (error: Error, ...args: any[]) => void;
+type CompleteHandler = (...args: any[]) => void;
 interface Responser<R> {
   successHandlers: SuccessHandler<R>[];
   errorHandlers: ErrorHandler[];
@@ -206,7 +205,7 @@ type UseHookReturnType<R, S> = FrontRequestState<
 > & {
   responser: Responser<R>;
   abort: () => void;
-  send: () => void;
+  send: (...args: any[]) => Promise<R>;
 }
 type UseFetchHookReturnType<S, E> = {
   fetching: UseHookReturnType<any, S>['loading'];
@@ -219,15 +218,15 @@ type UseFetchHookReturnType<S, E> = {
 
 // 导出类型
 export declare function createAlova<S, E>(options: AlovaOptions<S, E>): Alova<S, E>;
-export declare  function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, config?: RequestHookConfig): UseHookReturnType<R, S>;
+export declare  function useRequest<S, E, R, T>(methodHandler: Method<S, E, R, T> | (() => Method<S, E, R, T>), config?: RequestHookConfig): UseHookReturnType<R, S>;
 export declare function useWatcher<S, E, R, T>(handler: () => Method<S, E, R, T>, watchingStates: E[], config?: WatcherHookConfig): UseHookReturnType<R, S>;
 export declare function useFetcher<S, E>(alova: Alova<S, E>): UseFetchHookReturnType<S, E>;
-export declare function staleData<S, E, R, T>(methodInstance: Method<S, E, R, T>): void;
+export declare function invalidateCache<S, E, R, T>(methodInstance: Method<S, E, R, T>): void;
 // 以支持React和Vue的方式定义类型
 type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
 export declare function updateState<S, E, R, T>(methodInstance: Method<S, E, R, T>, handleUpdate: (data: OriginalType<R, S>) => void): void;
 // 手动设置缓存响应数据
-export declare function setFreshData<S, E, R, T>(methodInstance: Method<S, E, R, T>, data: R): void;
+export declare function setCacheData<S, E, R, T>(methodInstance: Method<S, E, R, T>, data: R): void;
 
 // 混合多个响应器，并在这些响应器都成功时调用成功回调，如果其中一个错误则调用失败回调
 // 类似Promise.all

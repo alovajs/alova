@@ -53,7 +53,7 @@ describe('update cached response data by user', function() {
   test('the cached response data should be changed and the screen should be update', async () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
-      staleTime: 100000,
+      localCache: 100000,
       transformData: data => data.data,
     });
 
@@ -80,7 +80,7 @@ describe('update cached response data by user', function() {
   test('test update function with vue', async () => {
     const alova = getInstanceWithVue();
     const Get = alova.Get<GetData, Result>('/unit-test', {
-      staleTime: 100000,
+      localCache: 100000,
       transformData: data => data.data,
     });
     const { data, responser } = useRequest(Get);

@@ -50,7 +50,7 @@ describe('use useFetcher hook to fetch data', function() {
       transformData(result, _) {
         return result.data;
       },
-      staleTime: 100 * 1000,
+      localCache: 100 * 1000,
     });
 
     const Get1 = createGet({ a: '1', b: '2'});

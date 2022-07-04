@@ -148,18 +148,12 @@ export default {
   // The test environment that will be used for testing
   testEnvironment: "jsdom",
 
-  _testMatch: [
-    "**/?(*.)+(spec|test).[tj]s?(x)",
-    // "**/test/browser/hooks/useRequest-react.spec.ts(x)?"
+  testMatch: [
+    // "**/?(*.)+(spec|test).[tj]s?(x)",
+    "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?"
     // "**/test/browser/behavior/persist-response-vue.spec.ts"
-    // "**/test/browser/stateManager/stale-data.spec.ts(x)?"
+    // "**/test/browser/stateManager/invalidate-cache.spec.ts(x)?"
   ],
-  get testMatch() {
-    return this._testMatch;
-  },
-  set testMatch(value) {
-    this._testMatch = value;
-  },
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [

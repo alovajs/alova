@@ -6,13 +6,15 @@ import listenNetwork, { addAlova } from './network';
 export { default as useRequest } from './hooks/useRequest';
 export { default as useWatcher } from './hooks/useWatcher';
 export { default as useFetcher } from './hooks/useFetcher';
-export { default as staleData } from './functions/staleData';
+export { default as invalidateCache } from './functions/invalidateCache';
 export { default as updateState } from './functions/updateState';
-export { default as setFreshData } from './functions/setFreshData';
+export { default as setCacheData } from './functions/setCacheData';
 export { all } from './Responser';
 
 // 预定义的配置
 export { default as GlobalFetch } from './predefine/GlobalFetch';
+// 导出缓存模式
+export { cacheMode } from './utils/variables';
 
 
 /**

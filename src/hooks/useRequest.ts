@@ -1,16 +1,20 @@
 import Method from '../methods/Method';
 import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
-import { key } from '../utils/helper';
+import { isFn } from '../utils/helper';
 import { getContext } from '../utils/variables';
 import { RequestHookConfig } from '../../typings';
 
-export default function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, {
+export default function useRequest<S, E, R, T>(methodHandler: Method<S, E, R, T> | ((...args: any[]) => Method<S, E, R, T>), {
   force,
   immediate = true,
   initialData,
 }: RequestHookConfig = {}) {
-  const props = createRequestState<S, E, R>(getContext(methodInstance), (
+  // isFn封装后不能自动判断类型，需手动转
+  const methodInstance = isFn(methodHandler) 
+    ? (methodHandler as () => Method<S, E, R, T>)() 
+    : (methodHandler as Method<S, E, R, T>);
+  const props = createRequestState(getContext(methodInstance), (
     originalState,
     responser,
     setAbort
@@ -18,11 +22,17 @@ export default function useRequest<S, E, R, T>(methodInstance: Method<S, E, R, T
     methodInstance,
     originalState,
     responser,
-    force
-  ).abort), key(methodInstance), initialData);
-
+    [],   // 只有调用send的时候才会有参数传入
+    !!force
+  ).abort), methodInstance, initialData);
+  
   return {
     ...props,
-    send: () => props.send(methodInstance, !!force),
+    send: (...args: any[]) => {
+      const methodInstance = isFn(methodHandler) 
+        ? (methodHandler as (...args: any[]) => Method<S, E, R, T>)(...args) 
+        : (methodHandler as Method<S, E, R, T>);
+      return props.send(methodInstance, !!force, args);
+    },
   };
 }

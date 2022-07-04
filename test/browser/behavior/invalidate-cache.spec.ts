@@ -35,11 +35,11 @@ function getInstance(
   });
 }
 
-describe('stale data', function() {
-  test('should hit the stale data when re request the same url with the same arguments', async () => {
+describe('cache data', function() {
+  test('should hit the cache data when re request the same url with the same arguments', async () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
-      staleTime: 500,
+      localCache: 500,
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);
@@ -55,10 +55,10 @@ describe('stale data', function() {
     expect(thirdState.loading.value).toBe(true);    // 因为缓存已过期，所以会重新发起请求，loading会改变
   });
 
-  test('stale data wouldn\'t be invalid when set staleTime to `Infinity`', async () => {
+  test('cache data wouldn\'t be invalid when set cacheTime to `Infinity`', async () => {
     const alova = getInstance();
     const Get = alova.Get<GetData, Result>('/unit-test', {
-      staleTime: Infinity,
+      localCache: Infinity,
       transformData: data => data.data,
     });
     const firstState = useRequest(Get);

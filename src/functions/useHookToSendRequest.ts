@@ -6,16 +6,15 @@ import sendRequest from './sendRequest';
 import { FrontRequestState } from '../../typings';
 import { getStateCache } from '../storage/responseCache';
 import Responser, { runHandlers } from '../Responser';
-import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
+import { getConfig, getContext, nullValue, promiseReject, promiseResolve, setTimeoutFn, undefinedValue } from '../utils/variables';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
  * @param method 请求方法对象
  * @param originalState 原始状态
- * @param successHandlers 成功回调函数数组
- * @param errorHandlers 失败回调函数数组
- * @param completeHandlers 完成回调函数数组
- * @param force 是否强制发起请求
+ * @param responser 响应处理对象
+ * @param responserHandlerArgs 响应处理回调的参数，该参数由use hooks的send传入
+ * @param forceRequest 是否强制发起请求
  * @param updateCacheState 是否更新缓存状态，一般在useFetcher时设置为true
  * @returns 请求状态
  */
@@ -23,12 +22,13 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
   methodInstance: Method<S, E, R, T>,
   originalState: FrontRequestState,
   responser: Responser<R>,
+  responserHandlerArgs: any[] = [],
   forceRequest = false,
   updateCacheState = false
 ) {
   const { id, options, storage } = getContext(methodInstance);
   const { update } = options.statesHook;
-  const { silent, enableDownload, enableUpload } = methodInstance.config;
+  const { silent, enableDownload, enableUpload } = getConfig(methodInstance);
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const silentMode = silent && !updateCacheState;   // 在fetch数据时不能静默请求
   const methodKey = key(methodInstance);
@@ -39,23 +39,25 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
     completeHandlers,
     timer: requestId,
   } = responser;
-  
+
+  const runArgsHandlers = (handlers: Function[], ...args: any[]) => runHandlers(handlers, ...args, ...responserHandlerArgs, requestId);
   if (silentMode) {
     myAssert(!(methodInstance.requestBody instanceof FormData), 'FormData is not supported when silent is true');
     // 需要异步执行，同步执行会导致无法收集各类回调函数
     setTimeoutFn(() => {
-      runHandlers(successHandlers, undefined, requestId);
-      runHandlers(completeHandlers, requestId);
-    }, 0);
+      runArgsHandlers(successHandlers, undefinedValue);
+      runArgsHandlers(completeHandlers);
+    });
     
     // silentMode下，如果网络离线的话就不再实际请求了，而是将请求信息存入缓存
     if (!navigator.onLine) {
       pushSilentRequest(id, methodKey, serializeMethod(methodInstance), storage);
       return {
-        response: () => promiseResolve(null),
+        response: () => promiseResolve(nullValue),
         headers: () => promiseResolve({} as Headers),
         progress: noop,
         abort: noop,
+        responseHandlePromise: promiseResolve(nullValue),
       };
     }
   }
@@ -72,7 +74,7 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
     loading: true,
   }, originalState);
 
-  response()
+  const responseHandlePromise = response()
     .then(data => {
       if (!updateCacheState) {
         update({ data }, originalState);
@@ -85,9 +87,10 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
       // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
       if (!silentMode) {
         update({ loading: false }, originalState);
-        runHandlers(successHandlers, data, requestId);
-        runHandlers(completeHandlers, requestId);
+        runArgsHandlers(successHandlers, data);
+        runArgsHandlers(completeHandlers);
       }
+      return data;
     })
     .catch((error: Error) => {
       // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
@@ -98,14 +101,18 @@ import { getContext, promiseResolve, setTimeoutFn } from '../utils/variables';
       if (silentMode) {
         pushSilentRequest(id, methodKey, serializeMethod(methodInstance), storage);
       } else {
-        runHandlers(errorHandlers, error, requestId);
-        runHandlers(completeHandlers, requestId);
+        runArgsHandlers(errorHandlers, error);
+        runArgsHandlers(completeHandlers);
       }
+      return promiseReject(error);
     });
   
   if (!silentMode) {
     enableDownload && onDownload(downloading => update({ downloading }, originalState));
     enableUpload && onUpload(uploading => update({ uploading }, originalState));
   }
-  return ctrl;
+  return {
+    ...ctrl,
+    responseHandlePromise,
+  };
 }

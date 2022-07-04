@@ -1,4 +1,5 @@
 import { CompleteHandler, ErrorHandler, SuccessHandler } from '../typings';
+import { nullValue } from './utils/variables';
 
 export default class Responser<R> {
   public timer = 0;   // 请求计数器，用于记录本hook请求的次数，主要用途是并行请求时判定请求的次数
@@ -25,7 +26,8 @@ export default class Responser<R> {
  * @param handlers 处理函数数组
  * @param args 参数数组
  */
-export const runHandlers = (handlers: Function[], ...args: any[]) => handlers.forEach(handler => handler.apply(null, args));
+export const runHandlers = (handlers: Function[], ...args: any[]) => handlers.forEach(handler => handler.apply(nullValue, args));
+
 
 /**
  * 混合多个响应器，并在这些响应器都成功时调用成功回调，如果其中一个错误则调用失败回调
@@ -44,7 +46,8 @@ export function all<T extends unknown[] | []>(responsers: T) {
   const responserLen = responsers.length;
   const requestCollections: Record<string, [any[], number]> = {};
   for (let i = 0; i < responserLen; i++) {
-    (responsers as Responser<any>[])[i].success((data, requestId) => {
+    (responsers as Responser<any>[])[i].success((data, ...rest) => {
+      const requestId = rest.pop();
       const collectionItem = requestCollections[requestId] = requestCollections[requestId] || [[], 0];
       collectionItem[0][i] = data;
       collectionItem[1]++;
@@ -52,14 +55,15 @@ export function all<T extends unknown[] | []>(responsers: T) {
         runHandlers(successHandlers, collectionItem[0], requestId);
         runHandlers(completeHandlers, requestId);
       }
-    }).error((error, requestId) => {
+    }).error((error, ...rest: any[]) => {
+      const requestId = rest.pop();
       runHandlers(errorHandlers, error, requestId);
       runHandlers(completeHandlers, requestId);
     });
   }
 
   // 当成功或失败回调被调用时，将会清空requestCollections，保证requestCollections没有多余的记录
-  return combinedResponser.complete(requestId => {
-    delete requestCollections[requestId];
+  return combinedResponser.complete((...rest: any[]) => {
+    delete requestCollections[rest.pop()];
   });
 }
