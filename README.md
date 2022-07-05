@@ -10,6 +10,7 @@ MVVM库的请求场景管理库。
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
+![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## 什么是请求场景管理
