@@ -2,11 +2,14 @@
 
 MVVM库的请求场景管理库。
 
-它是对请求库的一种补充而非替代品✔️
+它是对请求库的一种补充，而非替代品✔️
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
-[![ci](https://github.com/JOU-amjs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/JOU-amjs/alova/actions/workflows/main.yml)
-[![Coverage Status](https://coveralls.io/repos/github/JOU-amjs/alova/badge.svg?branch=main)](https://coveralls.io/github/JOU-amjs/alova?branch=main)
+[![build](https://github.com/JOU-amjs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/JOU-amjs/alova/actions/workflows/main.yml)
+[![coverage status](https://coveralls.io/repos/github/JOU-amjs/alova/badge.svg?branch=main)](https://coveralls.io/github/JOU-amjs/alova?branch=main)
+[![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
+[![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
+[![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## 什么是请求场景管理
@@ -66,7 +69,7 @@ MVVM库的请求场景管理库。
 6. 静默提交
 7. 离线提交
 8. 请求防抖
-9. Gzip 3kb轻量级
+9. Gzip3+kb轻量级
 10. typescript支持
 11. 支持tree shaking
 
