@@ -1,4 +1,4 @@
-import Method from '../methods/Method';
+import Method from '../Method';
 import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
 import myAssert from '../utils/myAssert';
@@ -22,7 +22,7 @@ export default function useWatcher<S, E, R, T>(
     responser,
     setAbort
   ) => {
-    const { abort, responseHandlePromise } = useHookToSendRequest(handler(), originalState, responser, [], !!force);
+    const { abort, p: responseHandlePromise } = useHookToSendRequest(handler(), originalState, responser, [], !!force);
     setAbort(abort);    // 将控制器传出去供使用者调用
     responseHandlePromise.catch(noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
 

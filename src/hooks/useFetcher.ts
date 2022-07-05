@@ -1,4 +1,4 @@
-import Method from '../methods/Method';
+import Method from '../Method';
 import Alova from '../Alova';
 import { noop } from '../utils/helper';
 import createRequestState from '../functions/createRequestState';

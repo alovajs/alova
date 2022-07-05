@@ -10,7 +10,7 @@ import { RequestConfig } from '../../../typings';
 import { GetData, Result } from '../result.type';
 import server from '../../server';
 import { ref } from 'vue';
-import Method from '../../../src/methods/Method';
+import Method from '../../../src/Method';
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());

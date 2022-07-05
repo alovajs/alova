@@ -1,7 +1,7 @@
 import { Ref } from 'vue';
 import { Progress, FrontRequestState } from '../../typings';
 import Alova from '../Alova';
-import Method from '../methods/Method';
+import Method from '../Method';
 import Responser from '../Responser';
 import { getResponseCache, removeStateCache, setResponseCache, setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
@@ -118,7 +118,7 @@ export default function createRequestState<S, E, R, T>(
     
     // 通过执行该方法来手动发起请求
     send<T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, responserHandlerArgs?: any[], updateCacheState?: boolean) {
-      const { abort, responseHandlePromise } = useHookToSendRequest(
+      const { abort, p } = useHookToSendRequest(
         methodInstance,
         originalState,
         responser,
@@ -127,7 +127,7 @@ export default function createRequestState<S, E, R, T>(
         updateCacheState
       );
       abortFn = abort;
-      return responseHandlePromise;
+      return p;
     },
   };
 }

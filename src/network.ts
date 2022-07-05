@@ -2,7 +2,7 @@ import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
 import { deserializeMethod, noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
-import { setTimeoutFn } from './utils/variables';
+import { PromiseCls, setTimeoutFn } from './utils/variables';
 
 const alovas = [] as Alova<any, any>[];
 /**
@@ -31,7 +31,7 @@ function runSilentRequest() {
       backgroundStoragedRequests.push(response().then(remove, noop));   // 如果请求失败需要捕获错误，否则会导致错误往外抛到控制台
     }
   }
-  backgroundStoragedRequests.length > 0 ? Promise.all(backgroundStoragedRequests).finally(runSilentRequest) : setTimeoutFn(runSilentRequest, 2000);
+  backgroundStoragedRequests.length > 0 ? PromiseCls.all(backgroundStoragedRequests).finally(runSilentRequest) : setTimeoutFn(runSilentRequest, 2000);
 }
 
 

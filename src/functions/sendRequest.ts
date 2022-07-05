@@ -1,8 +1,8 @@
 import { RequestConfig, ResponsedHandler, ResponseErrorHandler } from '../../typings';
-import Method from '../methods/Method';
+import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { getContext, getOptions, promiseReject, promiseResolve, undefinedValue } from '../utils/variables';
+import { getContext, getOptions, PromiseCls, promiseReject, promiseResolve, undefinedValue } from '../utils/variables';
 import { getLocalCacheConfigParam, isFn, key, noop, self } from '../utils/helper';
 
 
@@ -94,14 +94,14 @@ import { getLocalCacheConfigParam, isFn, key, noop, self } from '../utils/helper
   return {
     ...ctrls,
     useCache: false,
-    response: () => Promise.all([
+    response: () => PromiseCls.all([
       ctrls.response(),
       ctrls.headers(),
     ]).then(([rawResponse, headers]) => {
       try {
         let responsedHandlePayload = responsedHandler(rawResponse as any);
         
-        if (responsedHandlePayload instanceof Promise) {
+        if (responsedHandlePayload instanceof PromiseCls) {
           return responsedHandlePayload.then(data => {
             if (headers) {
               data = transformData(data, headers);

@@ -1,4 +1,4 @@
-import Method from '../methods/Method';
+import Method from '../Method';
 import { setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getLocalCacheConfigParam, key } from '../utils/helper';

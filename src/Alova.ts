@@ -4,13 +4,7 @@ import {
   RequestBody,
   Storage,
 } from '../typings';
-import Delete from './methods/Delete';
-import Get from './methods/Get';
-import Head from './methods/Head';
-import Options from './methods/Options';
-import Patch from './methods/Patch';
-import Post from './methods/Post';
-import Put from './methods/Put';
+import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 
 let idCounter = 0;
 export default class Alova<S, E> {
@@ -23,24 +17,24 @@ export default class Alova<S, E> {
     this.options = options;
   }
   Get<R, T = any>(url: string, config?: MethodConfig<R, T>) {
-    return new Get<S, E, R, T>(this, url, config);
+    return new Method<S, E, R, T>(typeGet, this, url, config);
   }
   Post<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
-    return new Post<S, E, R, T>(this, url, data, config);
+    return new Method<S, E, R, T>(typePost, this, url, config, data);
   }
   Delete<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
-    return new Delete<S, E, R, T>(this, url, data, config);
+    return new Method<S, E, R, T>(typeDelete, this, url, config, data);
   }
   Put<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
-    return new Put<S, E, R, T>(this, url, data, config);
+    return new Method<S, E, R, T>(typePut, this, url, config, data);
   }
   Head<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
-    return new Head<S, E, R, T>(this, url, config);
+    return new Method<S, E, R, T>(typeHead, this, url, config);
   }
   Patch<R, T = any>(url: string, data: RequestBody = {}, config: MethodConfig<R, T> = {}) {
-    return new Patch<S, E, R, T>(this, url, data, config);
+    return new Method<S, E, R, T>(typePatch, this, url, config, data);
   }
   Options<R, T = any>(url: string, config: MethodConfig<R, T> = {}) {
-    return new Options<S, E, R, T>(this, url, config);
+    return new Method<S, E, R, T>(typeOptions, this, url, config);
   }
 }

@@ -4,7 +4,7 @@ import {
   SerializedMethod
 } from '../../typings';
 import Alova from '../Alova';
-import Method from '../methods/Method';
+import Method from '../Method';
 import { clearTimeoutTimer, getConfig, getOptions, JSONStringify, MEMORY, nullValue, setTimeoutFn, STORAGE_PLACEHOLDER, STORAGE_RESTORE, undefinedValue } from './variables';
 
 /**

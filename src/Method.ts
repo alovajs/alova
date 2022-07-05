@@ -1,20 +1,27 @@
-import { MethodConfig, MethodType, RequestBody } from '../../typings';
-import Alova from '../Alova';
-import { getOptions, undefinedValue } from '../utils/variables';
+import { MethodConfig, MethodType, RequestBody } from '../typings';
+import Alova from './Alova';
+import { getOptions, undefinedValue } from './utils/variables';
 
 // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
 const cachedConfig = {
   localCache: 300000,
 };
 const submitConfig = {};
-const methodDefaultConfig: Record<MethodType, MethodConfig<any, any>> = {
-  GET: cachedConfig,
-  HEAD: submitConfig,
-  POST: submitConfig,
-  PUT: submitConfig,
-  PATCH: submitConfig,
-  DELETE: submitConfig,
-  OPTIONS: submitConfig,
+export const typeGet = 'GET';
+export const typeHead = 'HEAD';
+export const typePost = 'POST';
+export const typePut = 'PUT';
+export const typePatch = 'PATCH';
+export const typeDelete = 'DELETE';
+export const typeOptions = 'OPTIONS';
+export const methodDefaultConfig: Record<MethodType, MethodConfig<any, any>> = {
+  [typeGet]: cachedConfig,
+  [typeHead]: submitConfig,
+  [typePost]: submitConfig,
+  [typePut]: submitConfig,
+  [typePatch]: submitConfig,
+  [typeDelete]: submitConfig,
+  [typeOptions]: submitConfig,
 };
 export default class Method<S, E, R, T> {
   public type: MethodType;

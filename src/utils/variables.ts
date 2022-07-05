@@ -1,11 +1,10 @@
-import Method from '../methods/Method';
+import Method from '../Method';
 
 // 以下为减少编译代码量而添加的统一处理函数
+export const PromiseCls = Promise;
 export const getTime = (date?: Date) => date ? date.getTime() : Date.now();
-export const promiseResolve = <T>(value: T) => Promise.resolve(value);
-export const promiseReject = <T>(value: T) => Promise.reject(value);
-export const undefinedValue = undefined;
-export const nullValue = null;
+export const promiseResolve = <T>(value: T) => PromiseCls.resolve(value);
+export const promiseReject = <T>(value: T) => PromiseCls.reject(value);
 export const getContext = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => methodInstance.context;
 export const getConfig = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => methodInstance.config;
 export const getOptions = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => getContext(methodInstance).options;
@@ -13,6 +12,8 @@ export const JSONStringify = <T>(value: T) => JSON.stringify(value);
 export const JSONParse = (value: string) => JSON.parse(value);
 export const setTimeoutFn = (fn: Function, delay: number = 0) => setTimeout(fn, delay);
 export const clearTimeoutTimer = (timer: number) => clearTimeout(timer);
+export const undefinedValue = undefined;
+export const nullValue = null;
 
 
 /** 三种缓存模式 */

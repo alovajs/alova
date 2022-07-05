@@ -1,4 +1,4 @@
-import Method from '../methods/Method';
+import Method from '../Method';
 import { pushSilentRequest } from '../storage/silentStorage';
 import { key, noop, serializeMethod } from '../utils/helper';
 import myAssert from '../utils/myAssert';
@@ -57,7 +57,7 @@ import { getConfig, getContext, nullValue, promiseReject, promiseResolve, setTim
         headers: () => promiseResolve({} as Headers),
         progress: noop,
         abort: noop,
-        responseHandlePromise: promiseResolve(nullValue),
+        p: promiseResolve(nullValue),
       };
     }
   }
@@ -113,6 +113,6 @@ import { getConfig, getContext, nullValue, promiseReject, promiseResolve, setTim
   }
   return {
     ...ctrl,
-    responseHandlePromise,
+    p: responseHandlePromise,
   };
 }

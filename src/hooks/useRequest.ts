@@ -1,4 +1,4 @@
-import Method from '../methods/Method';
+import Method from '../Method';
 import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
 import { isFn, noop } from '../utils/helper';
@@ -20,7 +20,7 @@ export default function useRequest<S, E, R, T>(methodHandler: Method<S, E, R, T>
     setAbort
   ) => {
     if (immediate) {
-      const { abort, responseHandlePromise } = useHookToSendRequest(methodInstance, originalState, responser, [], !!force);
+      const { abort, p: responseHandlePromise } = useHookToSendRequest(methodInstance, originalState, responser, [], !!force);
       // 将控制器传出去供使用者调用
       setAbort(abort);
       responseHandlePromise.catch(noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑

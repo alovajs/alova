@@ -1,5 +1,5 @@
 import { Ref } from 'vue';
-import Method from '../methods/Method';
+import Method from '../Method';
 import { getStateCache } from '../storage/responseCache';
 import { key } from '../utils/helper';
 import { getContext } from '../utils/variables';

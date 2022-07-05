@@ -1,4 +1,4 @@
-import Method from '../methods/Method';
+import Method from '../Method';
 import { removeResponseCache } from '../storage/responseCache';
 import { removePersistentResponse } from '../storage/responseStorage';
 import { key } from '../utils/helper';
