@@ -31,13 +31,11 @@ function getInstance(
       beforeRequestExpect && beforeRequestExpect(config);
       return config;
     },
-    responsed: [response => {
+    responsed(response) {
       const jsonPromise = response.json();
       responseExpect && responseExpect(jsonPromise);
       return jsonPromise;
-    }, err => {
-      resErrorExpect && resErrorExpect(err);
-    }]
+    }
   });
 }
 function getInstanceWithVue() {

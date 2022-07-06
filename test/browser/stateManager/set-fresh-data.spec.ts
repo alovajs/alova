@@ -27,13 +27,16 @@ function getInstance(
       beforeRequestExpect && beforeRequestExpect(config);
       return config;
     },
-    responsed: [response => {
-      const jsonPromise = response.json();
-      responseExpect && responseExpect(jsonPromise);
-      return jsonPromise;
-    }, err => {
-      resErrorExpect && resErrorExpect(err);
-    }]
+    responsed: {
+      success: response => {
+        const jsonPromise = response.json();
+        responseExpect && responseExpect(jsonPromise);
+        return jsonPromise;
+      },
+      error: err => {
+        resErrorExpect && resErrorExpect(err);
+      }
+    }
   });
 }
 

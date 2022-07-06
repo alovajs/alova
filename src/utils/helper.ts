@@ -30,6 +30,9 @@ export const isFn = (arg: any) => typeof arg === 'function';
 export const isNumber = (arg: any) => typeof arg === 'number' && !isNaN(arg);
 
 
+// 判断是否为普通对象
+export const isPlainObject = (arg: any) => Object.prototype.toString.call(arg) === '[object Object]';
+
 /**
  * 获取请求方式的key值
  * @returns {string} 此请求方式的key值

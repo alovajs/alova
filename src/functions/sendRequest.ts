@@ -1,9 +1,9 @@
-import { RequestConfig, ResponsedHandler, ResponseErrorHandler } from '../../typings';
+import { RequestConfig, ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getContext, getOptions, PromiseCls, promiseReject, promiseResolve, undefinedValue } from '../utils/variables';
-import { getLocalCacheConfigParam, isFn, key, noop, self } from '../utils/helper';
+import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '../utils/helper';
 
 
 /**
@@ -82,9 +82,13 @@ import { getLocalCacheConfigParam, isFn, key, noop, self } from '../utils/helper
   let responseErrorHandler: ResponseErrorHandler = noop;
   if (isFn(responsed)) {
     responsedHandler = responsed as ResponsedHandler;
-  } else if (Array.isArray(responsed)) {
-    responsedHandler = isFn(responsed[0]) ? responsed[0] : responsedHandler;
-    responseErrorHandler = isFn(responsed[1]) ? responsed[1] : responseErrorHandler;
+  } else if (isPlainObject(responsed)) {
+    const {
+      success: successHandler,
+      error: errorHandler,
+    } = responsed as ResponsedHandlerRecord;
+    responsedHandler = isFn(successHandler) ? successHandler : responsedHandler;
+    responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
   }
 
   const errorCatcher = (error: any) => {

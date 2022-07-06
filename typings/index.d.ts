@@ -74,6 +74,10 @@ type RequestConfig<R, T> = CommonMethodParameters & Omit<MethodConfig<R, T>, 'he
 };
 type ResponsedHandler = (response: Response) => any;
 type ResponseErrorHandler = (error: any) => void;
+type ResponsedHandlerRecord = {
+  success: ResponsedHandler, 
+  error: ResponseErrorHandler
+};
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
 // E: export函数返回的状态组的类型
@@ -116,7 +120,7 @@ export interface AlovaOptions<S, E> {
 
   // 全局的响应钩子，可传一个数组表示正常响应和响应出错的钩子
   // 如果正常响应的钩子抛出错误也将进入响应失败的钩子函数
-  responsed?: ResponsedHandler | [ResponsedHandler, ResponseErrorHandler],
+  responsed?: ResponsedHandler | ResponsedHandlerRecord,
 }
 
 /** 三种缓存模式 */

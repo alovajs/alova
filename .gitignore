@@ -19,3 +19,4 @@ yarn-error.log*
 # Optional eslint cache
 .eslintcache
 /demo
+/design
