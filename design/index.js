@@ -212,6 +212,36 @@ responser.success(() => {
   fetch(getter(1, 2));
 });
 
+
+// 并行请求
+const {
+  data: [r1, r2],
+} = useRequests([
+  getter(1, 2),
+  poster(3, 4),
+]);
+const {
+  data: [r3, r4],
+} = useRequests([
+  () => getter(1, 2),
+  () => poster(3, 4),
+]);
+
+
+// 串行请求
+const {
+  data: [r5, r6],
+} = useRequests([
+  () => getter(1, 2),
+  lastData => poster(3, lastData.page),
+], {
+  serial: true,
+});
+
+
+
+
+
 all([responser, responser1])
   .success(([r1, r2]) => {})
   .error(err => {})
