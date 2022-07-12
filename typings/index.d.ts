@@ -63,7 +63,7 @@ export type MethodConfig<R, T> = {
   localCache?: LocalCacheConfigParam,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
   enableDownload?: boolean,   // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   enableUpload?: boolean,   // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
-  transformData?: (data: T, headers: Headers) => R,
+  transformData?: (data: T, headers: Headers) => R,   // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
 };
 
 // 获取fetch的第二个参数类型
@@ -143,26 +143,18 @@ interface Method<S, E, R, T> {
   context: Alova<S, E>;
   response: R;
 }
-interface Get<S, E, R, T> extends Method<S, E, R, T> {}
-interface Post<S, E, R, T> extends Method<S, E, R, T> {}
-interface Put<S, E, R, T> extends Method<S, E, R, T> {}
-interface Delete<S, E, R, T> extends Method<S, E, R, T> {}
-interface Head<S, E, R, T> extends Method<S, E, R, T> {}
-interface Options<S, E, R, T> extends Method<S, E, R, T> {}
-interface Patch<S, E, R, T> extends Method<S, E, R, T> {}
-
 
 declare class Alova<S, E> {
   public options: AlovaOptions<S, E>;
   public id: string;
   public storage: Storage;
-  Get<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Post<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Put<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Delete<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Head<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Options<R, T = any>(url: string, config?: MethodConfig<R, T>): Get<S, E, R, T>;
-  Patch<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Get<S, E, R, T>;
+  Get<R, T = any>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Post<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Put<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Delete<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Head<R, T = any>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Options<R, T = any>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Patch<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
 }
 
 // hook通用配置
