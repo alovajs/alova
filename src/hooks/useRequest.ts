@@ -12,8 +12,8 @@ export default function useRequest<S, E, R, T>(methodHandler: Method<S, E, R, T>
 }: RequestHookConfig = {}) {
   // isFn封装后不能自动判断类型，需手动转
   const methodInstance = isFn(methodHandler) 
-    ? (methodHandler as () => Method<S, E, R, T>)() 
-    : (methodHandler as Method<S, E, R, T>);
+    ? methodHandler() 
+    : methodHandler;
   const props = createRequestState(getContext(methodInstance), (
     originalState,
     responser,
@@ -31,8 +31,8 @@ export default function useRequest<S, E, R, T>(methodHandler: Method<S, E, R, T>
     ...props,
     send: (...args: any[]) => {
       const methodInstance = isFn(methodHandler) 
-        ? (methodHandler as (...args: any[]) => Method<S, E, R, T>)(...args) 
-        : (methodHandler as Method<S, E, R, T>);
+        ? methodHandler(...args) 
+        : methodHandler;
       return props.send(methodInstance, !!force, args);
     },
   };
