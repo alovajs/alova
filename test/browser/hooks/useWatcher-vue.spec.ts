@@ -7,7 +7,7 @@ import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 import { ref } from 'vue';
 import Method from '../../../src/Method';
@@ -46,7 +46,7 @@ function getInstance(
 describe('use useController hook to send GET with vue', function() {
   test('should specify at least one watching state', () => {
     const alova = getInstance();
-    expect(() => useWatcher(() => alova.Get<GetData, Result>('/unit-test'), [])).toThrowError();
+    expect(() => useWatcher(() => alova.Get<Result>('/unit-test'), [])).toThrowError();
   });
   test('should send request when change value', done => {
     const alova = getInstance();
@@ -60,13 +60,13 @@ describe('use useController hook to send GET with vue', function() {
       error,
       responser,
     } = useWatcher(() => {
-      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
         },
-        transformData: result => result.data,
+        transformData: (result: Result) => result.data,
         localCache: 100 * 1000,
       });
       return get;
@@ -131,13 +131,13 @@ describe('use useController hook to send GET with vue', function() {
       error,
       responser,
     } = useWatcher(() => {
-      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
         },
-        transformData: result => result.data,
+        transformData: (result: Result) => result.data,
         localCache: 100 * 1000,
       });
       return get;
@@ -190,13 +190,13 @@ describe('use useController hook to send GET with vue', function() {
       error,
       responser,
     } = useWatcher(() => {
-      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
         },
-        transformData: result => result.data,
+        transformData: (result: Result) => result.data,
         localCache: 0,
       });
       return get;
@@ -249,13 +249,13 @@ describe('use useController hook to send GET with vue', function() {
       error,
       responser,
     } = useWatcher(() => {
-      const get = currentGet = alova.Get<GetData, Result>('/unit-test', {
+      const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
         },
-        transformData: result => result.data,
+        transformData: (result: Result) => result.data,
         localCache: 0,
       });
       return get;

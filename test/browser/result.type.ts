@@ -1,9 +1,9 @@
-export type GetData = {
+type GetData = {
   path: string,
   method: string,
   params: Record<string, string>,
 };
-export type PostData = {
+type PostData = {
   path: string,
   method: string,
   params: Record<string, string>,

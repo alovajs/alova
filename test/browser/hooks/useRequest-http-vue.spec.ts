@@ -8,7 +8,7 @@ import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
-import { GetData, PostData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 
 beforeAll(() => server.listen());
@@ -58,13 +58,13 @@ describe('use useRequet hook to send GET with vue', function() {
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });
       }
     );
-    const Get = alova.Get<GetData, Result>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData(result, _) {
+      transformData(result: Result, _) {
         expect(result.code).toBe(200);
         expect(result.data.path).toBe('/unit-test');
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });
@@ -217,9 +217,9 @@ describe('use useRequet hook to send GET with vue', function() {
 
   test('it can pass custom params when call `send` function, and the function will return a Promise instance', async () => {
     const alova = getInstance();
-    const getGetter = (index: number) => alova.Get<GetData, Result<true>>('/unit-test', {
+    const getGetter = (index: number) => alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }) => data,
+      transformData: ({ data }: Result<true>) => data,
       params: {
         index,
       }
@@ -257,8 +257,8 @@ describe('use useRequet hook to send GET with vue', function() {
 
   test('should throw a request error when request error at calling `send` function', async () => {
     const alova = getInstance();
-    const getGetter = (index: number) => alova.Get<GetData, Result<true>>('/unit-test-404', {
-      transformData: ({ data }) => data,
+    const getGetter = (index: number) => alova.Get('/unit-test-404', {
+      transformData: ({ data }: Result<true>) => data,
       params: {
         index,
       }
@@ -312,13 +312,13 @@ describe('Test other methods without GET', function() {
         expect(data.params).toEqual({ a: 'a', b: 'str' });
       }
     );
-    const Post = alova.Post<PostData, Result<true>>('/unit-test', { post1: 'a' }, {
+    const Post = alova.Post('/unit-test', { post1: 'a' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData({ code, data }, _) {
+      transformData({ code, data }: Result<true>, _) {
         expect(code).toBe(200);
         expect(data.path).toBe('/unit-test');
         expect(data.params).toEqual({ a: 'a', b: 'str' });
@@ -372,13 +372,13 @@ describe('Test other methods without GET', function() {
         expect(data.params).toEqual({ a: 'a', b: 'str' });
       }
     );
-    const Delete = alova.Delete<PostData, Result<true>>('/unit-test', { post1: 'a' }, {
+    const Delete = alova.Delete('/unit-test', { post1: 'a' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData({ code, data }, _) {
+      transformData({ code, data }: Result<true>, _) {
         expect(code).toBe(200);
         expect(data.path).toBe('/unit-test');
         expect(data.params).toEqual({ a: 'a', b: 'str' });
@@ -432,13 +432,13 @@ describe('Test other methods without GET', function() {
         expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
       }
     );
-    const Put = alova.Put<PostData, Result<true>>('/unit-test?c=3', { post1: 'a' }, {
+    const Put = alova.Put('/unit-test?c=3', { post1: 'a' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData({ code, data }, _) {
+      transformData({ code, data }: Result<true>, _) {
         expect(code).toBe(200);
         expect(data.path).toBe('/unit-test');
         expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
@@ -477,13 +477,13 @@ describe('Test other methods without GET', function() {
     const alova = getInstance(config => {
       expect(config.method).toBe('HEAD');
     });
-    const Head = alova.Head<{}, Result>('/unit-test', {
+    const Head = alova.Head('/unit-test', {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData(resp, headers) {
+      transformData(resp: Result, headers) {
         expect(headers.get('x-powered-by')).toBe('msw');
         return resp;
       },
@@ -513,13 +513,13 @@ describe('Test other methods without GET', function() {
     const alova = getInstance(config => {
       expect(config.method).toBe('OPTIONS');
     });
-    const Options = alova.Options<{}, Result>('/unit-test', {
+    const Options = alova.Options('/unit-test', {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData(resp, headers) {
+      transformData(resp: Result, headers) {
         expect(headers.get('x-powered-by')).toBe('msw');
         return resp;
       },
@@ -549,13 +549,13 @@ describe('Test other methods without GET', function() {
     const alova = getInstance(config => {
       expect(config.method).toBe('PATCH');
     });
-    const Patch = alova.Patch<PostData, Result<true>>('/unit-test', { patch1: 'p' }, {
+    const Patch = alova.Patch('/unit-test', { patch1: 'p' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData(resp, headers) {
+      transformData(resp: Result<true>, headers) {
         expect(headers.get('x-powered-by')).toBe('msw');
         return resp.data;
       },

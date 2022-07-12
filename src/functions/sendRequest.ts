@@ -81,7 +81,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
   let responsedHandler: ResponsedHandler = noop;
   let responseErrorHandler: ResponseErrorHandler = noop;
   if (isFn(responsed)) {
-    responsedHandler = responsed as ResponsedHandler;
+    responsedHandler = responsed;
   } else if (isPlainObject(responsed)) {
     const {
       success: successHandler,

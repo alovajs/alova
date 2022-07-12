@@ -6,7 +6,7 @@ import {
 } from '../../../src';
 import ReactHook from '../../../src/predefine/ReactHook';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -61,9 +61,9 @@ afterAll(() => server.close());
 describe('useRequet hook with react', function() {
   test('send GET', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result<true>>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }) => data,
+      transformData: ({ data }: Result<true>) => data,
       localCache: 100 * 1000,
     });
     function Page() {
@@ -90,9 +90,9 @@ describe('useRequet hook with react', function() {
 
   test('shouldn\'t send request when set `immediate=false`', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result<true>>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }) => data,
+      transformData: ({ data }: Result<true>) => data,
       localCache: 100 * 1000,
     });
     function Page() {
@@ -136,8 +136,8 @@ describe('useRequet hook with react', function() {
 
   test('states should be remove in cache when component was unmounted', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData>('unit-test', {
-      transformData: ({ data }) => data,
+    const Get = alova.Get('unit-test', {
+      transformData: ({ data }: Result) => data,
     });
     function DataConsole() {
       const { data, loading } = useRequest(Get);

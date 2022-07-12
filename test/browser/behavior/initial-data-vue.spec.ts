@@ -6,7 +6,7 @@ import {
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 import { ref } from 'vue';
 
@@ -43,8 +43,8 @@ function getInstance(
 describe('Initial data before request', function() {
   test('[useRequest]should assign the initial data to state `data`', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
-      transformData: data => data.data,
+    const Get = alova.Get('/unit-test', {
+      transformData: ({ data }: Result) => data,
     });
     const {
       data,
@@ -60,8 +60,8 @@ describe('Initial data before request', function() {
   test('[useWatcher]should assign the initial data to state `data`', async () => {
     const stateA = ref('a');
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
-      transformData: data => data.data,
+    const Get = alova.Get('/unit-test', {
+      transformData: ({data}: Result) => data,
     });
     const {
       data,

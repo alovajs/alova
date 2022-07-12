@@ -8,7 +8,7 @@ import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 
 beforeAll(() => server.listen());
@@ -44,13 +44,13 @@ function getInstance(
 describe('use useFetcher hook to fetch data', function() {
   test('should replace cached response when fetch data', done => {
     const alova = getInstance();
-    const createGet = (params: Record<string, string>) => alova.Get<GetData, Result>('/unit-test-count', {
+    const createGet = (params: Record<string, string>) => alova.Get('/unit-test-count', {
       params,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData(result, _) {
+      transformData(result: Result, _) {
         return result.data;
       },
       localCache: 100 * 1000,

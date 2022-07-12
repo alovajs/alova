@@ -7,7 +7,7 @@ import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 
 beforeAll(() => server.listen());
@@ -43,9 +43,9 @@ function getInstance(
 describe('manual set cache response data', function() {
   test('the cache response data should be saved', () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       localCache: 100 * 1000,
-      transformData: data => data.data,
+      transformData: ({ data }: Result) => data,
     });
     setCacheData(Get, {
       path: '/unit-test',

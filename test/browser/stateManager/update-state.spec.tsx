@@ -7,7 +7,7 @@ import {
 import VueHook from '../../../src/predefine/VueHook';
 import ReactHook from '../../../src/predefine/ReactHook';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 import { render, screen } from '@testing-library/react';
 import React, { ReactElement } from 'react';
@@ -50,9 +50,9 @@ function getInstanceWithVue() {
 describe('update cached response data by user', function() {
   test('the cached response data should be changed and the screen should be update', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       localCache: 100000,
-      transformData: data => data.data,
+      transformData: ({ data }: Result) => data,
     });
 
     function Page() {
@@ -77,9 +77,9 @@ describe('update cached response data by user', function() {
 
   test('test update function with vue', async () => {
     const alova = getInstanceWithVue();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       localCache: 100000,
-      transformData: data => data.data,
+      transformData: ({ data }: Result) => data,
     });
     const { data, responser } = useRequest(Get);
     await new Promise(resolve => responser.success(() => resolve(1)));

@@ -148,13 +148,13 @@ declare class Alova<S, E> {
   public options: AlovaOptions<S, E>;
   public id: string;
   public storage: Storage;
-  Get<R, T = any>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
-  Post<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
-  Put<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
-  Delete<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
-  Head<R, T = any>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
-  Options<R, T = any>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
-  Patch<R, T = any>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Get<R, T = unknown>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Post<R, T = unknown>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Put<R, T = unknown>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Delete<R, T = unknown>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Head<R, T = unknown>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Options<R, T = unknown>(url: string, config?: MethodConfig<R, T>): Method<S, E, R, T>;
+  Patch<R, T = unknown>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
 }
 
 // hook通用配置

@@ -85,7 +85,7 @@ class NetworkController {
 describe('use useRequest to send silent request', function() {
   test('send a silent\'s post', done => {
     const alova = getInstance();
-    const Post = alova.Post<string, Result<string>>('/unit-test', { postData: 'abc' }, {
+    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,
     });
     const {
@@ -137,7 +137,7 @@ describe('use useRequest to send silent request', function() {
         done();
       }, 1000);
     });
-    const Post = alova.Post<string, Result<string>>('/unit-test', { postData: 'abc' }, {
+    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,
     });
     const {
@@ -159,7 +159,7 @@ describe('use useRequest to send silent request', function() {
     const responsedHookMock = jest.fn(() => {});
     const networkCtrl = new NetworkController(window);
     const alova = getInstance(requestHookMock, responsedHookMock);
-    const Post = alova.Post<string, Result<string>>('/unit-test', { postData: 'abc' }, {
+    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,
     });
     networkCtrl.setOffline();

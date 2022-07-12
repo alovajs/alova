@@ -20,14 +20,14 @@ export const self = <T>(arg: T) => arg;
  * @param fn 任意参数
  * @returns 该参数是否为函数
  */
-export const isFn = (arg: any) => typeof arg === 'function';
+export const isFn = (arg: any): arg is Function => typeof arg === 'function';
 
 /**
  * 判断参数是否为数字
  * @param arg 任意参数
  * @returns 该参数是否为数字
  */
-export const isNumber = (arg: any) => typeof arg === 'number' && !isNaN(arg);
+export const isNumber = (arg: any): arg is number => typeof arg === 'number' && !isNaN(arg);
 
 
 // 判断是否为普通对象
@@ -134,7 +134,7 @@ export function getLocalCacheConfigParam<S, E, R, T>(methodInstance?: Method<S, 
   const defaultCacheMode = MEMORY;
   if (isNumber(_localCache)) {
     return {
-      e: _localCache as number,
+      e: _localCache,
       m: defaultCacheMode,
       s: false,
     }

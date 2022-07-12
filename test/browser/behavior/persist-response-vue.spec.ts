@@ -6,7 +6,7 @@ import {
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
@@ -45,12 +45,12 @@ function getInstance(
 describe('persist data', function() {
   test('should persist responsed data but it will send request when request again', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test-count', {
+    const Get = alova.Get('/unit-test-count', {
       localCache: {
         expire: 500,
         mode: cacheMode.STORAGE_PLACEHOLDER
       },
-      transformData: data => data.data,
+      transformData: ({data}: Result) => data,
     });
     const firstState = useRequest(Get);
     await new Promise(resolve => firstState.responser.success(() => resolve(null)));
@@ -72,12 +72,12 @@ describe('persist data', function() {
 
   test('persistent data wouldn\'t be invalid when set persistTime to `Infinity`', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       localCache: {
         expire: Infinity,
         mode: cacheMode.STORAGE_PLACEHOLDER
       },
-      transformData: data => data.data,
+      transformData: ({data}: Result) => data,
     });
     const firstState = useRequest(Get);
     await new Promise(resolve => firstState.responser.success(() => resolve(null)));
@@ -95,12 +95,12 @@ describe('persist data', function() {
 
   test('persistent data will restore even if the cache of the same key is invalid', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100 * 1000,
         mode: cacheMode.STORAGE_RESTORE
       },
-      transformData: data => data.data,
+      transformData: ({data}: Result) => data,
     });
     const firstState = useRequest(Get);
     await new Promise(resolve => firstState.responser.success(() => resolve(null)));

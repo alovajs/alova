@@ -8,7 +8,7 @@ import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { RequestConfig } from '../../../typings';
-import { GetData, Result } from '../result.type';
+import { Result } from '../result.type';
 import server from '../../server';
 
 beforeAll(() => server.listen());
@@ -44,8 +44,8 @@ function getInstance(
 describe('invalitate cached response data', () => {
   test('It will use the default cache time when not set the cache time with `GET`', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
-      transformData: data => data.data,
+    const Get = alova.Get('/unit-test', {
+      transformData: ({ data }: Result) => data,
     });
     const firstState = useRequest(Get);
     await new Promise(resolve => firstState.responser.success(resolve));
@@ -55,9 +55,9 @@ describe('invalitate cached response data', () => {
 
   test('the cached response data should be removed', async () => {
     const alova = getInstance();
-    const Get = alova.Get<GetData, Result>('/unit-test', {
+    const Get = alova.Get('/unit-test', {
       localCache: 100000,
-      transformData: data => data.data,
+      transformData: ({ data }: Result) => data,
     });
     const firstState = useRequest(Get);
     await new Promise(resolve => firstState.responser.success(resolve));
