@@ -1,5 +1,5 @@
-import { Ref } from 'vue';
-import { Progress, FrontRequestState } from '../../typings';
+// import { Ref } from 'vue';
+import { Progress, FrontRequestState, ExportedType } from '../../typings';
 import Alova from '../Alova';
 import Method from '../Method';
 import Responser from '../Responser';
@@ -9,7 +9,7 @@ import { debounce, getLocalCacheConfigParam, key, noop } from '../utils/helper';
 import { nullValue, STORAGE_RESTORE, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
-type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持React和Vue的方式定义类型
+// type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态

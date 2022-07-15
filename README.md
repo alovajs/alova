@@ -73,6 +73,7 @@ MVVM库的请求场景管理库。
 9. Gzip3+kb轻量级
 10. typescript支持
 11. 支持tree shaking
+12. 状态更新追踪
 
 
 ## 安装

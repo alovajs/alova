@@ -191,7 +191,9 @@ interface Responser<R> {
   error(handler: ErrorHandler): Responser<R>;
   complete(handler: CompleteHandler): Responser<R>;
 }
-type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    // 以支持React和Vue的方式定义类型
+
+// 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
+type ExportedType<R, S> = S extends Ref ? Ref<R> : R;
 type UseHookReturnType<R, S> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,
