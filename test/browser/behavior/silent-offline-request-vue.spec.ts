@@ -99,7 +99,7 @@ describe('use useRequest to send silent request', function() {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     send();
     // 静默请求在发送请求时就会触发onSuccess
     let flag = 0;
@@ -107,7 +107,7 @@ describe('use useRequest to send silent request', function() {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
       const cacheData = getResponseCache(alova.id, key(Post));
       expect(cacheData).toBeUndefined();
       flag++;
@@ -150,7 +150,7 @@ describe('use useRequest to send silent request', function() {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     send().catch(() => {});
   });
 
@@ -172,7 +172,7 @@ describe('use useRequest to send silent request', function() {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     let persisted = getSilentRequest(alova.id, alova.storage);
     const serializedMethod = persisted.serializedMethod || { url: '', type: '', requestBody: {} };
     expect(serializedMethod.url).toBe('/unit-test');

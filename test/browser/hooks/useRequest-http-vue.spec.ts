@@ -81,7 +81,7 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     responser.success(rawData => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
@@ -89,7 +89,7 @@ describe('use useRequet hook to send GET with vue', function() {
       expect(rawData.path).toBe('/unit-test');
       expect(rawData.params).toEqual({ a: 'a', b: 'str' });
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
 
       // 缓存有值
       const cacheData = getResponseCache(alova.id, key(Get));
@@ -119,7 +119,7 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     responser.error((err, requestId) => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
@@ -153,7 +153,7 @@ describe('use useRequet hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     responser.error(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
@@ -178,7 +178,7 @@ describe('use useRequet hook to send GET with vue', function() {
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     responser.error(err => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
@@ -203,7 +203,7 @@ describe('use useRequet hook to send GET with vue', function() {
     } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     setTimeout(abort, 100);
     responser.error(err => {
       expect(loading.value).toBeFalsy();
@@ -302,6 +302,6 @@ describe('use useRequet hook to send GET with vue', function() {
     loading.value = false;
     expect(loading.value).toBeTruthy();
     error.value = new Error('custom error');
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
   });
 });

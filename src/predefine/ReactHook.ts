@@ -7,13 +7,14 @@ import {
 } from 'react';
 import { FrontRequestState } from '../../typings';
 
-const create = (data: any) => useState(data);
+const stateToData = <D>([ state ]: ReactState<D>) => state;
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 
 // React的预定义hooks
 export default {
-  create,
-  export: <D>(state: ReactState<D>) => state[0],
+  create: (data: any) => useState(data),
+  export: stateToData,
+  dehydrate: stateToData,
   update: (newVal: Partial<FrontRequestState>, state: FrontRequestState<ReactState<unknown>>) => Object.keys(newVal).forEach(key => {
     type Keys = keyof FrontRequestState;
     state[key as Keys][1](newVal[key as Keys] as any);

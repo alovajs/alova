@@ -30,6 +30,14 @@ export const isFn = (arg: any): arg is Function => typeof arg === 'function';
 export const isNumber = (arg: any): arg is number => typeof arg === 'number' && !isNaN(arg);
 
 
+/**
+ * 判断参数是否为字符串
+ * @param arg 任意参数
+ * @returns 该参数是否为字符串
+ */
+ export const isString = (arg: any): arg is string => typeof arg === 'string';
+
+
 // 判断是否为普通对象
 export const isPlainObject = (arg: any) => Object.prototype.toString.call(arg) === '[object Object]';
 

@@ -6,7 +6,7 @@ import Responser from '../Responser';
 import { getResponseCache, removeStateCache, setResponseCache, setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { debounce, getLocalCacheConfigParam, key, noop } from '../utils/helper';
-import { nullValue, STORAGE_RESTORE, undefinedValue } from '../utils/variables';
+import { STORAGE_RESTORE, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
 // type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    
@@ -59,7 +59,7 @@ export default function createRequestState<S, E, R, T>(
   const originalState = {
     loading: create(false),
     data: create(rawData),
-    error: create(nullValue as Error | null),
+    error: create(undefinedValue as Error | undefined),
     downloading: create({ ...progress }),
     uploading: create({ ...progress }),
   };

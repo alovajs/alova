@@ -1,12 +1,12 @@
 import { Progress, RequestConfig } from '../../typings';
 import alovaError from '../utils/alovaError';
-import { noop } from '../utils/helper';
+import { isString, noop } from '../utils/helper';
 import { clearTimeoutTimer, JSONStringify, promiseReject, setTimeoutFn } from '../utils/variables';
 
 type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
 const isBodyData = (data: any) => {
   const isTyped = (typed: any) => data instanceof typed;
-  return typeof data === 'string' || isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
+  return typeof isString(data) || isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
 }
 export default function GlobalFetch(requestInit: RequestInit = {}) {
   return function<R, T>(source: string, config: RequestConfig<R, T>, data?: any) {

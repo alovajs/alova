@@ -75,7 +75,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
     };
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     initialData();
@@ -94,7 +94,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('1');
       expect(data.value.params.str).toBe('b');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData.path).toBe('/unit-test');
@@ -150,14 +150,14 @@ describe('use useController hook to send GET with vue', function() {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
       setTimeout(() => {
         mutateNum.value = 2;
         mutateStr.value = 'c';
         expect(loading.value).toBeFalsy();
         expect(data.value).toBeUndefined();
         expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeNull();
+        expect(error.value).toBeUndefined();
       }, 500);
     }, 500);
     const mockCallback = jest.fn(() => {});
@@ -168,7 +168,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('2');
       expect(data.value.params.str).toBe('c');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData.path).toBe('/unit-test');
@@ -204,7 +204,7 @@ describe('use useController hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     const mockCallback = jest.fn(() => {});
     responser.success(mockCallback);
     const successTimesFns = [() => {
@@ -213,7 +213,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('0');
       expect(data.value.params.str).toBe('a');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData).toBeUndefined();
@@ -265,7 +265,7 @@ describe('use useController hook to send GET with vue', function() {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeNull();
+    expect(error.value).toBeUndefined();
     const mockCallback = jest.fn(() => {});
     responser.success(mockCallback);
     const successTimesFns = [() => {
@@ -274,7 +274,7 @@ describe('use useController hook to send GET with vue', function() {
       expect(data.value.params.num).toBe('0');
       expect(data.value.params.str).toBe('a');
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-      expect(error.value).toBeNull();
+      expect(error.value).toBeUndefined();
       // 缓存有值
       const cacheData = getResponseCache(alova.id, key(currentGet));
       expect(cacheData).toBeUndefined();

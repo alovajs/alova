@@ -55,7 +55,12 @@ type LocalCacheConfig = {
   mode?: number,
 };
 type LocalCacheConfigParam = number | LocalCacheConfig;
+interface ResponseSchema<T, H> {
+  data: T,
+  headers: H,
+}
 export type MethodConfig<R, T> = {
+  name?: string,    // method对象名称，在updateState、invalidateCache中可以通过名称或通配符获取对应method对象
   params?: Record<string, any>,
   headers?: Record<string, any>,
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
@@ -63,7 +68,7 @@ export type MethodConfig<R, T> = {
   localCache?: LocalCacheConfigParam,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
   enableDownload?: boolean,   // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   enableUpload?: boolean,   // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
-  transformData?: (data: T, headers: Headers) => R,   // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
+  transformData?: (data: T, headers: Headers, dehydratedData: unknown) => R,   // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
 };
 
 // 获取fetch的第二个参数类型
@@ -89,6 +94,9 @@ export interface AlovaOptions<S, E> {
   statesHook: {
     create: <D>(state: D) => S,
     export: (state: S) => E,
+
+    // 将状态转换为普通数据
+    dehydrate: (state: S) => any,
     update: (newVal: Partial<FrontRequestState>, state: FrontRequestState) => void,
 
     // 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
