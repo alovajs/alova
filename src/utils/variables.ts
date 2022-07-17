@@ -14,6 +14,8 @@ export const setTimeoutFn = (fn: Function, delay: number = 0) => setTimeout(fn, 
 export const clearTimeoutTimer = (timer: number) => clearTimeout(timer);
 export const undefinedValue = undefined;
 export const nullValue = null;
+export const trueValue = true;
+export const falseValue = false;
 
 
 /** 三种缓存模式 */

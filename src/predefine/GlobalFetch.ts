@@ -1,31 +1,31 @@
-import { Progress, RequestConfig } from '../../typings';
+import { AlovaRequestAdapterConfig, Progress } from '../../typings';
 import alovaError from '../utils/alovaError';
 import { isString, noop } from '../utils/helper';
-import { clearTimeoutTimer, JSONStringify, promiseReject, setTimeoutFn } from '../utils/variables';
+import { clearTimeoutTimer, falseValue, JSONStringify, promiseReject, setTimeoutFn, trueValue } from '../utils/variables';
 
-type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
-const isBodyData = (data: any) => {
+
+const isBodyData = (data: any): data is BodyInit => {
   const isTyped = (typed: any) => data instanceof typed;
-  return typeof isString(data) || isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
+  return isString(data) || isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
 }
-export default function GlobalFetch(requestInit: RequestInit = {}) {
-  return function<R, T>(source: string, config: RequestConfig<R, T>, data?: any) {
-    
+export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
+  return function<R, T>(adapterConfig: AlovaRequestAdapterConfig<R, T, RequestInit>) {
     // 设置了中断时间，则在指定时间后中断请求
-    const timeout = config.timeout || 0;
+    const timeout = adapterConfig.timeout || 0;
     const ctrl = new AbortController();
     let abortTimer: number;
-    let isTimeout = false;
+    let isTimeout = falseValue;
     if (timeout > 0) {
       abortTimer = setTimeoutFn(() => {
-        isTimeout = true;
+        isTimeout = trueValue;
         ctrl.abort();
       }, timeout);
     }
 
-    const fetchPromise = fetch(source, {
-      ...requestInit,
-      ...config,
+    const data = adapterConfig.data;
+    const fetchPromise = fetch(adapterConfig.url, {
+      ...defaultRequestInit,
+      ...adapterConfig,
       signal: ctrl.signal,
       body: isBodyData(data) ? data : JSONStringify(data),
     });

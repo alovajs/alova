@@ -2,7 +2,7 @@ import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
 import { deserializeMethod, noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
-import { PromiseCls, setTimeoutFn } from './utils/variables';
+import { PromiseCls, setTimeoutFn, trueValue } from './utils/variables';
 
 const alovas = [] as Alova<any, any>[];
 /**
@@ -27,7 +27,7 @@ function runSilentRequest() {
     const alova = alovas[i];
     const { serializedMethod, remove } = getSilentRequest(alova.id, alova.storage);
     if (serializedMethod) {
-      const { response } = sendRequest(deserializeMethod(serializedMethod, alova), true);
+      const { response } = sendRequest(deserializeMethod(serializedMethod, alova), trueValue);
       backgroundStoragedRequests.push(response().then(remove, noop));   // 如果请求失败需要捕获错误，否则会导致错误往外抛到控制台
     }
   }

@@ -3,11 +3,7 @@ export type Progress = {
   total: number,
   loaded: number,
 };
-type RequestAdapter<R, T> = (
-  source: string,
-  config: RequestConfig<R, T>,
-  data?: RequestBody,
-) => {
+type AlovaRequestAdapter<R, T, C> = (adapterConfig: AlovaRequestAdapterConfig<R, T, C>) => {
   response: () => Promise<Response>,
   headers: () => Promise<Headers | void>,
   onDownload?: (handler: (progress: Progress) => void) => void,
@@ -40,11 +36,14 @@ export interface Storage {
   removeItem(key: string): void,
 }
 
-type CommonMethodParameters = {
+// 获取fetch的第二个参数类型
+// type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
+// 通用的请求配置
+type CommonMethodConfig = {
   readonly url: string,
   readonly method: MethodType,
   data?: RequestBody,
-}
+};
 
 
 // 请求缓存设置
@@ -55,11 +54,13 @@ type LocalCacheConfig = {
   mode?: number,
 };
 type LocalCacheConfigParam = number | LocalCacheConfig;
-interface ResponseSchema<T, H> {
-  data: T,
-  headers: H,
+interface AlovaResponseSchema<R, T = any, RH = Response['headers']> {
+  data: R,
+  headers: RH,
+  hitStorage: boolean,
+  currentData: T,
 }
-export type MethodConfig<R, T> = {
+export type AlovaMethodConfig<R, T, C> = {
   name?: string,    // method对象名称，在updateState、invalidateCache中可以通过名称或通配符获取对应method对象
   params?: Record<string, any>,
   headers?: Record<string, any>,
@@ -68,15 +69,10 @@ export type MethodConfig<R, T> = {
   localCache?: LocalCacheConfigParam,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
   enableDownload?: boolean,   // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   enableUpload?: boolean,   // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
-  transformData?: (data: T, headers: Headers, dehydratedData: unknown) => R,   // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
-};
+  transformData?: (responseSchema: AlovaResponseSchema<R, T>) => R,   // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
+} & C;
+type AlovaRequestAdapterConfig<R, T, C> = CommonMethodConfig & AlovaMethodConfig<R, T, C>;
 
-// 获取fetch的第二个参数类型
-type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
-type RequestConfig<R, T> = CommonMethodParameters & Omit<MethodConfig<R, T>, 'headers'|'params'> & Omit<RequestInit, 'headers'> & {
-  headers: Record<string, any>,
-  params: Record<string, any>,
-};
 type ResponsedHandler = (response: Response) => any;
 type ResponseErrorHandler = (error: any) => void;
 type ResponsedHandlerRecord = {
@@ -92,7 +88,7 @@ export interface AlovaOptions<S, E> {
   
   // 状态hook函数，用于定义和更新指定MVVM库的状态
   statesHook: {
-    create: <D>(state: D) => S,
+    create: <D>(data: D) => S,
     export: (state: S) => E,
 
     // 将状态转换为普通数据
@@ -109,7 +105,7 @@ export interface AlovaOptions<S, E> {
   },
 
   // 请求适配器
-  requestAdapter: RequestAdapter<any, any>,
+  requestAdapter: AlovaRequestAdapter<any, any, RequestInit>,
 
   // 请求超时时间
   timeout?: number,
@@ -165,20 +161,28 @@ declare class Alova<S, E> {
   Patch<R, T = unknown>(url: string, requestBody?: RequestBody, config?: MethodConfig<R, T>): Method<S, E, R, T>;
 }
 
+type SuccessHandler<R> = (responseSchema: AlovaResponseSchema<unknown, unknown, R>, ...args: any[]) => void;
+type ErrorHandler = (error: Error, ...args: any[]) => void;
+type CompleteHandler = (...args: any[]) => void;
 // hook通用配置
-interface UseHookConfig {
+interface UseHookConfig<R> {
   force?: boolean,   // 强制请求
   initialData?: any,     // 初始数据
+  onSuccess?: SuccessHandler<R>,
+  onError?: ErrorHandler,
+  onComplete?: CompleteHandler,
 }
 // useRequest配置类型
-interface RequestHookConfig extends UseHookConfig {
+interface RequestHookConfig<R> extends UseHookConfig<R> {
   immediate?: boolean,   // 开启immediate后，useRequest会立即发起一次请求
 }
 // useWatcher配置类型
-interface WatcherHookConfig extends UseHookConfig {
+interface WatcherHookConfig<R> extends UseHookConfig<R> {
   immediate?: boolean,  // 开启immediate后，useWatcher初始化时会自动发起一次请求
   debounce?: number, // 延迟多少毫秒后再发起请求
 }
+// useFetcher配置类型
+interface FetcherHookConfig<R> extends Pick<UseHookConfig<R>, 'force'> {}
 
 // Vue状态类型
 interface Ref<T = any> {
@@ -188,17 +192,6 @@ interface Ref<T = any> {
 type Dispatch<A> = (value: A) => void;
 type SetStateAction<S> = S | ((prevState: S) => S);
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
-type SuccessHandler<R> = (data: R, ...args: any[]) => void;
-type ErrorHandler = (error: Error, ...args: any[]) => void;
-type CompleteHandler = (...args: any[]) => void;
-interface Responser<R> {
-  successHandlers: SuccessHandler<R>[];
-  errorHandlers: ErrorHandler[];
-  completeHandlers: CompleteHandler[];
-  success(handler: SuccessHandler<R>): Responser<R>;
-  error(handler: ErrorHandler): Responser<R>;
-  complete(handler: CompleteHandler): Responser<R>;
-}
 
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
 type ExportedType<R, S> = S extends Ref ? Ref<R> : R;
@@ -209,7 +202,6 @@ type UseHookReturnType<R, S> = FrontRequestState<
   ExportedType<Progress, S>,
   ExportedType<Progress, S>
 > & {
-  responser: Responser<R>;
   abort: () => void;
   send: (...args: any[]) => Promise<R>;
 }
@@ -218,7 +210,6 @@ type UseFetchHookReturnType<S, E> = {
   error: UseHookReturnType<any, S>['error'],
   downloading: UseHookReturnType<any, S>['downloading'],
   uploading: UseHookReturnType<any, S>['uploading'],
-  responser: UseHookReturnType<any, S>['responser'],
   fetch: <R, T>(methodInstance: Method<S, E, R, T>) => void;
 }
 
@@ -226,7 +217,7 @@ type UseFetchHookReturnType<S, E> = {
 export declare function createAlova<S, E>(options: AlovaOptions<S, E>): Alova<S, E>;
 export declare  function useRequest<S, E, R, T>(methodHandler: Method<S, E, R, T> | (() => Method<S, E, R, T>), config?: RequestHookConfig): UseHookReturnType<R, S>;
 export declare function useWatcher<S, E, R, T>(handler: () => Method<S, E, R, T>, watchingStates: E[], config?: WatcherHookConfig): UseHookReturnType<R, S>;
-export declare function useFetcher<S, E>(alova: Alova<S, E>): UseFetchHookReturnType<S, E>;
+export declare function useFetcher<S, E>(alova: Alova<S, E>, config?: FetcherHookConfig): UseFetchHookReturnType<S, E>;
 export declare function invalidateCache<S, E, R, T>(methodInstance: Method<S, E, R, T>): void;
 // 以支持React和Vue的方式定义类型
 type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
@@ -236,10 +227,10 @@ export declare function setCacheData<S, E, R, T>(methodInstance: Method<S, E, R,
 
 // 混合多个响应器，并在这些响应器都成功时调用成功回调，如果其中一个错误则调用失败回调
 // 类似Promise.all
-export declare function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
+// export declare function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
 
 // 预定义的配置
-export declare function GlobalFetch(requestInit?: RequestInit): <R, T>(source: string, config: RequestConfig<R, T>, data?: any) => {
+export declare function GlobalFetch(defaultRequestInit?: RequestInit): <R, T, C>(adapterConfig: AlovaRequestAdapterConfig<R, T, C>) => {
   response: () => Promise<Response>;
   headers: () => Promise<void | Headers>;
   onDownload: (handler: (progress: Progress) => void) => void;

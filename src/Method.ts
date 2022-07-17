@@ -1,4 +1,4 @@
-import { MethodConfig, MethodType, RequestBody } from '../typings';
+import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import { getOptions, undefinedValue } from './utils/variables';
 
@@ -14,7 +14,7 @@ export const typePut = 'PUT';
 export const typePatch = 'PATCH';
 export const typeDelete = 'DELETE';
 export const typeOptions = 'OPTIONS';
-export const methodDefaultConfig: Record<MethodType, MethodConfig<any, any>> = {
+export const methodDefaultConfig: Record<MethodType, AlovaMethodConfig<any, any, RequestInit>> = {
   [typeGet]: cachedConfig,
   [typeHead]: submitConfig,
   [typePost]: submitConfig,
@@ -26,11 +26,11 @@ export const methodDefaultConfig: Record<MethodType, MethodConfig<any, any>> = {
 export default class Method<S, E, R, T> {
   public type: MethodType;
   public url: string;
-  public config: MethodConfig<R, T>;
+  public config: AlovaMethodConfig<R, T, RequestInit>;
   public requestBody?: RequestBody;
   public context: Alova<S, E>;
   public response: R;
-  constructor(type: MethodType, context: Alova<S, E>, url: string, config: MethodConfig<R, T> = {}, requestBody?: RequestBody) {
+  constructor(type: MethodType, context: Alova<S, E>, url: string, config: AlovaMethodConfig<R, T, RequestInit> = {}, requestBody?: RequestBody) {
     this.type = type;
     this.url = url;
     this.context = context;

@@ -1,9 +1,9 @@
-import { RequestConfig, ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
+import { AlovaRequestAdapterConfig, ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { getContext, getOptions, PromiseCls, promiseReject, promiseResolve, undefinedValue } from '../utils/variables';
-import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '../utils/helper';
+import { falseValue, getContext, getOptions, PromiseCls, promiseReject, promiseResolve, trueValue, undefinedValue } from '../utils/variables';
+import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structureResponseSchema } from '../utils/helper';
 
 
 /**
@@ -12,7 +12,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
  * @param forceRequest 忽略缓存
  * @returns 响应数据
  */
- export default function sendRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean) {
+ export default function sendRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, hitStorage = falseValue, currentData?: T) {
   const {
     type,
     url,
@@ -37,33 +37,33 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
         response: () => promiseResolve(response),
         headers: () => promiseResolve(undefined),
         abort: noop,
-        useCache: true,
+        useCache: trueValue,
       };
     }
   }
   
   // 发送请求前调用钩子函数
-  let requestConfig: RequestConfig<R, T> = {
+  let requestConfig: AlovaRequestAdapterConfig<R, T, RequestInit> = {
     url,
+    ...config,
     method: type,
     data: requestBody,
-    ...config,
     headers: config.headers || {},
     params: config.params || {},
   };
   requestConfig = beforeRequest(requestConfig) || requestConfig;
-  const {
-    e: expireMilliseconds, 
-    s: toStorage
-  } = getLocalCacheConfigParam(undefinedValue, requestConfig.localCache ?? localCache);
-
   // 将params对象转换为get字符串
   const {
     url: newUrl,
-    params,
-    data,
+    params = {},
+    localCache: newLocalCache,
     transformData = self,
   } = requestConfig;
+  const {
+    e: expireMilliseconds, 
+    s: toStorage
+  } = getLocalCacheConfigParam(undefinedValue, newLocalCache ?? localCache);
+
   let paramsStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&');
 
   // 将get参数拼接到url后面，注意url可能已存在参数
@@ -76,7 +76,10 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
   const baseURLWithSlash = baseURL.lastIndexOf('/') === baseURL.length - 1 ? baseURL.slice(0, -1) : baseURL;
   
   // 请求数据
-  const ctrls = requestAdapter(baseURLWithSlash + urlWithParams, requestConfig, data);
+  const ctrls = requestAdapter({
+    ...requestConfig,
+    url: baseURLWithSlash + urlWithParams,
+  });
 
   let responsedHandler: ResponsedHandler = noop;
   let responseErrorHandler: ResponseErrorHandler = noop;
@@ -97,7 +100,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
   }
   return {
     ...ctrls,
-    useCache: false,
+    useCache: falseValue,
     response: () => PromiseCls.all([
       ctrls.response(),
       ctrls.headers(),
@@ -108,7 +111,9 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
         if (responsedHandlePayload instanceof PromiseCls) {
           return responsedHandlePayload.then(data => {
             if (headers) {
-              data = transformData(data, headers);
+              data = transformData(
+                structureResponseSchema(data, headers, hitStorage, currentData)
+              );
               setResponseCache(id, methodKey, data, expireMilliseconds);
               toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage);
             }
@@ -116,7 +121,9 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
           });
         } else {
           if (headers) {
-            responsedHandlePayload = transformData(responsedHandlePayload, headers);
+            responsedHandlePayload = transformData(
+              structureResponseSchema(responsedHandlePayload, headers, hitStorage, currentData)
+            );
             setResponseCache(id, methodKey, responsedHandlePayload, expireMilliseconds);
             toStorage && persistResponse(id, methodKey, responsedHandlePayload, expireMilliseconds, storage);
           }

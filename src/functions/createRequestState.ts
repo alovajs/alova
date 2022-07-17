@@ -1,12 +1,11 @@
 // import { Ref } from 'vue';
-import { Progress, FrontRequestState, ExportedType } from '../../typings';
+import { Progress, FrontRequestState, ExportedType, UseHookConfig } from '../../typings';
 import Alova from '../Alova';
 import Method from '../Method';
-import Responser from '../Responser';
 import { getResponseCache, removeStateCache, setResponseCache, setStateCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { debounce, getLocalCacheConfigParam, key, noop } from '../utils/helper';
-import { STORAGE_RESTORE, undefinedValue } from '../utils/variables';
+import { falseValue, STORAGE_RESTORE, trueValue, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
 // type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    
@@ -22,23 +21,21 @@ import useHookToSendRequest from './useHookToSendRequest';
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态
  */
-
-type HandleRequest<R> = (
-  originalState: FrontRequestState,
-  responser: Responser<R>,
-  setAbort: (abort: () => void) => void,
-) => void;
 export default function createRequestState<S, E, R, T>(
   {
     id,
     options,
     storage,
   }: Alova<S, E>,
-  handleRequest: HandleRequest<R>,
+  handleRequest: (
+    originalState: FrontRequestState,
+    hitStorage: boolean,
+    setAbort: (abort: () => void) => void
+  ) => void,
   methodInstance?: Method<S, E, R, T>,
   initialData?: any,
   watchedStates?: E[],
-  immediate = true,
+  immediate = trueValue,
   debounceDelay = 0
 ) {
   const {
@@ -50,14 +47,15 @@ export default function createRequestState<S, E, R, T>(
   // 如果有持久化数据则先使用它
   const methodKey = methodInstance ? key(methodInstance) : undefinedValue;
   const persistentResponse = methodKey ? getPersistentResponse(id, methodKey, storage) : undefinedValue;
-  const rawData = persistentResponse === undefinedValue ? initialData : persistentResponse;
+  const hitStorage = persistentResponse !== undefinedValue;   // 命中持久化数据
+  const rawData = hitStorage ? persistentResponse : initialData;
 
   const progress = {
     total: 0,
     loaded: 0,
   };
   const originalState = {
-    loading: create(false),
+    loading: create(falseValue),
     data: create(rawData),
     error: create(undefinedValue as Error | undefined),
     downloading: create({ ...progress }),
@@ -81,18 +79,17 @@ export default function createRequestState<S, E, R, T>(
       cacheMode === STORAGE_RESTORE && !getResponseCache(id, methodKey) && setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
     }
   }
-  const responser = new Responser<R>();
   let abortFn = noop;
 
   // 调用请求处理回调函数
-  let handleRequestCalled = false;
+  let handleRequestCalled = falseValue;
   const wrapEffectRequest = () => {
     handleRequest(
       originalState,
-      responser,
+      hitStorage,
       abort => abortFn = abort,
     );
-    handleRequestCalled = true;
+    handleRequestCalled = trueValue;
   };
 
   watchedStates !== undefinedValue ? effectRequest(
@@ -113,15 +110,14 @@ export default function createRequestState<S, E, R, T>(
   };
   return {
     ...exportedState,
-    responser,
     abort: () => abortFn(),
     
     // 通过执行该方法来手动发起请求
-    send<T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, responserHandlerArgs?: any[], updateCacheState?: boolean) {
+    send<T>(methodInstance: Method<S, E, R, T>, useHookConfig: UseHookConfig<R>, forceRequest: boolean, responserHandlerArgs?: any[], updateCacheState?: boolean) {
       const { abort, p } = useHookToSendRequest(
         methodInstance,
         originalState,
-        responser,
+        useHookConfig,
         responserHandlerArgs,
         forceRequest,
         updateCacheState

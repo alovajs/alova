@@ -6,7 +6,7 @@ import {
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { RequestConfig } from '../../../typings';
+import { AlovaRequestAdapterConfig, AlovaResponseSchema } from '../../../typings';
 import { Result } from '../result.type';
 import server from '../../server';
 
@@ -14,7 +14,7 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 function getInstance(
-  beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
+  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit>) => void,
   responseExpect?: (jsonPromise: Promise<any>) => void,
   resErrorExpect?: (err: Error) => void,
 ) {
@@ -63,11 +63,11 @@ describe('use useRequet hook to send GET with vue', function() {
       headers: {
         'Content-Type': 'application/json',
       },
-      transformData(result: Result, _) {
-        expect(result.code).toBe(200);
-        expect(result.data.path).toBe('/unit-test');
-        expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-        return result.data;
+      transformData({ data, currentData }: AlovaResponseSchema<Result>) {
+        expect(data.code).toBe(200);
+        expect(data.data.path).toBe('/unit-test');
+        expect(data.data.params).toEqual({ a: 'a', b: 'str' });
+        return data.data;
       },
       localCache: 100 * 1000,
     });
