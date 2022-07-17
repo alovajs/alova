@@ -9,7 +9,7 @@ import { getContext } from '../utils/variables';
 * 让对应的返回数据缓存失效
 * @param methodInstance 请求方法对象
 */
-export default function invalidateCache<S, E, R, T>(methodInstance: Method<S, E, R, T>) {
+export default function invalidateCache<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) {
   const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
   removeResponseCache(id, methodKey);

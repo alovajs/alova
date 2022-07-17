@@ -3,7 +3,7 @@ import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { falseValue, getContext, getOptions, PromiseCls, promiseReject, promiseResolve, trueValue, undefinedValue } from '../utils/variables';
-import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structureResponseSchema } from '../utils/helper';
+import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '../utils/helper';
 
 
 /**
@@ -12,7 +12,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structu
  * @param forceRequest 忽略缓存
  * @returns 响应数据
  */
- export default function sendRequest<S, E, R, T>(methodInstance: Method<S, E, R, T>, forceRequest: boolean, hitStorage = falseValue, currentData?: T) {
+ export default function sendRequest<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, forceRequest: boolean) {
   const {
     type,
     url,
@@ -43,7 +43,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structu
   }
   
   // 发送请求前调用钩子函数
-  let requestConfig: AlovaRequestAdapterConfig<R, T, RequestInit> = {
+  let requestConfig: AlovaRequestAdapterConfig<R, T, RC, RH> = {
     url,
     ...config,
     method: type,
@@ -60,7 +60,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structu
     transformData = self,
   } = requestConfig;
   const {
-    e: expireMilliseconds, 
+    e: expireMilliseconds,
     s: toStorage
   } = getLocalCacheConfigParam(undefinedValue, newLocalCache ?? localCache);
 
@@ -81,7 +81,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structu
     url: baseURLWithSlash + urlWithParams,
   });
 
-  let responsedHandler: ResponsedHandler = noop;
+  let responsedHandler: ResponsedHandler<RE> = noop;
   let responseErrorHandler: ResponseErrorHandler = noop;
   if (isFn(responsed)) {
     responsedHandler = responsed;
@@ -89,7 +89,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structu
     const {
       success: successHandler,
       error: errorHandler,
-    } = responsed as ResponsedHandlerRecord;
+    } = responsed as ResponsedHandlerRecord<RE>;
     responsedHandler = isFn(successHandler) ? successHandler : responsedHandler;
     responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
   }
@@ -106,14 +106,11 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structu
       ctrls.headers(),
     ]).then(([rawResponse, headers]) => {
       try {
-        let responsedHandlePayload = responsedHandler(rawResponse as any);
-        
+        let responsedHandlePayload = responsedHandler(rawResponse);
         if (responsedHandlePayload instanceof PromiseCls) {
           return responsedHandlePayload.then(data => {
             if (headers) {
-              data = transformData(
-                structureResponseSchema(data, headers, hitStorage, currentData)
-              );
+              data = transformData(data, headers);
               setResponseCache(id, methodKey, data, expireMilliseconds);
               toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage);
             }
@@ -121,9 +118,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, structu
           });
         } else {
           if (headers) {
-            responsedHandlePayload = transformData(
-              structureResponseSchema(responsedHandlePayload, headers, hitStorage, currentData)
-            );
+            responsedHandlePayload = transformData(responsedHandlePayload, headers);
             setResponseCache(id, methodKey, responsedHandlePayload, expireMilliseconds);
             toStorage && persistResponse(id, methodKey, responsedHandlePayload, expireMilliseconds, storage);
           }

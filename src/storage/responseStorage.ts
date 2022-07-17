@@ -11,7 +11,7 @@ const buildNamespacedStorageKey = (namespace: string, key: string) => responseSt
  * @param persistMilliseconds 持久化时间
  * @param storage 存储对象
  */
-export function persistResponse(namespace: string, key: string, response: any, persistMilliseconds: number, storage: Storage) {
+export const persistResponse = (namespace: string, key: string, response: any, persistMilliseconds: number, storage: Storage) => {
   // 小于0则不持久化了
   if (persistMilliseconds <= 0 || !response) {
     return;
@@ -29,7 +29,7 @@ export function persistResponse(namespace: string, key: string, response: any, p
  * @param key 存储的key
  * @param storage 存储对象
  */
-export function getPersistentResponse(namespace: string, key: string, storage: Storage) {
+export const getPersistentResponse = (namespace: string, key: string, storage: Storage) => {
   const namespacedResponseStorageKey = buildNamespacedStorageKey(namespace, key);
   const storageStr = storage.getItem(namespacedResponseStorageKey);
   if (storageStr) {
@@ -49,6 +49,6 @@ export function getPersistentResponse(namespace: string, key: string, storage: S
  * @param key 存储的key
  * @param storage 存储对象
  */
-export function removePersistentResponse(namespace: string, key: string, storage: Storage) {
+export const removePersistentResponse = (namespace: string, key: string, storage: Storage) => {
   storage.removeItem(buildNamespacedStorageKey(namespace, key));
 }

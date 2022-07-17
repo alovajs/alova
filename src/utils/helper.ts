@@ -1,5 +1,4 @@
 import {
-  AlovaResponseSchema,
   LocalCacheConfig,
   LocalCacheConfigParam,
   SerializedMethod
@@ -46,7 +45,7 @@ export const isPlainObject = (arg: any) => Object.prototype.toString.call(arg) =
  * 获取请求方式的key值
  * @returns {string} 此请求方式的key值
  */
-export const key = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => {
+export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const { type, url, requestBody } = methodInstance;
   const { params, headers } = getConfig(methodInstance);
   return JSONStringify([
@@ -63,27 +62,17 @@ export const key = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => {
  * @param methodInstance 请求方法对象
  * @returns 请求方法的序列化对象
  */
-export const serializeMethod = <S, E, R, T>(methodInstance: Method<S, E, R, T>) => {
+export const serializeMethod = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const {
     type,
     url,
     config,
     requestBody
   } = methodInstance;
-
-  const serializingConfig: Record<string, any> = {};
-  const serializingConfigKeys = ['params', 'headers', 'timeout', 'localCache'] as const;
-  type SerializingConfigKey = typeof serializingConfigKeys[number];
-  Object.keys(config).forEach(key => {
-    if (serializingConfigKeys.includes(key as SerializingConfigKey)) {
-      serializingConfig[key] = config[key as SerializingConfigKey];
-    }
-  });
-
   return {
     type,
     url,
-    config: serializingConfig,
+    config,
     requestBody
   };
 }
@@ -94,12 +83,12 @@ export const serializeMethod = <S, E, R, T>(methodInstance: Method<S, E, R, T>) 
  * @param methodInstance 请求方法对象
  * @returns 请求方法对象
  */
-export const deserializeMethod = <S, E>({
+export const deserializeMethod = <S, E, RC, RE, RH>({
   type,
   url,
   config,
   requestBody
-}: SerializedMethod, alova: Alova<S, E>) => new Method(type, alova, url, config, requestBody);
+}: SerializedMethod<any, any, RC, RE, RH>, alova: Alova<S, E, RC, RE, RH>) => new Method<S, E, any, any, RC, RE, RH>(type, alova, url, config, requestBody);
 
 /**
  * 创建防抖函数，只有enable为trueValue时会进入防抖环节，否则将立即触发此函数
@@ -132,7 +121,7 @@ export const debounce = (fn: Function, delay: number, enable: () => boolean) => 
  * @param localCache 本地缓存参数
  * @returns 统一的缓存参数对象
  */
-export const getLocalCacheConfigParam = <S, E, R, T>(methodInstance?: Method<S, E, R, T>, localCache?: LocalCacheConfigParam) => {
+export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance?: Method<S, E, R, T, RC, RE, RH>, localCache?: LocalCacheConfigParam) => {
   const _localCache = localCache !== undefinedValue
     ? localCache 
     : methodInstance 
@@ -153,26 +142,3 @@ export const getLocalCacheConfigParam = <S, E, R, T>(methodInstance?: Method<S, 
     s: [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode),
   };
 }
-
-
-/**
- * 构造响应框架结构数据
- * @param data 数据
- * @param headers 请求头信息
- * @param config 请求配置参数
- * @param hitStorage 是否命中本地存储
- * @param hitCache 是否命中缓存
- * @param currentData 当前数据
- * @returns 结构数据
- */
-export const structureResponseSchema = <T, H, CD>(
-  data: T,
-  headers: H,
-  hitStorage: boolean,
-  currentData: CD,
-): AlovaResponseSchema<T, H, CD> => ({
-  data,
-  headers,
-  hitStorage,
-  currentData,
-});

@@ -4,12 +4,12 @@ import { deserializeMethod, noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
 import { PromiseCls, setTimeoutFn, trueValue } from './utils/variables';
 
-const alovas = [] as Alova<any, any>[];
+const alovas = [] as Alova<any, any, any, any, any>[];
 /**
  * 收集Alova实例
  * @param instance alova实例
  */
-export const addAlova = <S, E>(instance: Alova<S, E>) => alovas.push(instance);
+export const addAlova = <S, E, RC, RE, RH>(instance: Alova<S, E, RC, RE, RH>) => alovas.push(instance);
 
 
 /**

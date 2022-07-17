@@ -21,18 +21,17 @@ import useHookToSendRequest from './useHookToSendRequest';
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态
  */
-export default function createRequestState<S, E, R, T>(
+export default function createRequestState<S, E, R, T, RC, RE, RH>(
   {
     id,
     options,
     storage,
-  }: Alova<S, E>,
+  }: Alova<S, E, RC, RE, RH>,
   handleRequest: (
     originalState: FrontRequestState,
-    hitStorage: boolean,
     setAbort: (abort: () => void) => void
   ) => void,
-  methodInstance?: Method<S, E, R, T>,
+  methodInstance?: Method<S, E, R, T, RC, RE, RH>,
   initialData?: any,
   watchedStates?: E[],
   immediate = trueValue,
@@ -84,11 +83,7 @@ export default function createRequestState<S, E, R, T>(
   // 调用请求处理回调函数
   let handleRequestCalled = falseValue;
   const wrapEffectRequest = () => {
-    handleRequest(
-      originalState,
-      hitStorage,
-      abort => abortFn = abort,
-    );
+    handleRequest(originalState, abort => abortFn = abort);
     handleRequestCalled = trueValue;
   };
 
@@ -113,13 +108,12 @@ export default function createRequestState<S, E, R, T>(
     abort: () => abortFn(),
     
     // 通过执行该方法来手动发起请求
-    send<T>(methodInstance: Method<S, E, R, T>, useHookConfig: UseHookConfig<R>, forceRequest: boolean, responserHandlerArgs?: any[], updateCacheState?: boolean) {
+    send(methodInstance: Method<S, E, R, T, RC, RE, RH>, useHookConfig: UseHookConfig<R>, responserHandlerArgs?: any[], updateCacheState?: boolean) {
       const { abort, p } = useHookToSendRequest(
         methodInstance,
         originalState,
         useHookConfig,
         responserHandlerArgs,
-        forceRequest,
         updateCacheState
       );
       abortFn = abort;

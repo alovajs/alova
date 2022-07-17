@@ -23,7 +23,7 @@ export { cacheMode } from './utils/variables';
  * @returns Alova实例
  */
 let networkIsListen = falseValue;
-export function createAlova<S, E>(options: AlovaOptions<S, E>) {
+export function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) {
   const alova = new Alova(options);
   addAlova(alova);
   if (!networkIsListen) {

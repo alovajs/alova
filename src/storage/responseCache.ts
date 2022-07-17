@@ -14,7 +14,7 @@ const responseCache: Record<string, Record<string, [
  * @param key 请求key值
  * @returns 缓存的响应数据，如果没有则返回undefined
  */
-export function getResponseCache(namespace: string, key: string) {
+export const getResponseCache = (namespace: string, key: string) => {
   const cachedResponse = responseCache[namespace];
   if (!cachedResponse) {
     return;
@@ -38,7 +38,7 @@ export function getResponseCache(namespace: string, key: string) {
  * @param data 缓存数据
  * @param cacheMilliseconds 过期时间，单位毫秒
  */
-export function setResponseCache(namespace: string, key: string, data: any, cacheMilliseconds = 0) {
+export const setResponseCache = (namespace: string, key: string, data: any, cacheMilliseconds = 0) => {
   // 小于0则不缓存了
   if (cacheMilliseconds <= 0 || !data) {
     return;
@@ -55,7 +55,7 @@ export function setResponseCache(namespace: string, key: string, data: any, cach
  * @param baseURL 基础URL
  * @param key 请求key值
  */
-export function removeResponseCache(namespace: string, key: string) {
+export const removeResponseCache = (namespace: string, key: string) => {
   const cachedResponse = responseCache[namespace];
   if (cachedResponse) {
     delete cachedResponse[key];
@@ -73,7 +73,7 @@ const stateCache: Record<string, Record<string, FrontRequestState>> = {};
  * @param key 请求key值
  * @returns 缓存的响应数据，如果没有则返回undefined
  */
-export function getStateCache(namespace: string, key: string) {
+export const getStateCache = (namespace: string, key: string) => {
   const cachedState = stateCache[namespace];
   if (!cachedState) {
     return undefinedValue;
@@ -87,7 +87,7 @@ export function getStateCache(namespace: string, key: string) {
  * @param key 请求key值
  * @param data 缓存数据
  */
-export function setStateCache(namespace: string, key: string, data: FrontRequestState) {
+export const setStateCache = (namespace: string, key: string, data: FrontRequestState) => {
   const cachedState = stateCache[namespace] = stateCache[namespace] || {};
   cachedState[key] = data;
 }
@@ -97,7 +97,7 @@ export function setStateCache(namespace: string, key: string, data: FrontRequest
  * @param baseURL 基础URL
  * @param key 请求key值
  */
-export function removeStateCache(namespace: string, key: string) {
+export const removeStateCache = (namespace: string, key: string) => {
   const cachedState = stateCache[namespace];
   if (cachedState) {
     delete cachedState[key];

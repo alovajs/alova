@@ -9,7 +9,7 @@ const isBodyData = (data: any): data is BodyInit => {
   return isString(data) || isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
 }
 export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
-  return function<R, T>(adapterConfig: AlovaRequestAdapterConfig<R, T, RequestInit>) {
+  return function(adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) {
     // 设置了中断时间，则在指定时间后中断请求
     const timeout = adapterConfig.timeout || 0;
     const ctrl = new AbortController();

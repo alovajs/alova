@@ -1,6 +1,6 @@
 import Method from '../Method';
 import { pushSilentRequest } from '../storage/silentStorage';
-import { key, noop, serializeMethod, structureResponseSchema } from '../utils/helper';
+import { key, noop, serializeMethod } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
 import { FrontRequestState, UseHookConfig } from '../../typings';
@@ -17,22 +17,20 @@ import { falseValue, getConfig, getContext, nullValue, promiseReject, promiseRes
  * @param updateCacheState 是否更新缓存状态，一般在useFetcher时设置为trueValue
  * @returns 请求状态
  */
- export default function useHookToSendRequest<S, E, R, T>(
-  methodInstance: Method<S, E, R, T>,
+ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
+  methodInstance: Method<S, E, R, T, RC, RE, RH>,
   originalState: FrontRequestState,
   useHookConfig: UseHookConfig<R>,
   responserHandlerArgs: any[] = [],
-  hitStorage = falseValue,
-  forceRequest = falseValue,
   updateCacheState = falseValue,
 ) {
+  const forceRequest = !!useHookConfig.force;
   const { id, options, storage } = getContext(methodInstance);
-  const { update, dehydrate } = options.statesHook;
+  const { update } = options.statesHook;
   const { silent, enableDownload, enableUpload } = getConfig(methodInstance);
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const silentMode = silent && !updateCacheState;   // 在fetch数据时不能静默请求
   const methodKey = key(methodInstance);
-  const dehydratedData = dehydrate(originalState.data) as T;
   const {
     onSuccess,
     onError,
@@ -40,13 +38,13 @@ import { falseValue, getConfig, getContext, nullValue, promiseReject, promiseRes
   } = useHookConfig;
   const runArgsHandler = (
     handler: Function = noop,
-    args?: any
-  ) => handler(args, ...responserHandlerArgs);
+    ...args: any[]
+  ) => handler(...args, ...responserHandlerArgs);
   if (silentMode) {
     myAssert(!(methodInstance.requestBody instanceof FormData), 'FormData is not supported when silent is trueValue');
     // 需要异步执行，同步执行会导致无法收集各类回调函数
     setTimeoutFn(() => {
-      runArgsHandler(onSuccess, structureResponseSchema(undefinedValue, {}, hitStorage, dehydratedData));
+      runArgsHandler(onSuccess, undefinedValue);
       runArgsHandler(onComplete);
     });
     
@@ -64,7 +62,7 @@ import { falseValue, getConfig, getContext, nullValue, promiseReject, promiseRes
   }
 
   // 非静默模式，且未使用缓存才需要更新loading状态
-  const ctrl = sendRequest(methodInstance, forceRequest, hitStorage, dehydratedData);
+  const ctrl = sendRequest(methodInstance, forceRequest);
   const {
     response,
     onDownload = noop,

@@ -14,7 +14,7 @@ export const typePut = 'PUT';
 export const typePatch = 'PATCH';
 export const typeDelete = 'DELETE';
 export const typeOptions = 'OPTIONS';
-export const methodDefaultConfig: Record<MethodType, AlovaMethodConfig<any, any, RequestInit>> = {
+export const methodDefaultConfig: Record<MethodType, AlovaMethodConfig<any, any, any, any>> = {
   [typeGet]: cachedConfig,
   [typeHead]: submitConfig,
   [typePost]: submitConfig,
@@ -23,14 +23,14 @@ export const methodDefaultConfig: Record<MethodType, AlovaMethodConfig<any, any,
   [typeDelete]: submitConfig,
   [typeOptions]: submitConfig,
 };
-export default class Method<S, E, R, T> {
+export default class Method<S, E, R, T, RC, RE, RH> {
   public type: MethodType;
   public url: string;
-  public config: AlovaMethodConfig<R, T, RequestInit>;
+  public config: AlovaMethodConfig<R, T, RC, RH>;
   public requestBody?: RequestBody;
-  public context: Alova<S, E>;
+  public context: Alova<S, E, RC, RE, RH>;
   public response: R;
-  constructor(type: MethodType, context: Alova<S, E>, url: string, config: AlovaMethodConfig<R, T, RequestInit> = {}, requestBody?: RequestBody) {
+  constructor(type: MethodType, context: Alova<S, E, RC, RE, RH>, url: string, config?: AlovaMethodConfig<R, T, RC, RH>, requestBody?: RequestBody) {
     this.type = type;
     this.url = url;
     this.context = context;
@@ -46,7 +46,7 @@ export default class Method<S, E, R, T> {
     this.config = {
       ...(methodDefaultConfig[type] || {}),
       ...contextConcatConfig,
-      ...config,
+      ...(config || {}),
     };
     this.requestBody = requestBody;
   }

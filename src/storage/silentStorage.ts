@@ -12,7 +12,7 @@ const silentRequestStorageKey = '__$$a_sreqssk$$__';
  * @param config 存储的配置
  * @param storage 存储对象
  */
-export function pushSilentRequest(namespace: string, key: string, config: Record<string, any>, storage: Storage) {
+export const pushSilentRequest = (namespace: string, key: string, config: Record<string, any>, storage: Storage) => {
   const namespacedSilentStorageKey = silentRequestStorageKey + namespace;
   key = '__$$sreq$$__' + namespace + key;
   storage.setItem(key, JSONStringify(config));
@@ -26,10 +26,10 @@ export function pushSilentRequest(namespace: string, key: string, config: Record
  * @param namespace 命名空间，即alovaId
  * @returns 返回一个对象，包含serializedMethod和remove方法
  */
-export function getSilentRequest(namespace: string, storage: Storage) {
+export const getSilentRequest = (namespace: string, storage: Storage) => {
   const namespacedSilentStorageKey = silentRequestStorageKey + namespace;
   const storageKeys = JSONParse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
-  let serializedMethod = undefinedValue as SerializedMethod | undefined;
+  let serializedMethod = undefinedValue as SerializedMethod<any, any, any, any, any> | undefined;
   let remove = noop;
   const keys = Object.keys(storageKeys);
   if (keys.length > 0) {

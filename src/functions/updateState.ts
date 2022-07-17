@@ -13,7 +13,7 @@ type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
  * @param method 请求方法对象
  * @param handleUpdate 更新回调
  */
-export default function updateState<S, E, R, T>(methodInstance: Method<S, E, R, T>, handleUpdate: (data: OriginalType<R, S>) => void) {
+export default function updateState<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, handleUpdate: (data: OriginalType<R, S>) => void) {
   const { id } = getContext(methodInstance);
   const methodKey = key(methodInstance);
   const states = getStateCache(id, methodKey);
