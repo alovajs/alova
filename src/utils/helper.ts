@@ -39,7 +39,29 @@ export const isNumber = (arg: any): arg is number => typeof arg === 'number' && 
 
 
 // 判断是否为普通对象
-export const isPlainObject = (arg: any) => Object.prototype.toString.call(arg) === '[object Object]';
+export const isPlainObject = (arg: any): arg is Object => Object.prototype.toString.call(arg) === '[object Object]';
+
+// 判断是否为某个类的实例
+export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls;
+
+
+// type ObjectPromise<I> = I extends undefined ? {} : I;
+// export const assign = <T extends unknown[] | []>(...args: T) => {
+//   type T0 = ObjectPromise<T[0]>;
+//   type T1 = ObjectPromise<T[1]>;
+//   type T2 = ObjectPromise<T[2]>;
+//   type T3 = ObjectPromise<T[3]>;
+//   type T4 = ObjectPromise<T[4]>;
+//   type T5 = ObjectPromise<T[5]>;
+//   type T6 = ObjectPromise<T[6]>;
+//   type T7 = ObjectPromise<T[7]>;
+//   type T8 = ObjectPromise<T[8]>;
+//   type T9 = ObjectPromise<T[9]>;
+//   type T10 = ObjectPromise<T[10]>;
+//   // convert union type to intersection type
+//   return 1 as any as T0 & T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8 & T9 & T10;
+// };
+
 
 /**
  * 获取请求方式的key值

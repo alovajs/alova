@@ -17,6 +17,9 @@ export default function useFetcher<S, E, R, RC, RE, RH>(alova: Alova<S, E, RC, R
     error: props.error,
     downloading: props.downloading,
     uploading: props.uploading,
+    onSuccess: props.onSuccess,
+    onError: props.onError,
+    onComplete: props.onComplete,
     
     // 通过执行该方法来拉取数据
     // fetch一定会发送请求。且如果当前请求的数据有管理对应的状态，则会更新这个状态

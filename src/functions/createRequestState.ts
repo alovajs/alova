@@ -1,11 +1,12 @@
 // import { Ref } from 'vue';
-import { Progress, FrontRequestState, ExportedType, UseHookConfig } from '../../typings';
+import { Progress, FrontRequestState, ExportedType, UseHookConfig, SuccessHandler, ErrorHandler, CompleteHandler } from '../../typings';
 import Alova from '../Alova';
 import Method from '../Method';
-import { getResponseCache, removeStateCache, setResponseCache, setStateCache } from '../storage/responseCache';
+import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
+import { removeStateCache, setStateCache } from '../storage/stateCache';
 import { debounce, getLocalCacheConfigParam, key, noop } from '../utils/helper';
-import { falseValue, STORAGE_RESTORE, trueValue, undefinedValue } from '../utils/variables';
+import { falseValue, pushItem, STORAGE_RESTORE, trueValue, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
 // type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    
@@ -29,6 +30,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
   }: Alova<S, E, RC, RE, RH>,
   handleRequest: (
     originalState: FrontRequestState,
+    successHandlers: SuccessHandler<R>[],
+    errorHandlers: ErrorHandler[],
+    completeHandlers: CompleteHandler[],
     setAbort: (abort: () => void) => void
   ) => void,
   methodInstance?: Method<S, E, R, T, RC, RE, RH>,
@@ -78,12 +82,16 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
       cacheMode === STORAGE_RESTORE && !getResponseCache(id, methodKey) && setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
     }
   }
+
+  const successHandlers = [] as SuccessHandler<R>[];
+  const errorHandlers = [] as ErrorHandler[];
+  const completeHandlers = [] as CompleteHandler[];
   let abortFn = noop;
 
   // 调用请求处理回调函数
   let handleRequestCalled = falseValue;
   const wrapEffectRequest = () => {
-    handleRequest(originalState, abort => abortFn = abort);
+    handleRequest(originalState, successHandlers, errorHandlers, completeHandlers, abort => abortFn = abort);
     handleRequestCalled = trueValue;
   };
 
@@ -105,6 +113,15 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
   };
   return {
     ...exportedState,
+    onSuccess(handler: SuccessHandler<R>) {
+      pushItem(successHandlers, handler);
+    },
+    onError(handler: ErrorHandler) {
+      pushItem(errorHandlers, handler);
+    },
+    onComplete(handler: CompleteHandler) {
+      pushItem(completeHandlers, handler);
+    },
     abort: () => abortFn(),
     
     // 通过执行该方法来手动发起请求
@@ -113,6 +130,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
         methodInstance,
         originalState,
         useHookConfig,
+        successHandlers,
+        errorHandlers,
+        completeHandlers,
         responserHandlerArgs,
         updateCacheState
       );

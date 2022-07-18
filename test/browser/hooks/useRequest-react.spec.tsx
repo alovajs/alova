@@ -5,17 +5,17 @@ import {
   useRequest,
 } from '../../../src';
 import ReactHook from '../../../src/predefine/ReactHook';
-import { RequestConfig } from '../../../typings';
+import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
 import server from '../../server';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { getStateCache } from '../../../src/storage/responseCache';
+import { getStateCache } from '../../../src/storage/stateCache';
 import { key } from '../../../src/utils/helper';
 
 
 function getInstance(
-  beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
+  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
   responseExpect?: (jsonPromise: Promise<any>) => void,
   resErrorExpect?: (err: Error) => void,
 ) {
@@ -125,8 +125,8 @@ describe('useRequet hook with react', function() {
     const alova = getInstanceSyncResponsed();
     const Get = alova.Get<{mock: string}>('/unit-test');
     function Page() {
-      const { data, responser } = useRequest(Get);
-      responser.success(() => {
+      const { data, onSuccess } = useRequest(Get);
+      onSuccess(() => {
         expect(data.mock).toBe('mockdata');
       });
       return <div>{data}</div>;

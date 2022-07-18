@@ -6,7 +6,7 @@ import {
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { RequestConfig } from '../../../typings';
+import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
 import server from '../../server';
 
@@ -14,7 +14,7 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 function getInstance(
-  beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
+  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
   responseExpect?: (jsonPromise: Promise<any>) => void,
   resErrorExpect?: (err: Error) => void,
 ) {

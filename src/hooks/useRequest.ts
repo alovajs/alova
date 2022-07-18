@@ -17,9 +17,9 @@ export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method
     : methodHandler;
   const props = createRequestState(
     getContext(methodInstance), 
-    (originalState, setAbort) => {
+    (originalState, successHandler, errorHandlers, completeHandlers, setAbort) => {
       if (immediate) {
-        const { abort, p: responseHandlePromise } = useHookToSendRequest(methodInstance, originalState, config, []);
+        const { abort, p: responseHandlePromise } = useHookToSendRequest(methodInstance, originalState, config, successHandler, errorHandlers, completeHandlers);
         // 将控制器传出去供使用者调用
         setAbort(abort);
         responseHandlePromise.catch(noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑

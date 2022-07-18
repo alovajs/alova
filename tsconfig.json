@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "resolveJsonModule": true,
-    "target": "ES6",
+    "target": "es2018",
     "module": "commonjs",
     "strict": true,
     "noImplicitAny": true,
@@ -19,9 +19,9 @@
     "skipDefaultLibCheck": false,
     "inlineSourceMap": false,
     "importHelpers": true,
-    "removeComments": true,
+    "removeComments": false,
     "esModuleInterop": true,
-    "jsx": "react"
+    "jsx": "react",
   },
   "paths": {
     "@/*": [

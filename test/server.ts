@@ -38,13 +38,17 @@ const result = (code: number, req: any, res: any, ctx: any, hasBody = false, ext
 }
 
 const baseURL = 'http://localhost:3000';
-let count = 0;
+const countMap = {} as Record<string, number>;
 export default setupServer(
   rest.get(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx)),
   rest.get(baseURL + '/unit-test-10s', (req, res, ctx) => {
     return new Promise(r => setTimeout(() => r(result(200, req, res, ctx)), 10000));
   }),
-  rest.get(baseURL + '/unit-test-count', (req, res, ctx) => result(200, req, res, ctx, false, { count: count++ })),
+  rest.get(baseURL + '/unit-test-count', (req, res, ctx) => {
+    const key = req.url.searchParams.get('countKey') || '';
+    countMap[key] = countMap[key] || 0;
+    return result(200, req, res, ctx, false, { count: countMap[key]++ });
+  }),
   rest.get(baseURL + '/unit-test-404', () => {
     throw new Error('404');
   }),
@@ -55,3 +59,13 @@ export default setupServer(
   rest.patch(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.options(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
 );
+
+
+export const untilCbCalled = <T>(
+  setCb: (cb: (arg: T) => void, ...others: any[]) => void,
+  ...args: any[]
+) => new Promise<T>(resolve => {
+  setCb(d => {
+    resolve(d);
+  }, ...args);
+});

@@ -63,7 +63,7 @@ MVVM库的请求场景管理库。
 
 ## 特性
 1. React/Vue请求非异步用法
-2. 学习成本低，与axios相似的API
+2. 与axios相似的api设计，简单熟悉
 3. 响应数据状态化
 4. 响应数据缓存
 5. 数据预拉取
@@ -72,7 +72,7 @@ MVVM库的请求场景管理库。
 8. 请求防抖
 9. Gzip3+kb轻量级
 10. typescript支持
-11. 支持tree shaking
+11. tree shaking支持
 12. 状态更新追踪
 
 ## 各类库的体积对比

@@ -11,6 +11,7 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "release": "npm test && npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags",
     "lint": "eslint -c .eslintrc.js 'src/**/*.ts'",
     "lint:fix": "eslint -c .eslintrc.js 'src/**/*.ts' --fix",
@@ -27,7 +28,7 @@
     "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
     "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
     "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook",
-    "coveralls": "jest --coverage && coveralls < coverage/lcov.info"
+    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info"
   },
   "author": "JOU-amjs",
   "license": "MIT",

@@ -155,15 +155,12 @@ declare class Alova<S, E, RC, RE, RH> {
 }
 
 type SuccessHandler<R> = (data: R, ...args: any[]) => void;
-type ErrorHandler = (error: Error, ...args: any[]) => void;
+type ErrorHandler = (error: any, ...args: any[]) => void;
 type CompleteHandler = (...args: any[]) => void;
 // hook通用配置
 interface UseHookConfig<R> {
   force?: boolean,   // 强制请求
   initialData?: any,     // 初始数据
-  onSuccess?: SuccessHandler<R>,
-  onError?: ErrorHandler,
-  onComplete?: CompleteHandler,
 }
 // useRequest配置类型
 interface RequestHookConfig<R> extends UseHookConfig<R> {
@@ -195,8 +192,11 @@ type UseHookReturnType<R, S> = FrontRequestState<
   ExportedType<Progress, S>,
   ExportedType<Progress, S>
 > & {
-  abort: () => void;
-  send: (...args: any[]) => Promise<R>;
+  abort: () => void,
+  send: (...args: any[]) => Promise<R>,
+  onSuccess: (handler: SuccessHandler<R>) => void,
+  onError: (handler: ErrorHandler) => void,
+  onComplete: (handler: CompleteHandler) => void,
 }
 type UseFetchHookReturnType<S, E, RC, RE, RH> = {
   fetching: UseHookReturnType<any, S>['loading'];
@@ -206,15 +206,27 @@ type UseFetchHookReturnType<S, E, RC, RE, RH> = {
   fetch: <R, T>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => void;
 }
 
+
+type MethodFilterHandler = (
+  method: Method<any, any, any, any, any, any, any>, 
+  index: number, 
+  methods: Method<any, any, any, any, any, any, any>[]
+) => boolean;
+type MethodFilter = string | RegExp | {
+  name: string | RegExp;
+  filter: MethodFilterHandler;
+};
+type MethodMatcher<S, E, R, T, RC, RE, RH> = Method<S, E, R, T, RC, RE, RH> | MethodFilter;
+
+
+// *************************************
 // 导出类型
 export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
 export declare  function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | (() => Method<S, E, R, T, RC, RE, RH>), config?: RequestHookConfig<R>): UseHookReturnType<R, S>;
 export declare function useWatcher<S, E, R, T, RC, RE, RH>(handler: () => Method<S, E, R, T, RC, RE, RH>, watchingStates: E[], config?: WatcherHookConfig<R>): UseHookReturnType<R, S>;
 export declare function useFetcher<S, E, RC, RE, RH>(alova: Alova<S, E, RC, RE, RH>, config?: FetcherHookConfig<any>): UseFetchHookReturnType<S, E, RC, RE, RH>;
-export declare function invalidateCache<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>): void;
-// 以支持React和Vue的方式定义类型
-type OriginalType<R, S> = S extends Ref ? Ref<R> : ReactState<R>;
-export declare function updateState<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, handleUpdate: (data: OriginalType<R, S>) => void): void;
+export declare function invalidateCache<S, E, R, T, RC, RE, RH>(matcher?: MethodMatcher<S, E, R, T, RC, RE, RH>): void;
+export declare function updateState<S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>, handleUpdate: (data: R) => any): void;
 // 手动设置缓存响应数据
 export declare function setCacheData<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, data: R): void;
 

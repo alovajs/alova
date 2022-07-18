@@ -6,7 +6,7 @@ import {
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { RequestConfig } from '../../../typings';
+import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
 import server from '../../server';
 import { getSilentRequest } from '../../../src/storage/silentStorage';
@@ -18,7 +18,7 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 function getInstance(
-  beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
+  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
   responseExpect?: (jsonPromise: Promise<any>) => void,
   resErrorExpect?: (err: Error) => void,
 ) {
@@ -94,7 +94,8 @@ describe('use useRequest to send silent request', function() {
       downloading,
       error,
       send,
-      responser,
+      onSuccess,
+      onComplete,
     } = useRequest(Post, { immediate: false });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
@@ -103,7 +104,7 @@ describe('use useRequest to send silent request', function() {
     send();
     // 静默请求在发送请求时就会触发onSuccess
     let flag = 0;
-    responser.success(() => {
+    onSuccess(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
@@ -112,7 +113,7 @@ describe('use useRequest to send silent request', function() {
       expect(cacheData).toBeUndefined();
       flag++;
     });
-    responser.complete(() => flag++);
+    onComplete(() => flag++);
     // 确保回调是立即执行的
     setTimeout(() => {
       expect(flag).toBe(2);

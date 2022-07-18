@@ -2,8 +2,9 @@ import { AlovaRequestAdapterConfig, ResponsedHandler, ResponsedHandlerRecord, Re
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { falseValue, getContext, getOptions, PromiseCls, promiseReject, promiseResolve, trueValue, undefinedValue } from '../utils/variables';
-import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '../utils/helper';
+import { falseValue, getContext, getOptions, objectKeys, PromiseCls, promiseReject, promiseResolve, trueValue, undefinedValue } from '../utils/variables';
+import { getLocalCacheConfigParam, instanceOf, isFn, isPlainObject, key, noop, self } from '../utils/helper';
+import { addMethodSnapshot } from '../storage/methodSnapshots';
 
 
 /**
@@ -64,7 +65,7 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
     s: toStorage
   } = getLocalCacheConfigParam(undefinedValue, newLocalCache ?? localCache);
 
-  let paramsStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&');
+  let paramsStr = objectKeys(params).map(key => `${key}=${params[key]}`).join('&');
 
   // 将get参数拼接到url后面，注意url可能已存在参数
   let urlWithParams = paramsStr ? 
@@ -105,9 +106,10 @@ import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '
       ctrls.response(),
       ctrls.headers(),
     ]).then(([rawResponse, headers]) => {
+      addMethodSnapshot(methodInstance);    // 只有请求成功的Method实例才会被保存到快照里
       try {
         let responsedHandlePayload = responsedHandler(rawResponse);
-        if (responsedHandlePayload instanceof PromiseCls) {
+        if (instanceOf(responsedHandlePayload, PromiseCls)) {
           return responsedHandlePayload.then(data => {
             if (headers) {
               data = transformData(data, headers);

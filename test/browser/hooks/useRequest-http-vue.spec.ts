@@ -8,7 +8,7 @@ import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server from '../../server';
+import server, { untilCbCalled } from '../../server';
 
 
 beforeAll(() => server.listen());
@@ -42,7 +42,7 @@ function getInstance(
 }
 
 describe('use useRequet hook to send GET with vue', function() {
-  test('init and send get request', done => {
+  test('init and send get request', async () => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test');
@@ -77,30 +77,29 @@ describe('use useRequet hook to send GET with vue', function() {
       data,
       downloading,
       error,
-    } = useRequest(Get, {
-      onSuccess(rawData) {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(rawData.path).toBe('/unit-test');
-        expect(rawData.params).toEqual({ a: 'a', b: 'str' });
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeUndefined();
-  
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, key(Get));
-        expect(cacheData.path).toBe('/unit-test');
-        expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
-        done();
-      }
-    });
+      onSuccess,
+    } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    const rawData = await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+    expect(rawData.path).toBe('/unit-test');
+    expect(rawData.params).toEqual({ a: 'a', b: 'str' });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+
+    // 缓存有值
+    const cacheData = getResponseCache(alova.id, key(Get));
+    expect(cacheData.path).toBe('/unit-test');
+    expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
   });
 
-  test('send get with request error', done => {
+  test('send get with request error', async () => {
     const alova = getInstance(undefined, undefined, error => {
       console.log('error callback', error.message);
       expect(error.message).toMatch(/404/);
@@ -115,27 +114,26 @@ describe('use useRequet hook to send GET with vue', function() {
       data,
       downloading,
       error,
-    } = useRequest(Get, {
-      onError(err) {
-        expect(loading.value).toBeFalsy();
-        expect(data.value).toBeUndefined();
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeInstanceOf(Error);
-        expect(error.value).toBe(err);
-  
-        // 请求错误无缓存
-        const cacheData = getResponseCache(alova.id, key(Get));
-        expect(cacheData).toBeUndefined();
-        done();
-      }
-    });
+      onError
+    } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    const err = await untilCbCalled(onError);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeInstanceOf(Error);
+    expect(error.value).toBe(err);
+
+    // 请求错误无缓存
+    const cacheData = getResponseCache(alova.id, key(Get));
+    expect(cacheData).toBeUndefined();
   });
 
-  test('send get with responseCallback error', done => {
+  test('send get with responseCallback error', async () => {
     const alova = getInstance(undefined, () => {
       throw new Error('responseCallback error');
     }, error => {
@@ -148,23 +146,22 @@ describe('use useRequet hook to send GET with vue', function() {
       data,
       downloading,
       error,
-    } = useRequest(Get, {
-      onError: err => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value).toBeUndefined();
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeInstanceOf(Object);
-        expect(error.value).toBe(err);
-        done();
-      }
-    });
+      onError
+    } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    const err = await untilCbCalled(onError);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBe(err);
   });
 
-  test('abort request when timeout', done => {
+  test('abort request when timeout', async () => {
     const alova = getInstance(undefined, undefined, error => {
       console.log('error timeout', error.message);
       expect(error.message).toMatch(/network timeout/);
@@ -174,21 +171,20 @@ describe('use useRequet hook to send GET with vue', function() {
       loading,
       data,
       error,
-    } = useRequest(Get, {
-      onError: err => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value).toBeUndefined();
-        expect(error.value).toBeInstanceOf(Object);
-        expect(error.value).toBe(err);
-        done();
-      }
-    });
+      onError
+    } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
+
+    const err = await untilCbCalled(onError);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBe(err);
   });
 
-  test('manual abort request', done => {
+  test('manual abort request', async () => {
     const alova = getInstance(undefined, undefined, error => {
       console.log('manual abort', error.message);
       expect(error.message).toMatch(/user aborted a request/);
@@ -198,20 +194,19 @@ describe('use useRequet hook to send GET with vue', function() {
       loading,
       data,
       error,
-      abort
-    } = useRequest(Get, {
-      onError: err => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value).toBeUndefined();
-        expect(error.value).toBeInstanceOf(Object);
-        expect(error.value).toBe(err);
-        done();
-      }
-    });
+      abort,
+      onError
+    } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     setTimeout(abort, 100);
+
+    const err = await untilCbCalled(onError);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBe(err);
   });
 
   test('it can pass custom params when call `send` function, and the function will return a Promise instance', async () => {
@@ -227,30 +222,33 @@ describe('use useRequet hook to send GET with vue', function() {
     const {
       data,
       send,
+      onSuccess,
+      onComplete
     } = useRequest((index: number) => getGetter(index), {
       immediate: false,
-      onSuccess: (data, index) => {
-        console.log('success passed params', index);
-        expect(data.path).toBe('/unit-test');
-        expect(index.toString()).toMatch(/3|5/);
-      },
-      onComplete: index => {
-        console.log('complete passed params', index);
-        expect(index.toString()).toMatch(/3|5/);
-      }
+    });
+
+    onSuccess((data, index) => {
+      console.log('success passed params', index);
+      expect(data.path).toBe('/unit-test');
+      expect(index.toString()).toMatch(/3|5/);
+    });
+    onComplete(index => {
+      console.log('complete passed params', index);
+      expect(index.toString()).toMatch(/3|5/);
     });
 
     // 延迟一会儿发送请求
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await untilCbCalled(setTimeout, 500);
     let rawData = await send(3);
     expect(rawData.path).toBe('/unit-test');
     expect(rawData.params.index).toEqual('3');
-    await new Promise(resolve => setTimeout(resolve, 500)); // 等待响应
+    await untilCbCalled(setTimeout, 500); // 等待响应
     expect(data.value.params.index).toBe('3');
     
     rawData = await send(5);
     expect(rawData.params.index).toEqual('5');
-    await new Promise(resolve => setTimeout(resolve, 500)); // 等待响应
+    await untilCbCalled(setTimeout, 500); // 等待响应
     expect(data.value.params.index).toBe('5');
   });
 
@@ -265,20 +263,23 @@ describe('use useRequet hook to send GET with vue', function() {
 
     const {
       send,
+      onError,
+      onComplete
     } = useRequest((index: number) => getGetter(index), {
       immediate: false,
-      onError: (err, index) => {
-        console.log('error passed params', index);
-        expect(err.message).toMatch(/404/);
-        expect(index.toString()).toMatch(/3|5/);
-      },
-      onComplete: index => {
-        expect(index.toString()).toMatch(/3|5/);
-      }
+    });
+
+    onError((err, index) => {
+      console.log('error passed params', index);
+      expect(err.message).toMatch(/404/);
+      expect(index.toString()).toMatch(/3|5/);
+    });
+    onComplete(index => {
+      expect(index.toString()).toMatch(/3|5/);
     });
 
     // 延迟一会儿发送请求
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await untilCbCalled(setTimeout, 500);
     try {
       const data = await send(3);
       expect(data.path).toBe('/unit-test');

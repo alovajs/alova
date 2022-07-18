@@ -6,7 +6,7 @@ import {
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { RequestConfig } from '../../../typings';
+import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
 import server from '../../server';
 import { ref } from 'vue';
@@ -16,7 +16,7 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 function getInstance(
-  beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
+  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
   responseExpect?: (jsonPromise: Promise<any>) => void,
   resErrorExpect?: (err: Error) => void,
 ) {
@@ -52,13 +52,13 @@ describe('use useController hook to send GET with vue', function() {
     const alova = getInstance();
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    let currentGet: Method<any, any, any, any>;
+    let currentGet: Method<any, any, any, any, any, any, any>;
     const {
       loading,
       data,
       downloading,
       error,
-      responser,
+      onSuccess,
     } = useWatcher(() => {
       const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -86,7 +86,7 @@ describe('use useController hook to send GET with vue', function() {
       mutateStr.value = 'b';
     }, 1000);
     const mockCallback = jest.fn(() => {});
-    responser.success(mockCallback);
+    onSuccess(mockCallback);
 
     const successTimesFns = [() => {
       expect(loading.value).toBeFalsy();
@@ -113,7 +113,7 @@ describe('use useController hook to send GET with vue', function() {
 
     // 根据触发次数来运行不同回调函数
     let watchTimes = 0;
-    responser.success(() => {
+    onSuccess(() => {
       successTimesFns[watchTimes]();
       watchTimes++;
     });
@@ -123,13 +123,13 @@ describe('use useController hook to send GET with vue', function() {
     const alova = getInstance();
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    let currentGet: Method<any, any, any, any>;
+    let currentGet: Method<any, any, any, any, any, any, any>;
     const {
       loading,
       data,
       downloading,
       error,
-      responser,
+      onSuccess
     } = useWatcher(() => {
       const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -161,8 +161,8 @@ describe('use useController hook to send GET with vue', function() {
       }, 500);
     }, 500);
     const mockCallback = jest.fn(() => {});
-    responser.success(mockCallback);
-    responser.success(() => {
+    onSuccess(mockCallback);
+    onSuccess(() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
       expect(data.value.params.num).toBe('2');
@@ -182,13 +182,13 @@ describe('use useController hook to send GET with vue', function() {
     const alova = getInstance();
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    let currentGet: Method<any, any, any, any>;
+    let currentGet: Method<any, any, any, any, any, any, any>;
     const {
       loading,
       data,
       downloading,
       error,
-      responser,
+      onSuccess
     } = useWatcher(() => {
       const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -206,7 +206,7 @@ describe('use useController hook to send GET with vue', function() {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     const mockCallback = jest.fn(() => {});
-    responser.success(mockCallback);
+    onSuccess(mockCallback);
     const successTimesFns = [() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
@@ -231,7 +231,7 @@ describe('use useController hook to send GET with vue', function() {
 
     // 根据触发次数来运行不同回调函数
     let watchTimes = 0;
-    responser.success(() => {
+    onSuccess(() => {
       successTimesFns[watchTimes]();
       watchTimes++;
     });
@@ -241,13 +241,13 @@ describe('use useController hook to send GET with vue', function() {
     const alova = getInstance();
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    let currentGet: Method<any, any, any, any>;
+    let currentGet: Method<any, any, any, any, any, any, any>;
     const {
       loading,
       data,
       downloading,
       error,
-      responser,
+      onSuccess,
     } = useWatcher(() => {
       const get = currentGet = alova.Get('/unit-test', {
         params: { num: mutateNum.value, str: mutateStr.value },
@@ -267,7 +267,7 @@ describe('use useController hook to send GET with vue', function() {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     const mockCallback = jest.fn(() => {});
-    responser.success(mockCallback);
+    onSuccess(mockCallback);
     const successTimesFns = [() => {
       expect(loading.value).toBeFalsy();
       expect(data.value.path).toBe('/unit-test');
@@ -298,7 +298,7 @@ describe('use useController hook to send GET with vue', function() {
 
     // 根据触发次数来运行不同回调函数
     let watchTimes = 0;
-    responser.success(() => {
+    onSuccess(() => {
       successTimesFns[watchTimes]();
       watchTimes++;
     });

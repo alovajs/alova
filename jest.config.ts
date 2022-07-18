@@ -149,11 +149,11 @@ export default {
   testEnvironment: "jsdom",
 
   testMatch: [
-    // "**/?(*.)+(spec|test).[tj]s?(x)",
-    "**/test/browser/hooks/useRequest-method.spec.ts(x)?",
-    // "**/test/browser/behavior/silent-offline-request-vue.spec.ts",
+    "**/?(*.)+(spec|test).[tj]s?(x)",
+    // "**/test/browser/hooks/useFetcher-vue.spec.ts(x)?",
+    // "**/test/browser/behavior/cache-expire.spec.ts",
     // "**/test/browser/batch/parallel-request.spec.ts",
-    // "**/test/browser/stateManager/invalidate-cache.spec.ts(x)?"
+    // "**/test/browser/stateManager/update-state.spec.ts(x)?"
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped

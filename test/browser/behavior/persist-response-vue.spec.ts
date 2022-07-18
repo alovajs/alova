@@ -5,9 +5,9 @@ import {
   cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import { RequestConfig } from '../../../typings';
+import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server from '../../server';
+import server, { untilCbCalled } from '../../server';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
 import { removeResponseCache } from '../../../src/storage/responseCache';
@@ -16,7 +16,7 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 function getInstance(
-  beforeRequestExpect?: (config: RequestConfig<any, any>) => void,
+  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
   responseExpect?: (jsonPromise: Promise<any>) => void,
   resErrorExpect?: (err: Error) => void,
 ) {
@@ -46,6 +46,7 @@ describe('persist data', function() {
   test('should persist responsed data but it will send request when request again', async () => {
     const alova = getInstance();
     const Get = alova.Get('/unit-test-count', {
+      params: { countKey: 'g' },
       localCache: {
         expire: 500,
         mode: cacheMode.STORAGE_PLACEHOLDER
@@ -53,19 +54,19 @@ describe('persist data', function() {
       transformData: ({data}: Result) => data,
     });
     const firstState = useRequest(Get);
-    await new Promise(resolve => firstState.responser.success(() => resolve(null)));
+    await untilCbCalled(firstState.onSuccess);
 
     // 持久化数据里有值
     const persisitentResponse = getPersistentResponse(alova.id, key(Get), alova.storage);
-    expect(persisitentResponse).toEqual({ path: '/unit-test-count', method: 'GET', params: { count: 0 } });
+    expect(persisitentResponse).toEqual({ path: '/unit-test-count', method: 'GET', params: { count: 0, countKey: 'g' } });
 
     // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
     removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);
-    expect(secondState.data.value).toEqual({ path: '/unit-test-count', method: 'GET', params: { count: 0 } });    // 因为有持久化数据，因此直接带出了持久化的数据
+    expect(secondState.data.value).toEqual({ path: '/unit-test-count', method: 'GET', params: { count: 0, countKey: 'g' } });    // 因为有持久化数据，因此直接带出了持久化的数据
     expect(secondState.loading.value).toBe(true);   // 即使有持久化数据，loading的状态也照样会是true
 
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await untilCbCalled(setTimeout, 600);
     const thirdState = useRequest(Get);
     expect(thirdState.data.value).toBeUndefined();   // 持久化数据过期，所以data没有值
   });
@@ -80,14 +81,15 @@ describe('persist data', function() {
       transformData: ({data}: Result) => data,
     });
     const firstState = useRequest(Get);
-    await new Promise(resolve => firstState.responser.success(() => resolve(null)));
+    await untilCbCalled(firstState.onSuccess);
+
     // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
     removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);
     expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });    // 因为有持久化数据，因此直接带出了持久化的数据
     expect(secondState.loading.value).toBe(true);   // 即使有持久化数据，loading的状态也照样会是true
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await untilCbCalled(setTimeout, 1000);
     const thirdState = useRequest(Get);
     expect(thirdState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });    // 持久化数据用不过期
   });
@@ -103,7 +105,8 @@ describe('persist data', function() {
       transformData: ({data}: Result) => data,
     });
     const firstState = useRequest(Get);
-    await new Promise(resolve => firstState.responser.success(() => resolve(null)));
+    await untilCbCalled(firstState.onSuccess);
+    
     // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
     removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);

@@ -1,6 +1,6 @@
 import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
-import { getOptions, undefinedValue } from './utils/variables';
+import { forEach, getOptions, undefinedValue } from './utils/variables';
 
 // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
 const cachedConfig = {
@@ -37,10 +37,11 @@ export default class Method<S, E, R, T, RC, RE, RH> {
     
     // 将请求相关的全局配置合并到Method对象中
     const contextConcatConfig: Record<string, any> = {};
-    (['timeout', 'localCache'] as const).forEach(key => {
+    forEach(['timeout', 'localCache'], key => {
       const contextOptions = getOptions(this);
-      if (contextOptions[key] !== undefinedValue) {
-        contextConcatConfig[key] = contextOptions[key];
+      type ContextOptionsKey = keyof typeof contextOptions;
+      if (contextOptions[key as ContextOptionsKey] !== undefinedValue) {
+        contextConcatConfig[key] = contextOptions[key as ContextOptionsKey];
       }
     });
     this.config = {

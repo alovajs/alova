@@ -2,14 +2,14 @@ import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
 import { deserializeMethod, noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
-import { PromiseCls, setTimeoutFn, trueValue } from './utils/variables';
+import { PromiseCls, pushItem, setTimeoutFn, trueValue } from './utils/variables';
 
 const alovas = [] as Alova<any, any, any, any, any>[];
 /**
  * 收集Alova实例
  * @param instance alova实例
  */
-export const addAlova = <S, E, RC, RE, RH>(instance: Alova<S, E, RC, RE, RH>) => alovas.push(instance);
+export const addAlova = <S, E, RC, RE, RH>(instance: Alova<S, E, RC, RE, RH>) => pushItem(alovas, instance);
 
 
 /**
@@ -28,7 +28,10 @@ function runSilentRequest() {
     const { serializedMethod, remove } = getSilentRequest(alova.id, alova.storage);
     if (serializedMethod) {
       const { response } = sendRequest(deserializeMethod(serializedMethod, alova), trueValue);
-      backgroundStoragedRequests.push(response().then(remove, noop));   // 如果请求失败需要捕获错误，否则会导致错误往外抛到控制台
+      pushItem(
+        backgroundStoragedRequests, 
+        response().then(remove, noop)
+      );    // 如果请求失败需要捕获错误，否则会导致错误往外抛到控制台
     }
   }
   backgroundStoragedRequests.length > 0 ? PromiseCls.all(backgroundStoragedRequests).finally(runSilentRequest) : setTimeoutFn(runSilentRequest, 2000);

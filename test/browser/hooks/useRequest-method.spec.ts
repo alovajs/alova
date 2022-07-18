@@ -9,7 +9,7 @@ import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server from '../../server';
+import server, { untilCbCalled } from '../../server';
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
@@ -45,7 +45,7 @@ function getInstance(
 
 // 其他请求方式测试
 describe('Test other methods without GET', function() {
-  test('send POST', done => {
+  test('send POST', async () => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test');
@@ -86,26 +86,25 @@ describe('Test other methods without GET', function() {
       loading,
       data,
       error,
-    } = useRequest(Post, {
-      onSuccess: () => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(error.value).toBeUndefined();
-  
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, key(Post));
-        expect(cacheData).toBeUndefined();
-        done();
-      }
-    });
+      onSuccess
+    } = useRequest(Post);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+    expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
+    expect(error.value).toBeUndefined();
+
+    // 缓存有值
+    const cacheData = getResponseCache(alova.id, key(Post));
+    expect(cacheData).toBeUndefined();
   });
 
-  test('send DELETE', done => {
+  test('send DELETE', async () => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test');
@@ -144,28 +143,27 @@ describe('Test other methods without GET', function() {
       data,
       downloading,
       error,
-    } = useRequest(Delete, {
-      onSuccess: () => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeUndefined();
-  
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, key(Delete));
-        expect(cacheData).toBeUndefined();
-        done();
-      }
-    });
+      onSuccess
+    } = useRequest(Delete);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+    expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+
+    // 缓存有值
+    const cacheData = getResponseCache(alova.id, key(Delete));
+    expect(cacheData).toBeUndefined();
   });
 
-  test('send PUT', done => {
+  test('send PUT', async () => {
     const alova = getInstance(
       config => {
         expect(config.url).toBe('/unit-test?c=3');
@@ -204,28 +202,27 @@ describe('Test other methods without GET', function() {
       data,
       downloading,
       error,
-    } = useRequest(Put, {
-      onSuccess: () => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str', c: '3' });
-        expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeUndefined();
-  
-        // 缓存有值
-        const cacheData = getResponseCache(alova.id, key(Put));
-        expect(cacheData).toBeUndefined();
-        done();
-      }
-    });
+      onSuccess
+    } = useRequest(Put);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toEqual({ a: 'a', b: 'str', c: '3' });
+    expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+
+    // 缓存有值
+    const cacheData = getResponseCache(alova.id, key(Put));
+    expect(cacheData).toBeUndefined();
   });
 
-  test('send HEAD', done => {
+  test('send HEAD', async () => {
     const alova = getInstance(config => {
       expect(config.method).toBe('HEAD');
     });
@@ -245,26 +242,25 @@ describe('Test other methods without GET', function() {
       data,
       downloading,
       error,
-    } = useRequest(Head, {
-      onSuccess: () => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value).toEqual({});
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeUndefined();
-        // 没有缓存值
-        const cacheData = getResponseCache(alova.id, key(Head));
-        expect(cacheData).toBeUndefined();
-        done();
-      }
-    });
+      onSuccess
+    } = useRequest(Head);
 
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toEqual({});
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    // 没有缓存值
+    const cacheData = getResponseCache(alova.id, key(Head));
+    expect(cacheData).toBeUndefined();
   });
 
-  test('send OPTIONS', done => {
+  test('send OPTIONS', async () => {
     const alova = getInstance(config => {
       expect(config.method).toBe('OPTIONS');
     });
@@ -284,25 +280,24 @@ describe('Test other methods without GET', function() {
       data,
       downloading,
       error,
-    } = useRequest(Options, {
-      onSuccess: () => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value).toEqual({});
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeUndefined();
-        // 没有缓存值
-        const cacheData = getResponseCache(alova.id, key(Options));
-        expect(cacheData).toBeUndefined();
-        done();
-      }
-    });
+      onSuccess
+    } = useRequest(Options);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toEqual({});
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    // 没有缓存值
+    const cacheData = getResponseCache(alova.id, key(Options));
+    expect(cacheData).toBeUndefined();
   });
 
-  test('send PATCH', done => {
+  test('send PATCH', async () => {
     const alova = getInstance(config => {
       expect(config.method).toBe('PATCH');
     });
@@ -322,23 +317,22 @@ describe('Test other methods without GET', function() {
       data,
       downloading,
       error,
-    } = useRequest(Patch, {
-      onSuccess: () => {
-        expect(loading.value).toBeFalsy();
-        expect(data.value.path).toBe('/unit-test');
-        expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-        expect(data.value.data).toEqual({ patch1: 'p' });
-        expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-        expect(error.value).toBeUndefined();
-        // 没有缓存值
-        const cacheData = getResponseCache(alova.id, key(Patch));
-        expect(cacheData).toBeUndefined();
-        done();
-      }
-    });
+      onSuccess
+    } = useRequest(Patch);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+    expect(data.value.data).toEqual({ patch1: 'p' });
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    // 没有缓存值
+    const cacheData = getResponseCache(alova.id, key(Patch));
+    expect(cacheData).toBeUndefined();
   });
 });
