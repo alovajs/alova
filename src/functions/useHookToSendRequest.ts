@@ -5,7 +5,7 @@ import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
 import { CompleteHandler, ErrorHandler, FrontRequestState, SuccessHandler, UseHookConfig } from '../../typings';
 import { getStateCache } from '../storage/stateCache';
-import { falseValue, forEach, getConfig, getContext, nullValue, promiseReject, promiseResolve, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
+import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, promiseReject, promiseResolve, promiseThen, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
@@ -72,8 +72,8 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseReject, p
     loading: trueValue,
   }, originalState);
 
-  const responseHandlePromise = response()
-    .then(data => {
+  const responseHandlePromise = promiseCatch(
+    promiseThen(response(), data => {
       if (!updateCacheState) {
         update({ data }, originalState);
       } else {
@@ -89,8 +89,10 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseReject, p
         runArgsHandler(completeHandlers);
       }
       return data;
-    })
-    .catch((error: Error) => {
+    }),
+    
+    // catch回调函数
+    (error: Error) => {
       // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
       update({
         error,
@@ -103,7 +105,8 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseReject, p
         runArgsHandler(completeHandlers);
       }
       return promiseReject(error);
-    });
+    }
+  );
   
   if (!silentMode) {
     enableDownload && onDownload(downloading => update({ downloading }, originalState));

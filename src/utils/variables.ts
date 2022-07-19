@@ -2,9 +2,18 @@ import Method from '../Method';
 
 // 以下为减少编译代码量而添加的统一处理函数或变量
 export const PromiseCls = Promise as typeof Promise<any>;
-export const getTime = (date?: Date) => date ? date.getTime() : Date.now();
 export const promiseResolve = <T>(value: T) => PromiseCls.resolve(value);
 export const promiseReject = <T>(value: T) => PromiseCls.reject(value);
+export const promiseThen = <T, U, O>(
+  promise: Promise<T>, 
+  onFulfilled: (value: T) => U,
+  onrejected?: (reason: any) => O,
+) => promise.then(onFulfilled, onrejected);
+export const promiseCatch = <T, O>(
+  promise: Promise<T>,
+  onrejected: (reason: any) => O,
+) => promise.catch(onrejected);
+export const getTime = (date?: Date) => date ? date.getTime() : Date.now();
 export const getContext = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.context;
 export const getConfig = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.config;
 export const getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => getContext(methodInstance).options;

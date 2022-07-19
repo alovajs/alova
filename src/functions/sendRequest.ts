@@ -2,7 +2,7 @@ import { AlovaRequestAdapterConfig, ResponsedHandler, ResponsedHandlerRecord, Re
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { falseValue, getContext, getOptions, objectKeys, PromiseCls, promiseReject, promiseResolve, trueValue, undefinedValue } from '../utils/variables';
+import { falseValue, getContext, getOptions, objectKeys, PromiseCls, promiseReject, promiseResolve, promiseThen, trueValue, undefinedValue } from '../utils/variables';
 import { getLocalCacheConfigParam, instanceOf, isFn, isPlainObject, key, noop, self } from '../utils/helper';
 import { addMethodSnapshot } from '../storage/methodSnapshots';
 
@@ -35,8 +35,8 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
     const response = getResponseCache(id, methodKey);
     if (response) {
       return {
-        response: () => promiseResolve(response),
-        headers: () => promiseResolve(undefined),
+        response: () => promiseResolve(response as R),
+        headers: () => promiseResolve({} as RH),
         abort: noop,
         useCache: trueValue,
       };
@@ -102,20 +102,18 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
   return {
     ...ctrls,
     useCache: falseValue,
-    response: () => PromiseCls.all([
+    response: () => promiseThen(PromiseCls.all([
       ctrls.response(),
       ctrls.headers(),
-    ]).then(([rawResponse, headers]) => {
+    ]), ([rawResponse, headers]) => {
       addMethodSnapshot(methodInstance);    // 只有请求成功的Method实例才会被保存到快照里
       try {
         let responsedHandlePayload = responsedHandler(rawResponse);
         if (instanceOf(responsedHandlePayload, PromiseCls)) {
-          return responsedHandlePayload.then(data => {
-            if (headers) {
-              data = transformData(data, headers);
-              setResponseCache(id, methodKey, data, expireMilliseconds);
-              toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage);
-            }
+          return promiseThen(responsedHandlePayload, data => {
+            data = transformData(data, headers);
+            setResponseCache(id, methodKey, data, expireMilliseconds);
+            toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage);
             return data;
           });
         } else {

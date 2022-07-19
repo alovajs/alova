@@ -2,7 +2,7 @@ import Method from '../Method';
 import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
 import { isFn, noop } from '../utils/helper';
-import { getContext, trueValue } from '../utils/variables';
+import { getContext, promiseCatch, trueValue } from '../utils/variables';
 import { RequestHookConfig } from '../../typings';
 
 export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | ((...args: any[]) => Method<S, E, R, T, RC, RE, RH>), config: RequestHookConfig<R> = {}) {
@@ -22,7 +22,7 @@ export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method
         const { abort, p: responseHandlePromise } = useHookToSendRequest(methodInstance, originalState, config, successHandler, errorHandlers, completeHandlers);
         // 将控制器传出去供使用者调用
         setAbort(abort);
-        responseHandlePromise.catch(noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
+        promiseCatch(responseHandlePromise, noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
       }
     },
     methodInstance, 

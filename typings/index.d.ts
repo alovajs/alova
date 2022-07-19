@@ -5,7 +5,7 @@ export type Progress = {
 };
 type AlovaRequestAdapter<R, T, RC, RE, RH> = (adapterConfig: AlovaRequestAdapterConfig<R, T, RC, RH>) => {
   response: () => Promise<RE>,
-  headers: () => Promise<RH | void>,
+  headers: () => Promise<RH>,
   onDownload?: (handler: (progress: Progress) => void) => void,
   onUpload?: (handler: (progress: Progress) => void) => void,
   abort: () => void,

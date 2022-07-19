@@ -1,7 +1,7 @@
 import { AlovaRequestAdapterConfig, Progress } from '../../typings';
 import alovaError from '../utils/alovaError';
-import { instanceOf, isString, noop } from '../utils/helper';
-import { clearTimeoutTimer, falseValue, JSONStringify, promiseReject, setTimeoutFn, trueValue } from '../utils/variables';
+import { instanceOf, isString } from '../utils/helper';
+import { clearTimeoutTimer, falseValue, JSONStringify, promiseReject, promiseThen, setTimeoutFn, trueValue } from '../utils/variables';
 
 
 const isBodyData = (data: any): data is BodyInit => {
@@ -34,15 +34,15 @@ export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
       response: () => fetchPromise.then(response => {
         // 请求成功后清除中断处理
         clearTimeoutTimer(abortTimer);
-        return /^[2|3]/.test(response.status.toString()) ? response : promiseReject(alovaError(response.statusText));
+        return /^[2|3]/.test(response.status.toString()) ? response : promiseReject(alovaError(response.statusText.toString()));
       }, err => promiseReject(
         alovaError(isTimeout ? 'fetchError: network timeout' : err.message)
       )),
 
       // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
-      headers: () => fetchPromise.then(({ headers }) => headers, noop),
+      headers: () => promiseThen(fetchPromise, ({ headers }) => headers, () => ({} as Headers)),
       onDownload: (cb: (progress: Progress) => void) => {
-        fetchPromise.then(response => {
+        promiseThen(fetchPromise, response => {
           const { headers, body } = response;
           const total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
           if (total <= 0) {
@@ -50,10 +50,9 @@ export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
           }
           let loaded = 0;
           let progressTimer = setInterval(() => {
-            body?.getReader().read().then(({ done, value = new Uint8Array() }) => {
-              if (done) {
-                clearInterval(progressTimer);
-              }
+            const reader = body?.getReader().read();
+            reader && promiseThen(reader, ({ done, value = new Uint8Array() }) => {
+              done && clearInterval(progressTimer);
               loaded += value.length;
               cb({ total, loaded });
             });
