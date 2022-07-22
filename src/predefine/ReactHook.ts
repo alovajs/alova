@@ -5,7 +5,7 @@ import {
   useRef,
   useState
 } from 'react';
-import { FrontRequestState } from '../../typings';
+import { FrontRequestState, WatchingParams } from '../../typings';
 import { falseValue, forEach, objectKeys, trueValue } from '../utils/variables';
 
 const stateToData = <D>([ state ]: ReactState<D>) => state;
@@ -23,7 +23,7 @@ export default {
       state[key as Keys][1](newVal[key as Keys] as any);
     }
   ),
-  effectRequest(handler: () => void, removeStates: () => void, watchedStates: any[] = [], immediate = trueValue) {
+  effectRequest(handler: () => void, removeStates: () => void, { immediate, states = [] }: WatchingParams) {
     const mountedRef = useRef(falseValue);
     useEffect(() => {
       if (!immediate && !mountedRef.current) {
@@ -32,6 +32,6 @@ export default {
       }
       handler();
       return removeStates;    // 组件卸载时移除对应状态
-    }, watchedStates);
+    }, states);
   },
 };

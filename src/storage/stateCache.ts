@@ -25,6 +25,7 @@ export const getStateCache = (namespace: string, key: string) => {
  * @param data 缓存数据
  */
 export const setStateCache = (namespace: string, key: string, data: FrontRequestState) => {
+  console.log(key, data);
   const cachedState = stateCache[namespace] = stateCache[namespace] || {};
   cachedState[key] = data;
 }

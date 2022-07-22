@@ -69,6 +69,11 @@ type ResponsedHandlerRecord<RE> = {
   success: ResponsedHandler<RE>, 
   error: ResponseErrorHandler
 };
+type WatchingParams = {
+  states?: any[],
+  immediate: boolean,
+};
+
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
 // E: export函数返回的状态组的类型
@@ -94,7 +99,7 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
     // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
     // 在vue中直接执行即可，而在react中需要在useEffect中执行
     // removeStates函数为清除当前状态的函数，应该在组件卸载时调用
-    effectRequest: (handleRequest: () => void, removeStates: () => void, watchedStates?: any[], immediate?: boolean) => void,
+    effectRequest: (handleRequest: () => void, removeStates: () => void, watchingParams: WatchingParams) => void,
   },
 
   // 请求适配器

@@ -134,7 +134,7 @@ describe('useRequet hook with react', function() {
     render(<Page /> as ReactElement<any, any>);
   });
 
-  test('states should be remove in cache when component was unmounted', async () => {
+  test.only('states should be remove in cache when component was unmounted', async () => {
     const alova = getInstance();
     const Get = alova.Get('unit-test', {
       transformData: ({ data }: Result) => data,

@@ -95,14 +95,18 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     handleRequestCalled = trueValue;
   };
 
+  // watchedStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
+  const watchingParams = {
+    states: watchedStates,
+    immediate: immediate ?? trueValue,
+  }
   watchedStates !== undefinedValue ? effectRequest(
     debounceDelay > 0 ? 
       debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled) :
       wrapEffectRequest,
     removeState,
-    watchedStates,
-    immediate
-  ) : effectRequest(wrapEffectRequest, removeState);
+    watchingParams
+  ) : effectRequest(wrapEffectRequest, removeState, watchingParams);
   
   const exportedState = {
     loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,

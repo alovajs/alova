@@ -1,6 +1,6 @@
 import { ref, Ref, onUnmounted, watch, readonly } from 'vue';
-import { FrontRequestState } from '../../typings';
-import { forEach, objectKeys, trueValue } from '../utils/variables';
+import { FrontRequestState, WatchingParams } from '../../typings';
+import { forEach, objectKeys } from '../utils/variables';
 
 // Vue的预定义hooks
 export default {
@@ -14,12 +14,12 @@ export default {
       state[key as Keys].value = newVal[key as Keys];
     }
   ),
-  effectRequest(handler: () => void, removeStates: () => void, watchedStates?: any[], immediate = trueValue) {
+  effectRequest(handler: () => void, removeStates: () => void, { immediate, states }: WatchingParams) {
     onUnmounted(removeStates);    // 组件卸载时移除对应状态
-    if (!watchedStates) {
+    if (!states) {
       handler();
       return;
     }
-    watch(watchedStates, handler, { immediate });
+    watch(states, handler, { immediate });
   },
 };

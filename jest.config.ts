@@ -150,7 +150,7 @@ export default {
 
   testMatch: [
     "**/?(*.)+(spec|test).[tj]s?(x)",
-    // "**/test/browser/hooks/useFetcher-vue.spec.ts(x)?",
+    // "**/test/browser/hooks/useRequest-react.spec.ts(x)?",
     // "**/test/browser/behavior/cache-expire.spec.ts",
     // "**/test/browser/batch/parallel-request.spec.ts",
     // "**/test/browser/stateManager/update-state.spec.ts(x)?"
