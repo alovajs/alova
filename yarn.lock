@@ -4979,6 +4979,11 @@
   "resolved" "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   "version" "1.0.0"
 
+"svelte@^3.49.0":
+  "integrity" "sha512-+lmjic1pApJWDfPCpUUTc1m8azDqYCG1JN9YEngrx/hUyIcFJo6VZhj0A1Ai0wqoHcEIuQy+e9tk+4uDgdtsFA=="
+  "resolved" "https://registry.npmjs.org/svelte/-/svelte-3.49.0.tgz"
+  "version" "3.49.0"
+
 "symbol-tree@^3.2.4":
   "integrity" "sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw=="
   "resolved" "https://registry.npmjs.org/symbol-tree/-/symbol-tree-3.2.4.tgz"

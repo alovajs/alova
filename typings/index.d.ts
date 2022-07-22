@@ -188,8 +188,16 @@ type Dispatch<A> = (value: A) => void;
 type SetStateAction<S> = S | ((prevState: S) => S);
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 
+// Svelte状态类型
+export interface Readable<D> {
+  subscribe(this: void, run: (value: D) => void, invalidate?: (value?: D) => void): () => void;
+}
+
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
-type ExportedType<R, S> = S extends Ref ? Ref<R> : R;
+type ExportedType<R, S> = S extends Ref 
+  ? Ref<R> 
+  : S extends Readable 
+    ? Readable<R> : R;
 type UseHookReturnType<R, S> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,
