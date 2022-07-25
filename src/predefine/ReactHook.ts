@@ -10,13 +10,14 @@ import { falseValue, forEach, objectKeys, trueValue } from '../utils/variables';
 
 const stateToData = <D>([ state ]: ReactState<D>) => state;
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
+type UnknownState = ReactState<unknown>;
 
 // React的预定义hooks
 export default {
   create: (data: any) => useState(data),
   export: stateToData,
   dehydrate: stateToData,
-  update: (newVal: Partial<FrontRequestState>, state: FrontRequestState<ReactState<unknown>>) => forEach(
+  update: (newVal: Partial<FrontRequestState>, state: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => forEach(
     objectKeys(newVal), 
     key => {
       type Keys = keyof FrontRequestState;

@@ -58,7 +58,7 @@ function getInstanceSyncResponsed() {
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
-describe('useRequet hook with react', function() {
+describe('useRequet hook with react', () => {
   test('send GET', async () => {
     const alova = getInstance();
     const Get = alova.Get('/unit-test', {
@@ -134,7 +134,7 @@ describe('useRequet hook with react', function() {
     render(<Page /> as ReactElement<any, any>);
   });
 
-  test.only('states should be remove in cache when component was unmounted', async () => {
+  test('states should be remove in cache when component was unmounted', async () => {
     const alova = getInstance();
     const Get = alova.Get('unit-test', {
       transformData: ({ data }: Result) => data,

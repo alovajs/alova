@@ -31,7 +31,7 @@
   "include": [
     "src/**/*.ts",
     "typings/*.d.ts",
-    "./jest-setup.ts"
+    "test/test-env.d.ts"
   ],
   "exclude": [
     "node_modules",

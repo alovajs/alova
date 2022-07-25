@@ -298,10 +298,13 @@ describe('use useRequet hook to send GET with vue', function() {
       error,
     } = useRequest(Get);
 
+    console.log('测试vue状态是否可以修改，请忽略该警告');
     data.value = 'hello';
     expect(data.value).toBeUndefined();
+    console.log('测试vue状态是否可以修改，请忽略该警告');
     loading.value = false;
     expect(loading.value).toBeTruthy();
+    console.log('测试vue状态是否可以修改，请忽略该警告');
     error.value = new Error('custom error');
     expect(error.value).toBeUndefined();
   });

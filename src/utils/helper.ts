@@ -1,5 +1,4 @@
 import {
-  LocalCacheConfig,
   LocalCacheConfigParam,
   SerializedMethod
 } from '../../typings';
@@ -155,12 +154,18 @@ export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance?
       e: _localCache,
       m: defaultCacheMode,
       s: falseValue,
+      t: undefinedValue,
     }
   }
-  const mode = (_localCache as LocalCacheConfig).mode || defaultCacheMode;
+  const {
+    mode = defaultCacheMode,
+    expire = 0,
+    tag
+  } = _localCache || {};
   return {
-    e: (_localCache as LocalCacheConfig).expire || 0,
+    e: expire,
     m: mode,
     s: [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode),
+    t: tag ? tag.toString() : undefinedValue,
   };
 }

@@ -1,5 +1,5 @@
 import { Storage } from '../../typings';
-import { getTime, JSONParse, JSONStringify, nullValue } from '../utils/variables';
+import { getTime, JSONParse, JSONStringify, nullValue, undefinedValue } from '../utils/variables';
 
 const responseStorageKey = '__$$aresp$$__';
 const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKey + namespace + key;
@@ -10,16 +10,17 @@ const buildNamespacedStorageKey = (namespace: string, key: string) => responseSt
  * @param response 存储的响应内容
  * @param persistMilliseconds 持久化时间
  * @param storage 存储对象
+ * @param tag 存储标签，用于区分不同的存储标记
  */
-export const persistResponse = (namespace: string, key: string, response: any, persistMilliseconds: number, storage: Storage) => {
+export const persistResponse = (namespace: string, key: string, response: any, persistMilliseconds: number, storage: Storage, tag: string|undefined) => {
   // 小于0则不持久化了
-  if (persistMilliseconds <= 0 || !response) {
-    return;
+  if (persistMilliseconds > 0 && response) {
+    storage.setItem(buildNamespacedStorageKey(namespace, key), JSONStringify([
+      response,
+      persistMilliseconds === Infinity ? nullValue : (getTime() + persistMilliseconds),
+      tag,
+    ]));
   }
-  storage.setItem(buildNamespacedStorageKey(namespace, key), JSONStringify([
-    response,
-    persistMilliseconds === Infinity ? nullValue : (getTime() + persistMilliseconds)
-  ]));
 }
 
 
@@ -28,18 +29,19 @@ export const persistResponse = (namespace: string, key: string, response: any, p
  * @param namespace 命名空间
  * @param key 存储的key
  * @param storage 存储对象
+ * @param tag 存储标签，标记改变了数据将会失效
  */
-export const getPersistentResponse = (namespace: string, key: string, storage: Storage) => {
+export const getPersistentResponse = (namespace: string, key: string, storage: Storage, tag: string|null = null) => {
   const namespacedResponseStorageKey = buildNamespacedStorageKey(namespace, key);
   const storageStr = storage.getItem(namespacedResponseStorageKey);
   if (storageStr) {
-    const [ response, expireTimestamp ] = JSONParse(storageStr) as [ any, number | null ];
+    const [ response, expireTimestamp, storedTag = undefinedValue ] = JSONParse(storageStr) as [ any, number | null, string | undefined ];
     // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
-    if (!expireTimestamp || expireTimestamp > getTime()) {
+    if (storedTag === tag && (!expireTimestamp || expireTimestamp > getTime())) {
       return response;
     }
     // 如果过期，则删除缓存
-    storage.removeItem(namespacedResponseStorageKey);
+    removePersistentResponse(namespace, key, storage);
   }
 }
 

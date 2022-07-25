@@ -29,7 +29,8 @@ export default {
   coveragePathIgnorePatterns: [
     "\\\\node_modules\\\\",
     "/node_modules/",
-    "test/server.ts"
+    "test/server.ts",
+    "test/components"
   ],
 
   // Indicates which provider should be used to instrument code for coverage
@@ -86,7 +87,8 @@ export default {
     "ts",
     "tsx",
     "json",
-    "node"
+    "node",
+    "svelte"
   ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
@@ -150,8 +152,8 @@ export default {
 
   testMatch: [
     "**/?(*.)+(spec|test).[tj]s?(x)",
-    // "**/test/browser/hooks/useRequest-react.spec.ts(x)?",
-    // "**/test/browser/behavior/cache-expire.spec.ts",
+    // "**/test/browser/hooks/useWatcher-svelte.spec.ts(x)?",
+    // "**/test/browser/behavior/persist-response-vue.spec.ts",
     // "**/test/browser/batch/parallel-request.spec.ts",
     // "**/test/browser/stateManager/update-state.spec.ts(x)?"
   ],
@@ -172,7 +174,9 @@ export default {
   // testRunner: "jest-circus/runner",
 
   // A map from regular expressions to paths to transformers
-  // transform: undefined,
+  transform: {
+    "^.+\\.svelte$": "svelte-jester"
+  },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [

@@ -49,7 +49,14 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
 
   // 如果有持久化数据则先使用它
   const methodKey = methodInstance ? key(methodInstance) : undefinedValue;
-  const persistentResponse = methodKey ? getPersistentResponse(id, methodKey, storage) : undefinedValue;
+
+  const {
+    e: expireMilliseconds,
+    m: cacheMode,
+    t: tag,
+  } = getLocalCacheConfigParam(methodInstance);
+
+  const persistentResponse = methodKey ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue;
   const hitStorage = persistentResponse !== undefinedValue;   // 命中持久化数据
   const rawData = hitStorage ? persistentResponse : initialData;
 
@@ -73,13 +80,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     removeState = () => removeStateCache(id, methodKey);
 
     // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
-    if (persistentResponse) {
-      const {
-        e: expireMilliseconds,
-        m: cacheMode,
-      } = getLocalCacheConfigParam(methodInstance);
-      // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
-      cacheMode === STORAGE_RESTORE && !getResponseCache(id, methodKey) && setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
+    // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
+    if (persistentResponse && cacheMode === STORAGE_RESTORE && !getResponseCache(id, methodKey)) {
+      setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
     }
   }
 

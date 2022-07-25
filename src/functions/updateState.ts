@@ -38,9 +38,10 @@ export default function updateState<S, E, R, T, RC, RE, RH>(
       const {
         e: expireMilliseconds,
         s: toStorage,
+        t: tag,
       } = getLocalCacheConfigParam(methodInstance);
       setResponseCache(id, methodKey, updatedData, expireMilliseconds);
-      toStorage && persistResponse(id, methodKey, updatedData, expireMilliseconds, storage);
+      toStorage && persistResponse(id, methodKey, updatedData, expireMilliseconds, storage, tag);
     }
   }
 }

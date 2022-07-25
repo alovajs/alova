@@ -62,7 +62,8 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
   } = requestConfig;
   const {
     e: expireMilliseconds,
-    s: toStorage
+    s: toStorage,
+    t: tag,
   } = getLocalCacheConfigParam(undefinedValue, newLocalCache ?? localCache);
 
   let paramsStr = objectKeys(params).map(key => `${key}=${params[key]}`).join('&');
@@ -113,14 +114,14 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
           return promiseThen(responsedHandlePayload, data => {
             data = transformData(data, headers);
             setResponseCache(id, methodKey, data, expireMilliseconds);
-            toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage);
+            toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
             return data;
           });
         } else {
           if (headers) {
             responsedHandlePayload = transformData(responsedHandlePayload, headers);
             setResponseCache(id, methodKey, responsedHandlePayload, expireMilliseconds);
-            toStorage && persistResponse(id, methodKey, responsedHandlePayload, expireMilliseconds, storage);
+            toStorage && persistResponse(id, methodKey, responsedHandlePayload, expireMilliseconds, storage, tag);
           }
           return responsedHandlePayload;
         }

@@ -1,3 +1,4 @@
+/// <reference types="svelte" />
 export type RequestBody = Record<string, any> | FormData | string;
 export type Progress = {
   total: number,
@@ -48,6 +49,7 @@ type CommonMethodConfig = {
 type LocalCacheConfig = {
   expire: number,
   mode?: number,
+  tag?: string|number,    // 持久化缓存标签，标签改变后原有持久化数据将会失效
 };
 type LocalCacheConfigParam = number | LocalCacheConfig;
 export type AlovaMethodConfig<R, T, RC, RH> = {
@@ -189,8 +191,12 @@ type SetStateAction<S> = S | ((prevState: S) => S);
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 
 // Svelte状态类型
-export interface Readable<D> {
-  subscribe(this: void, run: (value: D) => void, invalidate?: (value?: D) => void): () => void;
+interface Readable<T = any> {
+  subscribe(
+    this: void, 
+    run: (value: T) => void, 
+    invalidate?: (value?: T) => void
+  ): () => void;
 }
 
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化

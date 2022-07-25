@@ -5,7 +5,7 @@ import {
   cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import { AlovaRequestAdapterConfig } from '../../../typings';
+import { LocalCacheConfig } from '../../../typings';
 import { Result } from '../result.type';
 import server, { untilCbCalled } from '../../server';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
@@ -15,30 +15,20 @@ import { removeResponseCache } from '../../../src/storage/responseCache';
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
+function getInstance(localCache?: LocalCacheConfig) {
   return createAlova({
     baseURL: 'http://localhost:3000',
     timeout: 3000,
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
     beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
       return config;
     },
-    responsed: {
-      success: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      error: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
+    responsed: response => {
+      const jsonPromise = response.json();
+      return jsonPromise;
+    },
+    localCache,
   });
 }
 
@@ -100,7 +90,8 @@ describe('persist data', function() {
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100 * 1000,
-        mode: cacheMode.STORAGE_RESTORE
+        mode: cacheMode.STORAGE_RESTORE,
+        tag: 'v1',
       },
       transformData: ({data}: Result) => data,
     });
@@ -113,6 +104,68 @@ describe('persist data', function() {
 
     // 设置为restore后，即使本地缓存失效了，也会自动将持久化数据恢复到缓存在宏，因此会命中缓存
     expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState.loading.value).toBe(false);
+    expect(secondState.loading.value).toBeFalsy();
+  });
+
+  test('persistent data will invalid when param `tag` of alova instance is changed', async () => {
+    const alova = getInstance({
+      expire: 100 * 1000,
+      mode: cacheMode.STORAGE_RESTORE,
+    });
+    const Get = alova.Get('/unit-test', {
+      transformData: ({data}: Result) => data,
+    });
+    const firstState = useRequest(Get);
+    await untilCbCalled(firstState.onSuccess);
+    
+    // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
+    removeResponseCache(alova.id, key(Get));
+    (alova.options.localCache as LocalCacheConfig).tag = 'v3';    // 修改tag
+    const Get2 = alova.Get('/unit-test', {
+      transformData: ({data}: Result) => data,
+    });
+    const secondState = useRequest(Get2);
+
+    // alova实例的tag改变后，持久化数据会失效，因此会重新发起请求，并且data的值会变成undefined
+    expect(secondState.loading.value).toBeTruthy();
+    expect(secondState.data.value).toBeUndefined();
+
+    await untilCbCalled(secondState.onSuccess);
+    expect(secondState.loading.value).toBeFalsy();
+    expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+  });
+
+
+  test('persistent data will invalid when `methodInstance` param `tag` is changed', async () => {
+    const alova = getInstance();
+    const Get = alova.Get('/unit-test', {
+      localCache: {
+        expire: 100 * 1000,
+        mode: cacheMode.STORAGE_RESTORE,
+      },
+      transformData: ({data}: Result) => data,
+    });
+    const firstState = useRequest(Get);
+    await untilCbCalled(firstState.onSuccess);
+    
+    // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
+    removeResponseCache(alova.id, key(Get));
+    const Get2 = alova.Get('/unit-test', {
+      localCache: {
+        expire: 100 * 1000,
+        mode: cacheMode.STORAGE_RESTORE,
+        tag: 'v2'
+      },
+      transformData: ({data}: Result) => data,
+    });
+    const secondState = useRequest(Get2);
+
+    // tag改变后，持久化数据会失效，因此会重新发起请求，并且data的值会变成undefined
+    expect(secondState.loading.value).toBeTruthy();
+    expect(secondState.data.value).toBeUndefined();
+
+    await untilCbCalled(secondState.onSuccess);
+    expect(secondState.loading.value).toBeFalsy();
+    expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
   });
 });

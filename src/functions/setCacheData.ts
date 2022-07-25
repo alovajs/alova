@@ -13,10 +13,11 @@ import { getContext } from '../utils/variables';
 export default function setCacheData<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, data: R) {
   const {
     e: expireMilliseconds,
-    s: toStorage
+    s: toStorage,
+    t: tag,
   } = getLocalCacheConfigParam(methodInstance);
   const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
   setResponseCache(id, methodKey, data, expireMilliseconds);
-  toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage);
+  toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
 }
