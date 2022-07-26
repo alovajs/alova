@@ -1159,10 +1159,18 @@
   "resolved" "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.0.7.tgz"
   "version" "3.0.7"
 
-"@jridgewell/set-array@^1.0.0":
+"@jridgewell/set-array@^1.0.0", "@jridgewell/set-array@^1.0.1":
   "integrity" "sha512-Ct5MqZkLGEXTVmQYbGtx9SVqD2fqwvdubdps5D3djjAkgkKwT918VNOz65pEHFaYTeWcukmJmH5SwsA9Tn2ObQ=="
   "resolved" "https://registry.npmjs.org/@jridgewell/set-array/-/set-array-1.1.1.tgz"
   "version" "1.1.1"
+
+"@jridgewell/source-map@^0.3.2":
+  "integrity" "sha512-m7O9o2uR8k2ObDysZYzdfhb08VuEml5oWGiosa1VdaPZ/A6QyPkAJuwN0Q1lhULOf6B7MtQmHENS743hWtCrgw=="
+  "resolved" "https://registry.npmjs.org/@jridgewell/source-map/-/source-map-0.3.2.tgz"
+  "version" "0.3.2"
+  dependencies:
+    "@jridgewell/gen-mapping" "^0.3.0"
+    "@jridgewell/trace-mapping" "^0.3.9"
 
 "@jridgewell/sourcemap-codec@^1.4.10":
   "integrity" "sha512-GryiOJmNcWbovBxTfZSF71V/mXbgcV3MewDe3kIMCLyIh5e7SKAeUZs+rMnJ8jkMolZ/4/VsdBmMrw3l+VdZ3w=="
@@ -1286,7 +1294,7 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@testing-library/dom@^8.5.0":
+"@testing-library/dom@^8.1.0", "@testing-library/dom@^8.5.0":
   "integrity" "sha512-9VHgfIatKNXQNaZTtLnalIy0jNZzY35a4S3oi08YAt9Hv1VsfZ/DfA45lM8D/UhtHBGJ4/lGwp0PZkVndRkoOQ=="
   "resolved" "https://registry.npmjs.org/@testing-library/dom/-/dom-8.13.0.tgz"
   "version" "8.13.0"
@@ -1323,6 +1331,13 @@
     "@babel/runtime" "^7.12.5"
     "@testing-library/dom" "^8.5.0"
     "@types/react-dom" "^18.0.0"
+
+"@testing-library/svelte@^3.1.3":
+  "integrity" "sha512-pyed3yMnTu7wG9Z4XKoIxdrx52hSEFDC8qUaiSsiSh8tBVj3ZjqEKnV2Nfc0IF2llEkT0B7QOXnOVTLJ3O5RCw=="
+  "resolved" "https://registry.npmjs.org/@testing-library/svelte/-/svelte-3.1.3.tgz"
+  "version" "3.1.3"
+  dependencies:
+    "@testing-library/dom" "^8.1.0"
 
 "@testing-library/vue@^6.6.0":
   "integrity" "sha512-pVCYlXSc19TDe8h9KgZGRY9CrdrsN2wLOegWbyI53FDUEJOuk/3w/BeXPLTQPMYxIv4N3/ZKK2ZJcBsNCouajA=="
@@ -3704,7 +3719,7 @@
     "merge-stream" "^2.0.0"
     "supports-color" "^8.0.0"
 
-"jest@^28.0.0", "jest@^28.1.0":
+"jest@^28.0.0", "jest@^28.1.0", "jest@>= 27":
   "integrity" "sha512-TZR+tHxopPhzw3c3560IJXZWLNHgpcz1Zh0w5A65vynLGNcg/5pZ+VildAd7+XGOu6jd58XMY/HNn0IkZIXVXg=="
   "resolved" "https://registry.npmjs.org/jest/-/jest-28.1.0.tgz"
   "version" "28.1.0"
@@ -3879,11 +3894,6 @@
   "integrity" "sha1-vMbEmkKihA7Zl/Mj6tpezRguC/4="
   "resolved" "https://registry.npmjs.org/lodash.memoize/-/lodash.memoize-4.1.2.tgz"
   "version" "4.1.2"
-
-"lodash.sortby@^4.7.0":
-  "integrity" "sha1-7dFMgk4sycHgsKG0K7UhBRakJDg="
-  "resolved" "https://registry.npmjs.org/lodash.sortby/-/lodash.sortby-4.7.0.tgz"
-  "version" "4.7.0"
 
 "lodash.unescape@4.0.1":
   "integrity" "sha1-vyJJiGzlFM2hEvrpIYzcBlIR/Jw="
@@ -4805,13 +4815,6 @@
   "resolved" "https://registry.npmjs.org/source-map/-/source-map-0.6.1.tgz"
   "version" "0.6.1"
 
-"source-map@~0.8.0-beta.0":
-  "integrity" "sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA=="
-  "resolved" "https://registry.npmjs.org/source-map/-/source-map-0.8.0-beta.0.tgz"
-  "version" "0.8.0-beta.0"
-  dependencies:
-    "whatwg-url" "^7.0.0"
-
 "sourcemap-codec@^1.4.8":
   "integrity" "sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA=="
   "resolved" "https://registry.npmjs.org/sourcemap-codec/-/sourcemap-codec-1.4.8.tgz"
@@ -4979,7 +4982,12 @@
   "resolved" "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   "version" "1.0.0"
 
-"svelte@^3.49.0":
+"svelte-jester@^2.3.2":
+  "integrity" "sha512-JtxSz4FWAaCRBXbPsh4LcDs4Ua7zdXgLC0TZvT1R56hRV0dymmNP+abw67DTPF7sQPyNxWsOKd0Sl7Q8SnP8kg=="
+  "resolved" "https://registry.npmjs.org/svelte-jester/-/svelte-jester-2.3.2.tgz"
+  "version" "2.3.2"
+
+"svelte@^3.49.0", "svelte@>= 3", "svelte@3.x":
   "integrity" "sha512-+lmjic1pApJWDfPCpUUTc1m8azDqYCG1JN9YEngrx/hUyIcFJo6VZhj0A1Ai0wqoHcEIuQy+e9tk+4uDgdtsFA=="
   "resolved" "https://registry.npmjs.org/svelte/-/svelte-3.49.0.tgz"
   "version" "3.49.0"
@@ -5008,13 +5016,13 @@
     "supports-hyperlinks" "^2.0.0"
 
 "terser@^5.0.0":
-  "integrity" "sha512-hn4WKOfwnwbYfe48NgrQjqNOH9jzLqRcIfbYytOXCOv46LBfWr9bDS17MQqOi+BWGD0sJK3Sj5NC/gJjiojaoA=="
-  "resolved" "https://registry.npmjs.org/terser/-/terser-5.13.1.tgz"
-  "version" "5.13.1"
+  "integrity" "sha512-oL0rGeM/WFQCUd0y2QrWxYnq7tfSuKBiqTjRPWrRgB46WD/kiwHwF8T23z78H6Q6kGCuuHcPB+KULHRdxvVGQA=="
+  "resolved" "https://registry.npmjs.org/terser/-/terser-5.14.2.tgz"
+  "version" "5.14.2"
   dependencies:
+    "@jridgewell/source-map" "^0.3.2"
     "acorn" "^8.5.0"
     "commander" "^2.20.0"
-    "source-map" "~0.8.0-beta.0"
     "source-map-support" "~0.5.20"
 
 "test-exclude@^6.0.0":
@@ -5081,13 +5089,6 @@
   dependencies:
     "psl" "^1.1.28"
     "punycode" "^2.1.1"
-
-"tr46@^1.0.1":
-  "integrity" "sha1-qLE/1r/SSJUZZ0zN5VujaTtwbQk="
-  "resolved" "https://registry.npmjs.org/tr46/-/tr46-1.0.1.tgz"
-  "version" "1.0.1"
-  dependencies:
-    "punycode" "^2.1.0"
 
 "tr46@^3.0.0":
   "integrity" "sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA=="
@@ -5327,11 +5328,6 @@
   "resolved" "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-3.0.1.tgz"
   "version" "3.0.1"
 
-"webidl-conversions@^4.0.2":
-  "integrity" "sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg=="
-  "resolved" "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-4.0.2.tgz"
-  "version" "4.0.2"
-
 "webidl-conversions@^7.0.0":
   "integrity" "sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g=="
   "resolved" "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-7.0.0.tgz"
@@ -5372,15 +5368,6 @@
   dependencies:
     "tr46" "~0.0.3"
     "webidl-conversions" "^3.0.0"
-
-"whatwg-url@^7.0.0":
-  "integrity" "sha512-WUu7Rg1DroM7oQvGWfOiAK21n74Gg+T4elXEQYkOhtyLeWiJFoOGLXPKI/9gzIie9CtwVLm8wtw6YJdKyxSjeg=="
-  "resolved" "https://registry.npmjs.org/whatwg-url/-/whatwg-url-7.1.0.tgz"
-  "version" "7.1.0"
-  dependencies:
-    "lodash.sortby" "^4.7.0"
-    "tr46" "^1.0.1"
-    "webidl-conversions" "^4.0.2"
 
 "which@^1.2.9":
   "integrity" "sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ=="

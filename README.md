@@ -62,7 +62,7 @@ MVVM库的请求场景管理库。
 
 
 ## 特性
-1. React/Vue请求非异步用法
+1. React/Vue/Svelte请求非异步用法
 2. 与axios相似的api设计，简单熟悉
 3. 响应数据状态化
 4. 响应数据缓存
@@ -70,13 +70,15 @@ MVVM库的请求场景管理库。
 6. 静默提交
 7. 离线提交
 8. 请求防抖
-9. Gzip3+kb轻量级
+9. 轻量级Gzip 4kb
 10. typescript支持
 11. tree shaking支持
 12. 状态更新追踪
 
 ## 各类库的体积对比
-...
+|alova|react-query|vue-request|vue|react|
+| ---- | ---- | ---- | ---- | ---- |
+| [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzipped size](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzipped size](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzipped size](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzipped size](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
 
 
 ## 安装
@@ -94,25 +96,31 @@ yarn add alova
 <!-- 核心代码，全局变量为alova -->
 <script src="https://unpkg.com/alova/dist/alova.umd.min.js"></script>
 
-<!-- vue states hook，全局变量为VueHook -->
+<!-- vue states hook，全局变量为VueHook，使用前需引入vue -->
 <script src="https://unpkg.com/alova/dist/hooks/vuehook.umd.min.js"></script>
 
-<!-- react states hook，全局变量为ReactHook -->
+<!-- react states hook，全局变量为ReactHook，使用前需引入react -->
 <script src="https://unpkg.com/alova/dist/hooks/reacthook.umd.min.js"></script>
+
+<!-- svelte states hook，全局变量为SvelteHook，使用前需引入svelte和svelte/store -->
+<script src="https://unpkg.com/alova/dist/hooks/sveltehook.umd.min.js"></script>
 ```
 
 ## 入门指南
+在接下来的入门指南中，我们将以待办事项（todo）为例，围绕着获取不同日期的待办事项列表、查看事项详情，以及创建、编辑、删除事项等需求进行本js库的讲解。让我们一起往下看吧！
 
 ### 创建Alova实例
-一个`Alova`实例是使用的开端，它的写法类似`axios`，以下是一个最简单的`Alova`实例的创建方法。
+一个`Alova`实例是使用的开端，所有的请求都需要从它开始。它的写法类似`axios`，以下是一个最简单的`Alova`实例的创建方法。
 ```javascript
-import { createAlova, VueHook, GlobalFetch } from 'alova';
+import { createAlova, GlobalFetch } from 'alova';
+import VueHook from 'alova/vue';
 const alovaInstance = createAlova({
   // 假设我们需要与这个域名的服务器交互
-  baseURL: 'http://api.alovajs.org',
+  baseURL: 'https://api.alovajs.org',
 
   // 假设我们在开发Vue项目，VueHook可以帮我们用vue的ref函数创建请求相关的，可以被Alova管理的状态，包括请求状态loading、响应数据data、请求错误对象error等（后续详细介绍）
-  // 如果正在开发React项目，我们可以使用ReactHook
+  // 如果正在开发React项目，我们可以通过alova/react使用ReactHook
+  // 如果使用Svelte项目，我们可以通过alova/svelte使用SvelteHook
   statesHook: VueHook,
 
   // 请求适配器，我们推荐并提供了fetch请求适配器
@@ -122,7 +130,7 @@ const alovaInstance = createAlova({
 
 
 ### 设置全局请求拦截器
-有时候我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，我们可以设置在创建`Alova`实例时指定全局的请求拦截器，这也与`axios`相似。
+通常，我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，`Alova`为我们提供了全局的请求拦截器，它将在请求前被触发，我们可以在此拦截器中统一设置请求参数，这也与`axios`相似。
 ```javascript
 const alovaInstance = createAlova({
   // 省略其他参数...
@@ -142,11 +150,11 @@ const alovaInstance = createAlova({
   // 省略其他参数...
 
   // 使用数组的两个项，分别指定请求成功的拦截器和请求失败的拦截器
-  responsed: [
+  responsed: {
 
-    // 请求成功的拦截器，可以是普通函数和异步函数
+    // 请求成功的拦截器
     // 当使用GlobalFetch请求适配器时，它将接收Response对象。
-    async response => {
+    success: async response => {
       const json = await response.json();
       if (json.code !== 200) {
         // 这边抛出错误时，将会进入请求失败拦截器内
@@ -159,10 +167,10 @@ const alovaInstance = createAlova({
 
     // 请求失败的拦截器
     // 请求抛出错误时，或请求成功拦截器抛出错误时，将会进入该拦截器。
-    error => {
+    error: err => {
       alert(error.message);
     }
-  ]
+  }
 });
 ```
 如果不需要设置请求失败的拦截器，可以直接传入请求成功的拦截器函数。
@@ -170,12 +178,12 @@ const alovaInstance = createAlova({
 const alovaInstance = createAlova({
   // 省略其他参数...
 
-  // 直接设置请求成功的拦截器
   async responsed(response) {
-    // ...
+    // 请求成功的拦截器
   },
 });
 ```
+> ⚠️注意：请求成功可以是普通函数和异步函数
 
 ### 创建请求方法对象
 在`Alova`中，每个请求都对应一个method对象，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据、请求防抖等请求行为参数。`Method`对象的创建也类似`axios`的请求发送函数。
@@ -691,6 +699,14 @@ const handleCancel = () => {
 
 ### 持久化响应数据
 ...
+
+
+### 让持久化数据失效
+当你的某个接口设置了数据持久化并发布到了生产环境，然后因接口数据或者数据处理变动，需要在发布变动代码后让持久化数据失效，此时我们可以使用`localCache`配置的`tag`属性，每一份持久化数据都包含一个`tag`标识，当`tag`改变后原有的持久化数据就会失效，并重新获取新的数据，并用新的`tag`进行标识。
+```javascript
+
+```
+
 
 ### 重复请求（计划中）
 ...
