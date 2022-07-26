@@ -29,7 +29,6 @@ const getCompiler = (opt = {
 }) => typescript(opt);
 exports.banner = banner;
 exports.getCompiler = getCompiler;
-exports.external = ['vue', 'react'];
 const compilePaths = {
   core: {
     packageName: pkg.name,
@@ -45,7 +44,21 @@ const compilePaths = {
     packageName: 'ReactHook',
     input: 'src/predefine/ReactHook.ts',
     output: suffix => `dist/hooks/reacthook.${suffix}.js`,
+  },
+  svelte: {
+    extraExternal: ['svelte/store'],
+    packageName: 'SvelteHook',
+    input: 'src/predefine/SvelteHook.ts',
+    output: suffix => `dist/hooks/sveltehook.${suffix}.js`,
   }
 };
+exports.external = Object.keys(compilePaths)
+  .reduce((prev, next) => [
+    ...prev,
+    next,
+    ...(compilePaths[next].extraExternal || [])
+  ], [])
+  .filter(key => key !== 'core');
+
 const compileModule = process.env.MODULE || 'core';
 exports.compilePath = compilePaths[compileModule];

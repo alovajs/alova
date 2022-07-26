@@ -66,7 +66,7 @@ describe('update cached response data by user', function() {
         data = { path: '' },
         onSuccess,
       } = useRequest(Get);
-      onSuccess(() => updateState(Get, (data) => {
+      onSuccess(() => updateState(Get, data => {
         return {
           ...data,
           path: '/unit-test-updated',

@@ -22,12 +22,16 @@
     "build:vuehook:esm": "cross-env MODULE=vue rollup -c config/rollup.config.esm.js",
     "build:vuehook:umd": "cross-env NODE_ENV=development MODULE=vue rollup -c config/rollup.config.umd.js",
     "build:vuehook:umd.min": "cross-env NODE_ENV=production MODULE=vue rollup -c config/rollup.config.umd.js",
+    "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
     "build:reacthook:esm": "cross-env MODULE=react rollup -c config/rollup.config.esm.js",
     "build:reacthook:umd": "cross-env NODE_ENV=development MODULE=react rollup -c config/rollup.config.umd.js",
     "build:reacthook:umd.min": "cross-env NODE_ENV=production MODULE=react rollup -c config/rollup.config.umd.js",
-    "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
     "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
-    "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook",
+    "build:sveltehook:esm": "cross-env MODULE=svelte rollup -c config/rollup.config.esm.js",
+    "build:sveltehook:umd": "cross-env NODE_ENV=development MODULE=svelte rollup -c config/rollup.config.umd.js",
+    "build:sveltehook:umd.min": "cross-env NODE_ENV=production MODULE=svelte rollup -c config/rollup.config.umd.js",
+    "build:sveltehook": "npm run build:sveltehook:esm && npm run build:sveltehook:umd && npm run build:sveltehook:umd.min",
+    "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info"
   },
   "author": "JOU-amjs",
@@ -49,7 +53,8 @@
   "exports": {
     ".": "./dist/alova.esm.js",
     "./vue": "./dist/hooks/vuehook.esm.js",
-    "./react": "./dist/hooks/reacthook.esm.js"
+    "./react": "./dist/hooks/reacthook.esm.js",
+    "./svelte": "./dist/hooks/sveltehook.esm.js"
   },
   "typesVersions": {
     "*": {
@@ -58,6 +63,9 @@
       ],
       "react": [
         "typings/reacthook.d.ts"
+      ],
+      "svelte": [
+        "typings/sveltehook.d.ts"
       ]
     }
   },

@@ -152,10 +152,10 @@ export default {
 
   testMatch: [
     "**/?(*.)+(spec|test).[tj]s?(x)",
-    // "**/test/browser/hooks/useWatcher-svelte.spec.ts(x)?",
+    // "**/test/browser/hooks/useWatcher-react.spec.ts(x)?",
     // "**/test/browser/behavior/persist-response-vue.spec.ts",
     // "**/test/browser/batch/parallel-request.spec.ts",
-    // "**/test/browser/stateManager/update-state.spec.ts(x)?"
+    // "**/test/browser/stateManager/update-state-svelte.spec.ts(x)?"
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped

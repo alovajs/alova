@@ -6,7 +6,7 @@ import {
   useState
 } from 'react';
 import { FrontRequestState, WatchingParams } from '../../typings';
-import { falseValue, forEach, objectKeys, trueValue } from '../utils/variables';
+import { forEach, objectKeys, trueValue } from '../utils/variables';
 
 const stateToData = <D>([ state ]: ReactState<D>) => state;
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
@@ -25,13 +25,9 @@ export default {
     }
   ),
   effectRequest(handler: () => void, removeStates: () => void, { immediate, states = [] }: WatchingParams) {
-    const mountedRef = useRef(falseValue);
+    const needEmit = useRef(immediate);
     useEffect(() => {
-      if (!immediate && !mountedRef.current) {
-        mountedRef.current = trueValue;
-        return;
-      }
-      handler();
+      needEmit.current ? handler() : (needEmit.current = trueValue);
       return removeStates;    // 组件卸载时移除对应状态
     }, states);
   },
