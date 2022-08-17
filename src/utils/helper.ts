@@ -109,7 +109,7 @@ export const deserializeMethod = <S, E, RC, RE, RH>({
   url,
   config,
   requestBody
-}: SerializedMethod<any, any, RC, RE, RH>, alova: Alova<S, E, RC, RE, RH>) => new Method<S, E, any, any, RC, RE, RH>(type, alova, url, config, requestBody);
+}: SerializedMethod<any, any, RC, RH>, alova: Alova<S, E, RC, RE, RH>) => new Method<S, E, any, any, RC, RE, RH>(type, alova, url, config, requestBody);
 
 /**
  * 创建防抖函数，只有enable为trueValue时会进入防抖环节，否则将立即触发此函数

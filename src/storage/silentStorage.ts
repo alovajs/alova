@@ -30,7 +30,7 @@ export const pushSilentRequest = (namespace: string, key: string, config: Record
 export const getSilentRequest = (namespace: string, storage: Storage) => {
   const namespacedSilentStorageKey = silentRequestStorageKeyPrefix + namespace;
   const storageKeys = JSONParse(storage.getItem(namespacedSilentStorageKey) || '{}') as Record<string, null>;
-  let serializedMethod = undefinedValue as SerializedMethod<any, any, any, any, any> | undefined;
+  let serializedMethod = undefinedValue as SerializedMethod<any, any, any, any> | undefined;
   let remove = noop;
   const keys = objectKeys(storageKeys);
   if (keys.length > 0) {

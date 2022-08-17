@@ -1,3 +1,6 @@
+import { Ref } from './vuehook';
+import { Readable } from './sveltehook';
+
 export type RequestBody = Arg | FormData | string;
 export type Progress = {
   total: number,
@@ -20,10 +23,10 @@ type FrontRequestState<L = any, R = any, E = any, D = any, U = any> = {
 };
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
-export type SerializedMethod<R, T, RC, RE, RH> = {
+export type SerializedMethod<R, T, RC, RH> = {
   type: MethodType,
   url: string,
-  config?: AlovaMethodConfig<R, T, RC, RE, RH>
+  config?: AlovaMethodConfig<R, T, RC, RH>
   requestBody?: RequestBody
 };
 export interface Storage {
@@ -185,27 +188,23 @@ interface WatcherHookConfig<R> extends UseHookConfig<R> {
 interface FetcherHookConfig<R> extends Omit<UseHookConfig<R>, 'initialData'> {}
 
 // Vue状态类型
-interface Ref<T = any> {
-  value: T;
-}
-// react状态类型
-type Dispatch<A> = (value: A) => void;
-type SetStateAction<S> = S | ((prevState: S) => S);
-type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
+// interface Ref<T = any> {
+//   value: T;
+// }
 
 // Svelte状态类型
-interface Readable<T = any> {
-  subscribe(
-    this: void, 
-    run: (value: T) => void, 
-    invalidate?: (value?: T) => void
-  ): () => void;
-}
+// interface Readable<T = any> {
+//   subscribe(
+//     this: void, 
+//     run: (value: T) => void, 
+//     invalidate?: (value?: T) => void
+//   ): () => void;
+// }
 
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
 type ExportedType<R, S> = S extends Ref 
   ? Ref<R> 
-  : S extends Readable 
+  : S extends Readable<any> 
     ? Readable<R> : R;
 type UseHookReturnType<R, S> = FrontRequestState<
   ExportedType<boolean, S>,
@@ -258,9 +257,9 @@ export declare function setCacheData<S, E, R, T, RC, RE, RH>(methodInstance: Met
 // export declare function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
 
 // 预定义的fetch配置
-export declare function GlobalFetch(defaultRequestInit?: RequestInit): <R, T, RequestInit>(adapterConfig: AlovaRequestAdapterConfig<R, T, RequestInit>) => {
+export declare function GlobalFetch(defaultRequestInit?: RequestInit): (adapterConfig: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => {
   response: () => Promise<Response>;
-  headers: () => Promise<void | Headers>;
+  headers: () => Promise<Headers>;
   onDownload: (handler: (progress: Progress) => void) => void;
   abort: () => void;
 };

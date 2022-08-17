@@ -1,6 +1,7 @@
 import { FrontRequestState, WatchingParams } from '.';
-
 import { Readable } from 'svelte/store';
+export { Readable } from 'svelte/store';
+
 interface SvelteState<D> extends Readable<D> {
   val: D;
   set(this: void, val: D): void;
