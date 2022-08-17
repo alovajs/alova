@@ -89,8 +89,8 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
     responsedHandler = responsed;
   } else if (isPlainObject(responsed)) {
     const {
-      success: successHandler,
-      error: errorHandler,
+      onSuccess: successHandler,
+      onError: errorHandler,
     } = responsed as ResponsedHandlerRecord<RE>;
     responsedHandler = isFn(successHandler) ? successHandler : responsedHandler;
     responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;

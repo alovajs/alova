@@ -1,5 +1,4 @@
-/// <reference types="svelte" />
-export type RequestBody = Record<string, any> | FormData | string;
+export type RequestBody = Arg | FormData | string;
 export type Progress = {
   total: number,
   loaded: number,
@@ -52,10 +51,11 @@ type LocalCacheConfig = {
   tag?: string|number,    // 持久化缓存标签，标签改变后原有持久化数据将会失效
 };
 type LocalCacheConfigParam = number | LocalCacheConfig;
+type Arg = Record<string, any>;
 export type AlovaMethodConfig<R, T, RC, RH> = {
   name?: string,    // method对象名称，在updateState、invalidateCache中可以通过名称或通配符获取对应method对象
-  params?: Record<string, any>,
-  headers?: Record<string, any>,
+  params?: Arg,
+  headers?: Arg,
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
   timeout?: number,    // 当前中断时间
   localCache?: LocalCacheConfigParam,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
@@ -63,13 +63,16 @@ export type AlovaMethodConfig<R, T, RC, RH> = {
   enableUpload?: boolean,   // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
   transformData?: (data: T, headers: RH) => R,   // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
 } & RC;
-type AlovaRequestAdapterConfig<R, T, RC, RH> = CommonMethodConfig & AlovaMethodConfig<R, T, RC, RH>;
+type AlovaRequestAdapterConfig<R, T, RC, RH> = CommonMethodConfig & AlovaMethodConfig<R, T, RC, RH> & {
+  headers: Arg,
+  params: Arg,
+};
 
 type ResponsedHandler<RE> = (response: RE) => any;
 type ResponseErrorHandler = (error: any) => void;
 type ResponsedHandlerRecord<RE> = {
-  success: ResponsedHandler<RE>, 
-  error: ResponseErrorHandler
+  onSuccess: ResponsedHandler<RE>, 
+  onError: ResponseErrorHandler
 };
 type WatchingParams = {
   states?: any[],

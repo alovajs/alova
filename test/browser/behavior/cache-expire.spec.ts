@@ -26,12 +26,12 @@ function getInstance(
       return config;
     },
     responsed: {
-      success: response => {
+      onSuccess: response => {
         const jsonPromise = response.json();
         responseExpect && responseExpect(jsonPromise);
         return jsonPromise;
       },
-      error: err => {
+      onError: err => {
         resErrorExpect && resErrorExpect(err);
       }
     }

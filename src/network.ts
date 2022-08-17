@@ -4,13 +4,13 @@ import { deserializeMethod, noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
 import { PromiseCls, promiseThen, pushItem, setTimeoutFn, trueValue } from './utils/variables';
 
+const intervalTime = 2000;  // 重复请求间隔时间
 const alovas = [] as Alova<any, any, any, any, any>[];
 /**
  * 收集Alova实例
  * @param instance alova实例
  */
 export const addAlova = <S, E, RC, RE, RH>(instance: Alova<S, E, RC, RE, RH>) => pushItem(alovas, instance);
-
 
 /**
  * 运行静默请求，内部会轮询所有的alova实例，并发送请求
@@ -29,12 +29,15 @@ function runSilentRequest() {
     if (serializedMethod) {
       const { response } = sendRequest(deserializeMethod(serializedMethod, alova), trueValue);
       pushItem(
-        backgroundStoragedRequests, 
+        backgroundStoragedRequests,
         promiseThen(response(), remove, noop)
       );    // 如果请求失败需要捕获错误，否则会导致错误往外抛到控制台
     }
   }
-  backgroundStoragedRequests.length > 0 ? PromiseCls.all(backgroundStoragedRequests).finally(runSilentRequest) : setTimeoutFn(runSilentRequest, 2000);
+
+  PromiseCls.all(backgroundStoragedRequests).finally(() => {
+    setTimeoutFn(runSilentRequest, intervalTime);
+  });
 }
 
 
@@ -42,6 +45,6 @@ function runSilentRequest() {
  * 监听网络变化事件
  */
 export default function listenNetwork() {
-  window.addEventListener('online', runSilentRequest);
   runSilentRequest();
+  window.addEventListener('online', runSilentRequest);
 }

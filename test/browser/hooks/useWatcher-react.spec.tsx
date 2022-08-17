@@ -18,7 +18,7 @@ function getInstance(
   resErrorExpect?: (err: Error) => void,
 ) {
   return createAlova({
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3000/',
     timeout: 3000,
     statesHook: ReactHook,
     requestAdapter: GlobalFetch(),
@@ -27,12 +27,12 @@ function getInstance(
       return config;
     },
     responsed: {
-      success: response => {
+      onSuccess: response => {
         const jsonPromise = response.json();
         responseExpect && responseExpect(jsonPromise);
         return jsonPromise;
       },
-      error: err => {
+      onError: err => {
         resErrorExpect && resErrorExpect(err);
       }
     }
