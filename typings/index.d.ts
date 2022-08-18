@@ -44,7 +44,6 @@ type CommonMethodConfig = {
   data?: RequestBody,
 };
 
-
 // 请求缓存设置
 // expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
 // mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
@@ -56,7 +55,7 @@ type LocalCacheConfig = {
 type LocalCacheConfigParam = number | LocalCacheConfig;
 type Arg = Record<string, any>;
 export type AlovaMethodConfig<R, T, RC, RH> = {
-  name?: string,    // method对象名称，在updateState、invalidateCache中可以通过名称或通配符获取对应method对象
+  name?: string,    // method对象名称，在updateState、invalidateCache、以及fetch函数中可以通过名称或通配符获取对应method对象
   params?: Arg,
   headers?: Arg,
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求

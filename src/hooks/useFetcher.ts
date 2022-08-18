@@ -1,10 +1,11 @@
 import Method from '../Method';
 import Alova from '../Alova';
-import { noop } from '../utils/helper';
+import { instanceOf, noop } from '../utils/helper';
 import createRequestState from '../functions/createRequestState';
 import myAssert from '../utils/myAssert';
 import { getOptions, trueValue } from '../utils/variables';
-import { FetcherHookConfig } from '../../typings';
+import { FetcherHookConfig, MethodMatcher } from '../../typings';
+import { getMethodSnapshot, keyFind } from '../storage/methodSnapshots';
 
 /**
 * 获取请求数据并缓存
@@ -21,9 +22,15 @@ export default function useFetcher<S, E, R, RC, RE, RH>(alova: Alova<S, E, RC, R
     onError: props.onError,
     onComplete: props.onComplete,
     
-    // 通过执行该方法来拉取数据
+    /**
+     * 拉取数据
     // fetch一定会发送请求。且如果当前请求的数据有管理对应的状态，则会更新这个状态
-    fetch: <R, T>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
+     * @param matcher Method对象匹配器
+     */
+    fetch: <R, T>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>) => {
+      const methodInstance = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>) ? matcher : getMethodSnapshot(matcher, keyFind);
+
+      myAssert(!!methodInstance, 'method instance is not found');
       myAssert(alova.options.statesHook === getOptions(methodInstance).statesHook, 'the `statesHook` of the method instance is not the same as the alova instance');
       props.send(methodInstance, config, [], trueValue);
     },

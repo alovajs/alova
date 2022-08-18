@@ -7,8 +7,10 @@ import { forEach, getConfig, objectKeys, pushItem } from '../utils/variables';
 type AnyMethod = Method<any, any, any, any, any, any, any>;
 const methodSnapshots: Record<string, AnyMethod[]> = {};
 
-
+/** 过滤出所有符合条件的项 */
 export const keyFilter = 'filter';
+
+/** 过滤出符合条件的第一项 */
 export const keyFind = 'find';
 
 /**
