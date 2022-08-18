@@ -107,10 +107,10 @@ yarn add alova
 ```
 
 ## 入门指南
-在接下来的入门指南中，我们将以待办事项（todo）为例，围绕着获取不同日期的待办事项列表、查看事项详情，以及创建、编辑、删除事项等需求进行本js库的讲解。让我们一起往下看吧！
+在接下来的入门指南中，我们将以待办事项（todo）为例，围绕着获取不同日期的待办事项列表、查看todo详情，以及创建、编辑、删除事项等需求进行本`alova`的讲解。让我们一起往下看吧！
 
 ### 创建Alova实例
-一个`Alova`实例是使用的开端，所有的请求都需要从它开始。它的写法类似`axios`，以下是一个最简单的`Alova`实例的创建方法。
+一个`alova`实例是使用的开端，所有的请求都需要从它开始。它的写法类似`axios`，以下是一个最简单的`alova`实例的创建方法。
 ```javascript
 import { createAlova, GlobalFetch } from 'alova';
 import VueHook from 'alova/vue';
@@ -130,7 +130,7 @@ const alovaInstance = createAlova({
 
 
 ### 设置全局请求拦截器
-通常，我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，`Alova`为我们提供了全局的请求拦截器，它将在请求前被触发，我们可以在此拦截器中统一设置请求参数，这也与`axios`相似。
+通常，我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，`alova`为我们提供了全局的请求拦截器，它将在请求前被触发，我们可以在此拦截器中统一设置请求参数，这也与`axios`相似。
 ```javascript
 const alovaInstance = createAlova({
   // 省略其他参数...
@@ -144,7 +144,7 @@ const alovaInstance = createAlova({
 ```
 
 ### 设置全局响应拦截器
-当我们希望统一解析响应数据、统一处理错误时，此时可以在创建`Alova`实例时指定全局的响应拦截器，这同样与`axios`相似。响应拦截器包括请求成功的拦截器和请求失败的拦截器。
+当我们希望统一解析响应数据、统一处理错误时，此时可以在创建`alova`实例时指定全局的响应拦截器，这同样与`axios`相似。响应拦截器包括请求成功的拦截器和请求失败的拦截器。
 ```javascript
 const alovaInstance = createAlova({
   // 省略其他参数...
@@ -154,7 +154,7 @@ const alovaInstance = createAlova({
 
     // 请求成功的拦截器
     // 当使用GlobalFetch请求适配器时，它将接收Response对象。
-    success: async response => {
+    onSuccess: async response => {
       const json = await response.json();
       if (json.code !== 200) {
         // 这边抛出错误时，将会进入请求失败拦截器内
@@ -167,7 +167,7 @@ const alovaInstance = createAlova({
 
     // 请求失败的拦截器
     // 请求抛出错误时，或请求成功拦截器抛出错误时，将会进入该拦截器。
-    error: err => {
+    onError: err => {
       alert(error.message);
     }
   }
@@ -186,11 +186,12 @@ const alovaInstance = createAlova({
 > ⚠️注意：请求成功可以是普通函数和异步函数
 
 ### 创建请求方法对象
-在`Alova`中，每个请求都对应一个method对象，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据、请求防抖等请求行为参数。`Method`对象的创建也类似`axios`的请求发送函数。
+在`alova`中，每个请求都对应一个method对象表示，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据等请求行为参数，它不会实际发出请求。`Method`对象的创建也类似`axios`的请求发送函数。
+我们先来创建一个获取todo列表的`Method`对象，大概是这样的
 
 ```javascript
 // 创建一个Get对象，描述一次Get请求的信息
-const todoListGetter = alova.Get('/todo-list', {
+const todoListGetter = alova.Get('/todo/list', {
   headers: {
     'Content-Type': 'application/json;charset=UTF-8'
   },
@@ -199,15 +200,17 @@ const todoListGetter = alova.Get('/todo-list', {
     userId: 1
   }
 });
-
+```
+接着再创建一个创建todo项的`Method`对象，大概是这样的
+```javascript
 // 创建Post对象
-const createTodoPoster = alova.Post('/create-todo', 
-  // http body数据
+const createTodoPoster = alova.Post('/todo/create', 
+  // 第二个参数是http body数据
   {
     title: 'test todo',
     time: '12:00'
   }, 
-  // 请求配置相关信息放在了第三个参数
+  // 第三个参数是请求配置相关信息
   {
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
@@ -218,7 +221,7 @@ const createTodoPoster = alova.Post('/create-todo',
   }
 );
 ```
-> ⚠️⚠️⚠️注意：`Method`对象里只是保存了请求所需要的信息，但它不会发出请求，而是需要通过`use hook`发送请求，这点与`axios`的方法不同。
+> ⚠️注意：`Method`对象里只是保存了请求所需要的信息，但它不会发出请求，而是需要通过`use hook`发送请求，这点与`axios`不同。
 
 ### 请求方法类型
 `Alova`提供了包括GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH七种请求方法的抽象对象，具体的使用方式可以阅读[进阶-请求方法详解](#请求方法详解)。
@@ -238,78 +241,133 @@ const alovaInstance = createAlova({
 在创建请求方法对象时设置请求级别的请求超时时间，它将覆盖全局的`timeout`参数。
 ```javascript
 // 请求级别的请求超时时间
-const todoListGetter = alova.Get('/todo-list', {
+const todoListGetter = alova.Get('/todo/list', {
   // 省略其他参数...
 
   timeout: 10000,
 });
 ```
 
-### 为响应数据设置保鲜时间
-有些接口在短时间内可能会频繁重复请求，我们可以为它们的响应数据设置保鲜来重复利用之前请求的数据，即内存临时缓存响应数据，这样做既减少了服务器压力，又可以省去用户等待的时间。默认只有`alova.Get`会带有300000ms(5分钟)的响应数据保鲜时间，开发者也可以自定义设置响应保鲜时间。
+### 为响应数据设置缓存时间
+当你在写todo详情页的时候，你可能会想到用户会频繁在todo列表中点击查看详情，如果用户重复查看某条详情时不再重复请求接口，并且能立即返回数据，那该多好，既提升了响应速度，又减小了服务器压力。此时我们就可以为某个todo详情`Method`对象设置响应数据缓存。默认只有`alova.Get`会带有300000ms(5分钟)的响应数据缓存时间，开发者也可以自定义设置。
 
-> ⚠️⚠️⚠️响应数据缓存的key：是由method实例的请求方法(method)、请求地址(url)、请求头参数(headers)、url参数(params)、请求体参数(requestBody)组合作为唯一标识，任意一个位置不同都将被当做不同的key。
+> ⚠️响应数据缓存的key：是由method实例的请求方法(method)、请求地址(url)、请求头参数(headers)、url参数(params)、请求体参数(requestBody)组合作为唯一标识，任意一个位置不同都将被当做不同的key。
 
-以下是全局设置响应保鲜时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。
+以下是全局设置响应缓存时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。`alova`的缓存有三种模式，分别为内存模式、持久化模式、持久化占位模式。
+#### 内存模式（默认）
+表示缓存放在内存中，这意味着刷新页面缓存即失效，是最常用的缓存模式。
 ```javascript
-// 为所有请求设置固定的响应保鲜时间
 const alovaInstance = createAlova({
   // 省略其他参数...
 
-  // 单位为毫秒
-  // 当设置为`Infinity`，表示数据永不过期，设置为0或负数时表示不保鲜
-  staleTime: 60 * 10 * 1000
-});
+  localCache: {
+    // 设置缓存模式为内存模式
+    mode: cacheMode.MEMORY,
 
-// 通过钩子函数设置动态的响应保鲜时间
+    // 单位为毫秒
+    // 当设置为`Infinity`，表示数据永不过期，设置为0或负数时表示不缓存
+    expire: 60 * 10 * 1000,
+  },
+
+  ////////////////////////
+  ////////////////////////
+  // 因为默认是内存模式，上面的设置也可以简写成这样
+  localCache: 60 * 10 * 1000,
+});
+```
+#### 持久化模式
+表示缓存放在诸如`localStorage`存储中，如果过期时间未到即使刷新页面缓存也不会失效，它一般用于一些需要服务端管理，但基本不变的数据。
+```javascript
 const alovaInstance = createAlova({
   // 省略其他参数...
 
-  // 函数参数为响应拦截器处理后的响应数据、响应头对象、请求方法
-  // 函数要求返回保鲜时间，单位是毫秒
-  staleTime(rawData, headers, method) {
+  localCache: {
+    // 设置缓存模式为持久化模式
+    mode: cacheMode.STORAGE_RESTORE,
 
-    // 设置GET和POST请求方法具有10分钟的保鲜时间
-    if (['GET', 'POST'].includes(method)) {
-      return 10 * 60 * 1000;
-    }
-    return 0;
-  }
+    // 单位为毫秒
+    // 当设置为`Infinity`，表示数据永不过期，设置为0或负数时表示不缓存
+    expire: 60 * 10 * 1000,
+
+    // 缓存标签
+    tag: 'v1',
+  },
 });
 ```
+> ⚠️缓存标签tag参数：出于对接口数据变动、前端处理响应数据逻辑变动原因，我们需要在发布后让原持久化缓存在未过期时失效，此时可以设置一个不同的`tag`参数即可，然后就会重新请求接口数据了。
 
-如果需要请求级别的保鲜时间，你也可以在创建请求方法对象时覆盖全局`staleTime`参数。
+#### 持久化占位模式
+当页面数据在加载时不希望只展示加载图标，而是实际数据，同时又去加载最新数据时，我们可以使用持久化占位模式，首次加载它也会持久化缓存数据，然后再次请求时立即返回缓存数据，但和持久化模式不同的是，它还会立即发出请求并更新缓存，这样就达到了既快速展示实际数据，又获取了最新的数据。
 ```javascript
-const todoListGetter = alova.Get('/todo-list', {
+const alovaInstance = createAlova({
   // 省略其他参数...
 
-  // 参数用法与全局相同，也可以使用固定值和函数动态设置保鲜时间
-  staleTime: 60 * 10 * 1000,
+  localCache: {
+    // 设置缓存模式为持久化占位模式
+    mode: cacheMode.STORAGE_PLACEHOLDER,
+    // 缓存时间
+    expire: 60 * 10 * 1000,
+
+    // 此模式同样支持缓存标签
+    tag: 'v1',
+  },
 });
 ```
-> 注意：缓存的响应数据是保存在内存中的，当页面刷新时缓存的数据将会丢失。
+
+以上缓存设置同样支持请求级别，在创建请求方法对象上设置`localCache`参数来达到目的，设置方法相同。
+```javascript
+const todoListGetter = alova.Get('/todo/list', {
+  // 省略其他参数...
+
+  // 参数用法与全局相同
+  localCache: 60 * 10 * 1000,
+});
+```
 
 ## 在正确的时机发送请求
-在`Alova`中提供了`useRequest`、`useWatcher`、`useFetcher`三种`use hook`实现请求时机，由它们控制何时应该发出请求，同时将会为我们创建和维护状态化的请求相关数据，省去了开发者自主维护这些状态的麻烦，下面我们来了解下它们。
+接下来我们要来看看如何实际发出请求了，在`alova`中提供了`useRequest`、`useWatcher`、`useFetcher`三种`use hook`实现请求时机，由它们控制何时应该发出请求，同时将会为我们创建和维护状态化的请求相关数据，如`loading`、`data`、`error`等，省去了开发者自主维护这些状态的麻烦，下面我们来了解下它们。
 
 ### useRequest
-它侧重于表示一次请求的发送，执行`useRequest`时默认会发送一次请求，在页面获取初始化数据时很有用。同时我们也可以关闭它的默认发送请求，这在例如提交数据等手动触发的场景下很有用。
+它表示一次请求的发送，执行`useRequest`时默认会发送一次请求，在页面获取初始化数据时是最常用的方法。同时也支持关闭它的默认的请求发送，这在例如提交数据等通过点击事件触发的场景下非常有用。下面我们来发出对todo列表数据的请求。
 ```javascript
-// 这里我们使用上一步创建的todoListGetter对象获取todo list数据
 const {
   // loading是加载状态值，当加载时它的值为true，结束后自动更新为false
-  // 在Vue3环境下（使用VueHook），它通过ref函数创建，你可以通过loading.value访问它，或直接绑定到界面中
-  // 在React16环境下（使用ReactHook），它的值为普通的boolean值，请求状态变化时内部将调用setLoading函数更新它的值
+  // Vue3环境下（使用VueHook）：它是一个readonly的Ref类型的值，你可以通过loading.value访问它，或直接绑定到界面中
+  // React16环境下（使用ReactHook）：它的值为普通的boolean值，请求状态变化时内部将调用setLoading函数更新它的值
+  // 在Svelte环境下（使用SvelteHook）：它是一个Readable类型的值，内部将维护它的值
   loading,
 
   // 响应数据
   data: todoList,
 
-  // 请求错误对象，请求错误时有值，否则为null
-  error
-} = useRequest(todoListGetter);
+  // 请求错误对象，请求错误时有值，否则为undefined
+  error,
+
+  // 成功回调绑定
+  onSuccess,
+
+  // 失败回调绑定
+  onError,
+
+  // 完成回调绑定
+  onComplete,
+
+  // 直接将Method对象传入即可发送请求
+} = useRequest(todoListGetter, {
+  // 初始data数据
+  initialData: [],
+});
+onSuccess(todoListRaw => {
+  console.log('请求成功，响应数据为:', todoListRaw);
+});
+onError(error => {
+  console.log('请求失败，错误信息为:', error);
+});
+onComplete(() => {
+  console.log('请求完成，不管成功失败都会调用');
+});
 ```
-展示todo list数据到界面
+你可以直接使用todoList来渲染todo列表
 ```html
 <div v-if="loading">Loading...</div>
 <div v-else-if="error" class="error">{{ error.message }}</div>
@@ -321,61 +379,59 @@ const {
 </template>
 ```
 
-提交数据场景下，关闭默认发送请求，并手动触发请求。
+当你需要创建一条新的todo项时，可以先关闭默认发送请求，转为手动触发请求。然后将useRequest的第一个参数改为返回`Method`对象的函数，该函数在触发请求时被调用。
 ```javascript
+const createTodoPoster = newTodo => alova.Post('/todo', newTodo);
+
 const {
   loading,
   data,
   error,
 
   // 手动发送器请求的函数，调用后发送请求
-  send,
-
-  // 响应处理对象
-  responser,
-} = useRequest(createTodoPoster, {
+  send: addTodo,
+} = useRequest(newTodo => createTodoPoster(newTodo), {
   // 当immediate为false时，默认不发出
   immediate: false
 });
-```
-手动触发请求
-```html
-<!-- Vue -->
-<button @click="send">发送请求</button>
 
-<!-- React -->
-<button onClick={send}>发送请求</button>
-```
-如果你需要对请求响应做处理，可以使用`responser`对象，以下回调函数将会在每次请求时都触发。
-```javascript
-responser
-  .success(responseData => {
-    // TODO: 请求成功回调
-  })
-  .error(err => {
-    // TODO: 请求错误回调
-  })
-  .complete(() => {
-    // TODO: 请求结束回调
-  });
+
+// 手动发送请求
+const handleAddTodo = () => {
+
+  /** 手动触发函数可接受任意个参数，这些参数将被传入4个函数
+   * 1. useRequest的第一个参数为回调函数时可以接收到
+   * 2. onSuccess设置的回调中从第二个参数开始接收（第一个参数为响应数据）
+   * 3. onError设置的回调中从第二个参数开始接收（第一个参数为错误对象）
+   * 4. onComplete设置的回调中从第一个参数开始接收
+   * 
+   * 返回：一个Promise对象，可接收响应数据
+   */
+  const newTodo = {
+    title: '新的todo项',
+    time: new Date().toLocaleString()
+  };
+  addTodo(newTodo)
+    .then(result => {
+      console.log('新增todo项成功，响应数据为:', result);
+    })
+    .catch(error => {
+      console.log('新增todo项失败，错误信息为:', error);
+    });
+};
 ```
 
 ### useWatcher
-它侧重于监听状态变化后发送请求，在分页、数据筛选、模糊搜索等场景很有用。同时如果你希望更新服务端数据，你也可以在数据未变化时手动触发请求，手动触发方法与`useRequest`相同。以模糊搜索为例进行演示。
+它用于监听指定的状态变化，然后立即发送请求，在分页、数据筛选、模糊搜索等场景很有用。同时如果你希望更新服务端数据，接下来我们以搜索todo项为例。
 ```javascript
-// api.js
-// method实例创建函数
-export const filterTodoList = text => {
-  return alova.Get('/tood-list', {
+// 创建method实例
+const filterTodoList = text => {
+  return alova.Get('/tood/list/search', {
     params: {
       searchText: text,
-      userId: 1,
     }
   });
 };
-```
-```javascript
-import { filterTodoList } from '/api';
 const searchText = ref('');   // Vue3
 // const [searchText, setSearchText] = useState('');   // React16
 
@@ -384,101 +440,133 @@ const {
   data: todoList,
   error
 
-  // 第一个参数为返回method实例的函数，而非method实例本身
+  // 第一个参数必须为返回method实例的函数
 } = useWatcher(() => filterTodoList(searchText.value), 
+
   // 被监听的状态数组，这些状态变化将会触发一次请求
   [searchText], {
-    // 设置500ms防抖
+
+    // 设置500ms防抖，如果searchText频繁变化，只有在停止变化后500ms才发送请求
     debounce: 500,
   }
 );
 ```
 ```html
 <!-- searchText随着输入内容变化而变化 -->
-<input v-model="seatchText"></input>
-<!-- 筛选后的todo list列表 -->
-<div v-for="todo in todoList">
-  <div class="todo-title">{{ todo.title }}</div>
-  <div class="todo-time">{{ todo.time }}</div>
-</div>
+<input v-model="seatchText" />
+
+<!-- 渲染筛选后的todo列表 -->
+<div v-if="loading">Loading...</div>
+<template v-else>
+  <div v-for="todo in todoList">
+    <div class="todo-title">{{ todo.title }}</div>
+    <div class="todo-time">{{ todo.time }}</div>
+  </div>
+</template>
 ```
-如果要使用到分页场景，你可以这样做。
+如果要用在todo列表分页请求，你可以这样做。
 ```javascript
-// api.js
 // method实例创建函数
-export const getTodoList = currentPage => {
-  return alova.Get('/tood-list', {
+const getTodoList = currentPage => {
+  return alova.Get('/tood/list', {
     params: {
-      page: currentPage,
-      userId: 1,
+      currentPage,
+      pageSize: 10
     }
   });
 };
-```
-```javascript
-import { getTodoList } from '/api';
-const currentPage = ref(1);   // Vue3
 
+const currentPage = ref(1);   // Vue3
 const {
   loading,
   data: todoList,
   error,
 
-  // 如果需要在监听状态未变化时刷新列表数据，也可以调用send函数手动触发
-  send,
-
   // 第一个参数为返回method实例的函数，而非method实例本身
 } = useWatcher(() => getTodoList(currentPage.value), 
   // 被监听的状态数组，这些状态变化将会触发一次请求
   [currentPage], {
-    // 调用useWatcher默认不触发
+    // ⚠️调用useWatcher默认不触发，注意和useRequest的区别
     // 手动设置immediate为true可以初始获取第1页数据
     immediate: true,
   }
 );
 ```
+> ⚠️如果你只希望重新请求当前页的数据（可能是数据更新了），你也可以手动触发请求，用法和`useRequest`相同。
+
 
 ### useFetcher
-它侧重于拉取数据，所发送的请求不返回响应数据给开发者，而是将数据暂存到响应缓存中，如果预加载的请求在之前已请求过，那它还会更新这次请求对应的响应状态。`useFetcher`的请求定位如下：
+它用于拉取数据，响应数据不能直接接收到，`useFetcher`的请求定位如下：
 1. 预加载后续流程中将会使用到的数据，让用户不再等待数据加载的过程；
-2. 跨页面刷新界面数据，例如修改todo列表的某一项，修改完成后在修改页面即可触发列表页数据的刷新；
+2. 跨页面刷新界面数据，拉取的数据在页面中存在渲染时，它除了会更新缓存外还会更新响应状态，让界面刷新，例如修改todo列表的某一项后重新拉取最新数据，响应后将会刷新界面。
+
+与`useRequest`和`useWatcher`相比，`useFetcher`需要传入`alova`实例对象来确定应该如何创建状态，而且它不返回`data`字段，将`loading`改名为了`fetching`，也没有`send`函数，但多了一个fetch函数，可以重复利用fetch函数拉取不同的数据，且使用同一个fetching和error等状态，从而达到统一处理的目的。
+
+下面我们来实现修改某个todo数据，并重新拉取最新的todo列表数据，让界面刷新。
+
 ```javascript
-// 与上面两个use hook相比，它不返回data字段，但多了一个fetch函数
-// 可以重复利用fetch函数拉取不同的数据，且使用同一个fetching和error等状态，从而达到统一处理的目的。
+const getTodoList = currentPage => {
+  return alova.Get('/tood/list', {
+    // 注意：这边设置了name属性，用于在无法直接指定Method对象时，过滤出需要的Method对象
+    name: 'todoList',
+    params: {
+      currentPage,
+      pageSize: 10
+    }
+  });
+};
+
 const {
 
-  // fetching的效果与loading相同，发送拉取请求时为true，请求结束后为false
+  // fetching属性与loading相同，发送拉取请求时为true，请求结束后为false
   fetching,
   error,
-  responser,
+  onSuccess,
+  onError,
+  onComplete,
 
-  // 调用fetch后才会实际发送请求
+  // 调用fetch后才会发送请求拉取数据，可以重复调用fetch多次拉取不同接口的数据
   fetch,
 } = useFetcher(alova);
 
 // 在事件中触发数据拉取
 const handleSubmit = () => {
-  // 它接收一个method实例，表示需要拉取的请求相关信息
+  // 假设已完成todo项的修改...
+
+  // 开始拉取更新后的数据
+  // 情况1：当你明确知道拉取todoList第一页数据时，传入一个Method对象
   fetch(getTodoList(1));
+
+  // 情况2：当你只知道拉取todoList最后一次请求的数据时，通过Method对象过滤器来筛选
+  fetch({
+    name: 'todoList',
+    filter: (method, index, ary) => {
+
+      // 返回true来指定需要拉取的Method对象
+      return index === ary.length - 1;
+    },
+  })
 };
 ```
+界面中还可以渲染统一的拉取状态。
 ```html
 <div v-if="fetching">{{ 正在后台拉取数据... }}</div>
 <!-- 省略todo参数设置相关的html -->
-<button @click="handleSubmit">创建todo</button>
+<button @click="handleSubmit">修改todo项</button>
 ```
+
+详细的`Method`对象过滤器使用方法见 [进阶-Method对象过滤器](#Method对象过滤器)
 
 ## 响应数据管理
 响应数据状态化并统一管理，我们可以在任意位置访问任意的响应数据，并对它们进行操作。
 
-### 转换响应数据（beta）
-当响应数据结构不能直接满足前端需求时，我们可以为method实例设置`transformData`钩子函数将响应数据转换成需要的结构，转换后的数据会赋值给`data`状态。
+### 转换响应数据
+当响应数据结构不能直接满足前端需求时，我们可以为method实例设置`transformData`钩子函数将响应数据转换成需要的结构，数据转换后将会作为`data`状态的值。
 
 ```javascript
-const todoListGetter = alova.Get('/tood-list', {
+const todoListGetter = alova.Get('/tood/list', {
   params: {
     page: 1,
-    userId: 1,
   },
 
   // 函数接受未加工的数据和响应头对象，并要求将转换后的数据返回，它将会被赋值给data状态。
@@ -494,67 +582,104 @@ const todoListGetter = alova.Get('/tood-list', {
 });
 ```
 
-### 让响应缓存腐化
-有这样一个场景，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，普通做法是通过事件来触发上一页的内容更新，增加了事件维护的成本。`Alova`提供了3种方式达到这个目的：
-1. 使用`useFetcher`立即重新请求最新的数据，它类似于懒加载的饿汉模式；
+### 主动失效响应缓存
+有这样一个场景，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，通常的做法是通过事件来触发上一页的内容更新，这样增加了维护成本。而`alova`提供了3种方式，可以很优雅地达到这个目的：
+1. 使用`useFetcher`立即重新请求最新的数据，它在上面的章节中已经讲过；
 2. 手动更新缓存，这种方式将在下一个小节详细讲解；
-3. 让这个响应缓存腐化，即缓存失效，当再次请求时将不会命中缓存，它类似于懒加载的懒汉模式。这也是本小节所要讲的内容。
+3. 让这个响应缓存失效，当再次请求时将会因缓存失效而重新请求数据。这也是本小节所要讲的内容。
 
-假设使用上面创建的`todoListGetter`和`createTodoPoster`，调用`odo/create-todo`创建t项时让`/todo-list`接口对应的缓存腐化。
+现在我们尝试以缓存失效的方式实现本需求。
 ```javascript
-import { staleData } from 'alova';
+import { invalidateCache } from 'alova';
+
+const getTodoList = currentPage => {
+  return alova.Get('/tood/list', {
+    params: {
+      currentPage,
+      pageSize: 10
+    }
+  });
+};
 
 const {
   // ...
   send,
-  responser
+  onSuccess
 } = useRequest(createTodoPoster, { immediate: false });
-
-// 提交成功后腐化todo list响应缓存
-responser.success(() => {
-  staleData(todoListGetter);
+// 提交成功后，固定使第一页的todo数据缓存失效
+onSuccess(() => {
+  invalidateCache(getTodoList(1));
 });
 
-// todo创建提交回调函数
+// 当触发handleSubmit函数时将会触发请求
 const handleSubmit = () => {
   send();
 };
 ```
-```html
-<!-- 省略todo参数设置相关的html -->
-<button @click="handleSubmit">创建todo</button>
-```
+它的功能还远不止于此，我们还可以通过设置`Method`对象过滤器来实现多个，甚至全部的缓存失效。
 
-
-### 跨页面/模块更新响应数据
-我们继续以上一小节[让响应缓存腐化](#让响应缓存腐化)中提到的例子说起，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，上一小节提到的懒汉模式和饿汉模式都会重新发起请求，但这节我们使用一种不需要重新请求的方法，即手动更改被编辑的项。
 ```javascript
-import { updateState } from 'alova';
-// 省略其他代码
+const getTodoList = currentPage => {
+  return alova.Get('/tood/list', {
+    // 注意：设置了name属性，用于在无法直接指定Method对象时，过滤出需要的Method对象
+    name: 'todoList',
+    params: {
+      currentPage,
+      pageSize: 10
+    }
+  });
+};
 
-const editingTodo = { /* ... */ };
-// 提交成功后手动修改todo list的响应状态
-responser.success(() => {
-  
-  // 调用updateState并传入对应的method对象获取todo列表的响应状态
-  //  
-  // Vue3
-  updateState(todoListGetter, todoList => {
-    todoList.value = todoList.value.map(item => {
-      if (item.id === editingTodo.id) {
-        return {
-          ...item,
-          ...editingTodo,
-        };
-      }
-      return item;
-    });
+const {
+  // ...
+  send,
+  onSuccess
+} = useRequest(createTodoPoster, { immediate: false });
+// 提交成功后，固定使第一页的todo数据缓存失效
+onSuccess(() => {
+
+  // 失效名称为todoList的所有响应缓存
+  invalidateCache({
+    name: 'todoList',
+    filter: (method, index, ary) => {
+      // 名为todoList的前5个Method对象的响应缓存将会失效
+      return index < 5;
+    },
   });
 
+  // 不传任何参数时，失效所有响应缓存
+  invalidateCache();
+});
+```
 
-  // React16
-  updateState(todoListGetter, ([todoList, setTodoList]) => {
-    todoList = todoList.map(item => {
+详细的`Method`对象过滤器使用方法见 [进阶-Method对象过滤器](#Method对象过滤器)
+
+### 跨页面/模块更新响应数据
+我们继续以上一小节[主动失效响应缓存](#主动失效响应缓存)中提到的例子来说，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，使用`useFetcher`和`invalidateCache`的方式都会重新发起请求，那有没有不需要重新请求的方法呢？
+
+当然有！
+```javascript
+import { updateState } from 'alova';
+
+// 正在编辑的todo项
+const editingTodo = {
+  id: 1,
+  title: 'todo1',
+  time: '09:00'
+};
+
+const {
+  send,
+  onSuccess
+} = useRequest(createTodoPoster, { immediate: false });
+
+// 提交成功后，固定使第一页的todo数据缓存失效
+onSuccess(() => {
+
+  // 提交成功后，固定修改第一页的todo数据数据
+  // 第一个参数为Method对象，第二个为包含原缓存数据的回调函数，该函数需要返回修改后的数据
+  updateState(getTodoList(1), todoList => {
+    return todoList.map(item => {
       if (item.id === editingTodo.id) {
         return {
           ...item,
@@ -563,21 +688,21 @@ responser.success(() => {
       }
       return item;
     });
-    setTodoList(todoList);
   });
 });
 ```
+> 自主修改缓存数据时，不仅会更新对应的响应式状态，如果存在持久化缓存也会一起被更新。
 
 
 ### 自定义设置缓存数据
 有些服务接口支持批量请求数据，它意味着总是由不确定的若干组响应数据组成，当我们想要在初始化页面时批量请求数据，然后在交互中只请求单条数据的情况下，会造成缓存穿透的问题。
 
-例如我们在todo列表页初始化时获取了5月1日到5日，5天的数据，然后用户在操作时又获取了一次5月1日的数据，此时不会命中初始化时的5月1日数据，因为初始化的5天数据是存放在一起的，而没有剥离开，此时我们就可以为这5天的数据一一手动创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
+例如我们需要按日期获取todo列表数据，在初始化时一次请求获取了5月1日到5日，5天的数据，然后用户在操作时又获取了一次5月1日的数据，此时不会命中初始化时的5月1日数据，因为初始化的5天数据是存放在一起的，而不是分开缓存的，此时我们就可以为这5天的数据一一手动创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
 
 ```javascript
-import { setFreshData } from 'alova';
+import { setCacheData } from 'alova';
 
-const getTodoListByDate = dateList => alova.Get('/todo-list-dates', {
+const getTodoListByDate = dateList => alova.Get('/todo/list/dates', {
   params: { dateList }
 });
 // 初始化时批量获取5天的数据
@@ -590,26 +715,31 @@ const dates = ref([
 ]);
 const {
   // ...
-  responser
-} = useWatcher(() => getTodoListByDate(dates.value.join()), [dates], { immediate: true });
-responser.success(todoListDates => {
+  onSuccess
+} = useWatcher(() => getTodoListByDate(dates.value.join()),
+  [dates],
+  {
+    immediate: true
+  }
+);
+onSuccess(todoListDates => {
   if (todoListDates.length <= 1) {
     return;
   }
 
   // 默认情况下，这5天的数据会一起缓存到一个key中
-  // 为了让后续请求某一天的数据时也能命中缓存，我们可以将5天的数据拆解为按天，并通过setFreshData一一手动设置响应缓存
-  // setFreshData的第一个参数为method实例对象，作为缓存key
+  // 为了让后续请求某一天的数据时也能命中缓存，我们可以将5天的数据拆解为按天，并通过setCacheData一一手动设置响应缓存
+  // setCacheData的第一个参数为method实例对象，它用于指定缓存的key
   // 第二个参数为缓存数据
   todoListDates.forEach(todoDate => {
-    setFreshData(getTodoListByDate(todoDate.date), [ todoDate ]);
+    setCacheData(getTodoListByDate(todoDate.date), [ todoDate ]);
   });
 });
 ```
-交互时，用户因某些情况再次发起了5月1日的数据请求，那它将会命中我们手动设置的响应缓存。
+此时再在切换日期为5月1日时，它将会命中我们手动设置的响应缓存。
 ```javascript
 const handleTodolistToggle = () => {
-  // 改变监听值dates可以自动触发请求
+  // dates值正在被useWatcher监听，因此改变它就可以自动触发请求
   dates.value = ['2022-05-01'];
 }
 ```
@@ -670,6 +800,9 @@ const handleCancel = () => {
 通常我们都会在频繁触发的事件层面编写防抖代码，这次我们在请求层面实现了防抖功能。
 
 
+### Method对象过滤器
+...
+
 ### 下载进度
 ...
 
@@ -703,17 +836,22 @@ const {
   onError: onCountError
 } = useRequest(todoCountGetter);
 
-// 创建promise对象
-const listPromise = new Promise((resolve, reject) => {
-  onListSuccess(resolve);
-  onListError(reject);
+// 手动创建promise对象
+onMounted(async () => {
+  const listPromise = new Promise((resolve, reject) => {
+    onListSuccess(resolve);
+    onListError(reject);
+  });
+  const countPromise = new Promise((resolve, reject) => {
+    onCountSuccess(resolve);
+    onCountError(reject);
+  });
+  const [
+    listResponse,
+    countResponse,
+  ] = await Promise.all([listPromise, countPromise]);
+  // 并行请求完成，继续处理业务...
 });
-const countPromise = new Promise((resolve, reject) => {
-  onCountSuccess(resolve);
-  onCountError(reject);
-});
-await Promise.all([listPromise, countPromise]);
-// 并行请求完成
 ```
 
 方式2：使用`useRequest`函数返回的`send`函数，调用`send`将会返回一个可用的promise对象。
@@ -726,8 +864,14 @@ const {
   send: sendCount
 } = useRequest(todoCountGetter, { immediate: false });
 
-await Promise.all([sendList(), sendCount()]);
-// 并行请求完成
+// 利用send函数返回的promise对象
+onMounted(async () => {
+  const [
+    listResponse,
+    countResponse,
+  ] = await Promise.all([sendList(), sendCount()]);
+  // 并行请求完成，继续处理业务...
+});
 ```
 
 ### 串行请求
