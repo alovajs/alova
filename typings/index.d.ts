@@ -6,11 +6,12 @@ export type Progress = {
   total: number,
   loaded: number,
 };
+type ProgressUpdater = (loaded: number, total: number) => void;
 type AlovaRequestAdapter<R, T, RC, RE, RH> = (adapterConfig: AlovaRequestAdapterConfig<R, T, RC, RH>) => {
   response: () => Promise<RE>,
   headers: () => Promise<RH>,
-  onDownload?: (handler: (progress: Progress) => void) => void,
-  onUpload?: (handler: (progress: Progress) => void) => void,
+  onDownload?: (handler: ProgressUpdater) => void,
+  onUpload?: (handler: ProgressUpdater) => void,
   abort: () => void,
 };
 
@@ -256,7 +257,7 @@ export declare function setCacheData<S, E, R, T, RC, RE, RH>(methodInstance: Met
 // export declare function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
 
 // 预定义的fetch配置
-export declare function GlobalFetch(defaultRequestInit?: RequestInit): (adapterConfig: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => {
+export declare function GlobalFetch(defaultRequestInit?: RequestInit): (adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) => {
   response: () => Promise<Response>;
   headers: () => Promise<Headers>;
   onDownload: (handler: (progress: Progress) => void) => void;

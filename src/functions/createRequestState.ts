@@ -60,7 +60,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
   const hitStorage = persistentResponse !== undefinedValue;   // 命中持久化数据
   const rawData = hitStorage ? persistentResponse : initialData;
 
-  const progress = {
+  const progress: Progress = {
     total: 0,
     loaded: 0,
   };

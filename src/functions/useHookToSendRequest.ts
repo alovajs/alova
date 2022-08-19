@@ -108,10 +108,18 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, pr
     }
   );
   
-  if (!silentMode) {
-    enableDownload && onDownload(downloading => update({ downloading }, originalState));
-    enableUpload && onUpload(uploading => update({ uploading }, originalState));
-  }
+  const progressUpdater = (stage: 'downloading' | 'uploading') => 
+    (loaded: number, total: number) => {
+      update({
+        [stage]: {
+          loaded,
+          total,
+        },
+      }, originalState);
+    };
+  enableDownload && onDownload(progressUpdater('downloading'));
+  enableUpload && onUpload(progressUpdater('uploading'));
+  
   return {
     ...ctrl,
     p: responseHandlePromise,

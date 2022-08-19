@@ -294,7 +294,7 @@ const alovaInstance = createAlova({
   },
 });
 ```
-> ⚠️缓存标签tag参数：出于对接口数据变动、前端处理响应数据逻辑变动原因，我们需要在发布后让原持久化缓存在未过期时失效，此时可以设置一个不同的`tag`参数即可，然后就会重新请求接口数据了。
+> ⚠️缓存标签tag参数：出于对接口数据变动、前端处理响应数据逻辑变动原因，你需要在发布后让原持久化缓存立即失效，此时你可以设置`tag`属性，每一份持久化数据都包含一个`tag`标识，当`tag`改变后原有的持久化数据就会失效，并重新获取新的数据，并用新的`tag`进行标识。
 
 #### 持久化占位模式
 当页面数据在加载时不希望只展示加载图标，而是实际数据，同时又去加载最新数据时，我们可以使用持久化占位模式，首次加载它也会持久化缓存数据，然后再次请求时立即返回缓存数据，但和持久化模式不同的是，它还会立即发出请求并更新缓存，这样就达到了既快速展示实际数据，又获取了最新的数据。
@@ -537,7 +537,7 @@ const handleSubmit = () => {
   // 情况1：当你明确知道拉取todoList第一页数据时，传入一个Method对象
   fetch(getTodoList(1));
 
-  // 情况2：当你只知道拉取todoList最后一次请求的数据时，通过Method对象过滤器来筛选
+  // 情况2：当你只知道拉取todoList最后一次请求的数据时，通过Method对象匹配器来筛选
   fetch({
     name: 'todoList',
     filter: (method, index, ary) => {
@@ -554,8 +554,7 @@ const handleSubmit = () => {
 <!-- 省略todo参数设置相关的html -->
 <button @click="handleSubmit">修改todo项</button>
 ```
-
-详细的`Method`对象过滤器使用方法见 [进阶-Method对象过滤器](#Method对象过滤器)
+fetch函数将会忽略已有缓存，强制发起请求并更新缓存，至于`Method`对象匹配器，详细的使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
 
 ## 响应数据管理
 响应数据状态化并统一管理，我们可以在任意位置访问任意的响应数据，并对它们进行操作。
@@ -575,7 +574,7 @@ const todoListGetter = alova.Get('/tood/list', {
     return rawData.list.map(item => {
       return {
         ...item,
-        statusText: item.status === 1 ? '已完成' : '进行中',
+        statusText: item.done ? '已完成' : '进行中',
       };
     });
   }
@@ -616,7 +615,7 @@ const handleSubmit = () => {
   send();
 };
 ```
-它的功能还远不止于此，我们还可以通过设置`Method`对象过滤器来实现多个，甚至全部的缓存失效。
+它的功能还远不止于此，我们还可以通过设置`Method`对象匹配器来实现多个，甚至全部的缓存失效。
 
 ```javascript
 const getTodoList = currentPage => {
@@ -652,7 +651,7 @@ onSuccess(() => {
 });
 ```
 
-详细的`Method`对象过滤器使用方法见 [进阶-Method对象过滤器](#Method对象过滤器)
+详细的`Method`对象匹配器使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
 
 ### 跨页面/模块更新响应数据
 我们继续以上一小节[主动失效响应缓存](#主动失效响应缓存)中提到的例子来说，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，使用`useFetcher`和`invalidateCache`的方式都会重新发起请求，那有没有不需要重新请求的方法呢？
@@ -785,9 +784,9 @@ const {
 未设置`timeout`参数时请求是永不超时的，如果需要手动中断请求，可以在`useRequest`、`useWatcher`函数被调用时接收`abort`方法。
 ```javascript
 const {
-  // 省略其他参数
+  // 省略其他参数...
 
-  // 中断函数
+  // abort函数用于中断请求
   abort
 } = useRequest(todoListGetter);
 
@@ -797,19 +796,109 @@ const handleCancel = () => {
 };
 ```
 
-### 频繁请求防抖
-通常我们都会在频繁触发的事件层面编写防抖代码，这次我们在请求层面实现了防抖功能。
+### 请求防抖
+通常我们都会在频繁触发的事件层面编写防抖代码，这次我们在请求层面实现了防抖功能，这意味着你再也不用在模糊搜索功能中自己实现防抖了，用法也非常简单。
+```javascript
+const searchText = ref('');   // Vue3
+const {
+  loading,
+  data: todoList,
+  error
+} = useWatcher(() => filterTodoList(searchText.value), 
+  [searchText], {
+
+    // 设置debounce属性，单位为毫秒
+    // 如这边的searchText频繁变化，只有在停止变化后500ms才发送请求
+    debounce: 500,
+  }
+);
+```
 
 
-### Method对象过滤器
-...
+### Method对象匹配器
+当我们在处理完一些业务时，需要调用`invalidateCache`、`updateState`、`fetch`来失效缓存、手动更新缓存、或重新拉取数据，一般会有两种场景：
+1. 开发者知道需要操作哪个请求的数据，此时在调用上面三个函数时直接传入一个`Method`对象即可；
+2. 开发者只知道需要操作某个顺序位的请求，而不确定具体哪个，此时我们就可以使用`Method`对象匹配器的方式过滤出来。
+
+
+`Method`对象匹配器是依据`Method`对象设置的`name`属性来过滤的，多个匹配器允许设置相同的`name`，因此首先需要为需要过滤的`Method`对象设置`name`属性。
+```javascript
+// 每次调用getTodoList时都会生成一个新的Method对象，它们的name是相同的
+const getTodoList = currentPage => alova.Get('/tood/list', {
+  name: 'todoList',
+  params: {
+    currentPage,
+    pageSize: 10
+  }
+});
+```
+其次，我们在调用`invalidateCache`、`updateState`、`fetch`函数时传入匹配器即可，完整的`Method`对象匹配器的格式如下：
+```javascript
+type MethodFilter = {
+  name: string | RegExp;
+  filter: (method: Method, index: number, methods: Method[]) => boolean;
+};
+```
+`name`表示需要匹配的`Method`对象，它匹配出来是一个数组，然后通过`filter`过滤函数筛选出最终使用的`Method`对象集合，`filter`函数返回true表示匹配成功，返回false表示失败，让我们来看几个例子。
+```javascript
+// 以下表示匹配name为'todoList'的所有Method对象，并失效它们的缓存
+invalidateCache({
+  name: 'todoList',
+  filter: (method, index, methods) => true,
+});
+
+// 以下表示匹配name为以'todo'开头的所有Method对象
+invalidateCache({
+  name: /^todo/,
+  filter: (method, index, methods) => true,
+});
+
+// 如果不需要设置过滤函数，也可以直接传入一个字符串或者正则表达式
+invalidateCache('todoList');
+invalidateCache(/^todo/);
+
+// 以下表示重新拉取todo列表最后一次请求的数据
+const { fetch } = useFetcher(alova);
+fetch({
+  name: 'todoList',
+  filter: (method, index, methods) => index === methods.length - 1,
+});
+```
+要特别注意的是，`invalidateCache`会失效所有过滤出来的`Method`对象所对应的缓存，而`updateState`和`fetch`只会使用`Method`对象集合中的第一个项进行操作。
 
 ### 下载进度
-...
-
+在获取下载进度前，你需要在指定`Method`对象上启用下载进度，然后在`useRequest`、`useWatcher`、`useFetcher`三个use hook中接收`downloading`响应式状态，下载过程中将持续更新这个状态。
+```javascript
+const downloadGetter = alova.Get('/tood/downloadfile', {
+  enableDownload: true
+});
+const {
+  dowinlading
+} = useRequest(downloadGetter);
+```
+```html
+<div>文件大小：{{ downloading.total }}B</div>
+<div>已下载：{{ downloading.loaded }}B</div>
+<div>进度：{{ downloading.loaded / downloading.total * 100 }}%</div>
+```
 
 ### 上传进度
-...
+上传进度与下载进度使用方法相同，先启用再通过接收`uploading`响应式状态。
+```javascript
+const uploadGetter = alova.Get('/tood/uploadfile', {
+  enableUpload: true
+});
+const {
+  uploading
+} = useRequest(uploadGetter);
+```
+```html
+<div>文件大小：{{ uploading.total }}B</div>
+<div>已上传：{{ uploading.loaded }}B</div>
+<div>进度：{{ uploading.loaded / uploading.total * 100 }}%</div>
+```
+
+> ⚠️因fetch api限制，`alova`库提供的`GlobalFetch`适配器不支持上传进度，如需要上传进度，请自行编写请求适配器，详见 [高级-编写请求适配器](#编写请求适配器)。
 
 
 ### 并行请求
@@ -824,7 +913,7 @@ const {
 ```
 但这样的请求只适用于单纯的并行请求，如果你需要在并行请求都完成后再进行某些操作，有两种方式可以实现。
 
-方式1，可以手动创建promise对象，并使用`Promise.all`完成效果。
+方式1：可以手动创建promise对象，并使用`Promise.all`完成效果。
 ```javascript
 const {
   data: todoList,
@@ -894,52 +983,368 @@ onSuccess(todoList => {
 });
 ```
 
-### 缓存穿透
-...
-
 ### 静默提交
-...
+假设你想要进一步提高创建todo项的体验感，让用户点击“创建”按钮后立即生效，而感觉不到提交服务器的过程，你可以考虑使用静默提交的方式。
 
+你可能会想，服务器没有响应就可以把结果呈现给用户了吗？是的，`alova`具有后台请求可靠机制，在网络连接环境下间隔2秒重复发起请求，直到请求顺利完成，这在服务提供不稳定的时候很有效，当然，还是需要提醒你的是，不稳定的情况下，如果你的数据在多端展示时，可能就会有点不同步了。
 
-### 离线提交
-...
-
-
-### 持久化响应数据
-...
-
-
-### 让持久化数据失效
-当你的某个接口设置了数据持久化并发布到了生产环境，然后因接口数据或者数据处理变动，需要在发布变动代码后让持久化数据失效，此时我们可以使用`localCache`配置的`tag`属性，每一份持久化数据都包含一个`tag`标识，当`tag`改变后原有的持久化数据就会失效，并重新获取新的数据，并用新的`tag`进行标识。
+我们来展示一下静默创建todo项的代码。
 ```javascript
+const createTodoPoster = newTodo => alova.Post('/todo/create', newTodo, {
+  // 首先，开启静默提交
+  silent: true,
+});
 
+const {
+  send,
+  onSuccess
+} = useRequest(createTodoPoster);
+onSuccess(() => {
+  // 设置为静默提交后，onSuccess将会立即被调用，并且回调函数的第一个参数为undefined
+  // 而onError将永远不会被调用
+  // 立即将新todo项添加到列表中
+  updateState(todoListGetter, todoList => [...todoList, newTodo]);
+});
+
+// 点击创建按钮触发此函数
+const handleSubmit = () => {
+  send({
+    title: 'test todo',
+    time: '12:00'
+  });
+};
 ```
 
+### 离线提交
+如果你正在开发一个在线文档编写器，用户的每次输入都需要自动同步到服务端，即使是离线状态下也支持用户继续编写，在这种场景下，我们可以使用`alova`的离线提交机制，其实这个功能和静默提交功能是一体化的，都是得益于`alova`的后台请求可靠机制。
 
-### 重复请求（计划中）
-...
+它的处理方式是，当开启了静默提交后，在离线状态时提交数据会直接将请求数据缓存在本地，等到网络恢复后，会自动将缓存的请求数据重新提交到服务端，这就保证了离线状态下的静默提交也是可靠的。
 
+接下来我们以在线文档编写器为示例，展示一下离线提交的代码。
+```javascript
+const editingText = ref('');
+const {
+  loading
+} = useWatcher(() => alova.Post('/doc/save', {
+  text: editingText.value
+}, {
+  // 开启静默提交
+  silent: true,
+
+  // 设置500ms防抖降低服务器压力
+}), [editingText], { debounce: 500 });
+```
+```html
+<div v-if="loading">提交中...</div>
+<textarea v-model="editingText"></textarea>
+```
+
+这样就完成了简单的在线文档编写器。当然，在静默提交创建todo项的例子中离线提交也是适用的，即在离线状态下也能保证顺利创建todo项。
 
 ## 高级
+### 自定义请求适配器
+还记得你如何创建一个Alova实例吗？在调用`createAlova`时必须传入`requestAdapter`，这个就是`alova`的请求适配器，试想当`alova`运行在非浏览器环境时（可能是客户端、小程序），`fetch api`可能不再可用，那我们就需要更换一个支持当前环境的请求适配器。
 
-### Typescript支持
-...
+那应该如何自定义一个请求适配器呢？很简单，它其实是一个函数，在每次发起请求时都会调用此函数，并返回一个对象，这个对象内包含如`url`、`method`、`data`、`headers`、`timeout`等请求相关的数据集合，虽然字段较多，但我们只需访问我们需要的数据即可。
 
-### 编写请求适配器
-...
+请求适配器的参数类型，以及支持Typescript的写法，可以 [点此查看说明](#请求适配器类型)。
+
+一个简单的请求适配器是这样的：
+```javascript
+function customRequestAdapter(config) {
+  // 解构出需要用到的数据
+  const {
+    url,
+    method,
+    data,
+    headers,
+  } = config;
+
+  // 发送请求
+  const fetchPromise = fetch(url, {
+    method: method,
+    headers: headers,
+    body: data,
+  });
+
+  // 返回一个包含请求操作相关的对象
+  return {
+    response: () => fetchPromise,
+    headers: () => fetchPromise.then(res => res.headers),
+    abort: () => {
+      // TODO: 中断请求...
+    },
+    onDownload: updateDownloadProgress => {
+      let loaded = 0;
+      setInterval(() => {
+        updateDownloadProgress(1000, loaded += 1000);
+      }, 100);
+    },
+    onUpload: (updateUploadProgress) => {
+      let loaded = 0;
+      setInterval(() => {
+        updateUploadProgress(1000, loaded += 1000);
+      }, 100);
+    },
+  };
+}
+```
+请求适配器的返回值说明：
+1. 【必填】response函数：一个异步函数，函数返回响应值，它将会传递给全局的响应拦截器responsed；
+2. 【必填】headers函数：一个异步函数，函数返回的响应头对象将传递给Method对象的transformData转换钩子函数；
+3. 【必填】abort函数：一个普通函数，它用于中断请求，在 [手动中断请求](#手动中断请求) 章节中调用`abort`函数时，实际上触发中断请求的函数就是这个中断函数；
+4. 【可选】onDownload函数：一个普通函数，它接收一个更新下载进度的回调函数，在此函数内自定义进度更新的频率，在此示例中模拟每隔100毫秒更新一次。`updateDownloadProgress`回调函数接收两个参数，第一个参数是总大小，第二个参数是已下载大小；
+5. 【可选】onUpload函数：一个普通函数，它接收一个更新上传进度的回调函数，在此函数内自定义进度更新的频率，在此示例中模拟每隔100毫秒更新一次。`updateUploadProgress`回调函数接收两个参数，第一个参数是总大小，第二个参数是已上传大小；
+
+建议你可以查阅 [GlobalFetch源码](https://github.com/JOU-amjs/alova/blob/main/src/predefine/GlobalFetch.ts) 来了解更多关于请求适配器的细节。
 
 
-### 编写statesHook
-...
+### 自定义statesHook
+还记得你在调用`createAlova`时传入的`statesHook`吗？它将决定你在请求时返回哪个MVVM库的状态，如在vue项目中使用`VueHook`，在react项目中使用`ReactHook`，在svelte项目中使用`SvelteHook`，目前只支持这三个库。在大部分情况下你应该用不到这个功能，但如果你需要适配更多我们还不支持的MVVM库，就需要自定义编写`statesHook`了。
 
-### 编写存储适配器
-...
+我们来看看VueHook是怎么编写的。
+```javascript
+import { ref, readonly, watch } from 'vue';
+
+const VueHook = {
+  create: data => ref(data),
+
+  // 将导出的状态设置为readonly，不允许外部修改状态
+  export: state => readonly(state),
+
+  // 脱水函数，即将状态转换为普通数据，与create是相反的操作
+  dehydrate: state => state.value,
+
+  // 状态更新函数
+  update: (newVal, state) => {
+    Object.keys(newVal).forEach(key => {
+      state[key].value = newVal[key];
+    })
+  },
+
+  // 以状态为根据如何发起请求
+  effectRequest(sendRequest, removeStates, { immediate, states }) {
+    // 组件卸载时移除对应状态
+    onUnmounted(removeStates);
+    if (!states) {
+      sendRequest();
+      return;
+    }
+    watch(states, sendRequest, { immediate });
+  },
+};
+```
+
+### 自定义存储适配器
+`alova`中涉及多个需要数据持久化的功能，如持久化缓存、静默提交和离线提交。在默认情况下，`alova`会使用`localStorage`来存储持久化数据，但考虑到非浏览器环境下，因此也支持了自定义。
+
+自定义存储适配器同样非常简单，你只需要指定保存数据、获取数据，以及移除数据的函数即可，大致是这样的。
+```javascript
+const customStorageAdapter = {
+  setItem(key, value) {
+    // 保存数据
+  },
+  getItem(key) {
+    // 获取数据
+  },
+  removeItem(key) {
+    // 移除数据
+  }
+};
+```
+然后在创建`alova`实例时传入这个适配器即可。
+```javascript
+const alovaInstance = createAlova({
+  // ...
+  storageAdapter: customStorageAdapter
+});
+```
 
 ### 响应状态编辑追踪（计划中）
-...
+敬请期待
+
+
+### Typescript支持
+在Typescript方面，我们确实花了很大的精力优化，为的就是提供更好的使用体验，我们尽力地使用自动推断类型来减少你定义类型的次数。
+
+#### usehooks状态的类型
+在`createAlova`创建alova实例时会根据传入的`statesHook`自动推断出`useRequest`、`useWatcher`、`useFetcher`所创建的状态类型。遗憾的是，目前只支持Vue、React、Svelte三个MVVM库类型，如果你涉及其他库就需要自己编写类型来实现了。
+
+使用VueHook时：
+```javascript
+const vueAlova = createAlova({
+  statesHook: VueHook,
+  // ...
+});
+const {
+  loading,  // Readonly<Ref<boolean>>
+  data,  // Readonly<Ref<unknown>>
+  error,  // Readonly<Ref<Error>>
+} = useRequest(vueAlova.Get('/todo/list'));
+```
+使用ReactHook时：
+```javascript
+const reactAlova = createAlova({
+  statesHook: ReactHook,
+  // ...
+});
+const {
+  loading,  // boolean
+  data,  // unknown
+  error,  // Error
+} = useRequest(reactAlova.Get('/todo/list'));
+```
+使用SvelteHook时：
+```javascript
+const svelteAlova = createAlova({
+  statesHook: SvelteHook,
+  // ...
+});
+const {
+  loading,  // Readable<boolean>
+  data,  // Readable<unknown>
+  error,  // Readable<Error>
+} = useRequest(svelteAlova.Get('/todo/list'));
+```
+你可能会发现，data的类型是`unknown`，因为data需要根据不同接口单独设置类型，接下来我们看下。
+#### 响应数据的类型
+当你为一个数据接口指定类型时，需要分为两种情况。
+
+情况1：响应数据不需要再调用`transformData`转换
+```typescript
+interface Todo {
+  title: string;
+  time: string;
+  done: boolean;
+}
+const Get = alova.Get<Todo[]>('/todo/list');
+```
+
+情况2：响应数据需要再调用`transformData`转换
+```typescript
+interface Todo {
+  title: string;
+  time: string;
+  done: boolean;
+}
+const Get = alova.Get('/todo/list', {
+  // 将类型写到data参数中，而headers会自动推断，可以不用指定类型
+  transformData(data: Todo[], headers) {
+    return data.map(item => ({
+      ...item,
+      status: item.done ? '已完成' : '未完成'
+    }));
+  }
+});
+```
+这样data数据就会带有特定的类型了，需要注意的是，响应数据是经过全局响应拦截器转换后的，因此设置类型时也应该设置为转换后的类型。
+
+
+#### 根据请求适配器推断的类型
+因为`alova`支持自定义请求适配器，而不同的适配器的请求配置对象、响应对象、响应头都可能不同，因此全局的`beforeRequest`、`responsed`拦截器，以及`Method`对象创建时的配置对象的类型，都会根据请求适配器提供的类型自动推断，我们先来看这几个类型。
+```typescript
+// 通用的Method对象的通用配置类型
+type CommonMethodConfig = {
+  readonly url: string,
+  readonly method: MethodType,
+  data?: Record<string, any> | FormData | string,
+};
+
+// `Method`对象创建时的配置对象的类型
+type AlovaMethodConfig<R, T, RC, RH> = {
+  // 以下为创建Method对象时指定的配置对象
+  name?: string,
+
+  // url中的参数，一个对象
+  params?: Record<string, any>,
+
+  // 请求头，一个对象
+  headers?: Record<string, any>,
+
+  // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
+  silent?: boolean,
+
+  // 当前中断时间
+  timeout?: number,
+
+  // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
+  localCache?: numbe | {
+    expire: number,
+    mode?: number,
+    tag?: string | number,
+  },
+
+  // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+  enableDownload?: boolean,
+
+  // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+  enableUpload?: boolean,
+
+  // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
+  transformData?: (data: T, headers: RH) => R,
+} & RC;
+```
+这边涉及到的`RC`、`RH`，以及这边未出现的`RE`都是通过请求适配器推断的，它们分别表示请求配置对象类型、响应头对象类型、响应类型，如果你使用`GlobalFetch`时，他们的类型分别会被推断为：
+1. `RC`为fetch的请求配置对象`RequestInit`;
+2. `RH`为响应头对象`Headers`;
+3. `RE`为响应对象`Response`;
+
+知道了这些后我们继续看下面的类型定义。
+
+#### 全局请求前拦截器参数类型
+全局请求前拦截器`beforeRequest`接收一个汇总的请求配置，它的类型为：
+```typescript
+type AlovaRequestAdapterConfig<R, T, RC, RH> = 
+  CommonMethodConfig
+  & AlovaMethodConfig<R, T, RC, RH>
+  & {
+    // 会保证headers、params参数是一个对象
+    headers: Record<string, any>,
+    params: Record<string, any>,
+  };
+```
+
+#### 全局响应拦截器参数类型
+全局响应拦截器`responsed`接收一个响应对象，它的类型为响应对象`RE`。
+
+#### Method配置对象的类型
+Method配置对象的类型为上面提高的`AlovaMethodConfig`，它包含通用的配置参数和根据请求适配器推断出的`RC`的并集。
+
+
+#### 请求适配器类型
+```typescript
+interface Progress {
+  total: number;  // 总量
+  loaded: number; // 已加载量
+}
+
+type AlovaRequestAdapter<R, T, RC, RE, RH> = (adapterConfig: AlovaRequestAdapterConfig<R, T, RC, RH>) => {
+  response: () => Promise<RE>,
+  headers: () => Promise<RH>,
+  onDownload?: (handler: (total: number, loaded: number) => void) => void,
+  onUpload?: (handler: (total: number, loaded: number) => void) => void,
+  abort: () => void,
+};
+```
+需要注意的是，如果需要在`alova`中自动推断`RC`、`RE`、`RH`类型，那么自定义请求适配器上不应该指定任何泛型，且需要手动指定`RC`、`RE`、`RH`的类型，否则会导致类型推断错误。
+
+以`GlobalFetch`为例。[GlobalFetch源码点此查看](https://github.com/JOU-amjs/alova/blob/main/src/predefine/GlobalFetch.ts)
+```typescript
+type GlobalFetch = (defaultRequestInit?: RequestInit) => 
+  (adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) => {
+    response: () => Promise<Response>;
+    headers: () => Promise<Headers>;
+    onDownload: (handler: (total: number, loaded: number) => void) => void;
+    abort: () => void;
+  };
+```
+
+#### 自定义statesHook的类型
+敬请期待
+
 
 ## 实践示例（补充中）
 ...
 
-## 插件编写（计划中）
-...
+## 插件编写
+敬请期待
