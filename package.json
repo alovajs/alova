@@ -64,7 +64,7 @@
     "./vue": "./dist/hooks/vuehook.esm.js",
     "./react": "./dist/hooks/reacthook.esm.js",
     "./svelte": "./dist/hooks/sveltehook.esm.js",
-    "./GlobalFetch": "./dist/hooks/globalfetch.esm.js"
+    "./GlobalFetch": "./dist/adapter/globalfetch.esm.js"
   },
   "typesVersions": {
     "*": {

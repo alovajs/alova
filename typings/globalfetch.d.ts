@@ -4,7 +4,7 @@ import { AlovaRequestAdapterConfig, ProgressUpdater } from '.';
 type GlobalFetch = (defaultRequestInit?: RequestInit) => (adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) => {
   response: () => Promise<Response>;
   headers: () => Promise<Headers>;
-  onDownload: (handler: (handler: ProgressUpdater) => void) => void;
+  onDownload: (handler: ProgressUpdater) => void;
   abort: () => void;
 };
 
