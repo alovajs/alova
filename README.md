@@ -1,8 +1,6 @@
 # [alova](https://github.com/JOU-amjs/alova)
 
-MVVM库的请求场景管理库。
-
-它是对请求库的一种补充，而非替代品✔️
+MVVM库的请求场景管理库，它是对请求库的一种武装，而非替代品✔️
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/JOU-amjs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/JOU-amjs/alova/actions/workflows/main.yml)
@@ -12,6 +10,69 @@ MVVM库的请求场景管理库。
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
+
+## 目录
+- [什么是请求场景管理](#什么是请求场景管理)
+- [请求场景模型](#请求场景模型)
+  - [请求时机](#请求时机)
+  - [请求行为](#请求行为)
+  - [请求事件](#请求事件)
+  - [响应数据管理](#响应数据管理)
+- [特性](#特性)
+- [各类库的体积对比](#各类库的体积对比)
+- [安装](#安装)
+  - [npm](#NPM)
+  - [cdn](#CDN)
+- [入门指南](#入门指南)
+  - [创建Alova实例](#创建Alova实例)
+  - [设置全局请求拦截器](#设置全局请求拦截器)
+  - [设置全局响应拦截器](#设置全局响应拦截器)
+  - [创建请求方法对象](#创建请求方法对象)
+  - [请求方法类型](#请求方法类型)
+  - [设置请求超时时间](#设置请求超时时间)
+  - [为响应数据设置缓存时间](为响应数据设置缓存时间)
+    - [内存模式（默认）](#内存模式（默认）)
+    - [持久化模式](#持久化模式)
+    - [持久化占位模式](#持久化占位模式)
+  - [在正确的时机发送请求](在正确的时机发送请求)
+    - [useRequest](useRequest)
+    - [useWatcher](useWatcher)
+    - [useFetcher](useFetcher)
+  - [响应数据管理](#响应数据管理)
+    - [转换响应数据](#转换响应数据)
+    - [主动失效响应缓存](#主动失效响应缓存)
+    - [跨页面/模块更新响应数据](#跨页面/模块更新响应数据)
+    - [自定义设置缓存数据](#自定义设置缓存数据)
+    - [自定义设置缓存数据](#自定义设置缓存数据)
+    - [自定义设置缓存数据](#自定义设置缓存数据)
+- [进阶](#进阶)
+  - [请求方法详解](#请求方法详解)
+  - [设置初始响应数据](#设置初始响应数据)
+  - [手动中断请求](#手动中断请求)
+  - [请求防抖](#请求防抖)
+  - [Method对象匹配器](#Method对象匹配器)
+  - [下载进度](#下载进度)
+  - [上传进度](#上传进度)
+  - [并行请求](#并行请求)
+  - [串行请求](#串行请求)
+  - [静默提交](#静默提交)
+  - [离线提交](#离线提交)
+- [高级](#高级)
+  - [自定义请求适配器](#自定义请求适配器)
+  - [自定义statesHook](#自定义statesHook)
+  - [自定义存储适配器](#自定义存储适配器)
+  - [响应状态编辑追踪](#响应状态编辑追踪)
+  - [Typescript支持](#Typescript支持)
+    - [usehooks状态的类型](#usehooks状态的类型)
+    - [响应数据的类型](#响应数据的类型)
+    - [根据请求适配器推断的类型](#根据请求适配器推断的类型)
+    - [全局请求前拦截器参数类型](#全局请求前拦截器参数类型)
+    - [全局响应拦截器参数类型](#全局响应拦截器参数类型)
+    - [请求适配器类型](#请求适配器类型)
+    - [自定义statesHook的类型](#自定义statesHook的类型)
+    - [全局响应拦截器参数类型](#全局响应拦截器参数类型)
+- [实践示例](#实践示例)
+
 
 ## 什么是请求场景管理
 我们在进行一次请求时总是要思考以下问题，
@@ -95,6 +156,9 @@ yarn add alova
 ```html
 <!-- 核心代码，全局变量为alova -->
 <script src="https://unpkg.com/alova/dist/alova.umd.min.js"></script>
+
+<!-- 预定义的请求适配器 -->
+<script src="https://unpkg.com/alova/dist/adapter/globalfetch.umd.min.js"></script>
 
 <!-- vue states hook，全局变量为VueHook，使用前需引入vue -->
 <script src="https://unpkg.com/alova/dist/hooks/vuehook.umd.min.js"></script>
@@ -1186,7 +1250,7 @@ const alovaInstance = createAlova({
 });
 ```
 
-### 响应状态编辑追踪（计划中）
+### 响应状态编辑追踪
 敬请期待
 
 
@@ -1374,7 +1438,4 @@ type GlobalFetch = (defaultRequestInit?: RequestInit) =>
 
 
 ## 实践示例
-敬请期待
-
-## 插件编写
 敬请期待
