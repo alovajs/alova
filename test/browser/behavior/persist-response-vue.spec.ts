@@ -1,10 +1,10 @@
 import {
   createAlova,
   useRequest,
-  GlobalFetch,
   cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { LocalCacheConfig } from '../../../typings';
 import { Result } from '../result.type';
 import server, { untilCbCalled } from '../../server';

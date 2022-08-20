@@ -9,8 +9,9 @@
 </div>
 
 <script>
-import { createAlova, useWatcher, GlobalFetch } from '../../../src';
+import { createAlova, useWatcher } from '../../../src';
 import SvelteHook from '../../../src/predefine/SvelteHook';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { writable } from 'svelte/store';
 const stateId1 = writable(0);
 const stateId2 = writable(10);

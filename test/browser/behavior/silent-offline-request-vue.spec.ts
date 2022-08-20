@@ -1,9 +1,9 @@
 import {
   createAlova,
   useRequest,
-  GlobalFetch,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { AlovaRequestAdapterConfig } from '../../../typings';
@@ -121,13 +121,15 @@ describe('use useRequest to send silent request', function() {
     }, 10);
   });
 
-  test('should push to localStorage when silent\'s post is failed', done => {
+  test.only('should push to localStorage when silent\'s post is failed', done => {
+    jest.setTimeout(10000);   // 因为静默提交失败重新调用间隔为2秒，这边需加大超时时间
     let throwError = 0;
     const alova = getInstance(undefined, () => {
       throwError++;
       if (throwError < 3) {
         setTimeout(() => {
           const { serializedMethod } = getSilentRequest(alova.id, alova.storage);
+          console.log('serialized', serializedMethod);
           expect(serializedMethod).not.toBeUndefined();
         }, 0);
         throw new Error('custom error');
@@ -136,7 +138,7 @@ describe('use useRequest to send silent request', function() {
         const { serializedMethod } = getSilentRequest(alova.id, alova.storage);
         expect(serializedMethod).toBeUndefined();
         done();
-      }, 1000);
+      }, 0);
     });
     const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,

@@ -1,9 +1,9 @@
 import {
   createAlova,
-  GlobalFetch,
   setCacheData,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { AlovaRequestAdapterConfig } from '../../../typings';

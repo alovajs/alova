@@ -1,4 +1,4 @@
-import { AlovaRequestAdapterConfig, Progress } from '../../typings';
+import { AlovaRequestAdapterConfig } from '../../typings';
 import alovaError from '../utils/alovaError';
 import { instanceOf, isString } from '../utils/helper';
 import { clearTimeoutTimer, falseValue, JSONStringify, promiseReject, promiseThen, setTimeoutFn, trueValue } from '../utils/variables';
@@ -41,7 +41,7 @@ export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
 
       // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
       headers: () => promiseThen(fetchPromise, ({ headers }) => headers, () => ({} as Headers)),
-      onDownload: (cb: (progress: Progress) => void) => {
+      onDownload: (cb: (total: number, loaded: number) => void) => {
         promiseThen(fetchPromise, response => {
           const { headers, body } = response;
           const total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
@@ -54,7 +54,7 @@ export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
             reader && promiseThen(reader, ({ done, value = new Uint8Array() }) => {
               done && clearInterval(progressTimer);
               loaded += value.length;
-              cb({ total, loaded });
+              cb(total, loaded);
             });
           }, 100);
         });

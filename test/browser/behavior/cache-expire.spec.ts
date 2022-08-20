@@ -1,9 +1,9 @@
 import {
   createAlova,
   useRequest,
-  GlobalFetch,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { Result } from '../result.type';
 import server, { untilCbCalled } from '../../server';
 import { AlovaRequestAdapterConfig } from '../../../typings';

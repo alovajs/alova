@@ -11,8 +11,6 @@ export { default as invalidateCache } from './functions/invalidateCache';
 export { default as updateState } from './functions/updateState';
 export { default as setCacheData } from './functions/setCacheData';
 
-// 预定义的配置
-export { default as GlobalFetch } from './predefine/GlobalFetch';
 // 导出缓存模式
 export { cacheMode } from './utils/variables';
 

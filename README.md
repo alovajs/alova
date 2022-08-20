@@ -1076,14 +1076,20 @@ function customRequestAdapter(config) {
     },
     onDownload: updateDownloadProgress => {
       let loaded = 0;
-      setInterval(() => {
+      let timer = setInterval(() => {
         updateDownloadProgress(1000, loaded += 1000);
+        if (loaded >= 1000) {
+          clearInterval(timer);
+        }
       }, 100);
     },
     onUpload: (updateUploadProgress) => {
       let loaded = 0;
-      setInterval(() => {
+      let timer = setInterval(() => {
         updateUploadProgress(1000, loaded += 1000);
+        if (loaded >= 1000) {
+          clearInterval(timer);
+        }
       }, 100);
     },
   };
@@ -1102,38 +1108,55 @@ function customRequestAdapter(config) {
 ### 自定义statesHook
 还记得你在调用`createAlova`时传入的`statesHook`吗？它将决定你在请求时返回哪个MVVM库的状态，如在vue项目中使用`VueHook`，在react项目中使用`ReactHook`，在svelte项目中使用`SvelteHook`，目前只支持这三个库。在大部分情况下你应该用不到这个功能，但如果你需要适配更多我们还不支持的MVVM库，就需要自定义编写`statesHook`了。
 
-我们来看看VueHook是怎么编写的。
+`statesHook`是一个包含特定函数的普通对象，不过这些还是基本不涉及算法，我们来看看VueHook是怎么编写的吧。
 ```javascript
-import { ref, readonly, watch } from 'vue';
+import { ref, readonly, watch, onUnmounted } from 'vue';
 
 const VueHook = {
-  create: data => ref(data),
+  // 状态创建函数
+  create: rawData => ref(data),
 
-  // 将导出的状态设置为readonly，不允许外部修改状态
+  // 状态导出函数
   export: state => readonly(state),
 
-  // 脱水函数，即将状态转换为普通数据，与create是相反的操作
+  // 脱水函数
   dehydrate: state => state.value,
 
-  // 状态更新函数
-  update: (newVal, state) => {
+  // 响应式状态更新函数
+  update: (newVal, states) => {
     Object.keys(newVal).forEach(key => {
-      state[key].value = newVal[key];
-    })
+      states[key].value = newVal[key];
+    });
   },
 
-  // 以状态为根据如何发起请求
+  // 请求发送控制函数
   effectRequest(sendRequest, removeStates, { immediate, states }) {
     // 组件卸载时移除对应状态
     onUnmounted(removeStates);
+
+    // 调用useRequest和useFetcher时，states为undefined
     if (!states) {
       sendRequest();
       return;
     }
+
+    // 调用useWatcher时，states为需要监听的状态数组
+    // immediate为true时，表示需要立即发送请求
     watch(states, sendRequest, { immediate });
   },
 };
 ```
+自定义`statesHook`各个函数说明：
+1. 【必填】create函数：响应式状态创建函数，`loading`、`error`、`data`、`downloading`、`uploading`等都是调用此函数创建的，如vue3项目下将创建为ref值；
+2. 【必填】export函数：状态导出函数，此函数接收create函数创建的响应式状态，并导出最终给开发者使用的状态，这里`VueHook`导出的状态是readonly的；
+3. 【必填】dehydrate函数：脱水函数，意思是将响应式状态转换为普通数据，与create是相反的操作，在`updateState`中；
+4. 【必填】update函数：响应式状态更新函数，`alova`内部维护的状态更新都是通过此函数完成。此函数接收两个参数，第一个参数是新的数据对象，第二个参数是原响应式状态的map集合，这里你可以固定写一个循环更新`states`；
+5. 【必填】effectRequest函数：请求发送控制函数，它会在`useRequest`、`useWatcher`、`useFetcher`被调用时立即执行此函数，我们要在这个函数内要完成三件事：
+    1. 当前组件卸载时，调用removeStates函数移除当前组件涉及到的响应式状态，避免内存溢出;
+    2. 当调用useWatcher时，绑定状态监听，状态改变时调用sendRequest函数，你可以用`states`是否为数组判断是否为`useWatcher`被调用，同时，`immediate`参数用于判断`useWatcher`调用时是否需要立即发送请求；
+    3. 当调用`useRequest`和`useFetcher`时，调用sendRequest发出一次请求，此时`states`为`undefined`；
+
+> 如果你在自定义statesHook后，也希望它可以支持typescript，可以 [点此查看](#自定义statesHook的类型)
 
 ### 自定义存储适配器
 `alova`中涉及多个需要数据持久化的功能，如持久化缓存、静默提交和离线提交。在默认情况下，`alova`会使用`localStorage`来存储持久化数据，但考虑到非浏览器环境下，因此也支持了自定义。
@@ -1285,7 +1308,7 @@ type AlovaMethodConfig<R, T, RC, RH> = {
 } & RC;
 ```
 这边涉及到的`RC`、`RH`，以及这边未出现的`RE`都是通过请求适配器推断的，它们分别表示请求配置对象类型、响应头对象类型、响应类型，如果你使用`GlobalFetch`时，他们的类型分别会被推断为：
-1. `RC`为fetch的请求配置对象`RequestInit`;
+1. `RC`为fetch api的请求配置对象`RequestInit`;
 2. `RH`为响应头对象`Headers`;
 3. `RE`为响应对象`Response`;
 
@@ -1306,9 +1329,13 @@ type AlovaRequestAdapterConfig<R, T, RC, RH> =
 
 #### 全局响应拦截器参数类型
 全局响应拦截器`responsed`接收一个响应对象，它的类型为响应对象`RE`。
+```typescript
+type ResponsedHandler<RE> = (response: RE) => any;
+```
+当请求适配器使用`GlobalFetch`时，`RE`将自动推断为`Response`类型。
 
 #### Method配置对象的类型
-Method配置对象的类型为上面提高的`AlovaMethodConfig`，它包含通用的配置参数和根据请求适配器推断出的`RC`的并集。
+Method配置对象的类型为上面提高的 [AlovaMethodConfig](#根据请求适配器推断的类型)，它包含通用的配置参数和根据请求适配器推断出的`RC`的并集。当请求适配器使用`GlobalFetch`时，`RC`将自动推断为`RequestInit`类型。
 
 
 #### 请求适配器类型
@@ -1343,8 +1370,8 @@ type GlobalFetch = (defaultRequestInit?: RequestInit) =>
 敬请期待
 
 
-## 实践示例（补充中）
-...
+## 实践示例
+敬请期待
 
 ## 插件编写
 敬请期待

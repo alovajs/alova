@@ -1,9 +1,9 @@
 import {
   createAlova,
   useRequest,
-  GlobalFetch,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
 import { AlovaRequestAdapterConfig } from '../../../typings';
@@ -43,21 +43,7 @@ function getInstance(
 
 describe('use useRequet hook to send GET with vue', function() {
   test('init and send get request', async () => {
-    const alova = getInstance(
-      config => {
-        expect(config.url).toBe('/unit-test');
-        expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(config.headers).toEqual({
-          'Content-Type': 'application/json'
-        });
-        expect(config.timeout).toBe(10000);
-      },
-      async jsonPromise => {
-        const result = await jsonPromise;
-        expect(result.data.path).toBe('/unit-test');
-        expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-      }
-    );
+    const alova = getInstance();
     const Get = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
       timeout: 10000,

@@ -68,12 +68,15 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, pr
     onUpload = noop,
     useCache,
   } = ctrl;
+
+  // 静默模式下和命中缓存时不需要更新loading状态
   !silentMode && !useCache && update({
     loading: trueValue,
   }, originalState);
 
   const responseHandlePromise = promiseCatch(
     promiseThen(response(), data => {
+      // TODO: 更新缓存响应数据
       if (!updateCacheState) {
         update({ data }, originalState);
       } else {

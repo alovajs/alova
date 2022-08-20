@@ -1,11 +1,11 @@
 import {
   createAlova,
   useRequest,
-  GlobalFetch,
   updateState,
   cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import ReactHook from '../../../src/predefine/ReactHook';
 import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';

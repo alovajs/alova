@@ -11,7 +11,7 @@ interface SvelteHook {
   create: <D>(data: D) => SvelteState<D>;
   export: <D>(state: SvelteState<D>) => Readable<D>;
   dehydrate: <D>(state: SvelteState<D>) => D;
-  update: (newVal: Partial<FrontRequestState>, state: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => void;
+  update: (newVal: Partial<FrontRequestState>, states: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => void;
   effectRequest(handler: () => void, removeStates: () => void, watchedStates: WatchingParams): void;
 }
 declare const svelteHook: SvelteHook;

@@ -69,13 +69,14 @@ export type AlovaMethodConfig<R, T, RC, RH> = {
 type AlovaRequestAdapterConfig<R, T, RC, RH> = CommonMethodConfig & AlovaMethodConfig<R, T, RC, RH> & {
   headers: Arg,
   params: Arg,
+  extra?: any,  // 用于开发者自定义数据，可传入responsed中
 };
 
-type ResponsedHandler<RE> = (response: RE) => any;
-type ResponseErrorHandler = (error: any) => void;
-type ResponsedHandlerRecord<RE> = {
-  onSuccess: ResponsedHandler<RE>, 
-  onError: ResponseErrorHandler
+type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, config: AlovaRequestAdapterConfig<R, T, RC, RH>) => any;
+type ResponseErrorHandler <R, T, RC, RH> = (error: any, config: AlovaRequestAdapterConfig<R, T, RC, RH>) => void;
+type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
+  onSuccess: ResponsedHandler<R, T, RC, RE, RH>,
+  onError: ResponseErrorHandler<R, T, RC, RH>
 };
 type WatchingParams = {
   states?: any[],
@@ -130,7 +131,7 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
 
   // 全局的响应钩子，可传一个数组表示正常响应和响应出错的钩子
   // 如果正常响应的钩子抛出错误也将进入响应失败的钩子函数
-  responsed?: ResponsedHandler<RE> | ResponsedHandlerRecord<RE>,
+  responsed?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>,
 }
 
 /** 三种缓存模式 */
@@ -251,15 +252,3 @@ export declare function invalidateCache<S, E, R, T, RC, RE, RH>(matcher?: Method
 export declare function updateState<S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>, handleUpdate: (data: R) => any): void;
 // 手动设置缓存响应数据
 export declare function setCacheData<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, data: R): void;
-
-// 混合多个响应器，并在这些响应器都成功时调用成功回调，如果其中一个错误则调用失败回调
-// 类似Promise.all
-// export declare function all<T extends unknown[] | []>(responsers: T): Responser<{ -readonly [P in keyof T]: T[P] extends Responser<infer R> ? R : never }>;
-
-// 预定义的fetch配置
-export declare function GlobalFetch(defaultRequestInit?: RequestInit): (adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) => {
-  response: () => Promise<Response>;
-  headers: () => Promise<Headers>;
-  onDownload: (handler: (progress: Progress) => void) => void;
-  abort: () => void;
-};

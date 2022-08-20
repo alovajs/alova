@@ -156,6 +156,7 @@ export default {
     // "**/test/browser/behavior/persist-response-vue.spec.ts",
     // "**/test/browser/batch/parallel-request.spec.ts",
     // "**/test/browser/stateManager/update-state-svelte.spec.ts(x)?"
+    // "**/test/browser/global/request-response-hook.spec.ts(x)?"
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped

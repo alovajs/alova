@@ -17,11 +17,11 @@ export default {
   create: (data: any) => useState(data),
   export: stateToData,
   dehydrate: stateToData,
-  update: (newVal: Partial<FrontRequestState>, state: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => forEach(
+  update: (newVal: Partial<FrontRequestState>, states: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => forEach(
     objectKeys(newVal), 
     key => {
       type Keys = keyof FrontRequestState;
-      state[key as Keys][1](newVal[key as Keys] as any);
+      states[key as Keys][1](newVal[key as Keys] as any);
     }
   ),
   effectRequest(handler: () => void, removeStates: () => void, { immediate, states = [] }: WatchingParams) {

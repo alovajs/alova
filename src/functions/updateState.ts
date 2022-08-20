@@ -30,6 +30,7 @@ export default function updateState<S, E, R, T, RC, RE, RH>(
     // 将更新后的数据赋值给data状态
     if (originalStates) {
       const updatedData = handleUpdate(dehydrate(originalStates.data));
+      // TODO: 更新缓存响应数据
       update({
         data: updatedData,
       }, originalStates);

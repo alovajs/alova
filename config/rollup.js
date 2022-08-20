@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-06-12 10:04:03
+ * @LastEditTime: 2022-08-20 11:50:49
  */
 var typescript = require('rollup-plugin-typescript2');
 var pkg = require('../package.json');
@@ -50,6 +50,12 @@ const compilePaths = {
     packageName: 'SvelteHook',
     input: 'src/predefine/SvelteHook.ts',
     output: suffix => `dist/hooks/sveltehook.${suffix}.js`,
+  },
+  globalFetch: {
+    extraExternal: [],
+    packageName: 'GlobalFetch',
+    input: 'src/predefine/GlobalFetch.ts',
+    output: suffix => `dist/adapter/globalfetch.${suffix}.js`,
   }
 };
 exports.external = Object.keys(compilePaths)

@@ -21,11 +21,11 @@ export default {
   },
   export: <D>(state: SvelteState<D>) => derived(state, $state => $state),
   dehydrate: <D>(state: SvelteState<D>) => state.val,
-  update: (newVal: Partial<FrontRequestState>, state: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => forEach(
+  update: (newVal: Partial<FrontRequestState>, states: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => forEach(
     objectKeys(newVal), 
     key => {
       type Keys = keyof FrontRequestState;
-      const sItem = state[key as Keys];
+      const sItem = states[key as Keys];
       sItem.val = newVal[key as Keys];
       sItem.set(newVal[key as Keys]);
     }

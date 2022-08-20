@@ -3,7 +3,7 @@ import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { falseValue, getContext, getOptions, objectKeys, PromiseCls, promiseReject, promiseResolve, promiseThen, trueValue, undefinedValue } from '../utils/variables';
-import { getLocalCacheConfigParam, instanceOf, isFn, isPlainObject, key, noop, self } from '../utils/helper';
+import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '../utils/helper';
 import { addMethodSnapshot } from '../storage/methodSnapshots';
 
 
@@ -83,48 +83,41 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
     url: baseURLWithSlash + urlWithParams,
   });
 
-  let responsedHandler: ResponsedHandler<RE> = noop;
-  let responseErrorHandler: ResponseErrorHandler = noop;
+  let responsedHandler: ResponsedHandler<any, any, RC, RE, RH> = noop;
+  let responseErrorHandler: ResponseErrorHandler<any, any, RC, RH> = noop;
   if (isFn(responsed)) {
     responsedHandler = responsed;
   } else if (isPlainObject(responsed)) {
     const {
       onSuccess: successHandler,
       onError: errorHandler,
-    } = responsed as ResponsedHandlerRecord<RE>;
+    } = responsed as ResponsedHandlerRecord<any, any, RC, RE, RH>;
     responsedHandler = isFn(successHandler) ? successHandler : responsedHandler;
     responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
   }
 
   const errorCatcher = (error: any) => {
-    responseErrorHandler(error);
+    responseErrorHandler(error, requestConfig);
     return promiseReject(error);
   }
+
+  const aa = PromiseCls.all([
+    ctrls.response(),
+    ctrls.headers(),
+  ]);
   return {
     ...ctrls,
     useCache: falseValue,
-    response: () => promiseThen(PromiseCls.all([
-      ctrls.response(),
-      ctrls.headers(),
-    ]), ([rawResponse, headers]) => {
+    response: () => promiseThen(aa, ([rawResponse, headers]) => {
       addMethodSnapshot(methodInstance);    // 只有请求成功的Method实例才会被保存到快照里
       try {
-        let responsedHandlePayload = responsedHandler(rawResponse);
-        if (instanceOf(responsedHandlePayload, PromiseCls)) {
-          return promiseThen(responsedHandlePayload, data => {
-            data = transformData(data, headers);
-            setResponseCache(id, methodKey, data, expireMilliseconds);
-            toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
-            return data;
-          });
-        } else {
-          if (headers) {
-            responsedHandlePayload = transformData(responsedHandlePayload, headers);
-            setResponseCache(id, methodKey, responsedHandlePayload, expireMilliseconds);
-            toStorage && persistResponse(id, methodKey, responsedHandlePayload, expireMilliseconds, storage, tag);
-          }
-          return responsedHandlePayload;
-        }
+        const responsedHandleData = promiseResolve(responsedHandler(rawResponse, requestConfig));
+        return promiseThen(responsedHandleData, data => {
+          data = transformData(data, headers);
+          setResponseCache(id, methodKey, data, expireMilliseconds);
+          toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
+          return data;
+        });
       } catch (error: any) {
         return errorCatcher(error);
       }
