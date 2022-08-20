@@ -112,7 +112,8 @@ yarn add alova
 ### 创建Alova实例
 一个`alova`实例是使用的开端，所有的请求都需要从它开始。它的写法类似`axios`，以下是一个最简单的`alova`实例的创建方法。
 ```javascript
-import { createAlova, GlobalFetch } from 'alova';
+import { createAlova } from 'alova';
+import GlobalFetch from 'alova/GlobalFetch';
 import VueHook from 'alova/vue';
 const alovaInstance = createAlova({
   // 假设我们需要与这个域名的服务器交互
