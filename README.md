@@ -1,6 +1,8 @@
 # [alova](https://github.com/JOU-amjs/alova)
 
-MVVM库的请求场景管理库，它是对请求库的一种武装，而非替代品✔️
+The request scene management library of the MVVM library, it is an arm of the request library, not a replacement.✔️
+
+[中文文档](README-zh.md)
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/JOU-amjs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/JOU-amjs/alova/actions/workflows/main.yml)
@@ -11,273 +13,270 @@ MVVM库的请求场景管理库，它是对请求库的一种武装，而非替�
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## 目录
-- [什么是请求场景管理](#什么是请求场景管理)
-- [请求场景模型](#请求场景模型)
-  - [请求时机](#请求时机)
-  - [请求行为](#请求行为)
-  - [请求事件](#请求事件)
-  - [响应数据管理](#响应数据管理)
-- [特性](#特性)
-- [各类库的体积对比](#各类库的体积对比)
-- [安装](#安装)
-  - [npm](#NPM)
-  - [cdn](#CDN)
-- [入门指南](#入门指南)
-  - [创建Alova实例](#创建Alova实例)
-  - [设置全局请求拦截器](#设置全局请求拦截器)
-  - [设置全局响应拦截器](#设置全局响应拦截器)
-  - [创建请求方法对象](#创建请求方法对象)
-  - [请求方法类型](#请求方法类型)
-  - [设置请求超时时间](#设置请求超时时间)
-  - [为响应数据设置缓存时间](为响应数据设置缓存时间)
-    - [内存模式（默认）](#内存模式（默认）)
-    - [持久化模式](#持久化模式)
-    - [持久化占位模式](#持久化占位模式)
-  - [在正确的时机发送请求](在正确的时机发送请求)
-    - [useRequest](useRequest)
-    - [useWatcher](useWatcher)
-    - [useFetcher](useFetcher)
-  - [响应数据管理](#响应数据管理)
-    - [转换响应数据](#转换响应数据)
-    - [主动失效响应缓存](#主动失效响应缓存)
-    - [跨页面/模块更新响应数据](#跨页面/模块更新响应数据)
-    - [自定义设置缓存数据](#自定义设置缓存数据)
-    - [自定义设置缓存数据](#自定义设置缓存数据)
-    - [自定义设置缓存数据](#自定义设置缓存数据)
-- [进阶](#进阶)
-  - [请求方法详解](#请求方法详解)
-  - [设置初始响应数据](#设置初始响应数据)
-  - [手动中断请求](#手动中断请求)
-  - [请求防抖](#请求防抖)
-  - [Method对象匹配器](#Method对象匹配器)
-  - [下载进度](#下载进度)
-  - [上传进度](#上传进度)
-  - [并行请求](#并行请求)
-  - [串行请求](#串行请求)
-  - [静默提交](#静默提交)
-  - [离线提交](#离线提交)
-- [高级](#高级)
-  - [自定义请求适配器](#自定义请求适配器)
-  - [自定义statesHook](#自定义statesHook)
-  - [自定义存储适配器](#自定义存储适配器)
-  - [响应状态编辑追踪](#响应状态编辑追踪)
-  - [Typescript支持](#Typescript支持)
-    - [usehooks状态的类型](#usehooks状态的类型)
-    - [响应数据的类型](#响应数据的类型)
-    - [根据请求适配器推断的类型](#根据请求适配器推断的类型)
-    - [全局请求前拦截器参数类型](#全局请求前拦截器参数类型)
-    - [全局响应拦截器参数类型](#全局响应拦截器参数类型)
-    - [请求适配器类型](#请求适配器类型)
-    - [自定义statesHook的类型](#自定义statesHook的类型)
-    - [全局响应拦截器参数类型](#全局响应拦截器参数类型)
-- [实践示例](#实践示例)
+## Table of contents
+- [What is request scene management](#what-is-request-scene-management)
+- [Request scene model](#request-scene-model)
+  - [request timing](#request-timing)
+  - [request behavior](#request-behavior)
+  - [request event](#request-event)
+  - [response data management](#response-data-management)
+- [Features](#features)
+- [Volume comparison of various libraries](#volume-comparison-of-various-libraries)
+- [install](#install)
+  - [npm](#npm)
+  - [cdn](#cdn)
+- [Getting Started](#getting-started)
+  - [Create Alova instance](#create-alova-instance)
+  - [Set global request interceptor](#set-global-request-interceptor)
+  - [Set global response interceptor](#set-global-response-interceptor)
+  - [Create request method object](#create-request-method-object)
+  - [request method type](#request-method-type)
+  - [Set request timeout](#set-request-timeout)
+  - [Set cache time for response data](#set-cache-time-for-response-data)
+    - [memory mode(default)](#memory-mode(default))
+    - [persistence mode](#persistence-mode)
+    - [Persistent placeholder mode](#persistent-placeholder-mode)
+  - [Send the request at the right time](#send-the-request-at-the-right-time)
+    - [useRequest](#useRequest)
+    - [useWatcher](#useWatcher)
+    - [useFetcher](#useFetcher)
+  - [response data management](#response-data-management)
+    - [convert response data](#convert-response-data)
+    - [Actively invalidate the response cache](#actively-invalidate-the-response-cache)
+    - [Update response data across pages or modules](#update-response-data-across-pages-or-modules)
+    - [Custom setting cache data](#custom-setting-cache-data)
+- [Next step](#next-step)
+  - [Request method details](#request-method-details)
+  - [Set initial response data](#set-initial-response-data)
+  - [Manual Interrupt Request](#manual-interrupt-request)
+  - [Request anti-shake](#request-anti-shake)
+  - [Method object matcher](#method-object-matcher)
+  - [Download progress](#download-progress)
+  - [Upload progress](#upload-progress)
+  - [parallel request](#parallel-request)
+  - [serial request](#serial-request)
+  - [silent commit](#silent-commit)
+  - [offline submission](#offline-submission)
+- [Advanced](#advanced)
+  - [Custom request adapter](#custom-request-adapter)
+  - [Custom statesHook](#custom-stateshook)
+  - [Custom storage adapter](#custom-storage-adapter)
+  - [Response States Edit Tracking](#response-states-edit-tracking)
+  - [Typescript support](#typescript-support)
+    - [Usehooks state type](#usehooks-state-type)
+    - [Response data type](#response-data-type)
+    - [Type inferred from request adapter](#type-inferred-from-request-adapter)
+    - [Global request interceptor type](#global-request-interceptor-type)
+    - [Global response interceptor type](#global-response-interceptor-type)
+    - [Method configuration object type](#method-configuration-object-type)
+    - [Request adapter type](#request-adapter-type)
+    - [Custom statesHook type](#custom-stateshook-type)
+- [practice example](#practice-example)
 
 
-## 什么是请求场景管理
-我们在进行一次请求时总是要思考以下问题，
-1. 什么时候发出请求；
-2. 是否要展示请求状态；
-3. 是否要封装成请求函数以便重复调用；
-4. 要如何加工响应数据；
-5. 是否要对高频使用的响应数据做缓存；
-6. 如何进行跨页面操作数据；
-7. 离线了还能提交数据吗；
+## What is request scene management
+We always have to think about the following questions when making a request,
+1. When is the request made;
+2. Whether to display the request status;
+3. Whether to encapsulate it into a request function for repeated calls;
+4. How to process the response data;
+5. Whether to cache frequently used response data;
+6. How to operate data across pages;
+7. Can I still submit data when I am offline?
 8. ...
 
-`fetch`或`axios`往往更专注于如何与服务端交互，但对于上面的问题我们总是需要自己处理，这些有利于应用性能和稳定性的功能，总会让程序员们编写出低维护性的代码。请求场景管理就是从准备请求到响应数据加工完毕的所有环节进行抽象，从而覆盖以前端为视角的，整个CS交互生命周期的模型。`Alova`就是一个以请求场景模型的请求场景管理库，它是对`axios`等请求库的一种补充，而非替代品。
-> CS交互：泛指所有客户端类型和服务端的数据交互
+`fetch` or `axios` tend to focus more on how to interact with the server, but we always need to deal with the above problems by ourselves. These functions that are beneficial to application performance and stability will always allow programmers to write low-maintenance functions. sexual code. The request scene management is to abstract all the links from the preparation of the request to the completion of the response data processing, so as to cover the model of the entire CS interaction life cycle from the perspective of the front end. `alova` is a request scene management library based on the request scene model. It is a supplement to the request library such as `axios`, not a replacement.
+> CS interaction: refers to all client types and server-side data interaction
 
-## 请求场景模型
+## Request scene model
 ![model](https://user-images.githubusercontent.com/29848971/176368981-1dd4f94f-e9f9-49c4-bf11-0045df48faff.png)
-### 请求时机
-描述在什么时候需要发出请求，在`Alova`中以`useHook`实现。
-- 初始化展示数据，如刚进入某个界面或子界面；
-- 人机交互触发CS交互，需要变更数据重新发出请求，如翻页、筛选、排序、模糊搜索等；
-- 预加载数据，如分页内预先加载下一页内容、预测用户点击某个按钮后预先拉取数据；
-- 操作服务端数据，需发出增删改查请求，如提交数据、删除数据等；
-- 同步服务端状态，如数据变化较快的场景下轮询请求、操作了某个数据后重新拉取数据；
+### request timing
+Describes when a request needs to be made, implemented as `useHook` in `alova`.
+- Initialize display data, such as just entering an interface or sub-interface;
+- Human-computer interaction triggers CS interaction, which requires changing data to re-issue requests, such as page turning, filtering, sorting, fuzzy search, etc.;
+- Pre-loading data, such as pre-loading the content of the next page in a pagination, predicting that the user clicks a button to pre-fetch data;
+- To operate server-side data, it is necessary to issue a request for addition, deletion and modification, such as submitting data, deleting data, etc.;
+- Synchronize the status of the server, such as polling requests in scenarios where data changes rapidly, and re-pulling data after operating a certain data;
 
 
-### 请求行为
-描述以怎样的方式处理请求，在`Alova`中以method对象实现。
-- 占位请求，请求时展示loading、骨架图、或者是上次使用的真实数据；
-- 缓存高频响应，多次执行请求会使用保鲜数据；
-- 多请求串行与并行；
-- 对频繁的请求进行防抖，避免前端数据闪动，以及降低服务端压力；
-- 重要接口重试机制，降低网络不稳定造成的请求失败概率；
-- 静默提交，当只关心提交数据时，提交请求后直接响应成功事件，后台保证请求成功；
-- 离线提交，离线时将提交数据暂存到本地，网络连接后再提交；
+### Request behavior
+Describes how to handle the request, implemented as a method object in `alova`.
+- Placeholder request, displaying loading, skeleton diagram, or the last real data used when requesting;
+- Cache high-frequency responses, and execute requests multiple times will use fresh data;
+- Multi-request serial and parallel;
+- Anti-shake for frequent requests, avoid front-end data flashing, and reduce server pressure;
+- Important interface retry mechanism to reduce the probability of request failure caused by network instability;
+- Silent submission, when you only care about submitting data, directly respond to the success event after submitting the request, and the background ensures that the request is successful;
+- Offline submission, temporarily store the submitted data locally when offline, and submit it after network connection;
 
-### 请求事件
-表示携带请求参数发送请求，获得响应，`Alova`可以与`axios`、`fetch`、`XMLHttpRequest`等任意请求库或原生方案共同协作。
+### request event
+Indicates that the request is sent with the request parameters, and the response is obtained. `alova` can cooperate with any request library or native solution such as `axios`, `fetch`, `XMLHttpRequest`.
 
-### 响应数据管理
-`Alova`将响应数据状态化，并统一管理，任何位置都可以对响应数据进行操作，并利用MVVM库的特性自动更新对应的视图。
-- 移除缓存响应数据，再次发起请求时将从服务端拉取；
-- 更新缓存响应数据，可更新任意位置响应数据，非常有利于跨页面更新数据；
-- 刷新响应数据，可重新刷新任意位置的响应数据，也非常有利于跨页面更新数据；
-- 自定义设置缓存，在请求批量数据时，可手动对批量数据一一设置缓存，从而满足后续单条数据的缓存命中；
-
-
+### Response data management
+`alova` will state and manage the response data in a unified manner. The response data can be operated at any location, and the corresponding views can be automatically updated by using the characteristics of the MVVM library.
+- Remove the cached response data and pull it from the server when the request is made again;
+- Update cache response data, which can update response data at any location, which is very beneficial to update data across pages;
+- Refresh the response data, which can re-refresh the response data at any location, and is also very beneficial to update data across pages;
+- Custom setting cache, when requesting batch data, you can manually set the cache for batch data one by one, so as to satisfy the cache hit of subsequent single data;
 
 
-## 特性
-1. React/Vue/Svelte请求非异步用法
-2. 与axios相似的api设计，简单熟悉
-3. 响应数据状态化
-4. 响应数据缓存
-5. 数据预拉取
-6. 静默提交
-7. 离线提交
-8. 请求防抖
-9. 轻量级Gzip 4kb
-10. typescript支持
-11. tree shaking支持
-12. 状态更新追踪
 
-## 各类库的体积对比
+
+## Features
+1. React/Vue/Svelte request non-asynchronous usage
+2. Similar api design to axios, simple and familiar
+3. Stateful response data
+4. Response data cache
+5. Data pre-fetch
+6. Silent commit
+7. Offline submission
+8. Request stabilization
+9. Lightweight Gzip 3kb+
+10. Typescript support
+11. Tree shaking support
+12. Status Update Tracking
+
+## Volume comparison of various libraries
 |alova|react-query|vue-request|vue|react|
 | ---- | ---- | ---- | ---- | ---- |
 | [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzipped size](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzipped size](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzipped size](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzipped size](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
 
 
-## 安装
-### NPM
+## Install
+### npm
 ```bash
-# 使用npm
+# use npm
 npm install alova --save
 
-# 使用yarn
+# use yarn
 yarn add alova
 ```
 
-### CDN
+### cdn
 ```html
-<!-- 核心代码，全局变量为alova -->
+<!-- The core code, the global variable is alova -->
 <script src="https://unpkg.com/alova/dist/alova.umd.min.js"></script>
 
-<!-- 预定义的请求适配器 -->
+<!-- Predefined Request Adapter -->
 <script src="https://unpkg.com/alova/dist/adapter/globalfetch.umd.min.js"></script>
 
-<!-- vue states hook，全局变量为VueHook，使用前需引入vue -->
+<!-- vue states hook, the global variable is VueHook, vue needs to be imported before use -->
 <script src="https://unpkg.com/alova/dist/hooks/vuehook.umd.min.js"></script>
 
-<!-- react states hook，全局变量为ReactHook，使用前需引入react -->
+<!-- react states hook, the global variable is ReactHook, you need to import react before use -->
 <script src="https://unpkg.com/alova/dist/hooks/reacthook.umd.min.js"></script>
 
-<!-- svelte states hook，全局变量为SvelteHook，使用前需引入svelte和svelte/store -->
+<!-- svelte states hook, the global variable is SvelteHook, svelte and svelte/store need to be imported before use -->
 <script src="https://unpkg.com/alova/dist/hooks/sveltehook.umd.min.js"></script>
 ```
 
-## 入门指南
-在接下来的入门指南中，我们将以待办事项（todo）为例，围绕着获取不同日期的待办事项列表、查看todo详情，以及创建、编辑、删除事项等需求进行本`alova`的讲解。让我们一起往下看吧！
+## Getting Started
+In the next getting started guide, we will take todo as an example, and focus on getting the todo list on different dates, viewing todo details, and creating, editing, and deleting items. explain. Let's look down together!
 
-### 创建Alova实例
-一个`alova`实例是使用的开端，所有的请求都需要从它开始。它的写法类似`axios`，以下是一个最简单的`alova`实例的创建方法。
+### Create Alova instance
+An `alova` instance is the starting point of use, and all requests need to start from it. It is written like `axios`, and the following is the simplest way to create an `alova` instance.
 ```javascript
 import { createAlova } from 'alova';
 import GlobalFetch from 'alova/GlobalFetch';
 import VueHook from 'alova/vue';
 const alovaInstance = createAlova({
-  // 假设我们需要与这个域名的服务器交互
+  // Suppose we need to interact with the server for this domain
   baseURL: 'https://api.alovajs.org',
 
-  // 假设我们在开发Vue项目，VueHook可以帮我们用vue的ref函数创建请求相关的，可以被Alova管理的状态，包括请求状态loading、响应数据data、请求错误对象error等（后续详细介绍）
-  // 如果正在开发React项目，我们可以通过alova/react使用ReactHook
-  // 如果使用Svelte项目，我们可以通过alova/svelte使用SvelteHook
+  // Assuming we are developing a Vue project, VueHook can help us create request-related states that can be managed by Alova using vue's ref function, including request status loading, response data data, request error object error, etc. (detailed later)
+  // If we are developing a React project, we can use ReactHook via alova/react
+  // If using Svelte project, we can use SvelteHook via alova/svelte
   statesHook: VueHook,
 
-  // 请求适配器，我们推荐并提供了fetch请求适配器
+  // request adapter, we recommend and provide the fetch request adapter
   requestAdapter: GlobalFetch(),
 });
 ```
 
-
-### 设置全局请求拦截器
-通常，我们需要让所有请求都用上相同的配置，例如添加token、timestamp到请求头，`alova`为我们提供了全局的请求拦截器，它将在请求前被触发，我们可以在此拦截器中统一设置请求参数，这也与`axios`相似。
+### Set global request interceptor
+Usually, we need to use the same configuration for all requests, such as adding token and timestamp to the request header, `alova` provides us with a global request interceptor, which will be triggered before the request, we can use this interceptor Set request parameters uniformly in `axios`, which is also similar to `axios`.
 ```javascript
 const alovaInstance = createAlova({
-  // 省略其他参数...
+   // Ignore other parameters...
 
-  // 函数参数config内包含了url、params、data、headers等请求的所有配置
-  beforeRequest(config) {
-    // 假设我们需要添加token到请求头
-    config.headers.token = 'token';
-  },
+   // The function parameter config contains all the requested configurations such as url, params, data, headers, etc.
+   beforeRequest(config) {
+     // Suppose we need to add the token to the request header
+     config.headers.token = 'token';
+   },
 });
 ```
 
-### 设置全局响应拦截器
-当我们希望统一解析响应数据、统一处理错误时，此时可以在创建`alova`实例时指定全局的响应拦截器，这同样与`axios`相似。响应拦截器包括请求成功的拦截器和请求失败的拦截器。
+### Set global response interceptor
+When we want to parse the response data and handle errors uniformly, we can specify a global response interceptor when creating an `alova` instance, which is also similar to `axios`. Response interceptors include interceptors for successful requests and interceptors for failed requests.
 ```javascript
 const alovaInstance = createAlova({
-  // 省略其他参数...
+  // Ignore other parameters...
 
-  // 使用数组的两个项，分别指定请求成功的拦截器和请求失败的拦截器
+  // Use two items of the array to specify the interceptor for successful request and the interceptor for failed request respectively
   responsed: {
 
-    // 请求成功的拦截器
-    // 当使用GlobalFetch请求适配器时，第一个参数接收Response对象
-    // 第二个参数为请求的配置，它用于同步请求前后的配置信息
+    // Interceptor for successful request
+    // When using GlobalFetch to request the adapter, the first parameter receives the Response object
+    // The second parameter is the configuration of the request, which is used to synchronize the configuration information before and after the request
     onSuccess: async (response, config) => {
       const json = await response.json();
       if (json.code !== 200) {
-        // 这边抛出错误时，将会进入请求失败拦截器内
+        // When an error is thrown here, it will enter the request failure interceptor
         throw new Error(json.message);
       }
       
-      // 解析的响应数据将传给staleTime、persistTime、transformData三个钩子函数，这些函数将在后续讲解
+      // The parsed response data will be passed to three hook functions: staleTime, persistTime, and transformData. These functions will be explained later
       return json.data;
     },
 
-    // 请求失败的拦截器
-    // 请求抛出错误时，或请求成功拦截器抛出错误时，将会进入该拦截器。
-    // 第二个参数为请求的配置，它用于同步请求前后的配置信息
+    // Interceptor for failed requests
+    // When the request throws an error, or when the request succeeds the interceptor throws an error, the interceptor will be entered.
+    // The second parameter is the configuration of the request, which is used to synchronize the configuration information before and after the request
     onError: (err, config) => {
       alert(error.message);
     }
   }
 });
 ```
-如果不需要设置请求失败的拦截器，可以直接传入请求成功的拦截器函数。
+If you do not need to set an interceptor for failed requests, you can directly pass in the interceptor function for successful requests.
 ```javascript
 const alovaInstance = createAlova({
-  // 省略其他参数...
+  // Ignore other parameters...
 
   async responsed(response, config) {
-    // 请求成功的拦截器
+    // Interceptor for successful request
   },
 });
 ```
-> ⚠️注意：请求成功可以是普通函数和异步函数
+> ⚠️Note: Request success can be normal function and asynchronous function.
 
-### 创建请求方法对象
-在`alova`中，每个请求都对应一个method对象表示，它描述了一次请求的url、请求头、请求参数，以及响应数据加工、缓存加工数据等请求行为参数，它不会实际发出请求。`Method`对象的创建也类似`axios`的请求发送函数。
-我们先来创建一个获取todo列表的`Method`对象，大概是这样的
+### Create request method object
+In `alova`, each request corresponds to a method object representation, which describes the url, request header, request parameters, and request behavior parameters such as response data processing, cache processing data, etc., and it does not actually send a request. The creation of the `Method` object is also similar to the `axios` request sending function.
+Let's first create a `Method` object that gets the todo list, probably like this
 
 ```javascript
-// 创建一个Get对象，描述一次Get请求的信息
+// Create a Get object that describes the information of a Get request
 const todoListGetter = alova.Get('/todo/list', {
   headers: {
     'Content-Type': 'application/json;charset=UTF-8'
   },
-  // params参数将会以?的形式拼接在url后面
+  // The params parameter will be spliced ​​after the url in the form of ?
   params: {
     userId: 1
   }
 });
 ```
-接着再创建一个创建todo项的`Method`对象，大概是这样的
+Then create a `Method` object that creates a todo item, probably like this
 ```javascript
-// 创建Post对象
-const createTodoPoster = alova.Post('/todo/create', 
-  // 第二个参数是http body数据
+// create Post object
+const createTodoPoster = alova.Post('/todo/create',
+  // The second parameter is the http body data
   {
     title: 'test todo',
     time: '12:00'
-  }, 
-  // 第三个参数是请求配置相关信息
+  },
+  // The third parameter is the request configuration related information
   {
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
@@ -288,153 +287,153 @@ const createTodoPoster = alova.Post('/todo/create',
   }
 );
 ```
-> ⚠️注意：`Method`对象里只是保存了请求所需要的信息，但它不会发出请求，而是需要通过`use hook`发送请求，这点与`axios`不同。
+> ⚠️Note: The `Method` object only stores the information required for the request, but it does not send a request, but needs to send a request through `use hook`, which is different from `axios`.
 
-### 请求方法类型
-`Alova`提供了包括GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH七种请求方法的抽象对象，具体的使用方式可以阅读[进阶-请求方法详解](#请求方法详解)。
+### Request method type
+`Alova` provides abstract objects including seven request methods: GET, POST, PUT, DELETE, HEAD, OPTIONS, and PATCH. For the specific usage, please read [Advanced-Request Method Details](#Request Method Details).
 
-### 设置请求超时时间
-`alova`提供了全局和请求级的超时时间设置，全局设置请求超时后，所有由`alova`创建的`Method`对象都会继承该设置。
+### Set request timeout
+`alova` provides global and request-level timeout settings. After the global request timeout is set, all `Method` objects created by `alova` will inherit this setting.
 ```javascript
-// 全局设置请求超时时间
+// Globally set the request timeout
 const alovaInstance = createAlova({
-  // 省略其他参数...
+   // Ignore other parameters...
 
-  // 请求超时时间，单位为毫秒，默认为0，表示永不超时
-  timeout: 50000,
+   // Request timeout, in milliseconds, the default is 0, which means never timeout
+   timeout: 50000,
 });
 ```
 
-在创建请求方法对象时设置请求级别的请求超时时间，它将覆盖全局的`timeout`参数。
+Set the request-level request timeout when creating the request method object, which overrides the global `timeout` parameter.
 ```javascript
-// 请求级别的请求超时时间
+// request timeout at request level
 const todoListGetter = alova.Get('/todo/list', {
-  // 省略其他参数...
+   // Ignore other parameters...
 
-  timeout: 10000,
+   timeout: 10000,
 });
 ```
 
-### 为响应数据设置缓存时间
-当你在写todo详情页的时候，你可能会想到用户会频繁在todo列表中点击查看详情，如果用户重复查看某条详情时不再重复请求接口，并且能立即返回数据，那该多好，既提升了响应速度，又减小了服务器压力。此时我们就可以为某个todo详情`Method`对象设置响应数据缓存。默认只有`alova.Get`会带有300000ms(5分钟)的响应数据缓存时间，开发者也可以自定义设置。
+### Set cache time for response data
+When you are writing the todo details page, you may think that users will frequently click to view the details in the todo list. It would be great if the user would not repeatedly request the interface when viewing a certain detail repeatedly, and the data could be returned immediately. It not only improves the response speed, but also reduces the server pressure. At this point we can set the response data cache for a todo detail `Method` object. By default, only `alova.Get` will have a response data cache time of 300000ms (5 minutes), and developers can also customize the settings.
 
-> ⚠️响应数据缓存的key：是由method实例的请求方法(method)、请求地址(url)、请求头参数(headers)、url参数(params)、请求体参数(requestBody)组合作为唯一标识，任意一个位置不同都将被当做不同的key。
+> ⚠️The key of the response data cache: is the combination of the method instance's request method (method), request address (url), request header parameters (headers), url parameters (params), and request body parameters (requestBody) as a unique identifier, any A different position will be treated as a different key.
 
-以下是全局设置响应缓存时间的方法，所有由`alova`创建的`Method`对象都会继承该设置。`alova`的缓存有三种模式，分别为内存模式、持久化模式、持久化占位模式。
-#### 内存模式（默认）
-表示缓存放在内存中，这意味着刷新页面缓存即失效，是最常用的缓存模式。
+The following is a method to globally set the response cache time, which is inherited by all `Method` objects created by `alova`. The cache of `alova` has three modes, namely memory mode, persistent mode, and persistent placeholder mode.
+#### memory mode(default)
+Indicates that the cache is placed in memory, which means that refreshing the page cache will invalidate it, which is the most commonly used cache mode.
 ```javascript
 const alovaInstance = createAlova({
-  // 省略其他参数...
+  // Ignore other parameters...
 
   localCache: {
-    // 设置缓存模式为内存模式
+    // Set the cache mode to memory mode
     mode: cacheMode.MEMORY,
 
-    // 单位为毫秒
-    // 当设置为`Infinity`，表示数据永不过期，设置为0或负数时表示不缓存
+    // in milliseconds
+    // When set to `Infinity`, it means that the data will never expire, when set to 0 or a negative number, it means no cache
     expire: 60 * 10 * 1000,
   },
 
-  ////////////////////////
-  ////////////////////////
-  // 因为默认是内存模式，上面的设置也可以简写成这样
+  ///////////////////////
+  ///////////////////////
+  // Because the default is memory mode, the above settings can also be abbreviated as this
   localCache: 60 * 10 * 1000,
 });
 ```
-#### 持久化模式
-表示缓存放在诸如`localStorage`存储中，如果过期时间未到即使刷新页面缓存也不会失效，它一般用于一些需要服务端管理，但基本不变的数据。
+#### Persistence Mode
+Indicates that the cache is placed in a storage such as `localStorage`. If the expiration time is not reached, even if the page cache is refreshed, it will not be invalidated. It is generally used for some data that needs server management but is basically unchanged.
 ```javascript
 const alovaInstance = createAlova({
-  // 省略其他参数...
+  // Ignore other parameters...
 
   localCache: {
-    // 设置缓存模式为持久化模式
+    // Set cache mode to persistent mode
     mode: cacheMode.STORAGE_RESTORE,
 
-    // 单位为毫秒
-    // 当设置为`Infinity`，表示数据永不过期，设置为0或负数时表示不缓存
+    // in milliseconds
+    // When set to `Infinity`, it means that the data will never expire, when set to 0 or a negative number, it means no cache
     expire: 60 * 10 * 1000,
 
-    // 缓存标签
+    // cache tag
     tag: 'v1',
   },
 });
 ```
-> ⚠️缓存标签tag参数：出于对接口数据变动、前端处理响应数据逻辑变动原因，你需要在发布后让原持久化缓存立即失效，此时你可以设置`tag`属性，每一份持久化数据都包含一个`tag`标识，当`tag`改变后原有的持久化数据就会失效，并重新获取新的数据，并用新的`tag`进行标识。
+> ⚠️Cache tag tag parameter: For reasons of interface data changes and front-end processing response data logic changes, you need to invalidate the original persistent cache immediately after publishing. At this time, you can set the `tag` attribute, and each persistent The data contains a `tag` identifier. When the `tag` changes, the original persistent data will become invalid, and the new data will be retrieved and identified with the new `tag`.
 
-#### 持久化占位模式
-当页面数据在加载时不希望只展示加载图标，而是实际数据，同时又去加载最新数据时，我们可以使用持久化占位模式，首次加载它也会持久化缓存数据，然后再次请求时立即返回缓存数据，但和持久化模式不同的是，它还会立即发出请求并更新缓存，这样就达到了既快速展示实际数据，又获取了最新的数据。
+#### Persistent placeholder mode
+When the page data does not want to only display the loading icon, but the actual data, and at the same time to load the latest data, we can use the persistent placeholder mode, which will also persist the cached data when it is loaded for the first time, and then immediately when it is requested again Returns the cached data, but unlike the persistence mode, it also immediately issues a request and updates the cache, so that the actual data can be displayed quickly and the latest data can be obtained.
 ```javascript
 const alovaInstance = createAlova({
-  // 省略其他参数...
+  // Ignore other parameters...
 
   localCache: {
-    // 设置缓存模式为持久化占位模式
+    // Set the cache mode to persistent placeholder mode
     mode: cacheMode.STORAGE_PLACEHOLDER,
-    // 缓存时间
+    // cache time
     expire: 60 * 10 * 1000,
 
-    // 此模式同样支持缓存标签
+    // This mode also supports cache tags
     tag: 'v1',
   },
 });
 ```
 
-以上缓存设置同样支持请求级别，在创建请求方法对象上设置`localCache`参数来达到目的，设置方法相同。
+The above cache settings also support the request level. Set the `localCache` parameter on the create request method object to achieve the purpose, and the setting method is the same.
 ```javascript
 const todoListGetter = alova.Get('/todo/list', {
-  // 省略其他参数...
+  // Ignore other parameters...
 
-  // 参数用法与全局相同
+  // parameter usage is the same as global
   localCache: 60 * 10 * 1000,
 });
 ```
 
-## 在正确的时机发送请求
-接下来我们要来看看如何实际发出请求了，在`alova`中提供了`useRequest`、`useWatcher`、`useFetcher`三种`use hook`实现请求时机，由它们控制何时应该发出请求，同时将会为我们创建和维护状态化的请求相关数据，如`loading`、`data`、`error`等，省去了开发者自主维护这些状态的麻烦，下面我们来了解下它们。
+## Send the request at the right time
+Next, let's take a look at how to actually make a request. In `alova`, `useRequest`, `useWatcher`, and `useFetcher` three `use hook` are provided to realize the request timing, and they control when the request should be made. At the same time, it will create and maintain stateful request-related data for us, such as `loading`, `data`, `error`, etc., saving developers the trouble of maintaining these states independently. Let's learn about them below.
 
 ### useRequest
-它表示一次请求的发送，执行`useRequest`时默认会发送一次请求，在页面获取初始化数据时是最常用的方法。同时也支持关闭它的默认的请求发送，这在例如提交数据等通过点击事件触发的场景下非常有用。下面我们来发出对todo列表数据的请求。
+It represents the sending of a request. When `useRequest` is executed, a request will be sent by default, and it is the most commonly used method when the page obtains initialization data. It also supports the default request sending which is turned off, which is very useful in scenarios triggered by click events such as submitting data. Now let's make a request for the todo list data.
 ```javascript
 const {
-  // loading是加载状态值，当加载时它的值为true，结束后自动更新为false
-  // Vue3环境下（使用VueHook）：它是一个readonly的Ref类型的值，你可以通过loading.value访问它，或直接绑定到界面中
-  // React16环境下（使用ReactHook）：它的值为普通的boolean值，请求状态变化时内部将调用setLoading函数更新它的值
-  // 在Svelte环境下（使用SvelteHook）：它是一个Readable类型的值，内部将维护它的值
+  // loading is the loading state value, when it is loaded, its value is true, and it is automatically updated to false after the end
+  // Vue3 environment (using VueHook): it is a readonly Ref type value, you can access it through loading.value, or directly bind to the interface
+  // In the React16 environment (using ReactHook): its value is a common boolean value, and the setLoading function will be called internally to update its value when the request state changes
+  // In the Svelte environment (using SvelteHook): it is a value of type Readable, and its value will be maintained internally
   loading,
 
-  // 响应数据
+  // response data
   data: todoList,
 
-  // 请求错误对象，请求错误时有值，否则为undefined
+  // Request error object, it has a value when the request is wrong, otherwise it is undefined
   error,
 
-  // 成功回调绑定
+  // successful callback binding
   onSuccess,
 
-  // 失败回调绑定
+  // Failed callback binding
   onError,
 
-  // 完成回调绑定
+  // complete callback binding
   onComplete,
 
-  // 直接将Method对象传入即可发送请求
+  // Directly pass in the Method object to send the request
 } = useRequest(todoListGetter, {
-  // 初始data数据
+  // initial data data
   initialData: [],
 });
 onSuccess(todoListRaw => {
-  console.log('请求成功，响应数据为:', todoListRaw);
+  console.log('The request is successful, the response data is:', todoListRaw);
 });
 onError(error => {
-  console.log('请求失败，错误信息为:', error);
+  console.log('The request failed, the error message is:', error);
 });
 onComplete(() => {
-  console.log('请求完成，不管成功失败都会调用');
+  console.log('The request is completed, it will be called regardless of success or failure');
 });
 ```
-你可以直接使用todoList来渲染todo列表
+You can use todoList directly to render the todo list
 ```html
 <div v-if="loading">Loading...</div>
 <div v-else-if="error" class="error">{{ error.message }}</div>
@@ -446,7 +445,7 @@ onComplete(() => {
 </template>
 ```
 
-当你需要创建一条新的todo项时，可以先关闭默认发送请求，转为手动触发请求。然后将useRequest的第一个参数改为返回`Method`对象的函数，该函数在触发请求时被调用。
+When you need to create a new todo item, you can turn off the default sending request and switch to triggering the request manually. Then change the first parameter of useRequest to a function that returns a `Method` object, which is called when the request is fired.
 ```javascript
 const createTodoPoster = newTodo => alova.Post('/todo', newTodo);
 
@@ -455,43 +454,43 @@ const {
   data,
   error,
 
-  // 手动发送器请求的函数，调用后发送请求
+  // The function of the manual sender request, the request is sent after the call
   send: addTodo,
 } = useRequest(newTodo => createTodoPoster(newTodo), {
-  // 当immediate为false时，默认不发出
+  // When immediate is false, it is not emitted by default
   immediate: false
 });
 
 
-// 手动发送请求
+// Manually send the request
 const handleAddTodo = () => {
 
-  /** 手动触发函数可接受任意个参数，这些参数将被传入4个函数
-   * 1. useRequest的第一个参数为回调函数时可以接收到
-   * 2. onSuccess设置的回调中从第二个参数开始接收（第一个参数为响应数据）
-   * 3. onError设置的回调中从第二个参数开始接收（第一个参数为错误对象）
-   * 4. onComplete设置的回调中从第一个参数开始接收
-   * 
-   * 返回：一个Promise对象，可接收响应数据
+  /** Manual trigger function can accept any number of parameters, these parameters will be passed to 4 functions
+   * 1. It can be received when the first parameter of useRequest is a callback function
+   * 2. The callback set by onSuccess starts to receive from the second parameter (the first parameter is the response data)
+   * 3. The callback set by onError starts to receive from the second parameter (the first parameter is the error object)
+   * 4. Received from the first parameter in the callback set by onComplete
+   *
+   * Returns: a Promise object that can receive response data
    */
   const newTodo = {
-    title: '新的todo项',
+    title: 'New todo item',
     time: new Date().toLocaleString()
   };
   addTodo(newTodo)
     .then(result => {
-      console.log('新增todo项成功，响应数据为:', result);
+      console.log('Add todo item successfully, the response data is:', result);
     })
     .catch(error => {
-      console.log('新增todo项失败，错误信息为:', error);
+      console.log('Failed to add todo item, the error message is:', error);
     });
 };
 ```
 
 ### useWatcher
-它用于监听指定的状态变化，然后立即发送请求，在分页、数据筛选、模糊搜索等场景很有用。同时如果你希望更新服务端数据，接下来我们以搜索todo项为例。
+It is used to monitor the specified state changes, and then send the request immediately, which is useful in scenarios such as paging, data filtering, and fuzzy search. At the same time, if you want to update the server data, let's take the search todo item as an example.
 ```javascript
-// 创建method实例
+// create method instance
 const filterTodoList = text => {
   return alova.Get('/tood/list/search', {
     params: {
@@ -499,30 +498,30 @@ const filterTodoList = text => {
     }
   });
 };
-const searchText = ref('');   // Vue3
-// const [searchText, setSearchText] = useState('');   // React16
+const searchText = ref(''); // Vue3
+// const [searchText, setSearchText] = useState(''); // React16
 
 const {
   loading,
   data: todoList,
   error
 
-  // 第一个参数必须为返回method实例的函数
-} = useWatcher(() => filterTodoList(searchText.value), 
+  // The first parameter must be a function that returns an instance of method
+} = useWatcher(() => filterTodoList(searchText.value),
 
-  // 被监听的状态数组，这些状态变化将会触发一次请求
+  // Array of monitored states, these state changes will trigger a request
   [searchText], {
 
-    // 设置500ms防抖，如果searchText频繁变化，只有在停止变化后500ms才发送请求
+    // Set 500ms anti-shake, if the searchText changes frequently, the request will only be sent 500ms after it stops changing
     debounce: 500,
   }
 );
 ```
 ```html
-<!-- searchText随着输入内容变化而变化 -->
+<!-- searchText changes as input changes -->
 <input v-model="seatchText" />
 
-<!-- 渲染筛选后的todo列表 -->
+<!-- Render filtered todo list -->
 <div v-if="loading">Loading...</div>
 <template v-else>
   <div v-for="todo in todoList">
@@ -531,9 +530,9 @@ const {
   </div>
 </template>
 ```
-如果要用在todo列表分页请求，你可以这样做。
+If you want to paginate requests in the todo list, you can do this.
 ```javascript
-// method实例创建函数
+// method instance creation function
 const getTodoList = currentPage => {
   return alova.Get('/tood/list', {
     params: {
@@ -543,38 +542,38 @@ const getTodoList = currentPage => {
   });
 };
 
-const currentPage = ref(1);   // Vue3
+const currentPage = ref(1); // Vue3
 const {
   loading,
   data: todoList,
   error,
 
-  // 第一个参数为返回method实例的函数，而非method实例本身
-} = useWatcher(() => getTodoList(currentPage.value), 
-  // 被监听的状态数组，这些状态变化将会触发一次请求
+  // The first parameter is the function that returns the method instance, not the method instance itself
+} = useWatcher(() => getTodoList(currentPage.value),
+  // Array of monitored states, these state changes will trigger a request
   [currentPage], {
-    // ⚠️调用useWatcher默认不触发，注意和useRequest的区别
-    // 手动设置immediate为true可以初始获取第1页数据
+    // ⚠️ Calling useWatcher does not trigger by default, pay attention to the difference from useRequest
+    // Manually set immediate to true to get the first page data initially
     immediate: true,
   }
 );
 ```
-> ⚠️如果你只希望重新请求当前页的数据（可能是数据更新了），你也可以手动触发请求，用法和`useRequest`相同。
+> ⚠️If you only want to re-request the data of the current page (maybe the data has been updated), you can also trigger the request manually, the usage is the same as `useRequest`.
 
 
 ### useFetcher
-它用于拉取数据，响应数据不能直接接收到，`useFetcher`的请求定位如下：
-1. 预加载后续流程中将会使用到的数据，让用户不再等待数据加载的过程；
-2. 跨页面刷新界面数据，拉取的数据在页面中存在渲染时，它除了会更新缓存外还会更新响应状态，让界面刷新，例如修改todo列表的某一项后重新拉取最新数据，响应后将会刷新界面。
+It is used to pull data, and the response data cannot be received directly. The request of `useFetcher` is positioned as follows:
+1. Preload the data that will be used in the subsequent process, so that users no longer wait for the process of data loading;
+2. Refresh the interface data across pages. When the pulled data is rendered in the page, it will update the response state in addition to updating the cache, so that the interface refreshes. For example, after modifying an item in the todo list, the latest data is pulled again. The interface will be refreshed after the response.
 
-与`useRequest`和`useWatcher`相比，`useFetcher`需要传入`alova`实例对象来确定应该如何创建状态，而且它不返回`data`字段，将`loading`改名为了`fetching`，也没有`send`函数，但多了一个fetch函数，可以重复利用fetch函数拉取不同的数据，且使用同一个fetching和error等状态，从而达到统一处理的目的。
+In contrast to `useRequest` and `useWatcher`, `useFetcher` requires an `alova` instance object to determine how the state should be created, and it does not return a `data` field, renames `loading` to `fetching`, and does not `send` function, but with an additional fetch function, you can reuse the fetch function to pull different data, and use the same fetching and error states, so as to achieve the purpose of unified processing.
 
-下面我们来实现修改某个todo数据，并重新拉取最新的todo列表数据，让界面刷新。
+Now let's modify a certain todo data, and re-pull the latest todo list data to refresh the interface.
 
 ```javascript
 const getTodoList = currentPage => {
   return alova.Get('/tood/list', {
-    // 注意：这边设置了name属性，用于在无法直接指定Method对象时，过滤出需要的Method对象
+    // Note: The name attribute is set here to filter out the required Method object when the Method object cannot be specified directly
     name: 'todoList',
     params: {
       currentPage,
@@ -585,76 +584,76 @@ const getTodoList = currentPage => {
 
 const {
 
-  // fetching属性与loading相同，发送拉取请求时为true，请求结束后为false
+  // The fetching attribute is the same as loading, true when a pull request is sent, and false after the request is complete
   fetching,
   error,
   onSuccess,
   onError,
   onComplete,
 
-  // 调用fetch后才会发送请求拉取数据，可以重复调用fetch多次拉取不同接口的数据
+  // Only after calling fetch will the request to pull data be sent. You can repeatedly call fetch multiple times to pull data from different interfaces.
   fetch,
 } = useFetcher(alova);
 
-// 在事件中触发数据拉取
+// Trigger data pull in event
 const handleSubmit = () => {
-  // 假设已完成todo项的修改...
+  // Assuming you have finished modifying the todo item...
 
-  // 开始拉取更新后的数据
-  // 情况1：当你明确知道拉取todoList第一页数据时，传入一个Method对象
+  // Start pulling the updated data
+  // Case 1: When you clearly know to pull the first page of todoList data, pass in a Method object
   fetch(getTodoList(1));
 
-  // 情况2：当你只知道拉取todoList最后一次请求的数据时，通过Method对象匹配器来筛选
+  // Case 2: When you only know to pull the data of the last request of the todoList, filter by the Method object matcher
   fetch({
     name: 'todoList',
     filter: (method, index, ary) => {
 
-      // 返回true来指定需要拉取的Method对象
+      // Return true to specify the Method object to be pulled
       return index === ary.length - 1;
     },
   })
 };
 ```
-界面中还可以渲染统一的拉取状态。
+A unified pull state can also be rendered in the interface.
 ```html
-<div v-if="fetching">{{ 正在后台拉取数据... }}</div>
-<!-- 省略todo参数设置相关的html -->
-<button @click="handleSubmit">修改todo项</button>
+<div v-if="fetching">{{ Fetching data in the background... }}</div>
+<!-- Ignore the html related to the todo parameter setting -->
+<button @click="handleSubmit">Modify todo item</button>
 ```
-fetch函数将会忽略已有缓存，强制发起请求并更新缓存，至于`Method`对象匹配器，详细的使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
+The fetch function will ignore the existing cache, forcibly initiate a request and update the cache. As for the `Method` object matcher, see [Advanced-Method Object Matcher](#Method Object Matcher) for details.
 
-## 响应数据管理
-响应数据状态化并统一管理，我们可以在任意位置访问任意的响应数据，并对它们进行操作。
+## Response data management
+The response data is stateful and managed uniformly, and we can access any response data at any location and operate on them.
 
-### 转换响应数据
-当响应数据结构不能直接满足前端需求时，我们可以为method实例设置`transformData`钩子函数将响应数据转换成需要的结构，数据转换后将会作为`data`状态的值。
+### Convert response data
+When the response data structure cannot directly meet the front-end requirements, we can set the `transformData` hook function for the method instance to convert the response data into the required structure, and the data will be used as the value of the `data` state after conversion.
 
 ```javascript
 const todoListGetter = alova.Get('/tood/list', {
-  params: {
-    page: 1,
-  },
+   params: {
+     page: 1,
+   },
 
-  // 函数接受未加工的数据和响应头对象，并要求将转换后的数据返回，它将会被赋值给data状态。
-  // 注意：rawData一般是响应拦截器过滤后的数据，响应拦截器的配置可以参考[设置全局响应拦截器]章节。
-  transformData(rawData, headers) {
-    return rawData.list.map(item => {
-      return {
-        ...item,
-        statusText: item.done ? '已完成' : '进行中',
-      };
-    });
-  }
+   // The function accepts raw data and response header objects, and asks to return the converted data, which will be assigned to the data state.
+   // Note: rawData is generally the data filtered by the response interceptor. For the configuration of the response interceptor, please refer to the [Set Global Response Interceptor] chapter.
+   transformData(rawData, headers) {
+     return rawData.list.map(item => {
+       return {
+         ...item,
+         statusText: item.done ? 'completed' : 'in progress',
+       };
+     });
+   }
 });
 ```
 
-### 主动失效响应缓存
-有这样一个场景，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，通常的做法是通过事件来触发上一页的内容更新，这样增加了维护成本。而`alova`提供了3种方式，可以很优雅地达到这个目的：
-1. 使用`useFetcher`立即重新请求最新的数据，它在上面的章节中已经讲过；
-2. 手动更新缓存，这种方式将在下一个小节详细讲解；
-3. 让这个响应缓存失效，当再次请求时将会因缓存失效而重新请求数据。这也是本小节所要讲的内容。
+### Actively invalidate the response cache
+There is such a scenario, when the user clicks on an item in the todo list, enters the todo details page and edits it, at this time we hope that the todo list data in the previous page is also updated to the edited content, usually The practice is to trigger the content update of the previous page through an event, which increases the maintenance cost. And `alova` provides 3 ways to achieve this purpose very elegantly:
+1. Use `useFetcher` to immediately re-request the latest data, which has been covered in the above section;
+2. Manually update the cache, which will be explained in detail in the next section;
+3. Invalidate the cache of this response, when the request is made again, the data will be re-requested due to cache invalidation. That's what this section is about.
 
-现在我们尝试以缓存失效的方式实现本需求。
+Now we try to achieve this requirement by way of cache invalidation.
 ```javascript
 import { invalidateCache } from 'alova';
 
@@ -672,22 +671,22 @@ const {
   send,
   onSuccess
 } = useRequest(createTodoPoster, { immediate: false });
-// 提交成功后，固定使第一页的todo数据缓存失效
+// After the submission is successful, the todo data cache of the first page is fixed to be invalidated
 onSuccess(() => {
   invalidateCache(getTodoList(1));
 });
 
-// 当触发handleSubmit函数时将会触发请求
+// When the handleSubmit function is triggered, the request will be triggered
 const handleSubmit = () => {
   send();
 };
 ```
-它的功能还远不止于此，我们还可以通过设置`Method`对象匹配器来实现多个，甚至全部的缓存失效。
+Its function is far more than that, we can also achieve multiple or even all cache invalidation by setting the `Method` object matcher.
 
 ```javascript
 const getTodoList = currentPage => {
   return alova.Get('/tood/list', {
-    // 注意：设置了name属性，用于在无法直接指定Method对象时，过滤出需要的Method对象
+    // Note: The name attribute is set to filter out the required Method object when the Method object cannot be specified directly
     name: 'todoList',
     params: {
       currentPage,
@@ -701,33 +700,33 @@ const {
   send,
   onSuccess
 } = useRequest(createTodoPoster, { immediate: false });
-// 提交成功后，固定使第一页的todo数据缓存失效
+// After the submission is successful, the todo data cache of the first page is fixed to be invalidated
 onSuccess(() => {
 
-  // 失效名称为todoList的所有响应缓存
+  // invalidate all response caches named todoList
   invalidateCache({
     name: 'todoList',
     filter: (method, index, ary) => {
-      // 名为todoList的前5个Method对象的响应缓存将会失效
+      // The response cache for the first 5 Method objects named todoList will be invalidated
       return index < 5;
     },
   });
 
-  // 不传任何参数时，失效所有响应缓存
+  // When no parameters are passed, invalidate all response caches
   invalidateCache();
 });
 ```
 
-详细的`Method`对象匹配器使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
+For details on how to use the `Method` object matcher, see [Advanced-Method Object Matcher](#Method Object Matcher)
 
-### 跨页面/模块更新响应数据
-我们继续以上一小节[主动失效响应缓存](#主动失效响应缓存)中提到的例子来说，当用户点开todo列表中的某一项，进入todo详情页并对它执行了编辑，此时我们希望上一页中的todo列表数据也更新为编辑后的内容，使用`useFetcher`和`invalidateCache`的方式都会重新发起请求，那有没有不需要重新请求的方法呢？
+### Update response data across pages or modules
+Let's continue the example mentioned in the above section [Active invalidation response cache] (#Active invalidation response cache), when the user clicks on an item in the todo list, enters the todo details page and edits it, this At the same time, we hope that the todo list data in the previous page is also updated to the edited content. Using `useFetcher` and `invalidateCache` will re-initiate the request. Is there any method that does not require re-request?
 
-当然有！
+Of course there is!
 ```javascript
 import { updateState } from 'alova';
 
-// 正在编辑的todo项
+// the todo item being edited
 const editingTodo = {
   id: 1,
   title: 'todo1',
@@ -739,11 +738,11 @@ const {
   onSuccess
 } = useRequest(createTodoPoster, { immediate: false });
 
-// 提交成功后，固定使第一页的todo数据缓存失效
+// After the submission is successful, the todo data cache of the first page is fixed to be invalidated
 onSuccess(() => {
 
-  // 提交成功后，固定修改第一页的todo数据数据
-  // 第一个参数为Method对象，第二个为包含原缓存数据的回调函数，该函数需要返回修改后的数据
+  // After the submission is successful, the todo data data of the first page is fixedly modified
+  // The first parameter is the Method object, and the second is the callback function containing the original cached data, which needs to return the modified data
   updateState(getTodoList(1), todoList => {
     return todoList.map(item => {
       if (item.id === editingTodo.id) {
@@ -757,13 +756,13 @@ onSuccess(() => {
   });
 });
 ```
-> 自主修改缓存数据时，不仅会更新对应的响应式状态，如果存在持久化缓存也会一起被更新。
+> When you modify the cached data independently, not only will the corresponding responsive state be updated, but if there is a persistent cache, it will also be updated together.
 
 
-### 自定义设置缓存数据
-有些服务接口支持批量请求数据，它意味着总是由不确定的若干组响应数据组成，当我们想要在初始化页面时批量请求数据，然后在交互中只请求单条数据的情况下，会造成缓存穿透的问题。
+### Custom setting cache data
+Some service interfaces support batch request data, which means that it is always composed of indeterminate sets of response data. When we want to batch request data when initializing the page, and then request only a single piece of data in the interaction, it will cause caching penetration problem.
 
-例如我们需要按日期获取todo列表数据，在初始化时一次请求获取了5月1日到5日，5天的数据，然后用户在操作时又获取了一次5月1日的数据，此时不会命中初始化时的5月1日数据，因为初始化的5天数据是存放在一起的，而不是分开缓存的，此时我们就可以为这5天的数据一一手动创建单条的响应缓存，这样就可以解决单条数据请求时的缓存穿透的问题。
+For example, we need to obtain the todo list data by date. During initialization, we obtained the data from May 1st to 5th and 5 days in one request, and then the user obtained the data of May 1st again during the operation. Hit the May 1st data during initialization, because the initialized 5-day data are stored together instead of separately cached, at this time we can manually create a single response cache for the 5-day data, so that It can solve the problem of cache penetration when a single data request is made.
 
 ```javascript
 import { setCacheData } from 'alova';
@@ -771,7 +770,7 @@ import { setCacheData } from 'alova';
 const getTodoListByDate = dateList => alova.Get('/todo/list/dates', {
   params: { dateList }
 });
-// 初始化时批量获取5天的数据
+// Get 5 days of data in batches during initialization
 const dates = ref([
   '2022-05-01',
   '2022-05-02',
@@ -793,26 +792,26 @@ onSuccess(todoListDates => {
     return;
   }
 
-  // 默认情况下，这5天的数据会一起缓存到一个key中
-  // 为了让后续请求某一天的数据时也能命中缓存，我们可以将5天的数据拆解为按天，并通过setCacheData一一手动设置响应缓存
-  // setCacheData的第一个参数为method实例对象，它用于指定缓存的key
-  // 第二个参数为缓存数据
+  // By default, these 5 days of data will be cached together in a key
+  // In order to make subsequent requests for a certain day's data also hit the cache, we can disassemble the 5-day data into daily, and manually set the response cache one by one through setCacheData
+  // The first parameter of setCacheData is the method instance object, which is used to specify the cache key
+  // The second parameter is the cache data
   todoListDates.forEach(todoDate => {
     setCacheData(getTodoListByDate(todoDate.date), [ todoDate ]);
   });
 });
 ```
-此时再在切换日期为5月1日时，它将会命中我们手动设置的响应缓存。
+At this point and when the switch date is May 1st, it will hit our manually set response cache.
 ```javascript
 const handleTodolistToggle = () => {
-  // dates值正在被useWatcher监听，因此改变它就可以自动触发请求
+  // The dates value is being listened to by useWatcher, so changing it automatically triggers the request
   dates.value = ['2022-05-01'];
 }
 ```
 
-## 进阶
-### 请求方法详解
-`Alova`实例对象提供了七种请求方法的抽象对象，包括GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH。
+## Next step
+### Request method details
+The `Alova` instance object provides abstract objects for seven request methods, including GET, POST, PUT, DELETE, HEAD, OPTIONS, and PATCH.
 - GET: `alova.Get(url[, config])`;
 - POST: `alova.Post(url[, data[, config]])`;
 - PUT: `alova.Put(url[, data[, config]])`;
@@ -821,76 +820,76 @@ const handleTodolistToggle = () => {
 - OPTIONS: `alova.Options(url[, config])`;
 - PATCH: `alova.Patch(url[, data[, config]])`;
 
-参数说明：
-- `url`是请求路径，它将会与`createAlova`中的`baseURL`拼接成完整的url进行请求；
-- `data`为请求体数据对象；
-- `config`为请求配置对象，其中包含了请求头、params参数等、请求行为参数等配置；
+Parameter Description:
+- `url` is the request path, it will be concatenated with `baseURL` in `createAlova` to form a complete url for request;
+- `data` is the request body data object;
+- `config` is the request configuration object, which includes the configuration of request headers, params parameters, request behavior parameters, etc.;
 
-### 设置初始响应数据
-一个页面在获取到初始数据前，不可避免地需要等待服务端响应，在响应前一般需要先将状态初始化为一个空数组或空对象，以免造成页面报错，我们可以在`useRequest`和`useWatcher`中的第二个参数实现初始数据的设置。
+### Set initial response data
+Before a page gets the initial data, it inevitably needs to wait for the server to respond. Before responding, it is generally necessary to initialize the state to an empty array or empty object to avoid page errors. We can use `useRequest` and `useWatcher` The second parameter in implements the setting of the initial data.
 ```javascript
-// 在useRequest中设置初始数据
+// Set initial data in useRequest
 const {
-  // 响应前data的初始值为[]，而不是undefined
+  // The initial value of data before the response is [], not undefined
   data
 } = useRequest(todoListGetter, {
   initialData: []
 });
 
-// 在useWatcher中设置的方法相同
+// The same method set in useWatcher
 const {
-  // 响应前data的初始值为[]，而不是undefined
+  // The initial value of data before the response is [], not undefined
   data
-} = useWatcher(() => getTodoList(/* 参数 */), [/* 监听状态 */], {
+} = useWatcher(() => getTodoList(/* parameters */), [/* watch states */], {
   initialData: []
 });
 ```
 
 
-### 手动中断请求
-未设置`timeout`参数时请求是永不超时的，如果需要手动中断请求，可以在`useRequest`、`useWatcher`函数被调用时接收`abort`方法。
+### Manual interrupt request
+When the `timeout` parameter is not set, the request will never time out. If you need to manually interrupt the request, you can receive the `abort` method when the `useRequest` and `useWatcher` functions are called.
 ```javascript
 const {
-  // 省略其他参数...
+   // Ignore other parameters...
 
-  // abort函数用于中断请求
-  abort
+   // abort function is used for interrupt request
+   abort
 } = useRequest(todoListGetter);
 
-// 调用abort即可中断请求
+// Call abort to interrupt the request
 const handleCancel = () => {
-  abort();
+   abort();
 };
 ```
 
-### 请求防抖
-通常我们都会在频繁触发的事件层面编写防抖代码，这次我们在请求层面实现了防抖功能，这意味着你再也不用在模糊搜索功能中自己实现防抖了，用法也非常简单。
+### Request anti-shake
+Usually, we write anti-shake code at the level of frequently triggered events. This time, we implemented the anti-shake function at the request level, which means that you no longer have to implement anti-shake in the fuzzy search function, and the usage is very simple.
 ```javascript
-const searchText = ref('');   // Vue3
+const searchText = ref(''); // Vue3
 const {
-  loading,
-  data: todoList,
-  error
-} = useWatcher(() => filterTodoList(searchText.value), 
-  [searchText], {
+   loading,
+   data: todoList,
+   error
+} = useWatcher(() => filterTodoList(searchText.value),
+   [searchText], {
 
-    // 设置debounce属性，单位为毫秒
-    // 如这边的searchText频繁变化，只有在停止变化后500ms才发送请求
-    debounce: 500,
-  }
+     // Set the debounce property in milliseconds
+     // If the searchText here changes frequently, the request is only sent 500ms after the change is stopped
+     debounce: 500,
+   }
 );
 ```
 
 
-### Method对象匹配器
-当我们在处理完一些业务时，需要调用`invalidateCache`、`updateState`、`fetch`来失效缓存、手动更新缓存、或重新拉取数据，一般会有两种场景：
-1. 开发者知道需要操作哪个请求的数据，此时在调用上面三个函数时直接传入一个`Method`对象即可；
-2. 开发者只知道需要操作某个顺序位的请求，而不确定具体哪个，此时我们就可以使用`Method`对象匹配器的方式过滤出来。
+### Method object matcher
+When we finish processing some business, we need to call `invalidateCache`, `updateState`, `fetch` to invalidate the cache, manually update the cache, or re-pull data. There are generally two scenarios:
+1. The developer knows which request data needs to be manipulated. At this time, when calling the above three functions, a `Method` object can be directly passed in;
+2. The developer only knows the request that needs to operate a certain order bit, but is not sure which one. At this time, we can use the method of `Method` object matcher to filter out.
 
 
-`Method`对象匹配器是依据`Method`对象设置的`name`属性来过滤的，多个匹配器允许设置相同的`name`，因此首先需要为需要过滤的`Method`对象设置`name`属性。
+The `Method` object matcher is filtered according to the `name` property set by the `Method` object. Multiple matchers are allowed to set the same `name`, so first you need to set the `name` property for the `Method` object that needs to be filtered .
 ```javascript
-// 每次调用getTodoList时都会生成一个新的Method对象，它们的name是相同的
+// A new Method object is generated each time getTodoList is called, and their name is the same
 const getTodoList = currentPage => alova.Get('/tood/list', {
   name: 'todoList',
   params: {
@@ -899,42 +898,42 @@ const getTodoList = currentPage => alova.Get('/tood/list', {
   }
 });
 ```
-其次，我们在调用`invalidateCache`、`updateState`、`fetch`函数时传入匹配器即可，完整的`Method`对象匹配器的格式如下：
+Secondly, we can pass in the matcher when calling the `invalidateCache`, `updateState`, `fetch` functions. The format of the complete `Method` object matcher is as follows:
 ```javascript
 type MethodFilter = {
   name: string | RegExp;
   filter: (method: Method, index: number, methods: Method[]) => boolean;
 };
 ```
-`name`表示需要匹配的`Method`对象，它匹配出来是一个数组，然后通过`filter`过滤函数筛选出最终使用的`Method`对象集合，`filter`函数返回true表示匹配成功，返回false表示失败，让我们来看几个例子。
+`name` indicates the `Method` object that needs to be matched. It matches an array, and then uses the `filter` filter function to filter out the final set of `Method` objects. The `filter` function returns true to indicate that the match was successful, and false to indicate that the match was successful. Failing that, let's look at a few examples.
 ```javascript
-// 以下表示匹配name为'todoList'的所有Method对象，并失效它们的缓存
+// The following means match all Method objects with name 'todoList' and invalidate their cache
 invalidateCache({
   name: 'todoList',
   filter: (method, index, methods) => true,
 });
 
-// 以下表示匹配name为以'todo'开头的所有Method对象
+// The following means match all Method objects whose name starts with 'todo'
 invalidateCache({
   name: /^todo/,
   filter: (method, index, methods) => true,
 });
 
-// 如果不需要设置过滤函数，也可以直接传入一个字符串或者正则表达式
+// If you don't need to set a filter function, you can also pass in a string or regular expression directly
 invalidateCache('todoList');
 invalidateCache(/^todo/);
 
-// 以下表示重新拉取todo列表最后一次请求的数据
+// The following means to re-pull the data of the last request of the todo list
 const { fetch } = useFetcher(alova);
 fetch({
   name: 'todoList',
   filter: (method, index, methods) => index === methods.length - 1,
 });
 ```
-要特别注意的是，`invalidateCache`会失效所有过滤出来的`Method`对象所对应的缓存，而`updateState`和`fetch`只会使用`Method`对象集合中的第一个项进行操作。
+It is important to note that `invalidateCache` will invalidate all caches corresponding to the filtered `Method` objects, while `updateState` and `fetch` will only operate on the first item in the `Method` object collection.
 
-### 下载进度
-在获取下载进度前，你需要在指定`Method`对象上启用下载进度，然后在`useRequest`、`useWatcher`、`useFetcher`三个use hook中接收`downloading`响应式状态，下载过程中将持续更新这个状态。
+### Download progress
+Before getting the download progress, you need to enable the download progress on the specified `Method` object, and then receive the `downloading` responsive state in the three use hooks `useRequest`, `useWatcher`, `useFetcher`, which will continue during the download process Update this status.
 ```javascript
 const downloadGetter = alova.Get('/tood/downloadfile', {
   enableDownload: true
@@ -944,13 +943,13 @@ const {
 } = useRequest(downloadGetter);
 ```
 ```html
-<div>文件大小：{{ downloading.total }}B</div>
-<div>已下载：{{ downloading.loaded }}B</div>
-<div>进度：{{ downloading.loaded / downloading.total * 100 }}%</div>
+<div>File size: {{ downloading.total }}B</div>
+<div>Downloaded: {{ downloading.loaded }}B</div>
+<div>Progress: {{ downloading.loaded / downloading.total * 100 }}%</div>
 ```
 
-### 上传进度
-上传进度与下载进度使用方法相同，先启用再通过接收`uploading`响应式状态。
+### Upload progress
+The upload progress is used in the same way as the download progress, first enabled and then by receiving the `uploading` reactive status.
 ```javascript
 const uploadGetter = alova.Get('/tood/uploadfile', {
   enableUpload: true
@@ -960,16 +959,16 @@ const {
 } = useRequest(uploadGetter);
 ```
 ```html
-<div>文件大小：{{ uploading.total }}B</div>
-<div>已上传：{{ uploading.loaded }}B</div>
-<div>进度：{{ uploading.loaded / uploading.total * 100 }}%</div>
+<div>File size: {{ uploading.total }}B</div>
+<div>Uploaded: {{ uploading.loaded }}B</div>
+<div>Progress: {{ uploading.loaded / uploading.total * 100 }}%</div>
 ```
 
-> ⚠️因fetch api限制，`alova`库提供的`GlobalFetch`适配器不支持上传进度，如需要上传进度，请自行编写请求适配器，详见 [高级-编写请求适配器](#编写请求适配器)。
+> ⚠️Due to the limitation of fetch api, the `GlobalFetch` adapter provided by the `alova` library does not support upload progress. If you need to upload the progress, please write your own request adapter, see [Advanced-Write Request Adapter](#Write Request Adapter).
 
 
-### 并行请求
-简单的并行请求，只需要同时使用多个useRequest即可
+### Parallel request
+Simple parallel request, just need to use multiple useRequest at the same time
 ```javascript
 const {
   data: todoList
@@ -978,9 +977,9 @@ const {
   data: todoCounter
 } = useRequest(todoCountGetter);
 ```
-但这样的请求只适用于单纯的并行请求，如果你需要在并行请求都完成后再进行某些操作，有两种方式可以实现。
+But such a request is only suitable for pure parallel requests. If you need to perform some operations after the parallel requests are all completed, there are two ways to achieve it.
 
-方式1：可以手动创建promise对象，并使用`Promise.all`完成效果。
+Method 1: You can manually create a promise object and use `Promise.all` to complete the effect.
 ```javascript
 const {
   data: todoList,
@@ -993,8 +992,8 @@ const {
   onError: onCountError
 } = useRequest(todoCountGetter);
 
-// 手动创建promise对象
-onMounted(async () => {
+// Manually create the promise object
+onMounted(async() => {
   const listPromise = new Promise((resolve, reject) => {
     onListSuccess(resolve);
     onListError(reject);
@@ -1007,13 +1006,13 @@ onMounted(async () => {
     listResponse,
     countResponse,
   ] = await Promise.all([listPromise, countPromise]);
-  // 并行请求完成，继续处理业务...
+  // The parallel request is completed, continue to process the business...
 });
 ```
 
-方式2：使用`useRequest`函数返回的`send`函数，调用`send`将会返回一个可用的promise对象。
+Method 2: Using the `send` function returned by the `useRequest` function, calling `send` will return an available promise object.
 ```javascript
-// 先让它们不自动发送请求
+// Let them not automatically send requests first
 const {
   send: sendList
 } = useRequest(todoListGetter, { immediate: false });
@@ -1021,20 +1020,20 @@ const {
   send: sendCount
 } = useRequest(todoCountGetter, { immediate: false });
 
-// 利用send函数返回的promise对象
-onMounted(async () => {
+// Use the promise object returned by the send function
+onMounted(async() => {
   const [
     listResponse,
     countResponse,
   ] = await Promise.all([sendList(), sendCount()]);
-  // 并行请求完成，继续处理业务...
+  // The parallel request is completed, continue to process the business...
 });
 ```
 
-### 串行请求
-可通过以下写法完成串行请求：
+### Serial request
+Serial requests can be done by writing:
 ```javascript
-// 第一个请求自动发出，第二个请求等待第一个请求完成后再触发
+// The first request is sent automatically, and the second request waits for the first request to complete before triggering
 const {
   data: todoList,
   onSuccess,
@@ -1044,21 +1043,21 @@ const {
   send: sendTodoDetail
 } = useRequest(todoId => todoDetailGetter(todoId), { immediate: false });
 
-// 先获取列表，再获取第一个todo的详情
+// Get the list first, then get the details of the first todo
 onSuccess(todoList => {
   sendTodoDetail(todoList[0].id);
 });
 ```
 
-### 静默提交
-假设你想要进一步提高创建todo项的体验感，让用户点击“创建”按钮后立即生效，而感觉不到提交服务器的过程，你可以考虑使用静默提交的方式。
+### silent commit
+Suppose you want to further improve the experience of creating todo items, so that the user clicks the "Create" button to take effect immediately, without feeling the process of submitting to the server, you can consider using the silent submission method.
 
-你可能会想，服务器没有响应就可以把结果呈现给用户了吗？是的，`alova`具有后台请求可靠机制，在网络连接环境下间隔2秒重复发起请求，直到请求顺利完成，这在服务提供不稳定的时候很有效，当然，还是需要提醒你的是，不稳定的情况下，如果你的数据在多端展示时，可能就会有点不同步了。
+You might be thinking, can the server render the results to the user without a response? Yes, `alova` has a reliable mechanism for background requests. In the network connection environment, the request is repeated every 2 seconds until the request is successfully completed. This is very effective when the service is unstable. Of course, you still need to remind you that no In a stable situation, if your data is displayed on multiple ends, it may be a little out of sync.
 
-我们来展示一下静默创建todo项的代码。
+Let's show the code that silently creates todo items.
 ```javascript
 const createTodoPoster = newTodo => alova.Post('/todo/create', newTodo, {
-  // 首先，开启静默提交
+  // First, enable silent commit
   silent: true,
 });
 
@@ -1067,13 +1066,13 @@ const {
   onSuccess
 } = useRequest(createTodoPoster);
 onSuccess(() => {
-  // 设置为静默提交后，onSuccess将会立即被调用，并且回调函数的第一个参数为undefined
-  // 而onError将永远不会被调用
-  // 立即将新todo项添加到列表中
+  // After silent submission, onSuccess will be called immediately, and the first parameter of the callback function is undefined
+  // and onError will never be called
+  // Immediately add the new todo item to the list
   updateState(todoListGetter, todoList => [...todoList, newTodo]);
 });
 
-// 点击创建按钮触发此函数
+// Click the create button to trigger this function
 const handleSubmit = () => {
   send({
     title: 'test todo',
@@ -1082,12 +1081,12 @@ const handleSubmit = () => {
 };
 ```
 
-### 离线提交
-如果你正在开发一个在线文档编写器，用户的每次输入都需要自动同步到服务端，即使是离线状态下也支持用户继续编写，在这种场景下，我们可以使用`alova`的离线提交机制，其实这个功能和静默提交功能是一体化的，都是得益于`alova`的后台请求可靠机制。
+### Offline submission
+If you are developing an online document writer, each input of the user needs to be automatically synchronized to the server, and the user can continue to write even in the offline state. In this scenario, we can use the offline submission mechanism of `alova` , in fact, this function and the silent submission function are integrated, both benefit from the reliable mechanism of `alova` background request.
 
-它的处理方式是，当开启了静默提交后，在离线状态时提交数据会直接将请求数据缓存在本地，等到网络恢复后，会自动将缓存的请求数据重新提交到服务端，这就保证了离线状态下的静默提交也是可靠的。
+Its processing method is that when silent submission is enabled, submitting data in offline state will directly cache the request data locally, and when the network is restored, the cached request data will be automatically resubmitted to the server, which ensures that Silent commits while offline are also reliable.
 
-接下来我们以在线文档编写器为示例，展示一下离线提交的代码。
+Next, we take the online document writer as an example to show the code submitted offline.
 ```javascript
 const editingText = ref('');
 const {
@@ -1095,31 +1094,32 @@ const {
 } = useWatcher(() => alova.Post('/doc/save', {
   text: editingText.value
 }, {
-  // 开启静默提交
+  // enable silent commit
   silent: true,
 
-  // 设置500ms防抖降低服务器压力
+  // Set 500ms anti-shake to reduce server pressure
 }), [editingText], { debounce: 500 });
 ```
 ```html
-<div v-if="loading">提交中...</div>
+<div v-if="loading">Submitting...</div>
 <textarea v-model="editingText"></textarea>
 ```
 
-这样就完成了简单的在线文档编写器。当然，在静默提交创建todo项的例子中离线提交也是适用的，即在离线状态下也能保证顺利创建todo项。
+This completes the simple online document writer. Of course, offline submission is also applicable in the example of silent submission to create todo items, that is, the smooth creation of todo items can be guaranteed even in the offline state.
 
-## 高级
-### 自定义请求适配器
-还记得你如何创建一个Alova实例吗？在调用`createAlova`时必须传入`requestAdapter`，这个就是`alova`的请求适配器，试想当`alova`运行在非浏览器环境时（可能是客户端、小程序），`fetch api`可能不再可用，那我们就需要更换一个支持当前环境的请求适配器。
 
-那应该如何自定义一个请求适配器呢？很简单，它其实是一个函数，在每次发起请求时都会调用此函数，并返回一个对象，这个对象内包含如`url`、`method`、`data`、`headers`、`timeout`等请求相关的数据集合，虽然字段较多，但我们只需访问我们需要的数据即可。
+## Advanced
+### Custom Request Adapter
+Remember how you created an Alova instance? When calling `createAlova`, you must pass in `requestAdapter`, which is the request adapter of `alova`. Imagine that when `alova` runs in a non-browser environment (may be a client, a small program), `fetch api` may not If it is available again, then we need to replace a request adapter that supports the current environment.
 
-请求适配器的参数类型，以及支持Typescript的写法，可以 [点此查看说明](#请求适配器类型)。
+So how to customize a request adapter? Very simple, it is actually a function, this function is called every time a request is made, and an object is returned, which contains such as `url`, `method`, `data`, `headers`, `timeout`, etc. Request related data sets, although there are many fields, we only need to access the data we need.
 
-一个简单的请求适配器是这样的：
+The parameter type of the request adapter, as well as the writing method that supports Typescript, can be [click here to view the description](#request adapter type).
+
+A simple request adapter looks like this:
 ```javascript
 function customRequestAdapter(config) {
-  // 解构出需要用到的数据
+  // Deconstruct the data that needs to be used
   const {
     url,
     method,
@@ -1127,19 +1127,19 @@ function customRequestAdapter(config) {
     headers,
   } = config;
 
-  // 发送请求
+  // send request
   const fetchPromise = fetch(url, {
     method: method,
     headers: headers,
     body: data,
   });
 
-  // 返回一个包含请求操作相关的对象
+  // Returns an object containing the requested operation
   return {
     response: () => fetchPromise,
     headers: () => fetchPromise.then(res => res.headers),
     abort: () => {
-      // TODO: 中断请求...
+      // TODO: interrupt request...
     },
     onDownload: updateDownloadProgress => {
       let loaded = 0;
@@ -1162,145 +1162,145 @@ function customRequestAdapter(config) {
   };
 }
 ```
-请求适配器的返回值说明：
-1. 【必填】response函数：一个异步函数，函数返回响应值，它将会传递给全局的响应拦截器responsed；
-2. 【必填】headers函数：一个异步函数，函数返回的响应头对象将传递给Method对象的transformData转换钩子函数；
-3. 【必填】abort函数：一个普通函数，它用于中断请求，在 [手动中断请求](#手动中断请求) 章节中调用`abort`函数时，实际上触发中断请求的函数就是这个中断函数；
-4. 【可选】onDownload函数：一个普通函数，它接收一个更新下载进度的回调函数，在此函数内自定义进度更新的频率，在此示例中模拟每隔100毫秒更新一次。`updateDownloadProgress`回调函数接收两个参数，第一个参数是总大小，第二个参数是已下载大小；
-5. 【可选】onUpload函数：一个普通函数，它接收一个更新上传进度的回调函数，在此函数内自定义进度更新的频率，在此示例中模拟每隔100毫秒更新一次。`updateUploadProgress`回调函数接收两个参数，第一个参数是总大小，第二个参数是已上传大小；
+Description of the return value of the request adapter:
+1. [Required] `response`: an asynchronous function, the function returns the response value, which will be passed to the global response interceptor response;
+2. [Required] `headers`: an asynchronous function, the response header object returned by the function will be passed to the transformData conversion hook function of the Method object;
+3. [Required] `abort`: an ordinary function, which is used for interrupt request. When the `abort` function is called in the [Manual Interrupt Request](#Manual Interrupt Request) chapter, the function that actually triggers the interrupt request is this interrupt function;
+4. [Optional] `onDownload`: a common function, which receives a callback function for updating the download progress, and customizes the frequency of progress update in this function. In this example, the simulation is updated every 100 milliseconds. The `updateDownloadProgress` callback function receives two parameters, the first parameter is the total size, and the second parameter is the downloaded size;
+5. [Optional] `onUpload`: a common function, which receives a callback function for updating the upload progress. The frequency of the progress update is customized in this function. In this example, the simulation is updated every 100 milliseconds. The `updateUploadProgress` callback function receives two parameters, the first parameter is the total size, and the second parameter is the uploaded size;
 
-建议你可以查阅 [GlobalFetch源码](https://github.com/JOU-amjs/alova/blob/main/src/predefine/GlobalFetch.ts) 来了解更多关于请求适配器的细节。
+It is recommended that you refer to the [GlobalFetch source code](https://github.com/JOU-amjs/alova/blob/main/src/predefine/GlobalFetch.ts) for more details about the request adapter.
 
 
-### 自定义statesHook
-还记得你在调用`createAlova`时传入的`statesHook`吗？它将决定你在请求时返回哪个MVVM库的状态，如在vue项目中使用`VueHook`，在react项目中使用`ReactHook`，在svelte项目中使用`SvelteHook`，目前只支持这三个库。在大部分情况下你应该用不到这个功能，但如果你需要适配更多我们还不支持的MVVM库，就需要自定义编写`statesHook`了。
+### Custom statesHook
+Remember the `statesHook` you passed in when calling `createAlova`? It will decide which MVVM library status you return when you request, such as `VueHook` in vue project, `ReactHook` in react project, `SvelteHook` in svelte project, currently only these three libraries are supported. In most cases you should not use this feature, but if you need to adapt to more MVVM libraries that we don't support yet, you need to write `statesHook` custom.
 
-`statesHook`是一个包含特定函数的普通对象，不过这些还是基本不涉及算法，我们来看看VueHook是怎么编写的吧。
+`statesHook` is a normal object containing specific functions, but these are still basically no algorithm, let's see how VueHook is written.
 ```javascript
 import { ref, readonly, watch, onUnmounted } from 'vue';
 
 const VueHook = {
-  // 状态创建函数
+  // state creation function
   create: rawData => ref(data),
 
-  // 状态导出函数
+  // state export function
   export: state => readonly(state),
 
-  // 脱水函数
+  // dehydration function
   dehydrate: state => state.value,
 
-  // 响应式状态更新函数
+  // responsive state update function
   update: (newVal, states) => {
     Object.keys(newVal).forEach(key => {
       states[key].value = newVal[key];
     });
   },
 
-  // 请求发送控制函数
+  // request to send control function
   effectRequest(sendRequest, removeStates, { immediate, states }) {
-    // 组件卸载时移除对应状态
+    // Remove the corresponding state when the component is unloaded
     onUnmounted(removeStates);
 
-    // 调用useRequest和useFetcher时，states为undefined
+    // When calling useRequest and useFetcher, states are undefined
     if (!states) {
       sendRequest();
       return;
     }
 
-    // 调用useWatcher时，states为需要监听的状态数组
-    // immediate为true时，表示需要立即发送请求
+    // When useWatcher is called, states is an array of states that need to be monitored
+    // When immediate is true, it means that the request needs to be sent immediately
     watch(states, sendRequest, { immediate });
   },
 };
 ```
-自定义`statesHook`各个函数说明：
-1. 【必填】create函数：响应式状态创建函数，`loading`、`error`、`data`、`downloading`、`uploading`等都是调用此函数创建的，如vue3项目下将创建为ref值；
-2. 【必填】export函数：状态导出函数，此函数接收create函数创建的响应式状态，并导出最终给开发者使用的状态，这里`VueHook`导出的状态是readonly的；
-3. 【必填】dehydrate函数：脱水函数，意思是将响应式状态转换为普通数据，与create是相反的操作，在`updateState`中；
-4. 【必填】update函数：响应式状态更新函数，`alova`内部维护的状态更新都是通过此函数完成。此函数接收两个参数，第一个参数是新的数据对象，第二个参数是原响应式状态的map集合，这里你可以固定写一个循环更新`states`；
-5. 【必填】effectRequest函数：请求发送控制函数，它会在`useRequest`、`useWatcher`、`useFetcher`被调用时立即执行此函数，我们要在这个函数内要完成三件事：
-    1. 当前组件卸载时，调用removeStates函数移除当前组件涉及到的响应式状态，避免内存溢出;
-    2. 当调用useWatcher时，绑定状态监听，状态改变时调用sendRequest函数，你可以用`states`是否为数组判断是否为`useWatcher`被调用，同时，`immediate`参数用于判断`useWatcher`调用时是否需要立即发送请求；
-    3. 当调用`useRequest`和`useFetcher`时，调用sendRequest发出一次请求，此时`states`为`undefined`；
+Description of each function of custom `statesHook`:
+1. [Required] `create`: responsive state creation function, `loading`, `error`, `data`, `downloading`, `uploading`, etc. are all created by calling this function, such as the vue3 project will be created as ref value;
+2. [Required] `export`: state export function, this function receives the responsive state created by the create function, and exports the state that is finally used by developers. Here, the state exported by `VueHook` is readonly;
+3. [Required] `dehydrate`: dehydrate function, which means to convert the responsive state into ordinary data, which is the opposite of create, in `updateState`;
+4. [Required] `update`: responsive state update function, the state update maintained by `alova` is completed through this function. This function receives two parameters, the first parameter is the new data object, the second parameter is the map collection of the original reactive state, here you can write a fixed loop to update `states`;
+5. [Required] `effectRequest`: request sending control function, it will execute this function immediately when `useRequest`, `useWatcher`, `useFetcher` are called, we need to complete three things in this function:
+    1. When the current component is uninstalled, call the removeStates function to remove the responsive state involved in the current component to avoid memory overflow;
+    2. When calling useWatcher, bind the state monitor, and call the sendRequest function when the state changes. You can use whether `states` is an array to judge whether `useWatcher` is called, and at the same time, the `immediate` parameter is used to judge the `useWatcher` call whether the request needs to be sent immediately;
+    3. When calling `useRequest` and `useFetcher`, call sendRequest to send a request, at this time `states` is `undefined`;
 
-> 如果你在自定义statesHook后，也希望它可以支持typescript，可以 [点此查看](#自定义statesHook的类型)
+> If you want it to support typescript after customizing statesHook, you can [click here to view](#custom statesHook type)
 
-### 自定义存储适配器
-`alova`中涉及多个需要数据持久化的功能，如持久化缓存、静默提交和离线提交。在默认情况下，`alova`会使用`localStorage`来存储持久化数据，但考虑到非浏览器环境下，因此也支持了自定义。
+### Custom Storage Adapter
+`alova` involves multiple functions that require data persistence, such as persistent caching, silent commit, and offline commit. By default, `alova` will use `localStorage` to store persistent data, but for non-browser environments, customization is also supported.
 
-自定义存储适配器同样非常简单，你只需要指定保存数据、获取数据，以及移除数据的函数即可，大致是这样的。
+Custom storage adapters are also very simple, you only need to specify functions to save data, get data, and remove data, roughly like this.
 ```javascript
 const customStorageAdapter = {
-  setItem(key, value) {
-    // 保存数据
-  },
-  getItem(key) {
-    // 获取数据
-  },
-  removeItem(key) {
-    // 移除数据
-  }
+   setItem(key, value) {
+     // save data
+   },
+   getItem(key) {
+     // retrieve data
+   },
+   removeItem(key) {
+     // remove data
+   }
 };
 ```
-然后在创建`alova`实例时传入这个适配器即可。
+Then pass in this adapter when creating an `alova` instance.
 ```javascript
 const alovaInstance = createAlova({
-  // ...
-  storageAdapter: customStorageAdapter
+   // ...
+   storageAdapter: customStorageAdapter
 });
 ```
 
-### 响应状态编辑追踪
-敬请期待
+### Response States Edit Tracking
+coming soon
 
 
-### Typescript支持
-在Typescript方面，我们确实花了很大的精力优化，为的就是提供更好的使用体验，我们尽力地使用自动推断类型来减少你定义类型的次数。
+### Typescript support
+On the Typescript side, we do put a lot of effort into optimization in order to provide a better user experience, and we try our best to use automatically inferred types to reduce the number of times you define types.
 
-#### usehooks状态的类型
-在`createAlova`创建alova实例时会根据传入的`statesHook`自动推断出`useRequest`、`useWatcher`、`useFetcher`所创建的状态类型。遗憾的是，目前只支持Vue、React、Svelte三个MVVM库类型，如果你涉及其他库就需要自己编写类型来实现了。
+#### Usehooks state type
+When `createAlova` creates an alova instance, it will automatically infer the state types created by `useRequest`, `useWatcher`, and `useFetcher` according to the incoming `statesHook`. Unfortunately, currently only three MVVM library types are supported: Vue, React, and Svelte. If you involve other libraries, you need to write your own types to implement them.
 
-使用VueHook时：
+When using VueHook:
 ```javascript
 const vueAlova = createAlova({
   statesHook: VueHook,
   // ...
 });
 const {
-  loading,  // Readonly<Ref<boolean>>
-  data,  // Readonly<Ref<unknown>>
-  error,  // Readonly<Ref<Error>>
+  loading, // Readonly<Ref<boolean>>
+  data, // Readonly<Ref<unknown>>
+  error, // Readonly<Ref<Error>>
 } = useRequest(vueAlova.Get('/todo/list'));
 ```
-使用ReactHook时：
+When using ReactHook:
 ```javascript
 const reactAlova = createAlova({
   statesHook: ReactHook,
   // ...
 });
 const {
-  loading,  // boolean
-  data,  // unknown
-  error,  // Error
+  loading, // boolean
+  data, // unknown
+  error, // Error
 } = useRequest(reactAlova.Get('/todo/list'));
 ```
-使用SvelteHook时：
+When using SvelteHook:
 ```javascript
 const svelteAlova = createAlova({
   statesHook: SvelteHook,
   // ...
 });
 const {
-  loading,  // Readable<boolean>
-  data,  // Readable<unknown>
-  error,  // Readable<Error>
+  loading, // Readable<boolean>
+  data, // Readable<unknown>
+  error, // Readable<Error>
 } = useRequest(svelteAlova.Get('/todo/list'));
 ```
-你可能会发现，data的类型是`unknown`，因为data需要根据不同接口单独设置类型，接下来我们看下。
-#### 响应数据的类型
-当你为一个数据接口指定类型时，需要分为两种情况。
+You may find that the type of data is `unknown`, because data needs to be set separately according to different interfaces, let's take a look next.
+#### Response data type
+When you specify a type for a data interface, there are two cases.
 
-情况1：响应数据不需要再调用`transformData`转换
+Case 1: The response data does not need to call `transformData` again
 ```typescript
 interface Todo {
   title: string;
@@ -1310,106 +1310,106 @@ interface Todo {
 const Get = alova.Get<Todo[]>('/todo/list');
 ```
 
-情况2：响应数据需要再调用`transformData`转换
+Case 2: The response data needs to be transformed by calling `transformData` again
 ```typescript
 interface Todo {
   title: string;
   time: string;
   done: boolean;
 }
-const Get = alova.Get('/todo/list', {
-  // 将类型写到data参数中，而headers会自动推断，可以不用指定类型
+const Get = alova. Get('/todo/list', {
+  // Write the type to the data parameter, and the headers will be automatically inferred, so you don't need to specify the type
   transformData(data: Todo[], headers) {
     return data.map(item => ({
       ...item,
-      status: item.done ? '已完成' : '未完成'
+      status: item.done ? 'done' : 'incomplete'
     }));
   }
 });
 ```
-这样data数据就会带有特定的类型了，需要注意的是，响应数据是经过全局响应拦截器转换后的，因此设置类型时也应该设置为转换后的类型。
+In this way, the data data will have a specific type. It should be noted that the response data is converted by the global response interceptor, so when setting the type, it should also be set to the converted type.
 
 
-#### 根据请求适配器推断的类型
-因为`alova`支持自定义请求适配器，而不同的适配器的请求配置对象、响应对象、响应头都可能不同，因此全局的`beforeRequest`、`responsed`拦截器，以及`Method`对象创建时的配置对象的类型，都会根据请求适配器提供的类型自动推断，我们先来看这几个类型。
+#### Type inferred from request adapter
+Because `alova` supports custom request adapters, and different adapters may have different request configuration objects, response objects, and response headers, so the global `beforeRequest`, `responsed` interceptors, and `Method` object creation configuration The type of the object will be automatically inferred based on the type provided by the request adapter. Let's look at these types first.
 ```typescript
-// 通用的Method对象的通用配置类型
+// Generic configuration type for generic Method objects
 type CommonMethodConfig = {
   readonly url: string,
   readonly method: MethodType,
   data?: Record<string, any> | FormData | string,
 };
 
-// `Method`对象创建时的配置对象的类型
+// The type of the configuration object when the `Method` object was created
 type AlovaMethodConfig<R, T, RC, RH> = {
-  // 以下为创建Method对象时指定的配置对象
+  // The following is the configuration object specified when creating the Method object
   name?: string,
 
-  // url中的参数，一个对象
+  // parameters in the url, an object
   params?: Record<string, any>,
 
-  // 请求头，一个对象
+  // request header, an object
   headers?: Record<string, any>,
 
-  // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
+  // Silent request, onSuccess will be triggered immediately, if the request fails, it will be saved in the cache and continue to poll the request
   silent?: boolean,
 
-  // 当前中断时间
+  // current interrupt time
   timeout?: number,
 
-  // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
-  localCache?: numbe | {
+  // The response data will not be requested again within the cache time. Get and head requests are kept fresh for 5 minutes by default (300000 milliseconds), and other requests are not cached by default
+  localCache?: number | {
     expire: number,
     mode?: number,
     tag?: string | number,
   },
 
-  // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+  // Whether to enable download progress information. After enabling, each request for progress will have a progress value. Otherwise, the same value is 0, and it is not enabled by default.
   enableDownload?: boolean,
 
-  // 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+  // Whether to enable upload progress information. After enabling, each request progress will have a progress value. Otherwise, the same value is 0, and it is not enabled by default.
   enableUpload?: boolean,
 
-  // 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
+  // In response to data conversion, the converted data will be converted to the data state. If there is no conversion data, the response data will be directly used as the data state
   transformData?: (data: T, headers: RH) => R,
 } & RC;
 ```
-这边涉及到的`RC`、`RH`，以及这边未出现的`RE`都是通过请求适配器推断的，它们分别表示请求配置对象类型、响应头对象类型、响应类型，如果你使用`GlobalFetch`时，他们的类型分别会被推断为：
-1. `RC`为fetch api的请求配置对象`RequestInit`;
-2. `RH`为响应头对象`Headers`;
-3. `RE`为响应对象`Response`;
+The `RC`, `RH` involved here, and the `RE` that does not appear here are all inferred by the request adapter. They represent the request configuration object type, response header object type, and response type respectively. If you use ` When GlobalFetch`, their types will be inferred as:
+1. `RC` configures the object `RequestInit` for the request of the fetch api;
+2. `RH` is the response header object `Headers`;
+3. `RE` is the response object `Response`;
 
-知道了这些后我们继续看下面的类型定义。
+Knowing this, we continue to look at the following type definitions.
 
-#### 全局请求前拦截器参数类型
-全局请求前拦截器`beforeRequest`接收一个汇总的请求配置，它的类型为：
+#### Global request interceptor type
+The global pre-request interceptor `beforeRequest` receives an aggregated request configuration of type:
 ```typescript
-type AlovaRequestAdapterConfig<R, T, RC, RH> = 
+type AlovaRequestAdapterConfig<R, T, RC, RH> =
   CommonMethodConfig
   & AlovaMethodConfig<R, T, RC, RH>
   & {
-    // 会保证headers、params参数是一个对象
+    // Will ensure that the headers, params parameters are an object
     headers: Record<string, any>,
     params: Record<string, any>,
   };
 ```
 
-#### 全局响应拦截器参数类型
-全局响应拦截器`responsed`接收一个响应对象，它的类型为响应对象`RE`。
+#### Global response interceptor type
+The global response interceptor `responsed` receives a response object of type response object `RE`.
 ```typescript
 type ResponsedHandler<RE> = (response: RE) => any;
 ```
-当请求适配器使用`GlobalFetch`时，`RE`将自动推断为`Response`类型。
+When the request adapter uses `GlobalFetch`, `RE` will be automatically inferred as `Response` type.
 
-#### Method配置对象的类型
-Method配置对象的类型为上面提高的 [AlovaMethodConfig](#根据请求适配器推断的类型)，它包含通用的配置参数和根据请求适配器推断出的`RC`的并集。当请求适配器使用`GlobalFetch`时，`RC`将自动推断为`RequestInit`类型。
+#### Method configuration object type
+The type of the Method configuration object is the above-mentioned [AlovaMethodConfig] (# the type inferred from the request adapter), which contains the union of common configuration parameters and the `RC` inferred from the request adapter. When the request adapter uses `GlobalFetch`, `RC` will be automatically inferred to be of type `RequestInit`.
 
 
-#### 请求适配器类型
+#### Request adapter type
 ```typescript
 interface Progress {
-  total: number;  // 总量
-  loaded: number; // 已加载量
+  total: number; // total amount
+  loaded: number; // loaded amount
 }
 
 type AlovaRequestAdapter<R, T, RC, RE, RH> = (adapterConfig: AlovaRequestAdapterConfig<R, T, RC, RH>) => {
@@ -1420,11 +1420,11 @@ type AlovaRequestAdapter<R, T, RC, RE, RH> = (adapterConfig: AlovaRequestAdapter
   abort: () => void,
 };
 ```
-需要注意的是，如果需要在`alova`中自动推断`RC`、`RE`、`RH`类型，那么自定义请求适配器上不应该指定任何泛型，且需要手动指定`RC`、`RE`、`RH`的类型，否则会导致类型推断错误。
+It should be noted that if `RC`, `RE`, `RH` types need to be automatically inferred in `alova`, then no generics should be specified on the custom request adapter, and `RC`, `RE need to be specified manually `, `RH` type, otherwise it will cause a type inference error.
 
-以`GlobalFetch`为例。[GlobalFetch源码点此查看](https://github.com/JOU-amjs/alova/blob/main/src/predefine/GlobalFetch.ts)
+Take `GlobalFetch` for example. [Click here to view the GlobalFetch source code](https://github.com/JOU-amjs/alova/blob/main/src/predefine/GlobalFetch.ts)
 ```typescript
-type GlobalFetch = (defaultRequestInit?: RequestInit) => 
+type GlobalFetch = (defaultRequestInit?: RequestInit) =>
   (adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) => {
     response: () => Promise<Response>;
     headers: () => Promise<Headers>;
@@ -1433,9 +1433,9 @@ type GlobalFetch = (defaultRequestInit?: RequestInit) =>
   };
 ```
 
-#### 自定义statesHook的类型
-敬请期待
+#### Custom statesHook type
+comming soon
 
 
-## 实践示例
-敬请期待
+## Practical example
+comming soon
