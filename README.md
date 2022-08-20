@@ -154,8 +154,9 @@ const alovaInstance = createAlova({
   responsed: {
 
     // 请求成功的拦截器
-    // 当使用GlobalFetch请求适配器时，它将接收Response对象。
-    onSuccess: async response => {
+    // 当使用GlobalFetch请求适配器时，第一个参数接收Response对象
+    // 第二个参数为请求的配置，它用于同步请求前后的配置信息
+    onSuccess: async (response, config) => {
       const json = await response.json();
       if (json.code !== 200) {
         // 这边抛出错误时，将会进入请求失败拦截器内
@@ -168,7 +169,8 @@ const alovaInstance = createAlova({
 
     // 请求失败的拦截器
     // 请求抛出错误时，或请求成功拦截器抛出错误时，将会进入该拦截器。
-    onError: err => {
+    // 第二个参数为请求的配置，它用于同步请求前后的配置信息
+    onError: (err, config) => {
       alert(error.message);
     }
   }
@@ -179,7 +181,7 @@ const alovaInstance = createAlova({
 const alovaInstance = createAlova({
   // 省略其他参数...
 
-  async responsed(response) {
+  async responsed(response, config) {
     // 请求成功的拦截器
   },
 });
