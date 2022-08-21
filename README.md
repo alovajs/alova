@@ -53,10 +53,10 @@ The request scene management library of the MVVM library, it is an arm of the re
   - [Method object matcher](#method-object-matcher)
   - [Download progress](#download-progress)
   - [Upload progress](#upload-progress)
-  - [parallel request](#parallel-request)
-  - [serial request](#serial-request)
-  - [silent commit](#silent-commit)
-  - [offline submission](#offline-submission)
+  - [Parallel request](#parallel-request)
+  - [Serial request](#serial-request)
+  - [Silent submit](#silent-submit)
+  - [Offline submit](#offline-submit)
 - [Advanced](#advanced)
   - [Custom request adapter](#custom-request-adapter)
   - [Custom statesHook](#custom-stateshook)
@@ -106,8 +106,8 @@ Describes how to handle the request, implemented as a method object in `alova`.
 - Multi-request serial and parallel;
 - Anti-shake for frequent requests, avoid front-end data flashing, and reduce server pressure;
 - Important interface retry mechanism to reduce the probability of request failure caused by network instability;
-- Silent submission, when you only care about submitting data, directly respond to the success event after submitting the request, and the background ensures that the request is successful;
-- Offline submission, temporarily store the submitted data locally when offline, and submit it after network connection;
+- Silent submit, when you only care about submitting data, directly respond to the success event after submitting the request, and the background ensures that the request is successful;
+- Offline submit, temporarily store the submitted data locally when offline, and submit it after network connection;
 
 ### request event
 Indicates that the request is sent with the request parameters, and the response is obtained. `alova` can cooperate with any request library or native solution such as `axios`, `fetch`, `XMLHttpRequest`.
@@ -128,8 +128,8 @@ Indicates that the request is sent with the request parameters, and the response
 3. Stateful response data
 4. Response data cache
 5. Data pre-fetch
-6. Silent commit
-7. Offline submission
+6. Silent submit
+7. Offline submit
 8. Request stabilization
 9. Lightweight Gzip 3kb+
 10. Typescript support
@@ -1049,15 +1049,15 @@ onSuccess(todoList => {
 });
 ```
 
-### silent commit
-Suppose you want to further improve the experience of creating todo items, so that the user clicks the "Create" button to take effect immediately, without feeling the process of submitting to the server, you can consider using the silent submission method.
+### Silent submit
+Suppose you want to further improve the experience of creating todo items, so that the user clicks the "Create" button to take effect immediately, without feeling the process of submitting to the server, you can consider using the silent submit method.
 
 You might be thinking, can the server render the results to the user without a response? Yes, `alova` has a reliable mechanism for background requests. In the network connection environment, the request is repeated every 2 seconds until the request is successfully completed. This is very effective when the service is unstable. Of course, you still need to remind you that no In a stable situation, if your data is displayed on multiple ends, it may be a little out of sync.
 
 Let's show the code that silently creates todo items.
 ```javascript
 const createTodoPoster = newTodo => alova.Post('/todo/create', newTodo, {
-  // First, enable silent commit
+  // First, enable silent submit
   silent: true,
 });
 
@@ -1081,10 +1081,10 @@ const handleSubmit = () => {
 };
 ```
 
-### Offline submission
+### Offline submit
 If you are developing an online document writer, each input of the user needs to be automatically synchronized to the server, and the user can continue to write even in the offline state. In this scenario, we can use the offline submission mechanism of `alova` , in fact, this function and the silent submission function are integrated, both benefit from the reliable mechanism of `alova` background request.
 
-Its processing method is that when silent submission is enabled, submitting data in offline state will directly cache the request data locally, and when the network is restored, the cached request data will be automatically resubmitted to the server, which ensures that Silent commits while offline are also reliable.
+Its processing method is that when silent submission is enabled, submitting data in offline state will directly cache the request data locally, and when the network is restored, the cached request data will be automatically resubmitted to the server, which ensures that Silent submit while offline are also reliable.
 
 Next, we take the online document writer as an example to show the code submitted offline.
 ```javascript
@@ -1094,7 +1094,7 @@ const {
 } = useWatcher(() => alova.Post('/doc/save', {
   text: editingText.value
 }, {
-  // enable silent commit
+  // enable silent submit
   silent: true,
 
   // Set 500ms anti-shake to reduce server pressure
@@ -1226,7 +1226,7 @@ Description of each function of custom `statesHook`:
 > If you want it to support typescript after customizing statesHook, you can [click here to view](#custom statesHook type)
 
 ### Custom Storage Adapter
-`alova` involves multiple functions that require data persistence, such as persistent caching, silent commit, and offline commit. By default, `alova` will use `localStorage` to store persistent data, but for non-browser environments, customization is also supported.
+`alova` involves multiple functions that require data persistence, such as persistent caching, silent submit, and offline submit. By default, `alova` will use `localStorage` to store persistent data, but for non-browser environments, customization is also supported.
 
 Custom storage adapters are also very simple, you only need to specify functions to save data, get data, and remove data, roughly like this.
 ```javascript
