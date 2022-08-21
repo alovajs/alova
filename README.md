@@ -89,7 +89,7 @@ We always have to think about the following questions when making a request,
 > CS interaction: refers to all client types and server-side data interaction
 
 ## Request scene model
-![model](https://user-images.githubusercontent.com/29848971/176368981-1dd4f94f-e9f9-49c4-bf11-0045df48faff.png)
+![model](https://user-images.githubusercontent.com/29848971/185773573-761b6153-9e6c-42df-b0b7-beddd405833c.png)
 ### request timing
 Describes when a request needs to be made, implemented as `useHook` in `alova`.
 - Initialize display data, such as just entering an interface or sub-interface;
