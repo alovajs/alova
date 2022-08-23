@@ -43,7 +43,7 @@ function getInstance(
   });
 }
 
-describe('use useController hook to send GET with vue', function() {
+describe('use useWatcher hook to send GET with vue', function() {
   test('should specify at least one watching state', () => {
     const alova = getInstance();
     expect(() => useWatcher(() => alova.Get<Result>('/unit-test'), [])).toThrowError();

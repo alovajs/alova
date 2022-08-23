@@ -1,5 +1,5 @@
 import { ref, Ref, onUnmounted, watch, readonly } from 'vue';
-import { FrontRequestState, WatchingParams } from '../../typings';
+import { FrontRequestState, EffectRequestParams } from '../../typings';
 import { forEach, objectKeys } from '../utils/variables';
 
 type UnknownRef = Ref<unknown>;
@@ -15,12 +15,17 @@ export default {
       states[key as Keys].value = newVal[key as Keys];
     }
   ),
-  effectRequest(handler: () => void, removeStates: () => void, { immediate, states }: WatchingParams) {
+  effectRequest({
+    handler,
+    removeStates,
+    immediate,
+    watchStates,
+  }: EffectRequestParams) {
     onUnmounted(removeStates);    // 组件卸载时移除对应状态
-    if (!states) {
+    if (!watchStates) {
       handler();
       return;
     }
-    watch(states, handler, { immediate });
+    watch(watchStates, handler, { immediate });
   },
 };

@@ -6,6 +6,8 @@ import { debounce, getHandlerMethod, noop } from '../utils/helper';
 import { falseValue, getStatesHook, pushItem, trueValue, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
+type VoidFn = () => void;
+export type SaveStateFn = (frontStates: FrontRequestState) => void;
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -25,8 +27,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     successHandlers: SuccessHandler<R>[],
     errorHandlers: ErrorHandler[],
     completeHandlers: CompleteHandler[],
-    setAbort: (abort: () => void) => void,
-    setStateRemove: (removeState: () => void) => void
+    setFns: (abort: VoidFn, removeStates: VoidFn, saveStates: SaveStateFn) => void,
   ) => void,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   initialData?: any,
@@ -55,7 +56,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
   const errorHandlers = [] as ErrorHandler[];
   const completeHandlers = [] as CompleteHandler[];
   let abortFn = noop;
-  let removeStateFn = noop;
+  let removeStatesFn = noop;
+  let saveStatesFn = noop as SaveStateFn;
 
   // 调用请求处理回调函数
   let handleRequestCalled = falseValue;
@@ -65,24 +67,34 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
       successHandlers,
       errorHandlers,
       completeHandlers,
-      abort => abortFn = abort,
-      removeState => removeStateFn = removeState
+      (abort, removeStates, saveStates) => {
+        abortFn = abort;
+        removeStatesFn = removeStates;
+        saveStatesFn = saveStates;
+      },
     );
     handleRequestCalled = trueValue;
   };
 
   // watchedStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
-  const watchingParams = {
-    states: watchedStates,
+  const effectRequestParams = {
+    removeStates: () => removeStatesFn(),
+    saveStates: (states: FrontRequestState) => saveStatesFn(states),
+    frontStates: originalState,
+    watchedStates,
     immediate: immediate ?? trueValue,
-  }
-  watchedStates !== undefinedValue ? effectRequest(
-    debounceDelay > 0 ? 
-      debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled) :
-      wrapEffectRequest,
-    removeStateFn,
-    watchingParams
-  ) : effectRequest(wrapEffectRequest, removeStateFn, watchingParams);
+  };
+  watchedStates !== undefinedValue 
+    ? effectRequest({
+      handler: debounceDelay > 0 ? 
+        debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled) :
+        wrapEffectRequest,
+      ...effectRequestParams,
+    })
+    : effectRequest({
+      handler: wrapEffectRequest,
+      ...effectRequestParams
+    });
   
   const exportedState = {
     loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,
@@ -114,7 +126,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
      */
     send(useHookConfig: UseHookConfig<R>, sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, updateCacheState?: boolean) {
       methodInstance = methodInstance || getHandlerMethod(methodHandler, sendCallingArgs);
-      const { abort, p, r } = useHookToSendRequest(
+      const { abort, p, r, s } = useHookToSendRequest(
         methodInstance,
         originalState,
         useHookConfig,
@@ -125,7 +137,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
         updateCacheState
       );
       abortFn = abort;
-      removeStateFn = r;
+      removeStatesFn = r;
+      saveStatesFn = s;
       return p;
     },
   };

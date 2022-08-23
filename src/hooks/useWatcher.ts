@@ -21,8 +21,13 @@ export default function useWatcher<S, E, R, T, RC, RE, RH>(
   } = config;
   const props = createRequestState(
     alovas[0] as Alova<S, E, RC, RE, RH>,
-    (originalState, successHandlers, errorHandlers, completeHandlers, setAbort, setStateRemove) => {
-      const { abort, p: responseHandlePromise, r: removeState } = useHookToSendRequest(
+    (originalState, successHandlers, errorHandlers, completeHandlers, setFns) => {
+      const {
+        abort,
+        r: removeStates,
+        s: saveStates,
+        p: responseHandlePromise
+      } = useHookToSendRequest(
         handler(),
         originalState,
         config,
@@ -31,8 +36,7 @@ export default function useWatcher<S, E, R, T, RC, RE, RH>(
         completeHandlers
       );
       // 将控制器传出去供使用者调用
-      setAbort(abort);
-      setStateRemove(removeState);
+      setFns(abort, removeStates, saveStates);
 
       // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
       promiseCatch(responseHandlePromise, noop);

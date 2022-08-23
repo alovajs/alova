@@ -1,6 +1,6 @@
 import { onDestroy } from 'svelte';
 import { writable, derived, Readable } from 'svelte/store';
-import { FrontRequestState, WatchingParams } from '../../typings';
+import { FrontRequestState, EffectRequestParams } from '../../typings';
 import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
 
 
@@ -30,16 +30,21 @@ export default {
       sItem.set(newVal[key as Keys]);
     }
   ),
-  effectRequest(handler: () => void, removeStates: () => void, { states, immediate }: WatchingParams) {
+  effectRequest({
+    handler,
+    removeStates,
+    immediate,
+    watchStates,
+  }: EffectRequestParams) {
     onDestroy(removeStates);    // 组件卸载时移除对应状态
-    if (!states) {
+    if (!watchStates) {
       handler();
       return;
     }
 
     let timer: any;
     let needEmit = immediate;
-    forEach(states, state => {
+    forEach(watchStates, state => {
       state.subscribe(() => {
         timer && clearTimeoutTimer(timer);
         timer = setTimeoutFn(() => {

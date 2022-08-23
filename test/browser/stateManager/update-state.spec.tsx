@@ -184,7 +184,7 @@ describe('update cached response data by user', function() {
   });
 
 
-  test.only('delayed update data in silent request', async () => {
+  test('delayed update data in silent request', async () => {
     const alova = getInstanceWithVue();
     const Get1 = alova.Get('/unit-test', {
       params: { a: 1 },

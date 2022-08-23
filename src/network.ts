@@ -2,8 +2,8 @@ import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
 import { deserializeMethod, noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
-import { getStatesHook, len, PromiseCls, promiseThen, pushItem, setTimeoutFn, trueValue } from './utils/variables';
-import myAssert from './utils/myAssert';
+import { len, PromiseCls, promiseThen, pushItem, setTimeoutFn, trueValue } from './utils/variables';
+// import myAssert from './utils/myAssert';
 
 const intervalTime = 2000;  // 重复请求间隔时间
 export const alovas = [] as Alova<any, any, any, any, any>[];
@@ -13,7 +13,7 @@ export const alovas = [] as Alova<any, any, any, any, any>[];
  */
 export const addAlova = <S, E, RC, RE, RH>(instance: Alova<S, E, RC, RE, RH>) => {
   if (alovas[0]) {
-    myAssert(getStatesHook(alovas[0]) === getStatesHook(instance), 'must use the same statesHook in one environment');
+    // myAssert(getStatesHook(alovas[0]) === getStatesHook(instance), 'must use the same statesHook in one environment');
   }
   pushItem(alovas, instance);
 };

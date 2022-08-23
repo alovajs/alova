@@ -15,16 +15,16 @@ export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method
 
   const props = createRequestState(
     alovas[0] as Alova<S, E, RC, RE, RH>,
-    (originalState, successHandler, errorHandlers, completeHandlers, setAbort, setStateRemove) => {
+    (originalState, successHandler, errorHandlers, completeHandlers, setFns) => {
       if (immediate) {
         const {
           abort,
           p: responseHandlePromise,
-          r: removeState,
+          r: removeStates,
+          s: saveStates,
         } = useHookToSendRequest(getHandlerMethod(methodHandler), originalState, config, successHandler, errorHandlers, completeHandlers);
         // 将控制器传出去供使用者调用
-        setAbort(abort);
-        setStateRemove(removeState);
+        setFns(abort, removeStates, saveStates);
         promiseCatch(responseHandlePromise, noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
       }
     },

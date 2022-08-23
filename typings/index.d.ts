@@ -78,10 +78,14 @@ type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
   onSuccess: ResponsedHandler<R, T, RC, RE, RH>,
   onError: ResponseErrorHandler<R, T, RC, RH>
 };
-type WatchingParams = {
-  states?: any[],
+interface EffectRequestParams {
+  handler: () => void,
+  removeStates: () => void,
+  saveStates: (frontStates: FrontRequestState) => void,
+  frontStates: FrontRequestState,
+  watchStates?: any[],
   immediate: boolean,
-};
+}
 
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
@@ -108,7 +112,7 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
     // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
     // 在vue中直接执行即可，而在react中需要在useEffect中执行
     // removeStates函数为清除当前状态的函数，应该在组件卸载时调用
-    effectRequest: (handleRequest: () => void, removeStates: () => void, watchingParams: WatchingParams) => void,
+    effectRequest: (effectParams: EffectRequestParams) => void,
   },
 
   // 请求适配器

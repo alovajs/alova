@@ -9,6 +9,7 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, pr
 import { silentRequestPromises } from './updateState';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
+import { SaveStateFn } from './createRequestState';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
@@ -44,7 +45,8 @@ import { getResponseCache, setResponseCache } from '../storage/responseCache';
   ) => forEach(handlers, handler => handler(...args, ...responserHandlerArgs));
   
   // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
-  let removeState = noop;
+  let removeStates = noop;
+  let saveStates = noop as SaveStateFn;
   if (!updateCacheState) {
     const {
       e: expireMilliseconds,
@@ -61,10 +63,11 @@ import { getResponseCache, setResponseCache } from '../storage/responseCache';
     }
 
     // 将初始状态存入缓存以便后续更新
-    setStateCache(id, methodKey, originalState);
+    saveStates = (frontStates: FrontRequestState) => setStateCache(id, methodKey, frontStates);
+    saveStates(originalState);
 
     // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
-    removeState = () => removeStateCache(id, methodKey);
+    removeStates = () => removeStateCache(id, methodKey);
 
     // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
     // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
@@ -95,7 +98,8 @@ import { getResponseCache, setResponseCache } from '../storage/responseCache';
         progress: noop,
         abort: noop,
         p: resolvedPromise,
-        r: removeState,
+        r: removeStates,
+        s: saveStates,
       };
     }
   }
@@ -171,6 +175,7 @@ import { getResponseCache, setResponseCache } from '../storage/responseCache';
   return {
     ...ctrl,
     p: responseHandlePromise,
-    r: removeState,
+    r: removeStates,
+    s: saveStates,
   };
 }
