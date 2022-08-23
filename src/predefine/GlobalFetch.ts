@@ -1,7 +1,7 @@
 import { AlovaRequestAdapterConfig } from '../../typings';
 import alovaError from '../utils/alovaError';
 import { instanceOf, isString } from '../utils/helper';
-import { clearTimeoutTimer, falseValue, JSONStringify, promiseReject, promiseThen, setTimeoutFn, trueValue } from '../utils/variables';
+import { clearTimeoutTimer, falseValue, JSONStringify, len, promiseReject, promiseThen, setTimeoutFn, trueValue } from '../utils/variables';
 
 
 const isBodyData = (data: any): data is BodyInit => {
@@ -53,7 +53,7 @@ export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
             const reader = body?.getReader().read();
             reader && promiseThen(reader, ({ done, value = new Uint8Array() }) => {
               done && clearInterval(progressTimer);
-              loaded += value.length;
+              loaded += len(value);
               cb(total, loaded);
             });
           }, 100);

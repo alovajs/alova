@@ -182,4 +182,43 @@ describe('update cached response data by user', function() {
     expect(firstState.data.value.path).toBe('/unit-test');
     expect(secondState.data.value.path).toBe('/unit-test');
   });
+
+
+  test.only('delayed update data in silent request', async () => {
+    const alova = getInstanceWithVue();
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 1 },
+      transformData: ({ data }: Result) => data,
+    });
+    const Get2 = alova.Get('/unit-test', {
+      name: 'get2',
+      params: { b: 2 },
+      localCache: 100000,
+      transformData: ({ data }: Result) => data,
+      silent: true,
+    });
+    const firstState = useRequest(Get1);
+    await untilCbCalled(firstState.onSuccess);
+    
+    const secondState = useRequest(Get2);
+    await new Promise(res => {
+      secondState.onSuccess(() => {
+        updateState(Get1, rawData => {
+          return {
+            '+params': [(res: any) => res.params, {}],
+            method: rawData.method + '2',
+          }
+        });
+        // 一开始是默认值
+        console.log(firstState.data.value);
+        expect(firstState.data.value).toEqual({ method: 'GET2', params: {} });
+        res(null);
+      });
+    });
+
+    // 请求完成后是实际值
+    await untilCbCalled(setTimeout, 200);
+    console.log(firstState.data.value);
+    expect(firstState.data.value).toEqual({ method: 'GET2', params: { b: '2' } });
+  });
 });

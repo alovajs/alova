@@ -5,7 +5,8 @@ import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
 import { CompleteHandler, ErrorHandler, FrontRequestState, SuccessHandler, UseHookConfig } from '../../typings';
 import { getStateCache } from '../storage/stateCache';
-import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, promiseReject, promiseResolve, promiseThen, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
+import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, promiseReject, promiseResolve, promiseThen, pushItem, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
+import { silentRequestPromises } from './updateState';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
@@ -40,22 +41,26 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, pr
     ...args: any[]
   ) => forEach(handlers, handler => handler(...args, ...responserHandlerArgs));
   if (silentMode) {
-    myAssert(!instanceOf(methodInstance.requestBody, FormData), 'FormData is not supported when silent is trueValue');
+    myAssert(!instanceOf(methodInstance.requestBody, FormData), 'FormData is not supported when silent mode');
     // 需要异步执行，同步执行会导致无法收集各类回调函数
     setTimeoutFn(() => {
       runArgsHandler(successHandlers, undefinedValue);
       runArgsHandler(completeHandlers);
+      // 执行完需要从头开始清除promise，这样在updateState中才能获取到对应的promise
+      silentRequestPromises.shift();
     });
     
     // silentMode下，如果网络离线的话就不再实际请求了，而是将请求信息存入缓存
     if (!navigator.onLine) {
       pushSilentRequest(id, methodKey, serializeMethod(methodInstance), storage);
+      const resolvedPromise = promiseResolve(nullValue);
+      pushItem(silentRequestPromises, resolvedPromise);   // 离线状态下，静默请求也需要收集一个promise
       return {
-        response: () => promiseResolve(nullValue),
+        response: () => resolvedPromise,
         headers: () => promiseResolve({} as Headers),
         progress: noop,
         abort: noop,
-        p: promiseResolve(nullValue),
+        p: resolvedPromise,
       };
     }
   }
@@ -123,6 +128,11 @@ import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, pr
   enableDownload && onDownload(progressUpdater('downloading'));
   enableUpload && onUpload(progressUpdater('uploading'));
   
+  // 静默请求下，需要收集请求的promise，在updateState中使用
+  if (silentMode) {
+    pushItem(silentRequestPromises, responseHandlePromise);
+  }
+
   return {
     ...ctrl,
     p: responseHandlePromise,

@@ -1,3 +1,4 @@
+import Alova from '../Alova';
 import Method from '../Method';
 
 // 以下为减少编译代码量而添加的统一处理函数或变量
@@ -20,6 +21,7 @@ export const getTime = (date?: Date) => date ? date.getTime() : Date.now();
 export const getContext = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.context;
 export const getConfig = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.config;
 export const getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => getContext(methodInstance).options;
+export const getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) => alovaInstance.options.statesHook;
 export const JSONStringify = <T>(value: T) => JSON.stringify(value);
 export const JSONParse = (value: string) => JSON.parse(value);
 export const setTimeoutFn = (fn: Function, delay: number = 0) => setTimeout(fn, delay);
@@ -27,6 +29,7 @@ export const clearTimeoutTimer = (timer: number) => clearTimeout(timer);
 export const objectKeys = (obj: object) => Object.keys(obj);
 export const forEach = <T>(ary: T[], fn: (item: T, index: number, ary: T[]) => void) => ary.forEach(fn);
 export const pushItem = <T>(ary: T[], ...item: T[]) => ary.push(...item);
+export const len = (data: any[] | Uint8Array | string) => data.length;
 export const undefinedValue = undefined;
 export const nullValue = null;
 export const trueValue = true;

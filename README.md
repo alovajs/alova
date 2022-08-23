@@ -13,6 +13,21 @@ The request scene management library of the MVVM library, it is an arm of the re
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
+
+## Features
+1. React/Vue/Svelte request non-asynchronous usage
+2. Similar api design to axios, simple and familiar
+3. Stateful response data
+4. Response data cache
+5. Data pre-fetch
+6. Silent submit
+7. Offline submit
+8. Request stabilization
+9. Lightweight Gzip 4kb+
+10. Typescript support
+11. Tree shaking support
+12. Status Update Tracking
+
 ## Table of contents
 - [What is request scene management](#what-is-request-scene-management)
 - [Request scene model](#request-scene-model)
@@ -20,7 +35,6 @@ The request scene management library of the MVVM library, it is an arm of the re
   - [request behavior](#request-behavior)
   - [request event](#request-event)
   - [response data management](#response-data-management)
-- [Features](#features)
 - [Volume comparison of various libraries](#volume-comparison-of-various-libraries)
 - [install](#install)
   - [npm](#npm)
@@ -118,23 +132,6 @@ Indicates that the request is sent with the request parameters, and the response
 - Update cache response data, which can update response data at any location, which is very beneficial to update data across pages;
 - Refresh the response data, which can re-refresh the response data at any location, and is also very beneficial to update data across pages;
 - Custom setting cache, when requesting batch data, you can manually set the cache for batch data one by one, so as to satisfy the cache hit of subsequent single data;
-
-
-
-
-## Features
-1. React/Vue/Svelte request non-asynchronous usage
-2. Similar api design to axios, simple and familiar
-3. Stateful response data
-4. Response data cache
-5. Data pre-fetch
-6. Silent submit
-7. Offline submit
-8. Request stabilization
-9. Lightweight Gzip 3kb+
-10. Typescript support
-11. Tree shaking support
-12. Status Update Tracking
 
 ## Volume comparison of various libraries
 |alova|react-query|vue-request|vue|react|

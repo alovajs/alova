@@ -121,7 +121,7 @@ describe('use useRequest to send silent request', function() {
     }, 10);
   });
 
-  test.only('should push to localStorage when silent\'s post is failed', done => {
+  test('should push to localStorage when silent\'s post is failed', done => {
     jest.setTimeout(10000);   // 因为静默提交失败重新调用间隔为2秒，这边需加大超时时间
     let throwError = 0;
     const alova = getInstance(undefined, () => {

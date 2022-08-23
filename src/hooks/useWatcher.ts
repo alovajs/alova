@@ -4,14 +4,14 @@ import useHookToSendRequest from '../functions/useHookToSendRequest';
 import myAssert from '../utils/myAssert';
 import { WatcherHookConfig } from '../../typings';
 import { noop } from '../utils/helper';
-import { promiseCatch } from '../utils/variables';
+import { len, promiseCatch } from '../utils/variables';
 
 export default function useWatcher<S, E, R, T, RC, RE, RH>(
   handler: (...args: any[]) => Method<S, E, R, T, RC, RE, RH>, 
   watchingStates: E[],
   config: WatcherHookConfig<R> = {}
 ) {
-  myAssert(watchingStates && watchingStates.length > 0, 'must specify at least one watching state');
+  myAssert(watchingStates && len(watchingStates) > 0, 'must specify at least one watching state');
   
   const {
     immediate,

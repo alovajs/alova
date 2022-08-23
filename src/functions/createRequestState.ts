@@ -131,7 +131,14 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     },
     abort: () => abortFn(),
     
-    // 通过执行该方法来手动发起请求
+    /**
+     * 通过执行该方法来手动发起请求
+     * @param methodInstance 方法对象
+     * @param useHookConfig useHook配置参数对象
+     * @param responserHandlerArgs 响应回调函数参数
+     * @param updateCacheState 是否更新缓存状态，此为fetch传入
+     * @returns 请求promise
+     */
     send(methodInstance: Method<S, E, R, T, RC, RE, RH>, useHookConfig: UseHookConfig<R>, responserHandlerArgs?: any[], updateCacheState?: boolean) {
       const { abort, p } = useHookToSendRequest(
         methodInstance,
