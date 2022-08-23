@@ -151,8 +151,8 @@ export default {
   testEnvironment: "jsdom",
 
   testMatch: [
-    "**/?(*.)+(spec|test).[tj]s?(x)",
-    // "**/test/browser/hooks/useWatcher-react.spec.ts(x)?",
+    // "**/?(*.)+(spec|test).[tj]s?(x)",
+    "**/test/browser/hooks/useRequest-react.spec.ts(x)?",
     // "**/test/browser/behavior/persist-response-vue.spec.ts",
     // "**/test/browser/batch/parallel-request.spec.ts",
     // "**/test/browser/stateManager/update-state.spec.ts(x)?",

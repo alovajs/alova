@@ -129,7 +129,6 @@ describe('use useRequest to send silent request', function() {
       if (throwError < 3) {
         setTimeout(() => {
           const { serializedMethod } = getSilentRequest(alova.id, alova.storage);
-          console.log('serialized', serializedMethod);
           expect(serializedMethod).not.toBeUndefined();
         }, 0);
         throw new Error('custom error');

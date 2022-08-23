@@ -1,12 +1,14 @@
 import Method from '../Method';
 import { pushSilentRequest } from '../storage/silentStorage';
-import { instanceOf, key, noop, serializeMethod } from '../utils/helper';
+import { getLocalCacheConfigParam, instanceOf, key, noop, serializeMethod } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
 import { CompleteHandler, ErrorHandler, FrontRequestState, SuccessHandler, UseHookConfig } from '../../typings';
-import { getStateCache } from '../storage/stateCache';
-import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, promiseReject, promiseResolve, promiseThen, pushItem, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
+import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
+import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, promiseReject, promiseResolve, promiseThen, pushItem, setTimeoutFn, STORAGE_RESTORE, trueValue, undefinedValue } from '../utils/variables';
 import { silentRequestPromises } from './updateState';
+import { getPersistentResponse } from '../storage/responseStorage';
+import { getResponseCache, setResponseCache } from '../storage/responseCache';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
@@ -15,7 +17,7 @@ import { silentRequestPromises } from './updateState';
  * @param responser 响应处理对象
  * @param responserHandlerArgs 响应处理回调的参数，该参数由use hooks的send传入
  * @param forceRequest 是否强制发起请求
- * @param updateCacheState 是否更新缓存状态，一般在useFetcher时设置为trueValue
+ * @param updateCacheState 是否更新缓存状态，一般在useFetcher时设置为true
  * @returns 请求状态
  */
  export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
@@ -40,6 +42,38 @@ import { silentRequestPromises } from './updateState';
     handlers: Function[],
     ...args: any[]
   ) => forEach(handlers, handler => handler(...args, ...responserHandlerArgs));
+  
+  // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
+  let removeState = noop;
+  if (!updateCacheState) {
+    const {
+      e: expireMilliseconds,
+      m: cacheMode,
+      t: tag,
+    } = getLocalCacheConfigParam(methodInstance);
+
+    const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);    
+    // 如果命中持久化数据，则更新数据
+    if (persistentResponse !== undefinedValue) {
+      update({
+        data: persistentResponse,
+      }, originalState);
+    }
+
+    // 将初始状态存入缓存以便后续更新
+    setStateCache(id, methodKey, originalState);
+
+    // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
+    removeState = () => removeStateCache(id, methodKey);
+
+    // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
+    // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
+    if (persistentResponse && cacheMode === STORAGE_RESTORE && !getResponseCache(id, methodKey)) {
+      setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
+    }
+  }
+
+
   if (silentMode) {
     myAssert(!instanceOf(methodInstance.requestBody, FormData), 'FormData is not supported when silent mode');
     // 需要异步执行，同步执行会导致无法收集各类回调函数
@@ -61,6 +95,7 @@ import { silentRequestPromises } from './updateState';
         progress: noop,
         abort: noop,
         p: resolvedPromise,
+        r: removeState,
       };
     }
   }
@@ -136,5 +171,6 @@ import { silentRequestPromises } from './updateState';
   return {
     ...ctrl,
     p: responseHandlePromise,
+    r: removeState,
   };
 }

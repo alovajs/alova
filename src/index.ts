@@ -14,7 +14,6 @@ export { default as setCacheData } from './functions/setCacheData';
 // 导出缓存模式
 export { cacheMode } from './utils/variables';
 
-
 /**
  * 创建Alova实例
  * @param options alova配置参数

@@ -1,18 +1,18 @@
 import Method from '../Method';
-import Alova from '../Alova';
 import { instanceOf, noop } from '../utils/helper';
 import createRequestState from '../functions/createRequestState';
 import myAssert from '../utils/myAssert';
-import { getOptions, trueValue } from '../utils/variables';
+import { trueValue } from '../utils/variables';
 import { FetcherHookConfig, MethodMatcher } from '../../typings';
 import { getMethodSnapshot, keyFind } from '../storage/methodSnapshots';
+import Alova from '../Alova';
 
 /**
 * 获取请求数据并缓存
 * @param method 请求方法对象
 */
 export default function useFetcher<S, E, R, RC, RE, RH>(alova: Alova<S, E, RC, RE, RH>, config: FetcherHookConfig<R> = {}) {
-  const props = createRequestState<S, E, any, any, RC, RE, RH>(alova, noop);
+  const props = createRequestState<S, E, any, any, RC, RE, RH>(alova, noop, noop as any);
   return {
     fetching: props.loading,
     error: props.error,
@@ -29,10 +29,8 @@ export default function useFetcher<S, E, R, RC, RE, RH>(alova: Alova<S, E, RC, R
      */
     fetch: <R, T>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>) => {
       const methodInstance = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>) ? matcher : getMethodSnapshot(matcher, keyFind);
-
       myAssert(!!methodInstance, 'method instance is not found');
-      myAssert(alova.options.statesHook === getOptions(methodInstance).statesHook, 'the `statesHook` of the method instance is not the same as the alova instance');
-      props.send(methodInstance, config, [], trueValue);
+      props.send(config, [], methodInstance, trueValue);
     },
   };
 }

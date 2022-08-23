@@ -1,15 +1,11 @@
 // import { Ref } from 'vue';
-import { Progress, FrontRequestState, ExportedType, UseHookConfig, SuccessHandler, ErrorHandler, CompleteHandler } from '../../typings';
+import { Progress, FrontRequestState, ExportedType, UseHookConfig, SuccessHandler, ErrorHandler, CompleteHandler, AlovaMethodHandler } from '../../typings';
 import Alova from '../Alova';
 import Method from '../Method';
-import { getResponseCache, setResponseCache } from '../storage/responseCache';
-import { getPersistentResponse } from '../storage/responseStorage';
-import { removeStateCache, setStateCache } from '../storage/stateCache';
-import { debounce, getLocalCacheConfigParam, key, noop } from '../utils/helper';
-import { falseValue, pushItem, STORAGE_RESTORE, trueValue, undefinedValue } from '../utils/variables';
+import { debounce, getHandlerMethod, noop } from '../utils/helper';
+import { falseValue, getStatesHook, pushItem, trueValue, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
-// type ExportedType<R, S> = S extends Ref ? Ref<R> : R;    
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -23,19 +19,16 @@ import useHookToSendRequest from './useHookToSendRequest';
  * @returns 当前的请求状态
  */
 export default function createRequestState<S, E, R, T, RC, RE, RH>(
-  {
-    id,
-    options,
-    storage,
-  }: Alova<S, E, RC, RE, RH>,
+  alovaInstance: Alova<S, E, RC, RE, RH>,
   handleRequest: (
     originalState: FrontRequestState,
     successHandlers: SuccessHandler<R>[],
     errorHandlers: ErrorHandler[],
     completeHandlers: CompleteHandler[],
-    setAbort: (abort: () => void) => void
+    setAbort: (abort: () => void) => void,
+    setStateRemove: (removeState: () => void) => void
   ) => void,
-  methodInstance?: Method<S, E, R, T, RC, RE, RH>,
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   initialData?: any,
   watchedStates?: E[],
   immediate = trueValue,
@@ -45,56 +38,36 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     create,
     export: stateExport,
     effectRequest,
-  } = options.statesHook;
-
-  // 如果有持久化数据则先使用它
-  const methodKey = methodInstance ? key(methodInstance) : undefinedValue;
-
-  const {
-    e: expireMilliseconds,
-    m: cacheMode,
-    t: tag,
-  } = getLocalCacheConfigParam(methodInstance);
-
-  const persistentResponse = methodKey ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue;
-  const hitStorage = persistentResponse !== undefinedValue;   // 命中持久化数据
-  const rawData = hitStorage ? persistentResponse : initialData;
-
+  } = getStatesHook(alovaInstance);
   const progress: Progress = {
     total: 0,
     loaded: 0,
   };
   const originalState = {
     loading: create(falseValue),
-    data: create(rawData),
+    data: create(initialData),
     error: create(undefinedValue as Error | undefined),
     downloading: create({ ...progress }),
     uploading: create({ ...progress }),
   };
-  let removeState = noop;
-  if (methodInstance && methodKey) {
-    // 如果有methodKey时，将初始状态存入缓存以便后续更新
-    setStateCache(id, methodKey, originalState);
-
-    // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
-    removeState = () => removeStateCache(id, methodKey);
-
-    // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
-    // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
-    if (persistentResponse && cacheMode === STORAGE_RESTORE && !getResponseCache(id, methodKey)) {
-      setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
-    }
-  }
 
   const successHandlers = [] as SuccessHandler<R>[];
   const errorHandlers = [] as ErrorHandler[];
   const completeHandlers = [] as CompleteHandler[];
   let abortFn = noop;
+  let removeStateFn = noop;
 
   // 调用请求处理回调函数
   let handleRequestCalled = falseValue;
   const wrapEffectRequest = () => {
-    handleRequest(originalState, successHandlers, errorHandlers, completeHandlers, abort => abortFn = abort);
+    handleRequest(
+      originalState,
+      successHandlers,
+      errorHandlers,
+      completeHandlers,
+      abort => abortFn = abort,
+      removeState => removeStateFn = removeState
+    );
     handleRequestCalled = trueValue;
   };
 
@@ -107,9 +80,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     debounceDelay > 0 ? 
       debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled) :
       wrapEffectRequest,
-    removeState,
+    removeStateFn,
     watchingParams
-  ) : effectRequest(wrapEffectRequest, removeState, watchingParams);
+  ) : effectRequest(wrapEffectRequest, removeStateFn, watchingParams);
   
   const exportedState = {
     loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,
@@ -135,22 +108,24 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
      * 通过执行该方法来手动发起请求
      * @param methodInstance 方法对象
      * @param useHookConfig useHook配置参数对象
-     * @param responserHandlerArgs 响应回调函数参数
+     * @param sendCallingArgs 调用send函数时传入的参数
      * @param updateCacheState 是否更新缓存状态，此为fetch传入
      * @returns 请求promise
      */
-    send(methodInstance: Method<S, E, R, T, RC, RE, RH>, useHookConfig: UseHookConfig<R>, responserHandlerArgs?: any[], updateCacheState?: boolean) {
-      const { abort, p } = useHookToSendRequest(
+    send(useHookConfig: UseHookConfig<R>, sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, updateCacheState?: boolean) {
+      methodInstance = methodInstance || getHandlerMethod(methodHandler, sendCallingArgs);
+      const { abort, p, r } = useHookToSendRequest(
         methodInstance,
         originalState,
         useHookConfig,
         successHandlers,
         errorHandlers,
         completeHandlers,
-        responserHandlerArgs,
+        sendCallingArgs,
         updateCacheState
       );
       abortFn = abort;
+      removeStateFn = r;
       return p;
     },
   };

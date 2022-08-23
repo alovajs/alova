@@ -243,7 +243,7 @@ type MethodMatcher<S, E, R, T, RC, RE, RH> = Method<S, E, R, T, RC, RE, RH> | Me
 
 // *************************************
 // 导出类型
-type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: unknown[]) => Method<S, E, R, T, RC, RE, RH>;
+type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
 export declare  function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>, config?: RequestHookConfig<R>): UseHookReturnType<R, S>;
 export declare function useWatcher<S, E, R, T, RC, RE, RH>(handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>, watchingStates: E[], config?: WatcherHookConfig<R>): UseHookReturnType<R, S>;

@@ -1,41 +1,39 @@
-import Method from '../Method';
 import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
-import { isFn, noop } from '../utils/helper';
-import { getContext, promiseCatch, trueValue } from '../utils/variables';
-import { RequestHookConfig } from '../../typings';
+import { getHandlerMethod, noop } from '../utils/helper';
+import { promiseCatch, trueValue } from '../utils/variables';
+import { AlovaMethodHandler, RequestHookConfig } from '../../typings';
+import { alovas } from '../network';
+import Method from '../Method';
+import Alova from '../Alova';
 
-export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | ((...args: any[]) => Method<S, E, R, T, RC, RE, RH>), config: RequestHookConfig<R> = {}) {
+export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>, config: RequestHookConfig<R> = {}) {
   const {
     immediate = trueValue,
     initialData,
   } = config;
 
-  // isFn封装后不能自动判断类型，需手动转
-  const methodInstance = isFn(methodHandler) 
-    ? methodHandler() 
-    : methodHandler;
   const props = createRequestState(
-    getContext(methodInstance), 
-    (originalState, successHandler, errorHandlers, completeHandlers, setAbort) => {
+    alovas[0] as Alova<S, E, RC, RE, RH>,
+    (originalState, successHandler, errorHandlers, completeHandlers, setAbort, setStateRemove) => {
       if (immediate) {
-        const { abort, p: responseHandlePromise } = useHookToSendRequest(methodInstance, originalState, config, successHandler, errorHandlers, completeHandlers);
+        const {
+          abort,
+          p: responseHandlePromise,
+          r: removeState,
+        } = useHookToSendRequest(getHandlerMethod(methodHandler), originalState, config, successHandler, errorHandlers, completeHandlers);
         // 将控制器传出去供使用者调用
         setAbort(abort);
+        setStateRemove(removeState);
         promiseCatch(responseHandlePromise, noop);  // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
       }
     },
-    methodInstance, 
+    methodHandler,
     initialData
   );
   
   return {
     ...props,
-    send: (...args: any[]) => {
-      const methodInstance = isFn(methodHandler) 
-        ? methodHandler(...args) 
-        : methodHandler;
-      return props.send(methodInstance, config, args);
-    },
+    send: (...args: any[]) => props.send(config, args),
   };
 }

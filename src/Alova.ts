@@ -9,7 +9,7 @@ import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost
 let idCounter = 0;
 export default class Alova<S, E, RC, RE, RH> {
   public options: AlovaOptions<S, E, RC, RE, RH>;
-  public id = `alova-${++idCounter}`;
+  public id = (++idCounter) + '';
   public storage: Storage;
   constructor(options: AlovaOptions<S, E, RC, RE, RH>) {
     // 如果storage未指定，则默认使用localStorage

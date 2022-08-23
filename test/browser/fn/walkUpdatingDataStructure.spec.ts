@@ -56,7 +56,6 @@ describe('walkUpatingDataStructure', function() {
       [(v: any) => v.dd, 'a'],
       4,
     ]);
-    console.log(f3, c3);
     expect(f3[0]).toBe(1);
     expect(f3[1]).toBe(12);
     expect(typeof f3[2]).toBe('function');

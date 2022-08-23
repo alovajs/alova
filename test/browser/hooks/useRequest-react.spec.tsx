@@ -7,7 +7,7 @@ import ReactHook from '../../../src/predefine/ReactHook';
 import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server from '../../server';
+import server, { untilCbCalled } from '../../server';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { getStateCache } from '../../../src/storage/stateCache';
@@ -134,14 +134,16 @@ describe('useRequet hook with react', () => {
     render(<Page /> as ReactElement<any, any>);
   });
 
-  test('states should be remove in cache when component was unmounted', async () => {
+  test.only('states should be remove in cache when component was unmounted', async () => {
     const alova = getInstance();
     const Get = alova.Get('unit-test', {
       transformData: ({ data }: Result) => data,
     });
     function DataConsole() {
       const { data, loading } = useRequest(Get);
-      return <div>{loading ? 'loading...' : JSON.stringify(data)}</div>;
+      console.log(data, loading, '333');
+      console.log(getStateCache(alova.id, key(Get)));
+      return <div role="cell">{loading ? 'loading...' : JSON.stringify(data)}</div>;
     }
     function Page() {
       const [showData, setShowData] = useState(true);
@@ -156,11 +158,13 @@ describe('useRequet hook with react', () => {
     render(<Page /> as ReactElement<any, any>);
     await screen.findByText(/unit-test/);
 
+    console.log('finished');
+
     // useRequest内会缓存状态
     const { data } = getStateCache(alova.id, key(Get)) || { data: null };
     expect(data[0].path).toBe('/unit-test');
     fireEvent.click(screen.getByRole('btn'));
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await untilCbCalled(setTimeout, 100);
 
     // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露
     expect(getStateCache(alova.id, key(Get))).toBeUndefined();

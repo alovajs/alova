@@ -210,7 +210,6 @@ describe('update cached response data by user', function() {
           }
         });
         // 一开始是默认值
-        console.log(firstState.data.value);
         expect(firstState.data.value).toEqual({ method: 'GET2', params: {} });
         res(null);
       });
@@ -218,7 +217,6 @@ describe('update cached response data by user', function() {
 
     // 请求完成后是实际值
     await untilCbCalled(setTimeout, 200);
-    console.log(firstState.data.value);
     expect(firstState.data.value).toEqual({ method: 'GET2', params: { b: '2' } });
   });
 });
