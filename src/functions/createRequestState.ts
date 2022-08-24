@@ -15,7 +15,7 @@ export type SaveStateFn = (frontStates: FrontRequestState) => void;
  * @param method 请求方法对象
  * @param handleRequest 请求处理的回调函数
  * @param methodKey 请求方法的key
- * @param watchedStates 被监听的状态，如果未传入，直接调用handleRequest
+ * @param watchingStates 被监听的状态，如果未传入，直接调用handleRequest
  * @param immediate 是否立即发起请求
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态
@@ -31,7 +31,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
   ) => void,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   initialData?: any,
-  watchedStates?: E[],
+  watchingStates?: E[],
   immediate = trueValue,
   debounceDelay = 0
 ) {
@@ -76,15 +76,15 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     handleRequestCalled = trueValue;
   };
 
-  // watchedStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
+  // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
   const effectRequestParams = {
     removeStates: () => removeStatesFn(),
     saveStates: (states: FrontRequestState) => saveStatesFn(states),
     frontStates: originalState,
-    watchedStates,
+    watchingStates,
     immediate: immediate ?? trueValue,
   };
-  watchedStates !== undefinedValue 
+  watchingStates !== undefinedValue 
     ? effectRequest({
       handler: debounceDelay > 0 ? 
         debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled) :

@@ -1,48 +1,20 @@
 import {
-  createAlova,
   useRequest,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server from '../../server';
+import { mockServer, getAlovaInstance } from '../../utils';
 import { getSilentRequest } from '../../../src/storage/silentStorage';
 
-beforeAll(() => server.listen());
+beforeAll(() => mockServer.listen());
 afterEach(() => {
-  server.resetHandlers();
+  mockServer.resetHandlers();
   localStorage.clear();
 });
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
+afterAll(() => mockServer.close());
+
 class NetworkController {
   private win: Window;
   private onLine: boolean;
@@ -84,7 +56,7 @@ class NetworkController {
 
 describe('use useRequest to send silent request', function() {
   test('send a silent\'s post', done => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,
     });
@@ -124,20 +96,22 @@ describe('use useRequest to send silent request', function() {
   test('should push to localStorage when silent\'s post is failed', done => {
     jest.setTimeout(10000);   // 因为静默提交失败重新调用间隔为2秒，这边需加大超时时间
     let throwError = 0;
-    const alova = getInstance(undefined, () => {
-      throwError++;
-      if (throwError < 3) {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: () => {
+        throwError++;
+        if (throwError < 3) {
+          setTimeout(() => {
+            const { serializedMethod } = getSilentRequest(alova.id, alova.storage);
+            expect(serializedMethod).not.toBeUndefined();
+          }, 0);
+          throw new Error('custom error');
+        }
         setTimeout(() => {
           const { serializedMethod } = getSilentRequest(alova.id, alova.storage);
-          expect(serializedMethod).not.toBeUndefined();
+          expect(serializedMethod).toBeUndefined();
+          done();
         }, 0);
-        throw new Error('custom error');
       }
-      setTimeout(() => {
-        const { serializedMethod } = getSilentRequest(alova.id, alova.storage);
-        expect(serializedMethod).toBeUndefined();
-        done();
-      }, 0);
     });
     const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,
@@ -160,7 +134,10 @@ describe('use useRequest to send silent request', function() {
     const requestHookMock = jest.fn(() => {});
     const responsedHookMock = jest.fn(() => {});
     const networkCtrl = new NetworkController(window);
-    const alova = getInstance(requestHookMock, responsedHookMock);
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: requestHookMock,
+      responseExpect: responsedHookMock
+    });
     const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
       silent: true,
     });

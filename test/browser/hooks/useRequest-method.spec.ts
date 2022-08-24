@@ -1,53 +1,22 @@
 import {
-  createAlova,
   useRequest,
   cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server, { untilCbCalled } from '../../server';
+import { mockServer, getAlovaInstance, untilCbCalled } from '../../utils';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
-
-
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
 // 其他请求方式测试
 describe('Test other methods without GET', function() {
   test('send POST', async () => {
-    const alova = getInstance(
-      config => {
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: config => {
         expect(config.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.data).toEqual({ post1: 'a' });
@@ -57,13 +26,13 @@ describe('Test other methods without GET', function() {
         });
         expect(config.timeout).toBe(10000);
       },
-      async jsonPromise => {
+      responseExpect: async jsonPromise => {
         const { data } = await jsonPromise;
         expect(data.path).toBe('/unit-test');
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         expect(data.params).toEqual({ a: 'a', b: 'str' });
       }
-    );
+    });
     const Post = alova.Post('/unit-test', { post1: 'a' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
@@ -105,8 +74,8 @@ describe('Test other methods without GET', function() {
   });
 
   test('send DELETE', async () => {
-    const alova = getInstance(
-      config => {
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: config => {
         expect(config.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.data).toEqual({ post1: 'a' });
@@ -116,13 +85,13 @@ describe('Test other methods without GET', function() {
         });
         expect(config.timeout).toBe(10000);
       },
-      async jsonPromise => {
+      responseExpect: async jsonPromise => {
         const { data } = await jsonPromise;
         expect(data.path).toBe('/unit-test');
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         expect(data.params).toEqual({ a: 'a', b: 'str' });
       }
-    );
+    });
     const Delete = alova.Delete('/unit-test', { post1: 'a' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
@@ -164,8 +133,8 @@ describe('Test other methods without GET', function() {
   });
 
   test('send PUT', async () => {
-    const alova = getInstance(
-      config => {
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: config => {
         expect(config.url).toBe('/unit-test?c=3');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.data).toEqual({ post1: 'a' });
@@ -175,13 +144,13 @@ describe('Test other methods without GET', function() {
         });
         expect(config.timeout).toBe(10000);
       },
-      async jsonPromise => {
+      responseExpect: async jsonPromise => {
         const { data } = await jsonPromise;
         expect(data.path).toBe('/unit-test');
         expect(data.data).toEqual({ post1: 'a', post2: 'b' });
         expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
       }
-    );
+    });
     const Put = alova.Put('/unit-test?c=3', { post1: 'a' }, {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
@@ -223,8 +192,10 @@ describe('Test other methods without GET', function() {
   });
 
   test('send HEAD', async () => {
-    const alova = getInstance(config => {
-      expect(config.method).toBe('HEAD');
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: config => {
+        expect(config.method).toBe('HEAD');
+      }
     });
     const Head = alova.Head('/unit-test', {
       params: { a: 'a', b: 'str' },
@@ -261,8 +232,10 @@ describe('Test other methods without GET', function() {
   });
 
   test('send OPTIONS', async () => {
-    const alova = getInstance(config => {
-      expect(config.method).toBe('OPTIONS');
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: config => {
+        expect(config.method).toBe('OPTIONS');
+      }
     });
     const Options = alova.Options('/unit-test', {
       params: { a: 'a', b: 'str' },
@@ -298,8 +271,10 @@ describe('Test other methods without GET', function() {
   });
 
   test('send PATCH', async () => {
-    const alova = getInstance(config => {
-      expect(config.method).toBe('PATCH');
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: config => {
+        expect(config.method).toBe('PATCH');
+      }
     });
     const Patch = alova.Patch('/unit-test', { patch1: 'p' }, {
       params: { a: 'a', b: 'str' },

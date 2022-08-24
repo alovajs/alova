@@ -2,6 +2,9 @@ import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import fetch from 'node-fetch';
 import 'web-streams-polyfill';
+import { AlovaRequestAdapterConfig, LocalCacheConfig, StatesHook } from '../typings';
+import { createAlova } from '../src';
+import GlobalFetch from '../src/predefine/GlobalFetch';
 
 (global as any).fetch = (window as any).fetch = fetch;
 
@@ -14,6 +17,9 @@ console.warn = (...args: any[]) => {
   }
 };
 
+
+// -------------------
+// 服务模拟
 const result = (code: number, req: any, res: any, ctx: any, hasBody = false, extraParams = {}) => {
   const ret = {
     code,
@@ -39,7 +45,7 @@ const result = (code: number, req: any, res: any, ctx: any, hasBody = false, ext
 
 const baseURL = 'http://localhost:3000';
 const countMap = {} as Record<string, number>;
-export default setupServer(
+export const mockServer = setupServer(
   rest.get(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx)),
   rest.get(baseURL + '/unit-test-10s', (req, res, ctx) => {
     return new Promise(r => setTimeout(() => r(result(200, req, res, ctx)), 10000));
@@ -61,6 +67,9 @@ export default setupServer(
 );
 
 
+
+// -------------------------
+// 辅助函数
 export const untilCbCalled = <T>(
   setCb: (cb: (arg: T) => void, ...others: any[]) => void,
   ...args: any[]
@@ -69,3 +78,37 @@ export const untilCbCalled = <T>(
     resolve(d);
   }, ...args);
 });
+
+
+type AdapterConfig = AlovaRequestAdapterConfig<any, any, RequestInit, Headers>;
+export const getAlovaInstance = <S, E>(
+  statesHook: StatesHook<S, E>,
+  { localCache, beforeRequestExpect, responseExpect, resErrorExpect }: {
+    localCache?: LocalCacheConfig
+    beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
+    responseExpect?: (jsonPromise: Promise<any>, config: AdapterConfig) => void,
+    resErrorExpect?: (err: Error, config: AdapterConfig) => void,
+  } = {}
+) => {
+  return createAlova({
+    baseURL: 'http://localhost:3000',
+    timeout: 3000,
+    statesHook: statesHook,
+    requestAdapter: GlobalFetch(),
+    beforeRequest(config) {
+      beforeRequestExpect && beforeRequestExpect(config);
+      return config;
+    },
+    localCache,
+    responsed: {
+      onSuccess: (response, config) => {
+        const jsonPromise = response.json();
+        responseExpect && responseExpect(jsonPromise, config);
+        return jsonPromise;
+      },
+      onError: (err, config) => {
+        resErrorExpect && resErrorExpect(err, config);
+      }
+    }
+  });
+};

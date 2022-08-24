@@ -1,93 +1,20 @@
 import {
-  createAlova,
   useRequest,
   updateState,
-  cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
-import ReactHook from '../../../src/predefine/ReactHook';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server, { untilCbCalled } from '../../server';
-import { render, screen } from '@testing-library/react';
-import React, { ReactElement } from 'react';
+import { mockServer, getAlovaInstance, untilCbCalled } from '../../utils';
 import '@testing-library/jest-dom';
-import { getResponseCache } from '../../../src/storage/responseCache';
-import { key } from '../../../src/utils/helper';
-import { getPersistentResponse } from '../../../src/storage/responseStorage';
 
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: ReactHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed(response) {
-      const jsonPromise = response.json();
-      responseExpect && responseExpect(jsonPromise);
-      return jsonPromise;
-    }
-  });
-}
-function getInstanceWithVue() {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    responsed: response => response.json(),
-  });
-}
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
-describe('update cached response data by user', function() {
-  test('the cached response data should be changed and the screen should be update', async () => {
-    const alova = getInstance();
-    const Get = alova.Get('/unit-test', {
-      localCache: {
-        expire: 100000,
-        mode: cacheMode.STORAGE_PLACEHOLDER,
-      },
-      transformData: ({ data }: Result) => data,
-    });
-
-    function Page() {
-      const {
-        data = { path: '' },
-        onSuccess,
-      } = useRequest(Get);
-      onSuccess(() => updateState(Get, data => {
-        return {
-          ...data,
-          path: '/unit-test-updated',
-        };
-      }));
-      return <div role="path">{data.path}</div>;
-    }
-    render(<Page /> as ReactElement<any, any>);
-    await screen.findByText(/unit-test/);
-
-    // 延迟检查页面是否有更新
-    await untilCbCalled(setTimeout, 100);
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
-    const cacheData = getResponseCache(alova.id, key(Get)); 
-    expect(cacheData.path).toBe('/unit-test-updated');   // 除了状态数据被更新外，缓存也将会被更新
-    const storageData = getPersistentResponse(alova.id, key(Get), alova.storage);
-    expect(storageData.path).toBe('/unit-test-updated');   // 持久化数据也将被更新
-  });
-
+describe('update cached response data by user in vue', function() {
   test('test update function with vue', async () => {
-    const alova = getInstanceWithVue();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       localCache: 100000,
       transformData: ({ data }: Result) => data,
@@ -103,7 +30,7 @@ describe('update cached response data by user', function() {
 
 
   test('shouldn\'t be call when not get any states', () => {
-    const alova = getInstanceWithVue();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       params: { a: 1 },
       localCache: 100000,
@@ -120,7 +47,7 @@ describe('update cached response data by user', function() {
 
 
   test('should update the first matched one when find sereval Method instance', async () => {
-    const alova = getInstanceWithVue();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',
       params: { a: 1 },
@@ -151,7 +78,7 @@ describe('update cached response data by user', function() {
   });
 
   test('shouldn\'t throw error when not match any one', async () => {
-    const alova = getInstanceWithVue();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',
       params: { a: 1 },
@@ -185,7 +112,7 @@ describe('update cached response data by user', function() {
 
 
   test('delayed update data in silent request', async () => {
-    const alova = getInstanceWithVue();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       params: { a: 1 },
       transformData: ({ data }: Result) => data,

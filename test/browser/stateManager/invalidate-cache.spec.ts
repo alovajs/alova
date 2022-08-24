@@ -1,50 +1,21 @@
 import {
-  createAlova,
   useRequest,
   invalidateCache,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server, { untilCbCalled } from '../../server';
+import { mockServer, getAlovaInstance, untilCbCalled } from '../../utils';
 import Method from '../../../src/Method';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000/',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
 describe('invalitate cached response data', () => {
   test('It will use the default cache time when not set the cache time with `GET`', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
     });
@@ -55,7 +26,7 @@ describe('invalitate cached response data', () => {
   });
 
   test('the cached response data should be removed', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       localCache: 100000,
       transformData: ({ data }: Result) => data,
@@ -70,7 +41,7 @@ describe('invalitate cached response data', () => {
   });
 
   test('cache will be cleard when invalidateCache is called without params', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       localCache: Infinity,
       transformData: ({data}: Result) => data,
@@ -116,7 +87,7 @@ describe('invalitate cached response data', () => {
   });
 
   test('cache will be removed when invalidateCache is called with specific string', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'test-get1',
       localCache: Infinity,
@@ -165,7 +136,7 @@ describe('invalitate cached response data', () => {
   });
 
   test('cache will be removed that invalidateCache\'s regexp matches', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'test-get1',
       localCache: Infinity,
@@ -214,7 +185,7 @@ describe('invalitate cached response data', () => {
 
 
   test('cache will be removed that invalidateCache\'s regexp matches and filter one', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'test1-get',
       localCache: Infinity,
@@ -273,7 +244,7 @@ describe('invalitate cached response data', () => {
   });
 
   test('shouldn\'t throw error when not match any one', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'test-get1',
       localCache: Infinity,

@@ -34,17 +34,17 @@ export default {
     handler,
     removeStates,
     immediate,
-    watchStates,
+    watchingStates,
   }: EffectRequestParams) {
     onDestroy(removeStates);    // 组件卸载时移除对应状态
-    if (!watchStates) {
+    if (!watchingStates) {
       handler();
       return;
     }
 
     let timer: any;
     let needEmit = immediate;
-    forEach(watchStates, state => {
+    forEach(watchingStates, state => {
       state.subscribe(() => {
         timer && clearTimeoutTimer(timer);
         timer = setTimeoutFn(() => {

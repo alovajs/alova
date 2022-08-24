@@ -1,55 +1,25 @@
 import {
-  createAlova,
   useWatcher,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server from '../../server';
+import { mockServer, getAlovaInstance } from '../../utils';
 import { ref } from 'vue';
 import Method from '../../../src/Method';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    storageAdapter: localStorage,
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
 describe('use useWatcher hook to send GET with vue', function() {
   test('should specify at least one watching state', () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     expect(() => useWatcher(() => alova.Get<Result>('/unit-test'), [])).toThrowError();
   });
   test('should send request when change value', done => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method<any, any, any, any, any, any, any>;
@@ -120,7 +90,7 @@ describe('use useWatcher hook to send GET with vue', function() {
   });
 
   test('should send request one time when value change\'s time less then debounce', done => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method<any, any, any, any, any, any, any>;
@@ -179,7 +149,7 @@ describe('use useWatcher hook to send GET with vue', function() {
   });
 
   test('should send request when set the param `immediate`', done => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method<any, any, any, any, any, any, any>;
@@ -238,7 +208,7 @@ describe('use useWatcher hook to send GET with vue', function() {
   });
 
   test('initial request shouldn\'t delay when set the `immediate` and `debounce`', done => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method<any, any, any, any, any, any, any>;

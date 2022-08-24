@@ -1,49 +1,20 @@
 import {
-  createAlova,
   useFetcher,
   useRequest,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server, { untilCbCalled } from '../../server';
+import { mockServer, untilCbCalled, getAlovaInstance } from '../../utils';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
 describe('use useFetcher hook to fetch data', function() {
   test('should hit cached response when fetch data with default config', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const createGet = (params: Record<string, string>) => alova.Get('/unit-test-count', {
       params,
       timeout: 10000,
@@ -95,7 +66,7 @@ describe('use useFetcher hook to fetch data', function() {
   });
 
   test('should replace cached response when force fetch data', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const createGet = (params: Record<string, string>) => alova.Get('/unit-test-count', {
       params,
       timeout: 10000,

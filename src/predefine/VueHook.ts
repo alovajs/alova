@@ -19,13 +19,13 @@ export default {
     handler,
     removeStates,
     immediate,
-    watchStates,
+    watchingStates,
   }: EffectRequestParams) {
     onUnmounted(removeStates);    // 组件卸载时移除对应状态
-    if (!watchStates) {
+    if (!watchingStates) {
       handler();
       return;
     }
-    watch(watchStates, handler, { immediate });
+    watch(watchingStates, handler, { immediate });
   },
 };

@@ -1,46 +1,17 @@
 import {
-  createAlova,
   useRequest
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
-import server from '../../server';
-import { AlovaRequestAdapterConfig } from '../../../typings';
+import { mockServer, getAlovaInstance } from '../../utils';
 import { Result } from '../result.type';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
 describe('parallel request', function() {
   test('parallel request with `send` returned promise', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Getter = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
     });
@@ -63,7 +34,7 @@ describe('parallel request', function() {
 
 
   test('[request fail]parallel request with `send` returned promise', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Getter = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
     });
@@ -84,7 +55,7 @@ describe('parallel request', function() {
 
 
   test('parallel request with `onSuccess` and `onError` hook', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Getter = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
     });
@@ -115,7 +86,7 @@ describe('parallel request', function() {
 
 
   test('[request fail]parallel request with `onSuccess` and `onError` hook', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Getter = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
     });

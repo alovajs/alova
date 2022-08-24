@@ -1,11 +1,11 @@
-import server from '../../server';
+import { mockServer } from '../../utils';
 import '@testing-library/jest-dom'
 import {render, screen} from '@testing-library/svelte';
 import page from '../../components/svelte/page-useRequest.svelte';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 describe('useRequet hook with svelte', () => {
   test('send GET', async () => {
     render(page);

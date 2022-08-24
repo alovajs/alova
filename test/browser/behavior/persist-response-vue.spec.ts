@@ -1,40 +1,22 @@
 import {
-  createAlova,
   useRequest,
   cacheMode,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { LocalCacheConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server, { untilCbCalled } from '../../server';
+import { mockServer, untilCbCalled, getAlovaInstance } from '../../utils';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
 import { removeResponseCache } from '../../../src/storage/responseCache';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(localCache?: LocalCacheConfig) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      return config;
-    },
-    responsed: response => {
-      const jsonPromise = response.json();
-      return jsonPromise;
-    },
-    localCache,
-  });
-}
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
 describe('persist data', function() {
   test('should persist responsed data but it will send request when request again', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test-count', {
       params: { countKey: 'g' },
       localCache: {
@@ -62,7 +44,7 @@ describe('persist data', function() {
   });
 
   test('persistent data wouldn\'t be invalid when set persistTime to `Infinity`', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: Infinity,
@@ -86,7 +68,7 @@ describe('persist data', function() {
 
 
   test('persistent data will restore even if the cache of the same key is invalid', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100 * 1000,
@@ -108,9 +90,11 @@ describe('persist data', function() {
   });
 
   test('persistent data will invalid when param `tag` of alova instance is changed', async () => {
-    const alova = getInstance({
-      expire: 100 * 1000,
-      mode: cacheMode.STORAGE_RESTORE,
+    const alova = getAlovaInstance(VueHook, {
+      localCache: {
+        expire: 100 * 1000,
+        mode: cacheMode.STORAGE_RESTORE,
+      }
     });
     const Get = alova.Get('/unit-test', {
       transformData: ({data}: Result) => data,
@@ -137,7 +121,7 @@ describe('persist data', function() {
 
 
   test('persistent data will invalid when `methodInstance` param `tag` is changed', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100 * 1000,

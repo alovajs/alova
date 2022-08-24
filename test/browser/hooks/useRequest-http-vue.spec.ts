@@ -1,49 +1,20 @@
 import {
-  createAlova,
   useRequest,
 } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server, { untilCbCalled } from '../../server';
+import { mockServer, getAlovaInstance, untilCbCalled } from '../../utils';
 
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: VueHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 
 describe('use useRequet hook to send GET with vue', function() {
   test('init and send get request', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
@@ -86,9 +57,11 @@ describe('use useRequet hook to send GET with vue', function() {
   });
 
   test('send get with request error', async () => {
-    const alova = getInstance(undefined, undefined, error => {
-      console.log('error callback', error.message);
-      expect(error.message).toMatch(/404/);
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: error => {
+        console.log('error callback', error.message);
+        expect(error.message).toMatch(/404/);
+      }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-404', {
       localCache: {
@@ -120,11 +93,14 @@ describe('use useRequet hook to send GET with vue', function() {
   });
 
   test('send get with responseCallback error', async () => {
-    const alova = getInstance(undefined, () => {
-      throw new Error('responseCallback error');
-    }, error => {
-      console.log('error responseCallback', error.message);
-      expect(error.message).toMatch(/responseCallback error/);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: () => {
+        throw new Error('responseCallback error');
+      },
+      resErrorExpect: error => {
+        console.log('error responseCallback', error.message);
+        expect(error.message).toMatch(/responseCallback error/);
+      }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test');
     const {
@@ -148,9 +124,11 @@ describe('use useRequet hook to send GET with vue', function() {
   });
 
   test('abort request when timeout', async () => {
-    const alova = getInstance(undefined, undefined, error => {
-      console.log('error timeout', error.message);
-      expect(error.message).toMatch(/network timeout/);
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: error => {
+        console.log('error timeout', error.message);
+        expect(error.message).toMatch(/network timeout/);
+      }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-10s', {  timeout: 500 });
     const {
@@ -171,9 +149,11 @@ describe('use useRequet hook to send GET with vue', function() {
   });
 
   test('manual abort request', async () => {
-    const alova = getInstance(undefined, undefined, error => {
-      console.log('manual abort', error.message);
-      expect(error.message).toMatch(/user aborted a request/);
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: error => {
+        console.log('manual abort', error.message);
+        expect(error.message).toMatch(/user aborted a request/);
+      }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-10s');
     const {
@@ -196,12 +176,13 @@ describe('use useRequet hook to send GET with vue', function() {
   });
 
   test('it can pass custom params when call `send` function, and the function will return a Promise instance', async () => {
-    const alova = getInstance();
-    const getGetter = (index: number) => alova.Get('/unit-test', {
+    const alova = getAlovaInstance(VueHook);
+    const getGetter = (data: { a: string; b: string; }) => alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
       params: {
-        index,
+        a: data.a,
+        b: data.b
       }
     });
 
@@ -210,36 +191,39 @@ describe('use useRequet hook to send GET with vue', function() {
       send,
       onSuccess,
       onComplete
-    } = useRequest((index: number) => getGetter(index), {
+    } = useRequest(data => getGetter(data), {
       immediate: false,
     });
-
-    onSuccess((data, index) => {
-      console.log('success passed params', index);
+    onSuccess((data, obj) => {
       expect(data.path).toBe('/unit-test');
-      expect(index.toString()).toMatch(/3|5/);
+      expect(obj.a).toMatch(/~|\./);
+      expect(obj.b).toMatch(/~|\./);
     });
-    onComplete(index => {
-      console.log('complete passed params', index);
-      expect(index.toString()).toMatch(/3|5/);
+    onComplete(obj => {
+      expect(obj.a).toMatch(/~|\./);
+      expect(obj.b).toMatch(/~|\./);
     });
 
     // 延迟一会儿发送请求
     await untilCbCalled(setTimeout, 500);
-    let rawData = await send(3);
+    const sendObj = { a: '~', b: '~' };
+    let rawData = await send(sendObj);
     expect(rawData.path).toBe('/unit-test');
-    expect(rawData.params.index).toEqual('3');
-    await untilCbCalled(setTimeout, 500); // 等待响应
-    expect(data.value.params.index).toBe('3');
+    expect(rawData.params.a).toBe('~');
+    expect(data.value.params.b).toBe('~');
+    let cacheData: typeof data.value = getResponseCache(alova.id, key(getGetter(sendObj)));
+    expect(cacheData.params).toEqual(sendObj);
     
-    rawData = await send(5);
-    expect(rawData.params.index).toEqual('5');
-    await untilCbCalled(setTimeout, 500); // 等待响应
-    expect(data.value.params.index).toBe('5');
+    const sendObj2 = { a: '.', b: '.' };
+    rawData = await send(sendObj2);
+    expect(rawData.params.a).toBe('.');
+    expect(data.value.params.b).toBe('.');
+    cacheData = getResponseCache(alova.id, key(getGetter(sendObj2)));
+    expect(cacheData.params).toEqual(sendObj2);
   });
 
   test('should throw a request error when request error at calling `send` function', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const getGetter = (index: number) => alova.Get('/unit-test-404', {
       transformData: ({ data }: Result<true>) => data,
       params: {
@@ -276,7 +260,7 @@ describe('use useRequet hook to send GET with vue', function() {
   });
 
   test('shouldn\'t be changed when modify states', () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(VueHook);
     const Get = alova.Get('/unit-test');
     const {
       data,

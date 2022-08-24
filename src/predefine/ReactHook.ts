@@ -1,7 +1,7 @@
 import {
   Dispatch,
   SetStateAction,
-  // useCallback,
+  useCallback,
   useEffect,
   useRef,
   useState
@@ -28,10 +28,10 @@ export default {
   effectRequest({
     handler,
     removeStates,
-    // saveStates,
+    saveStates,
     immediate,
-    // frontStates,
-    watchStates = [],
+    frontStates,
+    watchingStates = [],
   }: EffectRequestParams) {
 
     // 当有监听状态时，状态变化再触发
@@ -39,14 +39,14 @@ export default {
     useEffect(() => {
       needEmit.current ? handler() : (needEmit.current = trueValue);
       return removeStates;    // 组件卸载时移除对应状态
-    }, watchStates);
+    }, watchingStates);
 
     // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
     // 当frontSatates变化时重新保存状态
-    // const needSave = useRef(false);
-    // const saveStatesFn = useCallback(saveStates, []);
-    // useEffect(() => {
-    //   needSave.current ? saveStatesFn(frontStates) : (needSave.current = trueValue);
-    // }, Object.values(frontStates).map(([state]) => state));
+    const needSave = useRef(false);
+    const saveStatesFn = useCallback(saveStates, []);
+    useEffect(() => {
+      needSave.current ? saveStatesFn(frontStates) : (needSave.current = trueValue);
+    }, Object.values(frontStates).map(([state]) => state));
   },
 };

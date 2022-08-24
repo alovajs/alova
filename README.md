@@ -55,7 +55,7 @@ The request scene management library of the MVVM library, it is an arm of the re
     - [useWatcher](#useWatcher)
     - [useFetcher](#useFetcher)
   - [response data management](#response-data-management)
-    - [convert response data](#convert-response-data)
+    - [Transform response data](#transform-response-data)
     - [Actively invalidate the response cache](#actively-invalidate-the-response-cache)
     - [Update response data across pages or modules](#update-response-data-across-pages-or-modules)
     - [Custom setting cache data](#custom-setting-cache-data)
@@ -71,6 +71,7 @@ The request scene management library of the MVVM library, it is an arm of the re
   - [Serial request](#serial-request)
   - [Silent submit](#silent-submit)
   - [Offline submit](#offline-submit)
+  - [Delayed data update](#delayed-data-update)
 - [Advanced](#advanced)
   - [Custom request adapter](#custom-request-adapter)
   - [Custom statesHook](#custom-stateshook)
@@ -559,11 +560,11 @@ const {
 
 
 ### useFetcher
-It is used to pull data, and the response data cannot be received directly. The request of `useFetcher` is positioned as follows:
-1. Preload the data that will be used in the subsequent process, so that users no longer wait for the process of data loading;
-2. Refresh the interface data across pages. When the pulled data is rendered in the page, it will update the response state in addition to updating the cache, so that the interface refreshes. For example, after modifying an item in the todo list, the latest data is pulled again. The interface will be refreshed after the response.
+It is used to pull data, and the response data cannot be received directly. The usage scenarios of `useFetcher` are as follows:
+1. Preload the data that will be used in the subsequent process and store it in the cache, so that users no longer wait for the process of data loading;
+2. Refresh interface data across pages. When the pulled data is rendered in the page, it will not only update the cache, but also update the response status to refresh the interface. For example, after modifying an item in the todo list, the latest data will be pulled again. The interface will be refreshed after the response.
 
-In contrast to `useRequest` and `useWatcher`, `useFetcher` requires an `alova` instance object to determine how the state should be created, and it does not return a `data` field, renames `loading` to `fetching`, and does not `send` function, but with an additional fetch function, you can reuse the fetch function to pull different data, and use the same fetching and error states, so as to achieve the purpose of unified processing.
+In contrast to `useRequest` and `useWatcher`, `useFetcher` requires an `alova` instance object to determine how the state should be created, and it does not return a `data` field, renames `loading` to `fetching`, and does not `send` function, but with an additional `fetch` function, you can reuse the fetch function to pull different data, and use the same fetching and error states, so as to achieve the purpose of unified processing.
 
 Now let's modify a certain todo data, and re-pull the latest todo list data to refresh the interface.
 
@@ -622,7 +623,7 @@ The fetch function will ignore the existing cache, forcibly initiate a request a
 ## Response data management
 The response data is stateful and managed uniformly, and we can access any response data at any location and operate on them.
 
-### Convert response data
+### Transform response data
 When the response data structure cannot directly meet the front-end requirements, we can set the `transformData` hook function for the method instance to convert the response data into the required structure, and the data will be used as the value of the `data` state after conversion.
 
 ```javascript
@@ -753,7 +754,10 @@ onSuccess(() => {
   });
 });
 ```
-> When you modify the cached data independently, not only will the corresponding responsive state be updated, but if there is a persistent cache, it will also be updated together.
+> 1. When you modify the cached data, not only will the corresponding responsive state be updated, but if there is a persistent cache, it will also be updated together.
+> 2. Alova manages the state returned by the hook only when useRequest and useWatcher are used to initiate a request. The reason is that the response state is generated and saved through a Method object, but the url in the Method object is not initiated when the request is not initiated. , params, query, headers and other parameters are still uncertain.
+
+Maybe sometimes you want to call `updateState` to update the data immediately when the todo creation data is silently submitted, and also want to update the `id` again after the todo item is created, you can learn more about [Update delayed data](#update-delayed-data)
 
 
 ### Custom setting cache data
@@ -1078,6 +1082,22 @@ const handleSubmit = () => {
 };
 ```
 
+There is a problem with the above silent submission, that is, the new todo item does not have an id, and the id generally needs to wait for the submission to return. At this time, we can use delayed data update.
+```javascript
+// omit other code...
+onSuccess(() => {
+   updateState(todoListGetter, todoList => [
+     ...todoList,
+     {
+       // id is set as a placeholder, which will be automatically replaced with actual data after waiting for the response
+       '+id': ({ id }) => id,
+       ...newTodo
+     }
+   ]);
+});
+```
+Dive into [Delayed data update](#delayed-data-update).
+
 ### Offline submit
 If you are developing an online document writer, each input of the user needs to be automatically synchronized to the server, and the user can continue to write even in the offline state. In this scenario, we can use the offline submission mechanism of `alova` , in fact, this function and the silent submission function are integrated, both benefit from the reliable mechanism of `alova` background request.
 
@@ -1103,6 +1123,183 @@ const {
 ```
 
 This completes the simple online document writer. Of course, offline submission is also applicable in the example of silent submission to create todo items, that is, the smooth creation of todo items can be guaranteed even in the offline state.
+
+
+### Delayed data update
+You may have such a requirement: when you create a todo item, set it to silent submission, and immediately call `updateState` to update the todo list, so that although you can immediately see the newly added todo item on the interface, there is no id yet, so this Todo items cannot be edited and deleted unless the full data is requested again.
+
+Deferred data update is used to solve this problem, it allows you to mark the id field with a placeholder format, replace the placeholder with a `default` value or `undefined` before the response, and then automatically put it after the response. The actual data replaces placeholder markers.
+```javascript
+const newTodo = {
+  title: '...',
+  time: '10:00'
+};
+const { onSuccess } = useRequest(/*...*/); // silent submit
+onSuccess(() => {
+  updateState(/*...*/, todoList => {
+    const newTodoWithPlaceholder = {
+      // Complete writing of placeholder format
+      id: {
+        // The value of action is a fixed spelling
+        action: 'responsed',
+
+        // getter function for delayed update
+        // It will be called after the response and replace the return value on the id property, the res parameter is the response data
+        value: res => res.id,
+
+        // Default value before data update, optional, undefined if not set
+        default: 0,
+      },
+      ...newTodo,
+    };
+
+    return [
+      ...todoList,
+      newTodoWithPlaceholder,
+    ];
+  });
+});
+```
+The above `newTodoWithPlaceholder` data will be compiled into the following value before responding, and the todo list page can immediately display the new todo item.
+```javascript
+{
+  id: 0, // because the default value before the request is set
+  title: '...',
+  time: '10:00',
+};
+```
+After the response, the id will be replaced by the return value of the getter function. At this time, the new todo item also supports operations such as editing and deleting.
+```javascript
+// Assume the response data is { id: 10 }
+{
+  id: 10,
+  title: '...',
+  time: '10:00',
+};
+```
+
+Delayed data placeholders can be used anywhere.
+
+used in array.
+```javascript
+[1, 2, { action: 'responsed', value: res => res.id }]
+
+// data before response
+[1, 2, undefined]
+
+// data after response
+// Assume the response data is { id: 10 }
+[1, 2, 10]
+```
+
+used on the object.
+```javascript
+{
+  a: { action: 'responsed', value: res => res.id },
+  b: { action: 'responsed', value: res => res.id, default: 1 },
+}
+// When placeholders are set to object properties, they can be abbreviated as follows
+// key starts with "+"
+{
+  '+a': res => res.id, // only set the getter function
+  '+b': [res => res.id, 1], // set the getter function and default value
+}
+
+// data before response
+{
+  a: undefined,
+  b: 1,
+}
+
+// data after response
+// Assume the response data is { id: 10 }
+{
+  a: 10,
+  b: 10,
+}
+```
+
+Use on non-arrays and objects.
+```javascript
+// directly represented as a placeholder
+{
+  action: 'responsed',
+  value: res => res.data,
+  default: { name: '', age: 0 }
+}
+
+// data before response
+{ name: '', age: 0 }
+
+// data after response
+// Assume the response data is { data: { name: 'Tom', age: 18 } }
+{ name: 'Tom', age: 18 }
+```
+
+Used in combinations of arrays and objects
+```javascript
+[
+   1,
+   {action: 'responsed', value: res => res.id, default: 12},
+   res => res.id,
+   4,
+   {
+     a: 1,
+     b: 2,
+     '+c': res => res.id,
+     d: {action: 'responsed', value: res => res.id, default: 24},
+     e: [
+       {action: 'responsed', value: res => res.id, default: 36},
+       3,
+       6
+     ]
+   }
+]
+
+// data before response
+[
+   1,
+   12,
+   res => res.id, // shorthand can only be used in objects with + prefixed key, so does not compile
+   4,
+   {
+     a: 1,
+     b: 2,
+     c: undefined,
+     d: 24,
+     e: [
+       36,
+       3,
+       6
+     ]
+   }
+]
+
+// data after response
+// Assume the response data is { id: 10 }
+[
+   1,
+   10,
+   res => res.id, // shorthand can only be used in objects with + prefixed key, so does not compile
+   4,
+   {
+     a: 1,
+     b: 2,
+     c: 10
+     d: 10,
+     e: [
+       10,
+       3,
+       6
+     ]
+   }
+]
+```
+
+
+> ⚠️Limitation 1: Delayed data update is only valid in silent mode, and the `updateState` function is called synchronously in the `onSuccess` callback function, otherwise it may cause data confusion or error.
+
+> ⚠️ Limitation 2: If there is a circular reference in the updated value of `updateState`, the delayed data update will no longer take effect
 
 
 ## Advanced

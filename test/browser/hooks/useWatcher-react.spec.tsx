@@ -1,51 +1,19 @@
 import React, { ReactElement, useState } from 'react';
 import {
-  createAlova,
   useWatcher,
 } from '../../../src';
 import ReactHook from '../../../src/predefine/ReactHook';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server from '../../server';
+import { getAlovaInstance, mockServer } from '../../utils';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000/',
-    timeout: 3000,
-    statesHook: ReactHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
-
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 describe('useWatcher hook with react', () => {
   test('should send request when change value', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(ReactHook);
     const getter = (id1: number, id2: number) => alova.Get('/unit-test', {
       params: {
         id1,
@@ -104,7 +72,7 @@ describe('useWatcher hook with react', () => {
   });
 
   test('should send request when init', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(ReactHook);
     const getter = (id1: number, id2: number) => alova.Get('/unit-test', {
       params: {
         id1,

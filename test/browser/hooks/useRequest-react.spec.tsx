@@ -5,42 +5,14 @@ import {
 } from '../../../src';
 import ReactHook from '../../../src/predefine/ReactHook';
 import GlobalFetch from '../../../src/predefine/GlobalFetch';
-import { AlovaRequestAdapterConfig } from '../../../typings';
 import { Result } from '../result.type';
-import server, { untilCbCalled } from '../../server';
+import { mockServer, getAlovaInstance, untilCbCalled } from '../../utils';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { getStateCache } from '../../../src/storage/stateCache';
 import { key } from '../../../src/utils/helper';
 
-
-function getInstance(
-  beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void,
-  responseExpect?: (jsonPromise: Promise<any>) => void,
-  resErrorExpect?: (err: Error) => void,
-) {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: ReactHook,
-    requestAdapter: GlobalFetch(),
-    beforeRequest(config) {
-      beforeRequestExpect && beforeRequestExpect(config);
-      return config;
-    },
-    responsed: {
-      onSuccess: response => {
-        const jsonPromise = response.json();
-        responseExpect && responseExpect(jsonPromise);
-        return jsonPromise;
-      },
-      onError: err => {
-        resErrorExpect && resErrorExpect(err);
-      }
-    }
-  });
-}
-function getInstanceSyncResponsed() {
+function getAlovaInstanceSyncResponsed() {
   return createAlova({
     baseURL: 'http://localhost:3000',
     timeout: 3000,
@@ -54,13 +26,12 @@ function getInstanceSyncResponsed() {
   });
 }
 
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 describe('useRequet hook with react', () => {
   test('send GET', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(ReactHook);
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
@@ -89,7 +60,7 @@ describe('useRequet hook with react', () => {
   });
 
   test('shouldn\'t send request when set `immediate=false`', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(ReactHook);
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
@@ -122,7 +93,7 @@ describe('useRequet hook with react', () => {
   });
 
   test('should return sync mock data from responsed hook', async () => {
-    const alova = getInstanceSyncResponsed();
+    const alova = getAlovaInstanceSyncResponsed();
     const Get = alova.Get<{mock: string}>('/unit-test');
     function Page() {
       const { data, onSuccess } = useRequest(Get);
@@ -135,7 +106,7 @@ describe('useRequet hook with react', () => {
   });
 
   test('states should be remove in cache when component was unmounted', async () => {
-    const alova = getInstance();
+    const alova = getAlovaInstance(ReactHook);
     const Get = alova.Get('unit-test', {
       transformData: ({ data }: Result) => data,
     });

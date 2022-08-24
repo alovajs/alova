@@ -1,12 +1,12 @@
-import server, { untilCbCalled } from '../../server';
+import { mockServer, untilCbCalled } from '../../utils';
 import '@testing-library/jest-dom'
 import {fireEvent, render, screen} from '@testing-library/svelte';
 import page from '../../components/svelte/page-useWatcher.svelte';
 import pageImmediate from '../../components/svelte/page-useWatcher-immediate.svelte';
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+beforeAll(() => mockServer.listen());
+afterEach(() => mockServer.resetHandlers());
+afterAll(() => mockServer.close());
 describe('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {
     render(page);

@@ -83,9 +83,26 @@ interface EffectRequestParams {
   removeStates: () => void,
   saveStates: (frontStates: FrontRequestState) => void,
   frontStates: FrontRequestState,
-  watchStates?: any[],
+  watchingStates?: any[],
   immediate: boolean,
 }
+
+interface StatesHook<S, E> {
+  create: <D>(data: D) => S,
+  export: (state: S) => E,
+
+  // 将状态转换为普通数据
+  dehydrate: (state: S) => any,
+  update: (newVal: Partial<FrontRequestState>, state: FrontRequestState) => void,
+
+  // 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
+  // 在useFetcher中的fetch函数中执行一次
+  // 当watchedStates为空数组时，执行一次handleRequest函数
+  // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
+  // 在vue中直接执行即可，而在react中需要在useEffect中执行
+  // removeStates函数为清除当前状态的函数，应该在组件卸载时调用
+  effectRequest: (effectParams: EffectRequestParams) => void,
+};
 
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
@@ -98,22 +115,7 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
   baseURL: string,
   
   // 状态hook函数，用于定义和更新指定MVVM库的状态
-  statesHook: {
-    create: <D>(data: D) => S,
-    export: (state: S) => E,
-
-    // 将状态转换为普通数据
-    dehydrate: (state: S) => any,
-    update: (newVal: Partial<FrontRequestState>, state: FrontRequestState) => void,
-
-    // 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
-    // 在useFetcher中的fetch函数中执行一次
-    // 当watchedStates为空数组时，执行一次handleRequest函数
-    // 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
-    // 在vue中直接执行即可，而在react中需要在useEffect中执行
-    // removeStates函数为清除当前状态的函数，应该在组件卸载时调用
-    effectRequest: (effectParams: EffectRequestParams) => void,
-  },
+  statesHook: StatesHook<S, E>,
 
   // 请求适配器
   requestAdapter: AlovaRequestAdapter<any, any, RC, RE, RH>,

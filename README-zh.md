@@ -71,6 +71,7 @@ MVVM库的请求场景管理库，它是对请求库的一种武装，而非替�
   - [串行请求](#串行请求)
   - [静默提交](#静默提交)
   - [离线提交](#离线提交)
+  - [延迟数据更新](#延迟数据更新)
 - [高级](#高级)
   - [自定义请求适配器](#自定义请求适配器)
   - [自定义statesHook](#自定义statesHook)
@@ -561,11 +562,11 @@ const {
 
 
 ### useFetcher
-它用于拉取数据，响应数据不能直接接收到，`useFetcher`的请求定位如下：
-1. 预加载后续流程中将会使用到的数据，让用户不再等待数据加载的过程；
+它用于拉取数据，响应数据不能直接接收到，`useFetcher`的使用场景如下：
+1. 预加载后续流程中将会使用到的数据并存放在缓存中，让用户不再等待数据加载的过程；
 2. 跨页面刷新界面数据，拉取的数据在页面中存在渲染时，它除了会更新缓存外还会更新响应状态，让界面刷新，例如修改todo列表的某一项后重新拉取最新数据，响应后将会刷新界面。
 
-与`useRequest`和`useWatcher`相比，`useFetcher`需要传入`alova`实例对象来确定应该如何创建状态，而且它不返回`data`字段，将`loading`改名为了`fetching`，也没有`send`函数，但多了一个fetch函数，可以重复利用fetch函数拉取不同的数据，且使用同一个fetching和error等状态，从而达到统一处理的目的。
+与`useRequest`和`useWatcher`相比，`useFetcher`需要传入`alova`实例对象来确定应该如何创建状态，而且它不返回`data`字段，将`loading`改名为了`fetching`，也没有`send`函数，但多了一个`fetch`函数，可以重复利用fetch函数拉取不同的数据，且使用同一个fetching和error等状态，从而达到统一处理的目的。
 
 下面我们来实现修改某个todo数据，并重新拉取最新的todo列表数据，让界面刷新。
 
@@ -619,7 +620,7 @@ const handleSubmit = () => {
 <!-- 省略todo参数设置相关的html -->
 <button @click="handleSubmit">修改todo项</button>
 ```
-fetch函数将会忽略已有缓存，强制发起请求并更新缓存，至于`Method`对象匹配器，详细的使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
+fetch函数将会忽略已有缓存，强制发起请求并更新缓存。至于`Method`对象匹配器，详细的使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
 
 ## 响应数据管理
 响应数据状态化并统一管理，我们可以在任意位置访问任意的响应数据，并对它们进行操作。
@@ -755,7 +756,10 @@ onSuccess(() => {
   });
 });
 ```
-> 自主修改缓存数据时，不仅会更新对应的响应式状态，如果存在持久化缓存也会一起被更新。
+> 1. 自主修改缓存数据时，不仅会更新对应的响应式状态，如果存在持久化缓存也会一起被更新。
+> 2. 只有当使用useRequest、useWatcher发起过请求时，alova才会管理hook返回的状态，原因是响应状态是通过一个Method对象来生成key并保存的，但在未发起请求时Method对象内的url、params、query、headers等参数都还不确定。
+
+可能有时候你会希望在静默提交todo创建数据时，立即调用`updateState`更新数据，并且还希望在todo项创建完成后再次把`id`更新上去，你可以深入了解 [延迟数据更新](#延迟数据更新)
 
 
 ### 自定义设置缓存数据
@@ -1080,6 +1084,22 @@ const handleSubmit = () => {
 };
 ```
 
+上面的静默提交会有一个问题，就是新的todo项没有id，而id一般需要等提交返回才行，此时我们可以使用延迟数据更新。
+```javascript
+// 省略其他代码...
+onSuccess(() => {
+  updateState(todoListGetter, todoList => [
+    ...todoList,
+    {
+      // id设为占位符，等待响应后将自动替换为实际数据
+      '+id': ({ id }) => id,
+      ...newTodo
+    }
+  ]);
+});
+```
+深入了解[延迟数据更新](#延迟数据更新)
+
 ### 离线提交
 如果你正在开发一个在线文档编写器，用户的每次输入都需要自动同步到服务端，即使是离线状态下也支持用户继续编写，在这种场景下，我们可以使用`alova`的离线提交机制，其实这个功能和静默提交功能是一体化的，都是得益于`alova`的后台请求可靠机制。
 
@@ -1105,6 +1125,181 @@ const {
 ```
 
 这样就完成了简单的在线文档编写器。当然，在静默提交创建todo项的例子中离线提交也是适用的，即在离线状态下也能保证顺利创建todo项。
+
+### 延迟数据更新
+你可能会有这样的需求：创建一个todo项时设为静默提交，并立即调用`updateState`更新todo列表，这样虽然可以立即在界面上看到新增的todo项，但还没有id，因此这个todo项无法被编辑和删除，除非重新请求完整数据。
+
+延迟数据更新就是用来解决这个问题的，它支持你用一种占位格式来标记id字段，在响应前会将占位符替换为`default`值或`undefined`，然后在响应后自动把实际数据替换占位标记。
+```javascript
+const newTodo = {
+  title: '...',
+  time: '10:00'
+};
+const { onSuccess } = useRequest(/*...*/);  // 静默提交
+onSuccess(() => {
+  updateState(/*...*/, todoList => {
+    const newTodoWithPlaceholder = {
+      // 占位格式完整写法
+      id: {
+        // action的值是固定写法
+        action: 'responsed',
+
+        // 延迟更新的getter函数
+        // 它将在响应后调用并将返回值替换到id属性上，res参数是响应数据
+        value: res => res.id,
+
+        // 数据更新前的默认值，可选项，不设时为undefined
+        default: 0,
+      },
+      ...newTodo,
+    };
+
+    return [
+      ...todoList,
+      newTodoWithPlaceholder,
+    ];
+  });
+});
+```
+以上`newTodoWithPlaceholder`数据在响应前将会被编译成如下的值，此时todo列表页可以立即展示新的todo项。
+```javascript
+{
+  id: 0,  // 因为设置了请求前的默认值
+  title: '...',
+  time: '10:00',
+};
+```
+响应后id将被getter函数的返回值替换，此时新的todo项也支持编辑和删除等操作了。
+```javascript
+// 假设响应数据为  { id: 10 }
+{
+  id: 10,
+  title: '...',
+  time: '10:00',
+};
+```
+
+延迟数据占位符可以用在任意位置。
+
+用在数组中
+```javascript
+[1, 2, {  action: 'responsed', value: res => res.id }]
+
+// 响应前的数据
+[1, 2, undefined]
+
+// 响应后的数据
+// 假设响应数据为  { id: 10 }
+[1, 2, 10]
+```
+
+用在对象上
+```javascript
+{
+  a: {  action: 'responsed', value: res => res.id },
+  b: {  action: 'responsed', value: res => res.id, default: 1 },
+}
+// 占位符设置到对象属性上时，可如下简写
+// key以“+”开头
+{
+  '+a': res => res.id,  // 只设置了getter函数
+  '+b': [res => res.id, 1],   // 设置了getter函数和默认值
+}
+
+// 响应前的数据
+{
+  a: undefined,
+  b: 1,
+}
+
+// 响应后的数据
+// 假设响应数据为  { id: 10 }
+{
+  a: 10,
+  b: 10,
+}
+```
+
+用在非数组和对象上
+```javascript
+// 直接以占位符表示
+{
+  action: 'responsed',
+  value: res => res.data,
+  default: { name: '', age: 0 }
+}
+
+// 响应前的数据
+{ name: '', age: 0 }
+
+// 响应后的数据
+// 假设响应数据为  { data: { name: 'Tom', age: 18 } }
+{ name: 'Tom', age: 18 }
+```
+
+用在数组和对象的组合中
+```javascript
+[
+  1,
+  {action: 'responsed', value: res => res.id, default: 12},
+  res => res.id,
+  4,
+  {
+    a: 1,
+    b: 2,
+    '+c': res => res.id,
+    d: {action: 'responsed', value: res => res.id, default: 24},
+    e: [
+      {action: 'responsed', value: res => res.id, default: 36},
+      3,
+      6
+    ]
+  }
+]
+
+// 响应前的数据
+[
+  1,
+  12,
+  res => res.id,  // 简写只能在+为前缀key的对象中使用，因此不编译
+  4,
+  {
+    a: 1,
+    b: 2,
+    c: undefined,
+    d: 24,
+    e: [
+      36,
+      3,
+      6
+    ]
+  }
+]
+
+// 响应后的数据
+// 假设响应数据为  { id: 10 }
+[
+  1,
+  10,
+  res => res.id,  // 简写只能在+为前缀key的对象中使用，因此不编译
+  4,
+  {
+    a: 1,
+    b: 2,
+    c: 10
+    d: 10,
+    e: [
+      10,
+      3,
+      6
+    ]
+  }
+]
+```
+
+> ⚠️限制1：延迟数据更新只有在静默模式下，且在`onSuccess`回调函数中同步调用`updateState`函数有效，否则可能会造成数据错乱或报错。
+
+> ⚠️限制2：如果`updateState`更新后的值中有循环引用的，延迟数据更新将不再生效
 
 ## 高级
 ### 自定义请求适配器
