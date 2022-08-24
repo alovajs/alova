@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Request scene management library for MVVM libraries such as Vue.js and React.js",
   "main": "dist/alova.umd.min.js",
   "jsnext:main": "dist/alova.esm.js",
