@@ -155,7 +155,7 @@ export default {
     // "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?",
     // "**/test/browser/behavior/persist-response-vue.spec.ts",
     // "**/test/browser/batch/parallel-request.spec.ts",
-    // "**/test/browser/stateManager/update-state.spec.ts(x)?",
+    // "**/test/browser/stateManager/update-state-react.spec.ts(x)?",
     // "**/test/browser/global/request-response-hook.spec.ts(x)?",
     // "**/test/browser/utils/walkUpdatingDataStructure.spec.ts(x)?",
   ],

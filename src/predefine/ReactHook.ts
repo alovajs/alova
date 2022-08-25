@@ -42,11 +42,11 @@ export default {
     }, watchingStates);
 
     // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
-    // 当frontSatates变化时重新保存状态
+    // 因此每次都需要更新管理的状态
     const needSave = useRef(false);
     const saveStatesFn = useCallback(saveStates, []);
     useEffect(() => {
       needSave.current ? saveStatesFn(frontStates) : (needSave.current = trueValue);
-    }, Object.values(frontStates).map(([state]) => state));
+    });
   },
 };

@@ -1426,9 +1426,11 @@ Description of each function of custom `statesHook`:
     2. When calling useWatcher, bind the state monitor, and call the sendRequest function when the state changes. You can use whether `states` is an array to judge whether `useWatcher` is called, and at the same time, the `immediate` parameter is used to judge the `useWatcher` call whether the request needs to be sent immediately;
     3. When calling `useRequest` and `useFetcher`, call sendRequest to send a request, at this time `states` is `undefined`;
 
-> ⚠️ Note: If the library involved in statesHook is like `react`, the use hook of `alova` will be called every time it is re-rendered, then you need to listen to the response state `frontStates` in `effectRequest`, and trigger when they change` saveStates function, this is because `react` refreshes its state references every time it re-renders, so we need to re-save them again.
+> ⚠️ Note: If the library involved in statesHook is like `react`, the use hook of `alova` will be called every time it is re-rendered, then in `effectRequest`, you need to trigger the `saveStates` function every time you re-render, this It's because `react` refreshes its state references every time it re-renders, so we need to re-save them again.
 
-If you want it to support typescript after customizing statesHook, you can [click here to view](#custom statesHook type)
+[Click here to view the ReactHook source code](https://github.com/JOU-amjs/alova/blob/main/src/predefine/ReactHook.ts)
+
+If you want it to support typescript after customizing statesHook, you can [click here to view](#custom-statesHook-type)
 
 ### Custom Storage Adapter
 `alova` involves multiple functions that require data persistence, such as persistent caching, silent submit, and offline submit. By default, `alova` will use `localStorage` to store persistent data, but for non-browser environments, customization is also supported.
