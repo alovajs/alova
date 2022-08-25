@@ -122,12 +122,11 @@ describe('update cached response data by user in vue', function() {
       params: { b: 2 },
       localCache: 100000,
       transformData: ({ data }: Result) => data,
-      silent: true,
     });
     const firstState = useRequest(Get1);
     await untilCbCalled(firstState.onSuccess);
     
-    const secondState = useRequest(Get2);
+    const secondState = useRequest(Get2, { silent: true });
     await new Promise(res => {
       secondState.onSuccess(() => {
         updateState(Get1, rawData => {

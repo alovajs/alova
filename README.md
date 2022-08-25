@@ -1057,15 +1057,15 @@ You might be thinking, can the server render the results to the user without a r
 
 Let's show the code that silently creates todo items.
 ```javascript
-const createTodoPoster = newTodo => alova.Post('/todo/create', newTodo, {
-  // First, enable silent submit
-  silent: true,
-});
+const createTodoPoster = newTodo => alova.Post('/todo/create', newTodo);
 
 const {
   send,
   onSuccess
-} = useRequest(createTodoPoster);
+} = useRequest(createTodoPoster, {
+  // enable silent submit when request
+  silent: true,
+});
 onSuccess(() => {
   // After silent submission, onSuccess will be called immediately, and the first parameter of the callback function is undefined
   // and onError will never be called
@@ -1106,16 +1106,18 @@ Its processing method is that when silent submission is enabled, submitting data
 Next, we take the online document writer as an example to show the code submitted offline.
 ```javascript
 const editingText = ref('');
+const saveDoc = () => alova.Post('/doc/save', {
+  text: editingText.value
+});
 const {
   loading
-} = useWatcher(() => alova.Post('/doc/save', {
-  text: editingText.value
-}, {
+} = useWatcher(saveDoc, [editingText], {
   // enable silent submit
   silent: true,
 
   // Set 500ms anti-shake to reduce server pressure
-}), [editingText], { debounce: 500 });
+  debounce: 500
+});
 ```
 ```html
 <div v-if="loading">Submitting...</div>
@@ -1391,19 +1393,26 @@ const VueHook = {
   },
 
   // request to send control function
-  effectRequest(sendRequest, removeStates, { immediate, states }) {
+  effectRequest({
+    handler,
+    removeStates,
+    saveStates,
+    immediate,
+    frontStates,
+    watchingStates
+  }) {
     // Remove the corresponding state when the component is unloaded
     onUnmounted(removeStates);
 
-    // When calling useRequest and useFetcher, states are undefined
-    if (!states) {
-      sendRequest();
+    // When calling useRequest and useFetcher, watchingStates are undefined
+    if (!watchingStates) {
+      handler();
       return;
     }
 
-    // When useWatcher is called, states is an array of states that need to be monitored
+    // When useWatcher is called, watchingStates is an array of states that need to be monitored
     // When immediate is true, it means that the request needs to be sent immediately
-    watch(states, sendRequest, { immediate });
+    watch(watchingStates, handler, { immediate });
   },
 };
 ```
@@ -1417,7 +1426,9 @@ Description of each function of custom `statesHook`:
     2. When calling useWatcher, bind the state monitor, and call the sendRequest function when the state changes. You can use whether `states` is an array to judge whether `useWatcher` is called, and at the same time, the `immediate` parameter is used to judge the `useWatcher` call whether the request needs to be sent immediately;
     3. When calling `useRequest` and `useFetcher`, call sendRequest to send a request, at this time `states` is `undefined`;
 
-> If you want it to support typescript after customizing statesHook, you can [click here to view](#custom statesHook type)
+> ⚠️ Note: If the library involved in statesHook is like `react`, the use hook of `alova` will be called every time it is re-rendered, then you need to listen to the response state `frontStates` in `effectRequest`, and trigger when they change` saveStates function, this is because `react` refreshes its state references every time it re-renders, so we need to re-save them again.
+
+If you want it to support typescript after customizing statesHook, you can [click here to view](#custom statesHook type)
 
 ### Custom Storage Adapter
 `alova` involves multiple functions that require data persistence, such as persistent caching, silent submit, and offline submit. By default, `alova` will use `localStorage` to store persistent data, but for non-browser environments, customization is also supported.

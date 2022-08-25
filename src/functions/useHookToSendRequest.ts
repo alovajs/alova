@@ -3,7 +3,7 @@ import { pushSilentRequest } from '../storage/silentStorage';
 import { getLocalCacheConfigParam, instanceOf, key, noop, serializeMethod } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import sendRequest from './sendRequest';
-import { CompleteHandler, ErrorHandler, FrontRequestState, SuccessHandler, UseHookConfig } from '../../typings';
+import { CompleteHandler, ErrorHandler, FrontRequestHookConfig, FrontRequestState, SuccessHandler, UseHookConfig } from '../../typings';
 import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
 import { falseValue, forEach, getConfig, getContext, nullValue, promiseCatch, promiseReject, promiseResolve, promiseThen, pushItem, setTimeoutFn, STORAGE_RESTORE, trueValue, undefinedValue } from '../utils/variables';
 import { silentRequestPromises } from './updateState';
@@ -31,10 +31,17 @@ import { SaveStateFn } from './createRequestState';
   responserHandlerArgs: any[] = [],
   updateCacheState = falseValue,
 ) {
-  const forceRequest = !!useHookConfig.force;
-  const { id, options, storage } = getContext(methodInstance);
+  const {
+    force: forceRequest = falseValue,
+    silent = falseValue
+  } = useHookConfig as FrontRequestHookConfig<R>;
+  const {
+    id,
+    options,
+    storage
+  } = getContext(methodInstance);
   const { update } = options.statesHook;
-  const { silent, enableDownload, enableUpload } = getConfig(methodInstance);
+  const { enableDownload, enableUpload } = getConfig(methodInstance);
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const silentMode = silent && !updateCacheState;   // 在fetch数据时不能静默请求
   const methodKey = key(methodInstance);

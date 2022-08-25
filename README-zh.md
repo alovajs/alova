@@ -1059,15 +1059,15 @@ onSuccess(todoList => {
 
 我们来展示一下静默创建todo项的代码。
 ```javascript
-const createTodoPoster = newTodo => alova.Post('/todo/create', newTodo, {
-  // 首先，开启静默提交
-  silent: true,
-});
+const createTodoPoster = newTodo => alova.Post('/todo/create', newTodo);
 
 const {
   send,
   onSuccess
-} = useRequest(createTodoPoster);
+} = useRequest(createTodoPoster, {
+  // 在请求时开启静默提交
+  silent: true,
+});
 onSuccess(() => {
   // 设置为静默提交后，onSuccess将会立即被调用，并且回调函数的第一个参数为undefined
   // 而onError将永远不会被调用
@@ -1108,16 +1108,18 @@ onSuccess(() => {
 接下来我们以在线文档编写器为示例，展示一下离线提交的代码。
 ```javascript
 const editingText = ref('');
+const saveDoc = () => alova.Post('/doc/save', {
+  text: editingText.value
+});
 const {
   loading
-} = useWatcher(() => alova.Post('/doc/save', {
-  text: editingText.value
-}, {
+} = useWatcher(saveDoc, [editingText], {
   // 开启静默提交
   silent: true,
 
   // 设置500ms防抖降低服务器压力
-}), [editingText], { debounce: 500 });
+  debounce: 500
+});
 ```
 ```html
 <div v-if="loading">提交中...</div>
@@ -1390,19 +1392,26 @@ const VueHook = {
   },
 
   // 请求发送控制函数
-  effectRequest(sendRequest, removeStates, { immediate, states }) {
+  effectRequest({
+    handler,
+    removeStates,
+    saveStates,
+    immediate,
+    frontStates,
+    watchingStates
+  }) {
     // 组件卸载时移除对应状态
     onUnmounted(removeStates);
 
-    // 调用useRequest和useFetcher时，states为undefined
-    if (!states) {
-      sendRequest();
+    // 调用useRequest和useFetcher时，watchingStates为undefined
+    if (!watchingStates) {
+      handler();
       return;
     }
 
-    // 调用useWatcher时，states为需要监听的状态数组
+    // 调用useWatcher时，watchingStates为需要监听的状态数组
     // immediate为true时，表示需要立即发送请求
-    watch(states, sendRequest, { immediate });
+    watch(watchingStates, handler, { immediate });
   },
 };
 ```
@@ -1416,7 +1425,9 @@ const VueHook = {
     2. 当调用useWatcher时，绑定状态监听，状态改变时调用sendRequest函数，你可以用`states`是否为数组判断是否为`useWatcher`被调用，同时，`immediate`参数用于判断`useWatcher`调用时是否需要立即发送请求；
     3. 当调用`useRequest`和`useFetcher`时，调用sendRequest发出一次请求，此时`states`为`undefined`；
 
-> 如果你在自定义statesHook后，也希望它可以支持typescript，可以 [点此查看](#自定义statesHook的类型)
+> ⚠️注意：如果statesHook涉及的库是像`react`，每次重新渲染都会调用`alova`的use hook的，那么在`effectRequest`中还需要监听响应状态`frontStates`，当它们改变时触发`saveStates`函数，这是因为`react`每次重新渲染都会刷新它的状态引用，因此我们需要再次重新保存它们。
+
+如果你在自定义statesHook后，也希望它可以支持typescript，可以 [点此查看](#自定义statesHook的类型)
 
 ### 自定义存储适配器
 `alova`中涉及多个需要数据持久化的功能，如持久化缓存、静默提交和离线提交。在默认情况下，`alova`会使用`localStorage`来存储持久化数据，但考虑到非浏览器环境下，因此也支持了自定义。

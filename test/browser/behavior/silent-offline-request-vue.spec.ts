@@ -57,9 +57,7 @@ class NetworkController {
 describe('use useRequest to send silent request', function() {
   test('send a silent\'s post', done => {
     const alova = getAlovaInstance(VueHook);
-    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
-      silent: true,
-    });
+    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' });
     const {
       loading,
       data,
@@ -68,7 +66,10 @@ describe('use useRequest to send silent request', function() {
       send,
       onSuccess,
       onComplete,
-    } = useRequest(Post, { immediate: false });
+    } = useRequest(Post, {
+      immediate: false,
+      silent: true,
+    });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
@@ -113,16 +114,14 @@ describe('use useRequest to send silent request', function() {
         }, 0);
       }
     });
-    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
-      silent: true,
-    });
+    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' });
     const {
       loading,
       data,
       downloading,
       error,
       send,
-    } = useRequest(Post, { immediate: false });
+    } = useRequest(Post, { immediate: false, silent: true, });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
@@ -138,16 +137,14 @@ describe('use useRequest to send silent request', function() {
       beforeRequestExpect: requestHookMock,
       responseExpect: responsedHookMock
     });
-    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' }, {
-      silent: true,
-    });
+    const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' });
     networkCtrl.setOffline();
     const {
       loading,
       data,
       downloading,
       error,
-    } = useRequest(Post);
+    } = useRequest(Post, { silent: true });
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });

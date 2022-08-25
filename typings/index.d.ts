@@ -59,7 +59,6 @@ export type AlovaMethodConfig<R, T, RC, RH> = {
   name?: string,    // method对象名称，在updateState、invalidateCache、以及fetch函数中可以通过名称或通配符获取对应method对象
   params?: Arg,
   headers?: Arg,
-  silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
   timeout?: number,    // 当前中断时间
   localCache?: LocalCacheConfigParam,   // 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
   enableDownload?: boolean,   // 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
@@ -180,33 +179,28 @@ type CompleteHandler = (...args: any[]) => void;
 // hook通用配置
 interface UseHookConfig<R> {
   force?: boolean,   // 强制请求
-  initialData?: any,     // 初始数据
 }
-// useRequest配置类型
-interface RequestHookConfig<R> extends UseHookConfig<R> {
+
+// useRequest和useWatcher都有的类型
+interface FrontRequestHookConfig<R> extends UseHookConfig<R> {
   immediate?: boolean,   // 开启immediate后，useRequest会立即发起一次请求
+  initialData?: any,     // 初始数据
+  silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
 }
+
+// useRequest配置类型
+interface RequestHookConfig<R> extends FrontRequestHookConfig<R> {}
+
+
 // useWatcher配置类型
-interface WatcherHookConfig<R> extends UseHookConfig<R> {
-  immediate?: boolean,  // 开启immediate后，useWatcher初始化时会自动发起一次请求
+interface WatcherHookConfig<R> extends FrontRequestHookConfig<R> {
   debounce?: number, // 延迟多少毫秒后再发起请求
 }
+
+
 // useFetcher配置类型
-interface FetcherHookConfig<R> extends Omit<UseHookConfig<R>, 'initialData'> {}
+interface FetcherHookConfig<R> extends UseHookConfig<R> {}
 
-// Vue状态类型
-// interface Ref<T = any> {
-//   value: T;
-// }
-
-// Svelte状态类型
-// interface Readable<T = any> {
-//   subscribe(
-//     this: void, 
-//     run: (value: T) => void, 
-//     invalidate?: (value?: T) => void
-//   ): () => void;
-// }
 
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
 type ExportedType<R, S> = S extends Ref 
