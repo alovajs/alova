@@ -519,7 +519,7 @@ const {
 ```
 ```html
 <!-- searchText随着输入内容变化而变化 -->
-<input v-model="seatchText" />
+<input v-model="searchText" />
 
 <!-- 渲染筛选后的todo列表 -->
 <div v-if="loading">Loading...</div>

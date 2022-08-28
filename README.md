@@ -517,7 +517,7 @@ const {
 ```
 ```html
 <!-- searchText changes as input changes -->
-<input v-model="seatchText" />
+<input v-model="searchText" />
 
 <!-- Render filtered todo list -->
 <div v-if="loading">Loading...</div>

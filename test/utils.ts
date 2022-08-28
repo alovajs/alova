@@ -5,8 +5,13 @@ import 'web-streams-polyfill';
 import { AlovaRequestAdapterConfig, LocalCacheConfig, StatesHook } from '../typings';
 import { createAlova } from '../src';
 import GlobalFetch from '../src/predefine/GlobalFetch';
+import { versions } from 'node:process';
 
-(global as any).fetch = (window as any).fetch = fetch;
+const [ major ] = versions.node.split('.');
+if (Number(major) < 18) {
+  console.log('using node-fetch');
+  (global as any).fetch = (window as any).fetch = fetch;
+}
 
 // 防止Vue warn打印
 const warn = console.warn;
