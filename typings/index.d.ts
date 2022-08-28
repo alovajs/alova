@@ -101,7 +101,7 @@ interface StatesHook<S, E> {
   // 在vue中直接执行即可，而在react中需要在useEffect中执行
   // removeStates函数为清除当前状态的函数，应该在组件卸载时调用
   effectRequest: (effectParams: EffectRequestParams) => void,
-};
+}
 
 // 泛型类型解释：
 // S: create函数创建的状态组的类型
@@ -177,29 +177,28 @@ type SuccessHandler<R> = (data: R, ...args: any[]) => void;
 type ErrorHandler = (error: any, ...args: any[]) => void;
 type CompleteHandler = (...args: any[]) => void;
 // hook通用配置
-interface UseHookConfig<R> {
+interface UseHookConfig {
   force?: boolean,   // 强制请求
 }
 
 // useRequest和useWatcher都有的类型
-interface FrontRequestHookConfig<R> extends UseHookConfig<R> {
+interface FrontRequestHookConfig extends UseHookConfig {
   immediate?: boolean,   // 开启immediate后，useRequest会立即发起一次请求
   initialData?: any,     // 初始数据
   silent?: boolean,    // 静默请求，onSuccess将会立即触发，如果请求失败则会保存到缓存中后续继续轮询请求
 }
 
 // useRequest配置类型
-interface RequestHookConfig<R> extends FrontRequestHookConfig<R> {}
-
+interface RequestHookConfig extends FrontRequestHookConfig {}
 
 // useWatcher配置类型
-interface WatcherHookConfig<R> extends FrontRequestHookConfig<R> {
+interface WatcherHookConfig extends FrontRequestHookConfig {
   debounce?: number, // 延迟多少毫秒后再发起请求
 }
 
 
 // useFetcher配置类型
-interface FetcherHookConfig<R> extends UseHookConfig<R> {}
+interface FetcherHookConfig extends UseHookConfig {}
 
 
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
@@ -245,9 +244,9 @@ type MethodMatcher<S, E, R, T, RC, RE, RH> = Method<S, E, R, T, RC, RE, RH> | Me
 // 导出类型
 type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
-export declare  function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>, config?: RequestHookConfig<R>): UseHookReturnType<R, S>;
-export declare function useWatcher<S, E, R, T, RC, RE, RH>(handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>, watchingStates: E[], config?: WatcherHookConfig<R>): UseHookReturnType<R, S>;
-export declare function useFetcher<S, E, RC, RE, RH>(alova: Alova<S, E, RC, RE, RH>, config?: FetcherHookConfig<any>): UseFetchHookReturnType<S, E, RC, RE, RH>;
+export declare  function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>, config?: RequestHookConfig): UseHookReturnType<R, S>;
+export declare function useWatcher<S, E, R, T, RC, RE, RH>(handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>, watchingStates: E[], config?: WatcherHookConfig): UseHookReturnType<R, S>;
+export declare function useFetcher<S, E, RC, RE, RH>(alova: Alova<S, E, RC, RE, RH>, config?: FetcherHookConfig): UseFetchHookReturnType<S, E, RC, RE, RH>;
 export declare function invalidateCache<S, E, R, T, RC, RE, RH>(matcher?: MethodMatcher<S, E, R, T, RC, RE, RH>): void;
 export declare function updateState<S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>, handleUpdate: (data: R) => any): void;
 // 手动设置缓存响应数据
