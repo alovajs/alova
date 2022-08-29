@@ -124,7 +124,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
      * @param updateCacheState 是否更新缓存状态，此为fetch传入
      * @returns 请求promise
      */
-    send(useHookConfig: UseHookConfig<R>, sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, updateCacheState?: boolean) {
+    send(useHookConfig: UseHookConfig, sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, updateCacheState?: boolean) {
       methodInstance = methodInstance || getHandlerMethod(methodHandler, sendCallingArgs);
       const { abort, p, r, s } = useHookToSendRequest(
         methodInstance,

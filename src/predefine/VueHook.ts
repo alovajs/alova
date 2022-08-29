@@ -1,4 +1,4 @@
-import { ref, Ref, onUnmounted, watch, readonly } from 'vue';
+import { ref, Ref, onUnmounted, watch } from 'vue';
 import { FrontRequestState, EffectRequestParams } from '../../typings';
 import { forEach, objectKeys } from '../utils/variables';
 
@@ -6,7 +6,7 @@ type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks
 export default {
   create: <D>(data: D) => ref(data),
-  export: <D>(state: Ref<D>) => readonly(state),    // 将导出的状态设置为readonly，不允许外部修改状态
+  export: <D>(state: Ref<D>) => state,
   dehydrate: <D>(state: Ref<D>) => state.value,
   update: (newVal: Partial<FrontRequestState>, states: FrontRequestState<UnknownRef, UnknownRef, UnknownRef, UnknownRef, UnknownRef>) => forEach(
     objectKeys(newVal), 

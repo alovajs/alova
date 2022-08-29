@@ -1,25 +1,26 @@
 import { onDestroy } from 'svelte';
-import { writable, derived, Readable } from 'svelte/store';
+import { writable, Writable } from 'svelte/store';
 import { FrontRequestState, EffectRequestParams } from '../../typings';
 import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
 
 
 // svelte的预定义hooks
-interface SvelteState<D> extends Readable<D> {
+interface SvelteState<D> extends Writable<D> {
   val: D;
   set(this: void, val: D): void;
 }
 type UnknownState = SvelteState<unknown>;
 export default {
   create: <D>(data: D): SvelteState<D> => {
-    const { subscribe, set } = writable(data);
+    const { subscribe, set, update } = writable(data);
     return {
       val: data,
       subscribe,
-      set
+      set,
+      update,
     }
   },
-  export: <D>(state: SvelteState<D>) => derived(state, $state => $state),
+  export: <D>(state: SvelteState<D>) => state,
   dehydrate: <D>(state: SvelteState<D>) => state.val,
   update: (newVal: Partial<FrontRequestState>, states: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => forEach(
     objectKeys(newVal), 

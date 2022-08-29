@@ -11,7 +11,7 @@ import Alova from '../Alova';
 * 获取请求数据并缓存
 * @param method 请求方法对象
 */
-export default function useFetcher<S, E, R, RC, RE, RH>(alova: Alova<S, E, RC, RE, RH>, config: FetcherHookConfig<R> = {}) {
+export default function useFetcher<S, E, R, RC, RE, RH>(alova: Alova<S, E, RC, RE, RH>, config: FetcherHookConfig = {}) {
   const props = createRequestState<S, E, any, any, RC, RE, RH>(alova, noop, noop as any);
   return {
     fetching: props.loading,

@@ -7,7 +7,7 @@ import { alovas } from '../network';
 import Method from '../Method';
 import Alova from '../Alova';
 
-export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>, config: RequestHookConfig<R> = {}) {
+export default function useRequest<S, E, R, T, RC, RE, RH>(methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>, config: RequestHookConfig = {}) {
   const {
     immediate = trueValue,
     initialData,

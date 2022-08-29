@@ -10,7 +10,7 @@ import Alova from '../Alova';
 export default function useWatcher<S, E, R, T, RC, RE, RH>(
   handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>, 
   watchingStates: E[],
-  config: WatcherHookConfig<R> = {}
+  config: WatcherHookConfig = {}
 ) {
   myAssert(watchingStates && len(watchingStates) > 0, 'must specify at least one watching state');
   

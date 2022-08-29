@@ -1,5 +1,5 @@
 import { Ref } from './vuehook';
-import { Readable } from './sveltehook';
+import { SvelteState } from './sveltehook';
 
 export type RequestBody = Arg | FormData | string;
 export type Progress = {
@@ -204,8 +204,8 @@ interface FetcherHookConfig extends UseHookConfig {}
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
 type ExportedType<R, S> = S extends Ref 
   ? Ref<R> 
-  : S extends Readable<any> 
-    ? Readable<R> : R;
+  : S extends SvelteState<any> 
+    ? SvelteState<R> : R;
 type UseHookReturnType<R, S> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,

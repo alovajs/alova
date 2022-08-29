@@ -24,7 +24,7 @@ import { SaveStateFn } from './createRequestState';
  export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
   originalState: FrontRequestState,
-  useHookConfig: UseHookConfig<R>,
+  useHookConfig: UseHookConfig,
   successHandlers: SuccessHandler<R>[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
@@ -34,7 +34,7 @@ import { SaveStateFn } from './createRequestState';
   const {
     force: forceRequest = falseValue,
     silent = falseValue
-  } = useHookConfig as FrontRequestHookConfig<R>;
+  } = useHookConfig as FrontRequestHookConfig;
   const {
     id,
     options,
