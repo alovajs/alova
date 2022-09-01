@@ -8,7 +8,7 @@ const isBodyData = (data: any): data is BodyInit => {
   const isTyped = (typed: any) => instanceOf(data, typed);
   return isString(data) || isTyped(FormData) || isTyped(Blob) || isTyped(ArrayBuffer) || isTyped(URLSearchParams) || isTyped(ReadableStream);
 }
-export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
+export default function GlobalFetch() {
   return function(adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) {
     // 设置了中断时间，则在指定时间后中断请求
     const timeout = adapterConfig.timeout || 0;
@@ -24,7 +24,6 @@ export default function GlobalFetch(defaultRequestInit: RequestInit = {}) {
 
     const data = adapterConfig.data;
     const fetchPromise = fetch(adapterConfig.url, {
-      ...defaultRequestInit,
       ...adapterConfig,
       signal: ctrl.signal,
       body: isBodyData(data) ? data : JSONStringify(data),
