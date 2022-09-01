@@ -1,6 +1,5 @@
 import { DeepReadonly, Ref, UnwrapRef } from 'vue';
 import { EffectRequestParams, FrontRequestState } from '.';
-export { Ref } from 'vue';
 
 type UnknownRef = Ref<unknown>;
 interface VueHook {

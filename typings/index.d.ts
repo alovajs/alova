@@ -1,5 +1,5 @@
-import { Ref } from './vuehook';
-import { SvelteState } from './sveltehook';
+import { Ref } from 'vue';
+import { Writable } from 'svelte/store';
 
 export type RequestBody = Arg | FormData | string;
 export type Progress = {
@@ -202,10 +202,17 @@ interface FetcherHookConfig extends UseHookConfig {}
 
 
 // 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
-type ExportedType<R, S> = S extends Ref 
+// 使用不同库的特征作为父类进行判断
+interface SvelteWritable {
+  set(this: void, value: any): void;
+}
+interface VueRef {
+  value: any;
+}
+type ExportedType<R, S> = S extends VueRef 
   ? Ref<R> 
-  : S extends SvelteState<any> 
-    ? SvelteState<R> : R;
+  : S extends SvelteWritable 
+    ? Writable<R> : R;
 type UseHookReturnType<R, S> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,
