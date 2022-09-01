@@ -4,30 +4,21 @@ import { FrontRequestState, EffectRequestParams } from '../../typings';
 import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
 
 
-// svelte的预定义hooks
-interface SvelteState<D> extends Writable<D> {
-  val: D;
-  set(this: void, val: D): void;
-}
-type UnknownState = SvelteState<unknown>;
+type UnknownWritable = Writable<unknown>;
 export default {
-  create: <D>(data: D): SvelteState<D> => {
-    const { subscribe, set, update } = writable(data);
-    return {
-      val: data,
-      subscribe,
-      set,
-      update,
-    }
+  create: <D>(data: D): Writable<D> => writable(data),
+  export: <D>(state: Writable<D>) => state,
+  dehydrate: <D>(state: Writable<D>) => {
+    let raw;
+    // 订阅时会立即执行一次函数，获取到值后立即调用解除订阅函数
+    state.subscribe(value => raw = value)();
+    return raw;
   },
-  export: <D>(state: SvelteState<D>) => state,
-  dehydrate: <D>(state: SvelteState<D>) => state.val,
-  update: (newVal: Partial<FrontRequestState>, states: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>) => forEach(
+  update: (newVal: Partial<FrontRequestState>, states: FrontRequestState<UnknownWritable, UnknownWritable, UnknownWritable, UnknownWritable, UnknownWritable>) => forEach(
     objectKeys(newVal), 
     key => {
       type Keys = keyof FrontRequestState;
       const sItem = states[key as Keys];
-      sItem.val = newVal[key as Keys];
       sItem.set(newVal[key as Keys]);
     }
   ),
