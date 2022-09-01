@@ -20,13 +20,14 @@ The request scene management library of the MVVM library, it is an arm of the re
 3. Stateful response data
 4. Response data cache
 5. Data pre-fetch
-6. Silent submit
-7. Offline submit
-8. Request stabilization
-9. Lightweight Gzip 4kb+
-10. Typescript support
-11. Tree shaking support
-12. Status Update Tracking
+6. Automatically manage request keys
+7. Silent commit
+8. Offline submission
+9. Request stabilization
+10. Lightweight Gzip 4kb+
+11. Typescript support
+12. Tree shaking support
+13. Status Update Tracking
 
 ## Table of contents
 - [What is request scene management](#what-is-request-scene-management)
