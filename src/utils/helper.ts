@@ -1,10 +1,8 @@
 import {
   LocalCacheConfigParam,
-  SerializedMethod,
-  AlovaMethodHandler
+  AlovaMethodHandler,
+  Method
 } from '../../typings';
-import Alova from '../Alova';
-import Method from '../Method';
 import { clearTimeoutTimer, falseValue, forEach, getConfig, getOptions, JSONStringify, MEMORY, nullValue, objectKeys, setTimeoutFn, STORAGE_PLACEHOLDER, STORAGE_RESTORE, undefinedValue } from './variables';
 
 /**
@@ -82,19 +80,6 @@ export const serializeMethod = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S
     requestBody
   };
 }
-
-
-/**
- * 反序列化请求方法对象
- * @param methodInstance 请求方法对象
- * @returns 请求方法对象
- */
-export const deserializeMethod = <S, E, RC, RE, RH>({
-  type,
-  url,
-  config,
-  requestBody
-}: SerializedMethod<any, any, RC, RH>, alova: Alova<S, E, RC, RE, RH>) => new Method<S, E, any, any, RC, RE, RH>(type, alova, url, config, requestBody);
 
 /**
  * 创建防抖函数，只有enable为trueValue时会进入防抖环节，否则将立即触发此函数

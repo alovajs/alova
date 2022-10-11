@@ -1,12 +1,26 @@
 import Alova from './Alova';
 import { getSilentRequest } from './storage/silentStorage';
-import { deserializeMethod, noop } from './utils/helper';
+import { noop } from './utils/helper';
 import sendRequest from './functions/sendRequest';
 import { getStatesHook, len, PromiseCls, promiseThen, pushItem, setTimeoutFn, trueValue } from './utils/variables';
 import myAssert from './utils/myAssert';
+import { SerializedMethod } from '../typings';
+import Method from './Method';
 
 const intervalTime = 2000;  // 重复请求间隔时间
 export const alovas = [] as Alova<any, any, any, any, any>[];
+
+/**
+ * 反序列化请求方法对象
+ * @param methodInstance 请求方法对象
+ * @returns 请求方法对象
+ */
+ export const deserializeMethod = <S, E, RC, RE, RH>({
+  type,
+  url,
+  config,
+  requestBody
+}: SerializedMethod<any, any, RC, RH>, alova: Alova<S, E, RC, RE, RH>) => new Method<S, E, any, any, RC, RE, RH>(type, alova, url, config, requestBody);
 /**
  * 收集Alova实例
  * @param instance alova实例
