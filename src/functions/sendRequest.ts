@@ -2,7 +2,7 @@ import { AlovaRequestAdapterConfig, ResponsedHandler, ResponsedHandlerRecord, Re
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { len, falseValue, getContext, getOptions, objectKeys, PromiseCls, promiseReject, promiseResolve, promiseThen, trueValue, undefinedValue } from '../utils/variables';
+import { falseValue, getContext, getOptions, objectKeys, PromiseCls, promiseReject, promiseResolve, promiseThen, trueValue, undefinedValue } from '../utils/variables';
 import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '../utils/helper';
 import { addMethodSnapshot } from '../storage/methodSnapshots';
 
@@ -70,12 +70,12 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
 
   // 将get参数拼接到url后面，注意url可能已存在参数
   let urlWithParams = paramsStr ? 
-    (newUrl.indexOf('?') > -1 ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`)
+    (newUrl.includes('?') ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`)
     : newUrl;
   // 如果不是/开头的，则需要添加/
-  urlWithParams = urlWithParams.indexOf('/') !== 0 ? `/${urlWithParams}` : urlWithParams;
+  urlWithParams = urlWithParams.startsWith('/') ? urlWithParams : `/${urlWithParams}`;
   // baseURL如果以/结尾，则去掉/
-  const baseURLWithSlash = baseURL.lastIndexOf('/') === len(baseURL) - 1 ? baseURL.slice(0, -1) : baseURL;
+  const baseURLWithSlash = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
   
   // 请求数据
   const ctrls = requestAdapter({

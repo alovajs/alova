@@ -62,6 +62,7 @@ MVVM库的请求场景管理库，它是对请求库的一种武装，而非替�
     - [自定义设置缓存数据](#自定义设置缓存数据)
 - [进阶](#进阶)
   - [请求方法详解](#请求方法详解)
+  - [直接发送请求(v1.2.0+)](直接发送请求(v1.2.0+))
   - [设置初始响应数据](#设置初始响应数据)
   - [手动中断请求](#手动中断请求)
   - [请求防抖](#请求防抖)
@@ -399,9 +400,9 @@ const todoListGetter = alova.Get('/todo/list', {
 ```javascript
 const {
   // loading是加载状态值，当加载时它的值为true，结束后自动更新为false
-  // Vue3环境下（使用VueHook）：它是一个readonly的Ref类型的值，你可以通过loading.value访问它，或直接绑定到界面中
+  // Vue3环境下（使用VueHook）：它是一个Ref类型的值，你可以通过loading.value访问它，或直接绑定到界面中
   // React16环境下（使用ReactHook）：它的值为普通的boolean值，请求状态变化时内部将调用setLoading函数更新它的值
-  // 在Svelte环境下（使用SvelteHook）：它是一个Readable类型的值，内部将维护它的值
+  // 在Svelte环境下（使用SvelteHook）：它是一个Writable类型的值，内部将维护它的值
   loading,
 
   // 响应数据
@@ -828,6 +829,30 @@ const handleTodolistToggle = () => {
 - `url`是请求路径，它将会与`createAlova`中的`baseURL`拼接成完整的url进行请求；
 - `data`为请求体数据对象；
 - `config`为请求配置对象，其中包含了请求头、params参数等、请求行为参数等配置；
+
+### 直接发送请求(v1.2.0+)
+有时候我们只想要简单地发出请求，并不需要各种状态，此时可以直接调用`Method`对象的`send`函数即可，它将返回一个带返回参数的`Promise`对象。
+```javascript
+// 获取全局的用户信息
+const globalUserGetter = alova.Get('/global/user', {
+  params: {
+    userId: 1,
+  },
+  transformData(rawData, headers) {
+    return {
+      data: rawData,
+      respHeaders: headers
+    };
+  }
+});
+
+// send方法接收一个参数，表示是否强制请求，默认为false
+const { data, respHeaders } = await globalUserGetter.send(true);
+// 使用数据...
+```
+⚠️需要注意的是：
+1. 返回的响应数据也会依次被全局的`responsed`和当前`Method`对象的`transformData`处理；
+2. 缓存机制依然有效，如果命中缓存也会返回缓存数据，此时可以在`send`方法中传入`true`来强制发起请求；
 
 ### 设置初始响应数据
 一个页面在获取到初始数据前，不可避免地需要等待服务端响应，在响应前一般需要先将状态初始化为一个空数组或空对象，以免造成页面报错，我们可以在`useRequest`和`useWatcher`中的第二个参数实现初始数据的设置。
@@ -1373,14 +1398,14 @@ function customRequestAdapter(config) {
 
 `statesHook`是一个包含特定函数的普通对象，不过这些还是基本不涉及算法，我们来看看VueHook是怎么编写的吧。
 ```javascript
-import { ref, readonly, watch, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 
 const VueHook = {
   // 状态创建函数
   create: rawData => ref(data),
 
   // 状态导出函数
-  export: state => readonly(state),
+  export: state => state,
 
   // 脱水函数
   dehydrate: state => state.value,
@@ -1418,7 +1443,7 @@ const VueHook = {
 ```
 自定义`statesHook`各个函数说明：
 1. 【必填】create函数：响应式状态创建函数，`loading`、`error`、`data`、`downloading`、`uploading`等都是调用此函数创建的，如vue3项目下将创建为ref值；
-2. 【必填】export函数：状态导出函数，此函数接收create函数创建的响应式状态，并导出最终给开发者使用的状态，这里`VueHook`导出的状态是readonly的；
+2. 【必填】export函数：状态导出函数，此函数接收create函数创建的响应式状态，并导出最终给开发者使用的状态，这里`VueHook`导出的状态是原状态；
 3. 【必填】dehydrate函数：脱水函数，意思是将响应式状态转换为普通数据，与create是相反的操作，在`updateState`中；
 4. 【必填】update函数：响应式状态更新函数，`alova`内部维护的状态更新都是通过此函数完成。此函数接收两个参数，第一个参数是新的数据对象，第二个参数是原响应式状态的map集合，这里你可以固定写一个循环更新`states`；
 5. 【必填】effectRequest函数：请求发送控制函数，它会在`useRequest`、`useWatcher`、`useFetcher`被调用时立即执行此函数，我们要在这个函数内要完成三件事：
@@ -1474,9 +1499,9 @@ const vueAlova = createAlova({
   // ...
 });
 const {
-  loading,  // Readonly<Ref<boolean>>
-  data,  // Readonly<Ref<unknown>>
-  error,  // Readonly<Ref<Error>>
+  loading,  // Ref<boolean>
+  data,  // Ref<unknown>
+  error,  // Ref<Error>
 } = useRequest(vueAlova.Get('/todo/list'));
 ```
 使用ReactHook时：

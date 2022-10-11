@@ -1,5 +1,6 @@
 import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
+import sendRequest from './functions/sendRequest';
 import { forEach, getOptions, undefinedValue } from './utils/variables';
 
 // get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
@@ -50,5 +51,12 @@ export default class Method<S, E, R, T, RC, RE, RH> {
       ...(config || {}),
     };
     this.requestBody = requestBody;
+  }
+
+  /**
+   * 直接发出请求，返回promise对象
+   */
+  send(forceRequest = false): Promise<R> {
+    return sendRequest(this, forceRequest).response();
   }
 }

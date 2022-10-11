@@ -158,6 +158,7 @@ interface Method<S, E, R, T, RC, RE, RH> {
   requestBody?: RequestBody;
   context: Alova<S, E, RC, RE, RH>;
   response: R;
+  send(forceRequest?: boolean): Promise<R>;
 }
 
 declare class Alova<S, E, RC, RE, RH> {

@@ -62,6 +62,7 @@ The request scene management library of the MVVM library, it is an arm of the re
     - [Custom setting cache data](#custom-setting-cache-data)
 - [Next step](#next-step)
   - [Request method details](#request-method-details)
+  - [Send request directly (v1.2.0+)](#send-request-directly-(v1.2.0+))
   - [Set initial response data](#set-initial-response-data)
   - [Manual Interrupt Request](#manual-interrupt-request)
   - [Request anti-shake](#request-anti-shake)
@@ -397,7 +398,7 @@ It represents the sending of a request. When `useRequest` is executed, a request
 ```javascript
 const {
   // loading is the loading state value, when it is loaded, its value is true, and it is automatically updated to false after the end
-  // Vue3 environment (using VueHook): it is a readonly Ref type value, you can access it through loading.value, or directly bind to the interface
+  // Vue3 environment (using VueHook): it is a Ref type value, you can access it through loading.value, or directly bind to the interface
   // In the React16 environment (using ReactHook): its value is a common boolean value, and the setLoading function will be called internally to update its value when the request state changes
   // In the Svelte environment (using SvelteHook): it is a value of type Readable, and its value will be maintained internally
   loading,
@@ -825,7 +826,31 @@ The `Alova` instance object provides abstract objects for seven request methods,
 Parameter Description:
 - `url` is the request path, it will be concatenated with `baseURL` in `createAlova` to form a complete url for request;
 - `data` is the request body data object;
-- `config` is the request configuration object, which includes the configuration of request headers, params parameters, request behavior parameters, etc.;
+- `config` is the request configuration object, which includes the configuration of request headers, params parameters, request behavior parameters, etc.
+
+### Send request directly (v1.2.0+)
+Sometimes we just want to simply make a request and do not need various states. In this case, we can directly call the `send` function of the `Method` object, which will return a `Promise` object with return parameters.
+```javascript
+// Get global user information
+const globalUserGetter = alova.Get('/global/user', {
+   params: {
+     userId: 1,
+   },
+   transformData(rawData, headers) {
+     return {
+       data: rawData,
+       respHeaders: headers
+     };
+   }
+});
+
+// The send method receives a parameter, indicating whether to force the request, the default is false.
+const { data, respHeaders } = await globalUserGetter.send(true);
+// use data...
+```
+⚠️ Note that:
+1. The returned response data will also be processed by the global `responsed` and the `transformData` of the current `Method` object in turn.
+2. The cache mechanism is still valid. If the cache is hit, the cached data will also be returned. At this time, you can pass `true` in the `send` method to force the request.
 
 ### Set initial response data
 Before a page gets the initial data, it inevitably needs to wait for the server to respond. Before responding, it is generally necessary to initialize the state to an empty array or empty object to avoid page errors. We can use `useRequest` and `useWatcher` The second parameter in implements the setting of the initial data.
@@ -1374,14 +1399,14 @@ Remember the `statesHook` you passed in when calling `createAlova`? It will deci
 
 `statesHook` is a normal object containing specific functions, but these are still basically no algorithm, let's see how VueHook is written.
 ```javascript
-import { ref, readonly, watch, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 
 const VueHook = {
   // state creation function
   create: rawData => ref(data),
 
   // state export function
-  export: state => readonly(state),
+  export: state => state,
 
   // dehydration function
   dehydrate: state => state.value,
@@ -1419,7 +1444,7 @@ const VueHook = {
 ```
 Description of each function of custom `statesHook`:
 1. [Required] `create`: responsive state creation function, `loading`, `error`, `data`, `downloading`, `uploading`, etc. are all created by calling this function, such as the vue3 project will be created as ref value;
-2. [Required] `export`: state export function, this function receives the responsive state created by the create function, and exports the state that is finally used by developers. Here, the state exported by `VueHook` is readonly;
+2. [Required] `export`: state export function, this function receives the responsive state created by the create function, and exports the state that is finally used by developers. Here, the state exported by `VueHook` is original value;
 3. [Required] `dehydrate`: dehydrate function, which means to convert the responsive state into ordinary data, which is the opposite of create, in `updateState`;
 4. [Required] `update`: responsive state update function, the state update maintained by `alova` is completed through this function. This function receives two parameters, the first parameter is the new data object, the second parameter is the map collection of the original reactive state, here you can write a fixed loop to update `states`;
 5. [Required] `effectRequest`: request sending control function, it will execute this function immediately when `useRequest`, `useWatcher`, `useFetcher` are called, we need to complete three things in this function:
@@ -1475,9 +1500,9 @@ const vueAlova = createAlova({
   // ...
 });
 const {
-  loading, // Readonly<Ref<boolean>>
-  data, // Readonly<Ref<unknown>>
-  error, // Readonly<Ref<Error>>
+  loading, // Ref<boolean>
+  data, // Ref<unknown>
+  error, // Ref<Error>
 } = useRequest(vueAlova.Get('/todo/list'));
 ```
 When using ReactHook:

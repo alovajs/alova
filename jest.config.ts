@@ -157,7 +157,7 @@ export default {
     // "**/test/browser/batch/parallel-request.spec.ts",
     // "**/test/browser/stateManager/update-state-react.spec.ts(x)?",
     // "**/test/browser/global/request-response-hook.spec.ts(x)?",
-    // "**/test/browser/utils/walkUpdatingDataStructure.spec.ts(x)?",
+    // "**/test/browser/fn/methodSend.spec.ts(x)?",
     // "**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?",
   ],
 
