@@ -101,14 +101,13 @@ import { addMethodSnapshot } from '../storage/methodSnapshots';
     return promiseReject(error);
   }
 
-  const aa = PromiseCls.all([
-    ctrls.response(),
-    ctrls.headers(),
-  ]);
   return {
     ...ctrls,
     useCache: falseValue,
-    response: () => promiseThen(aa, ([rawResponse, headers]) => {
+    response: () => promiseThen(PromiseCls.all([
+      ctrls.response(),
+      ctrls.headers(),
+    ]), ([rawResponse, headers]) => {
       addMethodSnapshot(methodInstance);    // 只有请求成功的Method实例才会被保存到快照里
       try {
         const responsedHandleData = promiseResolve(responsedHandler(rawResponse, requestConfig));

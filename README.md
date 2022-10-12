@@ -59,7 +59,6 @@ The request scene management library of the MVVM library, it is an arm of the re
     - [Transform response data](#transform-response-data)
     - [Actively invalidate the response cache](#actively-invalidate-the-response-cache)
     - [Update response data across pages or modules](#update-response-data-across-pages-or-modules)
-    - [Custom setting cache data](#custom-setting-cache-data)
 - [Next step](#next-step)
   - [Request method details](#request-method-details)
   - [Send request directly (v1.2.0+)](#send-request-directly-(v1.2.0+))
@@ -74,6 +73,7 @@ The request scene management library of the MVVM library, it is an arm of the re
   - [Silent submit](#silent-submit)
   - [Offline submit](#offline-submit)
   - [Delayed data update](#delayed-data-update)
+  - [Custom setting cache data](#custom-setting-cache-data)
 - [Advanced](#advanced)
   - [Custom request adapter](#custom-request-adapter)
   - [Custom statesHook](#custom-stateshook)
@@ -620,7 +620,7 @@ A unified pull state can also be rendered in the interface.
 <!-- Ignore the html related to the todo parameter setting -->
 <button @click="handleSubmit">Modify todo item</button>
 ```
-The fetch function will ignore the existing cache, forcibly initiate a request and update the cache. As for the `Method` object matcher, see [Advanced-Method Object Matcher](#Method Object Matcher) for details.
+The fetch function will ignore the existing cache, forcibly initiate a request and update the cache. As for the `Method` object matcher, see [Advanced - Method Object Matcher](#method-object-matcher) for details.
 
 ## Response data management
 The response data is stateful and managed uniformly, and we can access any response data at any location and operate on them.
@@ -717,7 +717,7 @@ onSuccess(() => {
 });
 ```
 
-For details on how to use the `Method` object matcher, see [Advanced-Method Object Matcher](#Method Object Matcher)
+For details on how to use the `Method` object matcher, see [Advanced - Method Object Matcher](#method-object-matcher)
 
 ### Update response data across pages or modules
 Let's continue the example mentioned in the above section [Active invalidation response cache] (#Active invalidation response cache), when the user clicks on an item in the todo list, enters the todo details page and edits it, this At the same time, we hope that the todo list data in the previous page is also updated to the edited content. Using `useFetcher` and `invalidateCache` will re-initiate the request. Is there any method that does not require re-request?
@@ -760,57 +760,6 @@ onSuccess(() => {
 > 2. Alova manages the state returned by the hook only when useRequest and useWatcher are used to initiate a request. The reason is that the response state is generated and saved through a Method object, but the url in the Method object is not initiated when the request is not initiated. , params, query, headers and other parameters are still uncertain.
 
 Maybe sometimes you want to call `updateState` to update the data immediately when the todo creation data is silently submitted, and also want to update the `id` again after the todo item is created, you can learn more about [Update delayed data](#update-delayed-data)
-
-
-### Custom setting cache data
-Some service interfaces support batch request data, which means that it is always composed of indeterminate sets of response data. When we want to batch request data when initializing the page, and then request only a single piece of data in the interaction, it will cause caching penetration problem.
-
-For example, we need to obtain the todo list data by date. During initialization, we obtained the data from May 1st to 5th and 5 days in one request, and then the user obtained the data of May 1st again during the operation. Hit the May 1st data during initialization, because the initialized 5-day data are stored together instead of separately cached, at this time we can manually create a single response cache for the 5-day data, so that It can solve the problem of cache penetration when a single data request is made.
-
-```javascript
-import { setCacheData } from 'alova';
-
-const getTodoListByDate = dateList => alova.Get('/todo/list/dates', {
-  params: { dateList }
-});
-// Get 5 days of data in batches during initialization
-const dates = ref([
-  '2022-05-01',
-  '2022-05-02',
-  '2022-05-03',
-  '2022-05-04',
-  '2022-05-05',
-]);
-const {
-  // ...
-  onSuccess
-} = useWatcher(() => getTodoListByDate(dates.value.join()),
-  [dates],
-  {
-    immediate: true
-  }
-);
-onSuccess(todoListDates => {
-  if (todoListDates.length <= 1) {
-    return;
-  }
-
-  // By default, these 5 days of data will be cached together in a key
-  // In order to make subsequent requests for a certain day's data also hit the cache, we can disassemble the 5-day data into daily, and manually set the response cache one by one through setCacheData
-  // The first parameter of setCacheData is the method instance object, which is used to specify the cache key
-  // The second parameter is the cache data
-  todoListDates.forEach(todoDate => {
-    setCacheData(getTodoListByDate(todoDate.date), [ todoDate ]);
-  });
-});
-```
-At this point and when the switch date is May 1st, it will hit our manually set response cache.
-```javascript
-const handleTodolistToggle = () => {
-  // The dates value is being listened to by useWatcher, so changing it automatically triggers the request
-  dates.value = ['2022-05-01'];
-}
-```
 
 ## Next step
 ### Request method details
@@ -909,7 +858,7 @@ const {
 
 
 ### Method object matcher
-When we finish processing some business, we need to call `invalidateCache`, `updateState`, `fetch` to invalidate the cache, manually update the cache, or re-pull data. There are generally two scenarios:
+When we finish processing some business, we need to call `invalidateCache`, `setCacheData`, `updateState` and `fetch` to invalidate cache, update cache, update state across pages, or re-pull data. There are generally two scenarios:
 1. The developer knows which request data needs to be manipulated. At this time, when calling the above three functions, a `Method` object can be directly passed in;
 2. The developer only knows the request that needs to operate a certain order bit, but is not sure which one. At this time, we can use the method of `Method` object matcher to filter out.
 
@@ -1327,7 +1276,94 @@ Used in combinations of arrays and objects
 
 > ⚠️Limitation 1: Delayed data update is only valid in silent mode, and the `updateState` function is called synchronously in the `onSuccess` callback function, otherwise it may cause data confusion or error.
 
-> ⚠️ Limitation 2: If there is a circular reference in the updated value of `updateState`, the delayed data update will no longer take effect
+> ⚠️ Limitation 2: If there is a circular reference in the updated value of `updateState`, the delayed data update will no longer take effect.
+
+
+### Custom setting cache data
+**Generally, there are two situations where you need to customize the cache data**
+
+Case 1: Some service interfaces support batch request data, which means that it is always composed of indeterminate sets of response data. When we want to request data in batches when initializing the page, and then request only a single piece of data in the interaction, It will cause the problem of cache penetration.
+
+For example, we need to obtain the todo list data by date. During initialization, we obtained the data from May 1st to 5th and 5 days in one request, and then the user obtained the data of May 1st again during the operation. Hit the May 1st data during initialization, because the initialized 5-day data are stored together instead of separately cached, at this time we can manually create a single response cache for the 5-day data, so that It can solve the problem of cache penetration when a single data request is made.
+
+```javascript
+import { setCacheData } from 'alova';
+
+const getTodoListByDate = dateList => alova.Get('/todo/list/dates', {
+  params: { dateList }
+});
+// Get 5 days of data in batches during initialization
+const dates = ref([
+  '2022-05-01',
+  '2022-05-02',
+  '2022-05-03',
+  '2022-05-04',
+  '2022-05-05',
+]);
+const {
+  // ...
+  onSuccess
+} = useWatcher(() => getTodoListByDate(dates.value.join()),
+  [dates],
+  {
+    immediate: true
+  }
+);
+onSuccess(todoListDates => {
+  if (todoListDates.length <= 1) {
+    return;
+  }
+
+  // By default, these 5 days of data will be cached together in a key
+  // In order to make subsequent requests for a certain day's data also hit the cache, we can disassemble the 5-day data into daily, and manually set the response cache one by one through setCacheData
+  // The first parameter of setCacheData is the method instance object, which is used to specify the cache key
+  // The second parameter is the cache data
+  todoListDates.forEach(todoDate => {
+    setCacheData(getTodoListByDate(todoDate.date), [ todoDate ]);
+  });
+});
+```
+At this point and when the switch date is May 1st, it will hit our manually set response cache.
+```javascript
+const handleTodolistToggle = () => {
+  // The dates value is being listened to by useWatcher, so changing it automatically triggers the request
+  dates.value = ['2022-05-01'];
+}
+```
+
+Case 2: When paging requests for data, multiple `Method` objects are generated due to page turning, resulting in the `data` data state of the rendered list often corresponding to multiple response caches. If you finish editing a piece of data, you want to update the list immediately. Instead of requesting the interface update list again, you can call the `updateState` function and modify the `data` data state and the corresponding cache at the same time, but if the data you want to modify at this time is not the data of this page, or involves For multiple pages of data, you can call `setCacheData` to modify the cache at this time to ensure that the data is updated next time the data of the specified page is displayed.
+
+For example, if there is a set of list data with category names, and you want to modify the category name after browsing a few pages, and immediately update the data in the cache, instead of re-pulling the data, you can write like this
+
+```javascript
+const todoListGetter = page => alova.Get('/todo/list', {
+  name: 'todoList', // Set the name of the Method object, the cache can be modified in batches by name in setCacheData
+  params: {
+    userId: 1,
+    page
+  }
+});
+
+const page = ref(1);
+const {
+  data: todoList
+} = useWatcher(() => todoListGetter(page), [page]);
+
+// Confirm the modification category name event callback
+const confirmCategoryNameChange = categoryName => {
+  
+  // The first parameter of setCacheData can be passed in a Method object, or a Method object matcher
+  // The second parameter can receive the update function. When multiple Method objects are matched, this function will be called multiple times. The function parameter is the old cache, and the updated cache is required to be returned.
+  setCacheData('todoList', oldCache => {
+    return {
+      ...cacheItem,
+      categoryNames
+    };
+  });
+}
+```
+
+For details on how to use the `Method` object matcher, see [Advanced - Method Object Matcher](#method-object-matcher)
 
 
 ## Advanced
