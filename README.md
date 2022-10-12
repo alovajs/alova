@@ -44,7 +44,7 @@ The request scene management library of the MVVM library, it is an arm of the re
   - [Create Alova instance](#create-alova-instance)
   - [Set global request interceptor](#set-global-request-interceptor)
   - [Set global response interceptor](#set-global-response-interceptor)
-  - [Create request method object](#create-request-method-object)
+  - [Create request method instance](#create-request-method-object)
   - [request method type](#request-method-type)
   - [Set request timeout](#set-request-timeout)
   - [Set cache time for response data](#set-cache-time-for-response-data)
@@ -65,7 +65,7 @@ The request scene management library of the MVVM library, it is an arm of the re
   - [Set initial response data](#set-initial-response-data)
   - [Manual Interrupt Request](#manual-interrupt-request)
   - [Request anti-shake](#request-anti-shake)
-  - [Method object matcher](#method-object-matcher)
+  - [Method instance matcher](#method-instance-matcher)
   - [Download progress](#download-progress)
   - [Upload progress](#upload-progress)
   - [Parallel request](#parallel-request)
@@ -117,7 +117,7 @@ Describes when a request needs to be made, implemented as `useHook` in `alova`.
 
 
 ### Request behavior
-Describes how to handle the request, implemented as a method object in `alova`.
+Describes how to handle the request, implemented as a method instance in `alova`.
 - Placeholder request, displaying loading, skeleton diagram, or the last real data used when requesting;
 - Cache high-frequency responses, and execute requests multiple times will use fresh data;
 - Multi-request serial and parallel;
@@ -251,9 +251,9 @@ const alovaInstance = createAlova({
 ```
 > ⚠️Note: Request success can be normal function and asynchronous function.
 
-### Create request method object
-In `alova`, each request corresponds to a method object representation, which describes the url, request header, request parameters, and request behavior parameters such as response data processing, cache processing data, etc., and it does not actually send a request. The creation of the `Method` object is also similar to the `axios` request sending function.
-Let's first create a `Method` object that gets the todo list, probably like this
+### Create request method instance
+In `alova`, each request corresponds to a method instance representation, which describes the url, request header, request parameters, and request behavior parameters such as response data processing, cache processing data, etc., and it does not actually send a request. The creation of the `Method` instance is also similar to the `axios` request sending function.
+Let's first create a `Method` instance that gets the todo list, probably like this
 
 ```javascript
 // Create a Get object that describes the information of a Get request
@@ -267,7 +267,7 @@ const todoListGetter = alova.Get('/todo/list', {
   }
 });
 ```
-Then create a `Method` object that creates a todo item, probably like this
+Then create a `Method` instance that creates a todo item, probably like this
 ```javascript
 // create Post object
 const createTodoPoster = alova.Post('/todo/create',
@@ -287,13 +287,13 @@ const createTodoPoster = alova.Post('/todo/create',
   }
 );
 ```
-> ⚠️Note: The `Method` object only stores the information required for the request, but it does not send a request, but needs to send a request through `use hook`, which is different from `axios`.
+> ⚠️Note: The `Method` instance only stores the information required for the request, but it does not send a request, but needs to send a request through `use hook`, which is different from `axios`.
 
 ### Request method type
 `Alova` provides abstract objects including seven request methods: GET, POST, PUT, DELETE, HEAD, OPTIONS, and PATCH. For the specific usage, please read [Advanced-Request Method Details](#Request Method Details).
 
 ### Set request timeout
-`alova` provides global and request-level timeout settings. After the global request timeout is set, all `Method` objects created by `alova` will inherit this setting.
+`alova` provides global and request-level timeout settings. After the global request timeout is set, all `Method` instances created by `alova` will inherit this setting.
 ```javascript
 // Globally set the request timeout
 const alovaInstance = createAlova({
@@ -304,7 +304,7 @@ const alovaInstance = createAlova({
 });
 ```
 
-Set the request-level request timeout when creating the request method object, which overrides the global `timeout` parameter.
+Set the request-level request timeout when creating the request method instance, which overrides the global `timeout` parameter.
 ```javascript
 // request timeout at request level
 const todoListGetter = alova.Get('/todo/list', {
@@ -315,11 +315,11 @@ const todoListGetter = alova.Get('/todo/list', {
 ```
 
 ### Set cache time for response data
-When you are writing the todo details page, you may think that users will frequently click to view the details in the todo list. It would be great if the user would not repeatedly request the interface when viewing a certain detail repeatedly, and the data could be returned immediately. It not only improves the response speed, but also reduces the server pressure. At this point we can set the response data cache for a todo detail `Method` object. By default, only `alova.Get` will have a response data cache time of 300000ms (5 minutes), and developers can also customize the settings.
+When you are writing the todo details page, you may think that users will frequently click to view the details in the todo list. It would be great if the user would not repeatedly request the interface when viewing a certain detail repeatedly, and the data could be returned immediately. It not only improves the response speed, but also reduces the server pressure. At this point we can set the response data cache for a todo detail `Method` instance. By default, only `alova.Get` will have a response data cache time of 300000ms (5 minutes), and developers can also customize the settings.
 
 > ⚠️The key of the response data cache: is the combination of the method instance's request method (method), request address (url), request header parameters (headers), url parameters (params), and request body parameters (requestBody) as a unique identifier, any A different position will be treated as a different key.
 
-The following is a method to globally set the response cache time, which is inherited by all `Method` objects created by `alova`. The cache of `alova` has three modes, namely memory mode, persistent mode, and persistent placeholder mode.
+The following is a method to globally set the response cache time, which is inherited by all `Method` instances created by `alova`. The cache of `alova` has three modes, namely memory mode, persistent mode, and persistent placeholder mode.
 #### memory mode(default)
 Indicates that the cache is placed in memory, which means that refreshing the page cache will invalidate it, which is the most commonly used cache mode.
 ```javascript
@@ -380,7 +380,7 @@ const alovaInstance = createAlova({
 });
 ```
 
-The above cache settings also support the request level. Set the `localCache` parameter on the create request method object to achieve the purpose, and the setting method is the same.
+The above cache settings also support the request level. Set the `localCache` parameter on the create request method instance to achieve the purpose, and the setting method is the same.
 ```javascript
 const todoListGetter = alova.Get('/todo/list', {
   // Ignore other parameters...
@@ -418,7 +418,7 @@ const {
   // complete callback binding
   onComplete,
 
-  // Directly pass in the Method object to send the request
+  // Directly pass in the Method instance to send the request
 } = useRequest(todoListGetter, {
   // initial data data
   initialData: [],
@@ -445,7 +445,7 @@ You can use todoList directly to render the todo list
 </template>
 ```
 
-When you need to create a new todo item, you can turn off the default sending request and switch to triggering the request manually. Then change the first parameter of useRequest to a function that returns a `Method` object, which is called when the request is fired.
+When you need to create a new todo item, you can turn off the default sending request and switch to triggering the request manually. Then change the first parameter of useRequest to a function that returns a `Method` instance, which is called when the request is fired.
 ```javascript
 const createTodoPoster = newTodo => alova.Post('/todo', newTodo);
 
@@ -573,7 +573,7 @@ Now let's modify a certain todo data, and re-pull the latest todo list data to r
 ```javascript
 const getTodoList = currentPage => {
   return alova.Get('/tood/list', {
-    // Note: The name attribute is set here to filter out the required Method object when the Method object cannot be specified directly
+    // Note: The name attribute is set here to filter out the required Method instance when the Method instance cannot be specified directly
     name: 'todoList',
     params: {
       currentPage,
@@ -600,15 +600,15 @@ const handleSubmit = () => {
   // Assuming you have finished modifying the todo item...
 
   // Start pulling the updated data
-  // Case 1: When you clearly know to pull the first page of todoList data, pass in a Method object
+  // Case 1: When you clearly know to pull the first page of todoList data, pass in a Method instance
   fetch(getTodoList(1));
 
-  // Case 2: When you only know to pull the data of the last request of the todoList, filter by the Method object matcher
+  // Case 2: When you only know to pull the data of the last request of the todoList, filter by the Method instance matcher
   fetch({
     name: 'todoList',
     filter: (method, index, ary) => {
 
-      // Return true to specify the Method object to be pulled
+      // Return true to specify the Method instance to be pulled
       return index === ary.length - 1;
     },
   })
@@ -620,7 +620,7 @@ A unified pull state can also be rendered in the interface.
 <!-- Ignore the html related to the todo parameter setting -->
 <button @click="handleSubmit">Modify todo item</button>
 ```
-The fetch function will ignore the existing cache, forcibly initiate a request and update the cache. As for the `Method` object matcher, see [Advanced - Method Object Matcher](#method-object-matcher) for details.
+The fetch function will ignore the existing cache, forcibly initiate a request and update the cache. As for the `Method` instance matcher, see [Advanced - Method instance Matcher](#method-instance-matcher) for details.
 
 ## Response data management
 The response data is stateful and managed uniformly, and we can access any response data at any location and operate on them.
@@ -681,12 +681,12 @@ const handleSubmit = () => {
   send();
 };
 ```
-Its function is far more than that, we can also achieve multiple or even all cache invalidation by setting the `Method` object matcher.
+Its function is far more than that, we can also achieve multiple or even all cache invalidation by setting the `Method` instance matcher.
 
 ```javascript
 const getTodoList = currentPage => {
   return alova.Get('/tood/list', {
-    // Note: The name attribute is set to filter out the required Method object when the Method object cannot be specified directly
+    // Note: The name attribute is set to filter out the required Method instance when the Method instance cannot be specified directly
     name: 'todoList',
     params: {
       currentPage,
@@ -707,7 +707,7 @@ onSuccess(() => {
   invalidateCache({
     name: 'todoList',
     filter: (method, index, ary) => {
-      // The response cache for the first 5 Method objects named todoList will be invalidated
+      // The response cache for the first 5 Method instances named todoList will be invalidated
       return index < 5;
     },
   });
@@ -717,7 +717,7 @@ onSuccess(() => {
 });
 ```
 
-For details on how to use the `Method` object matcher, see [Advanced - Method Object Matcher](#method-object-matcher)
+For details on how to use the `Method` instance matcher, see [Advanced - Method instance Matcher](#method-instance-matcher)
 
 ### Update response data across pages or modules
 Let's continue the example mentioned in the above section [Active invalidation response cache] (#Active invalidation response cache), when the user clicks on an item in the todo list, enters the todo details page and edits it, this At the same time, we hope that the todo list data in the previous page is also updated to the edited content. Using `useFetcher` and `invalidateCache` will re-initiate the request. Is there any method that does not require re-request?
@@ -742,7 +742,7 @@ const {
 onSuccess(() => {
 
   // After the submission is successful, the todo data data of the first page is fixedly modified
-  // The first parameter is the Method object, and the second is the callback function containing the original cached data, which needs to return the modified data
+  // The first parameter is the Method instance, and the second is the callback function containing the original cached data, which needs to return the modified data
   updateState(getTodoList(1), todoList => {
     return todoList.map(item => {
       if (item.id === editingTodo.id) {
@@ -757,7 +757,7 @@ onSuccess(() => {
 });
 ```
 > 1. When you modify the cached data, not only will the corresponding responsive state be updated, but if there is a persistent cache, it will also be updated together.
-> 2. Alova manages the state returned by the hook only when useRequest and useWatcher are used to initiate a request. The reason is that the response state is generated and saved through a Method object, but the url in the Method object is not initiated when the request is not initiated. , params, query, headers and other parameters are still uncertain.
+> 2. Alova manages the state returned by the hook only when useRequest and useWatcher are used to initiate a request. The reason is that the response state is generated and saved through a Method instance, but the url in the Method instance is not initiated when the request is not initiated. , params, query, headers and other parameters are still uncertain.
 
 Maybe sometimes you want to call `updateState` to update the data immediately when the todo creation data is silently submitted, and also want to update the `id` again after the todo item is created, you can learn more about [Update delayed data](#update-delayed-data)
 
@@ -778,7 +778,7 @@ Parameter Description:
 - `config` is the request configuration object, which includes the configuration of request headers, params parameters, request behavior parameters, etc.
 
 ### Send request directly (v1.2.0+)
-Sometimes we just want to simply make a request and do not need various states. In this case, we can directly call the `send` function of the `Method` object, which will return a `Promise` object with return parameters.
+Sometimes we just want to simply make a request and do not need various states. In this case, we can directly call the `send` function of the `Method` instance, which will return a `Promise` object with return parameters.
 ```javascript
 // Get global user information
 const globalUserGetter = alova.Get('/global/user', {
@@ -798,7 +798,7 @@ const { data, respHeaders } = await globalUserGetter.send(true);
 // use data...
 ```
 ⚠️ Note that:
-1. The returned response data will also be processed by the global `responsed` and the `transformData` of the current `Method` object in turn.
+1. The returned response data will also be processed by the global `responsed` and the `transformData` of the current `Method` instance in turn.
 2. The cache mechanism is still valid. If the cache is hit, the cached data will also be returned. At this time, you can pass `true` in the `send` method to force the request.
 
 ### Set initial response data
@@ -857,15 +857,15 @@ const {
 ```
 
 
-### Method object matcher
+### Method instance matcher
 When we finish processing some business, we need to call `invalidateCache`, `setCacheData`, `updateState` and `fetch` to invalidate cache, update cache, update state across pages, or re-pull data. There are generally two scenarios:
-1. The developer knows which request data needs to be manipulated. At this time, when calling the above three functions, a `Method` object can be directly passed in;
-2. The developer only knows the request that needs to operate a certain order bit, but is not sure which one. At this time, we can use the method of `Method` object matcher to filter out.
+1. The developer knows which request data needs to be manipulated. At this time, when calling the above three functions, a `Method` instance can be directly passed in;
+2. The developer only knows the request that needs to operate a certain order bit, but is not sure which one. At this time, we can use the method of `Method` instance matcher to filter out.
 
 
-The `Method` object matcher is filtered according to the `name` property set by the `Method` object. Multiple matchers are allowed to set the same `name`, so first you need to set the `name` property for the `Method` object that needs to be filtered .
+The `Method` instance matcher is filtered according to the `name` property set by the `Method` instance. Multiple matchers are allowed to set the same `name`, so first you need to set the `name` property for the `Method` instance that needs to be filtered .
 ```javascript
-// A new Method object is generated each time getTodoList is called, and their name is the same
+// A new Method instance is generated each time getTodoList is called, and their name is the same
 const getTodoList = currentPage => alova.Get('/tood/list', {
   name: 'todoList',
   params: {
@@ -874,25 +874,29 @@ const getTodoList = currentPage => alova.Get('/tood/list', {
   }
 });
 ```
-Secondly, we can pass in the matcher when calling the `invalidateCache`, `updateState`, `fetch` functions. The format of the complete `Method` object matcher is as follows:
+Secondly, we can pass in the matcher when calling the `invalidateCache`, `setCacheData`, `updateState`, `fetch` functions. The format of the complete `Method` instance matcher is as follows:
 ```javascript
 type MethodFilter = {
   name: string | RegExp;
   filter: (method: Method, index: number, methods: Method[]) => boolean;
+
+  // Optional parameter, if an alova object is passed in, it only matches the Method object created by this alova, otherwise it matches the Method objects of all alova instances
+  alova?: Alova;
 };
 ```
-`name` indicates the `Method` object that needs to be matched. It matches an array, and then uses the `filter` filter function to filter out the final set of `Method` objects. The `filter` function returns true to indicate that the match was successful, and false to indicate that the match was successful. Failing that, let's look at a few examples.
+`name` indicates the `Method` instance that needs to be matched. It matches an array, and then uses the `filter` filter function to filter out the final set of `Method` instances. The `filter` function returns true to indicate that the match was successful, and false to indicate that the match was successful. Failing that, let's look at a few examples.
 ```javascript
-// The following means match all Method objects with name 'todoList' and invalidate their cache
+// The following means match all Method instances with name 'todoList' and invalidate their cache
 invalidateCache({
   name: 'todoList',
   filter: (method, index, methods) => true,
 });
 
-// The following means match all Method objects whose name starts with 'todo'
+// The following means match all Method instances which created by alova1 instance and name starts with 'todo'
 invalidateCache({
   name: /^todo/,
   filter: (method, index, methods) => true,
+  alova: alova1,
 });
 
 // If you don't need to set a filter function, you can also pass in a string or regular expression directly
@@ -906,10 +910,10 @@ fetch({
   filter: (method, index, methods) => index === methods.length - 1,
 });
 ```
-It is important to note that `invalidateCache` will invalidate all caches corresponding to the filtered `Method` objects, while `updateState` and `fetch` will only operate on the first item in the `Method` object collection.
+It is important to note that `invalidateCache` will invalidate all caches corresponding to the filtered `Method` instances, while `updateState` and `fetch` will only operate on the first item in the `Method` instance collection.
 
 ### Download progress
-Before getting the download progress, you need to enable the download progress on the specified `Method` object, and then receive the `downloading` responsive state in the three use hooks `useRequest`, `useWatcher`, `useFetcher`, which will continue during the download process Update this status.
+Before getting the download progress, you need to enable the download progress on the specified `Method` instance, and then receive the `downloading` responsive state in the three use hooks `useRequest`, `useWatcher`, `useFetcher`, which will continue during the download process Update this status.
 ```javascript
 const downloadGetter = alova.Get('/tood/downloadfile', {
   enableDownload: true
@@ -1331,13 +1335,13 @@ const handleTodolistToggle = () => {
 }
 ```
 
-Case 2: When paging requests for data, multiple `Method` objects are generated due to page turning, resulting in the `data` data state of the rendered list often corresponding to multiple response caches. If you finish editing a piece of data, you want to update the list immediately. Instead of requesting the interface update list again, you can call the `updateState` function and modify the `data` data state and the corresponding cache at the same time, but if the data you want to modify at this time is not the data of this page, or involves For multiple pages of data, you can call `setCacheData` to modify the cache at this time to ensure that the data is updated next time the data of the specified page is displayed.
+Case 2: When paging requests for data, multiple `Method` instances are generated due to page turning, resulting in the `data` data state of the rendered list often corresponding to multiple response caches. If you finish editing a piece of data, you want to update the list immediately. Instead of requesting the interface update list again, you can call the `updateState` function and modify the `data` data state and the corresponding cache at the same time, but if the data you want to modify at this time is not the data of this page, or involves For multiple pages of data, you can call `setCacheData` to modify the cache at this time to ensure that the data is updated next time the data of the specified page is displayed.
 
 For example, if there is a set of list data with category names, and you want to modify the category name after browsing a few pages, and immediately update the data in the cache, instead of re-pulling the data, you can write like this
 
 ```javascript
 const todoListGetter = page => alova.Get('/todo/list', {
-  name: 'todoList', // Set the name of the Method object, the cache can be modified in batches by name in setCacheData
+  name: 'todoList', // Set the name of the Method instance, the cache can be modified in batches by name in setCacheData
   params: {
     userId: 1,
     page
@@ -1352,8 +1356,8 @@ const {
 // Confirm the modification category name event callback
 const confirmCategoryNameChange = categoryName => {
   
-  // The first parameter of setCacheData can be passed in a Method object, or a Method object matcher
-  // The second parameter can receive the update function. When multiple Method objects are matched, this function will be called multiple times. The function parameter is the old cache, and the updated cache is required to be returned.
+  // The first parameter of setCacheData can be passed in a Method instance, or a Method instance matcher
+  // The second parameter can receive the update function. When multiple Method instances are matched, this function will be called multiple times. The function parameter is the old cache, and the updated cache is required to be returned.
   setCacheData('todoList', oldCache => {
     return {
       ...cacheItem,
@@ -1363,7 +1367,7 @@ const confirmCategoryNameChange = categoryName => {
 }
 ```
 
-For details on how to use the `Method` object matcher, see [Advanced - Method Object Matcher](#method-object-matcher)
+For details on how to use the `Method` instance matcher, see [Advanced - Method instance Matcher](#method-instance-matcher)
 
 
 ## Advanced
@@ -1422,7 +1426,7 @@ function customRequestAdapter(config) {
 ```
 Description of the return value of the request adapter:
 1. [Required] `response`: an asynchronous function, the function returns the response value, which will be passed to the global response interceptor response;
-2. [Required] `headers`: an asynchronous function, the response header object returned by the function will be passed to the transformData conversion hook function of the Method object;
+2. [Required] `headers`: an asynchronous function, the response header object returned by the function will be passed to the transformData conversion hook function of the Method instance;
 3. [Required] `abort`: an ordinary function, which is used for interrupt request. When the `abort` function is called in the [Manual Interrupt Request](#Manual Interrupt Request) chapter, the function that actually triggers the interrupt request is this interrupt function;
 4. [Optional] `onDownload`: a common function, which receives a callback function for updating the download progress, and customizes the frequency of progress update in this function. In this example, the simulation is updated every 100 milliseconds. The `updateDownloadProgress` callback function receives two parameters, the first parameter is the total size, and the second parameter is the downloaded size;
 5. [Optional] `onUpload`: a common function, which receives a callback function for updating the upload progress. The frequency of the progress update is customized in this function. In this example, the simulation is updated every 100 milliseconds. The `updateUploadProgress` callback function receives two parameters, the first parameter is the total size, and the second parameter is the uploaded size;
@@ -1600,18 +1604,18 @@ In this way, the data data will have a specific type. It should be noted that th
 
 
 #### Type inferred from request adapter
-Because `alova` supports custom request adapters, and different adapters may have different request configuration objects, response objects, and response headers, so the global `beforeRequest`, `responsed` interceptors, and `Method` object creation configuration The type of the object will be automatically inferred based on the type provided by the request adapter. Let's look at these types first.
+Because `alova` supports custom request adapters, and different adapters may have different request configuration objects, response objects, and response headers, so the global `beforeRequest`, `responsed` interceptors, and `Method` instance creation configuration The type of the object will be automatically inferred based on the type provided by the request adapter. Let's look at these types first.
 ```typescript
-// Generic configuration type for generic Method objects
+// Generic configuration type for generic Method instances
 type CommonMethodConfig = {
   readonly url: string,
   readonly method: MethodType,
   data?: Record<string, any> | FormData | string,
 };
 
-// The type of the configuration object when the `Method` object was created
+// The type of the configuration object when the `Method` instance was created
 type AlovaMethodConfig<R, T, RC, RH> = {
-  // The following is the configuration object specified when creating the Method object
+  // The following is the configuration object specified when creating the Method instance
   name?: string,
 
   // parameters in the url, an object

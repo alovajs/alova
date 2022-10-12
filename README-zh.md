@@ -861,7 +861,7 @@ const {
 
 ### Method对象匹配器
 当我们在处理完一些业务时，需要调用`invalidateCache`、`setCacheData`、`updateState`和`fetch`来失效缓存、更新缓存、跨页面更新状态、或重新拉取数据，一般会有两种场景：
-1. 开发者知道需要操作哪个请求的数据，此时在调用上面三个函数时直接传入一个`Method`对象即可；
+1. 开发者知道需要操作哪个请求的数据，此时在调用上面的函数时直接传入一个`Method`对象即可；
 2. 开发者只知道需要操作某个顺序位的请求，而不确定具体哪个，此时我们就可以使用`Method`对象匹配器的方式过滤出来。
 
 
@@ -876,11 +876,14 @@ const getTodoList = currentPage => alova.Get('/tood/list', {
   }
 });
 ```
-其次，我们在调用`invalidateCache`、`updateState`、`fetch`函数时传入匹配器即可，完整的`Method`对象匹配器的格式如下：
+其次，我们在调用`invalidateCache`、`setCacheData`、`updateState`、`fetch`函数时传入匹配器即可，完整的`Method`对象匹配器的格式如下：
 ```javascript
 type MethodFilter = {
   name: string | RegExp;
   filter: (method: Method, index: number, methods: Method[]) => boolean;
+  
+  // 可选参数，如果传入alova对象则只匹配此alova所创建的Method对象，否则匹配所有alova实例的Method对象
+  alova?: Alova;
 };
 ```
 `name`表示需要匹配的`Method`对象，它匹配出来是一个数组，然后通过`filter`过滤函数筛选出最终使用的`Method`对象集合，`filter`函数返回true表示匹配成功，返回false表示失败，让我们来看几个例子。
@@ -891,10 +894,11 @@ invalidateCache({
   filter: (method, index, methods) => true,
 });
 
-// 以下表示匹配name为以'todo'开头的所有Method对象
+// 以下表示匹配alova1实例创建的，name为以'todo'开头的所有Method对象
 invalidateCache({
   name: /^todo/,
   filter: (method, index, methods) => true,
+  alova: alova1,
 });
 
 // 如果不需要设置过滤函数，也可以直接传入一个字符串或者正则表达式

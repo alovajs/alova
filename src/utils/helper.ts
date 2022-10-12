@@ -1,9 +1,19 @@
+import { AlovaMethodHandler, LocalCacheConfigParam, Method } from '../../typings';
 import {
-  LocalCacheConfigParam,
-  AlovaMethodHandler,
-  Method
-} from '../../typings';
-import { clearTimeoutTimer, falseValue, forEach, getConfig, getOptions, JSONStringify, MEMORY, nullValue, objectKeys, setTimeoutFn, STORAGE_PLACEHOLDER, STORAGE_RESTORE, undefinedValue } from './variables';
+	clearTimeoutTimer,
+	falseValue,
+	forEach,
+	getConfig,
+	getOptions,
+	JSONStringify,
+	MEMORY,
+	nullValue,
+	objectKeys,
+	setTimeoutFn,
+	STORAGE_PLACEHOLDER,
+	STORAGE_RESTORE,
+	undefinedValue
+} from './variables';
 
 /**
  * 空函数，做兼容处理
@@ -27,14 +37,12 @@ export const isFn = (arg: any): arg is Function => typeof arg === 'function';
  */
 export const isNumber = (arg: any): arg is number => typeof arg === 'number' && !isNaN(arg);
 
-
 /**
  * 判断参数是否为字符串
  * @param arg 任意参数
  * @returns 该参数是否为字符串
  */
- export const isString = (arg: any): arg is string => typeof arg === 'string';
-
+export const isString = (arg: any): arg is string => typeof arg === 'string';
 
 // 判断是否为普通对象
 export const isPlainObject = (arg: any): arg is Object => Object.prototype.toString.call(arg) === '[object Object]';
@@ -50,16 +58,10 @@ export const isArray = (arg: any): arg is any[] => Array.isArray(arg);
  * @returns {string} 此请求方式的key值
  */
 export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-  const { type, url, requestBody } = methodInstance;
-  const { params, headers } = getConfig(methodInstance);
-  return JSONStringify([
-    type,
-    url,
-    params,
-    requestBody,
-    headers,
-  ]);
-}
+	const { type, url, requestBody } = methodInstance;
+	const { params, headers } = getConfig(methodInstance);
+	return JSONStringify([type, url, params, requestBody, headers]);
+};
 
 /**
  * 序列化请求方法对象
@@ -67,19 +69,14 @@ export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, R
  * @returns 请求方法的序列化对象
  */
 export const serializeMethod = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-  const {
-    type,
-    url,
-    config,
-    requestBody
-  } = methodInstance;
-  return {
-    type,
-    url,
-    config,
-    requestBody
-  };
-}
+	const { type, url, config, requestBody } = methodInstance;
+	return {
+		type,
+		url,
+		config,
+		requestBody
+	};
+};
 
 /**
  * 创建防抖函数，只有enable为trueValue时会进入防抖环节，否则将立即触发此函数
@@ -90,20 +87,19 @@ export const serializeMethod = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S
  * @returns 延迟后的回调函数
  */
 export const debounce = (fn: Function, delay: number, enable: () => boolean) => {
-  let timer: any = nullValue;
-  return function(this: any, ...args: any[]) {
-    const bindFn = fn.bind(this, ...args);
-    if (!enable()) {
-      bindFn();
-      return;
-    }
-    if (timer) {
-      clearTimeoutTimer(timer);
-    }
-    timer = setTimeoutFn(bindFn, delay);
-  };
-}
-
+	let timer: any = nullValue;
+	return function (this: any, ...args: any[]) {
+		const bindFn = fn.bind(this, ...args);
+		if (!enable()) {
+			bindFn();
+			return;
+		}
+		if (timer) {
+			clearTimeoutTimer(timer);
+		}
+		timer = setTimeoutFn(bindFn, delay);
+	};
+};
 
 /**
  * 获取缓存的配置参数，固定返回{ e: number, s: boolean }格式的对象
@@ -112,34 +108,33 @@ export const debounce = (fn: Function, delay: number, enable: () => boolean) => 
  * @param localCache 本地缓存参数
  * @returns 统一的缓存参数对象
  */
-export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance?: Method<S, E, R, T, RC, RE, RH>, localCache?: LocalCacheConfigParam) => {
-  const _localCache = localCache !== undefinedValue
-    ? localCache 
-    : methodInstance 
-      ? (getOptions(methodInstance).localCache || getConfig(methodInstance).localCache) 
-      : undefinedValue;
-  const defaultCacheMode = MEMORY;
-  if (isNumber(_localCache)) {
-    return {
-      e: _localCache,
-      m: defaultCacheMode,
-      s: falseValue,
-      t: undefinedValue,
-    }
-  }
-  const {
-    mode = defaultCacheMode,
-    expire = 0,
-    tag
-  } = _localCache || {};
-  return {
-    e: expire,
-    m: mode,
-    s: [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode),
-    t: tag ? tag.toString() : undefinedValue,
-  };
-}
-
+export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(
+	methodInstance?: Method<S, E, R, T, RC, RE, RH>,
+	localCache?: LocalCacheConfigParam
+) => {
+	const _localCache =
+		localCache !== undefinedValue
+			? localCache
+			: methodInstance
+			? getOptions(methodInstance).localCache || getConfig(methodInstance).localCache
+			: undefinedValue;
+	const defaultCacheMode = MEMORY;
+	if (isNumber(_localCache)) {
+		return {
+			e: _localCache,
+			m: defaultCacheMode,
+			s: falseValue,
+			t: undefinedValue
+		};
+	}
+	const { mode = defaultCacheMode, expire = 0, tag } = _localCache || {};
+	return {
+		e: expire,
+		m: mode,
+		s: [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode),
+		t: tag ? tag.toString() : undefinedValue
+	};
+};
 
 /**
  * 获取请求方法对象
@@ -148,11 +143,9 @@ export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance?
  * @returns 请求方法对象
  */
 export const getHandlerMethod = <S, E, R, T, RC, RE, RH>(
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>, args: any[] = []
-) => isFn(methodHandler) 
-  ? methodHandler(...args)
-  : methodHandler;
-
+	methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+	args: any[] = []
+) => (isFn(methodHandler) ? methodHandler(...args) : methodHandler);
 
 /**
  * 深度走查正在更新的数据，当一个数据以如下格式呈现时，则需要在响应后将它替换为实际数据
@@ -169,61 +162,61 @@ export const getHandlerMethod = <S, E, R, T, RC, RE, RH>(
  * @returns 待替换数据的位置，及转换函数
  */
 export const walkUpatingDataStructure = (data: any) => {
-  const catchedUpdateAttrs: {
-    p: (number | string)[],
-    h: Function,
-  }[] = [];
+	const catchedUpdateAttrs: {
+		p: (number | string)[];
+		h: Function;
+	}[] = [];
 
-  // 解析函数
-  const parseResponsedStructure = (attr: any, key?: string) => {
-    let structure: { h: Function, d?: any } | undefined = undefined;
-    if (isPlainObject(attr)) {
-      const { action: a, value: h, default: d } = attr;
-      if (a === 'responsed' && isFn(h)) {
-        structure = { h, d };
-      }
-    } else if (key && key[0] === '+') {
-      if (isFn(attr)) {
-        structure = { h: attr };
-      } else if (isArray(attr) && isFn(attr[0])) {
-        structure = { h: attr[0], d: attr[1] };
-      }
-    }
-    return structure;
-  }
+	// 解析函数
+	const parseResponsedStructure = (attr: any, key?: string) => {
+		let structure: { h: Function; d?: any } | undefined = undefined;
+		if (isPlainObject(attr)) {
+			const { action: a, value: h, default: d } = attr;
+			if (a === 'responsed' && isFn(h)) {
+				structure = { h, d };
+			}
+		} else if (key && key[0] === '+') {
+			if (isFn(attr)) {
+				structure = { h: attr };
+			} else if (isArray(attr) && isFn(attr[0])) {
+				structure = { h: attr[0], d: attr[1] };
+			}
+		}
+		return structure;
+	};
 
-  let finalData = data;
-  // 遍历对象或数组内的单个项处理
-  const replaceStr = (key: string) => key.replace(/^\+/, '');
-  const walkItem = (item: any, position: (number | string)[], key?: string | number, parent?: any) => {
-    const structure = parseResponsedStructure(item, isString(key) ? key : undefinedValue);
-    if (structure) {
-      const { h, d } = structure;
-      catchedUpdateAttrs.push({
-        p: position,
-        h,
-      });
-      if (key !== undefinedValue) {
-        const keyReplaced = isString(key) ? replaceStr(key) : key;
-        if (keyReplaced !== key) {
-          delete parent[key];
-        }
-        parent[keyReplaced] = d;
-      } else {
-        finalData = d;
-      }
-    } else if (isPlainObject(item)) {
-      // 遍历对象
-      forEach(objectKeys(item), key => walkItem(item[key], [...position, replaceStr(key)], key, item));
-    } else if (isArray(item)) {
-      // 遍历数组
-      forEach(item, (arrItem, i) => walkItem(arrItem, [...position, i], i, item));
-    }
-  };
+	let finalData = data;
+	// 遍历对象或数组内的单个项处理
+	const replaceStr = (key: string) => key.replace(/^\+/, '');
+	const walkItem = (item: any, position: (number | string)[], key?: string | number, parent?: any) => {
+		const structure = parseResponsedStructure(item, isString(key) ? key : undefinedValue);
+		if (structure) {
+			const { h, d } = structure;
+			catchedUpdateAttrs.push({
+				p: position,
+				h
+			});
+			if (key !== undefinedValue) {
+				const keyReplaced = isString(key) ? replaceStr(key) : key;
+				if (keyReplaced !== key) {
+					delete parent[key];
+				}
+				parent[keyReplaced] = d;
+			} else {
+				finalData = d;
+			}
+		} else if (isPlainObject(item)) {
+			// 遍历对象
+			forEach(objectKeys(item), key => walkItem(item[key], [...position, replaceStr(key)], key, item));
+		} else if (isArray(item)) {
+			// 遍历数组
+			forEach(item, (arrItem, i) => walkItem(arrItem, [...position, i], i, item));
+		}
+	};
 
-  walkItem(data, []);
-  return {
-    f: finalData,
-    c: catchedUpdateAttrs
-  };
+	walkItem(data, []);
+	return {
+		f: finalData,
+		c: catchedUpdateAttrs
+	};
 };

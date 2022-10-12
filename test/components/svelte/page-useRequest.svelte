@@ -6,8 +6,8 @@
 
 <script>
 import { createAlova, useRequest } from '../../../src';
-import SvelteHook from '../../../src/predefine/SvelteHook';
 import GlobalFetch from '../../../src/predefine/GlobalFetch';
+import SvelteHook from '../../../src/predefine/SvelteHook';
 
 const alova = createAlova({
   baseURL: 'http://localhost:3000',
