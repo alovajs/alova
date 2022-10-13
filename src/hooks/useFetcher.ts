@@ -1,21 +1,19 @@
-import { FetcherHookConfig, MethodMatcher } from '../../typings';
-import Alova from '../Alova';
+import { FetcherHookConfig, FetcherType, MethodMatcher } from '../../typings';
 import createRequestState from '../functions/createRequestState';
 import Method from '../Method';
+import { alovas } from '../network';
 import { getMethodSnapshot, keyFind } from '../storage/responseCache';
 import { instanceOf, noop } from '../utils/helper';
-import myAssert from '../utils/myAssert';
+import myAssert, { assertAlovaCreation } from '../utils/myAssert';
 import { trueValue } from '../utils/variables';
 
 /**
  * 获取请求数据并缓存
  * @param method 请求方法对象
  */
-export default function useFetcher<S, E, R, RC, RE, RH>(
-	alova: Alova<S, E, RC, RE, RH>,
-	config: FetcherHookConfig = {}
-) {
-	const props = createRequestState<S, E, any, any, RC, RE, RH>(alova, noop, noop as any);
+export default function useFetcher<SE extends FetcherType<any>>(config: FetcherHookConfig = {}) {
+	assertAlovaCreation();
+	const props = createRequestState<SE['state'], SE['export'], any, any, any, any, any>(alovas[0], noop, noop as any);
 	return {
 		fetching: props.loading,
 		error: props.error,
@@ -30,7 +28,7 @@ export default function useFetcher<S, E, R, RC, RE, RH>(
     // fetch一定会发送请求。且如果当前请求的数据有管理对应的状态，则会更新这个状态
      * @param matcher Method对象匹配器
      */
-		fetch: <R, T>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>) => {
+		fetch: <S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>) => {
 			const methodInstance = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
 				? matcher
 				: getMethodSnapshot(matcher, keyFind);

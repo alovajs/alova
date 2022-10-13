@@ -1,8 +1,8 @@
 import { Writable } from 'svelte/store';
 import { Ref } from 'vue';
 
-export type RequestBody = Arg | FormData | string;
-export type Progress = {
+type RequestBody = Arg | FormData | string;
+type Progress = {
 	total: number;
 	loaded: number;
 };
@@ -22,9 +22,9 @@ type FrontRequestState<L = any, R = any, E = any, D = any, U = any> = {
 	downloading: D;
 	uploading: U;
 };
-export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
+type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
-export type SerializedMethod<R, T, RC, RH> = {
+type SerializedMethod<R, T, RC, RH> = {
 	type: MethodType;
 	url: string;
 	config?: AlovaMethodConfig<R, T, RC, RH>;
@@ -253,6 +253,12 @@ interface WatcherHookConfig extends FrontRequestHookConfig {
 /** useFetcher config type */
 interface FetcherHookConfig extends UseHookConfig {}
 
+/** 调用useFetcher时需要传入的类型，否则会导致状态类型错误 */
+type FetcherType<A extends Alova<any, any, any, any, any>> = {
+	state: ReturnType<A['options']['statesHook']['create']>;
+	export: ReturnType<A['options']['statesHook']['export']>;
+};
+
 /**
  * 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
  * 使用不同库的特征作为父类进行判断
@@ -277,12 +283,12 @@ type UseHookReturnType<R, S> = FrontRequestState<
 	onError: (handler: ErrorHandler) => void;
 	onComplete: (handler: CompleteHandler) => void;
 };
-type UseFetchHookReturnType<S, E, RC, RE, RH> = {
+type UseFetchHookReturnType<S> = {
 	fetching: UseHookReturnType<any, S>['loading'];
 	error: UseHookReturnType<any, S>['error'];
 	downloading: UseHookReturnType<any, S>['downloading'];
 	uploading: UseHookReturnType<any, S>['uploading'];
-	fetch: <R, T>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => void;
+	fetch: <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => void;
 };
 
 type MethodFilterHandler = (
@@ -312,10 +318,9 @@ export declare function useWatcher<S, E, R, T, RC, RE, RH>(
 	watchingStates: E[],
 	config?: WatcherHookConfig
 ): UseHookReturnType<R, S>;
-export declare function useFetcher<S, E, RC, RE, RH>(
-	alova: Alova<S, E, RC, RE, RH>,
+export declare function useFetcher<SE extends FetcherType<any>>(
 	config?: FetcherHookConfig
-): UseFetchHookReturnType<S, E, RC, RE, RH>;
+): UseFetchHookReturnType<SE['state']>;
 export declare function invalidateCache<S, E, R, T, RC, RE, RH>(matcher?: MethodMatcher<S, E, R, T, RC, RE, RH>): void;
 export declare function updateState<S, E, R, T, RC, RE, RH>(
 	matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,

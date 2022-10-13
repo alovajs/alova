@@ -563,17 +563,18 @@ const {
 
 ### useFetcher
 It is used to pull data, and the response data cannot be received directly. The usage scenarios of `useFetcher` are as follows:
+
 1. Preload the data that will be used in the subsequent process and store it in the cache, so that users no longer wait for the process of data loading;
-2. Refresh interface data across pages. When the pulled data is rendered in the page, it will not only update the cache, but also update the response status to refresh the interface. For example, after modifying an item in the todo list, the latest data will be pulled again. The interface will be refreshed after the response.
+2. Refresh the interface data across pages. When the pulled data is rendered in the page, it will update the response state in addition to updating the cache, so that the interface refreshes. For example, after modifying an item in the todo list, the latest data will be pulled again. The interface will be refreshed after the response.
 
-In contrast to `useRequest` and `useWatcher`, `useFetcher` requires an `alova` instance object to determine how the state should be created, and it does not return a `data` field, renames `loading` to `fetching`, and does not `send` function, but with an additional `fetch` function, you can reuse the fetch function to pull different data, and use the same fetching and error states, so as to achieve the purpose of unified processing.
+Compared with `useRequest` and `useWatcher`, `useFetcher` does not return `data` field, `loading` is renamed `fetching`, and there is no `send` function, but there is a `fetch` function, which can be reused The fetch function pulls different data and uses the same state of fetching and error, so as to achieve the purpose of unified processing.
 
-Now let's modify a certain todo data, and re-pull the latest todo list data to refresh the interface.
+Let's modify a todo data, and re-pull the latest todo list data to refresh the interface.
 
 ```javascript
 const getTodoList = currentPage => {
   return alova.Get('/tood/list', {
-    // Note: The name attribute is set here to filter out the required Method instance when the Method instance cannot be specified directly
+    // Note: The name attribute is set here to filter out the required Method object when the Method object cannot be specified directly
     name: 'todoList',
     params: {
       currentPage,
@@ -583,7 +584,6 @@ const getTodoList = currentPage => {
 };
 
 const {
-
   // The fetching attribute is the same as loading, true when a pull request is sent, and false after the request is complete
   fetching,
   error,
@@ -592,35 +592,44 @@ const {
   onComplete,
 
   // Only after calling fetch will the request to pull data be sent. You can repeatedly call fetch multiple times to pull data from different interfaces.
-  fetch,
-} = useFetcher(alova);
+  fetch
+} = useFetcher();
 
 // Trigger data pull in event
 const handleSubmit = () => {
   // Assuming you have finished modifying the todo item...
 
   // Start pulling the updated data
-  // Case 1: When you clearly know to pull the first page of todoList data, pass in a Method instance
+  // Case 1: When you clearly know to pull the first page of todoList data, pass in a Method object
   fetch(getTodoList(1));
 
-  // Case 2: When you only know to pull the data of the last request of the todoList, filter by the Method instance matcher
+  // Case 2: When you only know to pull the data of the last request of the todoList, filter by the Method object matcher
   fetch({
     name: 'todoList',
     filter: (method, index, ary) => {
-
-      // Return true to specify the Method instance to be pulled
+      // Return true to specify the Method object to be pulled
       return index === ary.length - 1;
-    },
-  })
+    }
+  });
 };
-```
+````
+
 A unified pull state can also be rendered in the interface.
+
 ```html
 <div v-if="fetching">{{ Fetching data in the background... }}</div>
-<!-- Ignore the html related to the todo parameter setting -->
+<!-- Omit the html related to the todo parameter setting -->
 <button @click="handleSubmit">Modify todo item</button>
 ```
-The fetch function will ignore the existing cache, forcibly initiate a request and update the cache. As for the `Method` instance matcher, see [Advanced - Method instance Matcher](#method-instance-matcher) for details.
+
+After the `useFetcher` request is completed, only the cache is updated, and if it is found that there is a `data` state under the `Method` object, it will also be updated synchronously to ensure consistent page data. It ignores the cache to force the request by default, and you can also turn it off in the following ways.
+```javascript
+useFetcher({
+  force: false
+});
+```
+
+As for about `Method` instance matcher, see [Advanced - Method instance Matcher](#method-instance-matcher) for details.
 
 ## Response data management
 The response data is stateful and managed uniformly, and we can access any response data at any location and operate on them.
@@ -904,7 +913,7 @@ invalidateCache('todoList');
 invalidateCache(/^todo/);
 
 // The following means to re-pull the data of the last request of the todo list
-const { fetch } = useFetcher(alova);
+const { fetch } = useFetcher();
 fetch({
   name: 'todoList',
   filter: (method, index, methods) => index === methods.length - 1,

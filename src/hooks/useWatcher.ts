@@ -4,7 +4,7 @@ import createRequestState from '../functions/createRequestState';
 import useHookToSendRequest from '../functions/useHookToSendRequest';
 import { alovas } from '../network';
 import { noop } from '../utils/helper';
-import myAssert from '../utils/myAssert';
+import myAssert, { assertAlovaCreation } from '../utils/myAssert';
 import { len, promiseCatch } from '../utils/variables';
 
 export default function useWatcher<S, E, R, T, RC, RE, RH>(
@@ -13,7 +13,7 @@ export default function useWatcher<S, E, R, T, RC, RE, RH>(
 	config: WatcherHookConfig = {}
 ) {
 	myAssert(watchingStates && len(watchingStates) > 0, 'must specify at least one watching state');
-
+	assertAlovaCreation();
 	const { immediate, debounce = 0, initialData } = config;
 	const props = createRequestState(
 		alovas[0] as Alova<S, E, RC, RE, RH>,

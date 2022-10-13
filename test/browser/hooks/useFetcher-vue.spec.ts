@@ -2,6 +2,7 @@ import { useFetcher, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
+import { FetcherType } from '../../../typings';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
@@ -28,7 +29,7 @@ describe('use useFetcher hook to fetch data', function () {
 		const Get1 = createGet({ a: '1', b: '2', countKey: 'a' });
 		const { data, onSuccess } = useRequest(Get1);
 
-		const { fetching, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher(alova); // 默认不强制请求，会命中缓存
+		const { fetching, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>(); // 默认不强制请求，会命中缓存
 		expect(fetching.value).toBeFalsy();
 		expect(downloading.value).toEqual({ total: 0, loaded: 0 });
 		expect(error.value).toBeUndefined();
@@ -71,8 +72,13 @@ describe('use useFetcher hook to fetch data', function () {
 
 		const Get1 = createGet({ a: '1', b: '2', countKey: 'b' });
 		const { data, onSuccess } = useRequest(Get1);
-
-		const { fetching, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher(alova, { force: true }); // 忽略缓存强制请求
+		const {
+			fetching,
+			downloading,
+			error,
+			fetch,
+			onSuccess: onFetchSuccess
+		} = useFetcher<FetcherType<typeof alova>>({ force: true }); // 忽略缓存强制请求
 		expect(fetching.value).toBeFalsy();
 		expect(downloading.value).toEqual({ total: 0, loaded: 0 });
 		expect(error.value).toBeUndefined();
