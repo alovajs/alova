@@ -148,4 +148,36 @@ describe('manual set cache response data', function () {
 		});
 		expect(mockfn).toBeCalledTimes(2); // 相同的Method请求不会被多次匹配
 	});
+
+	test('update will be canceled when callback return false', async () => {
+		const Get1 = alova.Get('/unit-test', {
+			params: { a: 200 },
+			localCache: 100 * 1000,
+			transformData: ({ data }: Result) => data
+		});
+		await Get1.send();
+
+		expect(getResponseCache(alova.id, key(Get1))).toEqual({
+			path: '/unit-test',
+			method: 'GET',
+			params: {
+				a: '200'
+			}
+		});
+
+		// 更新函数返回false时，表示中断更新
+		const mockfn = jest.fn();
+		setCacheData(Get1, _ => {
+			mockfn();
+			return false;
+		});
+		expect(getResponseCache(alova.id, key(Get1))).toEqual({
+			path: '/unit-test',
+			method: 'GET',
+			params: {
+				a: '200'
+			}
+		});
+		expect(mockfn).toBeCalledTimes(1); // 执行了一次
+	});
 });

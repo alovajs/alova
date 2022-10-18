@@ -1407,7 +1407,7 @@ onSuccess(todoListDates => {
 });
 ```
 
-此时再在切换日期为 5 月 1 日时，它将会命中我们手动设置的响应缓存。
+此时再在切换日期为5月1日时，它将会命中我们手动设置的响应缓存。
 
 ```javascript
 const handleTodolistToggle = () => {
@@ -1445,6 +1445,8 @@ const confirmCategoryNameChange = categoryName => {
 	});
 };
 ```
+
+> 在某些特殊情况下，你可能需要根据条件判断是否更新缓存，此时可返回`false`来中断本次的更新。
 
 `Method`对象匹配器的详细使用方法见 [进阶-Method 对象匹配器](#Method对象匹配器)
 

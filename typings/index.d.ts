@@ -329,5 +329,5 @@ export declare function updateState<S, E, R, T, RC, RE, RH>(
 /** 手动设置缓存响应数据 */
 export declare function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
 	matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
-	data: R | ((oldCache: R) => R)
+	dataOrUpater: R | ((oldCache: R) => R | false)
 ): void;

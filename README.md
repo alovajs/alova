@@ -1376,6 +1376,8 @@ const confirmCategoryNameChange = categoryName => {
 }
 ```
 
+> In some special cases, you may need to judge whether to update the cache according to the conditions. In this case, you can return `false` to interrupt this update.
+
 For details on how to use the `Method` instance matcher, see [Advanced - Method instance Matcher](#method-instance-matcher)
 
 
