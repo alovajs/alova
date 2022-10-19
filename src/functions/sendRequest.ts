@@ -73,7 +73,9 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 		t: tag
 	} = getLocalCacheConfigParam(undefinedValue, newLocalCache ?? localCache);
 
+	// 过滤掉值为undefined的
 	let paramsStr = objectKeys(params)
+		.filter(key => params[key] !== undefinedValue)
 		.map(key => `${key}=${params[key]}`)
 		.join('&');
 
