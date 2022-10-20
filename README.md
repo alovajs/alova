@@ -63,6 +63,7 @@ The request scene management library of the MVVM library, it is an arm of the re
   - [Request method details](#request-method-details)
   - [Send request directly (v1.2.0+)](#send-request-directly-(v1.2.0+))
   - [Set initial response data](#set-initial-response-data)
+  - [Force Sending Request](#force-sending-request)
   - [Manual Interrupt Request](#manual-interrupt-request)
   - [Request anti-shake](#request-anti-shake)
   - [Method instance matcher](#method-instance-matcher)
@@ -629,7 +630,9 @@ useFetcher({
 });
 ```
 
-As for about `Method` instance matcher, see [Advanced - Method instance Matcher](#method-instance-matcher) for details.
+For more information about forcing a request to be sent, see [Force Sending Request](#force-sending-request).
+
+As for about `Method` instance matcher, see [Method instance Matcher](#method-instance-matcher) for details.
 
 ## Response data management
 The response data is stateful and managed uniformly, and we can access any response data at any location and operate on them.
@@ -830,6 +833,25 @@ const {
 });
 ```
 
+## Force sending request
+When you are using the use hooks of `alova`, sometimes you want to send a request when the cache is hit. In this case, you can use the `force` parameter in the use hook configuration. The usage method is as follows:
+```javascript
+useRequest(methodInstance, {
+   force: true,
+});
+
+// If the force needs to be dynamically changed, it can be set to a function that returns a boolean value, which will be triggered on every request
+// useRequest, useWatcher, useFetcher are all supported
+const force = { value: false };
+useWatcher(() => methodInstance, [...], {
+   force: () => force.value
+});
+
+useFetcher({
+   force: false, // or set () => force.value
+});
+```
+It is worth noting that the force value of `useRequest` and `useWatcher` defaults to false, while the force value of `useFetcher` defaults to true.
 
 ### Manual interrupt request
 When the `timeout` parameter is not set, the request will never time out. If you need to manually interrupt the request, you can receive the `abort` method when the `useRequest` and `useWatcher` functions are called.

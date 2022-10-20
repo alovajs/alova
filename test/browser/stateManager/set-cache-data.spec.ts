@@ -119,6 +119,9 @@ describe('manual set cache response data', function () {
 		// 更新以上两个请求的缓存
 		const mockfn = jest.fn();
 		setCacheData<Result['data']>('test-get2', cache => {
+			if (!cache) {
+				return false;
+			}
 			cache.params.a = 'update';
 			mockfn();
 			return cache;
@@ -142,6 +145,9 @@ describe('manual set cache response data', function () {
 		const mockfn2 = jest.fn();
 		await Get2.send();
 		setCacheData<Result['data']>('test-get2', cache => {
+			if (!cache) {
+				return false;
+			}
 			cache.params.a = 'update2';
 			mockfn2();
 			return cache;

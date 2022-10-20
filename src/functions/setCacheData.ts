@@ -12,7 +12,7 @@ import { falseValue, forEach, getContext, undefinedValue } from '../utils/variab
  */
 export default function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
 	matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
-	dataOrUpater: R | ((oldCache: R) => R | false)
+	dataOrUpater: R | ((oldCache?: R) => R | false)
 ) {
 	const methods: Method<S, E, R, T, RC, RE, RH>[] = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
 		? [matcher]

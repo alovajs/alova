@@ -7,7 +7,7 @@ import {
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self } from '../utils/helper';
+import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, sloughConfig } from '../utils/helper';
 import {
 	falseValue,
 	getContext,
@@ -29,7 +29,7 @@ import {
  */
 export default function sendRequest<S, E, R, T, RC, RE, RH>(
 	methodInstance: Method<S, E, R, T, RC, RE, RH>,
-	forceRequest: boolean
+	forceRequest: boolean | (() => boolean)
 ) {
 	const { type, url, config, requestBody } = methodInstance;
 	const {
@@ -42,6 +42,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 	const { id, storage } = getContext(methodInstance);
 	const methodKey = key(methodInstance);
 
+	forceRequest = sloughConfig(forceRequest);
 	// 如果是强制请求的，则跳过从缓存中获取的步骤
 	if (!forceRequest) {
 		const response = getResponseCache(id, methodKey);

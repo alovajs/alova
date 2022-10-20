@@ -64,6 +64,7 @@ MVVM 库的请求场景管理库，它是对请求库的一种武装，而非替
   - [请求方法详解](#请求方法详解)
   - [直接发送请求(v1.2.0+)](<直接发送请求(v1.2.0+)>)
   - [设置初始响应数据](#设置初始响应数据)
+  - [强制发送请求](#强制发送请求)
   - [手动中断请求](#手动中断请求)
   - [请求防抖](#请求防抖)
   - [Method 对象匹配器](#Method对象匹配器)
@@ -689,7 +690,9 @@ useFetcher({
 });
 ```
 
-至于`Method`对象匹配器，详细的使用方法见 [进阶-Method 对象匹配器](#Method对象匹配器)
+更多关于强制发送请求的内容，查看 [进阶-强制发送请求](#强制发送请求)
+
+至于`Method`对象匹配器，详细的使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
 
 ## 响应数据管理
 
@@ -909,6 +912,26 @@ const {
 	}
 );
 ```
+
+### 强制发送请求
+当你在使用`alova`的use hooks时，有时候希望在命中缓存时也可以发送请求，此时可以用use hook配置中的`force`参数，使用方法如下：
+```javascript
+useRequest(methodInstance, {
+  force: true,
+});
+
+// 如果force需要动态变更，可设置为一个返回boolean值的函数，它将在每次请求时触发
+// useRequest、useWatcher、useFetcher都支持
+const force = { value: false };
+useWatcher(() => methodInstance, [...], {
+  force: () => force.value
+});
+
+useFetcher({
+  force: false,  // 或() => force.value
+});
+```
+值得注意的是，`useRequest`、`useWatcher`的force值默认为false，而`useFetcher`的force值默认为true。
 
 ### 手动中断请求
 

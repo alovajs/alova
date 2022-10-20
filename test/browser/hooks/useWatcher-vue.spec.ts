@@ -1,10 +1,10 @@
 import { ref } from 'vue';
-import { useWatcher } from '../../../src';
+import { setCacheData, useWatcher } from '../../../src';
 import Method from '../../../src/Method';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer } from '../../utils';
+import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
 beforeAll(() => mockServer.listen());
@@ -267,5 +267,42 @@ describe('use useWatcher hook to send GET with vue', function () {
 			successTimesFns[watchTimes]();
 			watchTimes++;
 		});
+	});
+
+	test('It would return the useHookConfig object when second param is function in `useRequest`', async () => {
+		const alova = getAlovaInstance(VueHook);
+		const getGetterObj = alova.Get('/unit-test', {
+			timeout: 10000,
+			transformData: ({ data }: Result<true>) => data,
+			params: {
+				val: '1'
+			}
+		});
+
+		const ctrlVal = ref(0);
+		const force = { value: false };
+		const { data, send, onSuccess } = useWatcher(() => getGetterObj, [ctrlVal], {
+			force: () => force.value
+		});
+
+		setCacheData(getGetterObj, {
+			path: '/unit-test',
+			method: 'GET',
+			params: { val: '-1' },
+			data: {}
+		});
+
+		ctrlVal.value = 1;
+		await untilCbCalled(onSuccess);
+		expect(data.value.path).toBe('/unit-test');
+		expect(data.value.params.val).toBe('-1');
+
+		force.value = true;
+		send();
+		await untilCbCalled(onSuccess);
+		expect(data.value.path).toBe('/unit-test');
+		expect(data.value.params.val).toBe('1');
+		const cacheData = getResponseCache(alova.id, key(getGetterObj));
+		expect(cacheData.params).toEqual({ val: '1' });
 	});
 });

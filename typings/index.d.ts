@@ -226,7 +226,7 @@ type CompleteHandler = (...args: any[]) => void;
 /** hook通用配置 */
 interface UseHookConfig {
 	/** 是否强制请求 */
-	force?: boolean;
+	force?: boolean | (() => boolean);
 }
 
 /** useRequest和useWatcher都有的类型 */

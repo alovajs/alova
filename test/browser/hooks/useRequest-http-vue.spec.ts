@@ -1,4 +1,4 @@
-import { useRequest } from '../../../src';
+import { setCacheData, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
@@ -218,5 +218,42 @@ describe('use useRequet hook to send GET with vue', function () {
 		} catch (err: any) {
 			expect(err.message).toMatch(/404/);
 		}
+	});
+
+	test('It would return the useHookConfig object when second param is function in `useRequest`', async () => {
+		const alova = getAlovaInstance(VueHook);
+		const getGetterObj = alova.Get('/unit-test', {
+			timeout: 10000,
+			transformData: ({ data }: Result<true>) => data,
+			params: {
+				a: '~',
+				b: '~~'
+			}
+		});
+
+		const force = { value: false };
+		const { data, send } = useRequest(getGetterObj, {
+			immediate: false,
+			force: () => force.value
+		});
+
+		setCacheData(getGetterObj, {
+			path: '/unit-test',
+			method: 'GET',
+			params: { a: '0', b: '1' },
+			data: {}
+		});
+
+		let rawData = await send();
+		expect(rawData.path).toBe('/unit-test');
+		expect(rawData.params.a).toBe('0');
+		expect(data.value.params.b).toBe('1');
+
+		force.value = true;
+		rawData = await send();
+		expect(rawData.params.a).toBe('~');
+		expect(data.value.params.b).toBe('~~');
+		const cacheData = getResponseCache(alova.id, key(getGetterObj));
+		expect(cacheData.params).toEqual({ a: '~', b: '~~' });
 	});
 });

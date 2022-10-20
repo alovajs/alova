@@ -220,3 +220,10 @@ export const walkUpatingDataStructure = (data: any) => {
 		c: catchedUpdateAttrs
 	};
 };
+
+/**
+ * 统一配置
+ * @param 数据
+ * @returns 统一的配置
+ */
+export const sloughConfig = <T>(config: T | (() => T)) => (isFn(config) ? config() : config);
