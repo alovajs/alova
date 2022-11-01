@@ -5,8 +5,8 @@ MVVM 库的请求场景管理库，它是对请求库的一种武装，而非替
 [英文文档](README.md)
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
-[![build](https://github.com/JOU-amjs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/JOU-amjs/alova/actions/workflows/main.yml)
-[![coverage status](https://coveralls.io/repos/github/JOU-amjs/alova/badge.svg?branch=main)](https://coveralls.io/github/JOU-amjs/alova?branch=main)
+[![build](https://github.com/alovajs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/main.yml)
+[![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
@@ -684,15 +684,16 @@ const handleSubmit = () => {
 ```
 
 `useFetcher` 请求完成后只更新缓存，且如果发现该`Method`对象下还有`data`状态，也会同步更新它，从而保证页面数据一致。它默认忽略缓存强制发起请求，你也可以通过以下方式关闭。
+
 ```javascript
 useFetcher({
-  force: false
+	force: false
 });
 ```
 
 更多关于强制发送请求的内容，查看 [进阶-强制发送请求](#强制发送请求)
 
-至于`Method`对象匹配器，详细的使用方法见 [进阶-Method对象匹配器](#Method对象匹配器)
+至于`Method`对象匹配器，详细的使用方法见 [进阶-Method 对象匹配器](#Method对象匹配器)
 
 ## 响应数据管理
 
@@ -914,7 +915,9 @@ const {
 ```
 
 ### 强制发送请求
-当你在使用`alova`的use hooks时，有时候希望在命中缓存时也可以发送请求，此时可以用use hook配置中的`force`参数，使用方法如下：
+
+当你在使用`alova`的 use hooks 时，有时候希望在命中缓存时也可以发送请求，此时可以用 use hook 配置中的`force`参数，使用方法如下：
+
 ```javascript
 useRequest(methodInstance, {
   force: true,
@@ -931,7 +934,8 @@ useFetcher({
   force: false,  // 或() => force.value
 });
 ```
-值得注意的是，`useRequest`、`useWatcher`的force值默认为false，而`useFetcher`的force值默认为true。
+
+值得注意的是，`useRequest`、`useWatcher`的 force 值默认为 false，而`useFetcher`的 force 值默认为 true。
 
 ### 手动中断请求
 
@@ -1430,7 +1434,7 @@ onSuccess(todoListDates => {
 });
 ```
 
-此时再在切换日期为5月1日时，它将会命中我们手动设置的响应缓存。
+此时再在切换日期为 5 月 1 日时，它将会命中我们手动设置的响应缓存。
 
 ```javascript
 const handleTodolistToggle = () => {
