@@ -93,6 +93,30 @@ describe('persist data', function () {
 		expect(secondState.loading.value).toBeFalsy();
 	});
 
+	test('expire param can also be set a Date instance', async () => {
+		const alova = getAlovaInstance(VueHook);
+		const expireDate = new Date();
+		expireDate.setHours(23, 59, 59, 999);
+		const Get = alova.Get('/unit-test', {
+			localCache: {
+				expire: expireDate,
+				mode: cacheMode.STORAGE_RESTORE,
+				tag: 'v1'
+			},
+			transformData: ({ data }: Result) => data
+		});
+		const firstState = useRequest(Get);
+		await untilCbCalled(firstState.onSuccess);
+
+		// 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
+		removeResponseCache(alova.id, key(Get));
+		const secondState = useRequest(Get);
+
+		// 设置为restore后，即使本地缓存失效了，也会自动将持久化数据恢复到缓存在宏，因此会命中缓存
+		expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+		expect(secondState.loading.value).toBeFalsy();
+	});
+
 	test('persistent data will invalid when param `tag` of alova instance is changed', async () => {
 		const alova = getAlovaInstance(VueHook, {
 			localCache: {

@@ -69,7 +69,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 	// 将params对象转换为get字符串
 	const { url: newUrl, params = {}, localCache: newLocalCache, transformData = self } = requestConfig;
 	const {
-		e: expireMilliseconds,
+		e: expireTimestamp,
 		s: toStorage,
 		t: tag
 	} = getLocalCacheConfigParam(undefinedValue, newLocalCache ?? localCache);
@@ -125,8 +125,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 						const responsedHandleData = promiseResolve(responsedHandler(rawResponse, requestConfig));
 						return promiseThen(responsedHandleData, data => {
 							data = transformData(data, headers);
-							setResponseCache(id, methodKey, data, methodInstance, expireMilliseconds);
-							toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
+							setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
+							toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
 							return data;
 						});
 					} catch (error: any) {

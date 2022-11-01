@@ -143,7 +143,7 @@ export default {
 	testMatch: [
 		'**/?(*.)+(spec|test).[tj]s?(x)'
 		// "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?",
-		// "**/test/browser/behavior/persist-response-vue.spec.ts",
+		// '**/test/browser/behavior/silent-offline-request-vue.spec.ts'
 		// "**/test/browser/batch/parallel-request.spec.ts",
 		// "**/test/browser/stateManager/set-cache-data.spec.ts(x)?",
 		// "**/test/browser/global/request-response-hook.spec.ts(x)?",

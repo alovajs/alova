@@ -52,7 +52,7 @@ class NetworkController {
 	}
 }
 
-describe('use useRequest to send silent request', function () {
+describe('send a silent request with useRequest', function () {
 	test("send a silent's post", done => {
 		const alova = getAlovaInstance(VueHook);
 		const Post = alova.Post<Result<string>>('/unit-test', { postData: 'abc' });
@@ -67,9 +67,9 @@ describe('use useRequest to send silent request', function () {
 		send();
 		// 静默请求在发送请求时就会触发onSuccess
 		let flag = 0;
-		onSuccess(() => {
+		onSuccess(rawData => {
 			expect(loading.value).toBeFalsy();
-			expect(data.value).toBeUndefined();
+			expect(rawData).toBeUndefined();
 			expect(downloading.value).toEqual({ total: 0, loaded: 0 });
 			expect(error.value).toBeUndefined();
 			const cacheData = getResponseCache(alova.id, key(Post));

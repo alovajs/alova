@@ -49,17 +49,20 @@ type CommonMethodConfig = {
 
 /**
  * 请求缓存设置
- * expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
+ * expire: 过期时间
+ *  1. 当设置为数字时：如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期；
+ *  2. 当设置为Date对象时，表示
  * mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
  */
+type CacheExpire = number | Date;
 type LocalCacheConfig = {
-	expire: number;
+	expire: CacheExpire;
 	mode?: number;
 
 	/** 持久化缓存标签，标签改变后原有持久化数据将会失效 */
 	tag?: string | number;
 };
-type LocalCacheConfigParam = number | LocalCacheConfig;
+type LocalCacheConfigParam = CacheExpire | LocalCacheConfig;
 type Arg = Record<string, any>;
 export type AlovaMethodConfig<R, T, RC, RH> = {
 	/** method对象名称，在updateState、invalidateCache、setCacheData、以及fetch函数中可以通过名称或通配符获取对应method对象 */

@@ -1,10 +1,11 @@
-import { AlovaMethodHandler, LocalCacheConfigParam, Method } from '../../typings';
+import { AlovaMethodHandler, CacheExpire, LocalCacheConfigParam, Method } from '../../typings';
 import {
 	clearTimeoutTimer,
 	falseValue,
 	forEach,
 	getConfig,
 	getOptions,
+	getTime,
 	JSONStringify,
 	MEMORY,
 	nullValue,
@@ -102,9 +103,11 @@ export const debounce = (fn: Function, delay: number, enable: () => boolean) => 
 };
 
 /**
- * 获取缓存的配置参数，固定返回{ e: number, s: boolean }格式的对象
- * e为expire缩写，表示缓存失效时间，单位为毫秒
+ * 获取缓存的配置参数，固定返回{ e: number, m: number, s: boolean, t: string }格式的对象
+ * e为expire缩写，表示缓存失效时间点（时间戳），单位为毫秒
+ * m为mode缩写，存储模式
  * s为storage缩写，是否存储到本地
+ * t为tag缩写，持久化存储标签
  * @param localCache 本地缓存参数
  * @returns 统一的缓存参数对象
  */
@@ -118,21 +121,27 @@ export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(
 			: methodInstance
 			? getOptions(methodInstance).localCache || getConfig(methodInstance).localCache
 			: undefinedValue;
-	const defaultCacheMode = MEMORY;
-	if (isNumber(_localCache)) {
-		return {
-			e: _localCache,
-			m: defaultCacheMode,
-			s: falseValue,
-			t: undefinedValue
-		};
+
+	const getCacheExpireTs = (_localCache: CacheExpire) =>
+		isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache);
+	let cacheMode = MEMORY;
+	let expire = 0;
+	let storage = falseValue;
+	let tag: undefined | string = undefinedValue;
+	if (isNumber(_localCache) || instanceOf(_localCache, Date)) {
+		expire = getCacheExpireTs(_localCache);
+	} else {
+		const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = _localCache || {};
+		cacheMode = mode;
+		expire = getCacheExpireTs(configExpire);
+		storage = [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode);
+		tag = configTag ? configTag.toString() : undefinedValue;
 	}
-	const { mode = defaultCacheMode, expire = 0, tag } = _localCache || {};
 	return {
 		e: expire,
-		m: mode,
-		s: [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode),
-		t: tag ? tag.toString() : undefinedValue
+		m: cacheMode,
+		s: storage,
+		t: tag
 	};
 };
 

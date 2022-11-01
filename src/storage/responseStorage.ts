@@ -3,12 +3,13 @@ import { getTime, JSONParse, JSONStringify, nullValue, undefinedValue } from '..
 
 const responseStorageKey = '__$$aresp$$__';
 const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKey + namespace + key;
+
 /**
  * 持久化响应数据
  * @param namespace 命名空间
  * @param key 存储的key
  * @param response 存储的响应内容
- * @param persistMilliseconds 持久化时间
+ * @param expireTimestamp 过期时间点的时间戳表示
  * @param storage 存储对象
  * @param tag 存储标签，用于区分不同的存储标记
  */
@@ -16,15 +17,15 @@ export const persistResponse = (
 	namespace: string,
 	key: string,
 	response: any,
-	persistMilliseconds: number,
+	expireTimestamp: number,
 	storage: Storage,
 	tag: string | undefined
 ) => {
 	// 小于0则不持久化了
-	if (persistMilliseconds > 0 && response) {
+	if (expireTimestamp > 0 && response) {
 		storage.setItem(
 			buildNamespacedStorageKey(namespace, key),
-			JSONStringify([response, persistMilliseconds === Infinity ? nullValue : getTime() + persistMilliseconds, tag])
+			JSONStringify([response, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag])
 		);
 	}
 };

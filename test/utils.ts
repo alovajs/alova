@@ -1,17 +1,13 @@
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import fetch from 'node-fetch';
-import { versions } from 'node:process';
+import nodeFetch from 'node-fetch';
 import 'web-streams-polyfill';
 import { createAlova } from '../src';
 import GlobalFetch from '../src/predefine/GlobalFetch';
 import { AlovaRequestAdapterConfig, LocalCacheConfig, StatesHook } from '../typings';
 
-const [major] = versions.node.split('.');
-if (Number(major) < 18) {
-	console.log('using node-fetch');
-	(global as any).fetch = (window as any).fetch = fetch;
-}
+// const [major] = versions.node.split('.');
+(global as any).fetch = (window as any).fetch = nodeFetch;
 
 // 防止Vue warn打印
 const warn = console.warn;

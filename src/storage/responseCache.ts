@@ -1,17 +1,17 @@
 import { Method, MethodFilter, MethodFilterHandler } from '../../typings';
 import { instanceOf, isPlainObject, isString } from '../utils/helper';
-import { forEach, getConfig, getTime, objectKeys, pushItem, undefinedValue } from '../utils/variables';
+import { forEach, getConfig, getTime, objectKeys, pushItem } from '../utils/variables';
 
 type AnyMethod = Method<any, any, any, any, any, any, any>;
 // 响应数据缓存
-let responseCache: Record<string, Record<string, [data: any, method: AnyMethod, expireTime?: Date]>> = {};
+let responseCache: Record<string, Record<string, [data: any, method: AnyMethod, expireTime: number]>> = {};
 
 /**
  * 检查给定时间是否过期，如果没有过期时间则表示数据永不过期，否则需要判断是否过期
  * @param expireTime 过期时间
  * @returns 是否过期
  */
-const isExpired = (expireTime?: Date) => expireTime && getTime(expireTime) < getTime();
+const isExpired = (expireTime: number) => expireTime < getTime();
 
 /**
  * @description 获取Response缓存数据
@@ -40,25 +40,20 @@ export const getResponseCache = (namespace: string, key: string) => {
  * @param key 请求key值
  * @param data 缓存数据
  * @param methodInstance method实例
- * @param cacheMilliseconds 过期时间，单位毫秒
+ * @param expireTimestamp 过期时间戳，单位毫秒
  */
 export const setResponseCache = (
 	namespace: string,
 	key: string,
 	data: any,
 	methodInstance: AnyMethod,
-	cacheMilliseconds = 0
+	expireTimestamp = 0
 ) => {
 	// 小于0则不缓存了
-	if (cacheMilliseconds <= 0 || !data) {
-		return;
+	if (expireTimestamp > 0 && data) {
+		const cachedResponse = (responseCache[namespace] = responseCache[namespace] || {});
+		cachedResponse[key] = [data, methodInstance, expireTimestamp];
 	}
-	const cachedResponse = (responseCache[namespace] = responseCache[namespace] || {});
-	cachedResponse[key] = [
-		data,
-		methodInstance,
-		cacheMilliseconds === Infinity ? undefinedValue : new Date(getTime() + cacheMilliseconds)
-	];
 };
 
 /**

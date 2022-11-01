@@ -124,8 +124,6 @@ describe('useRequet hook with react', () => {
 		render((<Page />) as ReactElement<any, any>);
 		await screen.findByText(/unit-test/);
 
-		console.log('finished');
-
 		// useRequest内会缓存状态
 		const { data } = getStateCache(alova.id, key(Get)) || { data: null };
 		expect(data[0].path).toBe('/unit-test');
