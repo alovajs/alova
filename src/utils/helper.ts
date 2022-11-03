@@ -10,6 +10,8 @@ import {
 	MEMORY,
 	nullValue,
 	objectKeys,
+	PromiseCls,
+	promiseThen,
 	setTimeoutFn,
 	STORAGE_PLACEHOLDER,
 	STORAGE_RESTORE,
@@ -236,3 +238,11 @@ export const walkUpatingDataStructure = (data: any) => {
  * @returns 统一的配置
  */
 export const sloughConfig = <T>(config: T | (() => T)) => (isFn(config) ? config() : config);
+
+/**
+ * 判断目标数据是否为Promise，如果是则在then函数中执行onAfter，否则同步执行onAfter
+ * @param target 目标数据
+ * @param onAfter 后续回调函数
+ * @returns {void}
+ */
+ export const asyncOrSync = <T, R>(target: T, onAfter: (data: T extends Promise<infer D> ? D : T) => R) => instanceOf(target, PromiseCls) ? promiseThen(target, onAfter) : onAfter(target as any);

@@ -7,7 +7,7 @@ import {
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, sloughConfig } from '../utils/helper';
+import { asyncOrSync, getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, sloughConfig } from '../utils/helper';
 import {
 	falseValue,
 	getContext,
@@ -122,8 +122,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 				PromiseCls.all([ctrls.response(), ctrls.headers()]),
 				([rawResponse, headers]) => {
 					try {
-						const responsedHandleData = promiseResolve(responsedHandler(rawResponse, requestConfig));
-						return promiseThen(responsedHandleData, data => {
+						return asyncOrSync(responsedHandler(rawResponse, requestConfig), data => {
 							data = transformData(data, headers);
 							setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
 							toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
