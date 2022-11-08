@@ -7,7 +7,16 @@ import {
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { asyncOrSync, getLocalCacheConfigParam, isFn, isPlainObject, key, noop, self, sloughConfig } from '../utils/helper';
+import {
+	asyncOrSync,
+	getLocalCacheConfigParam,
+	isFn,
+	isPlainObject,
+	key,
+	noop,
+	self,
+	sloughConfig
+} from '../utils/helper';
 import {
 	falseValue,
 	getContext,
@@ -32,13 +41,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 	forceRequest: boolean | (() => boolean)
 ) {
 	const { type, url, config, requestBody } = methodInstance;
-	const {
-		baseURL,
-		beforeRequest = noop,
-		responsed = self,
-		requestAdapter,
-		localCache = 0
-	} = getOptions(methodInstance);
+	const { baseURL, beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
 	const { id, storage } = getContext(methodInstance);
 	const methodKey = key(methodInstance);
 
@@ -68,11 +71,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 	requestConfig = beforeRequest(requestConfig) || requestConfig;
 	// 将params对象转换为get字符串
 	const { url: newUrl, params = {}, localCache: newLocalCache, transformData = self } = requestConfig;
-	const {
-		e: expireTimestamp,
-		s: toStorage,
-		t: tag
-	} = getLocalCacheConfigParam(undefinedValue, newLocalCache ?? localCache);
+	const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(undefinedValue, newLocalCache);
 
 	// 过滤掉值为undefined的
 	let paramsStr = objectKeys(params)

@@ -93,7 +93,7 @@ export const getAlovaInstance = <S, E>(
 		resErrorExpect?: (err: Error, config: AdapterConfig) => void;
 	} = {}
 ) => {
-	return createAlova({
+	const alovaInst = createAlova({
 		baseURL: 'http://localhost:3000',
 		timeout: 3000,
 		statesHook: statesHook,
@@ -102,7 +102,6 @@ export const getAlovaInstance = <S, E>(
 			beforeRequestExpect && beforeRequestExpect(config);
 			return config;
 		},
-		localCache,
 		responsed: {
 			onSuccess: (response, config) => {
 				const jsonPromise = response.json();
@@ -114,4 +113,8 @@ export const getAlovaInstance = <S, E>(
 			}
 		}
 	});
+	if (localCache) {
+		alovaInst.options.localCache = localCache;
+	}
+	return alovaInst;
 };

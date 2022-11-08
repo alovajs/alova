@@ -40,9 +40,10 @@ export default class Method<S, E, R, T, RC, RE, RH> {
 
 		// 合并localCache
 		const mergedLocalCacheKey = 'localCache';
-		const globalLocalCache = contextOptions[mergedLocalCacheKey]
-			? contextOptions[mergedLocalCacheKey][type]
-			: undefinedValue;
+		const globalLocalCache =
+			contextOptions[mergedLocalCacheKey] !== undefinedValue
+				? contextOptions[mergedLocalCacheKey][type]
+				: undefinedValue;
 		if (globalLocalCache !== undefinedValue) {
 			contextConcatConfig[mergedLocalCacheKey] = globalLocalCache;
 		}

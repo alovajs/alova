@@ -4,7 +4,6 @@ import {
 	falseValue,
 	forEach,
 	getConfig,
-	getOptions,
 	getTime,
 	JSONStringify,
 	MEMORY,
@@ -118,11 +117,7 @@ export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(
 	localCache?: LocalCacheConfig
 ) => {
 	const _localCache =
-		localCache !== undefinedValue
-			? localCache
-			: methodInstance
-			? getOptions(methodInstance).localCache || getConfig(methodInstance).localCache
-			: undefinedValue;
+		localCache !== undefinedValue ? localCache : methodInstance ? getConfig(methodInstance).localCache : undefinedValue;
 
 	const getCacheExpireTs = (_localCache: CacheExpire) =>
 		isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache);

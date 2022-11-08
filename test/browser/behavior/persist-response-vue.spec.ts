@@ -3,7 +3,7 @@ import VueHook from '../../../src/predefine/VueHook';
 import { removeResponseCache } from '../../../src/storage/responseCache';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
-import { LocalCacheConfig } from '../../../typings';
+import { DetailLocalCacheConfig } from '../../../typings';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
@@ -120,8 +120,10 @@ describe('persist data', function () {
 	test('persistent data will invalid when param `tag` of alova instance is changed', async () => {
 		const alova = getAlovaInstance(VueHook, {
 			localCache: {
-				expire: 100 * 1000,
-				mode: cacheMode.STORAGE_RESTORE
+				GET: {
+					expire: 100 * 1000,
+					mode: cacheMode.STORAGE_RESTORE
+				}
 			}
 		});
 		const Get = alova.Get('/unit-test', {
@@ -132,7 +134,7 @@ describe('persist data', function () {
 
 		// 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
 		removeResponseCache(alova.id, key(Get));
-		(alova.options.localCache as LocalCacheConfig).tag = 'v3'; // 修改tag
+		(alova.options.localCache?.GET as DetailLocalCacheConfig).tag = 'v3'; // 修改tag
 		const Get2 = alova.Get('/unit-test', {
 			transformData: ({ data }: Result) => data
 		});

@@ -1,5 +1,7 @@
 import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import { getResponseCache } from '../../../src/storage/responseCache';
+import { key } from '../../../src/utils/helper';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
@@ -8,7 +10,7 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
 describe('cache data', function () {
-	test.only("change the default localCache's setting Globally", async () => {
+	test("change the default localCache's setting Globally", async () => {
 		const alova = getAlovaInstance(VueHook, {
 			localCache: {
 				POST: 300000
@@ -25,9 +27,24 @@ describe('cache data', function () {
 		expect(secondState.loading.value).toBeTruthy(); // 因为GET没有缓存设置了，因此会发起请求
 
 		// POST有了缓存
-		const Post = alova.Get('/unit-test');
+		const Post = alova.Post('/unit-test', undefined, {
+			transformData: ({ data }: Result) => data
+		});
 		const thirdState = useRequest(Post);
-		console.log(thirdState);
+		await untilCbCalled(thirdState.onSuccess);
+		expect(thirdState.data.value).toEqual({
+			path: '/unit-test',
+			method: 'POST',
+			params: {},
+			data: '{}'
+		});
+		const postCache = getResponseCache(alova.id, key(Post));
+		expect(postCache).toEqual({
+			path: '/unit-test',
+			method: 'POST',
+			params: {},
+			data: '{}'
+		});
 	});
 
 	test('should hit the cache data when re request the same url with the same arguments', async () => {
