@@ -292,6 +292,9 @@ type UseFetchHookReturnType<S> = {
 	downloading: UseHookReturnType<any, S>['downloading'];
 	uploading: UseHookReturnType<any, S>['uploading'];
 	fetch: <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => void;
+	onSuccess: UseHookReturnType<any, S>['onSuccess'];
+	onError: UseHookReturnType<any, S>['onError'];
+	onComplete: UseHookReturnType<any, S>['onComplete'];
 };
 
 type MethodFilterHandler = (
