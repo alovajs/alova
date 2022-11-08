@@ -1,4 +1,4 @@
-import { AlovaMethodHandler, CacheExpire, LocalCacheConfigParam, Method } from '../../typings';
+import { AlovaMethodHandler, CacheExpire, LocalCacheConfig, Method } from '../../typings';
 import {
 	clearTimeoutTimer,
 	falseValue,
@@ -115,7 +115,7 @@ export const debounce = (fn: Function, delay: number, enable: () => boolean) => 
  */
 export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(
 	methodInstance?: Method<S, E, R, T, RC, RE, RH>,
-	localCache?: LocalCacheConfigParam
+	localCache?: LocalCacheConfig
 ) => {
 	const _localCache =
 		localCache !== undefinedValue
@@ -245,4 +245,5 @@ export const sloughConfig = <T>(config: T | (() => T)) => (isFn(config) ? config
  * @param onAfter 后续回调函数
  * @returns {void}
  */
- export const asyncOrSync = <T, R>(target: T, onAfter: (data: T extends Promise<infer D> ? D : T) => R) => instanceOf(target, PromiseCls) ? promiseThen(target, onAfter) : onAfter(target as any);
+export const asyncOrSync = <T, R>(target: T, onAfter: (data: T extends Promise<infer D> ? D : T) => R) =>
+	instanceOf(target, PromiseCls) ? promiseThen(target, onAfter) : onAfter(target as any);

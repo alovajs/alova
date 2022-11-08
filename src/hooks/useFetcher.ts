@@ -22,6 +22,7 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 		onComplete: props.onComplete,
+		abort: props.abort,
 
 		/**
      * 拉取数据

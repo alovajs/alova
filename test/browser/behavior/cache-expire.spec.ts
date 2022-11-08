@@ -8,6 +8,28 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
 describe('cache data', function () {
+	test.only("change the default localCache's setting Globally", async () => {
+		const alova = getAlovaInstance(VueHook, {
+			localCache: {
+				POST: 300000
+			}
+		});
+
+		// GET请求不再有默认的缓存设置
+		const Get = alova.Get('/unit-test', {
+			transformData: ({ data }: Result) => data
+		});
+		const firstState = useRequest(Get);
+		await untilCbCalled(firstState.onSuccess);
+		const secondState = useRequest(Get);
+		expect(secondState.loading.value).toBeTruthy(); // 因为GET没有缓存设置了，因此会发起请求
+
+		// POST有了缓存
+		const Post = alova.Get('/unit-test');
+		const thirdState = useRequest(Post);
+		console.log(thirdState);
+	});
+
 	test('should hit the cache data when re request the same url with the same arguments', async () => {
 		const alova = getAlovaInstance(VueHook);
 		const Get = alova.Get('/unit-test', {
@@ -48,7 +70,7 @@ describe('cache data', function () {
 		expect(thirdState.loading.value).toBe(true); // 因为缓存已过期，所以会重新发起请求，loading会改变
 	});
 
-	test("cache data wouldn't be invalid when set cacheTime to `Infinity`", async () => {
+	test("cache data wouldn't be invalid when set localCache to `Infinity`", async () => {
 		const alova = getAlovaInstance(VueHook);
 		const Get = alova.Get('/unit-test', {
 			localCache: Infinity,

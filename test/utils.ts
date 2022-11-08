@@ -4,7 +4,7 @@ import nodeFetch from 'node-fetch';
 import 'web-streams-polyfill';
 import { createAlova } from '../src';
 import GlobalFetch from '../src/predefine/GlobalFetch';
-import { AlovaRequestAdapterConfig, LocalCacheConfig, StatesHook } from '../typings';
+import { AlovaRequestAdapterConfig, GlobalLocalCacheConfig, StatesHook } from '../typings';
 
 // const [major] = versions.node.split('.');
 (global as any).fetch = (window as any).fetch = nodeFetch;
@@ -87,7 +87,7 @@ export const getAlovaInstance = <S, E>(
 		responseExpect,
 		resErrorExpect
 	}: {
-		localCache?: LocalCacheConfig;
+		localCache?: GlobalLocalCacheConfig;
 		beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void;
 		responseExpect?: (jsonPromise: Promise<any>, config: AdapterConfig) => void;
 		resErrorExpect?: (err: Error, config: AdapterConfig) => void;

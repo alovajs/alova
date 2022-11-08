@@ -55,14 +55,14 @@ type CommonMethodConfig = {
  * mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
  */
 type CacheExpire = number | Date;
-type LocalCacheConfig = {
+type DetailLocalCacheConfig = {
 	expire: CacheExpire;
 	mode?: number;
 
 	/** 持久化缓存标签，标签改变后原有持久化数据将会失效 */
 	tag?: string | number;
 };
-type LocalCacheConfigParam = CacheExpire | LocalCacheConfig;
+type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
 type Arg = Record<string, any>;
 export type AlovaMethodConfig<R, T, RC, RH> = {
 	/** method对象名称，在updateState、invalidateCache、setCacheData、以及fetch函数中可以通过名称或通配符获取对应method对象 */
@@ -74,7 +74,7 @@ export type AlovaMethodConfig<R, T, RC, RH> = {
 	timeout?: number;
 
 	/** 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存 */
-	localCache?: LocalCacheConfigParam;
+	localCache?: LocalCacheConfig;
 
 	/** 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启 */
 	enableDownload?: boolean;
@@ -128,6 +128,7 @@ interface StatesHook<S, E> {
 	effectRequest: (effectParams: EffectRequestParams) => void;
 }
 
+type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>>;
 /**
  * 泛型类型解释：
  * S: create函数创建的状态组的类型
@@ -153,9 +154,9 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
 	 * 全局的请求本地缓存设置
 	 * expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
 	 * mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
-	 * get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+	 * get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
 	 */
-	localCache?: LocalCacheConfigParam;
+	localCache?: GlobalLocalCacheConfig;
 
 	/** 持久化缓存接口，用于静默请求、响应数据持久化等 */
 	storageAdapter?: Storage;

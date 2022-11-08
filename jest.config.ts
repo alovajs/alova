@@ -141,9 +141,9 @@ export default {
 	testEnvironment: 'jsdom',
 
 	testMatch: [
-		'**/?(*.)+(spec|test).[tj]s?(x)'
+		// '**/?(*.)+(spec|test).[tj]s?(x)'
 		// "**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?",
-		// '**/test/browser/behavior/silent-offline-request-vue.spec.ts'
+		'**/test/browser/behavior/cache-expire.spec.ts'
 		// "**/test/browser/batch/parallel-request.spec.ts",
 		// "**/test/browser/stateManager/set-cache-data.spec.ts(x)?",
 		// "**/test/browser/global/request-response-hook.spec.ts(x)?",

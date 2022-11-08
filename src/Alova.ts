@@ -1,6 +1,13 @@
 import { AlovaMethodConfig, AlovaOptions, RequestBody, Storage } from '../typings';
 import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 
+// get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+const defaultAlovaOptions = {
+	localCache: {
+		[typeGet]: 300000
+	}
+};
+
 let idCounter = 0;
 export default class Alova<S, E, RC, RE, RH> {
 	public options: AlovaOptions<S, E, RC, RE, RH>;
@@ -9,7 +16,12 @@ export default class Alova<S, E, RC, RE, RH> {
 	constructor(options: AlovaOptions<S, E, RC, RE, RH>) {
 		// 如果storage未指定，则默认使用localStorage
 		this.storage = options.storageAdapter || window.localStorage;
-		this.options = options;
+
+		// 合并默认options
+		this.options = {
+			...defaultAlovaOptions,
+			...options
+		};
 	}
 	Get<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>) {
 		return new Method<S, E, R, T, RC, RE, RH>(typeGet, this, url, config);
