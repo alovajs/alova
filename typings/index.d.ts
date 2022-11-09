@@ -277,7 +277,7 @@ type ExportedType<R, S> = S extends VueRef ? Ref<R> : S extends SvelteWritable ?
 type UseHookReturnType<R, S> = FrontRequestState<
 	ExportedType<boolean, S>,
 	ExportedType<R, S>,
-	ExportedType<Error | null, S>,
+	ExportedType<Error | undefined, S>,
 	ExportedType<Progress, S>,
 	ExportedType<Progress, S>
 > & {
@@ -333,6 +333,7 @@ export declare function updateState<S, E, R, T, RC, RE, RH>(
 	matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
 	handleUpdate: (data: R) => any
 ): void;
+
 /** 手动设置缓存响应数据 */
 export declare function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
 	matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
