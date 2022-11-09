@@ -27,10 +27,12 @@ jobs:
 
       # 执行测试和打包操作
       - run: npm ci
-      - run: npm run build --if-present
 
       # 这条命令包含了测试和上传覆盖率
       - run: npm run coveralls
+
+      # 打包发布
+      - run: npm run build --if-present
       - run: npm publish
-        env: 
+        env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
