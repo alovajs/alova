@@ -1,6 +1,6 @@
 import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import { getAlovaInstance, mockServer } from '../../utils';
+import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
 beforeAll(() => mockServer.listen());
@@ -45,7 +45,7 @@ describe('request response hook', function () {
 				expect(config.extra).toEqual({ a: 1, b: 2 });
 			}
 		});
-		alova.Get('/unit-test', {
+		const Get = alova.Get('/unit-test', {
 			params: { a: 'a', b: 'str' },
 			timeout: 10000,
 			headers: {
@@ -53,6 +53,7 @@ describe('request response hook', function () {
 			},
 			localCache: 100 * 1000
 		});
+		useRequest(Get);
 	});
 
 	test('`responsed-onError` hook will receive the config param', async () => {
@@ -68,6 +69,70 @@ describe('request response hook', function () {
 				expect(config.extra).toEqual({ a: 1, b: 2 });
 			}
 		});
-		alova.Get('/unit-test-404');
+		const Get = alova.Get('/unit-test-404');
+		useRequest(Get);
+	});
+
+	test("shouldn't global error cb when responsed cb throw Error", async () => {
+		const mockFn = jest.fn();
+		const alova = getAlovaInstance(VueHook, {
+			responseExpect: async () => {
+				throw new Error('test error from responsed');
+			},
+			resErrorExpect: () => {
+				mockFn();
+			}
+		});
+
+		const Get = alova.Get('/unit-test', {
+			transformData(result: Result, _) {
+				return result.data;
+			}
+		});
+		const { onError } = useRequest(Get);
+		await untilCbCalled(onError);
+		expect(mockFn.mock.calls.length).toBe(0);
+	});
+
+	test("shouldn't emit global error cb when responsed cb return rejected Promise", async () => {
+		const mockFn = jest.fn();
+		const alova = getAlovaInstance(VueHook, {
+			responseExpect: async () => {
+				return Promise.reject(new Error('test error from responsed'));
+			},
+			resErrorExpect: () => {
+				mockFn();
+			}
+		});
+
+		const Get = alova.Get('/unit-test', {
+			transformData(result: Result, _) {
+				return result.data;
+			}
+		});
+		const { onError } = useRequest(Get);
+		await untilCbCalled(onError);
+		expect(mockFn.mock.calls.length).toBe(0);
+	});
+
+	test("shouldn't emit responsed instead onError when request error", async () => {
+		const mockFn = jest.fn();
+		const alova = getAlovaInstance(VueHook, {
+			responseExpect: () => {
+				mockFn();
+			},
+			resErrorExpect: error => {
+				console.log('error callback', error.message);
+				expect(error.message).toMatch(/404/);
+			}
+		});
+		const Get = alova.Get<string, Result<string>>('/unit-test-404', {
+			localCache: {
+				expire: 100 * 1000
+			}
+		});
+		const firstState = useRequest(Get);
+		await untilCbCalled(firstState.onSuccess);
+		expect(mockFn.mock.calls.length).toBe(0);
 	});
 });

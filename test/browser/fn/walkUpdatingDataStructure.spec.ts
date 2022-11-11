@@ -11,7 +11,7 @@ describe('walkUpatingDataStructure', function () {
 		expect(c2.length).toBe(0);
 
 		const { f: f3, c: c3 } = walkUpatingDataStructure(true);
-		expect(f3).toBe(true);
+		expect(f3).toBeTruthy();
 		expect(c3.length).toBe(0);
 	});
 

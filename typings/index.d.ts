@@ -97,8 +97,8 @@ type AlovaRequestAdapterConfig<R, T, RC, RH> = CommonMethodConfig &
 type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, config: AlovaRequestAdapterConfig<R, T, RC, RH>) => any;
 type ResponseErrorHandler<R, T, RC, RH> = (error: any, config: AlovaRequestAdapterConfig<R, T, RC, RH>) => void;
 type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
-	onSuccess: ResponsedHandler<R, T, RC, RE, RH>;
-	onError: ResponseErrorHandler<R, T, RC, RH>;
+	onSuccess?: ResponsedHandler<R, T, RC, RE, RH>;
+	onError?: ResponseErrorHandler<R, T, RC, RH>;
 };
 interface EffectRequestParams {
 	handler: () => void;

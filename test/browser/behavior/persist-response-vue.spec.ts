@@ -41,7 +41,7 @@ describe('persist data', function () {
 			method: 'GET',
 			params: { count: 0, countKey: 'g' }
 		}); // 因为有持久化数据，因此直接带出了持久化的数据
-		expect(secondState.loading.value).toBe(true); // 即使有持久化数据，loading的状态也照样会是true
+		expect(secondState.loading.value).toBeTruthy(); // 即使有持久化数据，loading的状态也照样会是true
 
 		await untilCbCalled(setTimeout, 600);
 		const thirdState = useRequest(Get);
@@ -64,7 +64,7 @@ describe('persist data', function () {
 		removeResponseCache(alova.id, key(Get));
 		const secondState = useRequest(Get);
 		expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} }); // 因为有持久化数据，因此直接带出了持久化的数据
-		expect(secondState.loading.value).toBe(true); // 即使有持久化数据，loading的状态也照样会是true
+		expect(secondState.loading.value).toBeTruthy(); // 即使有持久化数据，loading的状态也照样会是true
 
 		await untilCbCalled(setTimeout, 1000);
 		const thirdState = useRequest(Get);

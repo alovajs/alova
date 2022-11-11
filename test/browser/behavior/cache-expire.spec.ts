@@ -47,7 +47,7 @@ describe('cache data', function () {
 		});
 	});
 
-	test('should hit the cache data when re request the same url with the same arguments', async () => {
+	test('should hit the cache data when rerequest the same url with the same arguments', async () => {
 		const alova = getAlovaInstance(VueHook);
 		const Get = alova.Get('/unit-test', {
 			localCache: 500,
@@ -56,14 +56,19 @@ describe('cache data', function () {
 		const firstState = useRequest(Get);
 		await untilCbCalled(firstState.onSuccess);
 		const secondState = useRequest(Get);
-		expect(secondState.loading.value).toBe(false); // 因为使用缓存，所以不会发起请求，loading不会改变
-		await new Promise(resolve => setTimeout(resolve, 0));
+		// 因为使用缓存，所以不会发起请求，loading不会改变，data也是同步赋值
+		expect(secondState.loading.value).toBeFalsy();
+		expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+
+		const cache = getResponseCache(alova.id, key(Get));
+		expect(cache).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+		await untilCbCalled(setTimeout);
 		// 使用缓存时，将会立即获得数据
 		expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
 
-		await new Promise(resolve => setTimeout(resolve, 600));
+		await untilCbCalled(setTimeout, 600);
 		const thirdState = useRequest(Get);
-		expect(thirdState.loading.value).toBe(true); // 因为缓存已过期，所以会重新发起请求，loading会改变
+		expect(thirdState.loading.value).toBeTruthy(); // 因为缓存已过期，所以会重新发起请求，loading会改变
 	});
 
 	test('param localCache can also set to be a Date instance', async () => {
@@ -77,14 +82,14 @@ describe('cache data', function () {
 		const firstState = useRequest(Get);
 		await untilCbCalled(firstState.onSuccess);
 		const secondState = useRequest(Get);
-		expect(secondState.loading.value).toBe(false); // 因为使用缓存，所以不会发起请求，loading不会改变
-		await new Promise(resolve => setTimeout(resolve, 0));
+		expect(secondState.loading.value).toBeFalsy(); // 因为使用缓存，所以不会发起请求，loading不会改变
+		await untilCbCalled(setTimeout);
 		// 使用缓存时，将会立即获得数据
 		expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
 
-		await new Promise(resolve => setTimeout(resolve, 600));
+		await untilCbCalled(setTimeout, 600);
 		const thirdState = useRequest(Get);
-		expect(thirdState.loading.value).toBe(true); // 因为缓存已过期，所以会重新发起请求，loading会改变
+		expect(thirdState.loading.value).toBeTruthy(); // 因为缓存已过期，所以会重新发起请求，loading会改变
 	});
 
 	test("cache data wouldn't be invalid when set localCache to `Infinity`", async () => {
@@ -97,13 +102,13 @@ describe('cache data', function () {
 		await untilCbCalled(firstState.onSuccess);
 
 		const secondState = useRequest(Get);
-		expect(secondState.loading.value).toBe(false); // 因为使用缓存，所以不会发起请求，loading不会改变
-		await untilCbCalled(setTimeout, 0);
+		expect(secondState.loading.value).toBeFalsy(); // 因为使用缓存，所以不会发起请求，loading不会改变
+		await untilCbCalled(setTimeout);
 		// 使用缓存时，将会立即获得数据
 		expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
 
 		await untilCbCalled(setTimeout, 1000);
 		const thirdState = useRequest(Get);
-		expect(thirdState.loading.value).toBe(false); // 因为缓存未过期，所以继续使用缓存数据，loading不会改变
+		expect(thirdState.loading.value).toBeFalsy(); // 因为缓存未过期，所以继续使用缓存数据，loading不会改变
 	});
 });

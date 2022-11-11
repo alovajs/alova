@@ -24,10 +24,12 @@ describe('Test other methods without GET', function () {
 				expect(config.timeout).toBe(10000);
 			},
 			responseExpect: async jsonPromise => {
-				const { data } = await jsonPromise;
+				const res = await jsonPromise;
+				const { data } = res;
 				expect(data.path).toBe('/unit-test');
 				expect(data.data).toEqual({ post1: 'a', post2: 'b' });
 				expect(data.params).toEqual({ a: 'a', b: 'str' });
+				return res;
 			}
 		});
 		const Post = alova.Post(
@@ -82,10 +84,12 @@ describe('Test other methods without GET', function () {
 				expect(config.timeout).toBe(10000);
 			},
 			responseExpect: async jsonPromise => {
-				const { data } = await jsonPromise;
+				const res = await jsonPromise;
+				const { data } = res;
 				expect(data.path).toBe('/unit-test');
 				expect(data.data).toEqual({ post1: 'a', post2: 'b' });
 				expect(data.params).toEqual({ a: 'a', b: 'str' });
+				return res;
 			}
 		});
 		const Delete = alova.Delete(
@@ -139,10 +143,12 @@ describe('Test other methods without GET', function () {
 				expect(config.timeout).toBe(10000);
 			},
 			responseExpect: async jsonPromise => {
-				const { data } = await jsonPromise;
+				const res = await jsonPromise;
+				const { data } = res;
 				expect(data.path).toBe('/unit-test');
 				expect(data.data).toEqual({ post1: 'a', post2: 'b' });
 				expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
+				return res;
 			}
 		});
 		const Put = alova.Put(

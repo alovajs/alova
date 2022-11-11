@@ -6,8 +6,13 @@ import { createAlova } from '../src';
 import GlobalFetch from '../src/predefine/GlobalFetch';
 import { AlovaRequestAdapterConfig, GlobalLocalCacheConfig, StatesHook } from '../typings';
 
-// const [major] = versions.node.split('.');
 (global as any).fetch = (window as any).fetch = nodeFetch;
+// (global as any).Headers = (window as any).Headers = Headers;
+// (global as any).Request = (window as any).Request = Request;
+// (global as any).Response = (window as any).Response = Response;
+// (global as any).ReadableStream = (window as any).ReadableStream = ReadableStream;
+// (global as any).Blob = (window as any).Blob = Blob;
+// (global as any).FormData = (window as any).FormData = FormData;
 
 // 防止Vue warn打印
 const warn = console.warn;
@@ -105,12 +110,10 @@ export const getAlovaInstance = <S, E>(
 		responsed: {
 			onSuccess: (response, config) => {
 				const jsonPromise = response.json();
-				responseExpect && responseExpect(jsonPromise, config);
-				return jsonPromise;
+				const responseResult = responseExpect && responseExpect(jsonPromise, config);
+				return responseResult || jsonPromise;
 			},
-			onError: (err, config) => {
-				resErrorExpect && resErrorExpect(err, config);
-			}
+			onError: resErrorExpect
 		}
 	});
 	if (localCache) {

@@ -23,7 +23,6 @@ import {
 	getOptions,
 	objectKeys,
 	PromiseCls,
-	promiseReject,
 	promiseResolve,
 	promiseThen,
 	trueValue,
@@ -92,8 +91,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 		url: baseURLWithSlash + urlWithParams
 	});
 
-	let responsedHandler: ResponsedHandler<any, any, RC, RE, RH> = noop;
-	let responseErrorHandler: ResponseErrorHandler<any, any, RC, RH> = noop;
+	let responsedHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
+	let responseErrorHandler: ResponseErrorHandler<any, any, RC, RH> | undefined = undefinedValue;
 	if (isFn(responsed)) {
 		responsedHandler = responsed;
 	} else if (isPlainObject(responsed)) {
@@ -108,11 +107,6 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 		responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
 	}
 
-	const errorCatcher = (error: any) => {
-		responseErrorHandler(error, requestConfig);
-		return promiseReject(error);
-	};
-
 	return {
 		...ctrls,
 		useCache: falseValue,
@@ -120,18 +114,20 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 			promiseThen(
 				PromiseCls.all([ctrls.response(), ctrls.headers()]),
 				([rawResponse, headers]) => {
-					try {
-						return asyncOrSync(responsedHandler(rawResponse, requestConfig), data => {
-							data = transformData(data, headers);
-							setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
-							toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
-							return data;
-						});
-					} catch (error: any) {
-						return errorCatcher(error);
-					}
+					return asyncOrSync(responsedHandler(rawResponse, requestConfig), data => {
+						data = transformData(data, headers);
+						setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
+						toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
+						return data;
+					});
 				},
-				(error: any) => errorCatcher(error)
+				(error: any) => {
+					if (!isFn(responseErrorHandler)) {
+						throw error;
+					}
+					// 可能返回Promise.reject
+					return responseErrorHandler(error, requestConfig);
+				}
 			)
 	};
 }

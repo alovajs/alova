@@ -47,11 +47,41 @@ describe('use useRequet hook to send GET with vue', function () {
 		expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
 	});
 
-	test('send get with request error', async () => {
+	test("shouldn't emit onError of useRequest when global error cb don't throw Error at error request", async () => {
 		const alova = getAlovaInstance(VueHook, {
 			resErrorExpect: error => {
 				console.log('error callback', error.message);
 				expect(error.message).toMatch(/404/);
+			}
+		});
+		const Get = alova.Get<string, Result<string>>('/unit-test-404', {
+			localCache: {
+				expire: 100 * 1000
+			}
+		});
+		const { loading, data, downloading, error, onSuccess } = useRequest(Get);
+		expect(loading.value).toBeTruthy();
+		expect(data.value).toBeUndefined();
+		expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+		expect(error.value).toBeUndefined();
+
+		await untilCbCalled(onSuccess);
+		expect(loading.value).toBeFalsy();
+		expect(data.value).toBeUndefined();
+		expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+		expect(error.value).toBeUndefined();
+
+		// 请求错误无缓存
+		const cacheData = getResponseCache(alova.id, key(Get));
+		expect(cacheData).toBeUndefined();
+	});
+
+	test('should emit onError of useRequest when global error cb throw Error at error request', async () => {
+		const alova = getAlovaInstance(VueHook, {
+			resErrorExpect: error => {
+				console.log('error callback', error.message);
+				expect(error.message).toMatch(/404/);
+				throw new Error('throwed in error');
 			}
 		});
 		const Get = alova.Get<string, Result<string>>('/unit-test-404', {
@@ -71,20 +101,43 @@ describe('use useRequet hook to send GET with vue', function () {
 		expect(downloading.value).toEqual({ total: 0, loaded: 0 });
 		expect(error.value).toBeInstanceOf(Error);
 		expect(error.value).toBe(err);
+		expect(error.value?.message).toBe('throwed in error');
 
 		// 请求错误无缓存
 		const cacheData = getResponseCache(alova.id, key(Get));
 		expect(cacheData).toBeUndefined();
+
+		const alova2 = getAlovaInstance(VueHook, {
+			resErrorExpect: error => {
+				console.log('error callback', error.message);
+				expect(error.message).toMatch(/404/);
+				return Promise.reject(new Error('throwed in error2'));
+			}
+		});
+		const Get2 = alova2.Get<string, Result<string>>('/unit-test-404', {
+			localCache: {
+				expire: 100 * 1000
+			}
+		});
+		const secondState = useRequest(Get2);
+		expect(secondState.loading.value).toBeTruthy();
+		expect(secondState.data.value).toBeUndefined();
+		expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+		expect(secondState.error.value).toBeUndefined();
+
+		const err2 = await untilCbCalled(secondState.onError);
+		expect(secondState.loading.value).toBeFalsy();
+		expect(secondState.data.value).toBeUndefined();
+		expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+		expect(secondState.error.value).toBeInstanceOf(Error);
+		expect(secondState.error.value).toBe(err2);
+		expect(secondState.error.value?.message).toBe('throwed in error2');
 	});
 
 	test('send get with responseCallback error', async () => {
 		const alova = getAlovaInstance(VueHook, {
 			responseExpect: () => {
 				throw new Error('responseCallback error');
-			},
-			resErrorExpect: error => {
-				console.log('error responseCallback', error.message);
-				expect(error.message).toMatch(/responseCallback error/);
 			}
 		});
 		const Get = alova.Get<string, Result<string>>('/unit-test');
@@ -100,6 +153,27 @@ describe('use useRequet hook to send GET with vue', function () {
 		expect(downloading.value).toEqual({ total: 0, loaded: 0 });
 		expect(error.value).toBeInstanceOf(Object);
 		expect(error.value).toBe(err);
+		expect(error.value?.message).toBe('responseCallback error');
+
+		const alova2 = getAlovaInstance(VueHook, {
+			responseExpect: () => {
+				return Promise.reject(new Error('responseCallback error2'));
+			}
+		});
+		const Get2 = alova2.Get<string, Result<string>>('/unit-test');
+		const secondState = useRequest(Get2);
+		expect(secondState.loading.value).toBeTruthy();
+		expect(secondState.data.value).toBeUndefined();
+		expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+		expect(secondState.error.value).toBeUndefined();
+
+		const err2 = await untilCbCalled(secondState.onError);
+		expect(secondState.loading.value).toBeFalsy();
+		expect(secondState.data.value).toBeUndefined();
+		expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+		expect(secondState.error.value).toBeInstanceOf(Object);
+		expect(secondState.error.value).toBe(err2);
+		expect(secondState.error.value?.message).toBe('responseCallback error2');
 	});
 
 	test('abort request when timeout', async () => {
@@ -107,6 +181,7 @@ describe('use useRequet hook to send GET with vue', function () {
 			resErrorExpect: error => {
 				console.log('error timeout', error.message);
 				expect(error.message).toMatch(/network timeout/);
+				throw error;
 			}
 		});
 		const Get = alova.Get<string, Result<string>>('/unit-test-10s', { timeout: 500 });
@@ -127,6 +202,7 @@ describe('use useRequet hook to send GET with vue', function () {
 			resErrorExpect: error => {
 				console.log('manual abort', error.message);
 				expect(error.message).toMatch(/user aborted a request/);
+				return Promise.reject(error);
 			}
 		});
 		const Get = alova.Get<string, Result<string>>('/unit-test-10s');
@@ -200,21 +276,24 @@ describe('use useRequet hook to send GET with vue', function () {
 			immediate: false
 		});
 
+		const mockFn = jest.fn();
 		onError((err, index) => {
-			console.log('error passed params', index);
+			mockFn();
 			expect(err.message).toMatch(/404/);
 			expect(index.toString()).toMatch(/3|5/);
 		});
 		onComplete(index => {
+			mockFn();
 			expect(index.toString()).toMatch(/3|5/);
 		});
 
 		// 延迟一会儿发送请求
-		await untilCbCalled(setTimeout, 500);
+		await untilCbCalled(setTimeout, 100);
 		try {
 			const data = await send(3);
 			expect(data.path).toBe('/unit-test');
 			expect(data.params.index).toEqual('3');
+			expect(mockFn.mock.calls.length).toBe(2);
 		} catch (err: any) {
 			expect(err.message).toMatch(/404/);
 		}

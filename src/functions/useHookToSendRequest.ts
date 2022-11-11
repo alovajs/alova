@@ -69,13 +69,20 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
 	let saveStates = noop as SaveStateFn;
 	if (!updateCacheState) {
 		const { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
-
 		const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);
+		const cachedResponse = getResponseCache(id, methodKey);
+
+		// 如果有持久化数据，则需要判断是否需要恢复它到缓存中
+		// 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
+		if (persistentResponse && cacheMode === STORAGE_RESTORE && !cachedResponse) {
+			setResponseCache(id, methodKey, persistentResponse, methodInstance, expireMilliseconds);
+		}
+
 		// 如果命中持久化数据，则更新数据
-		if (persistentResponse !== undefinedValue) {
+		if (cachedResponse || persistentResponse) {
 			update(
 				{
-					data: persistentResponse
+					data: cachedResponse || persistentResponse
 				},
 				originalState
 			);
@@ -87,12 +94,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
 
 		// 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
 		removeStates = () => removeStateCache(id, methodKey);
-
-		// 如果有持久化数据，则需要判断是否需要恢复它到缓存中
-		// 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
-		if (persistentResponse && cacheMode === STORAGE_RESTORE && !getResponseCache(id, methodKey)) {
-			setResponseCache(id, methodKey, persistentResponse, methodInstance, expireMilliseconds);
-		}
 	}
 
 	if (silentMode) {
@@ -138,7 +139,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
 
 	const responseHandlePromise = promiseCatch(
 		promiseThen(response(), data => {
-			// TODO: 更新缓存响应数据
+			// 更新缓存响应数据
 			if (!updateCacheState) {
 				update({ data }, originalState);
 			} else {
