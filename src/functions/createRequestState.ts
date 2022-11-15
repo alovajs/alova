@@ -6,11 +6,12 @@ import {
 	FrontRequestState,
 	Progress,
 	SuccessHandler,
-	UseHookConfig
+	UseHookConfig,
+	WatcherHookConfig
 } from '../../typings';
 import Alova from '../Alova';
 import Method from '../Method';
-import { debounce, getHandlerMethod, noop } from '../utils/helper';
+import { debounce, getHandlerMethod, isNumber, noop } from '../utils/helper';
 import { falseValue, getStatesHook, pushItem, trueValue, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
@@ -41,7 +42,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
 	initialData?: any,
 	watchingStates?: E[],
 	immediate = trueValue,
-	debounceDelay = 0
+	debounceDelay: WatcherHookConfig['debounce'] = 0
 ) {
 	const { create, export: stateExport, effectRequest } = getStatesHook(alovaInstance);
 	const progress: Progress = {
@@ -64,7 +65,6 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
 	let saveStatesFn = noop as SaveStateFn;
 
 	// 调用请求处理回调函数
-	let handleRequestCalled = falseValue;
 	const wrapEffectRequest = () => {
 		handleRequest(
 			originalState,
@@ -77,29 +77,22 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
 				saveStatesFn = saveStates;
 			}
 		);
-		handleRequestCalled = trueValue;
 	};
 
-	// watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
-	const effectRequestParams = {
+	effectRequest({
+		handler:
+			// watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
+			watchingStates !== undefinedValue
+				? debounce(wrapEffectRequest, (changedIndex?: number) =>
+						isNumber(changedIndex) ? (isNumber(debounceDelay) ? debounceDelay : debounceDelay[changedIndex]) : 0
+				  )
+				: wrapEffectRequest,
 		removeStates: () => removeStatesFn(),
 		saveStates: (states: FrontRequestState) => saveStatesFn(states),
 		frontStates: originalState,
 		watchingStates,
 		immediate: immediate ?? trueValue
-	};
-	watchingStates !== undefinedValue
-		? effectRequest({
-				handler:
-					debounceDelay > 0
-						? debounce(wrapEffectRequest, debounceDelay, () => !immediate || handleRequestCalled)
-						: wrapEffectRequest,
-				...effectRequestParams
-		  })
-		: effectRequest({
-				handler: wrapEffectRequest,
-				...effectRequestParams
-		  });
+	});
 
 	const exportedState = {
 		loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,

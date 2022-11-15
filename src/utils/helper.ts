@@ -81,25 +81,23 @@ export const serializeMethod = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S
 };
 
 /**
- * 创建防抖函数，只有enable为trueValue时会进入防抖环节，否则将立即触发此函数
- * 场景：在调用useWatcher并设置了immediate为trueValue时，首次调用需立即执行，否则会造成延迟调用
- * @param fn 回调函数
- * @param delay 延迟描述
- * @param enable 是否启用防抖
+ * 创建防抖函数，当delay为0时立即触发函数
+ * 场景：在调用useWatcher并设置了immediate为true时，首次调用需立即执行，否则会造成延迟调用
+ * @param {Function} fn 回调函数
+ * @param {number|(...args: any[]) => number} delay 延迟描述，设置为函数时可实现动态的延迟
  * @returns 延迟后的回调函数
  */
-export const debounce = (fn: Function, delay: number, enable: () => boolean) => {
+export const debounce = (fn: Function, delay: number | ((...args: any[]) => number)) => {
 	let timer: any = nullValue;
 	return function (this: any, ...args: any[]) {
 		const bindFn = fn.bind(this, ...args);
-		if (!enable()) {
+		timer && clearTimeoutTimer(timer);
+		const delayMill = isNumber(delay) ? delay : delay(...args);
+		if (delayMill > 0) {
+			timer = setTimeoutFn(bindFn, delayMill);
+		} else {
 			bindFn();
-			return;
 		}
-		if (timer) {
-			clearTimeoutTimer(timer);
-		}
-		timer = setTimeoutFn(bindFn, delay);
 	};
 };
 

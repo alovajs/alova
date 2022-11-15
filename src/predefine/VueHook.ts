@@ -1,6 +1,6 @@
-import { onUnmounted, ref, Ref, watch } from 'vue';
+import { onUnmounted, ref, Ref, watch, WatchSource } from 'vue';
 import { EffectRequestParams, FrontRequestState } from '../../typings';
-import { forEach, objectKeys } from '../utils/variables';
+import { forEach, objectKeys, undefinedValue } from '../utils/variables';
 
 type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks
@@ -16,12 +16,23 @@ export default {
 			type Keys = keyof FrontRequestState;
 			states[key as Keys].value = newVal[key as Keys];
 		}),
-	effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams) {
+	effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<WatchSource>) {
 		onUnmounted(removeStates); // 组件卸载时移除对应状态
 		if (!watchingStates) {
 			handler();
 			return;
 		}
-		watch(watchingStates, handler, { immediate });
+		watch(
+			watchingStates,
+			(newVals, oldVals) => {
+				// 计算变更的值所在索引，以支持debounce对单个监听值的防抖
+				let changedIndex: number | undefined = undefinedValue;
+				forEach(oldVals, (val, i) => {
+					changedIndex = val === undefinedValue || newVals[i] === val ? changedIndex : i;
+				});
+				handler(changedIndex);
+			},
+			{ immediate }
+		);
 	}
 };

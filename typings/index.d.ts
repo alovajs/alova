@@ -100,12 +100,12 @@ type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
 	onSuccess?: ResponsedHandler<R, T, RC, RE, RH>;
 	onError?: ResponseErrorHandler<R, T, RC, RH>;
 };
-interface EffectRequestParams {
-	handler: () => void;
+interface EffectRequestParams<S> {
+	handler: (...args: any[]) => void;
 	removeStates: () => void;
 	saveStates: (frontStates: FrontRequestState) => void;
 	frontStates: FrontRequestState;
-	watchingStates?: any[];
+	watchingStates?: S[];
 	immediate: boolean;
 }
 
@@ -250,8 +250,8 @@ interface RequestHookConfig extends FrontRequestHookConfig {}
 
 /** useWatcher config type */
 interface WatcherHookConfig extends FrontRequestHookConfig {
-	/** 延迟多少毫秒后再发起请求 */
-	debounce?: number;
+	/** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
+	debounce?: number | number[];
 }
 
 /** useFetcher config type */

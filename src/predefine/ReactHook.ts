@@ -1,10 +1,13 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { EffectRequestParams, FrontRequestState } from '../../typings';
-import { forEach, objectKeys, trueValue } from '../utils/variables';
+import { forEach, objectKeys, trueValue, undefinedValue } from '../utils/variables';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 const stateToData = <D>([state]: ReactState<D>) => state;
 type UnknownState = ReactState<unknown>;
+
+const refCurrent = <T>(ref: MutableRefObject<T>) => ref.current;
+const setRef = <T>(ref: MutableRefObject<T>, newVal: T) => (ref.current = newVal);
 
 // React的预定义hooks
 export default {
@@ -26,11 +29,20 @@ export default {
 		immediate,
 		frontStates,
 		watchingStates = []
-	}: EffectRequestParams) {
+	}: EffectRequestParams<any>) {
 		// 当有监听状态时，状态变化再触发
 		const needEmit = useRef(immediate);
+		const oldStates = watchingStates.map(s => useRef(s)); // 用于对比新旧值
 		useEffect(() => {
-			needEmit.current ? handler() : (needEmit.current = trueValue);
+			// 对比新旧状态，获取变化的状态索引
+			let changedIndex: number | undefined = undefinedValue;
+			forEach(watchingStates, (newState, i) => {
+				if (!Object.is(refCurrent(oldStates[i]), newState)) {
+					changedIndex = i;
+					oldStates[i].current = newState;
+				}
+			});
+			refCurrent(needEmit) ? handler(changedIndex) : setRef(needEmit, trueValue);
 			return removeStates; // 组件卸载时移除对应状态
 		}, watchingStates);
 
@@ -39,7 +51,7 @@ export default {
 		const needSave = useRef(false);
 		const saveStatesFn = useCallback(saveStates, []);
 		useEffect(() => {
-			needSave.current ? saveStatesFn(frontStates) : (needSave.current = trueValue);
+			refCurrent(needSave) ? saveStatesFn(frontStates) : setRef(needSave, trueValue);
 		});
 	}
 };
