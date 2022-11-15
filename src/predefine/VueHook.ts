@@ -24,7 +24,7 @@ export default {
 		}
 		watch(
 			watchingStates,
-			(newVals, oldVals) => {
+			(newVals = [], oldVals = []) => {
 				// 计算变更的值所在索引，以支持debounce对单个监听值的防抖
 				let changedIndex: number | undefined = undefinedValue;
 				forEach(oldVals, (val, i) => {
