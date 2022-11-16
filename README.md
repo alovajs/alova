@@ -33,6 +33,9 @@ The request scene management library of the MVVM library, it is an arm of the re
 ## Examples
 [The examples here will show the power of alova.](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
 
+## We really need your approval
+If you like alova. we are very appreciate your star at the topright.
+
 ## Size comparison with other libraries
 | alova | axios | react-query | vue-request | vue | react |
 | ---- | ---- | ---- | ---- | ---- | ---- |
