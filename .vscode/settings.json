@@ -1,5 +1,5 @@
 {
-  "editor.formatOnSave": true, // 保存是格式化
+	"editor.formatOnSave": false, // 保存是格式化
 	"editor.tabSize": 2, // Tab 的大小2个空格
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"[vue]": {
