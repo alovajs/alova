@@ -82,6 +82,34 @@ describe('invalitate cached response data', () => {
 		});
 	});
 
+	test('cache in method array will be removed', async () => {
+		const alova = getAlovaInstance(VueHook);
+		const Get1 = alova.Get('/unit-test', {
+			localCache: Infinity,
+			transformData: ({ data }: Result) => data
+		});
+		const Get2 = alova.Get('/unit-test', {
+			localCache: Infinity,
+			transformData: ({ data }: Result) => data
+		});
+
+		const firstState = useRequest(Get1);
+		const secondState = useRequest(Get2);
+		await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+
+		// 检查缓存情况
+		expect(getResponseCache(alova.id, key(Get1))).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+		expect(getResponseCache(alova.id, key(Get2))).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+
+		invalidateCache([Get1, Get2]); // 删除缓存
+
+		// 缓存清空，会重新请求
+		const firstState3 = useRequest(Get1);
+		expect(firstState3.loading.value).toBeTruthy();
+		const secondState3 = useRequest(Get2);
+		expect(secondState3.loading.value).toBeTruthy();
+	});
+
 	test('cache will be removed when invalidateCache is called with specific string', async () => {
 		const alova = getAlovaInstance(VueHook);
 		const Get1 = alova.Get('/unit-test', {

@@ -2,7 +2,7 @@ import { MethodMatcher } from '../../typings';
 import Method from '../Method';
 import { getMethodSnapshot, getResponseCache, keyFilter, setResponseCache } from '../storage/responseCache';
 import { getPersistentResponse, persistResponse } from '../storage/responseStorage';
-import { getLocalCacheConfigParam, instanceOf, isFn, key } from '../utils/helper';
+import { getLocalCacheConfigParam, instanceOf, isArray, isFn, key } from '../utils/helper';
 import { falseValue, forEach, getContext, undefinedValue } from '../utils/variables';
 
 /**
@@ -11,10 +11,12 @@ import { falseValue, forEach, getContext, undefinedValue } from '../utils/variab
  * @param data 缓存数据
  */
 export default function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
-	matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
+	matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
 	dataOrUpater: R | ((oldCache?: R) => R | false)
 ) {
-	const methods: Method<S, E, R, T, RC, RE, RH>[] = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
+	const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
+		? matcher
+		: instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
 		? [matcher]
 		: getMethodSnapshot(matcher, keyFilter);
 	forEach(methods, methodInstance => {

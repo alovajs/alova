@@ -2,7 +2,7 @@ import { MethodMatcher } from '../../typings';
 import Method from '../Method';
 import { clearResponseCache, getMethodSnapshot, keyFilter, removeResponseCache } from '../storage/responseCache';
 import { removePersistentResponse } from '../storage/responseStorage';
-import { instanceOf, key } from '../utils/helper';
+import { instanceOf, isArray, key } from '../utils/helper';
 import { forEach, getContext } from '../utils/variables';
 
 /**
@@ -13,12 +13,16 @@ import { forEach, getContext } from '../utils/variables';
  * 3. 如果未传入matcher，则会清空所有缓存
  * @param matcher Method实例匹配器
  */
-export default function invalidateCache<S, E, R, T, RC, RE, RH>(matcher?: MethodMatcher<S, E, R, T, RC, RE, RH>) {
+export default function invalidateCache<S, E, R, T, RC, RE, RH>(
+	matcher?: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
+) {
 	if (!matcher) {
 		clearResponseCache();
 		return;
 	}
-	const methods: Method<S, E, R, T, RC, RE, RH>[] = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
+	const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
+		? matcher
+		: instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
 		? [matcher]
 		: getMethodSnapshot(matcher, keyFilter);
 	forEach(methods, methodInstance => {

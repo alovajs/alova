@@ -62,26 +62,49 @@ describe('manual set cache response data', function () {
 			}
 		});
 
-		// 重新设置以上两个请求的缓存
-		setCacheData('test-get1', {
+		// 通过传入数组设置
+		setCacheData([Get1, Get2], {
 			path: '/unit-test',
 			method: 'GET',
 			params: {
-				manual: 123
+				manual: '123'
 			}
 		});
 		expect(getResponseCache(alova.id, key(Get1))).toEqual({
 			path: '/unit-test',
 			method: 'GET',
 			params: {
-				manual: 123
+				manual: '123'
 			}
 		});
 		expect(getResponseCache(alova.id, key(Get2))).toEqual({
 			path: '/unit-test',
 			method: 'GET',
 			params: {
-				manual: 123
+				manual: '123'
+			}
+		});
+
+		// 通过通配符名称设置
+		setCacheData('test-get1', {
+			path: '/unit-test',
+			method: 'GET',
+			params: {
+				manual: '456'
+			}
+		});
+		expect(getResponseCache(alova.id, key(Get1))).toEqual({
+			path: '/unit-test',
+			method: 'GET',
+			params: {
+				manual: '456'
+			}
+		});
+		expect(getResponseCache(alova.id, key(Get2))).toEqual({
+			path: '/unit-test',
+			method: 'GET',
+			params: {
+				manual: '456'
 			}
 		});
 	});
