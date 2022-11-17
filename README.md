@@ -2,7 +2,7 @@
   <img width="244px" src="https://user-images.githubusercontent.com/29848971/202346516-7e0a9588-ddbc-440d-bf2d-c68dc058359b.png" />
 </p>
 
-<p align="center"><b>A request scene management library of the MVVM library, it can make your application management CS data interaction more efficient and better experience.</b></p>
+<p align="center"><b>A lightweight request scene management library of MVVM library, it can make your application management CS data interaction more efficient and better experience.</b></p>
 
 <p align="center">English | <a href="./README.zh-CN.md">📑中文</a></p>
 

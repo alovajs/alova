@@ -2,7 +2,7 @@
   <img width="244px" src="https://user-images.githubusercontent.com/29848971/202346516-7e0a9588-ddbc-440d-bf2d-c68dc058359b.png" />
 </p>
 
-<p align="center"><b>MVVM库的一个请求场景管理库，它可以让你的应用管理CS数据交互更高效，体验更好。</b></p>
+<p align="center"><b>一个轻量级的MVVM请求场景管理库，它可以让你的应用管理CS数据交互更高效，体验更好。</b></p>
 
 <p align="center">中文 | <a href="./README.md">📑English</a></p>
 
