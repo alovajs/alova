@@ -1,6 +1,6 @@
 # Contributing
 
-**alova's mission is to make the application manage CS data interaction more intelligently**, and propose better request management solutions for different request scenarios. Our expectation for alova is a request that combines both development experience and user experience. Management tool**, which has very flexible expansion capabilities to implement more request scenarios.
+**alova's mission is to make the application manage CS data interaction more intelligently**, and propose better request management solutions for different request scenarios. Our expectation for alova is a request that combines both development experience and user experience Management tool, which has very flexible expansion capabilities to implement more request scenarios.
 
 You are encouraged to contribute to the development of **alova** by submitting issues and pull requests.
 

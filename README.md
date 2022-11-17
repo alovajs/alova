@@ -2,7 +2,7 @@
 
 The request scene management library of the MVVM library, it is an arm of the request library, not a replacement. It makes your application more efficient and easy to develop.
 
-[🔥 Document Web](https://alova.js.org)
+[🔥 Document](https://alova.js.org) | [📑中文介绍](./README.zh-CN.md)
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/alovajs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/main.yml)
@@ -119,9 +119,9 @@ yarn add alova
 
 ## Contribution Guide
 
-Please make sure to read the [Contributing Guide](./.github/CONTRIBUTING.md) before making a pull request.
+Please make sure to read the [Contributing Guide](./CONTRIBUTING.md) before making a pull request.
 
-## Welcome to create a issue
+## Welcome to submit a issue
 If you encounter difficulties when using alova, whether it is a bug, or an unmet feature, you can [submit an issue](https://github.com/alovajs/alova/issues).
 
 ## LICENSE
