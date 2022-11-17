@@ -5,13 +5,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - src/**
+    # paths:
+    #   - src/**
   pull_request:
     branches:
       - main
-    paths:
-      - src/**
+    # paths:
+    #   - src/**
 
 # 任务
 jobs:
