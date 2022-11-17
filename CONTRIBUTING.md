@@ -1,9 +1,8 @@
 # Contributing
 
-**alova's mission is to make the application manage CS data interaction more intelligently**, and propose better request management solutions for different request scenarios. Our expectation for alova is a request that combines both development experience and user experience Management tool, which has very flexible expansion capabilities to implement more request scenarios.
+**The mission of alova is to make your app management CS data interaction more efficient and better experience**, and propose better request management solutions for different request scenarios. Our expectation for alova is a request that combines both development experience and user experience Management tool, which has very flexible expansion capabilities to implement more request scenarios.
 
 You are encouraged to contribute to the development of **alova** by submitting issues and pull requests.
-
 
 ## Acknowledgements
 
@@ -12,7 +11,6 @@ alova continues to recruit contributors, even answering questions in issues, or 
 If you like alova, you are welcome to contribute.
 
 I would like to thank all developers for their liking and support of alova. I hope you can become a core contributor to alova and work together to create a better applet development framework! 🍾🎉
-
 
 ## Issue submission
 
@@ -26,7 +24,6 @@ Before submitting an issue, please make sure that the following conditions are m
 - Complete the information in the template below
 
 If the above conditions have been met, we have provided a standard template for issue, please fill in according to the template.
-
 
 ## Pull request
 

@@ -1,8 +1,10 @@
-# [alova](https://github.com/JOU-amjs/alova)
+<p align="center">
+  <img width="244px" src="https://user-images.githubusercontent.com/29848971/202346516-7e0a9588-ddbc-440d-bf2d-c68dc058359b.png" />
+</p>
 
-The request scene management library of the MVVM library, it is an arm of the request library, not a replacement. It makes your application more efficient and easy to develop.
+<p align="center"><b>A request scene management library of the MVVM library, it can make your application management CS data interaction more efficient and better experience.</b></p>
 
-[🔥 Document](https://alova.js.org) | [📑中文介绍](./README.zh-CN.md)
+<p align="center">English | <a href="./README.zh-CN.md">📑中文</a></p>
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/alovajs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/main.yml)
@@ -12,6 +14,10 @@ The request scene management library of the MVVM library, it is an arm of the re
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
+
+## 🔥Documentation
+
+[https://alova.js.org](https://alova.js.org)
 
 ## 🚀 Features
 
@@ -31,14 +37,21 @@ The request scene management library of the MVVM library, it is an arm of the re
 - 🔌 Rich extension functions, you can customize request adapter, storage adapter, states hook
 
 ## Examples
+
 [The examples here will show the power of alova.](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
 
+## What relationship with request libraries
+
+The original intention of alova is to propose a solution for different request scenarios. It can implement request functions with better experience and performance more concisely and elegantly. It is an RSM implementation library, such as $.ajax, axios and fetch-api. It provides good support for request sending and response receiving. They are an indispensable part of the RSM process (request event link), and alova still needs to rely on them for requests, so we can regard alova as a request library. An armament that makes the request library even more powerful.
+
 ## We really need your star
+
 If you like alova. we are very appreciate your star at the topright. it's a approval of our work.
 
 ## Size comparison with other libraries
-| alova | axios | react-query | vue-request | vue | react |
-| ---- | ---- | ---- | ---- | ---- | ---- |
+
+| alova                                                                                             | axios                                                                                             | react-query                                                                                                   | vue-request                                                                                                   | vue                                                                                           | react                                                                                                     |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [![minzip](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzip](https://badgen.net/bundlephobia/minzip/axios)](https://bundlephobia.com/package/axios) | [![minzip](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzip](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzip](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzip](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
 
 ## What is request scene management
@@ -58,7 +71,7 @@ We always have to think about the following questions when making a request,
 
 > CS interaction: refers to all client types and server-side data interaction
 
-## Request scene model
+## RSM(Request scene model)
 
 ![model](https://user-images.githubusercontent.com/29848971/185773573-761b6153-9e6c-42df-b0b7-beddd405833c.png)
 
@@ -108,20 +121,22 @@ yarn add alova
 ```
 
 ## Usage
+
 [Usage is here](https://alova.js.org/getting-started/start)
 
-
 ## Official Ecosystem
-| Project | Description |
-| ---- | ---- |
-| [@alova/mock](https://github.com/alovajs/extensions/tree/main/packages/mock) | a mock request adapter of alova.js |
-| [@alova/hooks](https://github.com/alovajs/extensions/tree/main/packages/hooks) | extended hooks with alova.js |
+
+| Project                                                                        | Description                        |
+| ------------------------------------------------------------------------------ | ---------------------------------- |
+| [@alova/mock](https://github.com/alovajs/extensions/tree/main/packages/mock)   | a mock request adapter of alova.js |
+| [@alova/hooks](https://github.com/alovajs/extensions/tree/main/packages/hooks) | extended hooks with alova.js       |
 
 ## Contribution Guide
 
 Please make sure to read the [Contributing Guide](./CONTRIBUTING.md) before making a pull request.
 
 ## Welcome to submit a issue
+
 If you encounter difficulties when using alova, whether it is a bug, or an unmet feature, you can [submit an issue](https://github.com/alovajs/alova/issues).
 
 ## LICENSE
