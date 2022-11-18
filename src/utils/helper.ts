@@ -22,7 +22,7 @@ export type GeneralFn = (...args: any[]) => any;
 /**
  * 空函数，做兼容处理
  */
-export function noop() {}
+export const noop = () => {};
 
 // 返回自身函数，做兼容处理
 export const self = <T>(arg: T) => arg;
