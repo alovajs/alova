@@ -131,6 +131,25 @@ yarn add alova
 | [@alova/mock](https://github.com/alovajs/extensions/tree/main/packages/mock)   | a mock request adapter of alova.js |
 | [@alova/hooks](https://github.com/alovajs/extensions/tree/main/packages/hooks) | extended hooks with alova.js       |
 
+## What is next?
+
+### About alova
+
+- ✅ The storage time can be set to a date object, indicating that a certain point in time expires
+- ✅ You can set the default cache for different request methods globally, the current default is 500 seconds memory cache for GET requests
+- Additional state management to get and update additional states across pages and modules
+- request error log printing
+- Complete offline submission function, you can submit when offline, read offline information when you enter again, etc.
+- Request middleware design, which can manually control sending requests, state modification, etc., and then use middleware to implement delayed loading, debounce, etc. (disruptive, processed when upgrading to v2) (1)
+- Retry interval, maximum number of retries, etc. when silent submission fails
+- Delay loading
+- Server-side rendering support
+
+### Extension
+
+- Adapters for each operating environment (Uniapp, Taro)
+- Develop extension hooks under different request scenarios through the [**@alova/hooks**](https://github.com/alovajs/extensions/tree/main/packages/hooks) library, providing out-of-the-box high-performance and high-experience functions [[Refer to usePagination](https://alova.js.org/extension/ alova-hooks/usePagination)]
+
 ## Contribution Guide
 
 Please make sure to read the [Contributing Guide](./CONTRIBUTING.md) before making a pull request.
