@@ -74,6 +74,9 @@ npm run test
 
 # Run test and generate coverage.
 npm run test:coverage
+
+# lint check
+npm run lint:fix
 ```
 
 If you need to debug at IDE breakpoints, this project configures vscode's debug settings.

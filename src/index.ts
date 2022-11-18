@@ -18,12 +18,12 @@ export { cacheMode } from './utils/variables';
  */
 let networkIsListen = falseValue;
 export function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) {
-	const alova = new Alova(options);
-	addAlova(alova);
-	if (!networkIsListen) {
-		// 监听网络变化
-		listenNetwork();
-		networkIsListen = trueValue;
-	}
-	return alova;
+  const alova = new Alova(options);
+  addAlova(alova);
+  if (!networkIsListen) {
+    // 监听网络变化
+    listenNetwork();
+    networkIsListen = trueValue;
+  }
+  return alova;
 }

@@ -74,6 +74,9 @@ npm run test
 
 # 运行测试并生成覆盖率。
 npm run test:coverage
+
+# lint检查
+npm run lint:fix
 ```
 
 如果需要在 IDE 断点处调试，本项目配置 vscode 的调试设置。

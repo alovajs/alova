@@ -11,29 +11,29 @@ import { falseValue, forEach, getContext, undefinedValue } from '../utils/variab
  * @param data 缓存数据
  */
 export default function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
-	matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
-	dataOrUpater: R | ((oldCache?: R) => R | false)
+  matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
+  dataOrUpater: R | ((oldCache?: R) => R | false)
 ) {
-	const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
-		? matcher
-		: instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
-		? [matcher]
-		: getMethodSnapshot(matcher, keyFilter);
-	forEach(methods, methodInstance => {
-		const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
-		const { id, storage } = getContext(methodInstance);
-		const methodKey = key(methodInstance);
-		let data: any = dataOrUpater;
-		if (isFn(dataOrUpater)) {
-			data = dataOrUpater(
-				getResponseCache(id, methodKey) ||
-					(toStorage ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue)
-			);
-			if (data === falseValue) {
-				return;
-			}
-		}
-		setResponseCache(id, methodKey, data, methodInstance, expireMilliseconds);
-		toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
-	});
+  const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
+    ? matcher
+    : instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
+    ? [matcher]
+    : getMethodSnapshot(matcher, keyFilter);
+  forEach(methods, methodInstance => {
+    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
+    const { id, storage } = getContext(methodInstance);
+    const methodKey = key(methodInstance);
+    let data: any = dataOrUpater;
+    if (isFn(dataOrUpater)) {
+      data = dataOrUpater(
+        getResponseCache(id, methodKey) ||
+          (toStorage ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue)
+      );
+      if (data === falseValue) {
+        return;
+      }
+    }
+    setResponseCache(id, methodKey, data, methodInstance, expireMilliseconds);
+    toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
+  });
 }

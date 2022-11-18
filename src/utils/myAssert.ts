@@ -8,14 +8,14 @@ import { len } from './variables';
  * @param msg 断言消息
  */
 export default function myAssert(expression: boolean, msg: string) {
-	if (!expression) {
-		throw alovaError(msg);
-	}
+  if (!expression) {
+    throw alovaError(msg);
+  }
 }
 
 /**
  * 断言是否创建了alova实例
  */
 export function assertAlovaCreation() {
-	myAssert(len(alovas) > 0, 'please create a alova instance first.');
+  myAssert(len(alovas) > 0, 'please create a alova instance first.');
 }

@@ -14,21 +14,21 @@ import { forEach, getContext } from '../utils/variables';
  * @param matcher Method实例匹配器
  */
 export default function invalidateCache<S, E, R, T, RC, RE, RH>(
-	matcher?: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
+  matcher?: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
 ) {
-	if (!matcher) {
-		clearResponseCache();
-		return;
-	}
-	const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
-		? matcher
-		: instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
-		? [matcher]
-		: getMethodSnapshot(matcher, keyFilter);
-	forEach(methods, methodInstance => {
-		const { id, storage } = getContext(methodInstance);
-		const methodKey = key(methodInstance);
-		removeResponseCache(id, methodKey);
-		removePersistentResponse(id, methodKey, storage);
-	});
+  if (!matcher) {
+    clearResponseCache();
+    return;
+  }
+  const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
+    ? matcher
+    : instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
+    ? [matcher]
+    : getMethodSnapshot(matcher, keyFilter);
+  forEach(methods, methodInstance => {
+    const { id, storage } = getContext(methodInstance);
+    const methodKey = key(methodInstance);
+    removeResponseCache(id, methodKey);
+    removePersistentResponse(id, methodKey, storage);
+  });
 }
