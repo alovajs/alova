@@ -148,7 +148,7 @@ yarn add alova
 ### Extension
 
 - Adapters for each operating environment (Uniapp, Taro)
-- Develop extension hooks under different request scenarios through the [**@alova/hooks**](https://github.com/alovajs/extensions/tree/main/packages/hooks) library, providing out-of-the-box high-performance and high-experience functions [[Refer to usePagination](https://alova.js.org/extension/ alova-hooks/usePagination)]
+- Develop extension hooks under different request scenarios through the [**@alova/hooks**](https://github.com/alovajs/extensions/tree/main/packages/hooks) library, providing out-of-the-box high-performance and high-experience functions [[Refer to usePagination](https://alova.js.org/extension/alova-hooks/usePagination)]
 
 ## Contribution Guide
 
