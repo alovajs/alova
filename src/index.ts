@@ -27,3 +27,27 @@ export function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE
   }
   return alova;
 }
+
+if (process.env.NODE_ENV === 'development') {
+  const consoleInfo = (isVite = true) => {
+    console.log(`[alova]Using mock data: https://alova.js.org/extension/alova-mock`);
+    console.log(`[alova]More awesome alova hooks: https://alova.js.org/category/%E6%89%A9%E5%B1%95hooks`);
+    console.log(
+      `[alova]It will remove in production environment. set env variable %c${
+        isVite ? 'VITE_ALOVA_TIPS=0' : 'VUE_APP_ALOVA_TIPS=0 or REACT_APP_ALOVA_TIPS=0'
+      }`,
+      'color:rgb(26,115,232)',
+      'to hide tips in development environment.'
+    );
+  };
+
+  try {
+    // @ts-ignore
+    import.meta.env.VITE_ALOVA_TIPS !== '0' && consoleInfo();
+  } catch (e) {}
+  try {
+    if (process.env.VUE_APP_ALOVA_TIPS !== '0' && process.env.REACT_APP_ALOVA_TIPS !== '0') {
+      consoleInfo(false);
+    }
+  } catch (e) {}
+}
