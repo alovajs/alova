@@ -66,21 +66,21 @@ export default function GlobalFetch() {
         ),
       onDownload: (cb: (total: number, loaded: number) => void) => {
         promiseThen(fetchPromise, response => {
-          const { headers, body } = response;
+          const { headers, body } = response.clone();
+          const reader = body?.getReader().read();
           const total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
           if (total <= 0) {
             return;
           }
           let loaded = 0;
           const progressTimer = setInterval(() => {
-            const reader = body?.getReader().read();
             reader &&
               promiseThen(reader, ({ done, value = new Uint8Array() }) => {
                 done && clearInterval(progressTimer);
                 loaded += len(value);
                 cb(total, loaded);
               });
-          }, 100);
+          }, 0);
         });
       },
       abort: () => {
