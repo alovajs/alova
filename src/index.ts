@@ -40,7 +40,9 @@ if (process.env.NODE_ENV === 'development') {
 
   try {
     // @ts-ignore
-    import.meta.env.VITE_ALOVA_TIPS !== '0' && consoleInfo();
+    if (import.meta.env.VITE_ALOVA_TIPS !== '0') {
+      consoleInfo();
+    }
   } catch (e) {}
   try {
     if (process.env.VUE_APP_ALOVA_TIPS !== '0' && process.env.REACT_APP_ALOVA_TIPS !== '0') {
