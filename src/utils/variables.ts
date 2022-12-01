@@ -20,10 +20,11 @@ export const getContext = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, 
   methodInstance.context;
 export const getConfig = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
   methodInstance.config;
+export const getContextOptions = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) => alovaInstance.options;
 export const getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
-  getContext(methodInstance).options;
+  getContextOptions(getContext(methodInstance));
 export const getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
-  alovaInstance.options.statesHook;
+  getContextOptions(alovaInstance).statesHook;
 export const JSONStringify = <T>(value: T) => JSON.stringify(value);
 export const JSONParse = (value: string) => JSON.parse(value);
 export const setTimeoutFn = (fn: GeneralFn, delay = 0) => setTimeout(fn, delay);
@@ -31,6 +32,7 @@ export const clearTimeoutTimer = (timer: NodeJS.Timeout) => clearTimeout(timer);
 export const objectKeys = (obj: object) => Object.keys(obj);
 export const forEach = <T>(ary: T[], fn: (item: T, index: number, ary: T[]) => void) => ary.forEach(fn);
 export const pushItem = <T>(ary: T[], ...item: T[]) => ary.push(...item);
+export const slice = <T>(ary: T[], start?: number, end?: number) => ary.slice(start, end);
 export const len = (data: any[] | Uint8Array | string) => data.length;
 export const undefinedValue = undefined;
 export const nullValue = null;

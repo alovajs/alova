@@ -1,9 +1,9 @@
 import { MethodMatcher } from '../../typings';
 import Method from '../Method';
 import { getMethodSnapshot, getResponseCache, keyFilter, setResponseCache } from '../storage/responseCache';
-import { getPersistentResponse, persistResponse } from '../storage/responseStorage';
+import { persistResponse } from '../storage/responseStorage';
 import { getLocalCacheConfigParam, instanceOf, isArray, isFn, key } from '../utils/helper';
-import { falseValue, forEach, getContext, undefinedValue } from '../utils/variables';
+import { falseValue, forEach, getContext } from '../utils/variables';
 
 /**
  * 手动设置缓存响应数据，如果对应的methodInstance设置了持久化存储，则还会去检出持久化存储中的缓存
@@ -25,10 +25,7 @@ export default function setCacheData<R = any, S = any, E = any, T = any, RC = an
     const methodKey = key(methodInstance);
     let data: any = dataOrUpater;
     if (isFn(dataOrUpater)) {
-      data = dataOrUpater(
-        getResponseCache(id, methodKey) ||
-          (toStorage ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue)
-      );
+      data = dataOrUpater(getResponseCache(id, methodKey));
       if (data === falseValue) {
         return;
       }

@@ -1,4 +1,5 @@
 import {
+  AlovaGuardNext,
   CompleteHandler,
   ErrorHandler,
   FrontRequestHookConfig,
@@ -9,34 +10,30 @@ import {
 import Method from '../Method';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
-import { pushSilentRequest } from '../storage/silentStorage';
 import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
-import { GeneralFn, getLocalCacheConfigParam, instanceOf, key, noop, serializeMethod } from '../utils/helper';
-import myAssert from '../utils/myAssert';
+import { GeneralFn, getLocalCacheConfigParam, key, noop } from '../utils/helper';
 import {
   falseValue,
   forEach,
   getConfig,
   getContext,
-  nullValue,
+  len,
+  objectKeys,
   promiseCatch,
   promiseReject,
   promiseResolve,
   promiseThen,
-  pushItem,
-  setTimeoutFn,
   STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '../utils/variables';
 import { SaveStateFn } from './createRequestState';
 import sendRequest from './sendRequest';
-import { silentRequestPromises } from './updateState';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
  * @param method 请求方法对象
- * @param originalState 原始状态
+ * @param frontStates 前端状态集合
  * @param responser 响应处理对象
  * @param responserHandlerArgs 响应处理回调的参数，该参数由use hooks的send传入
  * @param forceRequest 是否强制发起请求
@@ -45,20 +42,27 @@ import { silentRequestPromises } from './updateState';
  */
 export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
-  originalState: FrontRequestState,
-  useHookConfig: UseHookConfig,
+  frontStates: FrontRequestState,
+  useHookConfig: UseHookConfig<S, E, R, T, RC, RE, RH>,
   successHandlers: SuccessHandler<R>[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
   responserHandlerArgs: any[] = [],
   updateCacheState = falseValue
 ) {
-  const { force: forceRequest = falseValue, silent = falseValue } = useHookConfig as FrontRequestHookConfig;
+  const { force: forceRequest = falseValue, middleware } = useHookConfig as FrontRequestHookConfig<
+    S,
+    E,
+    R,
+    T,
+    RC,
+    RE,
+    RH
+  >;
   const { id, options, storage } = getContext(methodInstance);
   const { update } = options.statesHook;
   const { enableDownload, enableUpload } = getConfig(methodInstance);
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
-  const silentMode = silent && !updateCacheState; // 在fetch数据时不能静默请求
   const methodKey = key(methodInstance);
 
   const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) =>
@@ -84,120 +88,130 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         {
           data: cachedResponse || persistentResponse
         },
-        originalState
+        frontStates
       );
     }
 
     // 将初始状态存入缓存以便后续更新
     saveStates = (frontStates: FrontRequestState) => setStateCache(id, methodKey, frontStates);
-    saveStates(originalState);
+    saveStates(frontStates);
 
     // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
     removeStates = () => removeStateCache(id, methodKey);
   }
 
-  if (silentMode) {
-    myAssert(!instanceOf(methodInstance.requestBody, FormData), 'FormData is not supported when silent mode');
-    // 需要异步执行，同步执行会导致无法收集各类回调函数
-    setTimeoutFn(() => {
-      runArgsHandler(successHandlers, undefinedValue);
-      runArgsHandler(completeHandlers);
-      // 执行完需要从头开始清除promise，这样在updateState中才能获取到对应的promise
-      silentRequestPromises.shift();
-    });
+  let requestCtrl: Partial<ReturnType<typeof sendRequest>> = {};
+  let responseHandlePromise = promiseResolve<any>(undefinedValue);
 
-    // silentMode下，如果网络离线的话就不再实际请求了，而是将请求信息存入缓存
-    if (!navigator.onLine) {
-      pushSilentRequest(id, methodKey, serializeMethod(methodInstance), storage);
-      const resolvedPromise = promiseResolve(nullValue);
-      pushItem(silentRequestPromises, resolvedPromise); // 离线状态下，静默请求也需要收集一个promise
-      return {
-        response: () => resolvedPromise,
-        headers: () => promiseResolve({} as Headers),
-        progress: noop,
-        abort: noop,
-        p: resolvedPromise,
-        r: removeStates,
-        s: saveStates
-      };
+  // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
+  const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
+    const { force: guardNextforceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
+      guardNextConfig || {};
+    // 未使用缓存才需要更新loading状态
+    const {
+      response,
+      onDownload = noop,
+      onUpload = noop,
+      useCache
+    } = (requestCtrl = sendRequest(guardNextReplacingMethod, guardNextforceRequest));
+
+    // 命中缓存时不需要更新loading状态
+    !useCache &&
+      update(
+        {
+          loading: trueValue
+        },
+        frontStates
+      );
+
+    responseHandlePromise = response();
+    const progressUpdater = (stage: 'downloading' | 'uploading') => (loaded: number, total: number) => {
+      update(
+        {
+          [stage]: {
+            loaded,
+            total
+          }
+        },
+        frontStates
+      );
+    };
+    enableDownload && onDownload(progressUpdater('downloading'));
+    enableUpload && onUpload(progressUpdater('uploading'));
+    return responseHandlePromise;
+  };
+
+  // 调用中间件函数
+  let middlewareCompletePromise: Promise<void> | void;
+  if (middleware) {
+    try {
+      middlewareCompletePromise = middleware(
+        {
+          method: methodInstance
+        },
+        guardNext
+      );
+    } catch (e) {
+      middlewareCompletePromise = promiseReject(e);
     }
+  } else {
+    guardNext();
   }
 
-  // 非静默模式，且未使用缓存才需要更新loading状态
-  const ctrl = sendRequest(methodInstance, forceRequest);
-  const { response, onDownload = noop, onUpload = noop, useCache } = ctrl;
-
-  // 静默模式下和命中缓存时不需要更新loading状态
-  !silentMode &&
-    !useCache &&
-    update(
-      {
-        loading: trueValue
-      },
-      originalState
-    );
-
-  const responseHandlePromise = promiseCatch(
-    promiseThen(response(), data => {
-      // 更新缓存响应数据
-      if (!updateCacheState) {
-        update({ data }, originalState);
-      } else {
-        // 更新缓存内的状态，一般为useFetcher中进入
-        const cachedState = getStateCache(id, methodKey);
-        cachedState && update({ data }, cachedState);
+  const isNextCalled = () => len(objectKeys(requestCtrl)) > 0;
+  // 统一处理响应
+  responseHandlePromise = promiseCatch(
+    promiseThen(middlewareCompletePromise || responseHandlePromise, responseData => {
+      if (!isNextCalled()) {
+        return;
       }
 
-      // 非静默请求才在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
-      if (!silentMode) {
-        update({ loading: falseValue }, originalState);
+      const afterSuccess = (data: any) => {
+        // 更新缓存响应数据
+        if (!updateCacheState) {
+          update({ data }, frontStates);
+        } else {
+          // 更新缓存内的状态，一般为useFetcher中进入
+          const cachedState = getStateCache(id, methodKey);
+          cachedState && update({ data }, cachedState);
+        }
+
+        // 在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
+        update({ loading: falseValue }, frontStates);
         runArgsHandler(successHandlers, data);
         runArgsHandler(completeHandlers);
-      }
-      return data;
+        return data;
+      };
+
+      // 当middlewareCompletePromise有值时，能进入此函数表示为没有错误,或者错误在middleware中被捕获了
+      // 此时即使请求有错误，也不需要抛出了，因此调用了afterSuccess(undefinedValue)
+      return middlewareCompletePromise
+        ? promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue))
+        : afterSuccess(responseData);
     }),
 
     // catch回调函数
     (error: Error) => {
+      if (!isNextCalled()) {
+        return;
+      }
+
       // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
       update(
         {
           error,
           loading: falseValue
         },
-        originalState
+        frontStates
       );
-      if (silentMode) {
-        pushSilentRequest(id, methodKey, serializeMethod(methodInstance), storage);
-      } else {
-        runArgsHandler(errorHandlers, error);
-        runArgsHandler(completeHandlers);
-      }
+      runArgsHandler(errorHandlers, error);
+      runArgsHandler(completeHandlers);
       return promiseReject(error);
     }
   );
 
-  const progressUpdater = (stage: 'downloading' | 'uploading') => (loaded: number, total: number) => {
-    update(
-      {
-        [stage]: {
-          loaded,
-          total
-        }
-      },
-      originalState
-    );
-  };
-  enableDownload && onDownload(progressUpdater('downloading'));
-  enableUpload && onUpload(progressUpdater('uploading'));
-
-  // 静默请求下，需要收集请求的promise，在updateState中使用
-  if (silentMode) {
-    pushItem(silentRequestPromises, responseHandlePromise);
-  }
-
   return {
-    ...ctrl,
+    ...requestCtrl,
     p: responseHandlePromise,
     r: removeStates,
     s: saveStates

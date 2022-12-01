@@ -1,7 +1,7 @@
 import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
-import { getOptions, undefinedValue } from './utils/variables';
+import { getContextOptions, undefinedValue } from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -12,6 +12,7 @@ export const typeDelete = 'DELETE';
 export const typeOptions = 'OPTIONS';
 export default class Method<S, E, R, T, RC, RE, RH> {
   public type: MethodType;
+  public baseURL: string;
   public url: string;
   public config: AlovaMethodConfig<R, T, RC, RH>;
   public requestBody?: RequestBody;
@@ -24,13 +25,14 @@ export default class Method<S, E, R, T, RC, RE, RH> {
     config?: AlovaMethodConfig<R, T, RC, RH>,
     requestBody?: RequestBody
   ) {
-    this.type = type;
+    const contextOptions = getContextOptions(context);
+    this.baseURL = contextOptions.baseURL || '';
     this.url = url;
+    this.type = type;
     this.context = context;
 
     // 将请求相关的全局配置合并到Method对象中
     const contextConcatConfig: any = {};
-    const contextOptions = getOptions(this);
 
     // 合并timeout
     const mergedTimeoutKey = 'timeout';

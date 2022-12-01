@@ -1,23 +1,21 @@
-import { MethodMatcher } from '../../typings';
+import { MethodMatcher, UpdateStateCollection } from '../../typings';
 import Method from '../Method';
 import { getMethodSnapshot, keyFind, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getStateCache } from '../storage/stateCache';
-import { getLocalCacheConfigParam, instanceOf, key, walkUpatingDataStructure } from '../utils/helper';
+import alovaError from '../utils/alovaError';
+import { getLocalCacheConfigParam, instanceOf, isFn, key } from '../utils/helper';
 import myAssert from '../utils/myAssert';
-import { forEach, getContext, getOptions, len, promiseThen } from '../utils/variables';
-
-/** 保存着静默请求时的promise对象 */
-export const silentRequestPromises: Promise<any>[] = [];
+import { forEach, getContext, getOptions, objectKeys, undefinedValue } from '../utils/variables';
 
 /**
  * 更新对应method的状态
  * @param method 请求方法对象
  * @param handleUpdate 更新回调
  */
-export default function updateState<S, E, R, T, RC, RE, RH>(
+export default function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
-  handleUpdate: (data: R) => any
+  handleUpdate: NonNullable<UpdateStateCollection<R>['data']> | UpdateStateCollection<R>
 ) {
   const methodInstance = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
     ? matcher
@@ -29,63 +27,34 @@ export default function updateState<S, E, R, T, RC, RE, RH>(
     } = getOptions(methodInstance);
     const methodKey = key(methodInstance);
     const { id, storage } = getContext(methodInstance);
-    const originalStates = getStateCache(id, methodKey);
+    const frontStates = getStateCache(id, methodKey);
 
-    // 将更新后的数据赋值给data状态
-    if (originalStates) {
-      const updateStateAndCache = (data: any) => {
-        update(
-          {
-            data
-          },
-          originalStates
-        );
-
-        // 同时需要更新缓存和持久化数据
-        const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
-        setResponseCache(id, methodKey, data, methodInstance, expireMilliseconds);
-        toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
-      };
-
-      let updatedData = handleUpdate(dehydrate(originalStates.data));
-      let catchedAttrs: ReturnType<typeof walkUpatingDataStructure>['c'] = [];
-      try {
-        const { f, c } = walkUpatingDataStructure(updatedData);
-        updatedData = f;
-        catchedAttrs = c;
-      } catch (error) {
-        // 如果有循环引用则不去解析了
-      }
-      updateStateAndCache(updatedData);
-
-      // 有延迟更新时才去执行
-      if (len(catchedAttrs) > 0) {
-        // 使用第一个即可，在useHookToSendRequest中会维护这个队列
-        const silentRequestPromise = silentRequestPromises[0];
-        myAssert(
-          !!silentRequestPromise && len(catchedAttrs) > 0,
-          'delayed update only can use at silent submit and must be called in onSuccess handler'
-        );
-        promiseThen(silentRequestPromise, rawData => {
-          for (const i in catchedAttrs) {
-            const { p: position, h: value } = catchedAttrs[i];
-            if (len(position) <= 0) {
-              updatedData = value(rawData);
-              break;
-            } else {
-              let nestedValue = updatedData;
-              forEach(position, (key, i) => {
-                if (i >= len(position) - 1) {
-                  nestedValue[key] = value(rawData);
-                } else {
-                  nestedValue = nestedValue[key];
-                }
-              });
-            }
-          }
-          updateStateAndCache(updatedData);
-        });
-      }
+    if (frontStates) {
+      const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
+      const updateStateCollection = isFn(handleUpdate)
+        ? ({ data: handleUpdate } as UpdateStateCollection<R>)
+        : handleUpdate;
+      // 循环遍历更新数据，并赋值给受监管的状态
+      forEach(objectKeys(updateStateCollection), stateName => {
+        myAssert(frontStates[stateName] !== undefinedValue, `can not find state named \`${stateName}\``);
+        myAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
+        try {
+          const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
+            dehydrate(frontStates[stateName])
+          );
+          update(
+            {
+              [stateName]: updatedData
+            },
+            frontStates
+          );
+          // 同时需要更新缓存和持久化数据
+          setResponseCache(id, methodKey, updatedData, methodInstance, expireMilliseconds);
+          toStorage && persistResponse(id, methodKey, updatedData, expireMilliseconds, storage, tag);
+        } catch (e) {
+          throw alovaError(`managed state \`${stateName}\` must be a state.`);
+        }
+      });
     }
   }
 }

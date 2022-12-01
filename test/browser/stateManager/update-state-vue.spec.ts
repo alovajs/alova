@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { Ref, ref } from 'vue';
 import { updateState, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
@@ -9,127 +10,137 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
 describe('update cached response data by user in vue', function () {
-	test('test update function with vue', async () => {
-		const alova = getAlovaInstance(VueHook);
-		const Get = alova.Get('/unit-test', {
-			localCache: 100000,
-			transformData: ({ data }: Result) => data
-		});
-		const { data, onSuccess } = useRequest(Get);
-		await untilCbCalled(onSuccess);
-		updateState(Get, data => {
-			data.path = '/unit-test-updated';
-			return data;
-		});
-		expect(data.value.path).toBe('/unit-test-updated');
-	});
+  test('test update function with vue', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const Get = alova.Get('/unit-test', {
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
+    const { data, onSuccess } = useRequest(Get);
+    await untilCbCalled(onSuccess);
+    updateState(Get, data => {
+      data.path = '/unit-test-updated';
+      return data;
+    });
+    expect(data.value.path).toBe('/unit-test-updated');
+  });
 
-	test("shouldn't be call when not get any states", () => {
-		const alova = getAlovaInstance(VueHook);
-		const Get = alova.Get('/unit-test', {
-			params: { a: 1 },
-			localCache: 100000,
-			transformData: ({ data }: Result) => data
-		});
+  test("shouldn't be called when not get any states", () => {
+    const alova = getAlovaInstance(VueHook);
+    const Get = alova.Get('/unit-test', {
+      params: { a: 1 },
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
 
-		const mockfn = jest.fn();
-		updateState(Get, data => {
-			mockfn();
-			return data;
-		});
-		expect(mockfn.mock.calls.length).toBe(0);
-	});
+    const mockfn = jest.fn();
+    updateState(Get, data => {
+      mockfn();
+      return data;
+    });
+    expect(mockfn.mock.calls.length).toBe(0);
+  });
 
-	test('should update the first matched one when find sereval Method instance', async () => {
-		const alova = getAlovaInstance(VueHook);
-		const Get1 = alova.Get('/unit-test', {
-			name: 'get1',
-			params: { a: 1 },
-			localCache: 100000,
-			transformData: ({ data }: Result) => data
-		});
-		const Get2 = alova.Get('/unit-test', {
-			name: 'get2',
-			params: { b: 2 },
-			localCache: 100000,
-			transformData: ({ data }: Result) => data
-		});
+  test('should update the first matched one when find sereval Method instance', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const Get1 = alova.Get('/unit-test', {
+      name: 'get1',
+      params: { a: 1 },
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
+    const Get2 = alova.Get('/unit-test', {
+      name: 'get2',
+      params: { b: 2 },
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
 
-		const firstState = useRequest(Get1);
-		const secondState = useRequest(Get2);
-		await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-		updateState(/^get/, (data: any) => {
-			data.path = '/unit-test-updated';
-			return data;
-		});
+    const firstState = useRequest(Get1);
+    const secondState = useRequest(Get2);
+    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+    updateState(/^get/, (data: any) => {
+      data.path = '/unit-test-updated';
+      return data;
+    });
 
-		// 匹配到多个method实例，只会更新第一个
-		expect(firstState.data.value.path).toBe('/unit-test-updated');
-		expect(secondState.data.value.path).toBe('/unit-test');
-	});
+    // 匹配到多个method实例，只会更新第一个
+    expect(firstState.data.value.path).toBe('/unit-test-updated');
+    expect(secondState.data.value.path).toBe('/unit-test');
+  });
 
-	test("shouldn't throw error when not match any one", async () => {
-		const alova = getAlovaInstance(VueHook);
-		const Get1 = alova.Get('/unit-test', {
-			name: 'get1',
-			params: { a: 1 },
-			localCache: 100000,
-			transformData: ({ data }: Result) => data
-		});
-		const Get2 = alova.Get('/unit-test', {
-			name: 'get2',
-			params: { b: 2 },
-			localCache: 100000,
-			transformData: ({ data }: Result) => data
-		});
+  test("shouldn't throw error when not match any one", async () => {
+    const alova = getAlovaInstance(VueHook);
+    const Get1 = alova.Get('/unit-test', {
+      name: 'get1',
+      params: { a: 1 },
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
+    const Get2 = alova.Get('/unit-test', {
+      name: 'get2',
+      params: { b: 2 },
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
 
-		const firstState = useRequest(Get1);
-		const secondState = useRequest(Get2);
-		await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+    const firstState = useRequest(Get1);
+    const secondState = useRequest(Get2);
+    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
 
-		// 不会匹配任何一个method实例
-		updateState('get', (data: any) => {
-			data.path = '/unit-test-updated';
-			return data;
-		});
+    // 不会匹配任何一个method实例
+    updateState('get', (data: any) => {
+      data.path = '/unit-test-updated';
+      return data;
+    });
 
-		// 匹配到多个method实例，只会更新第一个
-		expect(firstState.data.value.path).toBe('/unit-test');
-		expect(secondState.data.value.path).toBe('/unit-test');
-	});
+    // 匹配到多个method实例，只会更新第一个
+    expect(firstState.data.value.path).toBe('/unit-test');
+    expect(secondState.data.value.path).toBe('/unit-test');
+  });
 
-	test('delayed update data in silent request', async () => {
-		const alova = getAlovaInstance(VueHook);
-		const Get1 = alova.Get('/unit-test', {
-			params: { a: 1 },
-			transformData: ({ data }: Result) => data
-		});
-		const Get2 = alova.Get('/unit-test', {
-			name: 'get2',
-			params: { b: 2 },
-			localCache: 100000,
-			transformData: ({ data }: Result) => data
-		});
-		const firstState = useRequest(Get1);
-		await untilCbCalled(firstState.onSuccess);
+  test('update extra managed states', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const Get = alova.Get('/unit-test', {
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
 
-		const secondState = useRequest(Get2, { silent: true });
-		await new Promise(res => {
-			secondState.onSuccess(() => {
-				updateState(Get1, rawData => {
-					return {
-						'+params': [(res: any) => res.params, {}],
-						method: rawData.method + '2'
-					};
-				});
-				// 一开始是默认值
-				expect(firstState.data.value).toEqual({ method: 'GET2', params: {} });
-				res(null);
-			});
-		});
+    const extraData = ref(0);
+    const extraData2 = 1;
+    const { onSuccess } = useRequest(Get, {
+      managedStates: {
+        extraData,
+        extraData2: extraData2 as unknown as Ref<number>
+      }
+    });
+    await untilCbCalled(onSuccess);
 
-		// 请求完成后是实际值
-		await untilCbCalled(setTimeout, 200);
-		expect(firstState.data.value).toEqual({ method: 'GET2', params: { b: '2' } });
-	});
+    // 预设状态不能更新
+    expect(() => {
+      updateState(Get, {
+        loading: () => true
+      });
+    }).toThrow();
+
+    // 非状态数据不能更新
+    expect(() => {
+      updateState(Get, {
+        extraData2: () => 1
+      });
+    }).toThrow();
+
+    // 未找到状态抛出错误
+    expect(() => {
+      updateState(Get, {
+        extraData3: () => 1
+      });
+    }).toThrow();
+
+    // 更新成功
+    updateState(Get, {
+      extraData: () => 1
+    });
+    expect(extraData.value).toBe(1);
+  });
 });

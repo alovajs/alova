@@ -1,6 +1,7 @@
 import { AlovaMethodConfig, AlovaOptions, RequestBody, Storage } from '../typings';
 import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 
+export const alovas = [] as Alova<any, any, any, any, any>[];
 // get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
 const defaultAlovaOptions = {
   localCache: {

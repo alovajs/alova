@@ -6,64 +6,61 @@
 var typescript = require('rollup-plugin-typescript2');
 var pkg = require('../package.json');
 var version = pkg.version;
-var name = pkg.name;
 var author = pkg.author;
+var repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
 
-var banner =
-  `/**
-  * ${pkg.name} ${version} (https://github.com/${author}/${name})
-  * API https://github.com/${author}/${name}/blob/master/doc/api.md
-  * Copyright ${(new Date).getFullYear()} ${author}. All Rights Reserved
-  * Licensed under MIT (https://github.com/${author}/${name}/blob/master/LICENSE)
+var banner = `/**
+  * ${pkg.name} ${version} (${pkg.homepage})
+  * Document ${pkg.homepage}
+  * Copyright ${new Date().getFullYear()} ${author}. All Rights Reserved
+  * Licensed under MIT (${repository}/blob/main/LICENSE)
   */
 `;
 
-const getCompiler = (opt = {
-  // objectHashIgnoreUnknownHack: true,
-  // clean: true,
-  tsconfigOverride: {
-    compilerOptions: {
-      module: 'ES2015'
+const getCompiler = (
+  opt = {
+    // objectHashIgnoreUnknownHack: true,
+    // clean: true,
+    tsconfigOverride: {
+      compilerOptions: {
+        module: 'ES2015'
+      }
     }
   }
-}) => typescript(opt);
+) => typescript(opt);
 exports.banner = banner;
 exports.getCompiler = getCompiler;
 const compilePaths = {
   core: {
     packageName: pkg.name,
     input: 'src/index.ts',
-    output: suffix => `dist/${pkg.name}.${suffix}.js`,
+    output: suffix => `dist/${pkg.name}.${suffix}.js`
   },
   vue: {
     packageName: 'VueHook',
     input: 'src/predefine/VueHook.ts',
-    output: suffix => `dist/hooks/vuehook.${suffix}.js`,
+    output: suffix => `dist/hooks/vuehook.${suffix}.js`
   },
   react: {
     packageName: 'ReactHook',
     input: 'src/predefine/ReactHook.ts',
-    output: suffix => `dist/hooks/reacthook.${suffix}.js`,
+    output: suffix => `dist/hooks/reacthook.${suffix}.js`
   },
   svelte: {
     extraExternal: ['svelte/store'],
     packageName: 'SvelteHook',
     input: 'src/predefine/SvelteHook.ts',
-    output: suffix => `dist/hooks/sveltehook.${suffix}.js`,
+    output: suffix => `dist/hooks/sveltehook.${suffix}.js`
   },
   globalFetch: {
     extraExternal: [],
     packageName: 'GlobalFetch',
     input: 'src/predefine/GlobalFetch.ts',
-    output: suffix => `dist/adapter/globalfetch.${suffix}.js`,
+    output: suffix => `dist/adapter/globalfetch.${suffix}.js`
   }
 };
 exports.external = Object.keys(compilePaths)
-  .reduce((prev, next) => [
-    ...prev,
-    next,
-    ...(compilePaths[next].extraExternal || [])
-  ], [])
+  .reduce((prev, next) => [...prev, next, ...(compilePaths[next].extraExternal || [])], [])
   .filter(key => key !== 'core');
 
 const compileModule = process.env.MODULE || 'core';

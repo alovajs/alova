@@ -1,7 +1,7 @@
 import { AlovaOptions } from '../typings';
-import Alova from './Alova';
-import listenNetwork, { addAlova } from './network';
-import { falseValue, trueValue } from './utils/variables';
+import Alova, { alovas } from './Alova';
+import myAssert from './utils/myAssert';
+import { getStatesHook, pushItem } from './utils/variables';
 export { default as invalidateCache } from './functions/invalidateCache';
 export { default as setCacheData } from './functions/setCacheData';
 export { default as updateState } from './functions/updateState';
@@ -16,16 +16,16 @@ export { cacheMode } from './utils/variables';
  * @param options alova配置参数
  * @returns Alova实例
  */
-let networkIsListen = falseValue;
 export function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) {
-  const alova = new Alova(options);
-  addAlova(alova);
-  if (!networkIsListen) {
-    // 监听网络变化
-    listenNetwork();
-    networkIsListen = trueValue;
+  const alovaInstance = new Alova(options);
+  if (alovas[0]) {
+    myAssert(
+      getStatesHook(alovas[0]) === getStatesHook(alovaInstance),
+      'must use the same statesHook in one environment'
+    );
   }
-  return alova;
+  pushItem(alovas, alovaInstance);
+  return alovaInstance;
 }
 
 if (process.env.NODE_ENV === 'development') {

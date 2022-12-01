@@ -3,6 +3,7 @@ import {
   CompleteHandler,
   ErrorHandler,
   ExportedType,
+  FrontRequestHookConfig,
   FrontRequestState,
   Progress,
   SuccessHandler,
@@ -12,10 +13,9 @@ import {
 import Alova from '../Alova';
 import Method from '../Method';
 import { debounce, getHandlerMethod, isNumber, noop } from '../utils/helper';
-import { falseValue, getStatesHook, pushItem, trueValue, undefinedValue } from '../utils/variables';
+import { falseValue, getStatesHook, promiseCatch, pushItem, trueValue, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
-type VoidFn = () => void;
 export type SaveStateFn = (frontStates: FrontRequestState) => void;
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
@@ -31,27 +31,25 @@ export type SaveStateFn = (frontStates: FrontRequestState) => void;
  */
 export default function createRequestState<S, E, R, T, RC, RE, RH>(
   alovaInstance: Alova<S, E, RC, RE, RH>,
-  handleRequest: (
-    originalState: FrontRequestState,
-    successHandlers: SuccessHandler<R>[],
-    errorHandlers: ErrorHandler[],
-    completeHandlers: CompleteHandler[],
-    setFns: (abort: VoidFn, removeStates: VoidFn, saveStates: SaveStateFn) => void
-  ) => void,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  useHookConfig: UseHookConfig<S, E, R, T, RC, RE, RH>,
   initialData?: any,
+  immediate = falseValue,
   watchingStates?: E[],
-  immediate = trueValue,
-  debounceDelay: WatcherHookConfig['debounce'] = 0
+  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
   const { create, export: stateExport, effectRequest } = getStatesHook(alovaInstance);
   const progress: Progress = {
     total: 0,
     loaded: 0
   };
-  const originalState = {
-    loading: create(falseValue),
+
+  // 将外部传入的受监管的状态一同放到frontStates集合中
+  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
+  const frontStates = {
+    ...managedStates,
     data: create(initialData),
+    loading: create(falseValue),
     error: create(undefinedValue as Error | undefined),
     downloading: create({ ...progress }),
     uploading: create({ ...progress })
@@ -60,49 +58,71 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
   const successHandlers = [] as SuccessHandler<R>[];
   const errorHandlers = [] as ErrorHandler[];
   const completeHandlers = [] as CompleteHandler[];
-  let abortFn = noop;
+  let abortFn: typeof noop | undefined = undefinedValue;
   let removeStatesFn = noop;
   let saveStatesFn = noop as SaveStateFn;
+  const hasWatchingStates = watchingStates !== undefinedValue;
 
-  // 调用请求处理回调函数
-  const wrapEffectRequest = () => {
-    handleRequest(
-      originalState,
+  // 统一处理请求发送
+  const handleRequest = (
+    methodInstance = getHandlerMethod(methodHandler),
+    useHookConfigParam = useHookConfig,
+    sendCallingArgs?: any[],
+    updateCacheState?: boolean
+  ) => {
+    const {
+      abort,
+      p: responseHandlePromise,
+      r: removeStates,
+      s: saveStates
+    } = useHookToSendRequest(
+      methodInstance,
+      frontStates,
+      useHookConfigParam,
       successHandlers,
       errorHandlers,
       completeHandlers,
-      (abort, removeStates, saveStates) => {
-        abortFn = abort;
-        removeStatesFn = removeStates;
-        saveStatesFn = saveStates;
-      }
+      sendCallingArgs,
+      updateCacheState
     );
+    // 每次发送请求都需要保存最新的控制器
+    abortFn = abort;
+    removeStatesFn = removeStates;
+    saveStatesFn = saveStates;
+    return responseHandlePromise;
+  };
+
+  // 调用请求处理回调函数
+  const wrapEffectRequest = () => {
+    if (hasWatchingStates || (!hasWatchingStates && immediate)) {
+      promiseCatch(handleRequest(), noop); // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
+    }
   };
 
   effectRequest({
     handler:
       // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
-      watchingStates !== undefinedValue
+      hasWatchingStates
         ? debounce(wrapEffectRequest, (changedIndex?: number) =>
             isNumber(changedIndex) ? (isNumber(debounceDelay) ? debounceDelay : debounceDelay[changedIndex]) : 0
           )
         : wrapEffectRequest,
     removeStates: () => removeStatesFn(),
     saveStates: (states: FrontRequestState) => saveStatesFn(states),
-    frontStates: originalState,
+    frontStates: frontStates,
     watchingStates,
     immediate: immediate ?? trueValue
   });
 
-  const exportedState = {
-    loading: stateExport(originalState.loading) as unknown as ExportedType<boolean, S>,
-    data: stateExport(originalState.data) as unknown as ExportedType<R, S>,
-    error: stateExport(originalState.error) as unknown as ExportedType<Error | null, S>,
-    downloading: stateExport(originalState.downloading) as unknown as ExportedType<Progress, S>,
-    uploading: stateExport(originalState.uploading) as unknown as ExportedType<Progress, S>
+  const exportedStates = {
+    loading: stateExport(frontStates.loading) as unknown as ExportedType<boolean, S>,
+    data: stateExport(frontStates.data) as unknown as ExportedType<R, S>,
+    error: stateExport(frontStates.error) as unknown as ExportedType<Error | null, S>,
+    downloading: stateExport(frontStates.downloading) as unknown as ExportedType<Progress, S>,
+    uploading: stateExport(frontStates.uploading) as unknown as ExportedType<Progress, S>
   };
   return {
-    ...exportedState,
+    ...exportedStates,
     onSuccess(handler: SuccessHandler<R>) {
       pushItem(successHandlers, handler);
     },
@@ -112,7 +132,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
     onComplete(handler: CompleteHandler) {
       pushItem(completeHandlers, handler);
     },
-    abort: () => abortFn(),
+    abort: () => (abortFn || noop)(),
 
     /**
      * 通过执行该方法来手动发起请求
@@ -123,26 +143,17 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
      * @returns 请求promise
      */
     send(
-      useHookConfig: UseHookConfig,
+      useHookConfig: UseHookConfig<S, E, R, T, RC, RE, RH>,
       sendCallingArgs?: any[],
       methodInstance?: Method<S, E, R, T, RC, RE, RH>,
       updateCacheState?: boolean
     ) {
-      methodInstance = methodInstance || getHandlerMethod(methodHandler, sendCallingArgs);
-      const { abort, p, r, s } = useHookToSendRequest(
-        methodInstance,
-        originalState,
+      return handleRequest(
+        methodInstance || getHandlerMethod(methodHandler, sendCallingArgs),
         useHookConfig,
-        successHandlers,
-        errorHandlers,
-        completeHandlers,
         sendCallingArgs,
         updateCacheState
       );
-      abortFn = abort;
-      removeStatesFn = r;
-      saveStatesFn = s;
-      return p;
     }
   };
 }

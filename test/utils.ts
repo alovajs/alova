@@ -87,11 +87,13 @@ type AdapterConfig = AlovaRequestAdapterConfig<any, any, RequestInit, Headers>;
 export const getAlovaInstance = <S, E>(
   statesHook: StatesHook<S, E>,
   {
+    endWithSlash = false,
     localCache,
     beforeRequestExpect,
     responseExpect,
     resErrorExpect
   }: {
+    endWithSlash?: boolean;
     localCache?: GlobalLocalCacheConfig;
     beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void;
     responseExpect?: (jsonPromise: Promise<any>, config: AdapterConfig) => void;
@@ -99,7 +101,7 @@ export const getAlovaInstance = <S, E>(
   } = {}
 ) => {
   const alovaInst = createAlova({
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3000' + (endWithSlash ? '/' : ''),
     timeout: 3000,
     statesHook: statesHook,
     requestAdapter: GlobalFetch(),
@@ -107,14 +109,20 @@ export const getAlovaInstance = <S, E>(
       beforeRequestExpect && beforeRequestExpect(config);
       return config;
     },
-    responsed: {
-      onSuccess: (response, config) => {
-        const jsonPromise = response.json();
-        const responseResult = responseExpect && responseExpect(jsonPromise, config);
-        return responseResult || jsonPromise;
-      },
-      onError: resErrorExpect
-    }
+    responsed: resErrorExpect
+      ? {
+          onSuccess: (response, config) => {
+            const jsonPromise = response.json();
+            const responseResult = responseExpect && responseExpect(jsonPromise, config);
+            return responseResult || jsonPromise;
+          },
+          onError: resErrorExpect
+        }
+      : (response, config) => {
+          const jsonPromise = response.json();
+          const responseResult = responseExpect && responseExpect(jsonPromise, config);
+          return responseResult || jsonPromise;
+        }
   });
   if (localCache) {
     alovaInst.options.localCache = localCache;

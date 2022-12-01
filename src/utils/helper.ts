@@ -2,13 +2,11 @@ import { AlovaMethodHandler, CacheExpire, LocalCacheConfig, Method } from '../..
 import {
   clearTimeoutTimer,
   falseValue,
-  forEach,
   getConfig,
   getTime,
   JSONStringify,
   MEMORY,
   nullValue,
-  objectKeys,
   PromiseCls,
   promiseThen,
   setTimeoutFn,
@@ -66,21 +64,6 @@ export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, R
   const { type, url, requestBody } = methodInstance;
   const { params, headers } = getConfig(methodInstance);
   return JSONStringify([type, url, params, requestBody, headers]);
-};
-
-/**
- * 序列化请求方法对象
- * @param methodInstance 请求方法对象
- * @returns 请求方法的序列化对象
- */
-export const serializeMethod = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-  const { type, url, config, requestBody } = methodInstance;
-  return {
-    type,
-    url,
-    config,
-    requestBody
-  };
 };
 
 /**
@@ -153,80 +136,6 @@ export const getHandlerMethod = <S, E, R, T, RC, RE, RH>(
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   args: any[] = []
 ) => (isFn(methodHandler) ? methodHandler(...args) : methodHandler);
-
-/**
- * 深度走查正在更新的数据，当一个数据以如下格式呈现时，则需要在响应后将它替换为实际数据
- * 1. 完整格式
- * {
-        action: 'responsed',
-        value: d => d.id,
-        default: 0,
-    },
-    2. 在对象中可以这样简写
-    '+id': d => d.id,  // 无默认值情况
-    '+id': [d => d.id, 0],  // 有默认值情况
- * @param data 待解析数据
- * @returns 待替换数据的位置，及转换函数
- */
-export const walkUpatingDataStructure = (data: any) => {
-  const catchedUpdateAttrs: {
-    p: (number | string)[];
-    h: GeneralFn;
-  }[] = [];
-
-  // 解析函数
-  const parseResponsedStructure = (attr: any, key?: string) => {
-    let structure: { h: GeneralFn; d?: any } | undefined = undefined;
-    if (isPlainObject(attr)) {
-      const { action: a, value: h, default: d } = attr;
-      if (a === 'responsed' && isFn(h)) {
-        structure = { h, d };
-      }
-    } else if (key && key[0] === '+') {
-      if (isFn(attr)) {
-        structure = { h: attr };
-      } else if (isArray(attr) && isFn(attr[0])) {
-        structure = { h: attr[0], d: attr[1] };
-      }
-    }
-    return structure;
-  };
-
-  let finalData = data;
-  // 遍历对象或数组内的单个项处理
-  const replaceStr = (key: string) => key.replace(/^\+/, '');
-  const walkItem = (item: any, position: (number | string)[], key?: string | number, parent?: any) => {
-    const structure = parseResponsedStructure(item, isString(key) ? key : undefinedValue);
-    if (structure) {
-      const { h, d } = structure;
-      catchedUpdateAttrs.push({
-        p: position,
-        h
-      });
-      if (key !== undefinedValue) {
-        const keyReplaced = isString(key) ? replaceStr(key) : key;
-        if (keyReplaced !== key) {
-          delete parent[key];
-        }
-        parent[keyReplaced] = d;
-      } else {
-        finalData = d;
-      }
-    } else if (isPlainObject(item)) {
-      // 遍历对象
-      forEach(objectKeys(item), key => walkItem(item[key], [...position, replaceStr(key)], key, item));
-    } else if (isArray(item)) {
-      // 遍历数组
-      forEach(item, (arrItem, i) => walkItem(arrItem, [...position, i], i, item));
-    }
-  };
-
-  walkItem(data, []);
-  return {
-    f: finalData,
-    c: catchedUpdateAttrs
-  };
-};
 
 /**
  * 统一配置

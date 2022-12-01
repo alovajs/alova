@@ -39,8 +39,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
   forceRequest: boolean | (() => boolean)
 ) {
-  const { type, url, config, requestBody } = methodInstance;
-  const { baseURL, beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
+  const { baseURL, url, type, config, requestBody } = methodInstance;
+  const { beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
   const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
 

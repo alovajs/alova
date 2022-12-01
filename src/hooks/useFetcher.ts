@@ -1,7 +1,7 @@
 import { FetcherHookConfig, FetcherType, MethodMatcher } from '../../typings';
+import { alovas } from '../Alova';
 import createRequestState from '../functions/createRequestState';
 import Method from '../Method';
-import { alovas } from '../network';
 import { getMethodSnapshot, keyFind } from '../storage/responseCache';
 import { instanceOf, noop } from '../utils/helper';
 import myAssert, { assertAlovaCreation } from '../utils/myAssert';
@@ -13,7 +13,7 @@ import { trueValue } from '../utils/variables';
  */
 export default function useFetcher<SE extends FetcherType<any>>(config: FetcherHookConfig = {}) {
   assertAlovaCreation();
-  const props = createRequestState<SE['state'], SE['export'], any, any, any, any, any>(alovas[0], noop, noop as any);
+  const props = createRequestState<SE['state'], SE['export'], any, any, any, any, any>(alovas[0], noop as any, config);
   return {
     fetching: props.loading,
     error: props.error,

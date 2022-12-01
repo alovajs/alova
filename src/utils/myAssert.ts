@@ -1,4 +1,4 @@
-import { alovas } from '../network';
+import { alovas } from '../Alova';
 import alovaError from './alovaError';
 import { len } from './variables';
 
