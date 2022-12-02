@@ -150,7 +150,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       method: methodInstance,
       config: useHookConfig,
       frontStates,
-      statesUpdate: update,
+      statesUpdate: newFrontStates => update(newFrontStates, frontStates),
       sendArgs: responserHandlerArgs
     },
     guardNext
