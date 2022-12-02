@@ -135,7 +135,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
                   let isHit = falseValue;
                   const hitSource = cachedMethod.hitSource;
                   if (hitSource) {
-                    for (let i in hitSource) {
+                    for (const i in hitSource) {
                       const sourceMatcher = hitSource[i];
                       if (
                         instanceOf(sourceMatcher, RegExp)
