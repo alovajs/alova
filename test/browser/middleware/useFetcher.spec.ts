@@ -9,21 +9,23 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
 describe('useFetcher middleware', function () {
-  test('should send request synchronously when set a sync middleware function', async () => {
+  test('should send request when call next immediately in middleware function', async () => {
     const alova = getAlovaInstance(VueHook);
     const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
-      middleware: (context, next) => {
-        expect(context.method).toBe(getGetterObj);
-        next();
+      middleware: async (_, next) => {
+        await next();
       }
     });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
-    fetch(getGetterObj);
 
+    fetch(getGetterObj);
+    const mockFn = jest.fn();
+    onSuccess(mockFn);
     expect(fetching.value).toBeTruthy();
     await untilCbCalled(onSuccess);
+    expect(mockFn).toBeCalledTimes(1);
     expect(fetching.value).toBeFalsy();
   });
 
@@ -51,7 +53,7 @@ describe('useFetcher middleware', function () {
   test("shouldn't send request when not call next in middleware function", async () => {
     const alova = getAlovaInstance(VueHook);
     const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
-      middleware: () => {}
+      middleware: async () => {}
     });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data

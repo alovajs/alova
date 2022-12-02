@@ -65,6 +65,7 @@ export default {
         ignoreCodes: [1343]
       },
       astTransformers: {
+        // 转换import.meta
         before: [
           {
             path: 'node_modules/ts-jest-mock-import-meta',
@@ -169,11 +170,11 @@ export default {
     // '**/test/browser/hooks/useFetcher-vue.spec.ts(x)?'
     // '**/test/browser/behavior/cache-expire.spec.ts'
     // "**/test/browser/batch/parallel-request.spec.ts",
-    // '**/test/browser/stateManager/update-state-react.spec.ts(x)?'
+    // '**/test/browser/stateManager/auto-invalidate-cache.spec.ts(x)?'
     // '**/test/browser/global/request-response-hook.spec.ts(x)?'
     // "**/test/browser/fn/methodSend.spec.ts(x)?",
     // "**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?",
-    // '**/test/browser/middleware/useRequest.spec.ts(x)?'
+    // '**/test/browser/middleware/useWatcher.spec.ts(x)?'
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped

@@ -8,10 +8,12 @@ import {
   UseHookConfig
 } from '../../typings';
 import Method from '../Method';
+import defaultMiddleware from '../predefine/defaultMiddleware';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
-import { GeneralFn, getLocalCacheConfigParam, key, noop } from '../utils/helper';
+import { GeneralFn, getLocalCacheConfigParam, instanceOf, key, noop } from '../utils/helper';
+import myAssert from '../utils/myAssert';
 import {
   falseValue,
   forEach,
@@ -20,6 +22,7 @@ import {
   len,
   objectKeys,
   promiseCatch,
+  PromiseCls,
   promiseReject,
   promiseResolve,
   promiseThen,
@@ -40,17 +43,17 @@ import sendRequest from './sendRequest';
  * @param updateCacheState 是否更新缓存状态，一般在useFetcher时设置为true
  * @returns 请求状态
  */
-export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
+export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends UseHookConfig<S, E, R, T, RC, RE, RH>>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
   frontStates: FrontRequestState,
-  useHookConfig: UseHookConfig<S, E, R, T, RC, RE, RH>,
+  useHookConfig: UC,
   successHandlers: SuccessHandler<R>[],
   errorHandlers: ErrorHandler[],
   completeHandlers: CompleteHandler[],
   responserHandlerArgs: any[] = [],
   updateCacheState = falseValue
 ) {
-  const { force: forceRequest = falseValue, middleware } = useHookConfig as FrontRequestHookConfig<
+  const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as FrontRequestHookConfig<
     S,
     E,
     R,
@@ -142,26 +145,20 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
   };
 
   // 调用中间件函数
-  let middlewareCompletePromise: Promise<void> | void;
-  if (middleware) {
-    try {
-      middlewareCompletePromise = middleware(
-        {
-          method: methodInstance
-        },
-        guardNext
-      );
-    } catch (e) {
-      middlewareCompletePromise = promiseReject(e);
-    }
-  } else {
-    guardNext();
-  }
-
+  const middlewareCompletePromise = middleware(
+    {
+      method: methodInstance,
+      config: useHookConfig,
+      frontStates,
+      statesUpdate: update
+    },
+    guardNext
+  );
+  myAssert(instanceOf(middlewareCompletePromise, PromiseCls), 'middleware must be a async function');
   const isNextCalled = () => len(objectKeys(requestCtrl)) > 0;
   // 统一处理响应
-  responseHandlePromise = promiseCatch(
-    promiseThen(middlewareCompletePromise || responseHandlePromise, responseData => {
+  const responseCompletePromise = promiseCatch(
+    promiseThen(middlewareCompletePromise, () => {
       if (!isNextCalled()) {
         return;
       }
@@ -183,11 +180,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         return data;
       };
 
-      // 当middlewareCompletePromise有值时，能进入此函数表示为没有错误,或者错误在middleware中被捕获了
-      // 此时即使请求有错误，也不需要抛出了，因此调用了afterSuccess(undefinedValue)
-      return middlewareCompletePromise
-        ? promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue))
-        : afterSuccess(responseData);
+      // 当middlewareCompletePromise为resolve时有两种可能
+      // 1. 请求正常
+      // 2. 请求错误，但错误被中间件函数捕获了，此时也将调用成功回调，即afterSuccess(undefinedValue)
+      return promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue));
     }),
 
     // catch回调函数
@@ -212,7 +208,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
 
   return {
     ...requestCtrl,
-    p: responseHandlePromise,
+    p: responseCompletePromise,
     r: removeStates,
     s: saveStates
   };

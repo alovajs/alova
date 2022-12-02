@@ -1,6 +1,15 @@
-import { Method, MethodFilter, MethodFilterHandler } from '../../typings';
+import { Method, MethodFilter, MethodFilterHandler, MethodMatcher } from '../../typings';
 import { instanceOf, isPlainObject, isString } from '../utils/helper';
-import { forEach, getConfig, getTime, objectKeys, pushItem } from '../utils/variables';
+import {
+  deleteAttr,
+  forEach,
+  getConfig,
+  getTime,
+  isArray,
+  objectKeys,
+  pushItem,
+  undefinedValue
+} from '../utils/variables';
 
 type AnyMethod = Method<any, any, any, any, any, any, any>;
 // 响应数据缓存
@@ -30,7 +39,7 @@ export const getResponseCache = (namespace: string, key: string) => {
       return cachedItem[0];
     }
     // 如果过期，则删除缓存
-    delete cachedResponse[key];
+    deleteAttr(cachedResponse, key);
   }
 };
 
@@ -64,7 +73,7 @@ export const setResponseCache = (
 export const removeResponseCache = (namespace: string, key: string) => {
   const cachedResponse = responseCache[namespace];
   if (cachedResponse) {
-    delete cachedResponse[key];
+    deleteAttr(cachedResponse, key);
   }
 };
 
@@ -89,7 +98,7 @@ export const keyFind = 'find';
 export const getMethodSnapshot = <F extends 'filter' | 'find'>(filter: MethodFilter, filterFn: F) => {
   // 将filter参数统一解构为nameMatcher和filterHandler
   let namespace = '';
-  let nameMatcher: string | RegExp = '';
+  let nameMatcher: string | RegExp | undefined = undefinedValue;
   let filterHandler: MethodFilterHandler | undefined;
   if (isString(filter) || instanceOf(filter, RegExp)) {
     nameMatcher = filter;
@@ -109,14 +118,18 @@ export const getMethodSnapshot = <F extends 'filter' | 'find'>(filter: MethodFil
       const cachedResponse = responseCache[keyedNamespace];
       forEach(objectKeys(cachedResponse), methodKey => {
         // 为做到和缓存表现统一，如果过期了则不匹配出来，并删除其缓存
-        const [_, hitedMethodInstance, expireTime] = cachedResponse[methodKey];
+        const [_, hitMethodInstance, expireTime] = cachedResponse[methodKey];
         if (isExpired(expireTime)) {
-          delete cachedResponse[methodKey];
+          deleteAttr(cachedResponse, methodKey);
           return;
         }
-        const name = getConfig(hitedMethodInstance).name || '';
-        if (instanceOf(nameMatcher, RegExp) ? nameMatcher.test(name) : name === nameMatcher) {
-          pushItem(matches, hitedMethodInstance);
+        const name = getConfig(hitMethodInstance).name || '';
+        // 当nameMatcher为undefined时，表示命中所有method实例
+        if (
+          nameMatcher === undefinedValue ||
+          (instanceOf(nameMatcher, RegExp) ? nameMatcher.test(name) : name === nameMatcher)
+        ) {
+          pushItem(matches, hitMethodInstance);
         }
       });
     }
@@ -125,4 +138,25 @@ export const getMethodSnapshot = <F extends 'filter' | 'find'>(filter: MethodFil
   return (
     filterHandler ? matches[filterFn](filterHandler) : filterFn === keyFind ? matches[0] : matches
   ) as F extends 'filter' ? AnyMethod[] : AnyMethod;
+};
+
+/**
+ *
+ * @param matcher
+ * @param behavior
+ * @returns
+ */
+export const filterSnapshotMethodsUnified = <S, E, R, T, RC, RE, RH, F extends 'filter' | 'find'>(
+  matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
+  behavior: F
+): F extends 'filter' ? Method<S, E, R, T, RC, RE, RH>[] : Method<S, E, R, T, RC, RE, RH> | undefined => {
+  let methods: any;
+  if (isArray(matcher)) {
+    methods = matcher;
+  } else if ((matcher as Method<S, E, R, T, RC, RE, RH>).url) {
+    methods = behavior === keyFilter ? [matcher] : matcher;
+  } else {
+    methods = getMethodSnapshot(matcher as MethodFilter, behavior);
+  }
+  return methods;
 };

@@ -5,11 +5,12 @@ import {
   ResponseErrorHandler
 } from '../../typings';
 import Method from '../Method';
-import { getResponseCache, setResponseCache } from '../storage/responseCache';
+import { getMethodSnapshot, getResponseCache, keyFilter, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import {
   asyncOrSync,
   getLocalCacheConfigParam,
+  instanceOf,
   isFn,
   isPlainObject,
   key,
@@ -28,6 +29,7 @@ import {
   trueValue,
   undefinedValue
 } from '../utils/variables';
+import invalidateCache from './invalidateCache';
 
 /**
  * 实际的请求函数
@@ -69,7 +71,13 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   };
   requestConfig = beforeRequest(requestConfig) || requestConfig;
   // 将params对象转换为get字符串
-  const { url: newUrl, params = {}, localCache: newLocalCache, transformData = self } = requestConfig;
+  const {
+    url: newUrl,
+    params = {},
+    localCache: newLocalCache,
+    transformData = self,
+    name: methodInstanceName = ''
+  } = requestConfig;
   const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(undefinedValue, newLocalCache);
 
   // 过滤掉值为undefined的
@@ -116,8 +124,37 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         ([rawResponse, headers]) => {
           return asyncOrSync(responsedHandler(rawResponse, requestConfig), data => {
             data = transformData(data, headers);
+
+            // 保存缓存
             setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
             toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
+
+            const hitMethods = getMethodSnapshot(
+              {
+                filter: cachedMethod => {
+                  let isHit = falseValue;
+                  const hitSource = cachedMethod.hitSource;
+                  if (hitSource) {
+                    for (let i in hitSource) {
+                      const sourceMatcher = hitSource[i];
+                      if (
+                        instanceOf(sourceMatcher, RegExp)
+                          ? sourceMatcher.test(methodInstanceName)
+                          : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
+                      ) {
+                        isHit = trueValue;
+                        break;
+                      }
+                    }
+                  }
+                  return isHit;
+                }
+              },
+              keyFilter
+            );
+            invalidateCache(hitMethods);
+
+            // 查找hitTarget，让它的缓存失效
             return data;
           });
         },

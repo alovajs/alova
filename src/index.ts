@@ -28,6 +28,7 @@ export function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE
   return alovaInstance;
 }
 
+/* c8 ignore start */
 if (process.env.NODE_ENV === 'development') {
   const consoleInfo = () => {
     console.log(`[alova]Using mock data: https://alova.js.org/extension/alova-mock`);
@@ -50,3 +51,4 @@ if (process.env.NODE_ENV === 'development') {
     }
   } catch (e) {}
 }
+/* c8 ignore stop */

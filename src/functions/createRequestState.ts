@@ -29,10 +29,10 @@ export type SaveStateFn = (frontStates: FrontRequestState) => void;
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态
  */
-export default function createRequestState<S, E, R, T, RC, RE, RH>(
+export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig<S, E, R, T, RC, RE, RH>>(
   alovaInstance: Alova<S, E, RC, RE, RH>,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  useHookConfig: UseHookConfig<S, E, R, T, RC, RE, RH>,
+  useHookConfig: UC,
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
@@ -142,12 +142,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH>(
      * @param updateCacheState 是否更新缓存状态，此为fetch传入
      * @returns 请求promise
      */
-    send(
-      useHookConfig: UseHookConfig<S, E, R, T, RC, RE, RH>,
-      sendCallingArgs?: any[],
-      methodInstance?: Method<S, E, R, T, RC, RE, RH>,
-      updateCacheState?: boolean
-    ) {
+    send(sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, updateCacheState?: boolean) {
       return handleRequest(
         methodInstance || getHandlerMethod(methodHandler, sendCallingArgs),
         useHookConfig,

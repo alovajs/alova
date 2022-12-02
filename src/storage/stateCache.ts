@@ -1,5 +1,5 @@
 import { FrontRequestState } from '../../typings';
-import { undefinedValue } from '../utils/variables';
+import { deleteAttr, undefinedValue } from '../utils/variables';
 
 // 状态数据缓存
 const stateCache: Record<string, Record<string, FrontRequestState>> = {};
@@ -37,6 +37,6 @@ export const setStateCache = (namespace: string, key: string, data: FrontRequest
 export const removeStateCache = (namespace: string, key: string) => {
   const cachedState = stateCache[namespace];
   if (cachedState) {
-    delete cachedState[key];
+    deleteAttr(cachedState, key);
   }
 };

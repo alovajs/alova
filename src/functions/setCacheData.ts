@@ -1,8 +1,8 @@
 import { MethodMatcher } from '../../typings';
 import Method from '../Method';
-import { getMethodSnapshot, getResponseCache, keyFilter, setResponseCache } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified, getResponseCache, keyFilter, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
-import { getLocalCacheConfigParam, instanceOf, isArray, isFn, key } from '../utils/helper';
+import { getLocalCacheConfigParam, isFn, key } from '../utils/helper';
 import { falseValue, forEach, getContext } from '../utils/variables';
 
 /**
@@ -14,11 +14,7 @@ export default function setCacheData<R = any, S = any, E = any, T = any, RC = an
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
   dataOrUpater: R | ((oldCache?: R) => R | false)
 ) {
-  const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
-    ? matcher
-    : instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
-    ? [matcher]
-    : getMethodSnapshot(matcher, keyFilter);
+  const methods = filterSnapshotMethodsUnified(matcher, keyFilter);
   forEach(methods, methodInstance => {
     const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     const { id, storage } = getContext(methodInstance);

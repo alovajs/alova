@@ -14,6 +14,6 @@ export default function useRequest<S, E, R, T, RC, RE, RH>(
   const props = createRequestState(alovas[0] as Alova<S, E, RC, RE, RH>, handler, config, initialData, !!immediate);
   return {
     ...props,
-    send: (...args: any[]) => props.send(config, args)
+    send: (...args: any[]) => props.send(args)
   };
 }

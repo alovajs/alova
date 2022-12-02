@@ -64,6 +64,8 @@ export default function GlobalFetch() {
           ({ headers }) => headers,
           () => ({} as Headers)
         ),
+      // 因nodeFetch库限制，这块代码无法进行单元测试，但已在浏览器中通过测试
+      /* c8 ignore start */
       onDownload: (cb: (total: number, loaded: number) => void) => {
         promiseThen(fetchPromise, response => {
           const { headers, body } = response.clone();
@@ -83,6 +85,7 @@ export default function GlobalFetch() {
           }, 0);
         });
       },
+      /* c8 ignore start */
       abort: () => {
         ctrl.abort();
         clearTimeoutTimer(abortTimer);

@@ -1,6 +1,6 @@
 import { SerializedMethod, Storage } from '../../typings';
 import { noop } from '../utils/helper';
-import { JSONParse, JSONStringify, len, nullValue, objectKeys, undefinedValue } from '../utils/variables';
+import { deleteAttr, JSONParse, JSONStringify, len, nullValue, objectKeys, undefinedValue } from '../utils/variables';
 
 const silentRequestStorageKeyPrefix = '__$$a_sreqssk$$__';
 
@@ -37,7 +37,7 @@ export const getSilentRequest = (namespace: string, storage: Storage) => {
     const reqConfig = storage.getItem(key);
     serializedMethod = reqConfig ? JSONParse(reqConfig) : undefinedValue;
     remove = () => {
-      delete storageKeys[key];
+      deleteAttr(storageKeys, key);
       storage.setItem(namespacedSilentStorageKey, JSONStringify(storageKeys));
       storage.removeItem(key);
     };

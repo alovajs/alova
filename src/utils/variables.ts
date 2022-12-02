@@ -7,6 +7,11 @@ export const PromiseCls = Promise as typeof Promise<any>;
 export const promiseResolve = <T>(value: T) => PromiseCls.resolve(value);
 export const promiseReject = <T>(value: T) => PromiseCls.reject(value);
 
+export const undefinedValue = undefined;
+export const nullValue = null;
+export const trueValue = true;
+export const falseValue = false;
+
 // then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;
 
 export const promiseThen = <T, TResult1 = T, TResult2 = never>(
@@ -34,10 +39,8 @@ export const forEach = <T>(ary: T[], fn: (item: T, index: number, ary: T[]) => v
 export const pushItem = <T>(ary: T[], ...item: T[]) => ary.push(...item);
 export const slice = <T>(ary: T[], start?: number, end?: number) => ary.slice(start, end);
 export const len = (data: any[] | Uint8Array | string) => data.length;
-export const undefinedValue = undefined;
-export const nullValue = null;
-export const trueValue = true;
-export const falseValue = false;
+export const isArray = (arg: any): arg is any[] => Array.isArray(arg);
+export const deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) => delete arg[attr];
 
 /** 三种缓存模式 */
 // 只在内存中缓存，默认是此选项

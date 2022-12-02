@@ -3,4 +3,4 @@
  * @param msg 错误消息
  * @returns 错误对象
  */
-export default (msg: string) => new Error(`[alova:error]${msg}`);
+export default (msg: string) => new Error(`[alova:Error]${msg}`);

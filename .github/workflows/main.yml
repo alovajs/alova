@@ -40,6 +40,6 @@ jobs:
 
       # 打包发布
       - run: npm run build --if-present
-      - run: npm publish
+      - run: npm publish --tag alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}

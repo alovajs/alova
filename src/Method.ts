@@ -1,7 +1,8 @@
 import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
-import { getContextOptions, undefinedValue } from './utils/variables';
+import { instanceOf, key } from './utils/helper';
+import { deleteAttr, getContextOptions, isArray, undefinedValue } from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -16,6 +17,7 @@ export default class Method<S, E, R, T, RC, RE, RH> {
   public url: string;
   public config: AlovaMethodConfig<R, T, RC, RH>;
   public requestBody?: RequestBody;
+  public hitSource?: (string | RegExp)[];
   public context: Alova<S, E, RC, RE, RH>;
   public response: R;
   constructor(
@@ -49,6 +51,16 @@ export default class Method<S, E, R, T, RC, RE, RH> {
     if (globalLocalCache !== undefinedValue) {
       contextConcatConfig[mergedLocalCacheKey] = globalLocalCache;
     }
+
+    // 将hitSource统一处理成数组，且当有method实例时将它们转换为methodKey
+    const hitSource = config?.hitSource;
+    if (hitSource) {
+      this.hitSource = (isArray(hitSource) ? hitSource : [hitSource]).map(sourceItem =>
+        instanceOf(sourceItem, Method) ? key(sourceItem) : (sourceItem as string | RegExp)
+      );
+      deleteAttr(config, 'hitSource');
+    }
+
     this.config = {
       ...contextConcatConfig,
       ...(config || {})
@@ -59,7 +71,7 @@ export default class Method<S, E, R, T, RC, RE, RH> {
   /**
    * 直接发出请求，返回promise对象
    */
-  send(forceRequest = false): Promise<R> {
+  public send(forceRequest = false): Promise<R> {
     return sendRequest(this, forceRequest).response();
   }
 }

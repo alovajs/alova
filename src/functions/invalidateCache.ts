@@ -1,8 +1,13 @@
 import { MethodMatcher } from '../../typings';
 import Method from '../Method';
-import { clearResponseCache, getMethodSnapshot, keyFilter, removeResponseCache } from '../storage/responseCache';
+import {
+  clearResponseCache,
+  filterSnapshotMethodsUnified,
+  keyFilter,
+  removeResponseCache
+} from '../storage/responseCache';
 import { removePersistentResponse } from '../storage/responseStorage';
-import { instanceOf, isArray, key } from '../utils/helper';
+import { key } from '../utils/helper';
 import { forEach, getContext } from '../utils/variables';
 
 /**
@@ -20,11 +25,7 @@ export default function invalidateCache<S, E, R, T, RC, RE, RH>(
     clearResponseCache();
     return;
   }
-  const methods: Method<S, E, R, T, RC, RE, RH>[] = isArray(matcher)
-    ? matcher
-    : instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
-    ? [matcher]
-    : getMethodSnapshot(matcher, keyFilter);
+  const methods = filterSnapshotMethodsUnified(matcher, keyFilter);
   forEach(methods, methodInstance => {
     const { id, storage } = getContext(methodInstance);
     const methodKey = key(methodInstance);

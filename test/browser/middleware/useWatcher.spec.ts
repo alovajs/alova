@@ -16,9 +16,9 @@ describe('useWatcher middleware', function () {
     });
     const stateA = ref(0);
     const { loading, error, onSuccess, data, send } = useWatcher(() => getGetterObj, [stateA], {
-      middleware: (context, next) => {
+      middleware: async (context, next) => {
         expect(context.method).toBe(getGetterObj);
-        next();
+        await next();
       }
     });
 
@@ -42,7 +42,7 @@ describe('useWatcher middleware', function () {
     const stateA = ref(0);
     const { loading, onSuccess } = useWatcher(() => getGetterObj, [stateA], {
       middleware: async (_, next) => {
-        await untilCbCalled(setTimeout, 1000);
+        await untilCbCalled(setTimeout, 500);
         await next();
       },
       immediate: true
@@ -52,13 +52,13 @@ describe('useWatcher middleware', function () {
     const rawData = await untilCbCalled(onSuccess);
     let endTs = Date.now();
     expect(!!rawData).toBeTruthy();
-    expect(endTs - startTs).toBeGreaterThan(1000);
+    expect(endTs - startTs).toBeGreaterThan(500);
 
     stateA.value++;
     startTs = Date.now();
     await untilCbCalled(onSuccess);
     endTs = Date.now();
-    expect(endTs - startTs).toBeGreaterThan(1000);
+    expect(endTs - startTs).toBeGreaterThan(500);
   });
 
   test("shouldn't send request when not call next in middleware function", async () => {
@@ -69,7 +69,7 @@ describe('useWatcher middleware', function () {
 
     const stateA = ref(0);
     const { loading, data, onSuccess, send } = useWatcher(() => getGetterObj, [stateA], {
-      middleware: () => {},
+      middleware: async () => {},
       immediate: true
     });
 

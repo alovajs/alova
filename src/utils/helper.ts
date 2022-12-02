@@ -1,4 +1,5 @@
-import { AlovaMethodHandler, CacheExpire, LocalCacheConfig, Method } from '../../typings';
+import { AlovaMethodHandler, CacheExpire, LocalCacheConfig } from '../../typings';
+import Method from '../Method';
 import {
   clearTimeoutTimer,
   falseValue,
@@ -52,9 +53,6 @@ export const isPlainObject = (arg: any): arg is Record<string, any> =>
 
 // 判断是否为某个类的实例
 export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls;
-
-// 判断是否为数组
-export const isArray = (arg: any): arg is any[] => Array.isArray(arg);
 
 /**
  * 获取请求方式的key值

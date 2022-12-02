@@ -23,6 +23,6 @@ export default function useWatcher<S, E, R, T, RC, RE, RH>(
   );
   return {
     ...props,
-    send: (...args: any[]) => props.send(config, args)
+    send: (...args: any[]) => props.send(args)
   };
 }

@@ -1,10 +1,9 @@
 import { MethodMatcher, UpdateStateCollection } from '../../typings';
-import Method from '../Method';
-import { getMethodSnapshot, keyFind, setResponseCache } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified, keyFind, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getStateCache } from '../storage/stateCache';
 import alovaError from '../utils/alovaError';
-import { getLocalCacheConfigParam, instanceOf, isFn, key } from '../utils/helper';
+import { getLocalCacheConfigParam, isFn, key } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import { forEach, getContext, getOptions, objectKeys, undefinedValue } from '../utils/variables';
 
@@ -17,9 +16,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
   handleUpdate: NonNullable<UpdateStateCollection<R>['data']> | UpdateStateCollection<R>
 ) {
-  const methodInstance = instanceOf(matcher, Method as typeof Method<S, E, R, T, RC, RE, RH>)
-    ? matcher
-    : getMethodSnapshot(matcher, keyFind);
+  const methodInstance = filterSnapshotMethodsUnified(matcher, keyFind);
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
   if (methodInstance) {
     const {
