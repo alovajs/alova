@@ -72,7 +72,7 @@ describe('useRequet middleware', function () {
     expect(mockFn2).toBeCalledTimes(1);
   });
 
-  test('should send request until async middleware function is called', async () => {
+  test.only('should send request until async middleware function is called', async () => {
     const alova = getAlovaInstance(VueHook);
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
@@ -81,7 +81,12 @@ describe('useRequet middleware', function () {
       middleware: async (context, next) => {
         expect(context.method).toBe(getGetterObj);
         await untilCbCalled(setTimeout, 500);
-        await next();
+        const resp = await next();
+        expect(resp).toEqual({
+          path: '/unit-test',
+          method: 'GET',
+          params: {}
+        });
       }
     });
     expect(loading.value).toBeFalsy(); // 延迟1秒发送请求，表示异步发送请求，因此loading为false
@@ -146,60 +151,6 @@ describe('useRequet middleware', function () {
     expect(mockFn).toBeCalledTimes(2);
   });
 
-  test('we can change method instance in middleware function', async () => {
-    const alova = getAlovaInstance(VueHook);
-    const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
-    });
-    const { onSuccess } = useRequest(getGetterObj, {
-      middleware: async (context, next) => {
-        context;
-        expect(context.method).toBe(getGetterObj);
-        await untilCbCalled(setTimeout, 500);
-        await next();
-      }
-    });
-
-    // const alova = getAlovaInstance(VueHook);
-    // const getGetterObj = alova.Get('/unit-test', {
-    //   transformData: ({ data }: Result<true>) => data
-    // });
-    // const { onSuccess, onError } = useRequest(getGetterObj, {
-    //   middleware: async (_, next) => {
-    //     await untilCbCalled(setTimeout, 500);
-    //     // 替换method实例，并强制请求
-    //     await next({
-    //       force: true,
-    //       method: alova.Get('/unit-test', {
-    //         transformData: ({ data }: Result<true>) => data,
-    //         params: {
-    //           a: 'a',
-    //           b: 'b'
-    //         }
-    //       })
-    //     });
-    //   }
-    // });
-
-    // const mockFn = jest.fn();
-    onSuccess(() => {
-      console.log('---------====');
-      // mockFn();
-    });
-    // onError(() => {
-    //   console.log('fail');
-    // });
-    // expect(loading.value).toBeTruthy();
-    // await untilCbCalled(onSuccess);
-    // expect(data.value.params.a).toBe('a');
-    // expect(data.value.params.b).toBe('b');
-
-    // const rawData = await send();
-    // expect(rawData.params.a).toBe('a');
-    // expect(rawData.params.b).toBe('b');
-    // expect(mockFn).toBeCalledTimes(2);
-  });
-
   test('the behavior will be the same as normal when request error', async () => {
     const alova = getAlovaInstance(VueHook);
     const getGetterObj = alova.Get('/unit-test-404', {
@@ -219,6 +170,37 @@ describe('useRequet middleware', function () {
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeInstanceOf(Error);
     expect(data.value).toBeUndefined();
+  });
+
+  test('can catch error in middleware function when request error', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const getGetterObj = alova.Get('/unit-test-404', {
+      transformData: ({ data }: Result<true>) => data
+    });
+    const { loading, error, onSuccess, data, send } = useRequest(getGetterObj, {
+      middleware: async (_, next) => {
+        await untilCbCalled(setTimeout, 400);
+        try {
+          await next();
+        } catch (e) {}
+      }
+    });
+
+    // 错误在middleware中捕获后，外部不再接收到错误
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(error.value).toBeUndefined();
+    expect(data.value).toBeUndefined();
+    const mockFn = jest.fn();
+    try {
+      await send();
+    } catch (error) {
+      mockFn();
+    }
+    expect(mockFn).toBeCalledTimes(0);
   });
 
   test('can catch error in middleware function when request error', async () => {

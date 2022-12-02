@@ -158,7 +158,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const isNextCalled = () => len(objectKeys(requestCtrl)) > 0;
   // 统一处理响应
   const responseCompletePromise = promiseCatch(
-    promiseThen(middlewareCompletePromise, () => {
+    promiseThen(middlewareCompletePromise, middlewareReturnedData => {
       if (!isNextCalled()) {
         return;
       }

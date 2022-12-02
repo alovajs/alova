@@ -259,15 +259,12 @@ interface MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH> {
   method?: Method<any, any, any, any, any, any, any>;
 }
 interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
-  (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH>): Promise<void>;
+  (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH>): Promise<R>;
 }
 
 /** alova中间件类型 */
 interface AlovaMiddleware<S, E, R, T, RC, RE, RH> {
-  (
-    context: AlovaMiddlewareContext<S, E, R, T, RC, RE, RH>,
-    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
-  ): Promise<void>;
+  (context: AlovaMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): Promise<any>;
 }
 
 /** hook通用配置 */
