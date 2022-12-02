@@ -243,7 +243,10 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 当前的usehook配置对象 */
   config: any;
 
+  /** 状态更新函数 */
   statesUpdate: StatesHook<S, E>['update'];
+
+  /** 前端状态集合 */
   frontStates: FrontRequestState<
     ExportedType<boolean, S>,
     ExportedType<R, S>,
@@ -251,6 +254,9 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
     ExportedType<Progress, S>,
     ExportedType<Progress, S>
   >;
+
+  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
+  sendArgs: any[];
 }
 
 /** 中间件next函数 */
