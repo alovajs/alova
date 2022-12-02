@@ -244,17 +244,7 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   config: any;
 
   /** 状态更新函数 */
-  statesUpdate: (
-    newVal: Partial<
-      FrontRequestState<
-        ExportedType<boolean, S>,
-        ExportedType<R, S>,
-        ExportedType<Error | undefined, S>,
-        ExportedType<Progress, S>,
-        ExportedType<Progress, S>
-      >
-    >
-  ) => void;
+  statesUpdate: (newVal: Partial<FrontRequestState<boolean, any, Error | undefined, Progress, Progress>>) => void;
 
   /** 前端状态集合 */
   frontStates: FrontRequestState<
