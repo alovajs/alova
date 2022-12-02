@@ -160,10 +160,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   // 统一处理响应
   const responseCompletePromise = promiseCatch(
     promiseThen(middlewareCompletePromise, middlewareReturnedData => {
-      if (!isNextCalled()) {
-        return;
-      }
-
       const afterSuccess = (data: any) => {
         // 更新缓存响应数据
         if (!updateCacheState) {
@@ -180,6 +176,15 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         runArgsHandler(completeHandlers);
         return data;
       };
+
+      // 中间件中未返回数据或返回undefined时才继续获取真实的响应数据
+      // 否则使用返回数据并不再等待响应promise，此时也需要调用响应回调
+      if (middlewareReturnedData !== undefinedValue) {
+        return afterSuccess(middlewareReturnedData);
+      }
+      if (!isNextCalled()) {
+        return;
+      }
 
       // 当middlewareCompletePromise为resolve时有两种可能
       // 1. 请求正常

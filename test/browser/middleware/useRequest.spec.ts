@@ -72,7 +72,7 @@ describe('useRequet middleware', function () {
     expect(mockFn2).toBeCalledTimes(1);
   });
 
-  test.only('should send request until async middleware function is called', async () => {
+  test('should send request until async middleware function is called', async () => {
     const alova = getAlovaInstance(VueHook);
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
@@ -126,7 +126,7 @@ describe('useRequet middleware', function () {
     });
     const { loading, data, onSuccess, send } = useRequest(getGetterObj, {
       middleware: async (_, next) => {
-        await next({
+        const resp = await next({
           force: true,
           method: alova.Get('/unit-test', {
             transformData: ({ data }: Result<true>) => data,
@@ -135,6 +135,14 @@ describe('useRequet middleware', function () {
               b: 'b'
             }
           })
+        });
+        expect(resp).toEqual({
+          path: '/unit-test',
+          method: 'GET',
+          params: {
+            a: 'a',
+            b: 'b'
+          }
         });
       }
     });
@@ -203,34 +211,25 @@ describe('useRequet middleware', function () {
     expect(mockFn).toBeCalledTimes(0);
   });
 
-  test('can catch error in middleware function when request error', async () => {
+  test('should change response data when return custom data in middleware', async () => {
     const alova = getAlovaInstance(VueHook);
-    const getGetterObj = alova.Get('/unit-test-404', {
+    const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
-    const { loading, error, onSuccess, data, send } = useRequest(getGetterObj, {
-      middleware: async (_, next) => {
-        await untilCbCalled(setTimeout, 400);
-        try {
-          await next();
-        } catch (e) {}
+    const middlewareResp = {};
+    const { loading, error, onSuccess, data } = useRequest(getGetterObj, {
+      middleware: async () => {
+        return middlewareResp;
       }
     });
 
-    // 错误在middleware中捕获后，外部不再接收到错误
+    // 只有在中间件中未返回数据或返回undefined时才继续获取真实的响应数据，否则使用返回数据并不再等待响应promise
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeUndefined();
-    expect(data.value).toBeUndefined();
-    const mockFn = jest.fn();
-    try {
-      await send();
-    } catch (error) {
-      mockFn();
-    }
-    expect(mockFn).toBeCalledTimes(0);
+    expect(data.value).toEqual(middlewareResp);
   });
 });
