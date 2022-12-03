@@ -1,7 +1,7 @@
 import { Storage } from '../../typings';
 import { getTime, JSONParse, JSONStringify, nullValue, undefinedValue } from '../utils/variables';
 
-const responseStorageKey = '__$$aresp$$__';
+const responseStorageKey = 'alova.resp.';
 const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKey + namespace + key;
 
 /**

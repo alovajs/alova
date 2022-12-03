@@ -25,7 +25,7 @@ type FrontRequestState<L = any, R = any, E = any, D = any, U = any> = {
 };
 type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
-export interface Storage {
+interface Storage {
   setItem: (key: string, value: string) => void;
   getItem(key: string): string | null;
   removeItem(key: string): void;
@@ -59,7 +59,7 @@ type DetailLocalCacheConfig = {
 };
 type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
 type Arg = Record<string, any>;
-export type AlovaMethodConfig<R, T, RC, RH> = {
+type AlovaMethodConfig<R, T, RC, RH> = {
   /** method对象名称，在updateState、invalidateCache、setCacheData、以及fetch函数中可以通过名称或通配符获取对应method对象 */
   name?: string;
   params?: Arg;
@@ -144,7 +144,7 @@ type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>>;
  * RE(Response): 类型requestAdapter的响应配置类型，自动推断
  * RH(ResponseHeader): requestAdapter的响应头类型，自动推断
  */
-export interface AlovaOptions<S, E, RC, RE, RH> {
+interface AlovaOptions<S, E, RC, RE, RH> {
   /** base地址 */
   baseURL: string;
 
@@ -179,16 +179,6 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
    */
   responsed?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
 }
-
-/** 三种缓存模式 */
-export declare const cacheMode: {
-  /** 只在内存中缓存，默认是此选项 */
-  MEMORY: number;
-  /** 缓存会持久化，但当内存中没有缓存时，持久化缓存只会作为响应数据的占位符，且还会发送请求更新缓存 */
-  STORAGE_PLACEHOLDER: number;
-  /** 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存 */
-  STORAGE_RESTORE: number;
-};
 
 /** 请求方法类型 */
 interface Method<S, E, R, T, RC, RE, RH> {
@@ -379,8 +369,21 @@ type UpdateStateCollection<R> = {
   [attr in keyof Record<string | number | symbol, any>]: (data: attr extends 'data' ? R : any) => any;
 };
 
-// ************ 导出类型 ***************
 type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
+
+// ************ 导出类型 ***************
+/**
+ * 缓存模式
+ * 分别有MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
+ */
+export declare const cacheMode: {
+  /** 只在内存中缓存，默认是此选项 */
+  MEMORY: number;
+  /** 缓存会持久化，但当内存中没有缓存时，持久化缓存只会作为响应数据的占位符，且还会发送请求更新缓存 */
+  STORAGE_PLACEHOLDER: number;
+  /** 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存 */
+  STORAGE_RESTORE: number;
+};
 export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
 export declare function useRequest<S, E, R, T, RC, RE, RH>(
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
