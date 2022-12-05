@@ -11,7 +11,7 @@ export const typePut = 'PUT';
 export const typePatch = 'PATCH';
 export const typeDelete = 'DELETE';
 export const typeOptions = 'OPTIONS';
-export default class Method<S, E, R, T, RC, RE, RH> {
+export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
   public type: MethodType;
   public baseURL: string;
   public url: string;

@@ -77,11 +77,7 @@ export type AlovaMethodConfig<R, T, RC, RH> = {
    * 同时，此功能在错综复杂的失效关系中比invalidateCache方法更简洁
    * 该字段值可设置为method实例、其他method实例的name、name正则匹配，或者它们的数组
    */
-  hitSource?:
-    | string
-    | RegExp
-    | Method<any, any, any, any, any, any, any>
-    | (string | RegExp | Method<any, any, any, any, any, any, any>)[];
+  hitSource?: string | RegExp | Method | (string | RegExp | Method)[];
 
   /** 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启 */
   enableDownload?: boolean;
@@ -191,7 +187,7 @@ export declare const cacheMode: {
 };
 
 /** 请求方法类型 */
-interface Method<S, E, R, T, RC, RE, RH> {
+interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
   baseURL: string;
   url: string;
   type: MethodType;
@@ -202,11 +198,22 @@ interface Method<S, E, R, T, RC, RE, RH> {
   response: R;
   send(forceRequest?: boolean): Promise<R>;
 }
+interface MethodConstructor {
+  new <S, E, R, T, RC, RE, RH>(
+    type: MethodType,
+    context: Alova<S, E, RC, RE, RH>,
+    url: string,
+    config?: AlovaMethodConfig<R, T, RC, RH>,
+    requestBody?: RequestBody
+  ): Method<S, E, R, T, RC, RE, RH>;
+  readonly prototype: Method;
+}
+declare var Method: MethodConstructor;
 
-declare class Alova<S, E, RC, RE, RH> {
-  public options: AlovaOptions<S, E, RC, RE, RH>;
-  public id: string;
-  public storage: Storage;
+interface Alova<S, E, RC, RE, RH> {
+  options: AlovaOptions<S, E, RC, RE, RH>;
+  id: string;
+  storage: Storage;
   Get<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
   Post<R, T = unknown>(
     url: string,
@@ -262,7 +269,7 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
 /** 中间件next函数 */
 interface MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH> {
   force?: UseHookConfig<S, E, R, T, RC, RE, RH>['force'];
-  method?: Method<any, any, any, any, any, any, any>;
+  method?: Method;
 }
 interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
   (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH>): Promise<R>;
@@ -349,11 +356,7 @@ type UseFetchHookReturnType<S> = {
 };
 
 interface MethodFilterHandler {
-  (
-    method: Method<any, any, any, any, any, any, any>,
-    index: number,
-    methods: Method<any, any, any, any, any, any, any>[]
-  ): boolean;
+  (method: Method, index: number, methods: Method[]): boolean;
 }
 type MethodFilter =
   | string
@@ -371,29 +374,29 @@ type UpdateStateCollection<R> = {
 
 // ************ 导出类型 ***************
 type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
-export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
-export declare function useRequest<S, E, R, T, RC, RE, RH>(
+declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
+declare function useRequest<S, E, R, T, RC, RE, RH>(
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<R, S>;
-export declare function useWatcher<S, E, R, T, RC, RE, RH>(
+declare function useWatcher<S, E, R, T, RC, RE, RH>(
   handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   watchingStates: E[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<R, S>;
-export declare function useFetcher<SE extends FetcherType<any>>(
+declare function useFetcher<SE extends FetcherType<any>>(
   config?: FetcherHookConfig
 ): UseFetchHookReturnType<SE['state']>;
-export declare function invalidateCache<S, E, R, T, RC, RE, RH>(
+declare function invalidateCache<S, E, R, T, RC, RE, RH>(
   matcher?: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
 ): void;
-export declare function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
+declare function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
   handleUpdate: UpdateStateCollection<R>['data'] | UpdateStateCollection<R>
 ): void;
 
 /** 手动设置缓存响应数据 */
-export declare function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
+declare function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
   dataOrUpater: R | ((oldCache: R) => R | false)
 ): void;
