@@ -11,7 +11,7 @@ import {
   undefinedValue
 } from '../utils/variables';
 
-type AnyMethod = Method<any, any, any, any, any, any, any>;
+type AnyMethod = Method;
 // 响应数据缓存
 let responseCache: Record<string, Record<string, [data: any, method: AnyMethod, expireTime: number]>> = {};
 

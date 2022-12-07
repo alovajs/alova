@@ -8,15 +8,15 @@ export { default as updateState } from './functions/updateState';
 export { default as useFetcher } from './hooks/useFetcher';
 export { default as useRequest } from './hooks/useRequest';
 export { default as useWatcher } from './hooks/useWatcher';
-// 导出缓存模式
-export { cacheMode } from './utils/variables';
+export { default as Method } from './Method';
+export { cacheMode } from './utils/variables'; // 导出缓存模式
 
 /**
  * 创建Alova实例
  * @param options alova配置参数
  * @returns Alova实例
  */
-export function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) {
+export const createAlova = <S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) => {
   const alovaInstance = new Alova(options);
   if (alovas[0]) {
     myAssert(
@@ -26,7 +26,7 @@ export function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE
   }
   pushItem(alovas, alovaInstance);
   return alovaInstance;
-}
+};
 
 /* c8 ignore start */
 if (process.env.NODE_ENV === 'development') {

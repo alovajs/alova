@@ -16,8 +16,8 @@ export default function setCacheData<R = any, S = any, E = any, T = any, RC = an
 ) {
   const methods = filterSnapshotMethodsUnified(matcher, keyFilter);
   forEach(methods, methodInstance => {
-    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     const { id, storage } = getContext(methodInstance);
+    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     const methodKey = key(methodInstance);
     let data: any = dataOrUpater;
     if (isFn(dataOrUpater)) {
