@@ -164,20 +164,46 @@ describe('useRequet middleware', function () {
     const getGetterObj = alova.Get('/unit-test-404', {
       transformData: ({ data }: Result<true>) => data
     });
-    const { loading, error, onError, data } = useRequest(getGetterObj, {
-      middleware: async (_, next) => {
+    const mockFn = jest.fn();
+    const mockFn2 = jest.fn();
+    const { loading, error, onError, onComplete, data } = useRequest(getGetterObj, {
+      middleware: async ({ decorateError, decorateComplete }, next) => {
+        decorateError((handler, args, index) => {
+          mockFn();
+          const ret = handler(args as any, index);
+          expect(ret).toBe('a');
+        });
+        decorateComplete(() => {
+          mockFn2();
+        });
         await untilCbCalled(setTimeout, 400);
         await next();
       }
     });
 
+    onError((_, index) => {
+      expect(index).toBe(0);
+      return 'a';
+    });
+    onError((_, index) => {
+      expect(index).toBe(1);
+      return 'a';
+    });
+    onComplete(() => {
+      // 因为装饰函数中未调用handler，因此这个函数不会被执行
+      mockFn2();
+    });
+
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
-    await untilCbCalled(onError);
+    await untilCbCalled(setTimeout, 500);
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeInstanceOf(Error);
     expect(data.value).toBeUndefined();
+
+    expect(mockFn).toBeCalledTimes(2);
+    expect(mockFn2).toBeCalledTimes(1);
   });
 
   test('can catch error in middleware function when request error', async () => {
@@ -231,5 +257,46 @@ describe('useRequet middleware', function () {
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeUndefined();
     expect(data.value).toEqual(middlewareResp);
+  });
+
+  test('should decorate callbacks when set decorators', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const getGetterObj = alova.Get('/unit-test', {
+      transformData: ({ data }: Result<true>) => data
+    });
+    const mockFn = jest.fn();
+    const mockFn2 = jest.fn();
+    const { onSuccess, onComplete } = useRequest(getGetterObj, {
+      middleware: async ({ decorateSuccess, decorateComplete }, next) => {
+        // 在成功回调中注入代码
+        decorateSuccess((handler, args, index, length) => {
+          mockFn();
+          const ret = handler(args as any, index);
+          expect(ret).toBe('a');
+          expect(length).toBe(2);
+        });
+        decorateComplete(handler => {
+          mockFn2();
+          handler(1);
+        });
+        await next();
+      }
+    });
+
+    onSuccess((_, index) => {
+      expect(index).toBe(0);
+      return 'a';
+    });
+    onSuccess((_, index) => {
+      expect(index).toBe(1);
+      return 'a';
+    });
+    onComplete(customNum => {
+      mockFn2();
+      expect(customNum).toBe(1);
+    });
+    await untilCbCalled(setTimeout, 100);
+    expect(mockFn).toBeCalledTimes(2);
+    expect(mockFn2).toBeCalledTimes(2);
   });
 });

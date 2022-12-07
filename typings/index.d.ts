@@ -254,6 +254,17 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
 
   /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
   sendArgs: any[];
+
+  /** 成功回调装饰 */
+  decorateSuccess: (
+    decorator: (handler: SuccessHandler<R>, args: any[], index: number, length: number) => void
+  ) => void;
+
+  /** 失败回调装饰 */
+  decorateError: (decorator: (handler: ErrorHandler, args: any[], index: number, length: number) => void) => void;
+
+  /** 完成回调装饰 */
+  decorateComplete: (decorator: (handler: CompleteHandler, args: any[], index: number, length: number) => void) => void;
 }
 
 /** 中间件next函数 */

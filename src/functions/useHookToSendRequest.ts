@@ -12,7 +12,7 @@ import defaultMiddleware from '../predefine/defaultMiddleware';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
-import { GeneralFn, getLocalCacheConfigParam, instanceOf, key, noop } from '../utils/helper';
+import { GeneralFn, getLocalCacheConfigParam, instanceOf, isFn, key, noop } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import {
   falseValue,
@@ -67,9 +67,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const { enableDownload, enableUpload } = getConfig(methodInstance);
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const methodKey = key(methodInstance);
-
-  const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) =>
-    forEach(handlers, handler => handler(...args, ...responserHandlerArgs));
 
   // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
   let removeStates = noop;
@@ -145,18 +142,37 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   };
 
   // 调用中间件函数
+  let successHandlerDecorator: (handler: SuccessHandler<R>, args: any[], index: number, length: number) => void | void;
+  let errorHandlerDecorator: (handler: ErrorHandler, args: any[], index: number, length: number) => void | void;
+  let completeHandlerDecorator: (handler: CompleteHandler, args: any[], index: number, length: number) => void | void;
+
   const middlewareCompletePromise = middleware(
     {
       method: methodInstance,
       config: useHookConfig,
       frontStates,
       statesUpdate: newFrontStates => update(newFrontStates, frontStates),
-      sendArgs: responserHandlerArgs
+      sendArgs: responserHandlerArgs,
+      decorateSuccess: (decorator: NonNullable<typeof successHandlerDecorator>) => {
+        isFn(decorator) && (successHandlerDecorator = decorator);
+      },
+      decorateError: (decorator: NonNullable<typeof errorHandlerDecorator>) => {
+        isFn(decorator) && (errorHandlerDecorator = decorator);
+      },
+      decorateComplete: (decorator: NonNullable<typeof completeHandlerDecorator>) => {
+        isFn(decorator) && (completeHandlerDecorator = decorator);
+      }
     },
     guardNext
   );
   myAssert(instanceOf(middlewareCompletePromise, PromiseCls), 'middleware must be a async function');
   const isNextCalled = () => len(objectKeys(requestCtrl)) > 0;
+  const runArgsHandler = (handlers: GeneralFn[], decorator: (...args: any[]) => void, sendArgs: any[] = []) => {
+    const concatedArgs = [...sendArgs, ...responserHandlerArgs];
+    forEach(handlers, (handler, index) =>
+      isFn(decorator) ? decorator(handler, concatedArgs, index, len(handlers)) : handler(...concatedArgs)
+    );
+  };
   // 统一处理响应
   const responseCompletePromise = promiseCatch(
     promiseThen(middlewareCompletePromise, middlewareReturnedData => {
@@ -172,8 +188,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
         // 在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
         update({ loading: falseValue }, frontStates);
-        runArgsHandler(successHandlers, data);
-        runArgsHandler(completeHandlers);
+        runArgsHandler(successHandlers, successHandlerDecorator, [data]);
+        runArgsHandler(completeHandlers, completeHandlerDecorator);
         return data;
       };
 
@@ -206,8 +222,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         },
         frontStates
       );
-      runArgsHandler(errorHandlers, error);
-      runArgsHandler(completeHandlers);
+      runArgsHandler(errorHandlers, errorHandlerDecorator, [error]);
+      runArgsHandler(completeHandlers, completeHandlerDecorator);
       return promiseReject(error);
     }
   );
