@@ -170,7 +170,7 @@ export default {
     // '**/test/browser/hooks/useFetcher-vue.spec.ts(x)?'
     // '**/test/browser/behavior/cache-expire.spec.ts'
     // "**/test/browser/batch/parallel-request.spec.ts",
-    // '**/test/browser/stateManager/auto-invalidate-cache.spec.ts(x)?'
+    // '**/test/browser/stateManager/update-state-vue.spec.ts(x)?'
     // '**/test/browser/global/request-response-hook.spec.ts(x)?'
     // "**/test/browser/fn/methodSend.spec.ts(x)?",
     // "**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?",

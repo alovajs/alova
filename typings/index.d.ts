@@ -404,9 +404,14 @@ declare function useFetcher<SE extends FetcherType<any>>(
 declare function invalidateCache<S, E, R, T, RC, RE, RH>(
   matcher?: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
 ): void;
+
+interface updateOptions {
+  onMatch?: (method: Method) => void;
+}
 declare function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
-  handleUpdate: UpdateStateCollection<R>['data'] | UpdateStateCollection<R>
+  handleUpdate: UpdateStateCollection<R>['data'] | UpdateStateCollection<R>,
+  options?: updateOptions
 ): void;
 
 /** 手动设置缓存响应数据 */

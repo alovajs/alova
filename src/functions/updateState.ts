@@ -1,9 +1,9 @@
-import { MethodMatcher, UpdateStateCollection } from '../../typings';
+import { MethodMatcher, updateOptions, UpdateStateCollection } from '../../typings';
 import { filterSnapshotMethodsUnified, keyFind, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getStateCache } from '../storage/stateCache';
 import alovaError from '../utils/alovaError';
-import { getLocalCacheConfigParam, isFn, key } from '../utils/helper';
+import { getLocalCacheConfigParam, isFn, key, noop } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import { forEach, getContext, getOptions, objectKeys, undefinedValue } from '../utils/variables';
 
@@ -14,11 +14,14 @@ import { forEach, getContext, getOptions, objectKeys, undefinedValue } from '../
  */
 export default function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
-  handleUpdate: NonNullable<UpdateStateCollection<R>['data']> | UpdateStateCollection<R>
+  handleUpdate: NonNullable<UpdateStateCollection<R>['data']> | UpdateStateCollection<R>,
+  options: updateOptions = {}
 ) {
+  const { onMatch = noop } = options;
   const methodInstance = filterSnapshotMethodsUnified(matcher, keyFind);
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
   if (methodInstance) {
+    onMatch(methodInstance); // 触发onMatch事件
     const {
       statesHook: { dehydrate, update }
     } = getOptions(methodInstance);
