@@ -41,7 +41,7 @@ describe('update cached response data by user in vue', function () {
     expect(mockfn.mock.calls.length).toBe(0);
   });
 
-  test('should update the first matched one when find sereval Method instance', async () => {
+  test.only('should update the first matched one when find sereval Method instance', async () => {
     const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',
@@ -59,10 +59,18 @@ describe('update cached response data by user in vue', function () {
     const firstState = useRequest(Get1);
     const secondState = useRequest(Get2);
     await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-    updateState(/^get/, (data: any) => {
-      data.path = '/unit-test-updated';
-      return data;
-    });
+    updateState(
+      /^get/,
+      (data: any) => {
+        data.path = '/unit-test-updated';
+        return data;
+      },
+      {
+        onMatch: methodInstance => {
+          expect(methodInstance).toBe(Get1);
+        }
+      }
+    );
 
     // 匹配到多个method实例，只会更新第一个
     expect(firstState.data.value.path).toBe('/unit-test-updated');
