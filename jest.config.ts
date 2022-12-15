@@ -58,32 +58,7 @@ export default {
   // globalTeardown: undefined,
 
   // A set of global variables that need to be available in all test environments
-  globals: {
-    // mock import.meta, see https://www.npmjs.com/package/ts-jest-mock-import-meta
-    'ts-jest': {
-      diagnostics: {
-        ignoreCodes: [1343]
-      },
-      astTransformers: {
-        // 转换import.meta
-        before: [
-          {
-            path: 'node_modules/ts-jest-mock-import-meta',
-            options: {
-              metaObjectReplacement: {
-                url: 'https://xxx',
-                env: {
-                  PROD: false,
-                  DEV: true
-                },
-                status: 2
-              }
-            }
-          }
-        ]
-      }
-    }
-  },
+  // globals: {},
 
   // The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
   // maxWorkers: "50%",
@@ -169,11 +144,11 @@ export default {
     '**/?(*.)+(spec|test).[tj]s?(x)'
     // '**/test/browser/hooks/useFetcher-vue.spec.ts(x)?'
     // '**/test/browser/behavior/cache-expire.spec.ts'
-    // "**/test/browser/batch/parallel-request.spec.ts",
+    // '**/test/browser/batch/parallel-request.spec.ts'
     // '**/test/browser/stateManager/update-state-vue.spec.ts(x)?'
     // '**/test/browser/global/request-response-hook.spec.ts(x)?'
-    // "**/test/browser/fn/methodSend.spec.ts(x)?",
-    // "**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?",
+    // '**/test/browser/fn/methodSend.spec.ts(x)?',
+    // '**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?'
     // '**/test/browser/middleware/useRequest.spec.ts(x)?'
   ],
 
@@ -194,6 +169,33 @@ export default {
 
   // A map from regular expressions to paths to transformers
   transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      // mock import.meta, see https://www.npmjs.com/package/ts-jest-mock-import-meta
+      {
+        diagnostics: {
+          ignoreCodes: [1343]
+        },
+        astTransformers: {
+          // 转换import.meta
+          before: [
+            {
+              path: 'node_modules/ts-jest-mock-import-meta',
+              options: {
+                metaObjectReplacement: {
+                  url: 'https://xxx',
+                  env: {
+                    PROD: false,
+                    DEV: true
+                  },
+                  status: 2
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
     '^.+\\.svelte$': 'svelte-jester'
   }
 

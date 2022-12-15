@@ -21,7 +21,7 @@ describe('useRequet middleware', function () {
           next();
         }) as any
       });
-    }).toThrow();
+    }).toThrowError();
   });
 
   test('the behavior would be the same as the behavior not set middleware', async () => {

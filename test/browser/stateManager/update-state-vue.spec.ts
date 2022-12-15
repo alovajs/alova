@@ -41,7 +41,7 @@ describe('update cached response data by user in vue', function () {
     expect(mockfn.mock.calls.length).toBe(0);
   });
 
-  test.only('should update the first matched one when find sereval Method instance', async () => {
+  test('should update the first matched one when find sereval Method instance', async () => {
     const alova = getAlovaInstance(VueHook);
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',

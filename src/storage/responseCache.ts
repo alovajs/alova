@@ -59,7 +59,7 @@ export const setResponseCache = (
   expireTimestamp = 0
 ) => {
   // 小于0则不缓存了
-  if (expireTimestamp > 0 && data) {
+  if (expireTimestamp > getTime() && data) {
     const cachedResponse = (responseCache[namespace] = responseCache[namespace] || {});
     cachedResponse[key] = [data, methodInstance, expireTimestamp];
   }
