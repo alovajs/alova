@@ -52,13 +52,13 @@ describe('useWatcher middleware', function () {
     const rawData = await untilCbCalled(onSuccess);
     let endTs = Date.now();
     expect(!!rawData).toBeTruthy();
-    expect(endTs - startTs).toBeGreaterThan(500);
+    expect(endTs - startTs).toBeGreaterThanOrEqual(500);
 
     stateA.value++;
     startTs = Date.now();
     await untilCbCalled(onSuccess);
     endTs = Date.now();
-    expect(endTs - startTs).toBeGreaterThan(500);
+    expect(endTs - startTs).toBeGreaterThanOrEqual(500);
   });
 
   test("shouldn't send request when not call next in middleware function", async () => {
