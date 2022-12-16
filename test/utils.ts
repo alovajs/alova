@@ -63,8 +63,8 @@ export const mockServer = setupServer(
     countMap[key] = countMap[key] || 0;
     return result(200, req, res, ctx, false, { count: countMap[key]++ });
   }),
-  rest.get(baseURL + '/unit-test-404', () => {
-    throw new Error('404');
+  rest.get(baseURL + '/unit-test-404', (_, res, ctx) => {
+    return res(ctx.status(404, 'api not found'));
   }),
   rest.post(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.delete(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),

@@ -50,9 +50,10 @@ export default function GlobalFetch() {
           response => {
             // 请求成功后清除中断处理
             clearTimeoutTimer(abortTimer);
-            return /^[2|3]/.test(response.status.toString())
+            const { status, statusText } = response;
+            return /^[2|3]/.test(status.toString())
               ? response
-              : promiseReject(alovaError(response.statusText.toString()));
+              : promiseReject(alovaError(statusText.toString(), status));
           },
           err => promiseReject(alovaError(isTimeout ? 'fetchError: network timeout' : err.message))
         ),
