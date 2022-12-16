@@ -50,8 +50,8 @@ describe('use useRequet hook to send GET with vue', function () {
   test("shouldn't emit onError of useRequest when global error cb don't throw Error at error request", async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
-        console.log('error callback', error.message);
-        expect(error.message).toMatch(/404/);
+        expect(error.name).toBe(404);
+        expect(error.message).toBe('[alova:Error]api not found');
       }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-404', {
@@ -79,9 +79,9 @@ describe('use useRequet hook to send GET with vue', function () {
   test('should emit onError of useRequest when global error cb throw Error at error request', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
-        console.log('error callback', error.message);
-        expect(error.message).toMatch(/404/);
-        throw new Error('throwed in error');
+        expect(error.name).toBe(404);
+        expect(error.message).toBe('[alova:Error]api not found');
+        throw error;
       }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-404', {
@@ -101,7 +101,8 @@ describe('use useRequet hook to send GET with vue', function () {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeInstanceOf(Error);
     expect(error.value).toBe(err);
-    expect(error.value?.message).toBe('throwed in error');
+    expect(error.value?.name).toBe(404);
+    expect(error.value?.message).toBe('[alova:Error]api not found');
 
     // 请求错误无缓存
     const cacheData = getResponseCache(alova.id, key(Get));
@@ -110,7 +111,7 @@ describe('use useRequet hook to send GET with vue', function () {
     const alova2 = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
         console.log('error callback', error.message);
-        expect(error.message).toMatch(/404/);
+        expect(error.name).toBe(404);
         return Promise.reject(new Error('throwed in error2'));
       }
     });

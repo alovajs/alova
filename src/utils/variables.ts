@@ -12,8 +12,6 @@ export const nullValue = null;
 export const trueValue = true;
 export const falseValue = false;
 
-// then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;
-
 export const promiseThen = <T, TResult1 = T, TResult2 = never>(
   promise: Promise<T>,
   onFulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
