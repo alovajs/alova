@@ -193,7 +193,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         return data;
       };
 
-      // 中间件中未返回数据或返回undefined时才继续获取真实的响应数据
+      // 中间件中未返回数据或返回undefined时，去获取真实的响应数据
       // 否则使用返回数据并不再等待响应promise，此时也需要调用响应回调
       if (middlewareReturnedData !== undefinedValue) {
         return afterSuccess(middlewareReturnedData);
@@ -210,10 +210,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
     // catch回调函数
     (error: Error) => {
-      if (!isNextCalled()) {
-        return;
-      }
-
       // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
       update(
         {
