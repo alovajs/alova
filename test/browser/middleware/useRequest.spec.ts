@@ -319,4 +319,50 @@ describe('useRequet middleware', function () {
     expect(mockFn).toBeCalledTimes(2);
     expect(mockFn2).toBeCalledTimes(2);
   });
+
+  test('the behavior should be the same as normal when return another promise instance', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const getGetterObj = alova.Get('/unit-test', {
+      transformData: ({ data }: Result<true>) => data
+    });
+
+    // 成功示例
+    const { loading, onSuccess, data } = useRequest(getGetterObj, {
+      middleware: () => {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve({ anotherData: '123' });
+          }, 20);
+        });
+      }
+    });
+    expect(loading.value).toBeFalsy(); // loading是需要调用next才会改变
+    const dataRaw = await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toStrictEqual({ anotherData: '123' });
+    expect(dataRaw).toStrictEqual({ anotherData: '123' });
+
+    // 失败示例
+    const {
+      loading: loadingFail,
+      onError,
+      data: failData,
+      error
+    } = useRequest(getGetterObj, {
+      middleware: ({ statesUpdate }) => {
+        statesUpdate({ loading: true });
+        return new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error('middleware custom error'));
+          }, 20);
+        });
+      }
+    });
+    expect(loadingFail.value).toBeTruthy(); // middleware函数中手动更改了loading值
+    const errorRaw = await untilCbCalled(onError);
+    expect(loadingFail.value).toBeFalsy();
+    expect(failData.value).toBeUndefined();
+    expect(errorRaw.message).toBe('middleware custom error');
+    expect(error.value?.message).toBe('middleware custom error');
+  });
 });
