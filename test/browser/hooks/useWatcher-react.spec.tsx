@@ -11,7 +11,9 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 describe('useWatcher hook with react', () => {
   test('should send request when change value', async () => {
-    const alova = getAlovaInstance(ReactHook);
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
     const getter = (id1: number, id2: number) =>
       alova.Get('/unit-test', {
         params: {
@@ -70,7 +72,9 @@ describe('useWatcher hook with react', () => {
   });
 
   test('should send request when init', async () => {
-    const alova = getAlovaInstance(ReactHook);
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
     const getter = (id1: number, id2: number) =>
       alova.Get('/unit-test', {
         params: {
@@ -144,7 +148,9 @@ describe('useWatcher hook with react', () => {
   });
 
   test('in different debounce time when set param debounce to be a array', async () => {
-    const alova = getAlovaInstance(ReactHook);
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
     const getter = (id1: number, id2: number) =>
       alova.Get('/unit-test', {
         params: {
@@ -237,7 +243,9 @@ describe('useWatcher hook with react', () => {
   });
 
   test('set param debounce to be a array that contain a item', async () => {
-    const alova = getAlovaInstance(ReactHook);
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
     const getter = (id1: number, id2: number) =>
       alova.Get('/unit-test', {
         params: {

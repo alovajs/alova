@@ -10,7 +10,9 @@ afterAll(() => mockServer.close());
 
 describe('useFetcher middleware', function () {
   test('should send request when call next immediately in middleware function', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
       middleware: async (_, next) => {
         await next();
@@ -30,7 +32,9 @@ describe('useFetcher middleware', function () {
   });
 
   test('should send request until async middleware function is called', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
       middleware: async (_, next) => {
         await untilCbCalled(setTimeout, 1000);
@@ -51,7 +55,9 @@ describe('useFetcher middleware', function () {
   });
 
   test("shouldn't send request when not call next in middleware function", async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
       middleware: async () => {}
     });

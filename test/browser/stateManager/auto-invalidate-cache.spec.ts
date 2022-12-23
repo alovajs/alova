@@ -11,7 +11,9 @@ afterAll(() => mockServer.close());
 
 describe('auto invalitate cached response data', () => {
   test("shouldn't invalidate cache when source method not hit target method", async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: ['a1', /^a2/, alova.Post('/unit-test', { a: 1 })]
@@ -33,7 +35,9 @@ describe('auto invalitate cached response data', () => {
   });
 
   test('should invalidate cache when hit with the key of source method', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: alova.Post('/unit-test', { a: 1 })
@@ -49,7 +53,9 @@ describe('auto invalitate cached response data', () => {
   });
 
   test('should invalidate cache when equal with source name', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: 'a1'
@@ -71,7 +77,9 @@ describe('auto invalitate cached response data', () => {
   });
 
   test('should invalidate cache when the regexp match with source name', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: /^a2/
@@ -93,7 +101,9 @@ describe('auto invalitate cached response data', () => {
   });
 
   test('should invalidate cache when hit one of source flags', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: ['a1', /^a2/, alova.Post('/unit-test', { a: 1 })]

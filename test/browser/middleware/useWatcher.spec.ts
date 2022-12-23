@@ -10,7 +10,9 @@ afterAll(() => mockServer.close());
 
 describe('useWatcher middleware', function () {
   test('should send request synchronously when set a sync middleware function', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -34,7 +36,9 @@ describe('useWatcher middleware', function () {
   });
 
   test('should send request until async middleware function is called', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -62,7 +66,9 @@ describe('useWatcher middleware', function () {
   });
 
   test("shouldn't send request when not call next in middleware function", async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });

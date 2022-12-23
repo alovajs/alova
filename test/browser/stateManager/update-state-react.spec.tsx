@@ -15,7 +15,9 @@ afterAll(() => mockServer.close());
 
 describe('update cached response data by user in react', function () {
   test('the cached response data should be changed and the screen should be update', async () => {
-    const alova = getAlovaInstance(ReactHook);
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100000,
@@ -49,7 +51,9 @@ describe('update cached response data by user in react', function () {
   });
 
   test('front states would be valid when not changed theirs value', async () => {
-    const alova = getAlovaInstance(ReactHook);
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });
@@ -91,7 +95,9 @@ describe('update cached response data by user in react', function () {
   });
 
   test('update extra managed states', async () => {
-    const alova = getAlovaInstance(ReactHook);
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });

@@ -11,7 +11,9 @@ afterAll(() => mockServer.close());
 
 describe('update cached response data by user in vue', function () {
   test('test update function with vue', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       localCache: 100000,
       transformData: ({ data }: Result) => data
@@ -26,7 +28,9 @@ describe('update cached response data by user in vue', function () {
   });
 
   test("shouldn't be called when not get any states", () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       params: { a: 1 },
       localCache: 100000,
@@ -42,7 +46,9 @@ describe('update cached response data by user in vue', function () {
   });
 
   test('should update the first matched one when find sereval Method instance', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',
       params: { a: 1 },
@@ -78,7 +84,9 @@ describe('update cached response data by user in vue', function () {
   });
 
   test("shouldn't throw error when not match any one", async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',
       params: { a: 1 },
@@ -108,7 +116,9 @@ describe('update cached response data by user in vue', function () {
   });
 
   test('update extra managed states', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       localCache: 100000,
       transformData: ({ data }: Result) => data

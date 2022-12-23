@@ -9,7 +9,9 @@ afterAll(() => mockServer.close());
 
 describe('useRequet middleware', function () {
   test('middleware function must be set with a async function', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -25,7 +27,9 @@ describe('useRequet middleware', function () {
   });
 
   test('the behavior would be the same as the behavior not set middleware', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -40,7 +44,9 @@ describe('useRequet middleware', function () {
   });
 
   test('should get an error when throw error in middleware function', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -73,7 +79,9 @@ describe('useRequet middleware', function () {
   });
 
   test('should send request until async middleware function is called', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -98,7 +106,9 @@ describe('useRequet middleware', function () {
   });
 
   test("shouldn't send request when not call next in middleware function", async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -120,7 +130,9 @@ describe('useRequet middleware', function () {
   });
 
   test('we can change method instance in middleware function', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -160,7 +172,9 @@ describe('useRequet middleware', function () {
   });
 
   test('the behavior will be the same as normal when request error', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test-404', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -207,7 +221,9 @@ describe('useRequet middleware', function () {
   });
 
   test('can catch error in middleware function when request error', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test-404', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -238,7 +254,9 @@ describe('useRequet middleware', function () {
   });
 
   test('should change response data when return custom data in middleware', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
@@ -260,7 +278,9 @@ describe('useRequet middleware', function () {
   });
 
   test('should decorate callbacks when set decorators', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       transformData: ({ data }: Result<true>) => data
     });
