@@ -13,11 +13,15 @@ afterAll(() => mockServer.close());
 
 describe('use useWatcher hook to send GET with vue', function () {
   test('should specify at least one watching state', () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     expect(() => useWatcher(() => alova.Get<Result>('/unit-test'), [])).toThrowError();
   });
   test('should send request when change value', done => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method;
@@ -85,7 +89,9 @@ describe('use useWatcher hook to send GET with vue', function () {
   });
 
   test("should send request one time when value change's time less then debounce", done => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method;
@@ -142,7 +148,9 @@ describe('use useWatcher hook to send GET with vue', function () {
   });
 
   test('in different debounce time when set param debounce to be a array', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     const { loading, data, downloading, error, onSuccess } = useWatcher(
@@ -202,7 +210,9 @@ describe('use useWatcher hook to send GET with vue', function () {
   });
 
   test('set param debounce to be a array that contain a item', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     const { data, onSuccess } = useWatcher(
@@ -256,7 +266,9 @@ describe('use useWatcher hook to send GET with vue', function () {
   });
 
   test('should send request when set the param `immediate`', done => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method<any, any, any, any, any, any, any>;
@@ -316,7 +328,9 @@ describe('use useWatcher hook to send GET with vue', function () {
   });
 
   test("initial request shouldn't delay when set the `immediate` and `debounce`", done => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     let currentGet: Method;
@@ -384,7 +398,9 @@ describe('use useWatcher hook to send GET with vue', function () {
   });
 
   test('It would return the useHookConfig object when second param is function in `useRequest`', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const getGetterObj = alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,

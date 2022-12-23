@@ -9,7 +9,9 @@ beforeAll(() => mockServer.listen());
 afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
-const alova = getAlovaInstance(VueHook);
+const alova = getAlovaInstance(VueHook, {
+  responseExpect: r => r.json()
+});
 describe('manual set cache response data', function () {
   test('the cache response data should be saved', () => {
     const Get = alova.Get('/unit-test', {

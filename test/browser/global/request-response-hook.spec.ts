@@ -38,8 +38,8 @@ describe('request response hook', function () {
           b: 2
         };
       },
-      responseExpect: async (jsonPromise, config) => {
-        const result = await jsonPromise;
+      responseExpect: async (r, config) => {
+        const result = await r.json();
         expect(result.data.path).toBe('/unit-test');
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });
         expect(config.extra).toEqual({ a: 1, b: 2 });
@@ -122,10 +122,10 @@ describe('request response hook', function () {
         mockFn();
       },
       resErrorExpect: error => {
-        expect(error.name).toBe(404);
+        expect(error.message).toMatch('reason: server error');
       }
     });
-    const Get = alova.Get<string, Result<string>>('/unit-test-404', {
+    const Get = alova.Get<string, Result<string>>('/unit-test-error', {
       localCache: {
         expire: 100 * 1000
       }

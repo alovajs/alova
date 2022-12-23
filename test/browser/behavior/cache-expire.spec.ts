@@ -14,7 +14,8 @@ describe('cache data', function () {
     const alova = getAlovaInstance(VueHook, {
       localCache: {
         POST: 300000
-      }
+      },
+      responseExpect: r => r.json()
     });
 
     // GET请求不再有默认的缓存设置
@@ -48,7 +49,9 @@ describe('cache data', function () {
   });
 
   test('should hit the cache data when rerequest the same url with the same arguments', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       localCache: 500,
       transformData: ({ data }: Result) => data
@@ -72,7 +75,9 @@ describe('cache data', function () {
   });
 
   test('param localCache can also set to be a Date instance', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const expireDate = new Date();
     expireDate.setTime(expireDate.getTime() + 500);
     const Get = alova.Get('/unit-test', {
@@ -93,7 +98,9 @@ describe('cache data', function () {
   });
 
   test("cache data wouldn't be invalid when set localCache to `Infinity`", async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       localCache: Infinity,
       transformData: ({ data }: Result) => data
@@ -113,7 +120,9 @@ describe('cache data', function () {
   });
 
   test('cache data will be invalid when set localCache to 0', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const Get = alova.Get('/unit-test', {
       localCache: 0,
       transformData: ({ data }: Result) => data

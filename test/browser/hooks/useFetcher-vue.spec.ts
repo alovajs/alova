@@ -12,7 +12,9 @@ afterAll(() => mockServer.close());
 
 describe('use useFetcher hook to fetch data', function () {
   test('should hit cached response when fetch data with default config', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const createGet = (params: Record<string, string>) =>
       alova.Get('/unit-test-count', {
         params,
@@ -56,7 +58,9 @@ describe('use useFetcher hook to fetch data', function () {
   });
 
   test('should replace cached response when force fetch data', async () => {
-    const alova = getAlovaInstance(VueHook);
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
     const createGet = (params: Record<string, string>) =>
       alova.Get('/unit-test-count', {
         params,

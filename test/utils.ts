@@ -66,6 +66,9 @@ export const mockServer = setupServer(
   rest.get(baseURL + '/unit-test-404', (_, res, ctx) => {
     return res(ctx.status(404, 'api not found'));
   }),
+  rest.get(baseURL + '/unit-test-error', () => {
+    throw new Error('server error');
+  }),
   rest.post(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.delete(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.put(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
@@ -96,7 +99,7 @@ export const getAlovaInstance = <S, E>(
     endWithSlash?: boolean;
     localCache?: GlobalLocalCacheConfig;
     beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void;
-    responseExpect?: (jsonPromise: Promise<any>, config: AdapterConfig) => void;
+    responseExpect?: (response: Response, config: AdapterConfig) => void;
     resErrorExpect?: (err: Error, config: AdapterConfig) => void;
   } = {}
 ) => {
@@ -109,20 +112,15 @@ export const getAlovaInstance = <S, E>(
       beforeRequestExpect && beforeRequestExpect(config);
       return config;
     },
-    responsed: resErrorExpect
-      ? {
-          onSuccess: (response, config) => {
-            const jsonPromise = response.json();
-            const responseResult = responseExpect && responseExpect(jsonPromise, config);
-            return responseResult || jsonPromise;
-          },
-          onError: resErrorExpect
-        }
-      : (response, config) => {
-          const jsonPromise = response.json();
-          const responseResult = responseExpect && responseExpect(jsonPromise, config);
-          return responseResult || jsonPromise;
-        }
+    responsed:
+      responseExpect && !resErrorExpect
+        ? responseExpect
+        : resErrorExpect
+        ? {
+            onSuccess: responseExpect,
+            onError: resErrorExpect
+          }
+        : undefined
   });
   if (localCache) {
     alovaInst.options.localCache = localCache;
