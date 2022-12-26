@@ -198,7 +198,7 @@ interface MethodConstructor {
   ): Method<S, E, R, T, RC, RE, RH>;
   readonly prototype: Method;
 }
-declare var Method: MethodConstructor;
+declare const Method: MethodConstructor;
 
 interface Alova<S, E, RC, RE, RH> {
   options: AlovaOptions<S, E, RC, RE, RH>;
@@ -303,7 +303,7 @@ interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig<S
 }
 
 /** useRequest config type */
-interface RequestHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH> {}
+type RequestHookConfig<S, E, R, T, RC, RE, RH> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
 
 /** useWatcher config type */
 interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH> {
@@ -312,7 +312,7 @@ interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConf
 }
 
 /** useFetcher config type */
-interface FetcherHookConfig extends UseHookConfig<any, any, any, any, any, any, any> {}
+type FetcherHookConfig = UseHookConfig<any, any, any, any, any, any, any>;
 
 /** 调用useFetcher时需要传入的类型，否则会导致状态类型错误 */
 type FetcherType<A extends Alova<any, any, any, any, any>> = {
@@ -370,7 +370,9 @@ type MethodFilter =
 type MethodMatcher<S, E, R, T, RC, RE, RH> = Method<S, E, R, T, RC, RE, RH> | MethodFilter;
 
 type UpdateStateCollection<R> = {
-  [attr in keyof Record<string | number | symbol, any>]: (data: attr extends 'data' ? R : any) => any;
+  [key: string | number | symbol]: (data: any) => any;
+} & {
+  data?: (data: R) => any;
 };
 
 type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;

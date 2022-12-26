@@ -14,7 +14,7 @@ import { forEach, getContext, getOptions, objectKeys, undefinedValue } from '../
  */
 export default function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
-  handleUpdate: NonNullable<UpdateStateCollection<R>['data']> | UpdateStateCollection<R>,
+  handleUpdate: ((data: R) => any) | UpdateStateCollection<R>,
   options: updateOptions = {}
 ) {
   const { onMatch = noop } = options;
