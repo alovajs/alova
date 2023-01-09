@@ -7,12 +7,12 @@ beforeAll(() => mockServer.listen());
 afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 describe('useRequet hook with svelte', () => {
-	test('send GET', async () => {
-		render(page);
-		expect(screen.getByRole('status')).toHaveTextContent('loading');
-		const loadingEl = await screen.findByText(/loaded/);
-		expect(loadingEl).toHaveTextContent('loaded');
-		expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-		expect(screen.getByRole('method')).toHaveTextContent('GET');
-	});
+  test('send GET', async () => {
+    render(page);
+    expect(screen.getByRole('status')).toHaveTextContent('loading');
+    const loadingEl = await screen.findByText(/loaded/);
+    expect(loadingEl).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('method')).toHaveTextContent('GET');
+  });
 });

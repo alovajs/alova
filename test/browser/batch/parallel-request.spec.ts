@@ -1,5 +1,6 @@
 import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import { AlovaSuccessEvent } from '../../../typings';
 import { getAlovaInstance, mockServer } from '../../utils';
 import { Result } from '../result.type';
 
@@ -7,6 +8,7 @@ beforeAll(() => mockServer.listen());
 afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
+type AnyAlovaSuccessEvent<R> = AlovaSuccessEvent<any, any, R, any, any, any, any>;
 describe('parallel request', function () {
   test('parallel request with `send` returned promise', async () => {
     const alova = getAlovaInstance(VueHook, {
@@ -57,16 +59,21 @@ describe('parallel request', function () {
     const firstState = useRequest(Getter);
     const secondState = useRequest(Getter);
 
-    const firstPromise = new Promise<Result['data']>((resolve, reject) => {
+    const firstPromise = new Promise<AnyAlovaSuccessEvent<Result['data']>>((resolve, reject) => {
       firstState.onSuccess(resolve);
       firstState.onError(reject);
     });
-    const secondPromise = new Promise<Result['data']>((resolve, reject) => {
+    const secondPromise = new Promise<AnyAlovaSuccessEvent<Result['data']>>((resolve, reject) => {
       secondState.onSuccess(resolve);
       secondState.onError(reject);
     });
 
-    const [firstResponse, secondResponse] = await Promise.all([firstPromise, secondPromise]);
+    const [firstEvent, secondEvent] = await Promise.all([firstPromise, secondPromise]);
+    expect(firstEvent.method).toBe(Getter);
+    expect(firstEvent.sendArgs).toStrictEqual([]);
+
+    const firstResponse = firstEvent.data;
+    const secondResponse = secondEvent.data;
     expect(firstResponse.path).toBe('/unit-test');
     expect(firstState.data.value.path).toBe('/unit-test');
     expect(secondResponse.path).toBe('/unit-test');
@@ -86,11 +93,11 @@ describe('parallel request', function () {
     const firstState = useRequest(Getter);
     const secondState = useRequest(ErrorGetter);
 
-    const firstPromise = new Promise<Result['data']>((resolve, reject) => {
+    const firstPromise = new Promise<AnyAlovaSuccessEvent<Result['data']>>((resolve, reject) => {
       firstState.onSuccess(resolve);
       firstState.onError(reject);
     });
-    const secondPromise = new Promise<Result['data']>((resolve, reject) => {
+    const secondPromise = new Promise<AnyAlovaSuccessEvent<Result['data']>>((resolve, reject) => {
       secondState.onSuccess(resolve);
       secondState.onError(reject);
     });

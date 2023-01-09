@@ -1,4 +1,4 @@
-import { cacheMode, useRequest } from '../../../src';
+import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { removeResponseCache } from '../../../src/storage/responseCache';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
@@ -20,7 +20,7 @@ describe('persist data', function () {
       params: { countKey: 'g' },
       localCache: {
         expire: 500,
-        mode: cacheMode.STORAGE_PLACEHOLDER
+        mode: 'placeholder'
       },
       transformData: ({ data }: Result) => data
     });
@@ -57,7 +57,7 @@ describe('persist data', function () {
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: Infinity,
-        mode: cacheMode.STORAGE_PLACEHOLDER
+        mode: 'placeholder'
       },
       transformData: ({ data }: Result) => data
     });
@@ -82,7 +82,7 @@ describe('persist data', function () {
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100 * 1000,
-        mode: cacheMode.STORAGE_RESTORE,
+        mode: 'restore',
         tag: 'v1'
       },
       transformData: ({ data }: Result) => data
@@ -108,7 +108,7 @@ describe('persist data', function () {
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: expireDate,
-        mode: cacheMode.STORAGE_RESTORE,
+        mode: 'restore',
         tag: 'v1'
       },
       transformData: ({ data }: Result) => data
@@ -130,7 +130,7 @@ describe('persist data', function () {
       localCache: {
         GET: {
           expire: 100 * 1000,
-          mode: cacheMode.STORAGE_RESTORE
+          mode: 'restore'
         }
       },
       responseExpect: r => r.json()
@@ -165,7 +165,7 @@ describe('persist data', function () {
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100 * 1000,
-        mode: cacheMode.STORAGE_RESTORE
+        mode: 'restore'
       },
       transformData: ({ data }: Result) => data
     });
@@ -177,7 +177,7 @@ describe('persist data', function () {
     const Get2 = alova.Get('/unit-test', {
       localCache: {
         expire: 100 * 1000,
-        mode: cacheMode.STORAGE_RESTORE,
+        mode: 'restore',
         tag: 'v2'
       },
       transformData: ({ data }: Result) => data

@@ -25,7 +25,7 @@ describe('useWatcher middleware', function () {
     });
 
     stateA.value++;
-    let rawData = await untilCbCalled(onSuccess);
+    let { data: rawData } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
     expect(rawData.path).toBe('/unit-test');

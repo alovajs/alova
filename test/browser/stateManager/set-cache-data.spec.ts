@@ -205,7 +205,7 @@ describe('manual set cache response data', function () {
 
     // 更新函数返回false时，表示中断更新
     const mockfn = jest.fn();
-    setCacheData(Get1, _ => {
+    setCacheData(Get1, () => {
       mockfn();
       return false;
     });

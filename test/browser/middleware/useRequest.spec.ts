@@ -63,7 +63,7 @@ describe('useRequet middleware', function () {
     onError(mockFn);
     expect(loading.value).toBeTruthy();
     expect(error.value).toBeUndefined();
-    const errRaw = await untilCbCalled(onError);
+    const { error: errRaw } = await untilCbCalled(onError);
     expect(mockFn).toBeCalledTimes(1);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
@@ -182,9 +182,10 @@ describe('useRequet middleware', function () {
     const mockFn2 = jest.fn();
     const { loading, error, onError, onComplete, data } = useRequest(getGetterObj, {
       middleware: async ({ decorateError, decorateComplete }, next) => {
-        decorateError((handler, args, index) => {
+        decorateError((handler, event, index) => {
           mockFn();
-          const ret = handler(args as any, index);
+          (event as any).index = index;
+          const ret = handler(event);
           expect(ret).toBe('a');
         });
         decorateComplete(() => {
@@ -195,12 +196,12 @@ describe('useRequet middleware', function () {
       }
     });
 
-    onError((_, index) => {
-      expect(index).toBe(0);
+    onError(event => {
+      expect((event as any).index).toBe(0);
       return 'a';
     });
-    onError((_, index) => {
-      expect(index).toBe(1);
+    onError(event => {
+      expect((event as any).index).toBe(1);
       return 'a';
     });
     onComplete(() => {
@@ -289,26 +290,27 @@ describe('useRequet middleware', function () {
     const { onSuccess, onComplete } = useRequest(getGetterObj, {
       middleware: async ({ decorateSuccess, decorateComplete }, next) => {
         // 在成功回调中注入代码
-        decorateSuccess((handler, args, index, length) => {
+        decorateSuccess((handler, event, index, length) => {
           mockFn();
-          const ret = handler(args as any, index);
+          (event as any).index = index;
+          const ret = handler(event);
           expect(ret).toBe('a');
           expect(length).toBe(2);
         });
         decorateComplete(handler => {
           mockFn2();
-          handler(1);
+          handler(1 as any);
         });
         await next();
       }
     });
 
-    onSuccess((_, index) => {
-      expect(index).toBe(0);
+    onSuccess(event => {
+      expect((event as any).index).toBe(0);
       return 'a';
     });
-    onSuccess((_, index) => {
-      expect(index).toBe(1);
+    onSuccess(event => {
+      expect((event as any).index).toBe(1);
       return 'a';
     });
     onComplete(customNum => {
@@ -337,7 +339,7 @@ describe('useRequet middleware', function () {
       }
     });
     expect(loading.value).toBeFalsy(); // loading是需要调用next才会改变
-    const dataRaw = await untilCbCalled(onSuccess);
+    const { data: dataRaw } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({ anotherData: '123' });
     expect(dataRaw).toStrictEqual({ anotherData: '123' });
@@ -359,7 +361,7 @@ describe('useRequet middleware', function () {
       }
     });
     expect(loadingFail.value).toBeTruthy(); // middleware函数中手动更改了loading值
-    const errorRaw = await untilCbCalled(onError);
+    const { error: errorRaw } = await untilCbCalled(onError);
     expect(loadingFail.value).toBeFalsy();
     expect(failData.value).toBeUndefined();
     expect(errorRaw.message).toBe('middleware custom error');
