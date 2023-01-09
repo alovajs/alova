@@ -55,9 +55,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     uploading: create({ ...progress })
   };
 
-  const successHandlers = [] as SuccessHandler<R>[];
-  const errorHandlers = [] as ErrorHandler[];
-  const completeHandlers = [] as CompleteHandler[];
+  const successHandlers = [] as SuccessHandler<S, E, R, T, RC, RE, RH>[];
+  const errorHandlers = [] as ErrorHandler<S, E, R, T, RC, RE, RH>[];
+  const completeHandlers = [] as CompleteHandler<S, E, R, T, RC, RE, RH>[];
   let abortFn: typeof noop | undefined = undefinedValue;
   let removeStatesFn = noop;
   let saveStatesFn = noop as SaveStateFn;
@@ -123,13 +123,13 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   };
   return {
     ...exportedStates,
-    onSuccess(handler: SuccessHandler<R>) {
+    onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(successHandlers, handler);
     },
-    onError(handler: ErrorHandler) {
+    onError(handler: ErrorHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(errorHandlers, handler);
     },
-    onComplete(handler: CompleteHandler) {
+    onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(completeHandlers, handler);
     },
     abort: () => (abortFn || noop)(),

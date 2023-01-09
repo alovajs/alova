@@ -17,7 +17,7 @@ describe('method.send', function () {
       headers: {
         'Content-Type': 'application/json'
       },
-      transformData(result: Result, _) {
+      transformData(result: Result) {
         expect(result.code).toBe(200);
         expect(result.data.path).toBe('/unit-test');
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });

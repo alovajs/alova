@@ -85,7 +85,7 @@ describe('request response hook', function () {
     });
 
     const Get = alova.Get('/unit-test', {
-      transformData(result: Result, _) {
+      transformData(result: Result) {
         return result.data;
       }
     });
@@ -106,7 +106,7 @@ describe('request response hook', function () {
     });
 
     const Get = alova.Get('/unit-test', {
-      transformData(result: Result, _) {
+      transformData(result: Result) {
         return result.data;
       }
     });

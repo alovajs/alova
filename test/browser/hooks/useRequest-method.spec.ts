@@ -1,4 +1,4 @@
-import { cacheMode, useRequest } from '../../../src';
+import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
@@ -41,7 +41,7 @@ describe('Test other methods without GET', function () {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData({ code, data }: Result<true>, _) {
+        transformData({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
           expect(data.params).toEqual({ a: 'a', b: 'str' });
@@ -50,7 +50,7 @@ describe('Test other methods without GET', function () {
         },
         localCache: {
           expire: 100 * 1000,
-          mode: cacheMode.MEMORY
+          mode: 'memory'
         }
       }
     );
@@ -101,7 +101,7 @@ describe('Test other methods without GET', function () {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData({ code, data }: Result<true>, _) {
+        transformData({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
           expect(data.params).toEqual({ a: 'a', b: 'str' });
@@ -160,7 +160,7 @@ describe('Test other methods without GET', function () {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData({ code, data }: Result<true>, _) {
+        transformData({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
           expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });

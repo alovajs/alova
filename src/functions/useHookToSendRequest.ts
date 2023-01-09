@@ -1,5 +1,9 @@
 import {
+  AlovaCompleteEvent,
+  AlovaErrorEvent,
+  AlovaEvent,
   AlovaGuardNext,
+  AlovaSuccessEvent,
   CompleteHandler,
   ErrorHandler,
   FrontRequestHookConfig,
@@ -12,6 +16,7 @@ import defaultMiddleware from '../predefine/defaultMiddleware';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
+import createAlovaEvent from '../utils/createAlovaEvent';
 import { GeneralFn, getLocalCacheConfigParam, instanceOf, isFn, key, noop } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import {
@@ -47,9 +52,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
   frontStates: FrontRequestState,
   useHookConfig: UC,
-  successHandlers: SuccessHandler<R>[],
-  errorHandlers: ErrorHandler[],
-  completeHandlers: CompleteHandler[],
+  successHandlers: SuccessHandler<S, E, R, T, RC, RE, RH>[],
+  errorHandlers: ErrorHandler<S, E, R, T, RC, RE, RH>[],
+  completeHandlers: CompleteHandler<S, E, R, T, RC, RE, RH>[],
   responserHandlerArgs: any[] = [],
   updateCacheState = falseValue
 ) {
@@ -142,9 +147,24 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   };
 
   // 调用中间件函数
-  let successHandlerDecorator: (handler: SuccessHandler<R>, args: any[], index: number, length: number) => void | void;
-  let errorHandlerDecorator: (handler: ErrorHandler, args: any[], index: number, length: number) => void | void;
-  let completeHandlerDecorator: (handler: CompleteHandler, args: any[], index: number, length: number) => void | void;
+  let successHandlerDecorator: (
+    handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
+    event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
+    index: number,
+    length: number
+  ) => void | void;
+  let errorHandlerDecorator: (
+    handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
+    event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
+    index: number,
+    length: number
+  ) => void | void;
+  let completeHandlerDecorator: (
+    handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
+    event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
+    index: number,
+    length: number
+  ) => void | void;
 
   const middlewareCompletePromise = middleware(
     {
@@ -152,7 +172,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       config: useHookConfig,
       frontStates,
       statesUpdate: newFrontStates => update(newFrontStates, frontStates),
-      sendArgs: responserHandlerArgs,
       decorateSuccess: (decorator: NonNullable<typeof successHandlerDecorator>) => {
         isFn(decorator) && (successHandlerDecorator = decorator);
       },
@@ -167,10 +186,13 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   );
   myAssert(instanceOf(middlewareCompletePromise, PromiseCls), 'middleware must be a async function');
   const isNextCalled = () => len(objectKeys(requestCtrl)) > 0;
-  const runArgsHandler = (handlers: GeneralFn[], decorator: (...args: any[]) => void, sendArgs: any[] = []) => {
-    const concatedArgs = [...sendArgs, ...responserHandlerArgs];
+  const runArgsHandler = (
+    handlers: GeneralFn[],
+    decorator: (...args: any[]) => void,
+    event: AlovaEvent<S, E, R, T, RC, RE, RH>
+  ) => {
     forEach(handlers, (handler, index) =>
-      isFn(decorator) ? decorator(handler, concatedArgs, index, len(handlers)) : handler(...concatedArgs)
+      isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)
     );
   };
   // 统一处理响应
@@ -188,8 +210,16 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
         // 在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
         update({ loading: falseValue }, frontStates);
-        runArgsHandler(successHandlers, successHandlerDecorator, [data]);
-        runArgsHandler(completeHandlers, completeHandlerDecorator);
+        runArgsHandler(
+          successHandlers,
+          successHandlerDecorator,
+          createAlovaEvent(0, methodInstance, responserHandlerArgs, data)
+        );
+        runArgsHandler(
+          completeHandlers,
+          completeHandlerDecorator,
+          createAlovaEvent(2, methodInstance, responserHandlerArgs, data, undefinedValue, 'success')
+        );
         return data;
       };
 
@@ -218,8 +248,16 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         },
         frontStates
       );
-      runArgsHandler(errorHandlers, errorHandlerDecorator, [error]);
-      runArgsHandler(completeHandlers, completeHandlerDecorator);
+      runArgsHandler(
+        errorHandlers,
+        errorHandlerDecorator,
+        createAlovaEvent(1, methodInstance, responserHandlerArgs, undefinedValue, error)
+      );
+      runArgsHandler(
+        completeHandlers,
+        completeHandlerDecorator,
+        createAlovaEvent(2, methodInstance, responserHandlerArgs, undefinedValue, error, 'error')
+      );
       return promiseReject(error);
     }
   );

@@ -47,9 +47,9 @@ describe('useFetcher middleware', function () {
     fetch(getGetterObj);
 
     expect(fetching.value).toBeFalsy(); // 延迟1秒发送请求，表示异步发送请求，因此loading为false
-    let startTs = Date.now();
+    const startTs = Date.now();
     const rawData = await untilCbCalled(onSuccess);
-    let endTs = Date.now();
+    const endTs = Date.now();
     expect(!!rawData).toBeTruthy();
     expect(endTs - startTs).toBeGreaterThan(1000);
   });

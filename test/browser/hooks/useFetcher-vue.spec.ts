@@ -22,7 +22,7 @@ describe('use useFetcher hook to fetch data', function () {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result, _) {
+        transformData(result: Result) {
           return result.data;
         },
         localCache: 100 * 1000
@@ -68,7 +68,7 @@ describe('use useFetcher hook to fetch data', function () {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result, _) {
+        transformData(result: Result) {
           return result.data;
         },
         localCache: 100 * 1000

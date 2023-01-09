@@ -47,12 +47,12 @@ type CommonMethodConfig = {
  * expire: 过期时间
  *  1. 当设置为数字时：如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期；
  *  2. 当设置为Date对象时，表示
- * mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
+ * mode: 缓存模式，可选值为memory、placeholder、restore
  */
 type CacheExpire = number | Date;
 type DetailLocalCacheConfig = {
   expire: CacheExpire;
-  mode?: number;
+  mode?: 'memory' | 'placeholder' | 'restore';
 
   /** 持久化缓存标签，标签改变后原有持久化数据将会失效 */
   tag?: string | number;
@@ -229,9 +229,29 @@ interface Alova<S, E, RC, RE, RH> {
   ): Method<S, E, R, T, RC, RE, RH>;
 }
 
-type SuccessHandler<R> = (data: R, ...args: any[]) => void;
-type ErrorHandler = (error: any, ...args: any[]) => void;
-type CompleteHandler = (...args: any[]) => void;
+/** 根事件对象 */
+interface AlovaEvent<S, E, R, T, RC, RE, RH> {
+  sendArgs: any[];
+  method: Method<S, E, R, T, RC, RE, RH>;
+}
+/** 成功事件对象 */
+interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+  data: R;
+}
+/** 错误事件对象 */
+interface AlovaErrorEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+  error: any;
+}
+/** 完成事件对象 */
+interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+  status: 'success' | 'error';
+  data?: R;
+  error?: any;
+}
+
+type SuccessHandler<S, E, R, T, RC, RE, RH> = (event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>) => void;
+type ErrorHandler<S, E, R, T, RC, RE, RH> = (event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>) => void;
+type CompleteHandler<S, E, R, T, RC, RE, RH> = (event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>) => void;
 
 interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 当前的method对象 */
@@ -252,19 +272,35 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
     ExportedType<Progress, S>
   >;
 
-  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
-  sendArgs: any[];
-
   /** 成功回调装饰 */
   decorateSuccess: (
-    decorator: (handler: SuccessHandler<R>, args: any[], index: number, length: number) => void
+    decorator: (
+      handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
+      event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
+      index: number,
+      length: number
+    ) => void
   ) => void;
 
   /** 失败回调装饰 */
-  decorateError: (decorator: (handler: ErrorHandler, args: any[], index: number, length: number) => void) => void;
+  decorateError: (
+    decorator: (
+      handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
+      event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
+      index: number,
+      length: number
+    ) => void
+  ) => void;
 
   /** 完成回调装饰 */
-  decorateComplete: (decorator: (handler: CompleteHandler, args: any[], index: number, length: number) => void) => void;
+  decorateComplete: (
+    decorator: (
+      handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
+      event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
+      index: number,
+      length: number
+    ) => void
+  ) => void;
 }
 
 /** 中间件next函数 */
@@ -331,7 +367,7 @@ interface VueRef {
   value: any;
 }
 type ExportedType<R, S> = S extends VueRef ? Ref<R> : S extends SvelteWritable ? Writable<R> : R;
-type UseHookReturnType<R, S> = FrontRequestState<
+type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,
   ExportedType<Error | undefined, S>,
@@ -340,9 +376,9 @@ type UseHookReturnType<R, S> = FrontRequestState<
 > & {
   abort: () => void;
   send: (...args: any[]) => Promise<R>;
-  onSuccess: (handler: SuccessHandler<R>) => void;
-  onError: (handler: ErrorHandler) => void;
-  onComplete: (handler: CompleteHandler) => void;
+  onSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH>) => void;
+  onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
+  onComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
 };
 type UseFetchHookReturnType<S> = {
   fetching: UseHookReturnType<any, S>['loading'];
@@ -378,28 +414,16 @@ type UpdateStateCollection<R> = {
 type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 
 // ************ 导出类型 ***************
-/**
- * 缓存模式
- * 分别有MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
- */
-export declare const cacheMode: {
-  /** 只在内存中缓存，默认是此选项 */
-  MEMORY: number;
-  /** 缓存会持久化，但当内存中没有缓存时，持久化缓存只会作为响应数据的占位符，且还会发送请求更新缓存 */
-  STORAGE_PLACEHOLDER: number;
-  /** 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存 */
-  STORAGE_RESTORE: number;
-};
 export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
 export declare function useRequest<S, E, R, T, RC, RE, RH>(
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<R, S>;
+): UseHookReturnType<S, E, R, T, RC, RE, RH>;
 declare function useWatcher<S, E, R, T, RC, RE, RH>(
   handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   watchingStates: E[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<R, S>;
+): UseHookReturnType<S, E, R, T, RC, RE, RH>;
 declare function useFetcher<SE extends FetcherType<any>>(
   config?: FetcherHookConfig
 ): UseFetchHookReturnType<SE['state']>;

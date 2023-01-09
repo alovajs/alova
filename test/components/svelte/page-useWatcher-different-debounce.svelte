@@ -18,7 +18,6 @@ import SvelteHook from '../../../src/predefine/SvelteHook';
 const stateId1 = writable(0);
 const stateId2 = writable(10);
 
-
 const alova = createAlova({
   baseURL: 'http://localhost:3000',
   timeout: 3000,

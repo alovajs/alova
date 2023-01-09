@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
-import { cacheMode, updateState, useRequest } from '../../../src';
+import { updateState, useRequest } from '../../../src';
 import ReactHook from '../../../src/predefine/ReactHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
@@ -21,7 +21,7 @@ describe('update cached response data by user in react', function () {
     const Get = alova.Get('/unit-test', {
       localCache: {
         expire: 100000,
-        mode: cacheMode.STORAGE_PLACEHOLDER
+        mode: 'placeholder'
       },
       transformData: ({ data }: Result) => data
     });
