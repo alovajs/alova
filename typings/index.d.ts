@@ -257,6 +257,9 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 当前的method对象 */
   method: Method<S, E, R, T, RC, RE, RH>;
 
+  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
+  sendArgs: any[];
+
   /** 当前的usehook配置对象 */
   config: any;
 
