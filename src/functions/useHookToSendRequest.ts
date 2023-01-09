@@ -169,6 +169,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const middlewareCompletePromise = middleware(
     {
       method: methodInstance,
+      sendArgs: responserHandlerArgs,
       config: useHookConfig,
       frontStates,
       statesUpdate: newFrontStates => update(newFrontStates, frontStates),
