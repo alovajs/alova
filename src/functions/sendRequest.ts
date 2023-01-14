@@ -1,9 +1,4 @@
-import {
-  AlovaRequestAdapterConfig,
-  ResponsedHandler,
-  ResponsedHandlerRecord,
-  ResponseErrorHandler
-} from '../../typings';
+import { ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
 import Method from '../Method';
 import { getMethodSnapshot, getResponseCache, keyFilter, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
@@ -20,6 +15,7 @@ import {
 } from '../utils/helper';
 import {
   falseValue,
+  getConfig,
   getContext,
   getOptions,
   objectKeys,
@@ -41,7 +37,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
   forceRequest: boolean | (() => boolean)
 ) {
-  const { baseURL, url, type, config, requestBody } = methodInstance;
+  const { baseURL, url: newUrl, type, requestBody } = methodInstance;
   const { beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
   const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
@@ -54,32 +50,23 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       return {
         response: () => promiseResolve(response as R),
         headers: () => promiseResolve({} as RH),
-        abort: noop,
-        useCache: trueValue
+        abort: noop
       };
     }
   }
 
   // 发送请求前调用钩子函数
-  let requestConfig: AlovaRequestAdapterConfig<R, T, RC, RH> = {
-    url,
-    ...config,
-    method: type,
-    data: requestBody,
-    headers: config.headers || {},
-    params: config.params || {}
-  };
-  requestConfig = beforeRequest(requestConfig) || requestConfig;
-  // 将params对象转换为get字符串
+  beforeRequest(methodInstance);
   const {
-    url: newUrl,
     params = {},
+    headers = {},
     localCache: newLocalCache,
     transformData = self,
     name: methodInstanceName = ''
-  } = requestConfig;
+  } = getConfig(methodInstance);
   const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(undefinedValue, newLocalCache);
 
+  // 将params对象转换为get字符串
   // 过滤掉值为undefined的
   const paramsStr = objectKeys(params)
     .filter(key => params[key] !== undefinedValue)
@@ -94,13 +81,18 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   const baseURLWithSlash = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
 
   // 请求数据
-  const ctrls = requestAdapter({
-    ...requestConfig,
-    url: baseURLWithSlash + urlWithParams
-  });
+  const ctrls = requestAdapter(
+    {
+      url: baseURLWithSlash + urlWithParams,
+      type,
+      data: requestBody,
+      headers
+    },
+    methodInstance
+  );
 
   let responsedHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
-  let responseErrorHandler: ResponseErrorHandler<any, any, RC, RH> | undefined = undefinedValue;
+  let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
   if (isFn(responsed)) {
     responsedHandler = responsed;
   } else if (isPlainObject(responsed)) {
@@ -117,12 +109,11 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 
   return {
     ...ctrls,
-    useCache: falseValue,
     response: () =>
       promiseThen(
         PromiseCls.all([ctrls.response(), ctrls.headers()]),
         ([rawResponse, headers]) => {
-          return asyncOrSync(responsedHandler(rawResponse, requestConfig), data => {
+          return asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
             data = transformData(data, headers);
 
             // 保存缓存
@@ -139,7 +130,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
                       const sourceMatcher = hitSource[i];
                       if (
                         instanceOf(sourceMatcher, RegExp)
-                          ? sourceMatcher.test(methodInstanceName)
+                          ? sourceMatcher.test(methodInstanceName as string)
                           : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
                       ) {
                         isHit = trueValue;
@@ -163,7 +154,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             throw error;
           }
           // 可能返回Promise.reject
-          return responseErrorHandler(error, requestConfig);
+          return responseErrorHandler(error, methodInstance);
         }
       )
   };

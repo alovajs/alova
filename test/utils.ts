@@ -4,7 +4,7 @@ import nodeFetch from 'node-fetch';
 import 'web-streams-polyfill';
 import { createAlova } from '../src';
 import GlobalFetch from '../src/predefine/GlobalFetch';
-import { AlovaRequestAdapterConfig, GlobalLocalCacheConfig, StatesHook } from '../typings';
+import { GlobalLocalCacheConfig, Method, StatesHook } from '../typings';
 
 (global as any).fetch = (window as any).fetch = nodeFetch;
 // (global as any).Headers = (window as any).Headers = Headers;
@@ -86,7 +86,7 @@ export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[])
     }, ...args);
   });
 
-type AdapterConfig = AlovaRequestAdapterConfig<any, any, RequestInit, Headers>;
+type FetchMethod = Method<any, any, any, any, RequestInit, Response, Headers>;
 export const getAlovaInstance = <S, E>(
   statesHook: StatesHook<S, E>,
   {
@@ -98,9 +98,9 @@ export const getAlovaInstance = <S, E>(
   }: {
     endWithSlash?: boolean;
     localCache?: GlobalLocalCacheConfig;
-    beforeRequestExpect?: (config: AlovaRequestAdapterConfig<any, any, RequestInit, Headers>) => void;
-    responseExpect?: (response: Response, config: AdapterConfig) => void;
-    resErrorExpect?: (err: Error, config: AdapterConfig) => void;
+    beforeRequestExpect?: (methodInstance: FetchMethod) => void;
+    responseExpect?: (response: Response, method: FetchMethod) => void;
+    resErrorExpect?: (err: Error, method: FetchMethod) => void;
   } = {}
 ) => {
   const alovaInst = createAlova({

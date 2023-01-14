@@ -38,7 +38,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   watchingStates?: E[],
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
-  const { create, export: stateExport, effectRequest } = getStatesHook(alovaInstance);
+  const { create, export: stateExport, effectRequest, update } = getStatesHook(alovaInstance);
   const progress: Progress = {
     total: 0,
     loaded: 0
@@ -131,6 +131,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     },
     onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(completeHandlers, handler);
+    },
+    update(newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>) {
+      update(newFrontStates, frontStates);
     },
     abort: () => (abortFn || noop)(),
 

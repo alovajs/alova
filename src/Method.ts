@@ -2,7 +2,7 @@ import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { instanceOf, key } from './utils/helper';
-import { deleteAttr, getContextOptions, isArray, undefinedValue } from './utils/variables';
+import { deleteAttr, getConfig, getContextOptions, isArray, undefinedValue } from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -73,5 +73,13 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
    */
   public send(forceRequest = false): Promise<R> {
     return sendRequest(this, forceRequest).response();
+  }
+
+  /**
+   * 设置方法名称，如果已有名称将被覆盖
+   * @param name 方法名称
+   */
+  public setName(name: string | number) {
+    getConfig(this).name = name;
   }
 }

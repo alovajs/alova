@@ -184,11 +184,18 @@ describe('useRequet middleware', function () {
       middleware: async ({ decorateError, decorateComplete }, next) => {
         decorateError((handler, event, index) => {
           mockFn();
+          expect(event.error).toBeInstanceOf(Error);
+          expect(event.method).toBe(getGetterObj);
+          expect(event.sendArgs).toStrictEqual([]);
           (event as any).index = index;
           const ret = handler(event);
           expect(ret).toBe('a');
         });
-        decorateComplete(() => {
+        decorateComplete((_, event) => {
+          expect(event.status).toBe('error');
+          expect(event.error).toBeInstanceOf(Error);
+          expect(event.method).toBe(getGetterObj);
+          expect(event.sendArgs).toStrictEqual([]);
           mockFn2();
         });
         await untilCbCalled(setTimeout, 400);
@@ -297,8 +304,12 @@ describe('useRequet middleware', function () {
           expect(ret).toBe('a');
           expect(length).toBe(2);
         });
-        decorateComplete(handler => {
+        decorateComplete((handler, event) => {
           mockFn2();
+          expect(event.status).toBe('success');
+          expect(event.data).not.toBeUndefined();
+          expect(event.method).toBe(getGetterObj);
+          expect(event.sendArgs).toStrictEqual([]);
           handler(1 as any);
         });
         await next();
@@ -351,8 +362,8 @@ describe('useRequet middleware', function () {
       data: failData,
       error
     } = useRequest(getGetterObj, {
-      middleware: ({ statesUpdate }) => {
-        statesUpdate({ loading: true });
+      middleware: ({ update }) => {
+        update({ loading: true });
         return new Promise((_, reject) => {
           setTimeout(() => {
             reject(new Error('middleware custom error'));

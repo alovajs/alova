@@ -1,4 +1,4 @@
-import { useRequest } from '../../../src';
+import { Method, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
@@ -10,8 +10,10 @@ afterAll(() => mockServer.close());
 describe('request response hook', function () {
   test('`beforeRequest` hook will receive the request params', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        expect(config.url).toBe('/unit-test');
+      beforeRequestExpect: method => {
+        expect(method).toBeInstanceOf(Method);
+        const config = method.config;
+        expect(method.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
@@ -32,17 +34,18 @@ describe('request response hook', function () {
 
   test('`responsed-onSuccess` hook will receive the config param', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        config.extra = {
+      beforeRequestExpect: method => {
+        expect(method).toBeInstanceOf(Method);
+        method.extra = {
           a: 1,
           b: 2
         };
       },
-      responseExpect: async (r, config) => {
+      responseExpect: async (r, method) => {
         const result = await r.json();
         expect(result.data.path).toBe('/unit-test');
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-        expect(config.extra).toEqual({ a: 1, b: 2 });
+        expect(method.extra).toEqual({ a: 1, b: 2 });
       }
     });
     const Get = alova.Get('/unit-test', {
@@ -58,15 +61,15 @@ describe('request response hook', function () {
 
   test('`responsed-onError` hook will receive the config param', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        config.extra = {
+      beforeRequestExpect: method => {
+        method.extra = {
           a: 1,
           b: 2
         };
       },
-      resErrorExpect: async (error, config) => {
+      resErrorExpect: async (error, method) => {
         expect(error).not.toBeUndefined();
-        expect(config.extra).toEqual({ a: 1, b: 2 });
+        expect(method.extra).toEqual({ a: 1, b: 2 });
       }
     });
     const Get = alova.Get('/unit-test-404');
