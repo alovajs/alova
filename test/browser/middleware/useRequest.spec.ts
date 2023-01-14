@@ -362,8 +362,8 @@ describe('useRequet middleware', function () {
       data: failData,
       error
     } = useRequest(getGetterObj, {
-      middleware: ({ statesUpdate }) => {
-        statesUpdate({ loading: true });
+      middleware: ({ update }) => {
+        update({ loading: true });
         return new Promise((_, reject) => {
           setTimeout(() => {
             reject(new Error('middleware custom error'));

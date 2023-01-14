@@ -31,7 +31,8 @@ describe('use useFetcher hook to fetch data', function () {
     const Get1 = createGet({ a: '1', b: '2', countKey: 'a' });
     const { data, onSuccess } = useRequest(Get1);
 
-    const { fetching, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>(); // 默认不强制请求，会命中缓存
+    // fetcher默认不强制请求，会命中缓存
+    const { fetching, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>();
     expect(fetching.value).toBeFalsy();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();

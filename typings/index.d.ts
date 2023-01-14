@@ -1,13 +1,29 @@
 import { Writable } from 'svelte/store';
 import { Ref } from 'vue';
 
-type RequestBody = Arg | FormData | string;
+type Arg = Record<string, any>;
+type RequestBody = Arg | FormData | Blob | ArrayBuffer | ReadableStream;
+
+/** 进度信息 */
 type Progress = {
   total: number;
   loaded: number;
 };
+
+/**
+ * 请求要素，发送请求必备的信息
+ */
+interface RequestElements {
+  readonly url: string;
+  readonly type: MethodType;
+  readonly headers: Arg;
+  readonly data?: RequestBody;
+}
 type ProgressUpdater = (loaded: number, total: number) => void;
-type AlovaRequestAdapter<R, T, RC, RE, RH> = (adapterConfig: AlovaRequestAdapterConfig<R, T, RC, RH>) => {
+type AlovaRequestAdapter<R, T, RC, RE, RH> = (
+  elements: RequestElements,
+  method: Method<any, any, R, T, RC, RE, RH>
+) => {
   response: () => Promise<RE>;
   headers: () => Promise<RH>;
   onDownload?: (handler: ProgressUpdater) => void;
@@ -32,17 +48,6 @@ interface Storage {
 }
 
 /**
- * 获取fetch的第二个参数类型
- * type RequestInit = NonNullable<Parameters<typeof fetch>[1]>;
- * 通用的请求配置
- */
-type CommonMethodConfig = {
-  readonly url: string;
-  readonly method: MethodType;
-  data?: RequestBody;
-};
-
-/**
  * 请求缓存设置
  * expire: 过期时间
  *  1. 当设置为数字时：如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期；
@@ -58,10 +63,9 @@ type DetailLocalCacheConfig = {
   tag?: string | number;
 };
 type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
-type Arg = Record<string, any>;
 type AlovaMethodConfig<R, T, RC, RH> = {
   /** method对象名称，在updateState、invalidateCache、setCacheData、以及fetch函数中可以通过名称或通配符获取对应method对象 */
-  name?: string;
+  name?: string | number;
   params?: Arg;
   headers?: Arg;
 
@@ -88,20 +92,12 @@ type AlovaMethodConfig<R, T, RC, RH> = {
   /** 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态 */
   transformData?: (data: T, headers: RH) => R;
 } & RC;
-type AlovaRequestAdapterConfig<R, T, RC, RH> = CommonMethodConfig &
-  AlovaMethodConfig<R, T, RC, RH> & {
-    headers: Arg;
-    params: Arg;
 
-    /** 用于开发者自定义数据，可传入responsed中 */
-    extra?: any;
-  };
-
-type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, config: AlovaRequestAdapterConfig<R, T, RC, RH>) => any;
-type ResponseErrorHandler<R, T, RC, RH> = (error: any, config: AlovaRequestAdapterConfig<R, T, RC, RH>) => void;
+type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
+type ResponseErrorHandler<R, T, RC, RE, RH> = (error: any, methodInstance: Method<any, any, R, T, RC, RE, RH>) => void;
 type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
   onSuccess?: ResponsedHandler<R, T, RC, RE, RH>;
-  onError?: ResponseErrorHandler<R, T, RC, RH>;
+  onError?: ResponseErrorHandler<R, T, RC, RE, RH>;
 };
 interface EffectRequestParams<E> {
   handler: (...args: any[]) => void;
@@ -165,9 +161,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   storageAdapter?: Storage;
 
   /** 全局的请求前置钩子 */
-  beforeRequest?: (
-    config: AlovaRequestAdapterConfig<any, any, RC, RH>
-  ) => AlovaRequestAdapterConfig<any, any, RC, RH> | void;
+  beforeRequest?: (method: Method<S, E, any, any, RC, RE, RH>) => void;
 
   /**
    * 全局的响应钩子，可传一个数组表示正常响应和响应出错的钩子
@@ -186,7 +180,14 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
   hitSource?: (string | RegExp)[];
   context: Alova<S, E, RC, RE, RH>;
   response: R;
+
+  /**
+   * 用于在全局的request和response钩子函数中传递额外信息所用
+   * js项目中可使用任意字段
+   */
+  extra?: any;
   send(forceRequest?: boolean): Promise<R>;
+  setName(name: string | number): void;
 }
 interface MethodConstructor {
   new <S, E, R, T, RC, RE, RH>(
@@ -253,9 +254,15 @@ type SuccessHandler<S, E, R, T, RC, RE, RH> = (event: AlovaSuccessEvent<S, E, R,
 type ErrorHandler<S, E, R, T, RC, RE, RH> = (event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>) => void;
 type CompleteHandler<S, E, R, T, RC, RE, RH> = (event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>) => void;
 
+type ExportedUpdate<R> = (
+  newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
+) => void;
 interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 当前的method对象 */
   method: Method<S, E, R, T, RC, RE, RH>;
+
+  /** 命中的缓存数据 */
+  cachedResponse: R | undefined;
 
   /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
   sendArgs: any[];
@@ -264,7 +271,7 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   config: any;
 
   /** 状态更新函数 */
-  statesUpdate: (newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>) => void;
+  update: ExportedUpdate<R>;
 
   /** 前端状态集合 */
   frontStates: FrontRequestState<
@@ -378,6 +385,7 @@ type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, R
   ExportedType<Progress, S>
 > & {
   abort: () => void;
+  update: ExportedUpdate<R>;
   send: (...args: any[]) => Promise<R>;
   onSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH>) => void;
   onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;

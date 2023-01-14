@@ -1,4 +1,4 @@
-import { AlovaRequestAdapterConfig } from '../../typings';
+import { Method, RequestElements } from '../../typings';
 import alovaError from '../utils/alovaError';
 import { instanceOf, isString } from '../utils/helper';
 import {
@@ -24,8 +24,9 @@ const isBodyData = (data: any): data is BodyInit => {
   );
 };
 export default function GlobalFetch() {
-  return function (adapterConfig: AlovaRequestAdapterConfig<unknown, unknown, RequestInit, Headers>) {
+  return function (elements: RequestElements, method: Method<any, any, any, any, RequestInit, Response, Headers>) {
     // 设置了中断时间，则在指定时间后中断请求
+    const adapterConfig = method.config;
     const timeout = adapterConfig.timeout || 0;
     const ctrl = new AbortController();
     let abortTimer: NodeJS.Timeout;
@@ -37,9 +38,10 @@ export default function GlobalFetch() {
       }, timeout);
     }
 
-    const data = adapterConfig.data;
-    const fetchPromise = fetch(adapterConfig.url, {
+    const data = elements.data;
+    const fetchPromise = fetch(elements.url, {
       ...adapterConfig,
+      method: elements.type,
       signal: ctrl.signal,
       body: isBodyData(data) ? data : JSONStringify(data)
     });

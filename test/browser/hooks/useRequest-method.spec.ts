@@ -1,4 +1,4 @@
-import { useRequest } from '../../../src';
+import { Method, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
@@ -13,17 +13,20 @@ afterAll(() => mockServer.close());
 describe('Test other methods without GET', function () {
   test('send POST', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        expect(config.url).toBe('/unit-test');
+      beforeRequestExpect: method => {
+        expect(method).toBeInstanceOf(Method);
+        const config = method.config;
+        expect(method.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(config.data).toEqual({ post1: 'a' });
-        (config.data as Record<string, any>).post2 = 'b';
+        expect(method.requestBody).toEqual({ post1: 'a' });
+        (method.requestBody as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
         expect(config.timeout).toBe(10000);
       },
-      responseExpect: async r => {
+      responseExpect: async (r, method) => {
+        expect(method).toBeInstanceOf(Method);
         const res = await r.json();
         const { data } = res;
         expect(data.path).toBe('/unit-test');
@@ -73,11 +76,12 @@ describe('Test other methods without GET', function () {
 
   test('send DELETE', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        expect(config.url).toBe('/unit-test');
+      beforeRequestExpect: method => {
+        const config = method.config;
+        expect(method.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(config.data).toEqual({ post1: 'a' });
-        (config.data as Record<string, any>).post2 = 'b';
+        expect(method.requestBody).toEqual({ post1: 'a' });
+        (method.requestBody as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
@@ -132,11 +136,12 @@ describe('Test other methods without GET', function () {
 
   test('send PUT', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        expect(config.url).toBe('/unit-test?c=3');
+      beforeRequestExpect: method => {
+        const config = method.config;
+        expect(method.url).toBe('/unit-test?c=3');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(config.data).toEqual({ post1: 'a' });
-        (config.data as Record<string, any>).post2 = 'b';
+        expect(method.requestBody).toEqual({ post1: 'a' });
+        (method.requestBody as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
@@ -191,8 +196,8 @@ describe('Test other methods without GET', function () {
 
   test('send HEAD', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        expect(config.method).toBe('HEAD');
+      beforeRequestExpect: method => {
+        expect(method.type).toBe('HEAD');
       },
       responseExpect: r => r.json()
     });
@@ -226,8 +231,8 @@ describe('Test other methods without GET', function () {
 
   test('send OPTIONS', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        expect(config.method).toBe('OPTIONS');
+      beforeRequestExpect: method => {
+        expect(method.type).toBe('OPTIONS');
       },
       responseExpect: r => r.json()
     });
@@ -260,8 +265,8 @@ describe('Test other methods without GET', function () {
 
   test('send PATCH', async () => {
     const alova = getAlovaInstance(VueHook, {
-      beforeRequestExpect: config => {
-        expect(config.method).toBe('PATCH');
+      beforeRequestExpect: method => {
+        expect(method.type).toBe('PATCH');
       },
       responseExpect: r => r.json()
     });

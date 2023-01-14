@@ -17,7 +17,7 @@ import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { getPersistentResponse } from '../storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
 import createAlovaEvent from '../utils/createAlovaEvent';
-import { GeneralFn, getLocalCacheConfigParam, instanceOf, isFn, key, noop } from '../utils/helper';
+import { GeneralFn, getLocalCacheConfigParam, instanceOf, isFn, key, noop, sloughConfig } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import {
   falseValue,
@@ -76,15 +76,16 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
   let removeStates = noop;
   let saveStates = noop as SaveStateFn;
+  const { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
+  let cachedResponse: R | undefined = getResponseCache(id, methodKey);
   if (!updateCacheState) {
-    const { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
     const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);
-    const cachedResponse = getResponseCache(id, methodKey);
 
     // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
     // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
     if (persistentResponse && cacheMode === STORAGE_RESTORE && !cachedResponse) {
       setResponseCache(id, methodKey, persistentResponse, methodInstance, expireMilliseconds);
+      cachedResponse = persistentResponse;
     }
 
     // 如果命中持久化数据，则更新数据
@@ -110,24 +111,24 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
   // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
   const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
-    const { force: guardNextforceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
+    const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
       guardNextConfig || {};
     // 未使用缓存才需要更新loading状态
     const {
       response,
       onDownload = noop,
-      onUpload = noop,
-      useCache
-    } = (requestCtrl = sendRequest(guardNextReplacingMethod, guardNextforceRequest));
+      onUpload = noop
+    } = (requestCtrl = sendRequest(guardNextReplacingMethod, guardNextForceRequest));
 
-    // 命中缓存时不需要更新loading状态
-    !useCache &&
+    // 命中缓存，或强制请求时需要更新loading状态
+    if (sloughConfig(guardNextForceRequest) || !cachedResponse) {
       update(
         {
           loading: trueValue
         },
         frontStates
       );
+    }
 
     responseHandlePromise = response();
     const progressUpdater = (stage: 'downloading' | 'uploading') => (loaded: number, total: number) => {
@@ -169,10 +170,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const middlewareCompletePromise = middleware(
     {
       method: methodInstance,
+      cachedResponse,
       sendArgs: responserHandlerArgs,
       config: useHookConfig,
       frontStates,
-      statesUpdate: newFrontStates => update(newFrontStates, frontStates),
+      update: newFrontStates => update(newFrontStates, frontStates),
       decorateSuccess: (decorator: NonNullable<typeof successHandlerDecorator>) => {
         isFn(decorator) && (successHandlerDecorator = decorator);
       },
