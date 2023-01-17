@@ -112,8 +112,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     response: () =>
       promiseThen(
         PromiseCls.all([ctrls.response(), ctrls.headers()]),
-        ([rawResponse, headers]) => {
-          return asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
+        ([rawResponse, headers]) =>
+          asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
             data = transformData(data, headers);
 
             // 保存缓存
@@ -147,8 +147,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 
             // 查找hitTarget，让它的缓存失效
             return data;
-          });
-        },
+          }),
         (error: any) => {
           if (!isFn(responseErrorHandler)) {
             throw error;

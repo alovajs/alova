@@ -5,12 +5,13 @@ import { getStateCache } from '../storage/stateCache';
 import alovaError from '../utils/alovaError';
 import { getLocalCacheConfigParam, isFn, key, noop } from '../utils/helper';
 import myAssert from '../utils/myAssert';
-import { forEach, getContext, getOptions, objectKeys, undefinedValue } from '../utils/variables';
+import { falseValue, forEach, getContext, getOptions, objectKeys, trueValue, undefinedValue } from '../utils/variables';
 
 /**
  * 更新对应method的状态
  * @param method 请求方法对象
  * @param handleUpdate 更新回调
+ * @returns 是否更新成功，未找到对应的状态时不会更新成功
  */
 export default function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
@@ -19,6 +20,8 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
 ) {
   const { onMatch = noop } = options;
   const methodInstance = filterSnapshotMethodsUnified(matcher, keyFind);
+  let updated = falseValue;
+
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
   if (methodInstance) {
     onMatch(methodInstance); // 触发onMatch事件
@@ -55,6 +58,8 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
           throw alovaError(`managed state \`${stateName}\` must be a state.`);
         }
       });
+      updated = trueValue;
     }
   }
+  return updated;
 }
