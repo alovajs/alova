@@ -10,7 +10,7 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
 describe('update cached response data by user in vue', function () {
-  test('test update function with vue', async () => {
+  test('test update function', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -20,11 +20,12 @@ describe('update cached response data by user in vue', function () {
     });
     const { data, onSuccess } = useRequest(Get);
     await untilCbCalled(onSuccess);
-    updateState(Get, data => {
+    const updated = updateState(Get, data => {
       data.path = '/unit-test-updated';
       return data;
     });
     expect(data.value.path).toBe('/unit-test-updated');
+    expect(updated).toBeTruthy();
   });
 
   test("shouldn't be called when not get any states", () => {
@@ -38,11 +39,12 @@ describe('update cached response data by user in vue', function () {
     });
 
     const mockfn = jest.fn();
-    updateState(Get, data => {
+    const updated = updateState(Get, data => {
       mockfn();
       return data;
     });
     expect(mockfn.mock.calls.length).toBe(0);
+    expect(updated).toBeFalsy();
   });
 
   test('should update the first matched one when find sereval Method instance', async () => {

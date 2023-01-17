@@ -449,10 +449,10 @@ declare function updateState<R = any, S = any, E = any, T = any, RC = any, RE = 
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
   handleUpdate: UpdateStateCollection<R>['data'] | UpdateStateCollection<R>,
   options?: updateOptions
-): void;
+): boolean;
 
 /** 手动设置缓存响应数据 */
 declare function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
-  dataOrUpater: R | ((oldCache: R) => R | false)
+  dataOrUpdater: R | ((oldCache: R) => R | false)
 ): void;

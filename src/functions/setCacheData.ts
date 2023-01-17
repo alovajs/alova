@@ -12,16 +12,16 @@ import { falseValue, forEach, getContext } from '../utils/variables';
  */
 export default function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
-  dataOrUpater: R | ((oldCache?: R) => R | false)
+  dataOrUpdater: R | ((oldCache?: R) => R | false)
 ) {
-  const methods = filterSnapshotMethodsUnified(matcher, keyFilter);
-  forEach(methods, methodInstance => {
+  const methodInstances = filterSnapshotMethodsUnified(matcher, keyFilter);
+  forEach(methodInstances, methodInstance => {
     const { id, storage } = getContext(methodInstance);
     const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     const methodKey = key(methodInstance);
-    let data: any = dataOrUpater;
-    if (isFn(dataOrUpater)) {
-      data = dataOrUpater(getResponseCache(id, methodKey));
+    let data: any = dataOrUpdater;
+    if (isFn(dataOrUpdater)) {
+      data = dataOrUpdater(getResponseCache(id, methodKey));
       if (data === falseValue) {
         return;
       }
