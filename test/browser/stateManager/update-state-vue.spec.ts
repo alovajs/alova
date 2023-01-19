@@ -3,6 +3,7 @@ import { Ref, ref } from 'vue';
 import { updateState, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { removeStateCache } from '../../../src/storage/stateCache';
+import { key } from '../../../src/utils/helper';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
@@ -178,7 +179,7 @@ describe('update cached response data by user in vue', function () {
 
     const { onSuccess } = useRequest(Get1);
     await untilCbCalled(onSuccess);
-    removeStateCache(alova.id, Get1.key());
+    removeStateCache(alova.id, key(Get1));
 
     // onMatch将会被调用，但不会更新
     const mockMatchFn = jest.fn();
