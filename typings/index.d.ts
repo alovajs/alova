@@ -240,11 +240,6 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
   extra?: any;
   send(forceRequest?: boolean): Promise<R>;
   setName(name: string | number): void;
-  /**
-   * 获取method实例的key
-   * @returns 当前method实例的key
-   */
-  key(): string;
 }
 interface MethodConstructor {
   new <S, E, R, T, RC, RE, RH>(
