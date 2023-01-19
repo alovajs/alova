@@ -1,6 +1,7 @@
 import { setCacheData } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
+import { getPersistentResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
 import { getAlovaInstance, mockServer } from '../../utils';
 import { Result } from '../result.type';
@@ -217,5 +218,73 @@ describe('manual set cache response data', function () {
       }
     });
     expect(mockfn).toBeCalledTimes(1); // 执行了一次
+  });
+
+  test('should also replace storaged data when using method instance with `placeholder`', async () => {
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 200 },
+      localCache: {
+        mode: 'placeholder',
+        expire: 100 * 1000
+      },
+      transformData: ({ data }: Result) => data
+    });
+    await Get1.send();
+
+    setCacheData(Get1, rawData => {
+      if (rawData) {
+        rawData.path = 'changed';
+        return rawData;
+      }
+      return false;
+    });
+    expect(getResponseCache(alova.id, key(Get1))).toEqual({
+      path: 'changed',
+      method: 'GET',
+      params: {
+        a: '200'
+      }
+    });
+    expect(getPersistentResponse(alova.id, Get1, alova.storage)).toEqual({
+      path: 'changed',
+      method: 'GET',
+      params: {
+        a: '200'
+      }
+    });
+  });
+
+  test('should also replace storaged data when using method instance with `restore`', async () => {
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 200 },
+      localCache: {
+        mode: 'restore',
+        expire: 100 * 1000
+      },
+      transformData: ({ data }: Result) => data
+    });
+    await Get1.send();
+
+    setCacheData(Get1, rawData => {
+      if (rawData) {
+        rawData.path = 'changed';
+        return rawData;
+      }
+      return false;
+    });
+    expect(getResponseCache(alova.id, key(Get1))).toEqual({
+      path: 'changed',
+      method: 'GET',
+      params: {
+        a: '200'
+      }
+    });
+    expect(getPersistentResponse(alova.id, Get1, alova.storage)).toEqual({
+      path: 'changed',
+      method: 'GET',
+      params: {
+        a: '200'
+      }
+    });
   });
 });

@@ -1,7 +1,7 @@
 import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
-import { instanceOf, key } from './utils/helper';
+import { instanceOf, key as methodKey } from './utils/helper';
 import { deleteAttr, getConfig, getContextOptions, isArray, undefinedValue } from './utils/variables';
 
 export const typeGet = 'GET';
@@ -56,7 +56,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     const hitSource = config?.hitSource;
     if (hitSource) {
       this.hitSource = (isArray(hitSource) ? hitSource : [hitSource]).map(sourceItem =>
-        instanceOf(sourceItem, Method) ? key(sourceItem) : (sourceItem as string | RegExp)
+        instanceOf(sourceItem, Method) ? methodKey(sourceItem) : (sourceItem as string | RegExp)
       );
       deleteAttr(config, 'hitSource');
     }
@@ -81,5 +81,13 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
    */
   public setName(name: string | number) {
     getConfig(this).name = name;
+  }
+
+  /**
+   * 获取method实例的key
+   * @returns 当前method实例的key
+   */
+  public key() {
+    return methodKey(this);
   }
 }

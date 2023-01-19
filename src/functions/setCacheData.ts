@@ -27,6 +27,6 @@ export default function setCacheData<R = any, S = any, E = any, T = any, RC = an
       }
     }
     setResponseCache(id, methodKey, data, methodInstance, expireMilliseconds);
-    toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
+    toStorage && persistResponse(id, methodInstance, data, expireMilliseconds, storage, tag);
   });
 }

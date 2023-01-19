@@ -1,7 +1,8 @@
-import { useRequest } from '../../../src';
+import { createAlova, useRequest } from '../../../src';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import VueHook from '../../../src/predefine/VueHook';
 import { removeResponseCache } from '../../../src/storage/responseCache';
-import { getPersistentResponse } from '../../../src/storage/responseStorage';
+import { buildNamespacedStorageKey, getPersistentResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
 import { DetailLocalCacheConfig } from '../../../typings';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
@@ -12,7 +13,7 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
 describe('persist data', function () {
-  test('should persist responsed data but it will send request when request again', async () => {
+  test('should persist responsed data but it still send request when request again', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -28,7 +29,7 @@ describe('persist data', function () {
     await untilCbCalled(firstState.onSuccess);
 
     // 持久化数据里有值
-    const persisitentResponse = getPersistentResponse(alova.id, key(Get), alova.storage);
+    const persisitentResponse = getPersistentResponse(alova.id, Get, alova.storage);
     expect(persisitentResponse).toEqual({
       path: '/unit-test-count',
       method: 'GET',
@@ -191,5 +192,92 @@ describe('persist data', function () {
     await untilCbCalled(secondState.onSuccess);
     expect(secondState.loading.value).toBeFalsy();
     expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+  });
+
+  test('should change set and get behavior when custom storage in method instance creating', async () => {
+    const mockStorage = {} as Record<string, any>;
+    const alova = createAlova({
+      baseURL: 'http://localhost:3000',
+      timeout: 3000,
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responsed: r => r.json(),
+      storageAdapter: {
+        set(key, value) {
+          mockStorage[key] = value;
+        },
+        get(key) {
+          return mockStorage[key];
+        },
+        remove(key) {
+          delete mockStorage[key];
+        }
+      }
+    });
+    const Get = alova.Get('/unit-test', {
+      localCache: {
+        expire: 5000,
+        mode: 'placeholder'
+      },
+      storage: {
+        get(method, storageConnector) {
+          expect(method).toBe(Get);
+          const value = storageConnector.get(method);
+          expect(value).toBe(2);
+          return 50;
+        },
+        set(method, value, storageConnector) {
+          expect(method).toBe(Get);
+          storageConnector.set(method, value, Infinity);
+          expect(mockStorage[buildNamespacedStorageKey(alova.id, Get)][0]).toBe(value);
+        }
+      },
+      transformData: ({ data }: Result) => data
+    });
+    mockStorage[buildNamespacedStorageKey(alova.id, Get)] = [2, Infinity, null];
+    const { onSuccess } = useRequest(Get);
+    await untilCbCalled(onSuccess);
+  });
+
+  test('should change remove behavior when custom storage in method instance creating', async () => {
+    const mockStorage = {} as Record<string, any>;
+    const alova = createAlova({
+      baseURL: 'http://localhost:3000',
+      timeout: 3000,
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responsed: r => r.json(),
+      storageAdapter: {
+        set(key, value) {
+          mockStorage[key] = value;
+        },
+        get(key) {
+          return mockStorage[key];
+        },
+        remove(key) {
+          delete mockStorage[key];
+        }
+      }
+    });
+    const Get = alova.Get('/unit-test', {
+      localCache: {
+        expire: 500,
+        mode: 'placeholder'
+      },
+      storage: {
+        remove(method, storageConnector) {
+          expect(method).toBe(Get);
+          storageConnector.remove(method);
+          expect(mockStorage[buildNamespacedStorageKey(alova.id, Get)]).toBeUndefined();
+        }
+      },
+      transformData: ({ data }: Result) => data
+    });
+    useRequest(Get);
+    await untilCbCalled(setTimeout, 800);
+
+    // 缓存过期，将会调用remove
+    const { onSuccess } = useRequest(Get);
+    await untilCbCalled(onSuccess);
   });
 });
