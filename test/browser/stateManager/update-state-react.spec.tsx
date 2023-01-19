@@ -46,7 +46,7 @@ describe('update cached response data by user in react', function () {
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
     const cacheData = getResponseCache(alova.id, key(Get));
     expect(cacheData.path).toBe('/unit-test-updated'); // 除了状态数据被更新外，缓存也将会被更新
-    const storageData = getPersistentResponse(alova.id, key(Get), alova.storage);
+    const storageData = getPersistentResponse(alova.id, Get, alova.storage);
     expect(storageData.path).toBe('/unit-test-updated'); // 持久化数据也将被更新
   });
 

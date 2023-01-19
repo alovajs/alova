@@ -79,7 +79,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
   let cachedResponse: R | undefined = getResponseCache(id, methodKey);
   if (!updateCacheState) {
-    const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);
+    const persistentResponse = getPersistentResponse(id, methodInstance, storage, tag);
 
     // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
     // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中

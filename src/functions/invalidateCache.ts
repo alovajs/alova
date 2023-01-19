@@ -30,6 +30,6 @@ export default function invalidateCache<S, E, R, T, RC, RE, RH>(
     const { id, storage } = getContext(methodInstance);
     const methodKey = key(methodInstance);
     removeResponseCache(id, methodKey);
-    removePersistentResponse(id, methodKey, storage);
+    removePersistentResponse(id, methodInstance, storage);
   });
 }

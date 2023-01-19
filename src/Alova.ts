@@ -1,5 +1,6 @@
-import { AlovaMethodConfig, AlovaOptions, RequestBody, Storage } from '../typings';
+import { AlovaGlobalStorage, AlovaMethodConfig, AlovaOptions, RequestBody } from '../typings';
 import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
+import globalLocalStorage from './predefine/globalLocalStorage';
 
 export const alovas = [] as Alova<any, any, any, any, any>[];
 // get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
@@ -13,10 +14,10 @@ let idCounter = 0;
 export default class Alova<S, E, RC, RE, RH> {
   public options: AlovaOptions<S, E, RC, RE, RH>;
   public id = ++idCounter + '';
-  public storage: Storage;
+  public storage: AlovaGlobalStorage;
   constructor(options: AlovaOptions<S, E, RC, RE, RH>) {
     // 如果storage未指定，则默认使用localStorage
-    this.storage = options.storageAdapter || window.localStorage;
+    this.storage = options.storageAdapter || globalLocalStorage;
 
     // 合并默认options
     this.options = {

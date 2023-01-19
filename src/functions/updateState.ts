@@ -53,7 +53,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
           );
           // 同时需要更新缓存和持久化数据
           setResponseCache(id, methodKey, updatedData, methodInstance, expireMilliseconds);
-          toStorage && persistResponse(id, methodKey, updatedData, expireMilliseconds, storage, tag);
+          toStorage && persistResponse(id, methodInstance, updatedData, expireMilliseconds, storage, tag);
         } catch (e) {
           throw alovaError(`managed state \`${stateName}\` must be a state.`);
         }

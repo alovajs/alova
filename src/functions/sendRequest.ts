@@ -118,8 +118,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 
             // 保存缓存
             setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
-            toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
-
+            toStorage && persistResponse(id, methodInstance, data, expireTimestamp, storage, tag);
             const hitMethods = getMethodSnapshot(
               {
                 filter: cachedMethod => {
