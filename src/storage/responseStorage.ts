@@ -1,8 +1,9 @@
-import { AlovaGlobalStorage, AlovaMethodStorage, StorageConnector, StoragedData } from '../../typings';
+import { AlovaGlobalStorage, AlovaMethodStorage, StorageConnector } from '../../typings';
 import Method from '../Method';
 import { key } from '../utils/helper';
 import { getConfig, getContext, getTime, nullValue } from '../utils/variables';
 
+type StoragedData = [any, number | null, string | number | null];
 const responseStorageKey = 'alova.';
 export const buildNamespacedStorageKey = (namespace: string, methodInstance: Method) =>
   responseStorageKey + namespace + key(methodInstance);

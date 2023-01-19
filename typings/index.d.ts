@@ -41,7 +41,6 @@ type FrontRequestState<L = any, R = any, E = any, D = any, U = any> = {
 };
 type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
-type StoragedData = [any, number | null, string | number | null];
 /** 全局的存储适配器 */
 interface AlovaGlobalStorage {
   /**
@@ -49,13 +48,13 @@ interface AlovaGlobalStorage {
    * @param key 存储key
    * @param value 存储值
    */
-  set(key: string, value: StoragedData): void;
+  set(key: string, value: any): void;
 
   /**
    * 获取存储值
    * @param key 存储key
    */
-  get(key: string): StoragedData | undefined | null;
+  get(key: string): any | undefined | null;
 
   /**
    * 移除存储值
