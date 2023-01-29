@@ -2,6 +2,8 @@ import '@testing-library/jest-dom';
 import { Ref, ref } from 'vue';
 import { updateState, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
+import { removeStateCache } from '../../../src/storage/stateCache';
+import { key } from '../../../src/utils/helper';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
@@ -162,5 +164,42 @@ describe('update cached response data by user in vue', function () {
       extraData: () => 1
     });
     expect(extraData.value).toBe(1);
+  });
+
+  test('shouldn return false when matched method instance but has no cached states', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get1 = alova.Get('/unit-test', {
+      name: 'get10',
+      params: { a: 1 },
+      localCache: 100000,
+      transformData: ({ data }: Result) => data
+    });
+
+    const { onSuccess } = useRequest(Get1);
+    await untilCbCalled(onSuccess);
+    removeStateCache(alova.id, key(Get1));
+
+    // onMatch将会被调用，但不会更新
+    const mockMatchFn = jest.fn();
+    const mockUpdateFn = jest.fn();
+    const updated = updateState(
+      'get10',
+      (data: any) => {
+        mockUpdateFn();
+        return data;
+      },
+      {
+        onMatch(method) {
+          expect(method).toBe(Get1);
+          mockMatchFn();
+        }
+      }
+    );
+
+    expect(mockMatchFn).toBeCalled();
+    expect(mockUpdateFn).not.toBeCalled();
+    expect(updated).toBeFalsy();
   });
 });

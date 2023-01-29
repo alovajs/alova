@@ -41,20 +41,58 @@ type FrontRequestState<L = any, R = any, E = any, D = any, U = any> = {
 };
 type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
-/** 全局storage适配器对象 */
-interface GlobalStorage {
-  set(method: Method, value: any): void;
+/** 全局的存储适配器 */
+interface AlovaGlobalStorage {
+  /**
+   * 设置存储
+   * @param key 存储key
+   * @param value 存储值
+   */
+  set(key: string, value: any): void;
+
+  /**
+   * 获取存储值
+   * @param key 存储key
+   */
+  get(key: string): any | undefined | null;
+
+  /**
+   * 移除存储值
+   * @param key 存储key
+   */
+  remove(key: string): void;
+}
+
+/** method实例和全局存储适配器的连接器对象 */
+interface StorageConnector {
+  /**
+   * 设置持久化存储
+   * @param method 操作的method实例
+   * @param response 存储数据
+   * @param expireTimestamp 存储过期的时间点对应的时间戳
+   */
+  set(method: Method, response: any, expireTimestamp: number): void;
+
+  /**
+   * 获取持久化存储
+   * @param method 操作的method实例
+   */
   get(method: Method): any;
+
+  /**
+   * 移除持久化存储
+   * @param method 操作的method实例
+   */
   remove(method: Method): void;
 }
 
 /**
  * method实例内的storage对象
  */
-interface MethodStorage {
-  set?: (method: Method, value: any, globalStorage: GlobalStorage) => void;
-  get?: (method: Method, globalStorage: GlobalStorage) => any;
-  remove?: (method: Method, globalStorage: GlobalStorage) => void;
+interface AlovaMethodStorage {
+  set?(method: Method, response: any, storageConnector: StorageConnector): void;
+  get?: (method: Method, storageConnector: StorageConnector) => any;
+  remove?: (method: Method, storageConnector: StorageConnector) => void;
 }
 
 /**
@@ -103,7 +141,7 @@ type AlovaMethodConfig<R, T, RC, RH> = {
   transformData?: (data: T, headers: RH) => R;
 
   /** 请求级的存储适配器，设置后将通过此适配器管理存储 */
-  storageAdapter: MethodStorage;
+  storage?: AlovaMethodStorage;
 } & RC;
 
 type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
@@ -171,7 +209,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   localCache?: GlobalLocalCacheConfig;
 
   /** 持久化缓存接口，用于静默请求、响应数据持久化等 */
-  storageAdapter?: GlobalStorage;
+  storageAdapter?: AlovaGlobalStorage;
 
   /** 全局的请求前置钩子 */
   beforeRequest?: (method: Method<S, E, any, any, RC, RE, RH>) => void;
@@ -217,7 +255,7 @@ declare const Method: MethodConstructor;
 interface Alova<S, E, RC, RE, RH> {
   options: AlovaOptions<S, E, RC, RE, RH>;
   id: string;
-  storage: GlobalStorage;
+  storage: AlovaGlobalStorage;
   Get<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
   Post<R, T = unknown>(
     url: string,

@@ -139,4 +139,63 @@ describe('useRequet hook with react', () => {
     // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露
     expect(getStateCache(alova.id, key(Get))).toBeUndefined();
   });
+
+  test('should change states built in by using function `update` which return in `useRequest`', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    function Page() {
+      const Get = alova.Get('/unit-test', {
+        transformData: ({ data }: Result<true>) => data,
+        params: {
+          a: '~',
+          b: '~~'
+        }
+      });
+      const { loading, data, error, downloading, uploading, update } = useRequest(Get);
+      return (
+        <div>
+          <span role="loading">{loading ? 'loading...' : 'loaded'}</span>
+          <span role="path">{data?.path}</span>
+          <span role="error">{error?.message}</span>
+          <span role="downloading">
+            {downloading.loaded}_{downloading.total}
+          </span>
+          <span role="uploading">
+            {uploading.loaded}_{uploading.total}
+          </span>
+          <button
+            role="btn"
+            onClick={() =>
+              update({
+                loading: true,
+                data: {
+                  ...data,
+                  path: '/unit-test-changed'
+                },
+                error: new Error('changed error'),
+                downloading: {
+                  loaded: 1,
+                  total: 1000
+                },
+                uploading: {
+                  loaded: 100,
+                  total: 2000
+                }
+              })
+            }>
+            change data
+          </button>
+        </div>
+      );
+    }
+    render((<Page />) as ReactElement<any, any>);
+    await screen.findByText(/loaded/);
+    fireEvent.click(screen.getByRole('btn'));
+    await screen.findByText(/loading\.\.\./);
+    expect(screen.getByRole('loading')).toHaveTextContent('loading...');
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test-changed');
+    expect(screen.getByRole('downloading')).toHaveTextContent('1_1000');
+    expect(screen.getByRole('uploading')).toHaveTextContent('100_2000');
+  });
 });
