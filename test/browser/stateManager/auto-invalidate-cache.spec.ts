@@ -1,4 +1,4 @@
-import { setCacheData, useRequest } from '../../../src';
+import { setCache, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
@@ -114,7 +114,7 @@ describe('auto invalitate cached response data', () => {
       params: {},
       method: 'GET'
     };
-    setCacheData(targetGet, mockCache);
+    setCache(targetGet, mockCache);
 
     let sourcePost = alova.Post(
       '/unit-test',
@@ -128,7 +128,7 @@ describe('auto invalitate cached response data', () => {
     expect(!!cachedData).toBeFalsy();
 
     // 恢复缓存
-    setCacheData(targetGet, mockCache);
+    setCache(targetGet, mockCache);
     sourcePost = alova.Post(
       '/unit-test',
       {},
@@ -141,7 +141,7 @@ describe('auto invalitate cached response data', () => {
     expect(!!cachedData).toBeFalsy();
 
     // 恢复缓存
-    setCacheData(targetGet, mockCache);
+    setCache(targetGet, mockCache);
     sourcePost = alova.Post('/unit-test', { a: 1 });
     await sourcePost.send();
     cachedData = getResponseCache(alova.id, key(targetGet));

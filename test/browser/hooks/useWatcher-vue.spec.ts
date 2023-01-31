@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { setCacheData, useWatcher } from '../../../src';
+import { setCache, useWatcher } from '../../../src';
 import Method from '../../../src/Method';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
@@ -415,7 +415,7 @@ describe('use useWatcher hook to send GET with vue', function () {
       force: () => force.value
     });
 
-    setCacheData(getGetterObj, {
+    setCache(getGetterObj, {
       path: '/unit-test',
       method: 'GET',
       params: { val: '-1' },

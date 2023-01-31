@@ -220,13 +220,13 @@ describe('persist data', function () {
         mode: 'placeholder'
       },
       storage: {
-        get(method, storageConnector) {
+        get(storageConnector, method) {
           expect(method).toBe(Get);
           const value = storageConnector.get(method);
           expect(value).toBe(2);
           return 50;
         },
-        set(method, value, storageConnector) {
+        set(storageConnector, method, value) {
           expect(method).toBe(Get);
           storageConnector.set(method, value, Infinity);
           expect(mockStorage[buildNamespacedStorageKey(alova.id, Get)][0]).toBe(value);
@@ -265,7 +265,7 @@ describe('persist data', function () {
         mode: 'placeholder'
       },
       storage: {
-        remove(method, storageConnector) {
+        remove(storageConnector, method) {
           expect(method).toBe(Get);
           storageConnector.remove(method);
           expect(mockStorage[buildNamespacedStorageKey(alova.id, Get)]).toBeUndefined();

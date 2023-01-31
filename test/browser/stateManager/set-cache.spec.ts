@@ -1,4 +1,4 @@
-import { setCacheData } from '../../../src';
+import { setCache } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
@@ -21,12 +21,12 @@ describe('manual set cache response data', function () {
     });
 
     // 没有缓存时为undefined
-    setCacheData(Get, data => {
+    setCache(Get, data => {
       expect(data).toBeUndefined();
-      return false;
+      return undefined; // 返回undefined或不返回时，取消缓存修改
     });
 
-    setCacheData(Get, {
+    setCache(Get, {
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -73,7 +73,7 @@ describe('manual set cache response data', function () {
     });
 
     // 通过传入数组设置
-    setCacheData([Get1, Get2], {
+    setCache([Get1, Get2], {
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -96,7 +96,7 @@ describe('manual set cache response data', function () {
     });
 
     // 通过通配符名称设置
-    setCacheData('test-get1', {
+    setCache('test-get1', {
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -151,9 +151,9 @@ describe('manual set cache response data', function () {
 
     // 更新以上两个请求的缓存
     const mockfn = jest.fn();
-    setCacheData<Result['data']>('test-get2', cache => {
+    setCache<Result['data']>('test-get2', cache => {
       if (!cache) {
-        return false;
+        return;
       }
       cache.params.a = 'update';
       mockfn();
@@ -177,9 +177,9 @@ describe('manual set cache response data', function () {
 
     const mockfn2 = jest.fn();
     await Get2.send();
-    setCacheData<Result['data']>('test-get2', cache => {
+    setCache<Result['data']>('test-get2', cache => {
       if (!cache) {
-        return false;
+        return;
       }
       cache.params.a = 'update2';
       mockfn2();
@@ -206,9 +206,8 @@ describe('manual set cache response data', function () {
 
     // 更新函数返回false时，表示中断更新
     const mockfn = jest.fn();
-    setCacheData(Get1, () => {
+    setCache(Get1, () => {
       mockfn();
-      return false;
     });
     expect(getResponseCache(alova.id, key(Get1))).toEqual({
       path: '/unit-test',
@@ -231,12 +230,11 @@ describe('manual set cache response data', function () {
     });
     await Get1.send();
 
-    setCacheData(Get1, rawData => {
+    setCache(Get1, rawData => {
       if (rawData) {
         rawData.path = 'changed';
         return rawData;
       }
-      return false;
     });
     expect(getResponseCache(alova.id, key(Get1))).toEqual({
       path: 'changed',
@@ -265,12 +263,12 @@ describe('manual set cache response data', function () {
     });
     await Get1.send();
 
-    setCacheData(Get1, rawData => {
+    setCache(Get1, rawData => {
       if (rawData) {
         rawData.path = 'changed';
         return rawData;
       }
-      return false;
+      return undefined;
     });
     expect(getResponseCache(alova.id, key(Get1))).toEqual({
       path: 'changed',

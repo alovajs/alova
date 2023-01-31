@@ -53,7 +53,7 @@ const createStorageConnector = (
   tag: string | number | null = nullValue
 ) =>
   ({
-    set(methodInstance, response, expireTimestamp) {
+    set(methodInstance, response, expireTimestamp = Infinity) {
       wrapSetter(namespace, methodInstance, response, expireTimestamp, tag);
     },
     get(methodInstance) {
@@ -84,7 +84,7 @@ export const persistResponse = (
 ) => {
   const scopedStorage = getConfig(methodInstance).storage as AlovaMethodStorage;
   if (scopedStorage && scopedStorage.set) {
-    scopedStorage.set(methodInstance, response, createStorageConnector(namespace, storage, tag));
+    scopedStorage.set(createStorageConnector(namespace, storage, tag), methodInstance, response);
   } else {
     wrapSetter(namespace, methodInstance, response, expireTimestamp, tag);
   }
@@ -111,7 +111,7 @@ export const getPersistentResponse = (
 ) => {
   const scopedStorage = getConfig(methodInstance).storage as AlovaMethodStorage;
   return scopedStorage && scopedStorage.get
-    ? scopedStorage.get(methodInstance, createStorageConnector(namespace, storage, tag))
+    ? scopedStorage.get(createStorageConnector(namespace, storage, tag), methodInstance)
     : wrapGetter(storage.get(buildNamespacedStorageKey(namespace, methodInstance)), namespace, methodInstance, tag);
 };
 
@@ -124,6 +124,6 @@ export const getPersistentResponse = (
 export const removePersistentResponse = (namespace: string, methodInstance: Method, storage: AlovaGlobalStorage) => {
   const scopedStorage = getConfig(methodInstance).storage as AlovaMethodStorage;
   scopedStorage && scopedStorage.remove
-    ? scopedStorage.remove(methodInstance, createStorageConnector(namespace, storage))
+    ? scopedStorage.remove(createStorageConnector(namespace, storage), methodInstance)
     : storage.remove(buildNamespacedStorageKey(namespace, methodInstance));
 };
