@@ -1,4 +1,4 @@
-import { setCacheData } from '../../../src';
+import { setCache } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
@@ -18,7 +18,7 @@ describe('request adapter GlobalFetch', function () {
       localCache: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
-    setCacheData(Get, {
+    setCache(Get, {
       path: '/unit-test',
       method: 'GET',
       params: {

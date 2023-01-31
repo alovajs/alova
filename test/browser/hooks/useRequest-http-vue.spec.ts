@@ -1,4 +1,4 @@
-import { setCacheData, useRequest } from '../../../src';
+import { setCache, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
@@ -340,7 +340,7 @@ describe('use useRequet hook to send GET with vue', function () {
       force: () => force.value
     });
 
-    setCacheData(getGetterObj, {
+    setCache(getGetterObj, {
       path: '/unit-test',
       method: 'GET',
       params: { a: '0', b: '1' },

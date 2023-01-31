@@ -3,7 +3,7 @@ import Alova, { alovas } from './Alova';
 import myAssert from './utils/myAssert';
 import { getStatesHook, pushItem } from './utils/variables';
 export { default as invalidateCache } from './functions/invalidateCache';
-export { default as setCacheData } from './functions/setCacheData';
+export { default as setCache } from './functions/setCache';
 export { default as updateState } from './functions/updateState';
 export { default as useFetcher } from './hooks/useFetcher';
 export { default as useRequest } from './hooks/useRequest';

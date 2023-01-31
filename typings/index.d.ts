@@ -69,15 +69,15 @@ interface StorageConnector {
    * 设置持久化存储
    * @param method 操作的method实例
    * @param response 存储数据
-   * @param expireTimestamp 存储过期的时间点对应的时间戳
+   * @param expireTimestamp 存储过期的时间点对应的时间戳，未传则不过期
    */
-  set(method: Method, response: any, expireTimestamp: number): void;
+  set(method: Method, response: any, expireTimestamp?: number): void;
 
   /**
    * 获取持久化存储
    * @param method 操作的method实例
    */
-  get(method: Method): any;
+  get<R>(method: Method<any, any, R>): R | undefined;
 
   /**
    * 移除持久化存储
@@ -90,9 +90,9 @@ interface StorageConnector {
  * method实例内的storage对象
  */
 interface AlovaMethodStorage {
-  set?(method: Method, response: any, storageConnector: StorageConnector): void;
-  get?: (method: Method, storageConnector: StorageConnector) => any;
-  remove?: (method: Method, storageConnector: StorageConnector) => void;
+  set?(storageConnector: StorageConnector, method: Method, response: any): void;
+  get?: (storageConnector: StorageConnector, method: Method) => any;
+  remove?: (storageConnector: StorageConnector, method: Method) => void;
 }
 
 /**
@@ -112,7 +112,7 @@ type DetailLocalCacheConfig = {
 };
 type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
 type AlovaMethodConfig<R, T, RC, RH> = {
-  /** method对象名称，在updateState、invalidateCache、setCacheData、以及fetch函数中可以通过名称或通配符获取对应method对象 */
+  /** method对象名称，在updateState、invalidateCache、setCache、以及fetch函数中可以通过名称或通配符获取对应method对象 */
   name?: string | number;
   params?: Arg;
   headers?: Arg;
@@ -503,7 +503,7 @@ declare function updateState<R = any, S = any, E = any, T = any, RC = any, RE = 
 ): boolean;
 
 /** 手动设置缓存响应数据 */
-declare function setCacheData<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
+declare function setCache<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
-  dataOrUpdater: R | ((oldCache: R) => R | false)
+  dataOrUpdater: R | ((oldCache: R) => R | undefined | void)
 ): void;
