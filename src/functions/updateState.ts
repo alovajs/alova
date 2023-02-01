@@ -1,5 +1,5 @@
 import { MethodMatcher, updateOptions, UpdateStateCollection } from '../../typings';
-import { filterSnapshotMethodsUnified, keyFind, setResponseCache } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getStateCache } from '../storage/stateCache';
 import alovaError from '../utils/alovaError';
@@ -19,7 +19,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
   options: updateOptions = {}
 ) {
   const { onMatch = noop } = options;
-  const methodInstance = filterSnapshotMethodsUnified(matcher, keyFind);
+  const methodInstance = filterSnapshotMethodsUnified(matcher, falseValue);
   let updated = falseValue;
 
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理

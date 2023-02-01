@@ -1,14 +1,9 @@
 import { MethodMatcher } from '../../typings';
 import Method from '../Method';
-import {
-  clearResponseCache,
-  filterSnapshotMethodsUnified,
-  keyFilter,
-  removeResponseCache
-} from '../storage/responseCache';
+import { clearResponseCache, filterSnapshotMethodsUnified, removeResponseCache } from '../storage/responseCache';
 import { removePersistentResponse } from '../storage/responseStorage';
 import { key } from '../utils/helper';
-import { forEach, getContext } from '../utils/variables';
+import { forEach, getContext, trueValue } from '../utils/variables';
 
 /**
  * 让对应的返回数据缓存失效
@@ -25,7 +20,7 @@ export default function invalidateCache<S, E, R, T, RC, RE, RH>(
     clearResponseCache();
     return;
   }
-  const methods = filterSnapshotMethodsUnified(matcher, keyFilter);
+  const methods = filterSnapshotMethodsUnified(matcher, trueValue);
   forEach(methods, methodInstance => {
     const { id, storage } = getContext(methodInstance);
     const methodKey = key(methodInstance);

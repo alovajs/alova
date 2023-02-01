@@ -1,6 +1,6 @@
 import { ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
 import Method from '../Method';
-import { getMethodSnapshot, getResponseCache, keyFilter, setResponseCache } from '../storage/responseCache';
+import { getResponseCache, matchSnapshotMethod, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import {
   asyncOrSync,
@@ -119,7 +119,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             // 保存缓存
             setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
             toStorage && persistResponse(id, methodInstance, data, expireTimestamp, storage, tag);
-            const hitMethods = getMethodSnapshot(
+            const hitMethods = matchSnapshotMethod(
               {
                 filter: cachedMethod => {
                   let isHit = falseValue;
@@ -140,7 +140,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
                   return isHit;
                 }
               },
-              keyFilter
+              trueValue
             );
             invalidateCache(hitMethods);
 

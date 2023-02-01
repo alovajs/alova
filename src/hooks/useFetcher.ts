@@ -1,10 +1,10 @@
 import { FetcherHookConfig, FetcherType, MethodMatcher } from '../../typings';
 import { alovas } from '../Alova';
 import createRequestState from '../functions/createRequestState';
-import { filterSnapshotMethodsUnified, keyFind } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified } from '../storage/responseCache';
 import { noop } from '../utils/helper';
 import myAssert, { assertAlovaCreation } from '../utils/myAssert';
-import { trueValue } from '../utils/variables';
+import { falseValue, trueValue } from '../utils/variables';
 
 /**
  * 获取请求数据并缓存
@@ -33,7 +33,7 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
      * @param matcher Method对象匹配器
      */
     fetch: <S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>) => {
-      const methodInstance = filterSnapshotMethodsUnified(matcher, keyFind);
+      const methodInstance = filterSnapshotMethodsUnified(matcher, falseValue);
       myAssert(!!methodInstance, 'method instance is not found');
       props.send([], methodInstance, trueValue);
     }
