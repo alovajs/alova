@@ -1,4 +1,4 @@
-import { setCache, useRequest } from '../../../src';
+import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
@@ -109,13 +109,8 @@ describe('auto invalitate cached response data', () => {
       hitSource: ['a1', /^a2/, alova.Post('/unit-test', { a: 1 })]
     });
 
-    const mockCache = {
-      path: 'unit-test',
-      params: {},
-      method: 'GET'
-    };
-    setCache(targetGet, mockCache);
-
+    // 发送请求并保存快照和缓存
+    await targetGet.send();
     let sourcePost = alova.Post(
       '/unit-test',
       {},
@@ -127,8 +122,8 @@ describe('auto invalitate cached response data', () => {
     let cachedData = getResponseCache(alova.id, key(targetGet));
     expect(!!cachedData).toBeFalsy();
 
-    // 恢复缓存
-    setCache(targetGet, mockCache);
+    // 再次请求并生成缓存
+    await targetGet.send();
     sourcePost = alova.Post(
       '/unit-test',
       {},
@@ -140,8 +135,8 @@ describe('auto invalitate cached response data', () => {
     cachedData = getResponseCache(alova.id, key(targetGet));
     expect(!!cachedData).toBeFalsy();
 
-    // 恢复缓存
-    setCache(targetGet, mockCache);
+    // 再次请求并生成缓存
+    await targetGet.send();
     sourcePost = alova.Post('/unit-test', { a: 1 });
     await sourcePost.send();
     cachedData = getResponseCache(alova.id, key(targetGet));

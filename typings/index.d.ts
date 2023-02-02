@@ -462,7 +462,7 @@ type MethodFilter =
   | RegExp
   | {
       name?: string | RegExp;
-      filter: MethodFilterHandler;
+      filter?: MethodFilterHandler;
       alova?: Alova<any, any, any, any, any>;
     };
 type MethodMatcher<S, E, R, T, RC, RE, RH> = Method<S, E, R, T, RC, RE, RH> | MethodFilter;
@@ -507,3 +507,14 @@ declare function setCache<R = any, S = any, E = any, T = any, RC = any, RE = any
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
   dataOrUpdater: R | ((oldCache: R) => R | undefined | void)
 ): void;
+
+/**
+ * 以匹配的方式获取method实例快照，即已经请求过的method实例
+ * @param {MethodFilter} matcher method实例匹配器
+ * @param {boolean} matchAll 是否匹配全部，默认为true
+ * @returns {Method[] | Method} matchAll为true时返回method实例数组，否则返回method实例或undefined
+ */
+declare function matchSnapshotMethod<M extends boolean = true>(
+  matcher: MethodFilter,
+  matchAll?: M
+): M extends true ? Method[] : Method | undefined;
