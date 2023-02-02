@@ -84,7 +84,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
     // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
     if (persistentResponse && cacheMode === STORAGE_RESTORE && !cachedResponse) {
-      setResponseCache(id, methodKey, persistentResponse, methodInstance, expireMilliseconds);
+      setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
       cachedResponse = persistentResponse;
     }
 

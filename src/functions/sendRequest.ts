@@ -1,6 +1,7 @@
 import { ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
 import Method from '../Method';
-import { getResponseCache, matchSnapshotMethod, setResponseCache } from '../storage/responseCache';
+import { matchSnapshotMethod, saveMethodSnapshot } from '../storage/methodSnapShots';
+import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import {
   asyncOrSync,
@@ -18,6 +19,7 @@ import {
   getConfig,
   getContext,
   getOptions,
+  len,
   objectKeys,
   PromiseCls,
   promiseResolve,
@@ -117,8 +119,11 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             data = transformData(data, headers);
 
             // 保存缓存
-            setResponseCache(id, methodKey, data, methodInstance, expireTimestamp);
+            setResponseCache(id, methodKey, data, expireTimestamp);
+            saveMethodSnapshot(id, methodKey, methodInstance);
             toStorage && persistResponse(id, methodInstance, data, expireTimestamp, storage, tag);
+
+            // 查找hitTarget，让它的缓存失效
             const hitMethods = matchSnapshotMethod(
               {
                 filter: cachedMethod => {
@@ -142,9 +147,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
               },
               trueValue
             );
-            invalidateCache(hitMethods);
-
-            // 查找hitTarget，让它的缓存失效
+            len(hitMethods) > 0 && invalidateCache(hitMethods);
             return data;
           }),
         (error: any) => {

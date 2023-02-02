@@ -1,6 +1,7 @@
 import { MethodMatcher } from '../../typings';
 import Method from '../Method';
-import { filterSnapshotMethodsUnified, getResponseCache, setResponseCache } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified } from '../storage/methodSnapShots';
+import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getLocalCacheConfigParam, isFn, key } from '../utils/helper';
 import { forEach, getContext, trueValue, undefinedValue } from '../utils/variables';
@@ -26,7 +27,7 @@ export default function setCache<R = any, S = any, E = any, T = any, RC = any, R
         return;
       }
     }
-    setResponseCache(id, methodKey, data, methodInstance, expireMilliseconds);
+    setResponseCache(id, methodKey, data, expireMilliseconds);
     toStorage && persistResponse(id, methodInstance, data, expireMilliseconds, storage, tag);
   });
 }

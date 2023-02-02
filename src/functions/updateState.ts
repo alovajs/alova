@@ -1,5 +1,6 @@
 import { MethodMatcher, updateOptions, UpdateStateCollection } from '../../typings';
-import { filterSnapshotMethodsUnified, setResponseCache } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified } from '../storage/methodSnapShots';
+import { setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
 import { getStateCache } from '../storage/stateCache';
 import alovaError from '../utils/alovaError';
@@ -52,7 +53,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
             frontStates
           );
           // 同时需要更新缓存和持久化数据
-          setResponseCache(id, methodKey, updatedData, methodInstance, expireMilliseconds);
+          setResponseCache(id, methodKey, updatedData, expireMilliseconds);
           toStorage && persistResponse(id, methodInstance, updatedData, expireMilliseconds, storage, tag);
         } catch (e) {
           throw alovaError(`managed state \`${stateName}\` must be a state.`);

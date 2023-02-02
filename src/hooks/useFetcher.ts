@@ -1,7 +1,7 @@
 import { FetcherHookConfig, FetcherType, MethodMatcher } from '../../typings';
 import { alovas } from '../Alova';
 import createRequestState from '../functions/createRequestState';
-import { filterSnapshotMethodsUnified } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified } from '../storage/methodSnapShots';
 import { noop } from '../utils/helper';
 import myAssert, { assertAlovaCreation } from '../utils/myAssert';
 import { falseValue, trueValue } from '../utils/variables';

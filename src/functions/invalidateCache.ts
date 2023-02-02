@@ -1,6 +1,7 @@
 import { MethodMatcher } from '../../typings';
 import Method from '../Method';
-import { clearResponseCache, filterSnapshotMethodsUnified, removeResponseCache } from '../storage/responseCache';
+import { filterSnapshotMethodsUnified } from '../storage/methodSnapShots';
+import { clearResponseCache, removeResponseCache } from '../storage/responseCache';
 import { removePersistentResponse } from '../storage/responseStorage';
 import { key } from '../utils/helper';
 import { forEach, getContext, trueValue } from '../utils/variables';

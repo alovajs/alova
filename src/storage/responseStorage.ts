@@ -1,19 +1,19 @@
 import { AlovaGlobalStorage, AlovaMethodStorage, StorageConnector } from '../../typings';
 import Method from '../Method';
 import { key } from '../utils/helper';
-import { getConfig, getContext, getTime, nullValue } from '../utils/variables';
+import { getConfig, getTime, nullValue } from '../utils/variables';
 
-type StoragedData = [any, number | null, string | number | null];
 const responseStorageKey = 'alova.';
 export const buildNamespacedStorageKey = (namespace: string, methodInstance: Method) =>
   responseStorageKey + namespace + key(methodInstance);
 
 const wrapGetter = (
-  storagedData: StoragedData | undefined | null,
   namespace: string,
   methodInstance: Method,
+  storage: AlovaGlobalStorage,
   tag: string | number | null = nullValue
 ) => {
+  const storagedData = storage.get(buildNamespacedStorageKey(namespace, methodInstance));
   if (storagedData) {
     const [response, expireTimestamp, storedTag = nullValue] = storagedData;
     // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
@@ -21,19 +21,20 @@ const wrapGetter = (
       return response;
     }
     // 如果过期，则删除缓存
-    removePersistentResponse(namespace, methodInstance, getContext(methodInstance).storage);
+    removePersistentResponse(namespace, methodInstance, storage);
   }
 };
 const wrapSetter = (
   namespace: string,
   methodInstance: Method,
+  storage: AlovaGlobalStorage,
   response: any,
   expireTimestamp: number,
   tag: string | number | null = nullValue
 ) => {
-  // 小于0则不持久化了
-  if (expireTimestamp > 0 && response) {
-    getContext(methodInstance).storage.set(buildNamespacedStorageKey(namespace, methodInstance), [
+  // 过期时间已过则不缓存数据
+  if (expireTimestamp > getTime() && response) {
+    storage.set(buildNamespacedStorageKey(namespace, methodInstance), [
       response,
       expireTimestamp === Infinity ? nullValue : expireTimestamp,
       tag
@@ -54,11 +55,10 @@ const createStorageConnector = (
 ) =>
   ({
     set(methodInstance, response, expireTimestamp = Infinity) {
-      wrapSetter(namespace, methodInstance, response, expireTimestamp, tag);
+      wrapSetter(namespace, methodInstance, storage, response, expireTimestamp, tag);
     },
     get(methodInstance) {
-      const storagedResponse = storage.get(buildNamespacedStorageKey(namespace, methodInstance));
-      return wrapGetter(storagedResponse, namespace, methodInstance, tag);
+      return wrapGetter(namespace, methodInstance, storage, tag);
     },
     remove(methodInstance) {
       storage.remove(buildNamespacedStorageKey(namespace, methodInstance));
@@ -82,17 +82,11 @@ export const persistResponse = (
   storage: AlovaGlobalStorage,
   tag: string | number | null = nullValue
 ) => {
-  const scopedStorage = getConfig(methodInstance).storage as AlovaMethodStorage;
-  if (scopedStorage && scopedStorage.set) {
+  const scopedStorage = getConfig(methodInstance).storage as AlovaMethodStorage | undefined;
+  if (scopedStorage?.set) {
     scopedStorage.set(createStorageConnector(namespace, storage, tag), methodInstance, response);
   } else {
-    wrapSetter(namespace, methodInstance, response, expireTimestamp, tag);
-  }
-
-  // 小于0则不持久化了
-  if (expireTimestamp > 0 && response) {
-    const storageData = [response, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag] as StoragedData;
-    storage.set(buildNamespacedStorageKey(namespace, methodInstance), storageData);
+    wrapSetter(namespace, methodInstance, storage, response, expireTimestamp, tag);
   }
 };
 
@@ -112,7 +106,7 @@ export const getPersistentResponse = (
   const scopedStorage = getConfig(methodInstance).storage as AlovaMethodStorage;
   return scopedStorage && scopedStorage.get
     ? scopedStorage.get(createStorageConnector(namespace, storage, tag), methodInstance)
-    : wrapGetter(storage.get(buildNamespacedStorageKey(namespace, methodInstance)), namespace, methodInstance, tag);
+    : wrapGetter(namespace, methodInstance, storage, tag);
 };
 
 /**
