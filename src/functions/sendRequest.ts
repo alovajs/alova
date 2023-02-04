@@ -11,8 +11,7 @@ import {
   isPlainObject,
   key,
   noop,
-  self,
-  sloughConfig
+  self
 } from '../utils/helper';
 import {
   falseValue,
@@ -37,14 +36,13 @@ import invalidateCache from './invalidateCache';
  */
 export default function sendRequest<S, E, R, T, RC, RE, RH>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
-  forceRequest: boolean | (() => boolean)
+  forceRequest: boolean
 ) {
   const { baseURL, url: newUrl, type, requestBody } = methodInstance;
   const { beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
   const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
 
-  forceRequest = sloughConfig(forceRequest);
   // 如果是强制请求的，则跳过从缓存中获取的步骤
   if (!forceRequest) {
     const response = getResponseCache(id, methodKey);

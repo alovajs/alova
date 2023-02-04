@@ -140,7 +140,8 @@ export const getHandlerMethod = <S, E, R, T, RC, RE, RH>(
  * @param 数据
  * @returns 统一的配置
  */
-export const sloughConfig = <T>(config: T | (() => T)) => (isFn(config) ? config() : config);
+export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) =>
+  isFn(config) ? config(...args) : config;
 
 /**
  * 判断目标数据是否为Promise，如果是则在then函数中执行onAfter，否则同步执行onAfter

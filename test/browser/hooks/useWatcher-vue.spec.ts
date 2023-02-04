@@ -410,9 +410,8 @@ describe('use useWatcher hook to send GET with vue', function () {
     });
 
     const ctrlVal = ref(0);
-    const force = { value: false };
     const { data, send, onSuccess } = useWatcher(() => getGetterObj, [ctrlVal], {
-      force: () => force.value
+      force: (isForce = false) => isForce
     });
 
     setCache(getGetterObj, {
@@ -427,8 +426,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.val).toBe('-1');
 
-    force.value = true;
-    send();
+    send(true);
     await untilCbCalled(onSuccess);
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.val).toBe('1');

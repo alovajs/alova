@@ -9,7 +9,7 @@ beforeAll(() => mockServer.listen());
 afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
-describe('use useRequet hook to send GET with vue', function () {
+describe('use useRequest hook to send GET with vue', function () {
   test('init and send get request', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json(),
@@ -334,10 +334,9 @@ describe('use useRequet hook to send GET with vue', function () {
       }
     });
 
-    const force = { value: false };
     const { data, send } = useRequest(getGetterObj, {
       immediate: false,
-      force: () => force.value
+      force: (isForce = false) => isForce
     });
 
     setCache(getGetterObj, {
@@ -352,8 +351,7 @@ describe('use useRequet hook to send GET with vue', function () {
     expect(rawData.params.a).toBe('0');
     expect(data.value.params.b).toBe('1');
 
-    force.value = true;
-    rawData = await send();
+    rawData = await send(true);
     expect(rawData.params.a).toBe('~');
     expect(data.value.params.b).toBe('~~');
     const cacheData = getResponseCache(alova.id, key(getGetterObj));
