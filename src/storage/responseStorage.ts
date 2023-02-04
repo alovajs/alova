@@ -3,9 +3,8 @@ import Method from '../Method';
 import { key } from '../utils/helper';
 import { getConfig, getTime, nullValue } from '../utils/variables';
 
-const responseStorageKey = 'alova.';
 export const buildNamespacedStorageKey = (namespace: string, methodInstance: Method) =>
-  responseStorageKey + namespace + key(methodInstance);
+  `alova.${namespace}.${key(methodInstance)}`;
 
 const wrapGetter = (
   namespace: string,

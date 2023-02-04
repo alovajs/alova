@@ -19,7 +19,7 @@
     "skipDefaultLibCheck": false,
     "inlineSourceMap": false,
     "importHelpers": true,
-    "removeComments": true,
+    "removeComments": false,
     "esModuleInterop": true,
     "jsx": "react"
   },

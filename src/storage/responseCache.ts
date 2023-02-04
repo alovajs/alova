@@ -18,16 +18,15 @@ const isExpired = (expireTime: number) => expireTime < getTime();
  */
 export const getResponseCache = (namespace: string, key: string) => {
   const cachedResponse = responseCache[namespace];
-  if (!cachedResponse) {
-    return;
-  }
-  const cachedItem = cachedResponse[key];
-  if (cachedItem) {
-    if (!isExpired(cachedItem[1])) {
-      return cachedItem[0];
+  if (cachedResponse) {
+    const cachedItem = cachedResponse[key];
+    if (cachedItem) {
+      if (!isExpired(cachedItem[1])) {
+        return cachedItem[0];
+      }
+      // 如果过期，则删除缓存
+      deleteAttr(cachedResponse, key);
     }
-    // 如果过期，则删除缓存
-    deleteAttr(cachedResponse, key);
   }
 };
 

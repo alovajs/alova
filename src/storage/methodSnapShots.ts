@@ -1,7 +1,6 @@
-import { isString } from '@vue/shared';
 import { Method, MethodFilter, MethodFilterHandler, MethodMatcher } from '../../typings';
 import MethodCls from '../Method';
-import { instanceOf, isPlainObject } from '../utils/helper';
+import { instanceOf, isPlainObject, isString } from '../utils/helper';
 import { forEach, getConfig, isArray, objectKeys, pushItem, trueValue, undefinedValue } from '../utils/variables';
 
 /** method实例快照集合，发送过请求的method实例将会被保存 */

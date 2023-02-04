@@ -381,7 +381,7 @@ interface AlovaMiddleware<S, E, R, T, RC, RE, RH> {
 /** hook通用配置 */
 interface UseHookConfig<S, E, R, T, RC, RE, RH> {
   /** 是否强制请求 */
-  force?: boolean | (() => boolean);
+  force?: boolean | ((...args: any[]) => boolean);
 
   /** 中间件 */
   middleware?: AlovaMiddleware<S, E, R, T, RC, RE, RH>;

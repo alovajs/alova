@@ -113,15 +113,15 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
     const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
       guardNextConfig || {};
-    // 未使用缓存才需要更新loading状态
+    const forceRequestFinally = sloughConfig(guardNextForceRequest, responserHandlerArgs);
     const {
       response,
       onDownload = noop,
       onUpload = noop
-    } = (requestCtrl = sendRequest(guardNextReplacingMethod, guardNextForceRequest));
+    } = (requestCtrl = sendRequest(guardNextReplacingMethod, forceRequestFinally));
 
     // 命中缓存，或强制请求时需要更新loading状态
-    if (sloughConfig(guardNextForceRequest) || !cachedResponse) {
+    if (forceRequestFinally || !cachedResponse) {
       update(
         {
           loading: trueValue
