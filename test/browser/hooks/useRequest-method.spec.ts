@@ -18,8 +18,8 @@ describe('Test other methods without GET', function () {
         const config = method.config;
         expect(method.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.requestBody).toEqual({ post1: 'a' });
-        (method.requestBody as Record<string, any>).post2 = 'b';
+        expect(method.data).toEqual({ post1: 'a' });
+        (method.data as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
@@ -80,8 +80,8 @@ describe('Test other methods without GET', function () {
         const config = method.config;
         expect(method.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.requestBody).toEqual({ post1: 'a' });
-        (method.requestBody as Record<string, any>).post2 = 'b';
+        expect(method.data).toEqual({ post1: 'a' });
+        (method.data as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });
@@ -140,8 +140,8 @@ describe('Test other methods without GET', function () {
         const config = method.config;
         expect(method.url).toBe('/unit-test?c=3');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.requestBody).toEqual({ post1: 'a' });
-        (method.requestBody as Record<string, any>).post2 = 'b';
+        expect(method.data).toEqual({ post1: 'a' });
+        (method.data as Record<string, any>).post2 = 'b';
         expect(config.headers).toEqual({
           'Content-Type': 'application/json'
         });

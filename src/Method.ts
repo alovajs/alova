@@ -16,7 +16,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public baseURL: string;
   public url: string;
   public config: AlovaMethodConfig<R, T, RC, RH>;
-  public requestBody?: RequestBody;
+  public data?: RequestBody;
   public hitSource?: (string | RegExp)[];
   public context: Alova<S, E, RC, RE, RH>;
   public response: R;
@@ -25,7 +25,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     context: Alova<S, E, RC, RE, RH>,
     url: string,
     config?: AlovaMethodConfig<R, T, RC, RH>,
-    requestBody?: RequestBody
+    data?: RequestBody
   ) {
     const contextOptions = getContextOptions(context);
     this.baseURL = contextOptions.baseURL || '';
@@ -65,7 +65,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
       ...contextConcatConfig,
       ...(config || {})
     };
-    this.requestBody = requestBody;
+    this.data = data;
   }
 
   /**
