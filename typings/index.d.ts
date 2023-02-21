@@ -91,8 +91,8 @@ interface StorageConnector {
  */
 interface AlovaMethodStorage {
   set?(storageConnector: StorageConnector, method: Method, response: any): void;
-  get?: (storageConnector: StorageConnector, method: Method) => any;
-  remove?: (storageConnector: StorageConnector, method: Method) => void;
+  get?(storageConnector: StorageConnector, method: Method): any;
+  remove?(storageConnector: StorageConnector, method: Method): void;
 }
 
 /**
@@ -227,7 +227,7 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
   url: string;
   type: MethodType;
   config: AlovaMethodConfig<R, T, RC, RH>;
-  requestBody?: RequestBody;
+  data?: RequestBody;
   hitSource?: (string | RegExp)[];
   context: Alova<S, E, RC, RE, RH>;
   response: R;
@@ -246,7 +246,7 @@ interface MethodConstructor {
     context: Alova<S, E, RC, RE, RH>,
     url: string,
     config?: AlovaMethodConfig<R, T, RC, RH>,
-    requestBody?: RequestBody
+    data?: RequestBody
   ): Method<S, E, R, T, RC, RE, RH>;
   readonly prototype: Method;
 }
@@ -259,24 +259,24 @@ interface Alova<S, E, RC, RE, RH> {
   Get<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
   Post<R, T = unknown>(
     url: string,
-    requestBody?: RequestBody,
+    data?: RequestBody,
     config?: AlovaMethodConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
   Put<R, T = unknown>(
     url: string,
-    requestBody?: RequestBody,
+    data?: RequestBody,
     config?: AlovaMethodConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
   Delete<R, T = unknown>(
     url: string,
-    requestBody?: RequestBody,
+    data?: RequestBody,
     config?: AlovaMethodConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
   Head<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
   Options<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
   Patch<R, T = unknown>(
     url: string,
-    requestBody?: RequestBody,
+    data?: RequestBody,
     config?: AlovaMethodConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
 }

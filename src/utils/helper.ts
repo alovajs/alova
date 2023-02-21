@@ -59,9 +59,9 @@ export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is 
  * @returns {string} 此请求方式的key值
  */
 export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-  const { type, url, requestBody } = methodInstance;
+  const { type, url, data } = methodInstance;
   const { params, headers } = getConfig(methodInstance);
-  return JSONStringify([type, url, params, requestBody, headers]);
+  return JSONStringify([type, url, params, data, headers]);
 };
 
 /**
