@@ -40,11 +40,13 @@ import sendRequest from './sendRequest';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
- * @param method 请求方法对象
+ * @param methodInstance 请求方法对象
  * @param frontStates 前端状态集合
- * @param responser 响应处理对象
- * @param responserHandlerArgs 响应处理回调的参数，该参数由use hooks的send传入
- * @param forceRequest 是否强制发起请求
+ * @param useHookConfig useHook配置对象
+ * @param successHandlers 成功回调
+ * @param errorHandlers 失败回调
+ * @param completeHandlers 完成回调
+ * @param sendArgs send函数参数
  * @param updateCacheState 是否更新缓存状态，一般在useFetcher时设置为true
  * @returns 请求状态
  */
@@ -55,7 +57,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   successHandlers: SuccessHandler<S, E, R, T, RC, RE, RH>[],
   errorHandlers: ErrorHandler<S, E, R, T, RC, RE, RH>[],
   completeHandlers: CompleteHandler<S, E, R, T, RC, RE, RH>[],
-  responserHandlerArgs: any[] = [],
+  sendArgs: any[] = [],
   updateCacheState = falseValue
 ) {
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as FrontRequestHookConfig<
@@ -79,7 +81,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
   let cachedResponse: R | undefined = getResponseCache(id, methodKey);
   if (!updateCacheState) {
-    const persistentResponse = getPersistentResponse(id, methodInstance, storage, tag);
+    const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);
 
     // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
     // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
@@ -113,7 +115,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
     const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
       guardNextConfig || {};
-    const forceRequestFinally = sloughConfig(guardNextForceRequest, responserHandlerArgs);
+    const forceRequestFinally = sloughConfig(guardNextForceRequest, sendArgs);
     const {
       response,
       onDownload = noop,
@@ -171,7 +173,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     {
       method: methodInstance,
       cachedResponse,
-      sendArgs: responserHandlerArgs,
+      sendArgs,
       config: useHookConfig,
       frontStates,
       update: newFrontStates => update(newFrontStates, frontStates),
@@ -213,15 +215,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
         // 在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
         update({ loading: falseValue }, frontStates);
-        runArgsHandler(
-          successHandlers,
-          successHandlerDecorator,
-          createAlovaEvent(0, methodInstance, responserHandlerArgs, data)
-        );
+        runArgsHandler(successHandlers, successHandlerDecorator, createAlovaEvent(0, methodInstance, sendArgs, data));
         runArgsHandler(
           completeHandlers,
           completeHandlerDecorator,
-          createAlovaEvent(2, methodInstance, responserHandlerArgs, data, undefinedValue, 'success')
+          createAlovaEvent(2, methodInstance, sendArgs, data, undefinedValue, 'success')
         );
         return data;
       };
@@ -254,12 +252,12 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       runArgsHandler(
         errorHandlers,
         errorHandlerDecorator,
-        createAlovaEvent(1, methodInstance, responserHandlerArgs, undefinedValue, error)
+        createAlovaEvent(1, methodInstance, sendArgs, undefinedValue, error)
       );
       runArgsHandler(
         completeHandlers,
         completeHandlerDecorator,
-        createAlovaEvent(2, methodInstance, responserHandlerArgs, undefinedValue, error, 'error')
+        createAlovaEvent(2, methodInstance, sendArgs, undefinedValue, error, 'error')
       );
       return promiseReject(error);
     }

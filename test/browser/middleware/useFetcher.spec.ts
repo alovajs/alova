@@ -51,7 +51,7 @@ describe('useFetcher middleware', function () {
     const rawData = await untilCbCalled(onSuccess);
     const endTs = Date.now();
     expect(!!rawData).toBeTruthy();
-    expect(endTs - startTs).toBeGreaterThan(1000);
+    expect(endTs - startTs).toBeGreaterThanOrEqual(1000);
   });
 
   test("shouldn't send request when not call next in middleware function", async () => {

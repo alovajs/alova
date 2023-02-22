@@ -55,6 +55,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     uploading: create({ ...progress })
   };
 
+  // 请求事件
   const successHandlers = [] as SuccessHandler<S, E, R, T, RC, RE, RH>[];
   const errorHandlers = [] as ErrorHandler<S, E, R, T, RC, RE, RH>[];
   const completeHandlers = [] as CompleteHandler<S, E, R, T, RC, RE, RH>[];

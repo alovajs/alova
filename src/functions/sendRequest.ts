@@ -26,7 +26,7 @@ import {
   trueValue,
   undefinedValue
 } from '../utils/variables';
-import invalidateCache from './invalidateCache';
+import { invalidateCache } from './manipulateCache';
 
 /**
  * 实际的请求函数
@@ -119,7 +119,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             // 保存缓存
             setResponseCache(id, methodKey, data, expireTimestamp);
             saveMethodSnapshot(id, methodKey, methodInstance);
-            toStorage && persistResponse(id, methodInstance, data, expireTimestamp, storage, tag);
+            toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
 
             // 查找hitTarget，让它的缓存失效
             const hitMethods = matchSnapshotMethod(
