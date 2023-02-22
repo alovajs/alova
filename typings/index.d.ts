@@ -476,7 +476,7 @@ declare function setCache<R = any, S = any, E = any, T = any, RC = any, RE = any
 /** 查询缓存数据 */
 declare function queryCache<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>
-): R;
+): R | undefined;
 
 /**
  * 以匹配的方式获取method实例快照，即已经请求过的method实例
