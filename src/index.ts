@@ -2,8 +2,7 @@ import { AlovaOptions } from '../typings';
 import Alova, { alovas } from './Alova';
 import myAssert from './utils/myAssert';
 import { getStatesHook, pushItem } from './utils/variables';
-export { default as invalidateCache } from './functions/invalidateCache';
-export { default as setCache } from './functions/setCache';
+export * from './functions/manipulateCache';
 export { default as updateState } from './functions/updateState';
 export { default as useFetcher } from './hooks/useFetcher';
 export { default as useRequest } from './hooks/useRequest';
@@ -32,7 +31,7 @@ export const createAlova = <S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE
 if (process.env.NODE_ENV === 'development') {
   const consoleInfo = () => {
     console.log(`[alova tips]
--> More awesome alova hooks: https://alova.js.org/category/extend-hooks
+-> Powerful request strategies: https://alova.js.org//category/strategy
 -> Using mock data: https://alova.js.org/extension/alova-mock
 -> Please give alova a star if you like it: https://github.com/alovajs/alova
 -> This tips will remove in production environment. hide it in development: https://alova.js.org/others/hide-recommend-tips`);

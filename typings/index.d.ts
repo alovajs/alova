@@ -63,38 +63,6 @@ interface AlovaGlobalStorage {
   remove(key: string): void;
 }
 
-/** method实例和全局存储适配器的连接器对象 */
-interface StorageConnector {
-  /**
-   * 设置持久化存储
-   * @param method 操作的method实例
-   * @param response 存储数据
-   * @param expireTimestamp 存储过期的时间点对应的时间戳，未传则不过期
-   */
-  set(method: Method, response: any, expireTimestamp?: number): void;
-
-  /**
-   * 获取持久化存储
-   * @param method 操作的method实例
-   */
-  get<R>(method: Method<any, any, R>): R | undefined;
-
-  /**
-   * 移除持久化存储
-   * @param method 操作的method实例
-   */
-  remove(method: Method): void;
-}
-
-/**
- * method实例内的storage对象
- */
-interface AlovaMethodStorage {
-  set?(storageConnector: StorageConnector, method: Method, response: any): void;
-  get?(storageConnector: StorageConnector, method: Method): any;
-  remove?(storageConnector: StorageConnector, method: Method): void;
-}
-
 /**
  * 请求缓存设置
  * expire: 过期时间
@@ -139,9 +107,6 @@ type AlovaMethodConfig<R, T, RC, RH> = {
 
   /** 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态 */
   transformData?: (data: T, headers: RH) => R;
-
-  /** 请求级的存储适配器，设置后将通过此适配器管理存储 */
-  storage?: AlovaMethodStorage;
 } & RC;
 
 type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
@@ -442,7 +407,7 @@ type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, R
   onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
   onComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
 };
-type UseFetchHookReturnType<S> = {
+interface UseFetchHookReturnType<S> {
   fetching: UseHookReturnType<any, S>['loading'];
   error: UseHookReturnType<any, S>['error'];
   downloading: UseHookReturnType<any, S>['downloading'];
@@ -452,7 +417,7 @@ type UseFetchHookReturnType<S> = {
   onSuccess: UseHookReturnType<any, S>['onSuccess'];
   onError: UseHookReturnType<any, S>['onError'];
   onComplete: UseHookReturnType<any, S>['onComplete'];
-};
+}
 
 interface MethodFilterHandler {
   (method: Method, index: number, methods: Method[]): boolean;
@@ -502,11 +467,16 @@ declare function updateState<R = any, S = any, E = any, T = any, RC = any, RE = 
   options?: updateOptions
 ): boolean;
 
-/** 手动设置缓存响应数据 */
+/** 设置缓存 */
 declare function setCache<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
   dataOrUpdater: R | ((oldCache: R) => R | undefined | void)
 ): void;
+
+/** 查询缓存数据 */
+declare function queryCache<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
+  matcher: MethodMatcher<S, E, R, T, RC, RE, RH>
+): R;
 
 /**
  * 以匹配的方式获取method实例快照，即已经请求过的method实例

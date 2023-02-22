@@ -1,5 +1,4 @@
 import { Method, MethodFilter, MethodFilterHandler, MethodMatcher } from '../../typings';
-import MethodCls from '../Method';
 import { instanceOf, isPlainObject, isString } from '../utils/helper';
 import { forEach, getConfig, isArray, objectKeys, pushItem, trueValue, undefinedValue } from '../utils/variables';
 
@@ -64,18 +63,18 @@ export const matchSnapshotMethod = <M extends boolean = true>(matcher: MethodFil
 
 /**
  *
- * @param matcher
- * @param behavior
+ * @param matcher Method实例匹配器
+ * @param matchAll 是否匹配全部method实例
  * @returns
  */
-export const filterSnapshotMethodsUnified = <S, E, R, T, RC, RE, RH, M extends boolean>(
+export const filterSnapshotMethods = <S, E, R, T, RC, RE, RH, M extends boolean>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
   matchAll: M
 ): M extends true ? Method<S, E, R, T, RC, RE, RH>[] : Method<S, E, R, T, RC, RE, RH> | undefined => {
   let methods: any;
   if (isArray(matcher)) {
     methods = matcher;
-  } else if (instanceOf(matcher, MethodCls)) {
+  } else if (matcher && isString((matcher as Method).url)) {
     methods = matchAll ? [matcher] : matcher;
   } else {
     methods = matchSnapshotMethod(matcher as MethodFilter, matchAll);
