@@ -53,7 +53,9 @@ export default function GlobalFetch() {
           response => {
             // 请求成功后清除中断处理
             clearTimeoutTimer(abortTimer);
-            return response;
+
+            // Response的Readable只能被读取一次，需要克隆才可重复使用
+            return response.clone();
           },
           err => promiseReject(alovaError(isTimeout ? 'fetchError: network timeout' : err.message))
         ),
