@@ -8,6 +8,7 @@ import {
   JSONStringify,
   MEMORY,
   nullValue,
+  ObjectCls,
   PromiseCls,
   promiseThen,
   setTimeoutFn,
@@ -49,7 +50,7 @@ export const isString = (arg: any): arg is string => typeof arg === 'string';
 
 // 判断是否为普通对象
 export const isPlainObject = (arg: any): arg is Record<string, any> =>
-  Object.prototype.toString.call(arg) === '[object Object]';
+  ObjectCls.prototype.toString.call(arg) === '[object Object]';
 
 // 判断是否为某个类的实例
 export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls;

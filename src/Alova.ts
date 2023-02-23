@@ -1,13 +1,21 @@
 import { AlovaGlobalStorage, AlovaMethodConfig, AlovaOptions, RequestBody } from '../typings';
 import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 import globalLocalStorage from './predefine/globalLocalStorage';
+import { trueValue } from './utils/variables';
 
 export const alovas = [] as Alova<any, any, any, any, any>[];
-// get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
 const defaultAlovaOptions = {
+  /**
+   * GET请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+   */
   localCache: {
     [typeGet]: 300000
-  }
+  },
+
+  /**
+   * 共享请求默认为true
+   */
+  shareRequest: trueValue
 };
 
 let idCounter = 0;
