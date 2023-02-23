@@ -127,12 +127,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     response: () =>
       promiseThen(
         PromiseCls.all([hitAdapterCtrls.response(), hitAdapterCtrls.headers()]),
-        ([rawResponse, headers]) => {
-          // Response的Readable只能被读取一次，需要特殊处理Response
-          if (rawResponse.toString() === '[object Response]' && isFn(rawResponse.clone)) {
-            rawResponse = rawResponse.clone();
-          }
-          return asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
+        ([rawResponse, headers]) =>
+          asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
             deleteAttr(namespacedAdapterReturnMap, methodKey);
             data = transformData(data, headers);
 
@@ -167,8 +163,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             );
             len(hitMethods) > 0 && invalidateCache(hitMethods);
             return data;
-          });
-        },
+          }),
         (error: any) => {
           if (!isFn(responseErrorHandler)) {
             throw error;
