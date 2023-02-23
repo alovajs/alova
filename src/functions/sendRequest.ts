@@ -1,4 +1,4 @@
-import { ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
+import { AlovaRequestAdapter, ResponsedHandler, ResponsedHandlerRecord, ResponseErrorHandler } from '../../typings';
 import Method from '../Method';
 import { matchSnapshotMethod, saveMethodSnapshot } from '../storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
@@ -14,6 +14,7 @@ import {
   self
 } from '../utils/helper';
 import {
+  deleteAttr,
   falseValue,
   getConfig,
   getContext,
@@ -27,6 +28,10 @@ import {
   undefinedValue
 } from '../utils/variables';
 import { invalidateCache } from './manipulateCache';
+
+// 请求适配器返回信息暂存，用于实现请求共享
+type RequestAdapterReturnType = ReturnType<AlovaRequestAdapter<any, any, any, any, any>>;
+const adapterReturnMap: Record<string, Record<string, RequestAdapterReturnType>> = {};
 
 /**
  * 实际的请求函数
@@ -43,6 +48,9 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
 
+  // 发送请求前调用钩子函数
+  beforeRequest(methodInstance);
+
   // 如果是强制请求的，则跳过从缓存中获取的步骤
   if (!forceRequest) {
     const response = getResponseCache(id, methodKey);
@@ -55,41 +63,49 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     }
   }
 
-  // 发送请求前调用钩子函数
-  beforeRequest(methodInstance);
   const {
     params = {},
     headers = {},
     localCache: newLocalCache,
     transformData = self,
-    name: methodInstanceName = ''
+    name: methodInstanceName = '',
+    shareRequest
   } = getConfig(methodInstance);
   const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(undefinedValue, newLocalCache);
 
-  // 将params对象转换为get字符串
-  // 过滤掉值为undefined的
-  const paramsStr = objectKeys(params)
-    .filter(key => params[key] !== undefinedValue)
-    .map(key => `${key}=${params[key]}`)
-    .join('&');
+  const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
+  let hitAdapterCtrls = namespacedAdapterReturnMap[methodKey];
+  if (!shareRequest || !hitAdapterCtrls) {
+    // 将params对象转换为get字符串
+    // 过滤掉值为undefined的
+    const paramsStr = objectKeys(params)
+      .filter(key => params[key] !== undefinedValue)
+      .map(key => `${key}=${params[key]}`)
+      .join('&');
 
-  // 将get参数拼接到url后面，注意url可能已存在参数
-  let urlWithParams = paramsStr ? (newUrl.includes('?') ? `${newUrl}&${paramsStr}` : `${newUrl}?${paramsStr}`) : newUrl;
-  // 如果不是/开头的，则需要添加/
-  urlWithParams = urlWithParams.startsWith('/') ? urlWithParams : `/${urlWithParams}`;
-  // baseURL如果以/结尾，则去掉/
-  const baseURLWithSlash = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+    // 将get参数拼接到url后面，注意url可能已存在参数
+    let urlWithParams = paramsStr
+      ? newUrl.includes('?')
+        ? `${newUrl}&${paramsStr}`
+        : `${newUrl}?${paramsStr}`
+      : newUrl;
+    // 如果不是/开头的，则需要添加/
+    urlWithParams = urlWithParams.startsWith('/') ? urlWithParams : `/${urlWithParams}`;
+    // baseURL如果以/结尾，则去掉/
+    const baseURLWithSlash = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
 
-  // 请求数据
-  const ctrls = requestAdapter(
-    {
-      url: baseURLWithSlash + urlWithParams,
-      type,
-      data,
-      headers
-    },
-    methodInstance
-  );
+    // 请求数据
+    const ctrls = requestAdapter(
+      {
+        url: baseURLWithSlash + urlWithParams,
+        type,
+        data,
+        headers
+      },
+      methodInstance
+    );
+    hitAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
+  }
 
   let responsedHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
   let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
@@ -106,14 +122,18 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     responsedHandler = isFn(successHandler) ? successHandler : responsedHandler;
     responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
   }
-
   return {
-    ...ctrls,
+    ...hitAdapterCtrls,
     response: () =>
       promiseThen(
-        PromiseCls.all([ctrls.response(), ctrls.headers()]),
-        ([rawResponse, headers]) =>
-          asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
+        PromiseCls.all([hitAdapterCtrls.response(), hitAdapterCtrls.headers()]),
+        ([rawResponse, headers]) => {
+          // Response的Readable只能被读取一次，需要特殊处理Response
+          if (rawResponse.toString() === '[object Response]' && isFn(rawResponse.clone)) {
+            rawResponse = rawResponse.clone();
+          }
+          return asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
+            deleteAttr(namespacedAdapterReturnMap, methodKey);
             data = transformData(data, headers);
 
             // 保存缓存
@@ -147,7 +167,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             );
             len(hitMethods) > 0 && invalidateCache(hitMethods);
             return data;
-          }),
+          });
+        },
         (error: any) => {
           if (!isFn(responseErrorHandler)) {
             throw error;

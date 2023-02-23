@@ -80,15 +80,29 @@ type DetailLocalCacheConfig = {
 };
 type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
 type AlovaMethodConfig<R, T, RC, RH> = {
-  /** method对象名称，在updateState、invalidateCache、setCache、以及fetch函数中可以通过名称或通配符获取对应method对象 */
+  /**
+   * method对象名称，在updateState、invalidateCache、setCache、以及fetch函数中可以通过名称或通配符获取对应method对象
+   */
   name?: string | number;
+
+  /**
+   * url参数
+   */
   params?: Arg;
+
+  /**
+   * 请求头
+   */
   headers?: Arg;
 
-  /** 当前中断时间 */
+  /**
+   * 当前中断时间
+   */
   timeout?: number;
 
-  /** 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存 */
+  /**
+   * 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
+   */
   localCache?: LocalCacheConfig;
 
   /**
@@ -99,14 +113,29 @@ type AlovaMethodConfig<R, T, RC, RH> = {
    */
   hitSource?: string | RegExp | Method | (string | RegExp | Method)[];
 
-  /** 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启 */
+  /**
+   * 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+   * @default false
+   */
   enableDownload?: boolean;
 
-  /** 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启 */
+  /**
+   * 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
+   * @default false
+   */
   enableUpload?: boolean;
 
-  /** 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态 */
+  /**
+   * 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
+   */
   transformData?: (data: T, headers: RH) => R;
+
+  /**
+   * 请求级共享请求开关
+   * 开启共享请求后，同时发起相同请求时将共用同一个请求
+   * 当这边设置后将覆盖全局的设置
+   */
+  shareRequest?: boolean;
 } & RC;
 
 type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
@@ -170,6 +199,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
    * mode: 缓存模式，可选值为MEMORY、STORAGE_PLACEHOLDER、STORAGE_RESTORE
    * get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+   * @default { GET: 300000 }
    */
   localCache?: GlobalLocalCacheConfig;
 
@@ -184,6 +214,13 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * 如果正常响应的钩子抛出错误也将进入响应失败的钩子函数
    */
   responsed?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
+
+  /**
+   * 全局的共享请求开关
+   * 开启共享请求后，同时发起相同请求时将共用同一个请求
+   * @default true
+   */
+  shareRequest?: boolean;
 }
 
 /** 请求方法类型 */
@@ -476,7 +513,7 @@ declare function setCache<R = any, S = any, E = any, T = any, RC = any, RE = any
 /** 查询缓存数据 */
 declare function queryCache<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>
-): R;
+): R | undefined;
 
 /**
  * 以匹配的方式获取method实例快照，即已经请求过的method实例

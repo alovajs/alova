@@ -2,7 +2,15 @@ import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { instanceOf, key } from './utils/helper';
-import { deleteAttr, falseValue, getConfig, getContextOptions, isArray, undefinedValue } from './utils/variables';
+import {
+  deleteAttr,
+  falseValue,
+  forEach,
+  getConfig,
+  getContextOptions,
+  isArray,
+  undefinedValue
+} from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -36,11 +44,12 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     // 将请求相关的全局配置合并到Method对象中
     const contextConcatConfig: any = {};
 
-    // 合并timeout
-    const mergedTimeoutKey = 'timeout';
-    if (contextOptions[mergedTimeoutKey] !== undefinedValue) {
-      contextConcatConfig[mergedTimeoutKey] = contextOptions[mergedTimeoutKey];
-    }
+    // 合并参数
+    forEach(['timeout', 'shareRequest'], mergedKey => {
+      if (contextOptions[mergedKey as keyof typeof contextOptions] !== undefinedValue) {
+        contextConcatConfig[mergedKey] = contextOptions[mergedKey as keyof typeof contextOptions];
+      }
+    });
 
     // 合并localCache
     const mergedLocalCacheKey = 'localCache';
