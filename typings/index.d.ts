@@ -323,9 +323,6 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 当前的usehook配置对象 */
   config: any;
 
-  /** 状态更新函数 */
-  update: ExportedUpdate<R>;
-
   /** 前端状态集合 */
   frontStates: FrontRequestState<
     ExportedType<boolean, S>,
@@ -334,6 +331,9 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
     ExportedType<Progress, S>,
     ExportedType<Progress, S>
   >;
+
+  /** 状态更新函数 */
+  update: ExportedUpdate<R>;
 
   /** 成功回调装饰 */
   decorateSuccess: (
