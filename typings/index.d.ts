@@ -2,7 +2,7 @@ import { Writable } from 'svelte/store';
 import { Ref } from 'vue';
 
 type Arg = Record<string, any>;
-type RequestBody = Arg | FormData | Blob | ArrayBuffer | ReadableStream;
+type RequestBody = Arg | FormData | string;
 
 /** 进度信息 */
 type Progress = {
@@ -79,21 +79,23 @@ type DetailLocalCacheConfig = {
   tag?: string | number;
 };
 type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
+
+interface MethodRequestConfig {
+  /**
+   * url参数
+   */
+  params: Arg;
+
+  /**
+   * 请求头
+   */
+  headers: Arg;
+}
 type AlovaMethodConfig<R, T, RC, RH> = {
   /**
    * method对象名称，在updateState、invalidateCache、setCache、以及fetch函数中可以通过名称或通配符获取对应method对象
    */
   name?: string | number;
-
-  /**
-   * url参数
-   */
-  params?: Arg;
-
-  /**
-   * 请求头
-   */
-  headers?: Arg;
 
   /**
    * 当前中断时间
@@ -137,6 +139,7 @@ type AlovaMethodConfig<R, T, RC, RH> = {
    */
   shareRequest?: boolean;
 } & RC;
+type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 
 type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
 type ResponseErrorHandler<R, T, RC, RE, RH> = (error: any, methodInstance: Method<any, any, R, T, RC, RE, RH>) => void;
@@ -228,7 +231,7 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
   baseURL: string;
   url: string;
   type: MethodType;
-  config: AlovaMethodConfig<R, T, RC, RH>;
+  config: MethodRequestConfig & AlovaMethodConfig<R, T, RC, RH>;
   data?: RequestBody;
   hitSource?: (string | RegExp)[];
   context: Alova<S, E, RC, RE, RH>;
@@ -247,7 +250,7 @@ interface MethodConstructor {
     type: MethodType,
     context: Alova<S, E, RC, RE, RH>,
     url: string,
-    config?: AlovaMethodConfig<R, T, RC, RH>,
+    config?: AlovaMethodCreateConfig<R, T, RC, RH>,
     data?: RequestBody
   ): Method<S, E, R, T, RC, RE, RH>;
   readonly prototype: Method;
@@ -262,24 +265,24 @@ interface Alova<S, E, RC, RE, RH> {
   Post<R, T = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodConfig<R, T, RC, RH>
+    config?: AlovaMethodCreateConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
   Put<R, T = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodConfig<R, T, RC, RH>
+    config?: AlovaMethodCreateConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
   Delete<R, T = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodConfig<R, T, RC, RH>
+    config?: AlovaMethodCreateConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
-  Head<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
-  Options<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
+  Head<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
+  Options<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
   Patch<R, T = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodConfig<R, T, RC, RH>
+    config?: AlovaMethodCreateConfig<R, T, RC, RH>
   ): Method<S, E, R, T, RC, RE, RH>;
 }
 

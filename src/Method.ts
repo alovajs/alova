@@ -1,4 +1,4 @@
-import { AlovaMethodConfig, MethodType, RequestBody } from '../typings';
+import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { instanceOf, key } from './utils/helper';
@@ -23,7 +23,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public type: MethodType;
   public baseURL: string;
   public url: string;
-  public config: AlovaMethodConfig<R, T, RC, RH>;
+  public config: MethodRequestConfig & AlovaMethodConfig<R, T, RC, RH>;
   public data?: RequestBody;
   public hitSource?: (string | RegExp)[];
   public context: Alova<S, E, RC, RE, RH>;
@@ -72,6 +72,8 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
 
     this.config = {
       ...contextConcatConfig,
+      headers: {},
+      params: {},
       ...(config || {})
     };
     this.data = data;

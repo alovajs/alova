@@ -3,6 +3,7 @@ import Method from '../Method';
 import { matchSnapshotMethod, saveMethodSnapshot } from '../storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
 import { persistResponse } from '../storage/responseStorage';
+import cloneMethod from '../utils/cloneMethod';
 import {
   asyncOrSync,
   getLocalCacheConfigParam,
@@ -43,13 +44,14 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
   forceRequest: boolean
 ) {
-  const { baseURL, url: newUrl, type, data } = methodInstance;
   const { beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
-  const { id, storage } = getContext(methodInstance);
   const methodKey = key(methodInstance);
+  const clonedMethod = cloneMethod(methodInstance);
 
   // 发送请求前调用钩子函数
-  beforeRequest(methodInstance);
+  beforeRequest(clonedMethod);
+  const { baseURL, url: newUrl, type, data } = clonedMethod;
+  const { id, storage } = getContext(clonedMethod);
 
   // 如果是强制请求的，则跳过从缓存中获取的步骤
   if (!forceRequest) {
@@ -70,7 +72,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     transformData = self,
     name: methodInstanceName = '',
     shareRequest
-  } = getConfig(methodInstance);
+  } = getConfig(clonedMethod);
   const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(undefinedValue, newLocalCache);
 
   const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
@@ -102,7 +104,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         data,
         headers
       },
-      methodInstance
+      clonedMethod
     );
     hitAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
   }
@@ -128,7 +130,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       promiseThen(
         PromiseCls.all([hitAdapterCtrls.response(), hitAdapterCtrls.headers()]),
         ([rawResponse, headers]) =>
-          asyncOrSync(responsedHandler(rawResponse, methodInstance), data => {
+          asyncOrSync(responsedHandler(rawResponse, clonedMethod), data => {
             deleteAttr(namespacedAdapterReturnMap, methodKey);
             data = transformData(data, headers);
 
@@ -169,7 +171,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             throw error;
           }
           // 可能返回Promise.reject
-          return responseErrorHandler(error, methodInstance);
+          return responseErrorHandler(error, clonedMethod);
         }
       )
   };

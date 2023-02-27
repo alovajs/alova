@@ -7,12 +7,6 @@ import GlobalFetch from '../src/predefine/GlobalFetch';
 import { GlobalLocalCacheConfig, Method, StatesHook } from '../typings';
 
 (global as any).fetch = (window as any).fetch = nodeFetch;
-// (global as any).Headers = (window as any).Headers = Headers;
-// (global as any).Request = (window as any).Request = Request;
-// (global as any).Response = (window as any).Response = Response;
-// (global as any).ReadableStream = (window as any).ReadableStream = ReadableStream;
-// (global as any).Blob = (window as any).Blob = Blob;
-// (global as any).FormData = (window as any).FormData = FormData;
 
 // 防止Vue warn打印
 const warn = console.warn;

@@ -1,5 +1,6 @@
 import { AlovaOptions } from '../typings';
 import Alova, { alovas } from './Alova';
+import { newInstance } from './utils/helper';
 import myAssert from './utils/myAssert';
 import { getStatesHook, pushItem } from './utils/variables';
 export * from './functions/manipulateCache';
@@ -16,7 +17,7 @@ export { matchSnapshotMethod } from './storage/methodSnapShots';
  * @returns Alova实例
  */
 export const createAlova = <S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) => {
-  const alovaInstance = new Alova(options);
+  const alovaInstance = newInstance(Alova<S, E, RC, RE, RH>, options);
   if (alovas[0]) {
     myAssert(
       getStatesHook(alovas[0]) === getStatesHook(alovaInstance),

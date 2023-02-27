@@ -1,8 +1,9 @@
-import { AlovaMethodHandler, CacheExpire, LocalCacheConfig } from '../../typings';
+import { AlovaMethodHandler, Arg, CacheExpire, LocalCacheConfig, RequestBody } from '../../typings';
 import Method from '../Method';
 import {
   clearTimeoutTimer,
   falseValue,
+  forEach,
   getConfig,
   getTime,
   JSONStringify,
@@ -55,6 +56,22 @@ export const isPlainObject = (arg: any): arg is Record<string, any> =>
 // 判断是否为某个类的实例
 export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls;
 
+// 判断是否为FormData实例
+export const isFormData = (data: RequestBody = ''): data is FormData => /FormData/i.test(data.toString() || '');
+
+/**
+ * 将FormData转换为object实例
+ * @param formData FormData实例
+ * @returns object
+ */
+const formData2Object = (formData: FormData) => {
+  const dataObject: Arg = {};
+  forEach(formData as any, (value, key) => {
+    dataObject[key] = value;
+  });
+  return dataObject;
+};
+
 /**
  * 获取请求方式的key值
  * @returns {string} 此请求方式的key值
@@ -62,7 +79,7 @@ export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is 
 export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const { type, url, data } = methodInstance;
   const { params, headers } = getConfig(methodInstance);
-  return JSONStringify([type, url, params, data, headers]);
+  return JSONStringify([type, url, params, isFormData(data) ? formData2Object(data) : data, headers]);
 };
 
 /**
@@ -152,3 +169,14 @@ export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[]
  */
 export const asyncOrSync = <T, R>(target: T, onAfter: (data: T extends Promise<infer D> ? D : T) => R) =>
   instanceOf(target, PromiseCls) ? promiseThen(target, onAfter) : onAfter(target as any);
+
+/**
+ * 创建类实例
+ * @param cls 构造函数
+ * @param args 构造函数参数
+ * @returns 类实例
+ */
+export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(
+  cls: T,
+  ...args: ConstructorParameters<T>
+) => new cls(...args);

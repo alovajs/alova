@@ -1,4 +1,4 @@
-import { invalidateCache, useRequest } from '../../../src';
+import { invalidateCache, queryCache, useRequest } from '../../../src';
 import Method from '../../../src/Method';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
@@ -325,5 +325,49 @@ describe('invalitate cached response data', () => {
       method: 'GET',
       params: { count: 0, countKey: 'g' }
     });
+  });
+
+  test('should match method even if change method in beforeRequest', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json(),
+      beforeRequestExpect(methodInstance) {
+        methodInstance.config.headers = methodInstance.config.headers || {};
+        methodInstance.config.headers.token = 'token';
+      }
+    });
+    const Get1 = () =>
+      alova.Get('/unit-test', {
+        name: 'test10-get',
+        localCache: Infinity,
+        transformData: ({ data }: Result) => data
+      });
+    const Get2 = () =>
+      alova.Get('/unit-test', {
+        name: 'test20-get',
+        params: { key: 'f' },
+        localCache: Infinity,
+        transformData: ({ data }: Result) => data
+      });
+
+    const firstState = useRequest(Get1());
+    const secondState = useRequest(Get2());
+    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+
+    expect(queryCache(Get1())).toStrictEqual({
+      path: '/unit-test',
+      method: 'GET',
+      params: {}
+    });
+    expect(queryCache(Get2())).toStrictEqual({
+      path: '/unit-test',
+      method: 'GET',
+      params: { key: 'f' }
+    });
+
+    invalidateCache('test10-get');
+    expect(queryCache(Get1())).toBeUndefined();
+
+    invalidateCache(Get2());
+    expect(queryCache(Get2())).toBeUndefined();
   });
 });
