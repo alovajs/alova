@@ -261,7 +261,7 @@ interface Alova<S, E, RC, RE, RH> {
   options: AlovaOptions<S, E, RC, RE, RH>;
   id: string;
   storage: AlovaGlobalStorage;
-  Get<R, T = unknown>(url: string, config?: AlovaMethodConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
+  Get<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>): Method<S, E, R, T, RC, RE, RH>;
   Post<R, T = unknown>(
     url: string,
     data?: RequestBody,
