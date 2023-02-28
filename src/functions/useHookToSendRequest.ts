@@ -25,6 +25,7 @@ import {
   getConfig,
   getContext,
   len,
+  MEMORY,
   objectKeys,
   promiseCatch,
   PromiseCls,
@@ -71,7 +72,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   >;
   const { id, options, storage } = getContext(methodInstance);
   const { update } = options.statesHook;
-  const { enableDownload, enableUpload } = getConfig(methodInstance);
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const methodKey = key(methodInstance);
 
@@ -81,11 +81,13 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   const { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
   let cachedResponse: R | undefined = getResponseCache(id, methodKey);
   if (!updateCacheState) {
-    const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);
+    // 当缓存模式为memory时不获取缓存，减少缓存获取
+    const persistentResponse =
+      cacheMode !== MEMORY ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue;
 
     // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
     // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
-    if (persistentResponse && cacheMode === STORAGE_RESTORE && !cachedResponse) {
+    if (cacheMode === STORAGE_RESTORE && !cachedResponse && persistentResponse) {
       setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
       cachedResponse = persistentResponse;
     }
@@ -144,6 +146,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         frontStates
       );
     };
+
+    const { enableDownload, enableUpload } = getConfig(methodInstance);
     enableDownload && onDownload(progressUpdater('downloading'));
     enableUpload && onUpload(progressUpdater('uploading'));
     return responseHandlePromise;

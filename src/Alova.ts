@@ -28,7 +28,7 @@ export default class Alova<S, E, RC, RE, RH> {
   public storage: AlovaGlobalStorage;
   constructor(options: AlovaOptions<S, E, RC, RE, RH>) {
     // 如果storage未指定，则默认使用localStorage
-    this.storage = options.storageAdapter || globalLocalStorage;
+    this.storage = options.storageAdapter || globalLocalStorage();
 
     // 合并默认options
     this.options = {
