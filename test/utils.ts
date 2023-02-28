@@ -5,6 +5,7 @@ import 'web-streams-polyfill';
 import { createAlova } from '../src';
 import GlobalFetch from '../src/predefine/GlobalFetch';
 import { GlobalLocalCacheConfig, Method, StatesHook } from '../typings';
+import { FetchRequestInit } from '../typings/globalfetch';
 
 (global as any).fetch = (window as any).fetch = nodeFetch;
 
@@ -80,7 +81,7 @@ export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[])
     }, ...args);
   });
 
-type FetchMethod = Method<any, any, any, any, RequestInit, Response, Headers>;
+type FetchMethod = Method<any, any, any, any, FetchRequestInit, Response, Headers>;
 export const getAlovaInstance = <S, E>(
   statesHook: StatesHook<S, E>,
   {

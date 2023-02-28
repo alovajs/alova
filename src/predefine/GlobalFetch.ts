@@ -1,4 +1,5 @@
 import { Method, RequestElements } from '../../typings';
+import { FetchRequestInit } from '../../typings/globalfetch';
 import alovaError from '../utils/alovaError';
 import { instanceOf, isString } from '../utils/helper';
 import {
@@ -24,7 +25,7 @@ const isBodyData = (data: any): data is BodyInit => {
   );
 };
 export default function GlobalFetch() {
-  return function (elements: RequestElements, method: Method<any, any, any, any, RequestInit, Response, Headers>) {
+  return function (elements: RequestElements, method: Method<any, any, any, any, FetchRequestInit, Response, Headers>) {
     // 设置了中断时间，则在指定时间后中断请求
     const adapterConfig = method.config;
     const timeout = adapterConfig.timeout || 0;
