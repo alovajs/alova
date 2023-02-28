@@ -2,7 +2,7 @@
   <img width="200px" src="https://user-images.githubusercontent.com/29848971/202826407-92f17a6a-bc69-4ef8-be6f-001413ca8c90.png" />
 </p>
 
-<p align="center"><b>A lightweight request scene management library of MVVM library, it can make your application management CS data interaction more efficient and better experience.</b></p>
+<p align="center"><b>A lightweight request strategy library, which provides targeted request strategies for different request scenarios to improve application availability and fluency, reduce server pressure, and enable applications to have excellent strategic thinking like a wise man.</b></p>
 
 <p align="center">English | <a href="./README.zh-CN.md">📑中文</a></p>
 

@@ -2,7 +2,7 @@
   <img width="200px" src="https://user-images.githubusercontent.com/29848971/202826407-92f17a6a-bc69-4ef8-be6f-001413ca8c90.png" />
 </p>
 
-<p align="center"><b>一个轻量级的MVVM请求场景管理库，它可以让你的应用管理CS数据交互更高效，体验更好。</b></p>
+<p align="center"><b>轻量级的请求策略库，它针对不同请求场景分别提供了具有针对性的请求策略，来提升应用可用性、流畅性，降低服务端压力，让应用如智者一般具备卓越的策略思维。</b></p>
 
 <p align="center">中文 | <a href="./README.md">📑English</a></p>
 
