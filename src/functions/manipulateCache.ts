@@ -45,14 +45,15 @@ export const setCache = <R = any, S = any, E = any, T = any, RC = any, RE = any,
   forEach(methodInstances, methodInstance => {
     const { id, storage } = getContext(methodInstance);
     const methodKey = key(methodInstance);
+    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
-      data = dataOrUpdater(queryCache(methodInstance));
+      const cachedData = getResponseCache(id, methodKey) || getPersistentResponse(id, methodKey, storage, tag);
+      data = dataOrUpdater(cachedData);
       if (data === undefinedValue) {
         return;
       }
     }
-    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     setResponseCache(id, methodKey, data, expireMilliseconds);
     toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
   });

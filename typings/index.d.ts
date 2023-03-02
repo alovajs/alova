@@ -452,7 +452,7 @@ interface UseFetchHookReturnType<S> {
   error: UseHookReturnType<any, S>['error'];
   downloading: UseHookReturnType<any, S>['downloading'];
   uploading: UseHookReturnType<any, S>['uploading'];
-  fetch: <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => void;
+  fetch: <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, ...args: any[]) => void;
   abort: UseHookReturnType<any, S>['abort'];
   onSuccess: UseHookReturnType<any, S>['onSuccess'];
   onError: UseHookReturnType<any, S>['onError'];
@@ -528,3 +528,10 @@ declare function matchSnapshotMethod<M extends boolean = true>(
   matcher: MethodFilter,
   matchAll?: M
 ): M extends true ? Method[] : Method | undefined;
+
+/**
+ * 获取请求方式的key值
+ * @param {Method} methodInstance method实例
+ * @returns — 此请求方式的key值
+ */
+declare function getMethodKey<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>): string;

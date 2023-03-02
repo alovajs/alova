@@ -32,10 +32,10 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
      * fetch一定会发送请求，且如果当前请求的数据有管理对应的状态，则会更新这个状态
      * @param matcher Method对象匹配器
      */
-    fetch: <S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>) => {
+    fetch: <S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>, ...args: any[]) => {
       const methodInstance = filterSnapshotMethods(matcher, falseValue);
       myAssert(!!methodInstance, 'method instance is not found');
-      props.send([], methodInstance, trueValue);
+      props.send(args, methodInstance, trueValue);
     }
   };
 }

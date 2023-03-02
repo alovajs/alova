@@ -10,6 +10,7 @@ export { default as useRequest } from './hooks/useRequest';
 export { default as useWatcher } from './hooks/useWatcher';
 export { default as Method } from './Method';
 export { matchSnapshotMethod } from './storage/methodSnapShots';
+export { key as getMethodKey } from './utils/helper';
 
 /**
  * 创建Alova实例
