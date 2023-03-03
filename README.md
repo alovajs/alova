@@ -126,29 +126,35 @@ yarn add alova
 
 ## Official Ecosystem
 
-| Project                                                                        | Description                        |
-| ------------------------------------------------------------------------------ | ---------------------------------- |
-| [@alova/mock](https://github.com/alovajs/extensions/tree/main/packages/mock)   | a mock request adapter of alova.js |
-| [@alova/hooks](https://github.com/alovajs/extensions/tree/main/packages/hooks) | extended hooks with alova.js       |
+| Resources                                                          | Description                                  |
+| ------------------------------------------------------------------ | -------------------------------------------- |
+| [@alova/mock](https://github.com/alovajs/mock)                     | Mock request adapter for alova.js            |
+| [@alova/scene-react](https://github.com/alovajs/scene)             | react request strategy library for alova.js  |
+| [@alova/scene-vue](https://github.com/alovajs/scene)               | vue request strategy library for alova.js    |
+| [@alova/scene-svelte](https://github.com/alovajs/scene)            | svelte request strategy library for alova.js |
+| [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | uniapp adapter for alova.js                  |
+| [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | taro adapter for alova.js                    |
 
 ## What is next?
 
-### About alova
+### Alova core
 
-- ✅ The storage time can be set to a date object, indicating that a certain point in time expires
-- ✅ You can set the default cache for different request methods globally, the current default is 500 seconds memory cache for GET requests
-- Additional state management to get and update additional states across pages and modules
+- ✅ The storage time can be set as a date object, indicating that it expires at a certain point in time
+- ✅ You can set the default cache for different request methods globally. The current default is 500 seconds of memory cache for GET requests
+- ✅ Additional state management, get and update additional state across pages and modules
 - request error log printing
-- Complete offline submission function, you can submit when offline, read offline information when you enter again, etc.
-- Request middleware design, which can manually control sending requests, state modification, etc., and then use middleware to implement delayed loading, debounce, etc. (disruptive, processed when upgrading to v2) (1)
-- Retry interval, maximum number of retries, etc. when silent submission fails
-- Delay loading
+- ✅ Complete offline submission function, you can submit when you are offline, and you can read offline information when you enter again
+- ✅ Request middleware design, which can manually control sending requests, status modification, etc.
+- ✅ Retry interval, maximum number of retries, etc. when silent submission fails
+- ✅ Request to share
+- delayed loading
 - Server-side rendering support
+- Performance improvements
 
-### Extension
+### Extensions
 
-- Adapters for each operating environment (Uniapp, Taro)
-- Develop extension hooks under different request scenarios through the [**@alova/hooks**](https://github.com/alovajs/extensions/tree/main/packages/hooks) library, providing out-of-the-box high-performance and high-experience functions [[Refer to usePagination](https://alova.js.org/extension/alova-hooks/usePagination)]
+- ✅ Adapters for each operating environment (Uniapp, Taro)
+- Develop extended hooks under different request scenarios through [**alova/scene**](https://github.com/alovajs/scene) library, providing out-of-the-box high-performance and high-experience functions [[Refer to usePagination ](https://alova.js.org/strategy/usePagination)]
 
 ## Contribution Guide
 

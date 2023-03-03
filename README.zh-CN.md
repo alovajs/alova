@@ -126,10 +126,14 @@ yarn add alova
 
 ## 官方生态系统
 
-| 项目                                                                           | 说明                      |
-| ------------------------------------------------------------------------------ | ------------------------- |
-| [@alova/mock](https://github.com/alovajs/extensions/tree/main/packages/mock)   | alova.js 的模拟请求适配器 |
-| [@alova/hooks](https://github.com/alovajs/extensions/tree/main/packages/hooks) | alova.js 的扩展钩子       |
+| 项目                                                               | 说明                          |
+| ------------------------------------------------------------------ | ----------------------------- |
+| [@alova/mock](https://github.com/alovajs/mock)                     | alova.js 的模拟请求适配器     |
+| [@alova/scene-react](https://github.com/alovajs/scene)             | alova.js 的 react 请求策略库  |
+| [@alova/scene-vue](https://github.com/alovajs/scene)               | alova.js 的 vue 请求策略库    |
+| [@alova/scene-svelte](https://github.com/alovajs/scene)            | alova.js 的 svelte 请求策略库 |
+| [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | alova.js 的 uniapp 适配器     |
+| [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | alova.js 的 taro 适配器       |
 
 ## 接下来要做什么
 
@@ -137,18 +141,20 @@ yarn add alova
 
 - ✅ 存储时间可以设置一个 date 对象，表示某个时间点过期
 - ✅ 可全局分别设置不同请求方法的默认缓存，当前默认为 GET 请求 500 秒内存缓存
-- 额外的状态管理，可跨页面和模块获取并更新额外的状态
+- ✅ 额外的状态管理，可跨页面和模块获取并更新额外的状态
 - 请求错误日志打印
-- 完整的离线提交功能，当离线状态可提交，再次进入时可读取离线信息等
-- 请求中间件设计，可手动控制发送请求、状态修改等，然后将延迟 loading、debounce 等使用中间件实现（具有破坏性，升级到 v2 时处理）（1）
-- 静默提交失败时的重试间隔时间、最大重试次数等
+- ✅ 完整的离线提交功能，当离线状态可提交，再次进入时可读取离线信息等
+- ✅ 请求中间件设计，可手动控制发送请求、状态修改等
+- ✅ 静默提交失败时的重试间隔时间、最大重试次数等
+- ✅ 请求共享
 - 延迟 loading
 - 服务端渲染支持
+- 性能提升
 
 ### 扩展
 
-- 各运行环境下的适配器（Uniapp、Taro）
-- 通过 [**@alova/hooks**](https://github.com/alovajs/extensions/tree/main/packages/hooks) 库开发不同请求场景下的扩展 hooks，提供开箱即用的高性能和高体验功能 [[参考 usePagination](https://alova.js.org/extension/alova-hooks/usePagination)]
+- ✅ 各运行环境下的适配器（Uniapp、Taro）
+- 通过 [**alova/scene**](https://github.com/alovajs/scene) 库开发不同请求场景下的扩展 hooks，提供开箱即用的高性能和高体验功能 [[参考 usePagination](https://alova.js.org/strategy/usePagination)]
 
 ## 贡献指南
 
