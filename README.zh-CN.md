@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="200px" src="https://user-images.githubusercontent.com/29848971/202826407-92f17a6a-bc69-4ef8-be6f-001413ca8c90.png" />
+  <img width="200px" src="https://alova.js.org/img/logo-text-vertical.png" />
 </p>
 
 <p align="center"><b>轻量级的请求策略库，它针对不同请求场景分别提供了具有针对性的请求策略，来提升应用可用性、流畅性，降低服务端压力，让应用如智者一般具备卓越的策略思维。</b></p>
@@ -38,7 +38,7 @@
 
 ## 例子
 
-[这里的例子将展示 alova 的力量](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
+[这里的例子将展示 alova 的力量](https://alova.js.org/category/examples)
 
 ## 和请求库的关系是什么？
 
@@ -124,7 +124,7 @@ yarn add alova
 
 [使用文档在这里](https://alova.js.org/getting-started/start)
 
-## 官方生态系统
+## 官方生态
 
 | 项目                                                               | 说明                          |
 | ------------------------------------------------------------------ | ----------------------------- |
@@ -134,6 +134,7 @@ yarn add alova
 | [@alova/scene-svelte](https://github.com/alovajs/scene)            | alova.js 的 svelte 请求策略库 |
 | [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | alova.js 的 uniapp 适配器     |
 | [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | alova.js 的 taro 适配器       |
+| [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | alova.js 的 axios 适配器      |
 
 ## 接下来要做什么
 

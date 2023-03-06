@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="200px" src="https://user-images.githubusercontent.com/29848971/202826407-92f17a6a-bc69-4ef8-be6f-001413ca8c90.png" />
+  <img width="200px" src="https://alova.js.org/img/logo-text-vertical.png" />
 </p>
 
 <p align="center"><b>A lightweight request strategy library, which provides targeted request strategies for different request scenarios to improve application availability and fluency, reduce server pressure, and enable applications to have excellent strategic thinking like a wise man.</b></p>
@@ -38,7 +38,7 @@
 
 ## Examples
 
-[The examples here will show the power of alova.](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
+[The examples here will show the power of alova.](https://alova.js.org/category/examples)
 
 ## What relationship with request libraries
 
@@ -134,6 +134,7 @@ yarn add alova
 | [@alova/scene-svelte](https://github.com/alovajs/scene)            | svelte request strategy library for alova.js |
 | [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | uniapp adapter for alova.js                  |
 | [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | taro adapter for alova.js                    |
+| [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | axios adapter for alova.js                   |
 
 ## What is next?
 
