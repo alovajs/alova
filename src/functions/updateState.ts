@@ -29,7 +29,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
     const {
       statesHook: { dehydrate, update }
     } = getOptions(methodInstance);
-    const methodKey = key(methodInstance);
+    const methodKey = methodInstance.__key__ || key(methodInstance);
     const { id, storage } = getContext(methodInstance);
     const frontStates = getStateCache(id, methodKey);
 

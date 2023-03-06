@@ -10,6 +10,7 @@ import {
   instanceOf,
   isFn,
   isPlainObject,
+  isSpecialRequestBody,
   key,
   noop,
   self
@@ -45,6 +46,9 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   forceRequest: boolean
 ) {
   const { beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
+
+  // 使用克隆之前的method key，以免在beforeRequest中method被改动而导致method key改变
+  // method key在beforeRequest中被改变将会致使使用method 实例操作缓存时匹配失败
   const methodKey = key(methodInstance);
   const clonedMethod = cloneMethod(methodInstance);
 
@@ -134,10 +138,16 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             deleteAttr(namespacedAdapterReturnMap, methodKey);
             data = transformData(data, headers);
 
-            // 保存缓存
-            setResponseCache(id, methodKey, data, expireTimestamp);
             saveMethodSnapshot(id, methodKey, methodInstance);
-            toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
+            // 当requestBody为特殊数据时不保存缓存
+            // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
+            // 原因2：特殊数据不便于生成缓存key
+            const requestBody = clonedMethod.data;
+            const toCache = !requestBody || !isSpecialRequestBody(requestBody);
+            if (toCache) {
+              setResponseCache(id, methodKey, data, expireTimestamp);
+              toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
+            }
 
             // 查找hitTarget，让它的缓存失效
             const hitMethods = matchSnapshotMethod(

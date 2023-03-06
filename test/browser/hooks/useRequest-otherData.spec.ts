@@ -1,4 +1,4 @@
-import { useRequest } from '../../../src';
+import { queryCache, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { key } from '../../../src/utils/helper';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
@@ -22,16 +22,16 @@ describe('Request by other data', function () {
       responseExpect: async r => r.json()
     });
 
-    const f = new FormData();
-    f.append('post1', 'a');
-    f.append('post2', 'b');
-    const Post = alova.Post('/unit-test', f, {
+    const formData = new FormData();
+    formData.append('post1', 'a');
+    formData.append('post2', 'b');
+    const Post = alova.Post('/unit-test', formData, {
+      localCache: 100000,
       transformData({ data }: Result<true>) {
         return data;
       }
     });
 
-    expect(key(Post)).toBe('["POST","/unit-test",{},{"post1":"a","post2":"b"},{}]');
     const { onSuccess } = useRequest(Post);
     const { data } = await untilCbCalled(onSuccess);
     expect(data).toStrictEqual({
@@ -40,6 +40,9 @@ describe('Request by other data', function () {
       params: { p1: 'a' },
       data: '[object FormData]'
     });
+
+    // 提交特殊数据时不会缓存
+    expect(queryCache(Post)).toBeUndefined();
   });
 
   test('send POST with string', async () => {
@@ -51,6 +54,7 @@ describe('Request by other data', function () {
       headers: {
         'content-type': 'application/x-www-form-urlencoded'
       },
+      localCache: 100000,
       transformData({ data }: Result<true>) {
         return data;
       }
@@ -65,6 +69,9 @@ describe('Request by other data', function () {
       params: {},
       data: 'a=1&b=2'
     });
+
+    // 字符串不是特殊数据，会进行缓存
+    expect(queryCache(Post)).toStrictEqual(data);
   });
 
   test('send POST with Blob', async () => {
@@ -79,7 +86,6 @@ describe('Request by other data', function () {
       }
     });
 
-    expect(key(Post)).toBe('["POST","/unit-test",{},{},{}]');
     const { onSuccess } = useRequest(Post);
     const { data } = await untilCbCalled(onSuccess);
     expect(data).toStrictEqual({
@@ -88,5 +94,8 @@ describe('Request by other data', function () {
       params: {},
       data: '[object Blob]'
     });
+
+    // 提交特殊数据时不会缓存
+    expect(queryCache(Post)).toBeUndefined();
   });
 });

@@ -50,6 +50,9 @@ export const matchSnapshotMethod = <M extends boolean = true>(matcher: MethodFil
           nameMatcher === undefinedValue ||
           (instanceOf(nameMatcher, RegExp) ? nameMatcher.test(name) : name === nameMatcher)
         ) {
+          // 在外部需要使用原始的key，而不是实时生成key
+          // 原因是，method的参数可能传入引用类型值，但引用类型值在外部改变时，实时生成的key也随之改变，因此使用最开始的key更准确
+          hitMethodInstance.__key__ = methodKey;
           pushItem(matches, hitMethodInstance);
         }
       });

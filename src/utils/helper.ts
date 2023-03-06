@@ -1,9 +1,8 @@
-import { AlovaMethodHandler, Arg, CacheExpire, LocalCacheConfig, RequestBody } from '../../typings';
+import { AlovaMethodHandler, CacheExpire, LocalCacheConfig } from '../../typings';
 import Method from '../Method';
 import {
   clearTimeoutTimer,
   falseValue,
-  forEach,
   getConfig,
   getTime,
   JSONStringify,
@@ -49,27 +48,39 @@ export const isNumber = (arg: any): arg is number => typeof arg === 'number' && 
  */
 export const isString = (arg: any): arg is string => typeof arg === 'string';
 
-// 判断是否为普通对象
-export const isPlainObject = (arg: any): arg is Record<string, any> =>
-  ObjectCls.prototype.toString.call(arg) === '[object Object]';
-
-// 判断是否为某个类的实例
-export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls;
-
-// 判断是否为FormData实例
-export const isFormData = (data: RequestBody = ''): data is FormData => /FormData/i.test(data.toString() || '');
+/**
+ * 全局的toString
+ * @param arg 任意参数
+ * @returns 字符串化的参数
+ */
+export const globalToString = (arg: any) => ObjectCls.prototype.toString.call(arg);
 
 /**
- * 将FormData转换为object实例
- * @param formData FormData实例
- * @returns object
+ * 判断是否为普通对象
+ * @param arg 任意参数
+ * @returns 判断结果
  */
-const formData2Object = (formData: FormData) => {
-  const dataObject: Arg = {};
-  forEach(formData as any, (value, key) => {
-    dataObject[key] = value;
-  });
-  return dataObject;
+export const isPlainObject = (arg: any): arg is Record<string, any> => globalToString(arg) === '[object Object]';
+
+/**
+ * 判断是否为某个类的实例
+ * @param arg 任意参数
+ * @returns 判断结果
+ */
+export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls;
+
+/**
+ * 是否为特殊数据
+ * @param data 提交数据
+ * @returns 判断结果
+ */
+export const isSpecialRequestBody = (data: any) => {
+  const dataTypeString = globalToString(data);
+  return (
+    /^\[object (Blob|FormData|ReadableStream)\]$/i.test(dataTypeString) ||
+    instanceOf(data, ArrayBuffer) ||
+    instanceOf(data, URLSearchParams)
+  );
 };
 
 /**
@@ -79,7 +90,7 @@ const formData2Object = (formData: FormData) => {
 export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const { type, url, data } = methodInstance;
   const { params, headers } = getConfig(methodInstance);
-  return JSONStringify([type, url, params, isFormData(data) ? formData2Object(data) : data, headers]);
+  return JSONStringify([type, url, params, data, headers]);
 };
 
 /**
