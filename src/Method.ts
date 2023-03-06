@@ -28,6 +28,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public hitSource?: (string | RegExp)[];
   public context: Alova<S, E, RC, RE, RH>;
   public response: R;
+  public __key__?: string;
   constructor(
     type: MethodType,
     context: Alova<S, E, RC, RE, RH>,

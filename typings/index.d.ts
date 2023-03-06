@@ -2,7 +2,7 @@ import { Writable } from 'svelte/store';
 import { Ref } from 'vue';
 
 type Arg = Record<string, any>;
-type RequestBody = Arg | FormData | string;
+type RequestBody = Arg | string | FormData | Blob | ArrayBuffer | URLSearchParams | ReadableStream;
 
 /** 进度信息 */
 type Progress = {
@@ -236,6 +236,11 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
   hitSource?: (string | RegExp)[];
   context: Alova<S, E, RC, RE, RH>;
   response: R;
+
+  /**
+   * 存储临时的key
+   */
+  __key__?: string;
 
   /**
    * 用于在全局的request和response钩子函数中传递额外信息所用

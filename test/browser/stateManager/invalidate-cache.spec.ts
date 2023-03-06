@@ -168,6 +168,41 @@ describe('invalitate cached response data', () => {
     });
   });
 
+  test('cache still will be removed when pass object in vue', async () => {
+    // 使用引用类型作为参数，期望仍能失效对应的缓存
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+
+    const params = {
+      a: 'a111'
+    };
+    const Get1 = alova.Get('/unit-test', {
+      name: 'test-get111',
+      localCache: Infinity,
+      params,
+      transformData: ({ data }: Result) => data
+    });
+    const Get2 = alova.Get('/unit-test', {
+      name: 'test-get222',
+      params,
+      localCache: Infinity,
+      transformData: ({ data }: Result) => data
+    });
+
+    await Get1.send();
+    params.a = 'a222';
+    await Get2.send();
+
+    invalidateCache(/test-get/); // 删除test-get前缀的缓存
+
+    let cache = queryCache(Get2);
+    expect(cache).toBeUndefined();
+    params.a = 'a111';
+    cache = queryCache(Get1);
+    expect(cache).toBeUndefined();
+  });
+
   test("cache will be removed that invalidateCache's regexp matches", async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
