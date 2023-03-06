@@ -38,7 +38,7 @@
 
 ## Examples
 
-[The examples here will show the power of alova.](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
+[The examples here will show the power of alova.](https://alova.js.org/category/examples)
 
 ## What relationship with request libraries
 

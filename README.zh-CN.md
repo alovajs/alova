@@ -38,7 +38,7 @@
 
 ## 例子
 
-[这里的例子将展示 alova 的力量](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
+[这里的例子将展示 alova 的力量](https://alova.js.org/category/examples)
 
 ## 和请求库的关系是什么？
 
