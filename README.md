@@ -25,7 +25,7 @@
 - 🕶 Support vue, react, svelte
 - 🦾 Real-time automatic status management
 - 📑 Similar api design to axios, easier
-- ▪️ 4kb, only 40% of axios
+- ▪️ 4kb, only 30%+ of axios
 - 👄 Declarative Scenario Request
 - 🔩 Flexible: Work with any request library like axios, superagent, or fetch-api
 - 🔋 3 response data caching modes
@@ -33,8 +33,7 @@
 - 🎈 Typescript support
 - 🖥️ Offline submition
 - ⚡ Fully tree shakeable: Only take what you want, bundle size
-- ⛑️ Safer optimistic data updates
-- 🔌 Rich extension functions, you can customize request adapter, storage adapter, states hook
+- 🔌 Rich extension functions, you can customize request adapter, storage adapter, request middleware, states hook
 
 ## Examples
 
@@ -54,7 +53,7 @@ If you like alova. we are very appreciate your star at the topright. it's a appr
 | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [![minzip](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzip](https://badgen.net/bundlephobia/minzip/axios)](https://bundlephobia.com/package/axios) | [![minzip](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzip](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzip](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzip](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
 
-## What is request scene management
+## What is request scene model
 
 We always have to think about the following questions when making a request,
 
@@ -135,6 +134,7 @@ yarn add alova
 | [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | uniapp adapter for alova.js                  |
 | [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | taro adapter for alova.js                    |
 | [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | axios adapter for alova.js                   |
+| [@alova/adapter-xhr](https://github.com/alovajs/adapter-xhr)       | XMLHttpRequest adapter for alova.js          |
 
 ## What is next?
 

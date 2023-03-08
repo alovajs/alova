@@ -25,16 +25,15 @@
 - 🕶 支持 vue、react、svelte
 - 🦾 实时自动状态管理
 - 📑 类似 axios 的 api 设计，更简单
-- ▪️ 4kb，只有 axios 的 40%
+- ▪️ 4kb，只有 axios 的 30%+
 - 👄 声明式场景请求
 - 🔩 灵活：使用任何请求库，如 axios、superagent 或 fetch-api
 - 🔋 3 种响应数据缓存模式
 - ✨ 界面数据在任何情况下都是预取的，这意味着用户可以更快地看到信息
-- 🎈 打字稿支持
-- 🖥️ 离线提交
-- ⚡ 完全可摇动的树：只拿你想要的，捆绑大小
-- ⛑️ 更安全的乐观数据更新
-- 🔌 丰富的扩展功能，可以自定义请求适配器、存储适配器、状态钩子
+- 🎈 Typescript 支持
+- 🖥️ 静默/离线提交
+- ⚡ 完全支持 Tree shaking：只拿你想要的，捆绑大小
+- 🔌 丰富的扩展功能，可以自定义请求适配器、存储适配器、请求中间件、状态钩子等
 
 ## 例子
 
@@ -54,7 +53,7 @@ alova 的创建初衷是对不同请求场景提出的一个解决方案，它�
 | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [![minzip](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzip](https://badgen.net/bundlephobia/minzip/axios)](https://bundlephobia.com/package/axios) | [![minzip](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzip](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzip](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzip](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
 
-## 什么是请求场景管理
+## 什么是请求场景模型
 
 在提出请求时，我们总是要考虑以下问题，
 
@@ -126,15 +125,16 @@ yarn add alova
 
 ## 官方生态
 
-| 项目                                                               | 说明                          |
-| ------------------------------------------------------------------ | ----------------------------- |
-| [@alova/mock](https://github.com/alovajs/mock)                     | alova.js 的模拟请求适配器     |
-| [@alova/scene-react](https://github.com/alovajs/scene)             | alova.js 的 react 请求策略库  |
-| [@alova/scene-vue](https://github.com/alovajs/scene)               | alova.js 的 vue 请求策略库    |
-| [@alova/scene-svelte](https://github.com/alovajs/scene)            | alova.js 的 svelte 请求策略库 |
-| [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | alova.js 的 uniapp 适配器     |
-| [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | alova.js 的 taro 适配器       |
-| [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | alova.js 的 axios 适配器      |
+| 项目                                                               | 说明                              |
+| ------------------------------------------------------------------ | --------------------------------- |
+| [@alova/mock](https://github.com/alovajs/mock)                     | alova.js 的模拟请求适配器         |
+| [@alova/scene-react](https://github.com/alovajs/scene)             | alova.js 的 react 请求策略库      |
+| [@alova/scene-vue](https://github.com/alovajs/scene)               | alova.js 的 vue 请求策略库        |
+| [@alova/scene-svelte](https://github.com/alovajs/scene)            | alova.js 的 svelte 请求策略库     |
+| [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | alova.js 的 uniapp 适配器         |
+| [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | alova.js 的 taro 适配器           |
+| [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | alova.js 的 axios 适配器          |
+| [@alova/adapter-xhr](https://github.com/alovajs/adapter-xhr)       | alova.js 的 XMLHttpRequest 适配器 |
 
 ## 接下来要做什么
 
