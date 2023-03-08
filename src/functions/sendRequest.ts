@@ -177,6 +177,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             return data;
           }),
         (error: any) => {
+          // 请求失败时也需要移除共享的请求
+          deleteAttr(namespacedAdapterReturnMap, methodKey);
           if (!isFn(responseErrorHandler)) {
             throw error;
           }

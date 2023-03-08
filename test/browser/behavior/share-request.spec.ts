@@ -105,6 +105,41 @@ describe('Request shared', function () {
     expect(requestMockFn).toBeCalledTimes(1);
   });
 
+  test('request shared promise will also remove when request error', async () => {
+    let index = 0;
+    const alova = createAlova({
+      baseURL: 'http://xxx',
+      localCache: {
+        GET: 0
+      },
+      statesHook: VueHook,
+      requestAdapter() {
+        const promise = new Promise((resolve, reject) => {
+          if (index === 0) {
+            index++;
+            reject(new Error('request error'));
+          } else {
+            resolve({
+              id: 1
+            });
+          }
+        });
+        return {
+          response: () => promise,
+          headers: async () => ({}),
+          abort() {}
+        };
+      }
+    });
+
+    const Get = alova.Get('/unit-test');
+
+    // 第一次请求会抛出错误，第二次开始不会
+    await expect(Get.send()).rejects.toThrow('request error');
+    const res = await Get.send();
+    expect(res).toStrictEqual({ id: 1 });
+  });
+
   test("shouldn't share request when close in global config", async () => {
     const requestMockFn = jest.fn();
     const alova = createAlova({
