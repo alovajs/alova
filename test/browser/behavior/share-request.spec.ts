@@ -1,6 +1,7 @@
 import { createAlova, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import { mockServer, untilCbCalled } from '../../utils';
+import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
+import { Result } from '../result.type';
 
 beforeAll(() => mockServer.listen());
 afterEach(() => mockServer.resetHandlers());
@@ -138,6 +139,80 @@ describe('Request shared', function () {
     await expect(Get.send()).rejects.toThrow('request error');
     const res = await Get.send();
     expect(res).toStrictEqual({ id: 1 });
+  });
+
+  test('request shared promise will also remove when throw in response handler', async () => {
+    let i = 0;
+    const alova = getAlovaInstance(VueHook, {
+      localCache: {
+        GET: 0
+      },
+      responseExpect(response) {
+        if (i === 0) {
+          i++;
+          throw new Error('custom error');
+        }
+        return response.json();
+      }
+    });
+
+    const Get = alova.Get('/unit-test-count', {
+      params: {
+        countKey: 'bb'
+      },
+      transformData: ({ data }: Result) => data
+    });
+
+    // 第一次请求会抛出错误，第二次开始不会
+    await expect(Get.send()).rejects.toThrow('custom error');
+    const res = await Get.send();
+
+    // count=1表示重新请求到了服务
+    expect(res).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: {
+        countKey: 'bb',
+        count: 1
+      }
+    });
+  });
+
+  test('request shared promise will also remove when throw in async response handler', async () => {
+    let i = 0;
+    const alova = getAlovaInstance(VueHook, {
+      localCache: {
+        GET: 0
+      },
+      async responseExpect(response) {
+        if (i === 0) {
+          i++;
+          throw new Error('custom error');
+        }
+        return response.json();
+      }
+    });
+
+    const Get = alova.Get('/unit-test-count', {
+      params: {
+        countKey: 'cc'
+      },
+      transformData: ({ data }: Result) => data
+    });
+
+    // 第一次请求会抛出错误，第二次开始不会
+    await expect(Get.send()).rejects.toThrow('custom error');
+    const res = await Get.send();
+
+    // count=1表示重新请求到了服务
+    expect(res).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: {
+        countKey: 'cc',
+        count: 1
+      }
+    });
   });
 
   test("shouldn't share request when close in global config", async () => {
