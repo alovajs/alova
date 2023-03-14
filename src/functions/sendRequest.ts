@@ -12,6 +12,7 @@ import {
   isPlainObject,
   isSpecialRequestBody,
   key,
+  newInstance,
   noop,
   self
 } from '../utils/helper';
@@ -25,7 +26,6 @@ import {
   objectKeys,
   PromiseCls,
   promiseResolve,
-  promiseThen,
   trueValue,
   undefinedValue
 } from '../utils/variables';
@@ -131,51 +131,59 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   return {
     ...hitAdapterCtrls,
     response: () =>
-      promiseThen(
-        PromiseCls.all([hitAdapterCtrls.response(), hitAdapterCtrls.headers()]),
+      PromiseCls.all([hitAdapterCtrls.response(), hitAdapterCtrls.headers()]).then(
         ([rawResponse, headers]) =>
-          asyncOrSync(responsedHandler(rawResponse, clonedMethod), data => {
-            deleteAttr(namespacedAdapterReturnMap, methodKey);
-            data = transformData(data, headers);
+          asyncOrSync(
+            newInstance(PromiseCls, resolve => {
+              resolve(responsedHandler(rawResponse, clonedMethod));
+            }),
+            data => {
+              deleteAttr(namespacedAdapterReturnMap, methodKey);
+              data = transformData(data, headers);
 
-            saveMethodSnapshot(id, methodKey, methodInstance);
-            // 当requestBody为特殊数据时不保存缓存
-            // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
-            // 原因2：特殊数据不便于生成缓存key
-            const requestBody = clonedMethod.data;
-            const toCache = !requestBody || !isSpecialRequestBody(requestBody);
-            if (toCache) {
-              setResponseCache(id, methodKey, data, expireTimestamp);
-              toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
-            }
+              saveMethodSnapshot(id, methodKey, methodInstance);
+              // 当requestBody为特殊数据时不保存缓存
+              // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
+              // 原因2：特殊数据不便于生成缓存key
+              const requestBody = clonedMethod.data;
+              const toCache = !requestBody || !isSpecialRequestBody(requestBody);
+              if (toCache) {
+                setResponseCache(id, methodKey, data, expireTimestamp);
+                toStorage && persistResponse(id, methodKey, data, expireTimestamp, storage, tag);
+              }
 
-            // 查找hitTarget，让它的缓存失效
-            const hitMethods = matchSnapshotMethod(
-              {
-                filter: cachedMethod => {
-                  let isHit = falseValue;
-                  const hitSource = cachedMethod.hitSource;
-                  if (hitSource) {
-                    for (const i in hitSource) {
-                      const sourceMatcher = hitSource[i];
-                      if (
-                        instanceOf(sourceMatcher, RegExp)
-                          ? sourceMatcher.test(methodInstanceName as string)
-                          : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-                      ) {
-                        isHit = trueValue;
-                        break;
+              // 查找hitTarget，让它的缓存失效
+              const hitMethods = matchSnapshotMethod(
+                {
+                  filter: cachedMethod => {
+                    let isHit = falseValue;
+                    const hitSource = cachedMethod.hitSource;
+                    if (hitSource) {
+                      for (const i in hitSource) {
+                        const sourceMatcher = hitSource[i];
+                        if (
+                          instanceOf(sourceMatcher, RegExp)
+                            ? sourceMatcher.test(methodInstanceName as string)
+                            : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
+                        ) {
+                          isHit = trueValue;
+                          break;
+                        }
                       }
                     }
+                    return isHit;
                   }
-                  return isHit;
-                }
-              },
-              trueValue
-            );
-            len(hitMethods) > 0 && invalidateCache(hitMethods);
-            return data;
-          }),
+                },
+                trueValue
+              );
+              len(hitMethods) > 0 && invalidateCache(hitMethods);
+              return data;
+            },
+            reason => {
+              deleteAttr(namespacedAdapterReturnMap, methodKey);
+              throw reason;
+            }
+          ),
         (error: any) => {
           // 请求失败时也需要移除共享的请求
           deleteAttr(namespacedAdapterReturnMap, methodKey);

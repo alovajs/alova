@@ -178,8 +178,18 @@ export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[]
  * @param onAfter 后续回调函数
  * @returns {void}
  */
-export const asyncOrSync = <T, R>(target: T, onAfter: (data: T extends Promise<infer D> ? D : T) => R) =>
-  instanceOf(target, PromiseCls) ? promiseThen(target, onAfter) : onAfter(target as any);
+export const asyncOrSync = <T, R>(
+  target: T,
+  onfulfill: (data: T extends Promise<infer D> ? D : T) => R,
+  onreject?: (reason: any) => void
+) =>
+  promiseThen(
+    newInstance(PromiseCls, resolve => {
+      resolve(target);
+    }),
+    onfulfill,
+    onreject
+  );
 
 /**
  * 创建类实例
