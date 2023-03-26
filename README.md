@@ -43,6 +43,12 @@
 
 The original intention of alova is to propose a solution for different request scenarios. It can implement request functions with better experience and performance more concisely and elegantly. It is an RSM implementation library, such as $.ajax, axios and fetch-api. It provides good support for request sending and response receiving. They are an indispensable part of the RSM process (request event link), and alova still needs to rely on them for requests, so we can regard alova as a request library. An armament that makes the request library even more powerful.
 
+## Library Stability
+
+It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 126 unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
+
+**I promise to solve it as soon as possible after receiving your issue**
+
 ## We really need your star
 
 If you like alova. we are very appreciate your star at the topright. it's a approval of our work.
