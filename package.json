@@ -1,9 +1,8 @@
 {
   "name": "alova",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
-  "main": "dist/alova.umd.min.js",
-  "jsnext:main": "dist/alova.esm.js",
+  "main": "dist/alova.esm.js",
   "module": "dist/alova.esm.js",
   "types": "typings/index.d.ts",
   "sideEffects": false,
@@ -25,6 +24,8 @@
     "superagent",
     "alova"
   ],
+  "jsdelivr": "dist/alova.umd.min.js",
+  "unpkg": "dist/alova.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
     "test": "jest",
