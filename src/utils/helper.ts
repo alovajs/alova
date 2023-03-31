@@ -77,9 +77,7 @@ export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is 
 export const isSpecialRequestBody = (data: any) => {
   const dataTypeString = globalToString(data);
   return (
-    /^\[object (Blob|FormData|ReadableStream)\]$/i.test(dataTypeString) ||
-    instanceOf(data, ArrayBuffer) ||
-    instanceOf(data, URLSearchParams)
+    /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) || instanceOf(data, ArrayBuffer)
   );
 };
 
