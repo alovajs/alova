@@ -1,7 +1,4 @@
-import { setCache } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import { getResponseCache } from '../../../src/storage/responseCache';
-import { key } from '../../../src/utils/helper';
 import { getAlovaInstance, mockServer } from '../../utils';
 import { Result } from '../result.type';
 
@@ -10,27 +7,22 @@ afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
 
 describe('request adapter GlobalFetch', function () {
-  test('the cache response data should be saved', () => {
+  test('the cache response data should be saved', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
       localCache: 100 * 1000,
-      transformData: ({ data }: Result) => data
-    });
-    setCache(Get, {
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        manual: '1'
+      transformData: ({ data }: Result, headers) => {
+        expect(data).toStrictEqual({
+          path: '/unit-test',
+          method: 'GET',
+          params: {}
+        });
+        expect(headers.get('x-powered-by')).toBe('msw');
+        return data;
       }
     });
-    expect(getResponseCache(alova.id, key(Get))).toEqual({
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        manual: '1'
-      }
-    });
+    await Get.send();
   });
 });
