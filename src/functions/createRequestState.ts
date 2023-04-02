@@ -13,7 +13,15 @@ import {
 import Alova from '../Alova';
 import Method from '../Method';
 import { debounce, getHandlerMethod, isNumber, noop } from '../utils/helper';
-import { falseValue, getStatesHook, promiseCatch, pushItem, trueValue, undefinedValue } from '../utils/variables';
+import {
+  falseValue,
+  getStatesHook,
+  isArray,
+  promiseCatch,
+  pushItem,
+  trueValue,
+  undefinedValue
+} from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
 export type SaveStateFn = (frontStates: FrontRequestState) => void;
@@ -95,9 +103,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
 
   // 调用请求处理回调函数
   const wrapEffectRequest = () => {
-    if (hasWatchingStates || (!hasWatchingStates && immediate)) {
-      promiseCatch(handleRequest(), noop); // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
-    }
+    // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
+    promiseCatch(handleRequest(), noop);
   };
 
   effectRequest({
@@ -105,7 +112,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
       hasWatchingStates
         ? debounce(wrapEffectRequest, (changedIndex?: number) =>
-            isNumber(changedIndex) ? (isNumber(debounceDelay) ? debounceDelay : debounceDelay[changedIndex]) : 0
+            isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
           )
         : wrapEffectRequest,
     removeStates: () => removeStatesFn(),

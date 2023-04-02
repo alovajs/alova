@@ -1,7 +1,15 @@
 import { onDestroy } from 'svelte';
 import { writable, Writable } from 'svelte/store';
 import { EffectRequestParams, FrontRequestState } from '../../typings';
-import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
+import {
+  clearTimeoutTimer,
+  falseValue,
+  forEach,
+  objectKeys,
+  setTimeoutFn,
+  trueValue,
+  undefinedValue
+} from '../utils/variables';
 
 type UnknownWritable = Writable<unknown>;
 export default {
@@ -23,22 +31,18 @@ export default {
       sItem.set(newVal[key as Keys]);
     }),
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<Writable<any>>) {
-    onDestroy(removeStates); // 组件卸载时移除对应状态
-    if (!watchingStates) {
-      handler();
-      return;
-    }
+    // 组件卸载时移除对应状态
+    onDestroy(removeStates);
+    immediate && handler();
 
     let timer: any;
-    let needEmit = immediate;
-    let changedIndex: number | undefined = undefinedValue;
-    forEach(watchingStates, (state, i) => {
+    let needEmit = falseValue;
+    forEach(watchingStates || [], (state, i) => {
       state.subscribe(() => {
-        changedIndex = i;
         timer && clearTimeoutTimer(timer);
         timer = setTimeoutFn(() => {
-          // svelte的writable默认会触发一次，因此当immediate=false时需要过滤掉第一次触发调用
-          needEmit ? handler(changedIndex) : (needEmit = trueValue);
+          // svelte的writable默认会触发一次，因此当immediate为false时需要过滤掉第一次触发调用
+          needEmit ? handler(i) : (needEmit = trueValue);
           timer = undefinedValue;
         }, 10);
       });

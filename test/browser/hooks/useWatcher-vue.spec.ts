@@ -352,6 +352,138 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(endTs - startTs).toBeLessThan(100);
   });
 
+  test('the debounce should be effective when nest value is changed', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateObj = ref({
+      num: 0
+    });
+    const mutateObjReactive = reactive({
+      str: 'a'
+    });
+    const { data, onSuccess } = useWatcher(
+      () => {
+        const get = alova.Get('/unit-test', {
+          params: { num: mutateObj.value.num, str: mutateObjReactive.str },
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          transformData: (result: Result) => result.data,
+          localCache: 100 * 1000
+        });
+        return get;
+      },
+      [mutateObj, mutateObjReactive],
+      { debounce: 1000 }
+    );
+
+    await untilCbCalled(setTimeout, 100);
+    mutateObj.value.num = 1;
+    let startTs = Date.now();
+    await untilCbCalled(onSuccess);
+    let endTs = Date.now();
+    // 请求已响应
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('a');
+    let diffTs = endTs - startTs;
+    expect(diffTs).toBeGreaterThanOrEqual(1000);
+    expect(diffTs).toBeLessThan(1100);
+
+    mutateObjReactive.str = 'b';
+    startTs = Date.now();
+    await untilCbCalled(onSuccess);
+    endTs = Date.now();
+    // 请求已响应
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('b');
+    diffTs = endTs - startTs;
+    expect(diffTs).toBeGreaterThanOrEqual(1000);
+    expect(diffTs).toBeLessThan(1100);
+
+    // 同时改变，以后一个为准
+    mutateObj.value.num = 3;
+    mutateObjReactive.str = 'c';
+    startTs = Date.now();
+    await untilCbCalled(onSuccess);
+    endTs = Date.now();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('3');
+    expect(data.value.params.str).toBe('c');
+    diffTs = endTs - startTs;
+    expect(diffTs).toBeGreaterThanOrEqual(1000);
+    expect(diffTs).toBeLessThan(1100);
+  });
+
+  test('the debounce of array should be effective when nest value is changed', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateObj = ref({
+      num: 0
+    });
+    const mutateObjReactive = reactive({
+      str: 'a'
+    });
+    const { data, onSuccess } = useWatcher(
+      () => {
+        const get = alova.Get('/unit-test', {
+          params: { num: mutateObj.value.num, str: mutateObjReactive.str },
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          transformData: (result: Result) => result.data,
+          localCache: 100 * 1000
+        });
+        return get;
+      },
+      [mutateObj, mutateObjReactive],
+      { debounce: [1000, 200] }
+    );
+
+    await untilCbCalled(setTimeout, 100);
+    mutateObj.value.num = 1;
+    let startTs = Date.now();
+    await untilCbCalled(onSuccess);
+    let endTs = Date.now();
+    // 请求已响应
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('a');
+    let diffTs = endTs - startTs;
+    expect(diffTs).toBeGreaterThanOrEqual(1000);
+    expect(diffTs).toBeLessThan(1100);
+
+    mutateObjReactive.str = 'b';
+    startTs = Date.now();
+    await untilCbCalled(onSuccess);
+    endTs = Date.now();
+    // 请求已响应
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('b');
+    diffTs = endTs - startTs;
+    expect(diffTs).toBeGreaterThanOrEqual(200);
+    expect(diffTs).toBeLessThan(250);
+
+    // 同时改变，以后一个为准
+    mutateObj.value.num = 3;
+    mutateObjReactive.str = 'c';
+    startTs = Date.now();
+    await untilCbCalled(onSuccess);
+    endTs = Date.now();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('3');
+    expect(data.value.params.str).toBe('c');
+    diffTs = endTs - startTs;
+    expect(diffTs).toBeGreaterThanOrEqual(200);
+    expect(diffTs).toBeLessThan(250);
+  });
+
   test('should send request when set the param `immediate`', done => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
