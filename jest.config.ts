@@ -142,7 +142,7 @@ export default {
 
   testMatch: [
     '**/?(*.)+(spec|test).[tj]s?(x)'
-    // '**/test/browser/hooks/useRequest-otherData.spec.ts(x)?'
+    // '**/test/browser/hooks/useWatcher-svelte.spec.ts(x)?'
     // '**/test/browser/behavior/share-request.spec.ts'
     // '**/test/browser/batch/parallel-request.spec.ts'
     // '**/test/browser/stateManager/invalidate-cache.spec.ts(x)?'
