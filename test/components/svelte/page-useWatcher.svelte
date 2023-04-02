@@ -5,7 +5,8 @@
     <div role="id1">{$data.params.id1}</div>
     <div role="id2">{$data.params.id2}</div>
   {/if}
-  <button on:click={handleClick}>button</button>
+  <button role="btn1" on:click={handleClick1}>button1</button>
+  <button role="btn2" on:click={handleClick2}>button2</button>
 </div>
 
 <script>
@@ -14,7 +15,9 @@ import { createAlova, useWatcher } from '../../../src';
 import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import SvelteHook from '../../../src/predefine/SvelteHook';
 const stateId1 = writable(0);
-const stateId2 = writable(10);
+const stateObj = writable({
+  id: 10
+});
 
 
 const alova = createAlova({
@@ -32,17 +35,19 @@ const getter = (id1, id2) => alova.Get('/unit-test', {
   transformData: ({ data }) => data,
 });
 
-const handleClick = () => {
+const handleClick1 = () => {
   $stateId1++;
-  $stateId2++;
 };
+const handleClick2 = () => {
+  $stateObj.id++;
+}
 
 
 const {
   loading,
   data,
   onSuccess,
-} = useWatcher(() => getter($stateId1, $stateId2), [stateId1, stateId2], {
+} = useWatcher(() => getter($stateId1, $stateObj.id), [stateId1, stateObj], {
   initialData: {
     path: '',
     params: { id1: '', id2: '' }

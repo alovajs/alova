@@ -1,6 +1,6 @@
 import { onUnmounted, ref, Ref, watch, WatchSource } from 'vue';
 import { EffectRequestParams, FrontRequestState } from '../../typings';
-import { forEach, objectKeys, undefinedValue } from '../utils/variables';
+import { forEach, objectKeys, trueValue, undefinedValue } from '../utils/variables';
 
 type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks
@@ -32,7 +32,7 @@ export default {
         });
         handler(changedIndex);
       },
-      { immediate }
+      { immediate, deep: trueValue }
     );
   }
 };

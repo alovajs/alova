@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { setCache, useWatcher } from '../../../src';
 import Method from '../../../src/Method';
 import VueHook from '../../../src/predefine/VueHook';
@@ -86,6 +86,93 @@ describe('use useWatcher hook to send GET with vue', function () {
       successTimesFns[watchTimes]();
       watchTimes++;
     });
+  });
+
+  test('should also send request when nest value changed', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateObj = ref({
+      num: 0
+    });
+    const mutateObjReactive = reactive({
+      str: ''
+    });
+    const { loading, data, downloading, error, onSuccess } = useWatcher(
+      () =>
+        alova.Get('/unit-test', {
+          params: { num: mutateObj.value.num, str: mutateObjReactive.str },
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          transformData: (result: Result) => result.data,
+          localCache: 100 * 1000
+        }),
+      [mutateObj, mutateObjReactive]
+    );
+    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+
+    // 改变数据触发请求
+    mutateObj.value.num = 1;
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('');
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+
+    // 再次改变数据，触发请求
+    mutateObj.value.num = 2;
+    mutateObjReactive.str = 'c';
+    await untilCbCalled(onSuccess);
+    expect(data.value.params.num).toBe('2');
+    expect(data.value.params.str).toBe('c');
+  });
+
+  test('should also send request when computed value changed', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const computedStr = computed(() => (mutateNum.value === 0 ? 'str1' : 'str2'));
+    const { loading, data, downloading, error, onSuccess } = useWatcher(
+      () =>
+        alova.Get('/unit-test', {
+          params: { str: computedStr.value },
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          transformData: (result: Result) => result.data,
+          localCache: 100 * 1000
+        }),
+      [computedStr]
+    );
+    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+
+    // 改变数据触发请求
+    mutateNum.value = 1;
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.str).toBe('str2');
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+
+    // 再次改变数据，触发请求
+    mutateNum.value = 0;
+    await untilCbCalled(onSuccess);
+    expect(data.value.params.str).toBe('str1');
   });
 
   test("should send request one time when value change's time less then debounce", done => {

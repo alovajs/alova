@@ -13,16 +13,16 @@ describe('useWatcher hook with svelte', () => {
     render(page);
     // 需要暂停一段时间再触发事件和检查响应数据
     await untilCbCalled(setTimeout, 100);
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 500);
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('id1')).toHaveTextContent('1');
+    expect(screen.getByRole('id2')).toHaveTextContent('10');
+    fireEvent.click(screen.getByRole('btn2'));
     await untilCbCalled(setTimeout, 500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
-    fireEvent.click(screen.getByRole('button'));
-    await untilCbCalled(setTimeout, 500);
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('2');
-    expect(screen.getByRole('id2')).toHaveTextContent('12');
   });
 
   test('should send request when init', async () => {
