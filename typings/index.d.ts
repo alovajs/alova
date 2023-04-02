@@ -1,5 +1,5 @@
 import { Writable } from 'svelte/store';
-import { Ref } from 'vue';
+import { Ref, WatchSource } from 'vue';
 
 type Arg = Record<string, any>;
 type RequestBody = Arg | string | FormData | Blob | ArrayBuffer | URLSearchParams | ReadableStream;
@@ -493,7 +493,7 @@ export declare function useRequest<S, E, R, T, RC, RE, RH>(
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;
 declare function useWatcher<S, E, R, T, RC, RE, RH>(
   handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  watchingStates: E[],
+  watchingStates: S extends VueRef ? (WatchSource<any> | object)[] : S extends SvelteWritable ? Writable<any>[] : any[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;
 declare function useFetcher<SE extends FetcherType<any>>(
