@@ -39,6 +39,8 @@ jobs:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
   release:
     runs-on: ubuntu-latest
+    needs: [quality]
+    if: ${{ github.ref == 'refs/head/main' }}
     steps:
       # 拉取代码
       - name: Checkout
