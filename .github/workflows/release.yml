@@ -3,8 +3,9 @@ name: build
 # 触发条件：在 push或合并请求 到 master 或 release开头的分支后
 on:
   push:
-    branches:
-      - main
+    branches: [main, alpha, beta]
+  pull_request:
+    branches: '*'
     # paths:
     #   - src/**
 
@@ -40,7 +41,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: [quality]
-    if: ${{ github.ref == 'refs/head/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       # 拉取代码
       - name: Checkout
