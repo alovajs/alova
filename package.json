@@ -30,7 +30,7 @@
     "clean": "rimraf ./dist",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "release": "npm test && npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags",
+    "release": "semantic-release --branches main",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build:self": "rollup -c config/rollup.config.js",
@@ -57,7 +57,7 @@
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
-    "commit": "cz"
+    "commit": "git add . && cz && git push"
   },
   "author": "JOU-amjs",
   "license": "MIT",
