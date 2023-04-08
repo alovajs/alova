@@ -87,7 +87,19 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     return promisify(beforeRequest(clonedMethod)).then(() => {
       const { baseURL, url: newUrl, type, data } = clonedMethod;
       const { id, storage } = getContext(clonedMethod);
+      const {
+        params = {},
+        headers = {},
+        localCache,
+        transformData = self,
+        name: methodInstanceName = '',
+        shareRequest
+      } = getConfig(clonedMethod);
 
+      // 如果当前method设置了受控缓存，则看是否有自定义的数据
+      if (isFn(localCache)) {
+        return localCache();
+      }
       // 如果是强制请求的，则跳过从缓存中获取的步骤
       // 否则判断是否使用缓存数据
       if (!forceRequest) {
@@ -97,14 +109,6 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         }
       }
 
-      const {
-        params = {},
-        headers = {},
-        localCache: newLocalCache,
-        transformData = self,
-        name: methodInstanceName = '',
-        shareRequest
-      } = getConfig(clonedMethod);
       const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(clonedMethod);
 
       const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
