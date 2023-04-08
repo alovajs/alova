@@ -39,29 +39,48 @@ const compilePaths = {
   vue: {
     packageName: 'VueHook',
     input: 'src/predefine/VueHook.ts',
+
+    // key作为external数组，external对象作为global对象
+    externalMap: {
+      vue: 'Vue'
+    },
     output: suffix => `dist/hooks/vuehook.${suffix}.js`
   },
   react: {
     packageName: 'ReactHook',
     input: 'src/predefine/ReactHook.ts',
+    externalMap: {
+      react: 'React'
+    },
     output: suffix => `dist/hooks/reacthook.${suffix}.js`
   },
   svelte: {
-    extraExternal: ['svelte/store'],
+    externalMap: {
+      // undefined或null表示需要从globals中过滤掉
+      svelte: undefined,
+      'svelte/store': undefined
+    },
     packageName: 'SvelteHook',
     input: 'src/predefine/SvelteHook.ts',
     output: suffix => `dist/hooks/sveltehook.${suffix}.js`
   },
   globalFetch: {
-    extraExternal: [],
     packageName: 'GlobalFetch',
     input: 'src/predefine/GlobalFetch.ts',
     output: suffix => `dist/adapter/globalfetch.${suffix}.js`
   }
 };
-exports.external = Object.keys(compilePaths)
-  .reduce((prev, next) => [...prev, next, ...(compilePaths[next].extraExternal || [])], [])
-  .filter(key => key !== 'core');
 
 const compileModule = process.env.MODULE || 'core';
-exports.compilePath = compilePaths[compileModule];
+const compilePath = (exports.compilePath = compilePaths[compileModule]);
+// 计算external、globals
+if (compilePath.externalMap) {
+  const external = (exports.external = Object.keys(compilePath.externalMap));
+  exports.globals = external.reduce((globals, key) => {
+    const globalVal = compilePath.externalMap[key];
+    if (![undefined, null].includes(globalVal)) {
+      globals[key] = globalVal;
+    }
+    return globals;
+  }, {});
+}
