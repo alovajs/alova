@@ -79,7 +79,7 @@ type DetailLocalCacheConfig = {
   tag?: string | number;
 };
 type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
-
+type LocalCacheController = <R>() => R | Promise<R>;
 interface MethodRequestConfig {
   /**
    * url参数
@@ -105,7 +105,7 @@ type AlovaMethodConfig<R, T, RC, RH> = {
   /**
    * 响应数据在缓存时间内则不再次请求。get、head请求默认保鲜5分钟（300000毫秒），其他请求默认不缓存
    */
-  localCache?: LocalCacheConfig;
+  localCache?: LocalCacheConfig | LocalCacheController<R>;
 
   /**
    * 打击源方法实例，当源方法实例请求成功时，当前方法实例的缓存将被失效
@@ -130,7 +130,7 @@ type AlovaMethodConfig<R, T, RC, RH> = {
   /**
    * 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
    */
-  transformData?: (data: T, headers: RH) => R;
+  transformData?: (data: T, headers: RH) => R | Promise<R>;
 
   /**
    * 请求级共享请求开关
@@ -210,7 +210,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   storageAdapter?: AlovaGlobalStorage;
 
   /** 全局的请求前置钩子 */
-  beforeRequest?: (method: Method<S, E, any, any, RC, RE, RH>) => void;
+  beforeRequest?: (method: Method<S, E, any, any, RC, RE, RH>) => void | Promise<void>;
 
   /**
    * 全局的响应钩子，可传一个数组表示正常响应和响应出错的钩子
