@@ -105,7 +105,6 @@ export const getAlovaInstance = <S, E>(
     requestAdapter: GlobalFetch(),
     beforeRequest(config) {
       beforeRequestExpect && beforeRequestExpect(config);
-      return config;
     },
     responsed:
       responseExpect && !resErrorExpect

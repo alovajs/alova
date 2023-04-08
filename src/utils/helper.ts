@@ -1,19 +1,19 @@
-import { AlovaMethodHandler, CacheExpire, LocalCacheConfig } from '../../typings';
+import { AlovaMethodHandler, CacheExpire } from '../../typings';
 import Method from '../Method';
 import {
+  JSONStringify,
+  MEMORY,
+  ObjectCls,
+  PromiseCls,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   clearTimeoutTimer,
   falseValue,
   getConfig,
   getTime,
-  JSONStringify,
-  MEMORY,
   nullValue,
-  ObjectCls,
-  PromiseCls,
-  promiseThen,
+  promiseResolve,
   setTimeoutFn,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   undefinedValue
 } from './variables';
 
@@ -121,13 +121,8 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
  * @param localCache 本地缓存参数
  * @returns 统一的缓存参数对象
  */
-export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(
-  methodInstance?: Method<S, E, R, T, RC, RE, RH>,
-  localCache?: LocalCacheConfig
-) => {
-  const _localCache =
-    localCache !== undefinedValue ? localCache : methodInstance ? getConfig(methodInstance).localCache : undefinedValue;
-
+export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
+  const _localCache = getConfig(methodInstance).localCache;
   const getCacheExpireTs = (_localCache: CacheExpire) =>
     isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache);
   let cacheMode = MEMORY;
@@ -171,23 +166,12 @@ export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[]
   isFn(config) ? config(...args) : config;
 
 /**
- * 判断目标数据是否为Promise，如果是则在then函数中执行onAfter，否则同步执行onAfter
+ * 判断target是否为Promise，如果是则直接返回promise对象，否则返回Promise.resolve(target)包装成promise
  * @param target 目标数据
- * @param onAfter 后续回调函数
- * @returns {void}
+ * @returns {Promise<any>}
  */
-export const asyncOrSync = <T, R>(
-  target: T,
-  onfulfill: (data: T extends Promise<infer D> ? D : T) => R,
-  onreject?: (reason: any) => void
-) =>
-  promiseThen(
-    newInstance(PromiseCls, resolve => {
-      resolve(target);
-    }),
-    onfulfill,
-    onreject
-  );
+export const promisify = <T>(target: T): Promise<T> =>
+  instanceOf(target, PromiseCls) ? target : promiseResolve(target);
 
 /**
  * 创建类实例
