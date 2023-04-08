@@ -129,14 +129,16 @@ export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance:
   let expire = 0;
   let storage = falseValue;
   let tag: undefined | string = undefinedValue;
-  if (isNumber(_localCache) || instanceOf(_localCache, Date)) {
-    expire = getCacheExpireTs(_localCache);
-  } else {
-    const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = _localCache || {};
-    cacheMode = mode;
-    expire = getCacheExpireTs(configExpire);
-    storage = [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode);
-    tag = configTag ? configTag.toString() : undefinedValue;
+  if (!isFn(_localCache)) {
+    if (isNumber(_localCache) || instanceOf(_localCache, Date)) {
+      expire = getCacheExpireTs(_localCache);
+    } else {
+      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = _localCache || {};
+      cacheMode = mode;
+      expire = getCacheExpireTs(configExpire);
+      storage = [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode);
+      tag = configTag ? configTag.toString() : undefinedValue;
+    }
   }
   return {
     e: expire,

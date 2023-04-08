@@ -205,15 +205,11 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   };
 
   return {
-    abort: () => {
-      requestAdapterCtrls?.abort();
-    },
-    onDownload: (handler: ProgressUpdater) => {
-      requestAdapterCtrls?.onDownload?.(handler);
-    },
-    onUpload: (handler: ProgressUpdater) => {
-      requestAdapterCtrls?.onUpload?.(handler);
-    },
+    abort: () => requestAdapterCtrls && requestAdapterCtrls.abort(),
+    onDownload: (handler: ProgressUpdater) =>
+      requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler),
+    onUpload: (handler: ProgressUpdater) =>
+      requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler),
     response
   };
 }
