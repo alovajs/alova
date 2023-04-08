@@ -12,37 +12,35 @@ on:
 
 # 任务
 jobs:
-  # quality:
-  #   # 服务器环境：最新版 Ubuntu
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     # 拉取代码
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Use Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 18.12.x
-  #         registry-url: 'https://registry.npmjs.org'
-  #         cache: 'npm'
+  quality:
+    # 服务器环境：最新版 Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      # 拉取代码
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.12.x
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
 
-  #     # 执行测试和打包操作
-  #     - name: Install deps
-  #       run: npm ci
+      # 执行测试和打包操作
+      - name: Install deps
+        run: npm ci
 
-  #     - name: Lint check
-  #       run: npm run lint
+      - name: Lint check
+        run: npm run lint
 
-  #     # 这条命令包含了测试
-  #     - name: Unit tests
-  #       run: npm run test
-  # - run: npm publish
-  #   env:
-  #     NODE_AUTH_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
+      # 这条命令包含了测试
+      - name: Unit tests
+        run: npm run test
+
   release:
     runs-on: ubuntu-latest
-    # needs: [quality]
-    # if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [quality]
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       # 拉取代码
       - name: Checkout
@@ -59,8 +57,8 @@ jobs:
         run: npm ci
 
       # 这条命令包含了测试和上传覆盖率
-      # - name: Coverage
-      #   run: npm run coveralls
+      - name: Coverage
+        run: npm run coveralls
 
       # 打包发布
       - name: Build
