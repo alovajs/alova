@@ -30,7 +30,7 @@
     "clean": "rimraf ./dist",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "release": "npm test && npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags",
+    "release": "semantic-release",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build:self": "rollup -c config/rollup.config.js",
@@ -55,13 +55,15 @@
     "build:globalfetch": "npm run build:globalfetch:esm && npm run build:globalfetch:umd && npm run build:globalfetch:umd.min",
     "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook && npm run build:globalfetch",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
+    "commit": "git add . && git-cz && git push"
   },
   "author": "JOU-amjs",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/alovajs/alova.git"
+    "url": "https://github.com/alovajs/alova.git"
   },
   "bugs": {
     "url": "https://github.com/alovajs/alova/issues"
@@ -116,8 +118,11 @@
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
     "babel-jest": "^29.2.2",
+    "commitizen": "^4.3.0",
+    "conventional-changelog-cli": "^2.2.2",
     "coveralls": "^3.1.1",
     "cross-env": "5.2.0",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -133,6 +138,7 @@
     "rollup": "^2.74.1",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.31.2",
+    "semantic-release": "^21.0.1",
     "svelte": "^3.49.0",
     "svelte-jester": "^2.3.2",
     "ts-jest": "^29.0.3",
@@ -146,5 +152,10 @@
   "resolutions": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
