@@ -33,21 +33,20 @@
     "release": "semantic-release",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build:self": "rollup -c config/rollup.config.js",
     "build:esm": "rollup -c config/rollup.config.esm.js",
-    "build:umd": "cross-env NODE_ENV=development rollup -c config/rollup.config.umd.js",
+    "build:umd": "cross-env rollup -c config/rollup.config.umd.js",
     "build:umd.min": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.js",
     "build:vuehook:esm": "cross-env MODULE=vue rollup -c config/rollup.config.esm.js",
-    "build:vuehook:umd": "cross-env NODE_ENV=development MODULE=vue rollup -c config/rollup.config.umd.js",
+    "build:vuehook:umd": "cross-env MODULE=vue rollup -c config/rollup.config.umd.js",
     "build:vuehook:umd.min": "cross-env NODE_ENV=production MODULE=vue rollup -c config/rollup.config.umd.js",
     "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
     "build:reacthook:esm": "cross-env MODULE=react rollup -c config/rollup.config.esm.js",
-    "build:reacthook:umd": "cross-env NODE_ENV=development MODULE=react rollup -c config/rollup.config.umd.js",
+    "build:reacthook:umd": "cross-env MODULE=react rollup -c config/rollup.config.umd.js",
     "build:reacthook:umd.min": "cross-env NODE_ENV=production MODULE=react rollup -c config/rollup.config.umd.js",
     "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
     "build:sveltehook:esm": "cross-env MODULE=svelte rollup -c config/rollup.config.esm.js",
     "build:globalfetch:esm": "cross-env MODULE=globalFetch rollup -c config/rollup.config.esm.js",
-    "build:globalfetch:umd": "cross-env NODE_ENV=development MODULE=globalFetch rollup -c config/rollup.config.umd.js",
+    "build:globalfetch:umd": "cross-env MODULE=globalFetch rollup -c config/rollup.config.umd.js",
     "build:globalfetch:umd.min": "cross-env NODE_ENV=production MODULE=globalFetch rollup -c config/rollup.config.umd.js",
     "build:globalfetch": "npm run build:globalfetch:esm && npm run build:globalfetch:umd && npm run build:globalfetch:umd.min",
     "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook:esm && npm run build:globalfetch",
@@ -155,5 +154,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "@semantic-release/exec": "^6.0.3"
   }
 }

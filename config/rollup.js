@@ -1,11 +1,14 @@
 /*
  * @Date: 2020-04-09 11:06:01
  * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-08-20 11:50:49
+ * @LastEditTime: 2023-04-09 14:37:26
  */
+// 设置环境变量
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
 var typescript = require('rollup-plugin-typescript2');
 var pkg = require('../package.json');
-var version = pkg.version;
+var version = process.env.VERSION || pkg.version;
 var author = pkg.author;
 var repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
 
