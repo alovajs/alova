@@ -1,5 +1,6 @@
 branches:
   - main
+  - 'release/*'
   - name: beta
     prerelease: true
   - name: alpha
@@ -10,4 +11,7 @@ plugins:
   - '@semantic-release/release-notes-generator'
   - '@semantic-release/npm'
   - '@semantic-release/github'
-  - '@semantic-release/git'
+  - - '@semantic-release/git'
+    - message: 'chore(release): ${nextRelease.version}\n\n${nextRelease.notes}'
+  - - '@semantic-release/exec'
+    - prepareCmd: 'cross-env VERSION=${nextRelease.version} npm run build'

@@ -1,11 +1,4 @@
-import {
-  AlovaRequestAdapter,
-  Arg,
-  ProgressUpdater,
-  ResponsedHandler,
-  ResponsedHandlerRecord,
-  ResponseErrorHandler
-} from '../../typings';
+import { AlovaRequestAdapter, Arg, ProgressUpdater, ResponsedHandler, ResponseErrorHandler } from '../../typings';
 import Method from '../Method';
 import { matchSnapshotMethod, saveMethodSnapshot } from '../storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '../storage/responseCache';
@@ -76,7 +69,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   let requestAdapterCtrls: RequestAdapterReturnType | undefined = undefinedValue;
   let fromCache = trueValue;
   const response = () => {
-    const { beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
+    const { beforeRequest = noop, responsed, responded, requestAdapter } = getOptions(methodInstance);
 
     // 使用克隆之前的method key，以免在beforeRequest中method被改动而导致method key改变
     // method key在beforeRequest中被改变将会致使使用method 实例操作缓存时匹配失败
@@ -128,26 +121,25 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         requestAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
       }
 
-      let responsedHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
+      let responseHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
       let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
-      if (isFn(responsed)) {
-        responsedHandler = responsed;
-      } else if (isPlainObject(responsed)) {
-        const { onSuccess: successHandler, onError: errorHandler } = responsed as ResponsedHandlerRecord<
-          any,
-          any,
-          RC,
-          RE,
-          RH
-        >;
-        responsedHandler = isFn(successHandler) ? successHandler : responsedHandler;
+
+      // responsed是一个错误的单词，正确的单词是responded
+      // 在2.1.0+添加了responded的支持，并和responsed做了兼容处理
+      // 计划将在3.0中正式使用responded
+      const responseUnified = responded || responsed;
+      if (isFn(responseUnified)) {
+        responseHandler = responseUnified;
+      } else if (isPlainObject(responseUnified)) {
+        const { onSuccess: successHandler, onError: errorHandler } = responseUnified;
+        responseHandler = isFn(successHandler) ? successHandler : responseHandler;
         responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
       }
       return (
         PromiseCls.all([requestAdapterCtrls!.response(), requestAdapterCtrls!.headers()])
           .then(
             ([rawResponse, headers]) =>
-              promisify(responsedHandler(rawResponse, clonedMethod))
+              promisify(responseHandler(rawResponse, clonedMethod))
                 .then(data => transformData(data, headers))
                 .then(transformedData => {
                   saveMethodSnapshot(id, methodKey, methodInstance);

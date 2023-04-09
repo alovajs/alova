@@ -222,6 +222,13 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   responsed?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
 
   /**
+   * 由于responsed单词写错，使用responded这个正确的单词进行兼容处理
+   * 计划将在3.0中废弃responsed字段并正式使用此字段
+   * @version 2.1.0+
+   */
+  responded?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
+
+  /**
    * 全局的共享请求开关
    * 开启共享请求后，同时发起相同请求时将共用同一个请求
    * @default true

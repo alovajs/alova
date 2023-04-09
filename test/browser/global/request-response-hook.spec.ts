@@ -1,4 +1,5 @@
-import { Method, useRequest } from '../../../src';
+import { Method, createAlova, useRequest } from '../../../src';
+import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import VueHook from '../../../src/predefine/VueHook';
 import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
@@ -29,7 +30,7 @@ describe('request response hook', function () {
       },
       localCache: 100 * 1000
     });
-    useRequest(Get);
+    await Get.send();
   });
 
   test('`responsed-onSuccess` hook will receive the config param', async () => {
@@ -56,7 +57,37 @@ describe('request response hook', function () {
       },
       localCache: 100 * 1000
     });
-    useRequest(Get);
+    await Get.send();
+  });
+
+  test('You can also use `responded` to handle global response event', async () => {
+    const alova = createAlova({
+      baseURL: 'http://localhost:3000',
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      beforeRequest: method => {
+        expect(method).toBeInstanceOf(Method);
+        method.extra = {
+          a: 1,
+          b: 2
+        };
+      },
+      responded: async (r, method) => {
+        const result = await r.json();
+        expect(result.data.path).toBe('/unit-test');
+        expect(result.data.params).toEqual({ a: 'a', b: 'str' });
+        expect(method.extra).toEqual({ a: 1, b: 2 });
+      }
+    });
+    const Get = alova.Get('/unit-test', {
+      params: { a: 'a', b: 'str' },
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      localCache: 100 * 1000
+    });
+    await Get.send();
   });
 
   test('`responsed-onError` hook will receive the config param', async () => {
@@ -73,7 +104,7 @@ describe('request response hook', function () {
       }
     });
     const Get = alova.Get('/unit-test-404');
-    useRequest(Get);
+    await Get.send();
   });
 
   test("shouldn't global error cb when responsed cb throw Error", async () => {
