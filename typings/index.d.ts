@@ -142,7 +142,10 @@ type AlovaMethodConfig<R, T, RC, RH> = {
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 
 type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
-type ResponseErrorHandler<R, T, RC, RE, RH> = (error: any, methodInstance: Method<any, any, R, T, RC, RE, RH>) => void;
+type ResponseErrorHandler<R, T, RC, RE, RH> = (
+  error: any,
+  methodInstance: Method<any, any, R, T, RC, RE, RH>
+) => void | Promise<void>;
 type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
   onSuccess?: ResponsedHandler<R, T, RC, RE, RH>;
   onError?: ResponseErrorHandler<R, T, RC, RE, RH>;
@@ -298,6 +301,8 @@ interface AlovaEvent<S, E, R, T, RC, RE, RH> {
 }
 /** 成功事件对象 */
 interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+  /** data数据是否来自缓存 */
+  fromCache: boolean;
   data: R;
 }
 /** 错误事件对象 */
@@ -306,7 +311,10 @@ interface AlovaErrorEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T,
 }
 /** 完成事件对象 */
 interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+  /** 响应状态 */
   status: 'success' | 'error';
+  /** data数据是否来自缓存，当status为error时，fromCache始终为false */
+  fromCache: boolean;
   data?: R;
   error?: any;
 }

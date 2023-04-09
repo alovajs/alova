@@ -1,5 +1,5 @@
 import { AlovaCompleteEvent, Method } from '../../typings';
-import { forEach, ObjectCls, objectKeys, undefinedValue } from './variables';
+import { ObjectCls, forEach, objectKeys, undefinedValue } from './variables';
 
 /**
  * 创建统一的事件对象
@@ -9,13 +9,13 @@ export default <S, E, R, T, RC, RE, RH>(
   eventType: number,
   method: Method<S, E, R, T, RC, RE, RH>,
   sendArgs: any[],
+  fromCache: boolean,
   data?: R,
   error?: any,
   status?: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */
-
     /** 当前的method实例 */
     method,
 
@@ -29,7 +29,10 @@ export default <S, E, R, T, RC, RE, RH>(
     error,
 
     /** 请求状态 */
-    status
+    status,
+
+    /** data数据是否来自缓存，当status为error时，fromCache始终为false */
+    fromCache
   };
   const eventInstance: any = {};
   forEach(objectKeys(allPropsEvent), key => {

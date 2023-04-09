@@ -20,19 +20,19 @@ import createAlovaEvent from '../utils/createAlovaEvent';
 import { GeneralFn, getLocalCacheConfigParam, instanceOf, isFn, key, noop, sloughConfig } from '../utils/helper';
 import myAssert from '../utils/myAssert';
 import {
+  MEMORY,
+  PromiseCls,
+  STORAGE_RESTORE,
   falseValue,
   forEach,
   getConfig,
   getContext,
   len,
-  MEMORY,
   objectKeys,
   promiseCatch,
-  PromiseCls,
   promiseReject,
   promiseResolve,
   promiseThen,
-  STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '../utils/variables';
@@ -112,6 +112,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
   let requestCtrl: Partial<ReturnType<typeof sendRequest>> = {};
   let responseHandlePromise = promiseResolve<any>(undefinedValue);
+  let fromCache = !!cachedResponse;
 
   // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
   const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
@@ -121,8 +122,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     const {
       response,
       onDownload = noop,
-      onUpload = noop
+      onUpload = noop,
+      fromCache: getFromCacheValue
     } = (requestCtrl = sendRequest(guardNextReplacingMethod, forceRequestFinally));
+    fromCache = getFromCacheValue();
 
     // 命中缓存，或强制请求时需要更新loading状态
     if (forceRequestFinally || !cachedResponse) {
@@ -219,11 +222,15 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
         // 在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
         update({ loading: falseValue }, frontStates);
-        runArgsHandler(successHandlers, successHandlerDecorator, createAlovaEvent(0, methodInstance, sendArgs, data));
+        runArgsHandler(
+          successHandlers,
+          successHandlerDecorator,
+          createAlovaEvent(0, methodInstance, sendArgs, fromCache, data)
+        );
         runArgsHandler(
           completeHandlers,
           completeHandlerDecorator,
-          createAlovaEvent(2, methodInstance, sendArgs, data, undefinedValue, 'success')
+          createAlovaEvent(2, methodInstance, sendArgs, fromCache, data, undefinedValue, 'success')
         );
         return data;
       };
@@ -256,12 +263,12 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       runArgsHandler(
         errorHandlers,
         errorHandlerDecorator,
-        createAlovaEvent(1, methodInstance, sendArgs, undefinedValue, error)
+        createAlovaEvent(1, methodInstance, sendArgs, fromCache, undefinedValue, error)
       );
       runArgsHandler(
         completeHandlers,
         completeHandlerDecorator,
-        createAlovaEvent(2, methodInstance, sendArgs, undefinedValue, error, 'error')
+        createAlovaEvent(2, methodInstance, sendArgs, fromCache, undefinedValue, error, 'error')
       );
       return promiseReject(error);
     }
