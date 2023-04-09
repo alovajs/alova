@@ -74,6 +74,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   forceRequest: boolean
 ) {
   let requestAdapterCtrls: RequestAdapterReturnType | undefined = undefinedValue;
+  let fromCache = trueValue;
   const response = () => {
     const { beforeRequest = noop, responsed = self, requestAdapter } = getOptions(methodInstance);
 
@@ -109,8 +110,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         }
       }
 
+      fromCache = falseValue;
       const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(clonedMethod);
-
       const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
       requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
       if (!shareRequest || !requestAdapterCtrls) {
@@ -142,64 +143,58 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         responsedHandler = isFn(successHandler) ? successHandler : responsedHandler;
         responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
       }
-      return PromiseCls.all([requestAdapterCtrls!.response(), requestAdapterCtrls!.headers()]).then(
-        ([rawResponse, headers]) =>
-          promisify(responsedHandler(rawResponse, clonedMethod))
-            .then(
-              data => {
-                deleteAttr(namespacedAdapterReturnMap, methodKey);
-                return transformData(data, headers);
-              },
-              reason => {
-                deleteAttr(namespacedAdapterReturnMap, methodKey);
-                throw reason;
-              }
-            )
-            .then(transformedData => {
-              saveMethodSnapshot(id, methodKey, methodInstance);
-              // 当requestBody为特殊数据时不保存缓存
-              // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
-              // 原因2：特殊数据不便于生成缓存key
-              const requestBody = clonedMethod.data;
-              const toCache = !requestBody || !isSpecialRequestBody(requestBody);
-              if (toCache) {
-                setResponseCache(id, methodKey, transformedData, expireTimestamp);
-                toStorage && persistResponse(id, methodKey, transformedData, expireTimestamp, storage, tag);
-              }
-
-              // 查找hitTarget，让它的缓存失效
-              const hitMethods = matchSnapshotMethod({
-                filter: cachedMethod => {
-                  let isHit = falseValue;
-                  const hitSource = cachedMethod.hitSource;
-                  if (hitSource) {
-                    for (const i in hitSource) {
-                      const sourceMatcher = hitSource[i];
-                      if (
-                        instanceOf(sourceMatcher, RegExp)
-                          ? sourceMatcher.test(methodInstanceName as string)
-                          : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-                      ) {
-                        isHit = trueValue;
-                        break;
-                      }
-                    }
+      return (
+        PromiseCls.all([requestAdapterCtrls!.response(), requestAdapterCtrls!.headers()])
+          .then(
+            ([rawResponse, headers]) =>
+              promisify(responsedHandler(rawResponse, clonedMethod))
+                .then(data => transformData(data, headers))
+                .then(transformedData => {
+                  saveMethodSnapshot(id, methodKey, methodInstance);
+                  // 当requestBody为特殊数据时不保存缓存
+                  // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
+                  // 原因2：特殊数据不便于生成缓存key
+                  const requestBody = clonedMethod.data;
+                  const toCache = !requestBody || !isSpecialRequestBody(requestBody);
+                  if (toCache) {
+                    setResponseCache(id, methodKey, transformedData, expireTimestamp);
+                    toStorage && persistResponse(id, methodKey, transformedData, expireTimestamp, storage, tag);
                   }
-                  return isHit;
-                }
-              });
-              len(hitMethods) > 0 && invalidateCache(hitMethods);
-              return transformedData;
-            }),
-        (error: any) => {
-          // 请求失败时也需要移除共享的请求
-          deleteAttr(namespacedAdapterReturnMap, methodKey);
-          if (!isFn(responseErrorHandler)) {
-            throw error;
-          }
-          // 可能返回Promise.reject
-          return responseErrorHandler(error, clonedMethod);
-        }
+
+                  // 查找hitTarget，让它的缓存失效
+                  const hitMethods = matchSnapshotMethod({
+                    filter: cachedMethod => {
+                      let isHit = falseValue;
+                      const hitSource = cachedMethod.hitSource;
+                      if (hitSource) {
+                        for (const i in hitSource) {
+                          const sourceMatcher = hitSource[i];
+                          if (
+                            instanceOf(sourceMatcher, RegExp)
+                              ? sourceMatcher.test(methodInstanceName as string)
+                              : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
+                          ) {
+                            isHit = trueValue;
+                            break;
+                          }
+                        }
+                      }
+                      return isHit;
+                    }
+                  });
+                  len(hitMethods) > 0 && invalidateCache(hitMethods);
+                  return transformedData;
+                }),
+            (error: any) => {
+              if (!isFn(responseErrorHandler)) {
+                throw error;
+              }
+              // 可能返回Promise.reject
+              return responseErrorHandler(error, clonedMethod);
+            }
+          )
+          // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
+          .finally(() => deleteAttr(namespacedAdapterReturnMap, methodKey))
       );
     });
   };
@@ -210,6 +205,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler),
     onUpload: (handler: ProgressUpdater) =>
       requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler),
-    response
+    response,
+    fromCache: () => fromCache
   };
 }
