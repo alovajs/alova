@@ -1,6 +1,5 @@
 branches:
   - main
-  - 'release/*'
   - name: beta
     prerelease: true
   - name: alpha
@@ -14,4 +13,6 @@ plugins:
   - - '@semantic-release/git'
     - message: 'chore(release): ${nextRelease.version}\n\n${nextRelease.notes}'
   - - '@semantic-release/exec'
+
+    # 使用下一个版本号执行打包命令
     - prepareCmd: 'cross-env VERSION=${nextRelease.version} npm run build'

@@ -60,10 +60,6 @@ jobs:
       - name: Coverage
         run: npm run coveralls
 
-      # 打包发布
-      - name: Build
-        run: npm run build --if-present
-
       - name: Release
         run: npm run release
         env:
