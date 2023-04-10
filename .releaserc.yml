@@ -1,6 +1,5 @@
 branches:
   - main
-  - 'release/*'
   - name: beta
     prerelease: true
   - name: alpha
