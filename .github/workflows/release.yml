@@ -64,4 +64,4 @@ jobs:
         run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.ALOVA_GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ALOVA_GITHUB_TOKEN }}
