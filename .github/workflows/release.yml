@@ -19,6 +19,8 @@ jobs:
       # 拉取代码
       - name: Checkout
         uses: actions/checkout@v3
+        with: 
+          persist-credentials: false
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -66,4 +68,4 @@ jobs:
         run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ALOVA_GITHUB_TOKEN }}
