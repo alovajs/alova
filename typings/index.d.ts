@@ -178,7 +178,7 @@ interface StatesHook<S, E> {
   effectRequest: (effectParams: EffectRequestParams<E>) => void;
 }
 
-type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>>;
+type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>> | null;
 /**
  * 泛型类型解释：
  * S: create函数创建的状态组的类型
@@ -188,14 +188,14 @@ type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>>;
  * RH(ResponseHeader): requestAdapter的响应头类型，自动推断
  */
 interface AlovaOptions<S, E, RC, RE, RH> {
-  /** base地址 */
-  baseURL: string;
-
   /** 状态hook函数，用于定义和更新指定MVVM库的状态 */
   statesHook: StatesHook<S, E>;
 
   /** 请求适配器 */
   requestAdapter: AlovaRequestAdapter<any, any, RC, RE, RH>;
+
+  /** base地址 */
+  baseURL?: string;
 
   /** 请求超时时间 */
   timeout?: number;
