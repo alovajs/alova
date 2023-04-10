@@ -50,8 +50,8 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
 
   // 将get参数拼接到url后面，注意url可能已存在参数
   let urlWithParams = paramsStr ? (url.includes('?') ? `${url}&${paramsStr}` : `${url}?${paramsStr}`) : url;
-  // 如果不是/开头的，则需要添加/
-  urlWithParams = urlWithParams.startsWith('/') ? urlWithParams : `/${urlWithParams}`;
+  // 如果不是/或http协议开头的，则需要添加/
+  urlWithParams = urlWithParams.match(/^(\/|https?:\/\/)/) ? urlWithParams : `/${urlWithParams}`;
   // baseURL如果以/结尾，则去掉/
   return (baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL) + urlWithParams;
 };
@@ -136,7 +136,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
       }
       return (
-        PromiseCls.all([requestAdapterCtrls!.response(), requestAdapterCtrls!.headers()])
+        PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()])
           .then(
             ([rawResponse, headers]) =>
               promisify(responseHandler(rawResponse, clonedMethod))

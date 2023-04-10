@@ -53,7 +53,7 @@
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
-    "commit": "git add . && git-cz && git push"
+    "commit": "git-cz && git push"
   },
   "author": "JOU-amjs",
   "license": "MIT",
@@ -102,6 +102,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
+    "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
@@ -154,8 +155,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "dependencies": {
-    "@semantic-release/exec": "^6.0.3"
   }
 }
