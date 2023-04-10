@@ -57,14 +57,21 @@ describe('invalitate cached response data', () => {
 
     const firstState = useRequest(Get1);
     const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+    const [ev1, ev2] = await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+    // 此时响应数据来自网络请求
+    expect(ev1.fromCache).toBeFalsy();
+    expect(ev2.fromCache).toBeFalsy();
 
     // 检查缓存情况
     const firstState2 = useRequest(Get1);
     expect(firstState2.loading.value).toBeFalsy();
     const secondState2 = useRequest(Get2);
     expect(secondState2.loading.value).toBeFalsy();
-    await Promise.all([untilCbCalled(firstState2.onSuccess), untilCbCalled(secondState2.onSuccess)]);
+    const [ev3, ev4] = await Promise.all([untilCbCalled(firstState2.onSuccess), untilCbCalled(secondState2.onSuccess)]);
+    // 此时响应数据来自缓存
+    expect(ev3.fromCache).toBeTruthy();
+    expect(ev4.fromCache).toBeTruthy();
+
     expect(firstState2.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
     expect(secondState2.data.value).toEqual({
       path: '/unit-test-count',
@@ -79,7 +86,10 @@ describe('invalitate cached response data', () => {
     expect(firstState3.loading.value).toBeTruthy();
     const secondState3 = useRequest(Get2);
     expect(secondState3.loading.value).toBeTruthy();
-    await Promise.all([untilCbCalled(firstState3.onSuccess), untilCbCalled(secondState3.onSuccess)]);
+    const [ev5, ev6] = await Promise.all([untilCbCalled(firstState3.onSuccess), untilCbCalled(secondState3.onSuccess)]);
+    // 缓存清除，此时响应数据再次来自网络请求
+    expect(ev5.fromCache).toBeFalsy();
+    expect(ev6.fromCache).toBeFalsy();
     expect(firstState3.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
     expect(secondState3.data.value).toEqual({
       path: '/unit-test-count',

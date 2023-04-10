@@ -1,7 +1,7 @@
 import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '../typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
-import { instanceOf, key } from './utils/helper';
+import { instanceOf, isPlainObject, key } from './utils/helper';
 import {
   deleteAttr,
   falseValue,
@@ -54,10 +54,9 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
 
     // 合并localCache
     const mergedLocalCacheKey = 'localCache';
-    const globalLocalCache =
-      contextOptions[mergedLocalCacheKey] !== undefinedValue
-        ? contextOptions[mergedLocalCacheKey][type]
-        : undefinedValue;
+    const globalLocalCache = isPlainObject(contextOptions[mergedLocalCacheKey])
+      ? contextOptions[mergedLocalCacheKey][type]
+      : undefinedValue;
     if (globalLocalCache !== undefinedValue) {
       contextConcatConfig[mergedLocalCacheKey] = globalLocalCache;
     }
