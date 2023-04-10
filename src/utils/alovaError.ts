@@ -6,7 +6,7 @@ import { newInstance } from './helper';
  * @returns 错误对象
  */
 export default (msg: string, code?: any) => {
-  const err = newInstance(Error, `[alova:Error]${msg}`);
+  const err = newInstance(Error, `[alova]${msg}`);
   code && (err.name = code);
   return err;
 };

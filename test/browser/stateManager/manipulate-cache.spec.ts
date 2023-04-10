@@ -1,8 +1,8 @@
-import { queryCache, setCache } from '../../../src';
+import { queryCache, setCache, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getPersistentResponse, persistResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer } from '../../utils';
+import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
 
 beforeAll(() => mockServer.listen());
@@ -334,5 +334,69 @@ describe('manipulate cache', function () {
     });
     // 未匹配到时返回undefined
     expect(queryCache('test-get222')).toBeUndefined();
+  });
+
+  // 通过设置localCache为函数，将缓存变为受控状态，可以自定义返回需要使用的缓存数据
+  test('should hit the controlled cache when localCache is common function', async () => {
+    const mockControlledCache = {
+      path: 'local-controlled',
+      params: {},
+      method: 'Get'
+    };
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 1000 },
+      localCache() {
+        return mockControlledCache;
+      },
+      transformData: ({ data }: Result) => data
+    });
+    const { onSuccess, data } = useRequest(Get1);
+    const event = await untilCbCalled(onSuccess);
+    expect(event.fromCache).toBeTruthy();
+    expect(event.data).toStrictEqual(mockControlledCache);
+    expect(data.value).toStrictEqual(mockControlledCache);
+
+    const rawData = await Get1.send();
+    expect(rawData).toStrictEqual(mockControlledCache);
+  });
+  test('localCache can also be a async function', async () => {
+    const mockControlledCache = {
+      path: 'local-controlled',
+      params: {},
+      method: 'Get'
+    };
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 1000 },
+      async localCache() {
+        await new Promise(resolve => {
+          setTimeout(resolve, 200);
+        });
+        return mockControlledCache;
+      },
+      transformData: ({ data }: Result) => data
+    });
+    const { onSuccess, data } = useRequest(Get1);
+    const event = await untilCbCalled(onSuccess);
+    expect(event.fromCache).toBeTruthy();
+    expect(event.data).toStrictEqual(mockControlledCache);
+    expect(data.value).toStrictEqual(mockControlledCache);
+
+    const rawData = await Get1.send();
+    expect(rawData).toStrictEqual(mockControlledCache);
+  });
+
+  test('should emit onError when localCache throws a error', async () => {
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 1000 },
+      localCache() {
+        throw new Error('error in localCache');
+      },
+      transformData: ({ data }: Result) => data
+    });
+    const { onError } = useRequest(Get1);
+    const event = await untilCbCalled(onError);
+    expect(event.error.message).toBe('error in localCache');
+
+    await expect(Get1.send()).rejects.toThrow('error in localCache');
   });
 });

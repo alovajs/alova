@@ -35,7 +35,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
-    const { data: rawData } = await untilCbCalled(onSuccess);
+    const { data: rawData, fromCache } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params).toEqual({ a: 'a', b: 'str' });
@@ -43,6 +43,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(rawData.params).toEqual({ a: 'a', b: 'str' });
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
+    expect(fromCache).toBeFalsy();
 
     // 缓存有值
     const cacheData = getResponseCache(alova.id, key(Get));
