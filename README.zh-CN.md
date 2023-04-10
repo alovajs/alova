@@ -7,7 +7,7 @@
 <p align="center">中文 | <a href="./README.md">📑English</a></p>
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
-[![build](https://github.com/alovajs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/main.yml)
+[![build](https://github.com/alovajs/alova/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/release.yml)
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
@@ -45,7 +45,7 @@ alova 的创建初衷是对不同请求场景提出的一个解决方案，它�
 
 ## 库稳定性
 
-alova 从第一个版本的开发到现在已经过去将近一年时间了，在这一年中我们也在持续发现问题优化，到目前为止 alova 已通过了 132 项单元测试，覆盖率为 99%。即便如此，alova 还属于新秀，因此我也建议你可以先保守使用。
+alova 从第一个版本的开发到现在已经过去将近一年时间了，在这一年中我们也在持续发现问题优化，到目前为止 alova 已通过了 143 项单元测试，覆盖率为 99%。即便如此，alova 还属于新秀，因此我也建议你可以先保守使用。
 
 **我保证会在收到 issue 后，第一时间解决**
 

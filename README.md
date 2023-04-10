@@ -7,7 +7,7 @@
 <p align="center">English | <a href="./README.zh-CN.md">📑中文</a></p>
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
-[![build](https://github.com/alovajs/alova/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/main.yml)
+[![build](https://github.com/alovajs/alova/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/release.yml)
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
@@ -45,7 +45,7 @@ The original intention of alova is to propose a solution for different request s
 
 ## Library Stability
 
-It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 132 unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
+It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 143 unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
 
 **I promise to solve it as soon as possible after receiving your issue**
 
