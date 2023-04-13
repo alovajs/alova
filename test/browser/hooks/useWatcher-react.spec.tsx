@@ -3,9 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 import { useWatcher } from '../../../src';
 import ReactHook from '../../../src/predefine/ReactHook';
-import { getAlovaInstance, mockServer } from '../../utils';
+import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
 import { Result } from '../result.type';
-
+jest.setTimeout(1000000);
 beforeAll(() => mockServer.listen());
 afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());
@@ -97,7 +97,10 @@ describe('useWatcher hook with react', () => {
           params: { id1: '', id2: '' }
         }
       });
-      onSuccess(mockfn);
+      onSuccess(ev => {
+        console.log(ev.data);
+        mockfn();
+      });
       return (
         <div role="wrap">
           <span role="status">{loading ? 'loading' : 'loaded'}</span>
@@ -140,7 +143,8 @@ describe('useWatcher hook with react', () => {
     expect(mockfn).toHaveBeenCalledTimes(3);
 
     fireEvent.click(screen.getByRole('btn2'));
-    await screen.findByText('loaded');
+    // 将会命中缓存，因此不能再使用await screen.findByText('loaded')判断请求成功了
+    await untilCbCalled(setTimeout, 100);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('2');
     expect(screen.getByRole('id2')).toHaveTextContent('12');

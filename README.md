@@ -25,7 +25,7 @@
 - 🕶 Support vue, react, svelte
 - 🦾 Real-time automatic status management
 - 📑 Similar api design to axios, easier
-- ▪️ 4kb, only 30%+ of axios
+- 🐦 4kb, only 30%+ of axios
 - 👄 Declarative Scenario Request
 - 🔩 Flexible: Work with any request library like axios, superagent, or fetch-api
 - 🔋 3 response data caching modes
@@ -45,7 +45,7 @@ The original intention of alova is to propose a solution for different request s
 
 ## Library Stability
 
-It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 143 unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
+It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 145 unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
 
 **I promise to solve it as soon as possible after receiving your issue**
 

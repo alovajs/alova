@@ -385,6 +385,24 @@ describe('manipulate cache', function () {
     expect(rawData).toStrictEqual(mockControlledCache);
   });
 
+  test('should continue send request when localCache function is return undefined', async () => {
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 1000 },
+      async localCache() {
+        return undefined;
+      },
+      transformData: ({ data }: Result) => data
+    });
+    const { onSuccess } = useRequest(Get1);
+    const event = await untilCbCalled(onSuccess);
+    expect(event.fromCache).toBeFalsy();
+    expect(event.data).toStrictEqual({
+      path: '/unit-test',
+      params: { a: '1000' },
+      method: 'GET'
+    });
+  });
+
   test('should emit onError when localCache throws a error', async () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 1000 },
