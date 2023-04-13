@@ -78,117 +78,124 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数
-    return promisify(beforeRequest(clonedMethod)).then(() => {
-      const { baseURL, url: newUrl, type, data } = clonedMethod;
-      const { id, storage } = getContext(clonedMethod);
-      const {
-        params = {},
-        headers = {},
-        localCache,
-        transformData = self,
-        name: methodInstanceName = '',
-        shareRequest
-      } = getConfig(clonedMethod);
-
-      // 如果当前method设置了受控缓存，则看是否有自定义的数据
-      if (isFn(localCache)) {
-        return localCache();
-      }
-      // 如果是强制请求的，则跳过从缓存中获取的步骤
-      // 否则判断是否使用缓存数据
-      if (!forceRequest) {
-        const cachedResp = getResponseCache(id, methodKey);
-        if (cachedResp) {
-          return cachedResp;
+    return promisify(beforeRequest(clonedMethod))
+      .then(() => {
+        // 获取受控缓存或非受控缓存
+        const { localCache } = getConfig(clonedMethod);
+        // 如果当前method设置了受控缓存，则看是否有自定义的数据
+        if (isFn(localCache)) {
+          return localCache();
         }
-      }
+        // 如果是强制请求的，则跳过从缓存中获取的步骤
+        // 否则判断是否使用缓存数据
+        if (!forceRequest) {
+          const cachedResp = getResponseCache(getContext(clonedMethod).id, methodKey);
+          if (cachedResp) {
+            return cachedResp;
+          }
+        }
+      })
+      .then(cachedResponse => {
+        // 如果没有缓存则发起请求
+        if (cachedResponse !== undefinedValue) {
+          return cachedResponse;
+        }
+        const { baseURL, url: newUrl, type, data } = clonedMethod;
+        const { id, storage } = getContext(clonedMethod);
+        const {
+          params = {},
+          headers = {},
+          transformData = self,
+          name: methodInstanceName = '',
+          shareRequest
+        } = getConfig(clonedMethod);
 
-      fromCache = falseValue;
-      const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(clonedMethod);
-      const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
-      requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
-      if (!shareRequest || !requestAdapterCtrls) {
-        // 请求数据
-        const ctrls = requestAdapter(
-          {
-            url: buildCompletedURL(baseURL, newUrl, params),
-            type,
-            data,
-            headers
-          },
-          clonedMethod
-        );
-        requestAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
-      }
+        fromCache = falseValue;
+        const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(clonedMethod);
+        const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
+        requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
+        if (!shareRequest || !requestAdapterCtrls) {
+          // 请求数据
+          const ctrls = requestAdapter(
+            {
+              url: buildCompletedURL(baseURL, newUrl, params),
+              type,
+              data,
+              headers
+            },
+            clonedMethod
+          );
+          requestAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
+        }
 
-      let responseHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
-      let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
+        let responseHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
+        let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
 
-      // responsed是一个错误的单词，正确的单词是responded
-      // 在2.1.0+添加了responded的支持，并和responsed做了兼容处理
-      // 计划将在3.0中正式使用responded
-      const responseUnified = responded || responsed;
-      if (isFn(responseUnified)) {
-        responseHandler = responseUnified;
-      } else if (isPlainObject(responseUnified)) {
-        const { onSuccess: successHandler, onError: errorHandler } = responseUnified;
-        responseHandler = isFn(successHandler) ? successHandler : responseHandler;
-        responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
-      }
-      return (
-        PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()])
-          .then(
-            ([rawResponse, headers]) =>
-              promisify(responseHandler(rawResponse, clonedMethod))
-                .then(data => transformData(data, headers))
-                .then(transformedData => {
-                  saveMethodSnapshot(id, methodKey, methodInstance);
-                  // 当requestBody为特殊数据时不保存缓存
-                  // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
-                  // 原因2：特殊数据不便于生成缓存key
-                  const requestBody = clonedMethod.data;
-                  const toCache = !requestBody || !isSpecialRequestBody(requestBody);
-                  if (toCache) {
-                    setResponseCache(id, methodKey, transformedData, expireTimestamp);
-                    toStorage && persistResponse(id, methodKey, transformedData, expireTimestamp, storage, tag);
-                  }
+        // responsed是一个错误的单词，正确的单词是responded
+        // 在2.1.0+添加了responded的支持，并和responsed做了兼容处理
+        // 计划将在3.0中正式使用responded
+        const responseUnified = responded || responsed;
+        if (isFn(responseUnified)) {
+          responseHandler = responseUnified;
+        } else if (isPlainObject(responseUnified)) {
+          const { onSuccess: successHandler, onError: errorHandler } = responseUnified;
+          responseHandler = isFn(successHandler) ? successHandler : responseHandler;
+          responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
+        }
+        return (
+          PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()])
+            .then(
+              ([rawResponse, headers]) =>
+                promisify(responseHandler(rawResponse, clonedMethod))
+                  .then(data => transformData(data, headers))
+                  .then(transformedData => {
+                    saveMethodSnapshot(id, methodKey, methodInstance);
+                    // 当requestBody为特殊数据时不保存缓存
+                    // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
+                    // 原因2：特殊数据不便于生成缓存key
+                    const requestBody = clonedMethod.data;
+                    const toCache = !requestBody || !isSpecialRequestBody(requestBody);
+                    if (toCache) {
+                      setResponseCache(id, methodKey, transformedData, expireTimestamp);
+                      toStorage && persistResponse(id, methodKey, transformedData, expireTimestamp, storage, tag);
+                    }
 
-                  // 查找hitTarget，让它的缓存失效
-                  const hitMethods = matchSnapshotMethod({
-                    filter: cachedMethod => {
-                      let isHit = falseValue;
-                      const hitSource = cachedMethod.hitSource;
-                      if (hitSource) {
-                        for (const i in hitSource) {
-                          const sourceMatcher = hitSource[i];
-                          if (
-                            instanceOf(sourceMatcher, RegExp)
-                              ? sourceMatcher.test(methodInstanceName as string)
-                              : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-                          ) {
-                            isHit = trueValue;
-                            break;
+                    // 查找hitTarget，让它的缓存失效
+                    const hitMethods = matchSnapshotMethod({
+                      filter: cachedMethod => {
+                        let isHit = falseValue;
+                        const hitSource = cachedMethod.hitSource;
+                        if (hitSource) {
+                          for (const i in hitSource) {
+                            const sourceMatcher = hitSource[i];
+                            if (
+                              instanceOf(sourceMatcher, RegExp)
+                                ? sourceMatcher.test(methodInstanceName as string)
+                                : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
+                            ) {
+                              isHit = trueValue;
+                              break;
+                            }
                           }
                         }
+                        return isHit;
                       }
-                      return isHit;
-                    }
-                  });
-                  len(hitMethods) > 0 && invalidateCache(hitMethods);
-                  return transformedData;
-                }),
-            (error: any) => {
-              if (!isFn(responseErrorHandler)) {
-                throw error;
+                    });
+                    len(hitMethods) > 0 && invalidateCache(hitMethods);
+                    return transformedData;
+                  }),
+              (error: any) => {
+                if (!isFn(responseErrorHandler)) {
+                  throw error;
+                }
+                // 可能返回Promise.reject
+                return responseErrorHandler(error, clonedMethod);
               }
-              // 可能返回Promise.reject
-              return responseErrorHandler(error, clonedMethod);
-            }
-          )
-          // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
-          .finally(() => deleteAttr(namespacedAdapterReturnMap, methodKey))
-      );
-    });
+            )
+            // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
+            .finally(() => deleteAttr(namespacedAdapterReturnMap, methodKey))
+        );
+      });
   };
 
   return {
