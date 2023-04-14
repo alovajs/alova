@@ -147,7 +147,16 @@ type ResponseErrorHandler<R, T, RC, RE, RH> = (
   methodInstance: Method<any, any, R, T, RC, RE, RH>
 ) => void | Promise<void>;
 type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
+  /**
+   * 全局的请求成功钩子函数
+   * 如果在全局onSuccess中抛出错误不会触发全局onError，而是会触发请求位置的onError
+   */
   onSuccess?: ResponsedHandler<R, T, RC, RE, RH>;
+
+  /**
+   * 全局的请求错误钩子函数，请求错误是指网络请求失败，服务端返回404、500等错误代码不会进入此钩子函数
+   * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
+   */
   onError?: ResponseErrorHandler<R, T, RC, RE, RH>;
 };
 interface EffectRequestParams<E> {
@@ -216,8 +225,9 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   beforeRequest?: (method: Method<S, E, any, any, RC, RE, RH>) => void | Promise<void>;
 
   /**
-   * 全局的响应钩子，可传一个数组表示正常响应和响应出错的钩子
-   * 如果正常响应的钩子抛出错误也将进入响应失败的钩子函数
+   * 全局的响应钩子，可传一个也可以设置为带onSuccess和onError的对象，表示请求成功和请求错误的钩子
+   * 如果在全局onSuccess中抛出错误不会触发全局onError，而是会触发请求位置的onError
+   * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
    */
   responsed?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
 
