@@ -13,7 +13,7 @@ import {
   key,
   noop,
   promisify,
-  self
+  _self
 } from '../utils/helper';
 import {
   deleteAttr,
@@ -105,7 +105,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         const {
           params = {},
           headers = {},
-          transformData = self,
+          transformData = _self,
           name: methodInstanceName = '',
           shareRequest
         } = getConfig(clonedMethod);
@@ -128,7 +128,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           requestAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
         }
 
-        let responseHandler: ResponsedHandler<any, any, RC, RE, RH> = self;
+        let responseHandler: ResponsedHandler<any, any, RC, RE, RH> = _self;
         let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
 
         // responsed是一个错误的单词，正确的单词是responded
