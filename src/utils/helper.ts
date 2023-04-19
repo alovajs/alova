@@ -1,19 +1,19 @@
 import { AlovaMethodHandler, CacheExpire } from '../../typings';
 import Method from '../Method';
 import {
-  JSONStringify,
-  MEMORY,
-  ObjectCls,
-  PromiseCls,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   clearTimeoutTimer,
   falseValue,
   getConfig,
   getTime,
+  JSONStringify,
+  MEMORY,
   nullValue,
+  ObjectCls,
+  PromiseCls,
   promiseResolve,
   setTimeoutFn,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   undefinedValue
 } from './variables';
 
@@ -24,8 +24,13 @@ export type GeneralFn = (...args: any[]) => any;
  */
 export const noop = () => {};
 
-// 返回自身函数，做兼容处理
-export const self = <T>(arg: T) => arg;
+/**
+ * 返回参数自身的函数，做兼容处理用
+ * 由于部分系统将self作为了保留字，故使用_self来区分
+ * @param arg 任意参数
+ * @returns 返回参数本身
+ */
+export const _self = <T>(arg: T) => arg;
 
 /**
  * 判断参数是否为函数
