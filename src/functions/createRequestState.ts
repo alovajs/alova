@@ -15,6 +15,7 @@ import Method from '../Method';
 import { debounce, getHandlerMethod, isNumber, noop } from '../utils/helper';
 import {
   falseValue,
+  getConfig,
   getStatesHook,
   isArray,
   promiseCatch,
@@ -74,7 +75,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
 
   // 统一处理请求发送
   const handleRequest = (
-    methodInstance = getHandlerMethod(methodHandler),
+    methodInstance: Method<S, E, R, T, RC, RE, RH>,
     useHookConfigParam = useHookConfig,
     sendCallingArgs?: any[],
     updateCacheState?: boolean
@@ -104,7 +105,11 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   // 调用请求处理回调函数
   const wrapEffectRequest = () => {
     // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
-    promiseCatch(handleRequest(), noop);
+    const methodInstance = getHandlerMethod(methodHandler);
+    // promiseCatch(handleRequest(methodInstance), noop);
+    getConfig(methodInstance).silent
+      ? promiseCatch(handleRequest(methodInstance), noop)
+      : handleRequest(methodInstance);
   };
 
   effectRequest({

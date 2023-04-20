@@ -94,13 +94,17 @@ describe('useRequet hook with react', () => {
     const alova = getAlovaInstanceSyncResponsed();
     const Get = alova.Get<{ mock: string }>('/unit-test');
     function Page() {
-      const { data, onSuccess } = useRequest(Get);
-      onSuccess(() => {
-        expect(data.mock).toBe('mockdata');
-      });
-      return <div>{data}</div>;
+      const { data, loading } = useRequest(Get);
+      return (
+        <div>
+          <span>{loading ? 'loading' : 'loaded'}</span>
+          <span role="data">{JSON.stringify(data)}</span>
+        </div>
+      );
     }
     render((<Page />) as ReactElement<any, any>);
+    await screen.findByText(/loaded/);
+    expect(screen.getByRole('data')).toHaveTextContent('{"mock":"mockdata"}');
   });
 
   test('states should be remove in cache when component was unmounted', async () => {

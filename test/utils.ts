@@ -106,6 +106,7 @@ export const getAlovaInstance = <S, E>(
     beforeRequest(config) {
       beforeRequestExpect && beforeRequestExpect(config);
     },
+    silent: true,
     responsed:
       responseExpect && !resErrorExpect
         ? responseExpect
