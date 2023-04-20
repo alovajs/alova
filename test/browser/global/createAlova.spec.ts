@@ -27,6 +27,34 @@ describe('createAlova', function () {
     });
   });
 
+  test('baseURL can be set a url that contains params', async () => {
+    const alova = createAlova({
+      baseURL: 'http://localhost:3000/unit-test?ctrl=api/',
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch()
+    });
+    const response = await alova
+      .Get<Response>('/unit-test', {
+        params: {
+          aa: 2
+        }
+      })
+      .send();
+    const result = await response.json();
+    expect(result).toStrictEqual({
+      code: 200,
+      msg: '',
+      data: {
+        path: '/unit-test',
+        method: 'GET',
+        params: {
+          ctrl: 'api/unit-test',
+          aa: '2'
+        }
+      }
+    });
+  });
+
   test('localCache can be set with null to disable all cache', async () => {
     const alova = getAlovaInstance(VueHook, {
       localCache: null
