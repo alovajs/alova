@@ -46,7 +46,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     const contextConcatConfig: any = {};
 
     // 合并参数
-    forEach(['timeout', 'shareRequest'], mergedKey => {
+    forEach(['timeout', 'shareRequest', 'silent'], mergedKey => {
       if (contextOptions[mergedKey as keyof typeof contextOptions] !== undefinedValue) {
         contextConcatConfig[mergedKey] = contextOptions[mergedKey as keyof typeof contextOptions];
       }
