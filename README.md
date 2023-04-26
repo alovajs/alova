@@ -30,8 +30,9 @@
 - 🔩 Flexible: Work with any request library like axios, superagent, or fetch-api
 - 🔋 3 response data caching modes
 - ✨ Interface data is pre-fetched in any case, which means users can see information faster
+- 🖥️ Server-side rendering（SSR）
 - 🎈 Typescript support
-- 🖥️ Offline submition
+- 📴 Offline submition
 - ⚡ Fully tree shakeable: Only take what you want, bundle size
 - 🔌 Rich extension functions, you can customize request adapter, storage adapter, request middleware, states hook
 
@@ -159,7 +160,7 @@ If you have thought of some specific and typical business request scenarios, you
 - ✅ Request middleware design, which can manually control sending requests, status modification, etc.
 - ✅ Retry interval, maximum number of retries, etc. when silent submission fails
 - ✅ Request to share
-- Server-side rendering support
+- ✅ Server-side rendering support
 - Performance improvements
 
 ### Extensions
