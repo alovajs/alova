@@ -15,7 +15,6 @@ import Method from '../Method';
 import { debounce, getHandlerMethod, isNumber, noop } from '../utils/helper';
 import {
   falseValue,
-  getConfig,
   getStatesHook,
   isArray,
   promiseCatch,
@@ -106,10 +105,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   const wrapEffectRequest = () => {
     // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
     const methodInstance = getHandlerMethod(methodHandler);
-    // promiseCatch(handleRequest(methodInstance), noop);
-    getConfig(methodInstance).silent
-      ? promiseCatch(handleRequest(methodInstance), noop)
-      : handleRequest(methodInstance);
+    promiseCatch(handleRequest(methodInstance), noop);
   };
 
   effectRequest({
