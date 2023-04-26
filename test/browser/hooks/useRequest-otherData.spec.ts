@@ -1,16 +1,11 @@
 import { queryCache, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 // 其他请求方式测试
 describe('Request by other data', function () {
-  test('send POST with FormData', async () => {
+  (isSSR ? xtest : test)('send POST with FormData', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         method.config.params.p1 = 'a';
@@ -74,7 +69,7 @@ describe('Request by other data', function () {
     expect(queryCache(Post)).toStrictEqual(data);
   });
 
-  test('send POST with Blob', async () => {
+  (isSSR ? xtest : test)('send POST with Blob', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: async r => r.json()
     });

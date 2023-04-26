@@ -3,12 +3,7 @@ import Method from '../../../src/Method';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 describe('invalitate cached response data', () => {
   test('It will use the default cache time when not set the cache time with `GET`', async () => {

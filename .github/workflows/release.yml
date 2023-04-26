@@ -61,6 +61,9 @@ jobs:
       - name: Install deps
         run: npm ci
 
+      - name: Test SSR
+        run: npm run test:node
+
       # 这条命令包含了测试和上传覆盖率
       - name: Coverage
         run: npm run coveralls

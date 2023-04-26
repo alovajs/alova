@@ -43,4 +43,6 @@ export const PromiseCls = Promise as typeof Promise<any>,
 
   STORAGE_PLACEHOLDER = 'placeholder',
   // 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
-  STORAGE_RESTORE = 'restore';
+  STORAGE_RESTORE = 'restore',
+  // 是否为服务端渲染
+  isSSR = typeof window === 'undefined';

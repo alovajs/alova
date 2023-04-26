@@ -3,13 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 import { useWatcher } from '../../../src';
 import ReactHook from '../../../src/predefine/ReactHook';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-jest.setTimeout(1000000);
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
-describe('useWatcher hook with react', () => {
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+
+(isSSR ? xdescribe : describe)('useWatcher hook with react', () => {
   test('should send request when change value', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
@@ -98,7 +94,6 @@ describe('useWatcher hook with react', () => {
         }
       });
       onSuccess(ev => {
-        console.log(ev.data);
         mockfn();
       });
       return (

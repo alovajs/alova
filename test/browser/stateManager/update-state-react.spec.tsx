@@ -6,14 +6,9 @@ import ReactHook from '../../../src/predefine/ReactHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { getPersistentResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
-
-describe('update cached response data by user in react', function () {
+(isSSR ? xdescribe : describe)('update cached response data by user in react', function () {
   test('the cached response data should be changed and the screen should be update', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

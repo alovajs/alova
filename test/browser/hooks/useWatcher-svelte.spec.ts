@@ -4,12 +4,9 @@ import pageDebounceImmediate from '../../components/svelte/page-useWatcher-debou
 import pageDifferentDebounce from '../../components/svelte/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '../../components/svelte/page-useWatcher-immediate.svelte';
 import page from '../../components/svelte/page-useWatcher.svelte';
-import { mockServer, untilCbCalled } from '../../utils';
+import { untilCbCalled } from '../../utils';
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
-describe('useWatcher hook with svelte', () => {
+(isSSR ? xdescribe : describe)('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {
     render(page);
     // 需要暂停一段时间再触发事件和检查响应数据

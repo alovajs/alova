@@ -4,12 +4,7 @@ import { updateState, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { removeStateCache } from '../../../src/storage/stateCache';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 describe('update cached response data by user in vue', function () {
   test('test update function', async () => {

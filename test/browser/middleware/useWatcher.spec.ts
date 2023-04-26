@@ -1,12 +1,7 @@
 import { ref } from 'vue';
 import { useWatcher } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 describe('useWatcher middleware', function () {
   test('should send request synchronously when set a sync middleware function', async () => {
