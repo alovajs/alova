@@ -129,7 +129,6 @@ describe('createAlova', function () {
       beforeRequest: async () => {
         throw new Error('error in beforeRequest');
       },
-      silent: true,
       responded: r => r.json()
     });
     const Get = alova.Get<Result>('/unit-test');

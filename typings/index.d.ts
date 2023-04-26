@@ -138,14 +138,6 @@ type AlovaMethodConfig<R, T, RC, RH> = {
    * 当这边设置后将覆盖全局的设置
    */
   shareRequest?: boolean;
-
-  /**
-   * 请求级静默状态开关
-   * 开启静默状态后，内部的错误和提示不会在控制台打印，默认关闭静默状态
-   * @version 2.2.0
-   * @default false
-   */
-  silent?: boolean;
 } & RC;
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 
@@ -252,14 +244,6 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * @default true
    */
   shareRequest?: boolean;
-
-  /**
-   * 全局的静默状态开关
-   * 开启静默状态后，内部的错误和提示不会在控制台打印，默认关闭静默状态
-   * @version 2.2.0
-   * @default false
-   */
-  silent?: boolean;
 }
 
 /** 请求方法类型 */
