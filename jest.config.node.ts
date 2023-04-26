@@ -144,7 +144,7 @@ export default {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  testEnvironment: 'jsdom',
+  // testEnvironment: 'node',
 
   testMatch: [
     '**/?(*.)+(spec|test).[tj]s?(x)'

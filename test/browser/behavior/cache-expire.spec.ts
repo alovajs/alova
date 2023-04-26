@@ -2,12 +2,8 @@ import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getResponseCache } from '../../../src/storage/responseCache';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+// import mockServer from '../../mockServer';
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 describe('cache data', function () {
   test("change the default localCache's setting Globally", async () => {

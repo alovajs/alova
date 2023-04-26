@@ -5,15 +5,15 @@
  */
 // rollup.config.js
 // umd
-var { nodeResolve } = require('@rollup/plugin-node-resolve');
-var commonjs = require('@rollup/plugin-commonjs');
-var { terser } = require('rollup-plugin-terser');
-var replace = require('@rollup/plugin-replace');
-var json = require('@rollup/plugin-json');
-var config = require('./rollup.js');
-var prod = process.env.NODE_ENV === 'production';
-var paths = config.compilePath;
-var moduleType = prod ? 'umd.min' : 'umd';
+const { nodeResolve } = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
+const { terser } = require('rollup-plugin-terser');
+const replace = require('@rollup/plugin-replace');
+const json = require('@rollup/plugin-json');
+const config = require('./rollup.cjs');
+const prod = process.env.NODE_ENV === 'production';
+const paths = config.compilePath;
+const moduleType = prod ? 'umd.min' : 'umd';
 
 module.exports = {
   input: paths.input,

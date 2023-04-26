@@ -6,13 +6,13 @@
 // 设置环境变量
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-var typescript = require('rollup-plugin-typescript2');
-var pkg = require('../package.json');
-var version = process.env.VERSION || pkg.version;
-var author = pkg.author;
-var repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
+const typescript = require('rollup-plugin-typescript2');
+const pkg = require('../package.json');
+const version = process.env.VERSION || pkg.version;
+const author = pkg.author;
+const repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
 
-var banner = `/**
+const banner = `/**
   * ${pkg.name} ${version} (${pkg.homepage})
   * Document ${pkg.homepage}
   * Copyright ${new Date().getFullYear()} ${author}. All Rights Reserved

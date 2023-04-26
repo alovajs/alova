@@ -2,12 +2,7 @@ import { queryCache, setCache, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { getPersistentResponse, persistResponse } from '../../../src/storage/responseStorage';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 const alova = getAlovaInstance(VueHook, {
   responseExpect: r => r.json()

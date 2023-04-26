@@ -2,11 +2,7 @@ import VueHook from '../../../src/predefine/VueHook';
 import { matchSnapshotMethod, saveMethodSnapshot } from '../../../src/storage/methodSnapShots';
 import { key } from '../../../src/utils/helper';
 import { falseValue } from '../../../src/utils/variables';
-import { getAlovaInstance, mockServer } from '../../utils';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance } from '../../utils';
 
 describe('matchSnapshotMethod', function () {
   test('match with name string', () => {

@@ -1,12 +1,7 @@
 import { useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { AlovaSuccessEvent } from '../../../typings';
-import { getAlovaInstance, mockServer } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result } from '../../utils';
 
 type AnyAlovaSuccessEvent<R> = AlovaSuccessEvent<any, any, R, any, any, any, any>;
 describe('parallel request', function () {

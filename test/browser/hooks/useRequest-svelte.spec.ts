@@ -1,12 +1,8 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/svelte';
 import page from '../../components/svelte/page-useRequest.svelte';
-import { mockServer } from '../../utils';
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
-describe('useRequet hook with svelte', () => {
+(isSSR ? xdescribe : describe)('useRequet hook with svelte', () => {
   test('send GET', async () => {
     render(page);
     expect(screen.getByRole('status')).toHaveTextContent('loading');

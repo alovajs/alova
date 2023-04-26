@@ -6,8 +6,7 @@ import GlobalFetch from '../../../src/predefine/GlobalFetch';
 import ReactHook from '../../../src/predefine/ReactHook';
 import { getStateCache } from '../../../src/storage/stateCache';
 import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 function getAlovaInstanceSyncResponsed() {
   return createAlova({
@@ -23,10 +22,7 @@ function getAlovaInstanceSyncResponsed() {
   });
 }
 
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
-describe('useRequet hook with react', () => {
+(isSSR ? xdescribe : describe)('useRequet hook with react', () => {
   test('send GET', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

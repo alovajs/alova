@@ -1,11 +1,6 @@
 import { createAlova, useRequest } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 describe('Request shared', function () {
   test('should share request when use usehooks', async () => {

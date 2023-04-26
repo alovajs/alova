@@ -1,12 +1,7 @@
 import { useFetcher } from '../../../src';
 import VueHook from '../../../src/predefine/VueHook';
 import { FetcherType } from '../../../typings';
-import { getAlovaInstance, mockServer, untilCbCalled } from '../../utils';
-import { Result } from '../result.type';
-
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());
+import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 describe('useFetcher middleware', function () {
   test('should send request when call next immediately in middleware function', async () => {
