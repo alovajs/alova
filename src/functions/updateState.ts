@@ -1,12 +1,11 @@
-import { MethodMatcher, updateOptions, UpdateStateCollection } from '../../typings';
-import { filterSnapshotMethods } from '../storage/methodSnapShots';
-import { setResponseCache } from '../storage/responseCache';
-import { persistResponse } from '../storage/responseStorage';
-import { getStateCache } from '../storage/stateCache';
-import alovaError from '../utils/alovaError';
-import { getLocalCacheConfigParam, isFn, key, noop } from '../utils/helper';
-import myAssert from '../utils/myAssert';
-import { falseValue, forEach, getContext, getOptions, objectKeys, trueValue, undefinedValue } from '../utils/variables';
+import { filterSnapshotMethods } from '@/storage/methodSnapShots';
+import { setResponseCache } from '@/storage/responseCache';
+import { persistResponse } from '@/storage/responseStorage';
+import { getStateCache } from '@/storage/stateCache';
+import { getLocalCacheConfigParam, isFn, key, noop } from '@/utils/helper';
+import myAssert from '@/utils/myAssert';
+import { falseValue, forEach, getContext, getOptions, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
+import { MethodMatcher, updateOptions, UpdateStateCollection } from '~/typings';
 
 /**
  * 更新对应method的状态
@@ -42,22 +41,18 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
       forEach(objectKeys(updateStateCollection), stateName => {
         myAssert(frontStates[stateName] !== undefinedValue, `can not find state named \`${stateName}\``);
         myAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
-        try {
-          const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
-            dehydrate(frontStates[stateName])
-          );
-          update(
-            {
-              [stateName]: updatedData
-            },
-            frontStates
-          );
-          // 同时需要更新缓存和持久化数据
-          setResponseCache(id, methodKey, updatedData, expireMilliseconds);
-          toStorage && persistResponse(id, methodKey, updatedData, expireMilliseconds, storage, tag);
-        } catch (e) {
-          throw alovaError(`managed state \`${stateName}\` must be a state.`);
-        }
+        const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
+          dehydrate(frontStates[stateName])
+        );
+        update(
+          {
+            [stateName]: updatedData
+          },
+          frontStates
+        );
+        // 同时需要更新缓存和持久化数据
+        setResponseCache(id, methodKey, updatedData, expireMilliseconds);
+        toStorage && persistResponse(id, methodKey, updatedData, expireMilliseconds, storage, tag);
       });
       updated = trueValue;
     }

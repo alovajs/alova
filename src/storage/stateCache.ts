@@ -1,5 +1,5 @@
-import { FrontRequestState } from '../../typings';
-import { deleteAttr, undefinedValue } from '../utils/variables';
+import { deleteAttr, undefinedValue } from '@/utils/variables';
+import { FrontRequestState } from '~/typings';
 
 // 状态数据缓存
 const stateCache: Record<string, Record<string, FrontRequestState>> = {};

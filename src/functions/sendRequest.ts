@@ -1,9 +1,9 @@
-import { AlovaRequestAdapter, Arg, ProgressUpdater, ResponsedHandler, ResponseErrorHandler } from '../../typings';
-import Method from '../Method';
-import { matchSnapshotMethod, saveMethodSnapshot } from '../storage/methodSnapShots';
-import { getResponseCache, setResponseCache } from '../storage/responseCache';
-import { persistResponse } from '../storage/responseStorage';
-import cloneMethod from '../utils/cloneMethod';
+import Method from '@/Method';
+import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
+import { getResponseCache, setResponseCache } from '@/storage/responseCache';
+import { persistResponse } from '@/storage/responseStorage';
+import cloneMethod from '@/utils/cloneMethod';
+import { AlovaRequestAdapter, Arg, ProgressUpdater, ResponsedHandler, ResponseErrorHandler } from '~/typings';
 import {
   getLocalCacheConfigParam,
   instanceOf,

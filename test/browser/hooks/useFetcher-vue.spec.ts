@@ -1,9 +1,9 @@
-import { useFetcher, useRequest } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { getResponseCache } from '../../../src/storage/responseCache';
-import { key } from '../../../src/utils/helper';
-import { FetcherType } from '../../../typings';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { useFetcher, useRequest } from '@/index';
+import VueHook from '@/predefine/VueHook';
+import { getResponseCache } from '@/storage/responseCache';
+import { key } from '@/utils/helper';
+import { FetcherType } from '~/typings';
 
 describe('use useFetcher hook to fetch data', function () {
   test('should hit cached response when fetch data with default config', async () => {

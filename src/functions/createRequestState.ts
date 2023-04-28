@@ -1,3 +1,4 @@
+import { debounce, getHandlerMethod, isNumber, noop } from '@/utils/helper';
 import {
   AlovaMethodHandler,
   CompleteHandler,
@@ -9,10 +10,9 @@ import {
   SuccessHandler,
   UseHookConfig,
   WatcherHookConfig
-} from '../../typings';
+} from '~/typings';
 import Alova from '../Alova';
 import Method from '../Method';
-import { debounce, getHandlerMethod, isNumber, noop } from '../utils/helper';
 import {
   falseValue,
   getStatesHook,

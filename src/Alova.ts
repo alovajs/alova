@@ -1,4 +1,4 @@
-import { AlovaGlobalStorage, AlovaMethodConfig, AlovaOptions, MethodRequestConfig, RequestBody } from '../typings';
+import { AlovaGlobalStorage, AlovaMethodConfig, AlovaOptions, MethodRequestConfig, RequestBody } from '~/typings';
 import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 import globalLocalStorage from './predefine/globalLocalStorage';
 import { newInstance } from './utils/helper';

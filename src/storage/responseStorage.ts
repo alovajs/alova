@@ -1,5 +1,5 @@
-import { AlovaGlobalStorage } from '../../typings';
-import { getTime, nullValue } from '../utils/variables';
+import { getTime, nullValue } from '@/utils/variables';
+import { AlovaGlobalStorage } from '~/typings';
 
 const responseStorageKey = 'alova.';
 const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKey + namespace + key;

@@ -1,6 +1,6 @@
+import { forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { EffectRequestParams, FrontRequestState } from '../../typings';
-import { forEach, objectKeys, trueValue, undefinedValue } from '../utils/variables';
+import { EffectRequestParams, FrontRequestState } from '~/typings';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 const stateToData = <D>([state]: ReactState<D>) => state;

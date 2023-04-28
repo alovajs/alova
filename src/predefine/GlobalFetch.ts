@@ -1,7 +1,5 @@
-import { Method, RequestElements } from '../../typings';
-import { FetchRequestInit } from '../../typings/globalfetch';
-import alovaError from '../utils/alovaError';
-import { isSpecialRequestBody, isString } from '../utils/helper';
+import alovaError from '@/utils/alovaError';
+import { isSpecialRequestBody, isString } from '@/utils/helper';
 import {
   clearTimeoutTimer,
   falseValue,
@@ -11,7 +9,9 @@ import {
   promiseThen,
   setTimeoutFn,
   trueValue
-} from '../utils/variables';
+} from '@/utils/variables';
+import { Method, RequestElements } from '~/typings';
+import { FetchRequestInit } from '~/typings/globalfetch';
 
 const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
 export default function GlobalFetch() {

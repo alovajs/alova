@@ -1,10 +1,10 @@
-import { useRequest } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { removeResponseCache } from '../../../src/storage/responseCache';
-import { getPersistentResponse } from '../../../src/storage/responseStorage';
-import { key } from '../../../src/utils/helper';
-import { DetailLocalCacheConfig } from '../../../typings';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { useRequest } from '@/index';
+import VueHook from '@/predefine/VueHook';
+import { removeResponseCache } from '@/storage/responseCache';
+import { getPersistentResponse } from '@/storage/responseStorage';
+import { key } from '@/utils/helper';
+import { DetailLocalCacheConfig } from '~/typings';
 
 describe('persist data', function () {
   test('should persist responsed data but it still send request when request again', async () => {

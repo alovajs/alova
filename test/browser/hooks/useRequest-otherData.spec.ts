@@ -1,7 +1,7 @@
-import { queryCache, useRequest } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { queryCache, useRequest } from '@/index';
+import VueHook from '@/predefine/VueHook';
+import { key } from '@/utils/helper';
 
 // 其他请求方式测试
 describe('Request by other data', function () {

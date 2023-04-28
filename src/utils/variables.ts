@@ -1,5 +1,5 @@
-import Alova from '../Alova';
-import Method from '../Method';
+import Alova from '@/Alova';
+import Method from '@/Method';
 import { GeneralFn } from './helper';
 
 // 以下为减少编译代码量而添加的统一处理函数或变量

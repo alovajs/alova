@@ -1,5 +1,5 @@
-import { AlovaCompleteEvent, Method } from '../../typings';
-import { ObjectCls, forEach, objectKeys, undefinedValue } from './variables';
+import { AlovaCompleteEvent, Method } from '~/typings';
+import { forEach, ObjectCls, objectKeys, undefinedValue } from './variables';
 
 /**
  * 创建统一的事件对象

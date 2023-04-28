@@ -1,4 +1,4 @@
-import Method from '../Method';
+import Method from '@/Method';
 import { newInstance } from './helper';
 import { getContext } from './variables';
 
