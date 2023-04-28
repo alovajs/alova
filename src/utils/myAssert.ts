@@ -1,4 +1,4 @@
-import { alovas } from '../Alova';
+import { alovas } from '@/Alova';
 import alovaError from './alovaError';
 import { len } from './variables';
 

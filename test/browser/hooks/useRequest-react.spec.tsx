@@ -1,12 +1,12 @@
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { createAlova, useRequest } from '@/index';
+import GlobalFetch from '@/predefine/GlobalFetch';
+import ReactHook from '@/predefine/ReactHook';
+import { getStateCache } from '@/storage/stateCache';
+import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
-import { createAlova, useRequest } from '../../../src';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
-import ReactHook from '../../../src/predefine/ReactHook';
-import { getStateCache } from '../../../src/storage/stateCache';
-import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 function getAlovaInstanceSyncResponsed() {
   return createAlova({

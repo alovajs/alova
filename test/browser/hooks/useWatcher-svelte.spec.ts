@@ -1,10 +1,10 @@
+import pageDebounceImmediate from '#/components/svelte/page-useWatcher-debounce-immediate.svelte';
+import pageDifferentDebounce from '#/components/svelte/page-useWatcher-different-debounce.svelte';
+import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
+import page from '#/components/svelte/page-useWatcher.svelte';
+import { untilCbCalled } from '#/utils';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/svelte';
-import pageDebounceImmediate from '../../components/svelte/page-useWatcher-debounce-immediate.svelte';
-import pageDifferentDebounce from '../../components/svelte/page-useWatcher-different-debounce.svelte';
-import pageImmediate from '../../components/svelte/page-useWatcher-immediate.svelte';
-import page from '../../components/svelte/page-useWatcher.svelte';
-import { untilCbCalled } from '../../utils';
 
 (isSSR ? xdescribe : describe)('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {

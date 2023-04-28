@@ -1,7 +1,7 @@
-import { useRequest } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { AlovaSuccessEvent } from '../../../typings';
-import { getAlovaInstance, Result } from '../../utils';
+import { getAlovaInstance, Result } from '#/utils';
+import { useRequest } from '@/index';
+import VueHook from '@/predefine/VueHook';
+import { AlovaSuccessEvent } from '~/typings';
 
 type AnyAlovaSuccessEvent<R> = AlovaSuccessEvent<any, any, R, any, any, any, any>;
 describe('parallel request', function () {

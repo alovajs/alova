@@ -1,7 +1,7 @@
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { useRequest, useWatcher } from '@/index';
+import VueHook from '@/predefine/VueHook';
 import { ref } from 'vue';
-import { useRequest, useWatcher } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 describe('Initial data before request', function () {
   test('[useRequest]should assign the initial data to state `data`', async () => {

@@ -1,6 +1,6 @@
-import { Method, MethodFilter, MethodFilterHandler, MethodMatcher } from '../../typings';
-import { instanceOf, isPlainObject, isString } from '../utils/helper';
-import { forEach, getConfig, isArray, objectKeys, pushItem, trueValue, undefinedValue } from '../utils/variables';
+import { instanceOf, isPlainObject, isString } from '@/utils/helper';
+import { forEach, getConfig, isArray, objectKeys, pushItem, trueValue, undefinedValue } from '@/utils/variables';
+import { Method, MethodFilter, MethodFilterHandler, MethodMatcher } from '~/typings';
 
 /** method实例快照集合，发送过请求的method实例将会被保存 */
 const methodSnapshots: Record<string, Record<string, Method>> = {};

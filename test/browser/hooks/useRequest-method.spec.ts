@@ -1,8 +1,8 @@
-import { Method, useRequest } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { getResponseCache } from '../../../src/storage/responseCache';
-import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { Method, useRequest } from '@/index';
+import VueHook from '@/predefine/VueHook';
+import { getResponseCache } from '@/storage/responseCache';
+import { key } from '@/utils/helper';
 
 // 其他请求方式测试
 describe('Test other methods without GET', function () {

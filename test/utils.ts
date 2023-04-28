@@ -1,7 +1,7 @@
-import { createAlova } from '../src';
-import GlobalFetch from '../src/predefine/GlobalFetch';
-import { GlobalLocalCacheConfig, Method, StatesHook } from '../typings';
-import { FetchRequestInit } from '../typings/globalfetch';
+import { createAlova } from '@/index';
+import GlobalFetch from '@/predefine/GlobalFetch';
+import { GlobalLocalCacheConfig, Method, StatesHook } from '~/typings';
+import { FetchRequestInit } from '~/typings/globalfetch';
 
 type GetData = {
   path: string;

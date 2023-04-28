@@ -1,10 +1,10 @@
-import { FetcherHookConfig, FetcherType, MethodMatcher } from '../../typings';
-import { alovas } from '../Alova';
-import createRequestState from '../functions/createRequestState';
-import { filterSnapshotMethods } from '../storage/methodSnapShots';
-import { noop } from '../utils/helper';
-import myAssert, { assertAlovaCreation } from '../utils/myAssert';
-import { falseValue, trueValue } from '../utils/variables';
+import { alovas } from '@/Alova';
+import createRequestState from '@/functions/createRequestState';
+import { filterSnapshotMethods } from '@/storage/methodSnapShots';
+import { noop } from '@/utils/helper';
+import myAssert, { assertAlovaCreation } from '@/utils/myAssert';
+import { falseValue, trueValue } from '@/utils/variables';
+import { FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
 
 /**
  * 获取请求数据并缓存

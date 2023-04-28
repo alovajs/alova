@@ -1,4 +1,4 @@
-import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '../typings';
+import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '~/typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { instanceOf, isPlainObject, key } from './utils/helper';

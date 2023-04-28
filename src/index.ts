@@ -1,4 +1,4 @@
-import { AlovaOptions } from '../typings';
+import { AlovaOptions } from '~/typings';
 import Alova, { alovas } from './Alova';
 import { newInstance } from './utils/helper';
 import myAssert from './utils/myAssert';

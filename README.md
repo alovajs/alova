@@ -30,7 +30,7 @@
 - 🔩 Flexible: Work with any request library like axios, superagent, or fetch-api
 - 🔋 3 response data caching modes
 - ✨ Interface data is pre-fetched in any case, which means users can see information faster
-- 🖥️ Server-side rendering（SSR）
+- 🖥️ Server-side rendering(SSR)
 - 🎈 Typescript support
 - 📴 Offline submition
 - ⚡ Fully tree shakeable: Only take what you want, bundle size

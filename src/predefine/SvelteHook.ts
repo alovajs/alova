@@ -1,6 +1,6 @@
 import { onDestroy } from 'svelte';
 import { writable, Writable } from 'svelte/store';
-import { EffectRequestParams, FrontRequestState } from '../../typings';
+import { EffectRequestParams, FrontRequestState } from '~/typings';
 import {
   clearTimeoutTimer,
   falseValue,

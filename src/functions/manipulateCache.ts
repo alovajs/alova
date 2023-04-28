@@ -1,10 +1,10 @@
-import { MethodMatcher } from '../../typings';
-import Method from '../Method';
-import { filterSnapshotMethods } from '../storage/methodSnapShots';
-import { clearResponseCache, getResponseCache, removeResponseCache, setResponseCache } from '../storage/responseCache';
-import { getPersistentResponse, persistResponse, removePersistentResponse } from '../storage/responseStorage';
-import { getLocalCacheConfigParam, isFn, key } from '../utils/helper';
-import { falseValue, forEach, getContext, trueValue, undefinedValue } from '../utils/variables';
+import Method from '@/Method';
+import { filterSnapshotMethods } from '@/storage/methodSnapShots';
+import { clearResponseCache, getResponseCache, removeResponseCache, setResponseCache } from '@/storage/responseCache';
+import { getPersistentResponse, persistResponse, removePersistentResponse } from '@/storage/responseStorage';
+import { getLocalCacheConfigParam, isFn, key } from '@/utils/helper';
+import { falseValue, forEach, getContext, trueValue, undefinedValue } from '@/utils/variables';
+import { MethodMatcher } from '~/typings';
 
 /*
  * 以下三个函数中的matcher为Method实例匹配器，它分为3种情况：

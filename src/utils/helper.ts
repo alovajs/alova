@@ -1,4 +1,4 @@
-import { AlovaMethodHandler, CacheExpire } from '../../typings';
+import { AlovaMethodHandler, CacheExpire } from '~/typings';
 import Method from '../Method';
 import {
   clearTimeoutTimer,

@@ -1,8 +1,8 @@
-import { setCache, useRequest } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { getResponseCache } from '../../../src/storage/responseCache';
-import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { setCache, useRequest } from '@/index';
+import VueHook from '@/predefine/VueHook';
+import { getResponseCache } from '@/storage/responseCache';
+import { key } from '@/utils/helper';
 
 describe('use useRequest hook to send GET with vue', function () {
   test('init and send get request', async () => {

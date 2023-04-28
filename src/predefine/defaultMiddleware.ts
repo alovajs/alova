@@ -1,4 +1,4 @@
-import { AlovaMiddleware } from '../../typings';
+import { AlovaMiddleware } from '~/typings';
 
 const defaultMiddleware: AlovaMiddleware<any, any, any, any, any, any, any> = (_, next) => next();
 

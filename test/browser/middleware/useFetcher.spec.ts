@@ -1,7 +1,7 @@
-import { useFetcher } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { FetcherType } from '../../../typings';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { useFetcher } from '@/index';
+import VueHook from '@/predefine/VueHook';
+import { FetcherType } from '~/typings';
 
 describe('useFetcher middleware', function () {
   test('should send request when call next immediately in middleware function', async () => {

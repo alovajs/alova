@@ -1,6 +1,6 @@
+import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
 import { onUnmounted, ref, Ref, watch, WatchSource } from 'vue';
-import { EffectRequestParams, FrontRequestState } from '../../typings';
-import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '../utils/variables';
+import { EffectRequestParams, FrontRequestState } from '~/typings';
 
 type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks

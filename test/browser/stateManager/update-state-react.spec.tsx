@@ -1,12 +1,12 @@
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { updateState, useRequest } from '@/index';
+import ReactHook from '@/predefine/ReactHook';
+import { getResponseCache } from '@/storage/responseCache';
+import { getPersistentResponse } from '@/storage/responseStorage';
+import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
-import { updateState, useRequest } from '../../../src';
-import ReactHook from '../../../src/predefine/ReactHook';
-import { getResponseCache } from '../../../src/storage/responseCache';
-import { getPersistentResponse } from '../../../src/storage/responseStorage';
-import { key } from '../../../src/utils/helper';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
 
 (isSSR ? xdescribe : describe)('update cached response data by user in react', function () {
   test('the cached response data should be changed and the screen should be update', async () => {

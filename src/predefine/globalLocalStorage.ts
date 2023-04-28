@@ -1,5 +1,5 @@
-import { AlovaGlobalStorage } from '../../typings';
-import { deleteAttr, isSSR, JSONParse, JSONStringify } from '../utils/variables';
+import { deleteAttr, isSSR, JSONParse, JSONStringify } from '@/utils/variables';
+import { AlovaGlobalStorage } from '~/typings';
 
 /**
  * 创建默认的localStorage存储适配器

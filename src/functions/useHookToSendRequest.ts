@@ -1,24 +1,11 @@
-import {
-  AlovaCompleteEvent,
-  AlovaErrorEvent,
-  AlovaEvent,
-  AlovaGuardNext,
-  AlovaSuccessEvent,
-  CompleteHandler,
-  ErrorHandler,
-  FrontRequestHookConfig,
-  FrontRequestState,
-  SuccessHandler,
-  UseHookConfig
-} from '../../typings';
-import Method from '../Method';
-import defaultMiddleware from '../predefine/defaultMiddleware';
-import { getResponseCache, setResponseCache } from '../storage/responseCache';
-import { getPersistentResponse } from '../storage/responseStorage';
-import { getStateCache, removeStateCache, setStateCache } from '../storage/stateCache';
-import createAlovaEvent from '../utils/createAlovaEvent';
-import { GeneralFn, getLocalCacheConfigParam, instanceOf, isFn, key, noop, sloughConfig } from '../utils/helper';
-import myAssert from '../utils/myAssert';
+import Method from '@/Method';
+import defaultMiddleware from '@/predefine/defaultMiddleware';
+import { getResponseCache, setResponseCache } from '@/storage/responseCache';
+import { getPersistentResponse } from '@/storage/responseStorage';
+import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
+import createAlovaEvent from '@/utils/createAlovaEvent';
+import { GeneralFn, getLocalCacheConfigParam, instanceOf, isFn, key, noop, sloughConfig } from '@/utils/helper';
+import myAssert from '@/utils/myAssert';
 import {
   falseValue,
   forEach,
@@ -35,7 +22,20 @@ import {
   STORAGE_RESTORE,
   trueValue,
   undefinedValue
-} from '../utils/variables';
+} from '@/utils/variables';
+import {
+  AlovaCompleteEvent,
+  AlovaErrorEvent,
+  AlovaEvent,
+  AlovaGuardNext,
+  AlovaSuccessEvent,
+  CompleteHandler,
+  ErrorHandler,
+  FrontRequestHookConfig,
+  FrontRequestState,
+  SuccessHandler,
+  UseHookConfig
+} from '~/typings';
 import { SaveStateFn } from './createRequestState';
 import sendRequest from './sendRequest';
 

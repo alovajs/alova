@@ -1,8 +1,8 @@
-import VueHook from '../../../src/predefine/VueHook';
-import { matchSnapshotMethod, saveMethodSnapshot } from '../../../src/storage/methodSnapShots';
-import { key } from '../../../src/utils/helper';
-import { falseValue } from '../../../src/utils/variables';
-import { getAlovaInstance } from '../../utils';
+import { getAlovaInstance } from '#/utils';
+import VueHook from '@/predefine/VueHook';
+import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
+import { key } from '@/utils/helper';
+import { falseValue } from '@/utils/variables';
 
 describe('matchSnapshotMethod', function () {
   test('match with name string', () => {

@@ -1,7 +1,7 @@
-import { createAlova, Method, useRequest } from '../../../src';
-import GlobalFetch from '../../../src/predefine/GlobalFetch';
-import VueHook from '../../../src/predefine/VueHook';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { createAlova, Method, useRequest } from '@/index';
+import GlobalFetch from '@/predefine/GlobalFetch';
+import VueHook from '@/predefine/VueHook';
 
 describe('createAlova', function () {
   test('baseURL can not be set and use complete url set in method to send request', async () => {

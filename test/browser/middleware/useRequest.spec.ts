@@ -1,6 +1,6 @@
-import { useRequest } from '../../../src';
-import VueHook from '../../../src/predefine/VueHook';
-import { getAlovaInstance, Result, untilCbCalled } from '../../utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { useRequest } from '@/index';
+import VueHook from '@/predefine/VueHook';
 
 describe('useRequet middleware', function () {
   test('middleware function must be set with a async function', async () => {
