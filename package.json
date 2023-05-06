@@ -150,10 +150,6 @@
     "vue": "^3.2.33",
     "web-streams-polyfill": "^3.2.1"
   },
-  "resolutions": {
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0"
-  },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"

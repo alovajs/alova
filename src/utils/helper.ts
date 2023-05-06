@@ -10,7 +10,6 @@ import {
   nullValue,
   ObjectCls,
   PromiseCls,
-  promiseResolve,
   setTimeoutFn,
   STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
@@ -173,12 +172,20 @@ export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[]
   isFn(config) ? config(...args) : config;
 
 /**
- * 判断target是否为Promise，如果是则直接返回promise对象，否则返回Promise.resolve(target)包装成promise
- * @param target 目标数据
- * @returns {Promise<any>}
+ * 将targetFn转换为异步函数
+ * @param targetFn 目标函数
+ * @returns 异步函数
  */
-export const promisify = <T>(target: T): Promise<T> =>
-  instanceOf(target, PromiseCls) ? target : promiseResolve(target);
+export const promisify =
+  <T extends any[], R>(targetFn: (...args: T) => R) =>
+  (...args: T) =>
+    newInstance(PromiseCls, (resolve, reject) => {
+      try {
+        resolve(targetFn(...args));
+      } catch (error) {
+        reject(error);
+      }
+    });
 
 /**
  * 创建类实例

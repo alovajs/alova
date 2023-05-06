@@ -22,7 +22,7 @@ const alova = createAlova({
   timeout: 3000,
   statesHook: SvelteHook,
   requestAdapter: GlobalFetch(),
-  responsed: response =>  response.json(),
+  responded: response =>  response.json(),
 });
 const getter = (id1, id2) => alova.Get('/unit-test', {
   params: {

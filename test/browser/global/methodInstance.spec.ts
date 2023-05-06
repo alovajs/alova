@@ -56,16 +56,25 @@ describe('method instance', function () {
   });
 
   test('should emit onError event when `method.config.transformData` throws a error', async () => {
-    const Get = alova.Get('/unit-test', {
-      transformData() {
-        throw new Error('error in transformData');
-      }
-    });
+    const Get = (async = true) =>
+      alova.Get('/unit-test', {
+        transformData() {
+          if (async) {
+            return Promise.reject(new Error('reject in transformData'));
+          }
+          throw new Error('error in transformData');
+        }
+      });
 
     const { onError } = useRequest(Get);
     const { error } = await untilCbCalled(onError);
-    expect(error.message).toBe('error in transformData');
-    await expect(Get.send()).rejects.toThrow('error in transformData');
+    expect(error.message).toBe('reject in transformData');
+    await expect(Get().send()).rejects.toThrow('reject in transformData');
+
+    const { onError: onError2 } = useRequest(Get(false));
+    const { error: error2 } = await untilCbCalled(onError2);
+    expect(error2.message).toBe('error in transformData');
+    await expect(Get(false).send()).rejects.toThrow('error in transformData');
   });
 
   test('should set method name dynamically when call `method.setName`', async () => {

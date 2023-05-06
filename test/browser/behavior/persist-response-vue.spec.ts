@@ -7,7 +7,7 @@ import { key } from '@/utils/helper';
 import { DetailLocalCacheConfig } from '~/typings';
 
 describe('persist data', function () {
-  test('should persist responsed data but it still send request when request again', async () => {
+  test('should persist responded data but it still send request when request again', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });

@@ -332,7 +332,7 @@ describe('manipulate cache', function () {
   });
 
   // 通过设置localCache为函数，将缓存变为受控状态，可以自定义返回需要使用的缓存数据
-  test('should hit the controlled cache when localCache is common function', async () => {
+  test('should hit the controlled cache when localCache is sync function', async () => {
     const mockControlledCache = {
       path: 'local-controlled',
       params: {},
@@ -399,17 +399,25 @@ describe('manipulate cache', function () {
   });
 
   test('should emit onError when localCache throws a error', async () => {
-    const Get1 = alova.Get('/unit-test', {
-      params: { a: 1000 },
-      localCache() {
-        throw new Error('error in localCache');
-      },
-      transformData: ({ data }: Result) => data
-    });
+    const Get1 = (async = true) =>
+      alova.Get('/unit-test', {
+        params: { a: 1000 },
+        localCache() {
+          if (async) {
+            return Promise.reject(new Error('reject in localCache'));
+          }
+          throw new Error('error in localCache');
+        },
+        transformData: ({ data }: Result) => data
+      });
     const { onError } = useRequest(Get1);
-    const event = await untilCbCalled(onError);
-    expect(event.error.message).toBe('error in localCache');
+    let event = await untilCbCalled(onError);
+    expect(event.error.message).toBe('reject in localCache');
+    await expect(Get1().send()).rejects.toThrow('reject in localCache');
 
-    await expect(Get1.send()).rejects.toThrow('error in localCache');
+    const { onError: onError2 } = useRequest(Get1(false));
+    event = await untilCbCalled(onError2);
+    expect(event.error.message).toBe('error in localCache');
+    await expect(Get1(false).send()).rejects.toThrow('error in localCache');
   });
 });

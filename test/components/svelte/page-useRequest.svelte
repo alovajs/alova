@@ -14,7 +14,7 @@ const alova = createAlova({
   timeout: 3000,
   statesHook: SvelteHook,
   requestAdapter: GlobalFetch(),
-  responsed: response => response.json(),
+  responded: response => response.json(),
 });
 const Get = alova.Get('/unit-test', {
   transformData: ({ data }) => data,
