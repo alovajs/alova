@@ -186,7 +186,6 @@ describe('use useRequest hook to send GET with vue', function () {
   test('abort request when timeout', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
-        console.log('error timeout', error.message);
         expect(error.message).toMatch(/network timeout/);
         throw error;
       }
@@ -207,7 +206,6 @@ describe('use useRequest hook to send GET with vue', function () {
   test('manual abort request', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
-        console.log('manual abort', error.message);
         expect(error.message).toMatch(/user aborted a request/);
         return Promise.reject(error);
       }

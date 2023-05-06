@@ -16,7 +16,7 @@ describe('Request shared', function () {
       beforeRequest() {
         beforeRequestMockFn();
       },
-      responsed(data) {
+      responded(data) {
         responseMockFn();
         return data;
       },

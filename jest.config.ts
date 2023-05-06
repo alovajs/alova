@@ -156,7 +156,7 @@ export default {
     // '**/test/browser/behavior/share-request.spec.ts'
     // '**/test/browser/batch/parallel-request.spec.ts'
     // '**/test/browser/stateManager/manipulate-cache.spec.ts(x)?'
-    // '**/test/browser/global/createAlova.spec.ts(x)?'
+    // '**/test/browser/global/methodInstance.spec.ts(x)?'
     // '**/test/browser/fn/matchSnapshotMethod.spec.ts(x)?'
     // '**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?'
     // '**/test/browser/middleware/useRequest.spec.ts(x)?'

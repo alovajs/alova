@@ -78,7 +78,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数
-    return promisify(beforeRequest(clonedMethod))
+    return promisify(beforeRequest)(clonedMethod)
       .then(() => {
         // 获取受控缓存或非受控缓存
         const { localCache } = getConfig(clonedMethod);
@@ -146,7 +146,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()])
             .then(
               ([rawResponse, headers]) =>
-                promisify(responseHandler(rawResponse, clonedMethod))
+                promisify(responseHandler)(rawResponse, clonedMethod)
                   .then(data => transformData(data, headers))
                   .then(transformedData => {
                     saveMethodSnapshot(id, methodKey, methodInstance);

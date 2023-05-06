@@ -8,13 +8,13 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
-function getAlovaInstanceSyncResponsed() {
+function getAlovaInstanceSyncResponded() {
   return createAlova({
     baseURL: 'http://localhost:3000',
     timeout: 3000,
     statesHook: ReactHook,
     requestAdapter: GlobalFetch(),
-    responsed: () => {
+    responded: () => {
       return {
         mock: 'mockdata'
       };
@@ -86,8 +86,8 @@ function getAlovaInstanceSyncResponsed() {
     expect(screen.getByRole('method')).toHaveTextContent('GET');
   });
 
-  test('should return sync mock data from responsed hook', async () => {
-    const alova = getAlovaInstanceSyncResponsed();
+  test('should return sync mock data from responded hook', async () => {
+    const alova = getAlovaInstanceSyncResponded();
     const Get = alova.Get<{ mock: string }>('/unit-test');
     function Page() {
       const { data, loading } = useRequest(Get);
