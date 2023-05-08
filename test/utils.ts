@@ -1,6 +1,7 @@
 import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
-import { GlobalLocalCacheConfig, Method, StatesHook } from '~/typings';
+import { AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders } from '@alova/adapter-xhr';
+import { AlovaRequestAdapter, GlobalLocalCacheConfig, Method, StatesHook } from '~/typings';
 import { FetchRequestInit } from '~/typings/globalfetch';
 
 type GetData = {
@@ -19,6 +20,18 @@ export type Result<T = string> = {
   msg: string;
   data: T extends string ? GetData : PostData;
 };
+
+/**
+ * XMLHttpRequest请求适配器类型
+ * @alova/adapter-xhr中的AlovaXHRAdapter内部引用了alova，因此这边不可用，只能自行定义一个类型使用
+ */
+export type AlovaXHRAdapter = AlovaRequestAdapter<
+  any,
+  any,
+  AlovaXHRRequestConfig,
+  AlovaXHRResponse,
+  AlovaXHRResponseHeaders
+>;
 
 export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[]) => void, ...args: any[]) =>
   new Promise<T>(resolve => {

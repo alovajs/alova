@@ -98,6 +98,7 @@
     }
   },
   "devDependencies": {
+    "@alova/adapter-xhr": "^1.0.0",
     "@babel/core": "^7.18.2",
     "@commitlint/cli": "^17.2.0",
     "@commitlint/config-conventional": "^17.2.0",

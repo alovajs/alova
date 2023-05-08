@@ -11,6 +11,7 @@ import {
   isPlainObject,
   isSpecialRequestBody,
   key,
+  newInstance,
   noop,
   promisify,
   _self
@@ -24,6 +25,7 @@ import {
   len,
   objectKeys,
   PromiseCls,
+  promiseThen,
   trueValue,
   undefinedValue
 } from '../utils/variables';
@@ -72,8 +74,11 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   methodInstance: Method<S, E, R, T, RC, RE, RH>,
   forceRequest: boolean
 ) {
-  let requestAdapterCtrls: RequestAdapterReturnType | undefined = undefinedValue;
   let fromCache = trueValue;
+  let requestAdapterCtrlsPromiseResolveFn: (value?: RequestAdapterReturnType) => void;
+  const requestAdapterCtrlsPromise = newInstance(PromiseCls, resolve => {
+    requestAdapterCtrlsPromiseResolveFn = resolve;
+  }) as Promise<RequestAdapterReturnType | undefined>;
   const response = () => {
     const { beforeRequest = noop, responsed, responded, requestAdapter } = getOptions(methodInstance);
 
@@ -104,6 +109,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       .then(cachedResponse => {
         // 如果没有缓存则发起请求
         if (cachedResponse !== undefinedValue) {
+          requestAdapterCtrlsPromiseResolveFn(); // 遇到缓存将不传入ctrls
           return cachedResponse;
         }
         const { baseURL, url: newUrl, type, data } = clonedMethod;
@@ -119,7 +125,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         fromCache = falseValue;
         const { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(clonedMethod);
         const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
-        requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
+        let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
         if (!shareRequest || !requestAdapterCtrls) {
           // 请求数据
           const ctrls = requestAdapter(
@@ -133,6 +139,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           );
           requestAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
         }
+        // 将requestAdapterCtrls传到promise中供onDownload、onUpload及abort中使用
+        requestAdapterCtrlsPromiseResolveFn(requestAdapterCtrls);
 
         let responseHandler: ResponsedHandler<any, any, RC, RE, RH> = _self;
         let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
@@ -205,11 +213,26 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   };
 
   return {
-    abort: () => requestAdapterCtrls && requestAdapterCtrls.abort(),
-    onDownload: (handler: ProgressUpdater) =>
-      requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler),
-    onUpload: (handler: ProgressUpdater) =>
-      requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler),
+    abort: () => {
+      promiseThen(
+        requestAdapterCtrlsPromise,
+        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
+      );
+    },
+    onDownload: (handler: ProgressUpdater) => {
+      promiseThen(
+        requestAdapterCtrlsPromise,
+        requestAdapterCtrls =>
+          requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler)
+      );
+    },
+    onUpload: (handler: ProgressUpdater) => {
+      promiseThen(
+        requestAdapterCtrlsPromise,
+        requestAdapterCtrls =>
+          requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler)
+      );
+    },
     response,
     fromCache: () => fromCache
   };

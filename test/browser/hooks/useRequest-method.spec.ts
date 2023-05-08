@@ -1,8 +1,10 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { Method, useRequest } from '@/index';
+import { AlovaXHRAdapter, getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { createAlova, Method, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
+import { xhrRequestAdapter } from '@alova/adapter-xhr';
+import { baseURL } from '~/test/mockServer';
 
 // 其他请求方式测试
 describe('Test other methods without GET', function () {
@@ -296,5 +298,34 @@ describe('Test other methods without GET', function () {
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, key(Patch));
     expect(cacheData).toBeUndefined();
+  });
+
+  (isSSR ? xtest : test).only('should download file and pass the right args', async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter() as AlovaXHRAdapter,
+      statesHook: VueHook,
+      responded({ data }) {
+        return data;
+      }
+    });
+
+    const Get = alovaInst.Get('/unit-test-download', {
+      enableDownload: true,
+      responseType: 'blob'
+    });
+
+    const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Get);
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeInstanceOf(Blob);
+    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 3273178, loaded: 3273178 });
+    expect(error.value).toBeUndefined();
+
+    // 有缓存的情况下，不再有下载信息
+    const { downloading: downloading2, onSuccess: onSuccess2 } = useRequest(Get);
+    await untilCbCalled(onSuccess2);
+    expect(downloading2.value).toEqual({ total: 0, loaded: 0 });
   });
 });
