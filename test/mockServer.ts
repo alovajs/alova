@@ -1,5 +1,7 @@
+import { readFileSync } from 'fs';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import path from 'path';
 
 // -------------------
 // 服务模拟
@@ -29,7 +31,7 @@ const result = (code: number, req: any, res: any, ctx: any, hasBody = false, ext
   return res(ctx.json(ret));
 };
 
-const baseURL = 'http://localhost:3000';
+export const baseURL = 'http://localhost:3000';
 const countMap = {} as Record<string, number>;
 const mockServer = setupServer(
   rest.get(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx)),
@@ -52,7 +54,17 @@ const mockServer = setupServer(
   rest.put(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.head(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
   rest.patch(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
-  rest.options(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({})))
+  rest.options(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
+  rest.get(baseURL + '/unit-test-download', (_, res, ctx) => {
+    // Read the image from the file system using the "fs" module.
+    const imageBuffer = readFileSync(path.resolve(__dirname, './image.jpg'));
+    return res(
+      ctx.set('Content-Length', imageBuffer.byteLength.toString()),
+      ctx.set('Content-Type', 'image/jpeg'),
+      // Respond with the "ArrayBuffer".
+      ctx.body(imageBuffer)
+    );
+  })
 );
 
 export default mockServer;
