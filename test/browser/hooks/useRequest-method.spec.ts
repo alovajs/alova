@@ -300,7 +300,7 @@ describe('Test other methods without GET', function () {
     expect(cacheData).toBeUndefined();
   });
 
-  (isSSR ? xtest : test).only('should download file and pass the right args', async () => {
+  (isSSR ? xtest : test)('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter() as AlovaXHRAdapter,
