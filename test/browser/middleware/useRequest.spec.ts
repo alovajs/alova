@@ -380,10 +380,10 @@ describe('useRequet middleware', function () {
       transformData: ({ data }: Result<true>) => data
     });
 
-    // 调用了controlLoding后将自定义控制loading状态
+    // 调用了controlLoading后将自定义控制loading状态
     const state1 = useRequest(getGetterObj, {
-      middleware: ({ controlLoding }, next) => {
-        controlLoding();
+      middleware: ({ controlLoading }, next) => {
+        controlLoading();
         return next();
       }
     });
@@ -392,8 +392,8 @@ describe('useRequet middleware', function () {
     expect(state1.loading.value).toBeFalsy();
 
     const state2 = useRequest(getGetterObj, {
-      middleware: ({ controlLoding, update }, next) => {
-        controlLoding();
+      middleware: ({ controlLoading, update }, next) => {
+        controlLoading();
         update({ loading: true });
         return next();
       }

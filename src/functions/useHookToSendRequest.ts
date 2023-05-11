@@ -182,7 +182,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       config: useHookConfig,
       frontStates,
       update: newFrontStates => update(newFrontStates, frontStates),
-      controlLoding(control = trueValue) {
+      controlLoading(control = trueValue) {
         controlledLoading = control;
       },
       decorateSuccess(decorator: NonNullable<typeof successHandlerDecorator>) {
