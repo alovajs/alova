@@ -368,6 +368,14 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 状态更新函数 */
   update: ExportedUpdate<R>;
 
+  /**
+   * 调用后将自定义控制loading的状态，内部不再触发loading状态的变更
+   * 传入control为false时将取消控制
+   *
+   * @param control 是否控制loading，默认为true
+   */
+  controlLoding: (control?: boolean) => void;
+
   /** 成功回调装饰 */
   decorateSuccess: (
     decorator: (

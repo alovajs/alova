@@ -373,4 +373,33 @@ describe('useRequet middleware', function () {
     expect(errorRaw.message).toBe('middleware custom error');
     expect(error.value?.message).toBe('middleware custom error');
   });
+
+  test("shouldn't change loading state after response when prevent loaded", async () => {
+    const alova = getAlovaInstance(VueHook);
+    const getGetterObj = alova.Get('/unit-test', {
+      transformData: ({ data }: Result<true>) => data
+    });
+
+    // 调用了controlLoding后将自定义控制loading状态
+    const state1 = useRequest(getGetterObj, {
+      middleware: ({ controlLoding }, next) => {
+        controlLoding();
+        return next();
+      }
+    });
+    expect(state1.loading.value).toBeFalsy(); // loading已受控
+    await untilCbCalled(state1.onSuccess);
+    expect(state1.loading.value).toBeFalsy();
+
+    const state2 = useRequest(getGetterObj, {
+      middleware: ({ controlLoding, update }, next) => {
+        controlLoding();
+        update({ loading: true });
+        return next();
+      }
+    });
+    expect(state2.loading.value).toBeTruthy(); // loading已受控
+    await untilCbCalled(state2.onSuccess);
+    expect(state2.loading.value).toBeTruthy();
+  });
 });
