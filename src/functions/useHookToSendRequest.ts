@@ -113,6 +113,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   let requestCtrl: Partial<ReturnType<typeof sendRequest>> = {};
   let responseHandlePromise = promiseResolve<any>(undefinedValue);
   let fromCache = () => !!cachedResponse;
+  // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
+  let controlledLoading = falseValue;
 
   // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
   const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
@@ -128,13 +130,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     fromCache = getFromCacheValue;
 
     // 命中缓存，或强制请求时需要更新loading状态
-    if (forceRequestFinally || !cachedResponse) {
-      update(
-        {
-          loading: trueValue
-        },
-        frontStates
-      );
+    // loading状态受控时将不再更改为false
+    if ((forceRequestFinally || !cachedResponse) && !controlledLoading) {
+      update({ loading: trueValue }, frontStates);
     }
 
     responseHandlePromise = response();
@@ -184,13 +182,16 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       config: useHookConfig,
       frontStates,
       update: newFrontStates => update(newFrontStates, frontStates),
-      decorateSuccess: (decorator: NonNullable<typeof successHandlerDecorator>) => {
+      controlLoding(control = trueValue) {
+        controlledLoading = control;
+      },
+      decorateSuccess(decorator: NonNullable<typeof successHandlerDecorator>) {
         isFn(decorator) && (successHandlerDecorator = decorator);
       },
-      decorateError: (decorator: NonNullable<typeof errorHandlerDecorator>) => {
+      decorateError(decorator: NonNullable<typeof errorHandlerDecorator>) {
         isFn(decorator) && (errorHandlerDecorator = decorator);
       },
-      decorateComplete: (decorator: NonNullable<typeof completeHandlerDecorator>) => {
+      decorateComplete(decorator: NonNullable<typeof completeHandlerDecorator>) {
         isFn(decorator) && (completeHandlerDecorator = decorator);
       }
     },
@@ -220,8 +221,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
           cachedState && update({ data }, cachedState);
         }
 
-        // 在请求后触发对应回调函数，静默请求在请求前已经触发过回调函数了
-        update({ loading: falseValue }, frontStates);
+        // loading状态受控时将不再更改为false
+        !controlledLoading && update({ loading: falseValue }, frontStates);
+        // 在请求后触发对应回调函数
         runArgsHandler(
           successHandlers,
           successHandlerDecorator,
@@ -252,14 +254,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
     // catch回调函数
     (error: Error) => {
-      // 静默请求下，失败了的话则将请求信息保存到缓存，并开启循环调用请求
-      update(
-        {
-          error,
-          loading: falseValue
-        },
-        frontStates
-      );
+      const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
+      // loading状态受控时将不再更改为false
+      !controlledLoading && (newStates.loading = falseValue);
+      update(newStates, frontStates);
       runArgsHandler(
         errorHandlers,
         errorHandlerDecorator,
