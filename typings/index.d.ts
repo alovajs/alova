@@ -374,7 +374,7 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
    *
    * @param control 是否控制loading，默认为true
    */
-  controlLoding: (control?: boolean) => void;
+  controlLoading: (control?: boolean) => void;
 
   /** 成功回调装饰 */
   decorateSuccess: (
