@@ -151,4 +151,18 @@ describe('use useFetcher hook to fetch data', function () {
     expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 1 });
     expect(mockFn).toBeCalled();
   });
+
+  test('should update states when call update returns in useFetcher', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+
+    const { fetching, error, update } = useFetcher<FetcherType<typeof alova>>();
+    update({
+      fetching: true,
+      error: new Error('custom fetch error')
+    });
+    expect(fetching.value).toBeTruthy();
+    expect(error.value?.message).toBe('custom fetch error');
+  });
 });
