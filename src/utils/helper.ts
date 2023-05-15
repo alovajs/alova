@@ -1,4 +1,4 @@
-import { AlovaMethodHandler, CacheExpire } from '~/typings';
+import { AlovaMethodHandler, CacheExpire, FrontRequestState } from '~/typings';
 import Method from '../Method';
 import {
   clearTimeoutTimer,
@@ -197,3 +197,17 @@ export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>
   cls: T,
   ...args: ConstructorParameters<T>
 ) => new cls(...args);
+
+/**
+ * 导出fetchStates map
+ * @param frontStates front states map
+ * @returns fetchStates map
+ */
+export const exportFetchStates = <L = any, R = any, E = any, D = any, U = any>(
+  frontStates: FrontRequestState<L, R, E, D, U>
+) => ({
+  fetching: frontStates.loading,
+  error: frontStates.error,
+  downloading: frontStates.downloading,
+  uploading: frontStates.uploading
+});

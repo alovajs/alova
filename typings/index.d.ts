@@ -39,6 +39,13 @@ type FrontRequestState<L = any, R = any, E = any, D = any, U = any> = {
   uploading: U;
   [x: string | number | symbol]: any;
 };
+type FetchRequestState<F = any, E = any, D = any, U = any> = {
+  fetching: F;
+  error: E;
+  downloading: D;
+  uploading: U;
+  [x: string | number | symbol]: any;
+};
 type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
 /** 全局的存储适配器 */
@@ -174,7 +181,7 @@ interface StatesHook<S, E> {
 
   /** 将状态转换为普通数据 */
   dehydrate: (state: S) => any;
-  update: (newVal: Partial<FrontRequestState>, state: FrontRequestState) => void;
+  update: (newVal: Record<string, any>, state: Record<string, S>) => void;
 
   /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
@@ -340,8 +347,11 @@ type SuccessHandler<S, E, R, T, RC, RE, RH> = (event: AlovaSuccessEvent<S, E, R,
 type ErrorHandler<S, E, R, T, RC, RE, RH> = (event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>) => void;
 type CompleteHandler<S, E, R, T, RC, RE, RH> = (event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>) => void;
 
-type ExportedUpdate<R> = (
+type FrontExportedUpdate<R> = (
   newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
+) => void;
+type FetcherExportedUpdate = (
+  newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
 ) => void;
 interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 当前的method对象 */
@@ -350,31 +360,11 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 命中的缓存数据 */
   cachedResponse: R | undefined;
 
-  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
-  sendArgs: any[];
-
   /** 当前的usehook配置对象 */
   config: any;
 
-  /** 前端状态集合 */
-  frontStates: FrontRequestState<
-    ExportedType<boolean, S>,
-    ExportedType<R, S>,
-    ExportedType<Error | undefined, S>,
-    ExportedType<Progress, S>,
-    ExportedType<Progress, S>
-  >;
-
-  /** 状态更新函数 */
-  update: ExportedUpdate<R>;
-
-  /**
-   * 调用后将自定义控制loading的状态，内部不再触发loading状态的变更
-   * 传入control为false时将取消控制
-   *
-   * @param control 是否控制loading，默认为true
-   */
-  controlLoading: (control?: boolean) => void;
+  /** 中断函数 */
+  abort: UseHookReturnType<any, S>['abort'];
 
   /** 成功回调装饰 */
   decorateSuccess: (
@@ -407,31 +397,103 @@ interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   ) => void;
 }
 
+/**
+ * useRequest和useWatcher中间件的context参数
+ */
+interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH> extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+  /** 发送请求函数 */
+  send: SendHandler<R>;
+
+  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
+  sendArgs: any[];
+
+  /** 前端状态集合 */
+  frontStates: FrontRequestState<
+    ExportedType<boolean, S>,
+    ExportedType<R, S>,
+    ExportedType<Error | undefined, S>,
+    ExportedType<Progress, S>,
+    ExportedType<Progress, S>
+  >;
+
+  /** 状态更新函数 */
+  update: FrontExportedUpdate<R>;
+
+  /**
+   * 调用后将自定义控制loading的状态，内部不再触发loading状态的变更
+   * 传入control为false时将取消控制
+   *
+   * @param control 是否控制loading，默认为true
+   */
+  controlLoading: (control?: boolean) => void;
+}
+
+/**
+ * useFetcher中间件的context参数
+ */
+interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH> extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+  /** 发送请求函数 */
+  fetch: FetchHandler;
+
+  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
+  fetchArgs: any[];
+
+  /** fetch状态集合 */
+  fetchStates: FetchRequestState<
+    ExportedType<boolean, S>,
+    ExportedType<Error | undefined, S>,
+    ExportedType<Progress, S>,
+    ExportedType<Progress, S>
+  >;
+
+  /** 状态更新函数 */
+  update: FetcherExportedUpdate;
+
+  /**
+   * 调用后将自定义控制fetching的状态，内部不再触发fetching状态的变更
+   * 传入control为false时将取消控制
+   *
+   * @param control 是否控制fetching，默认为true
+   */
+  controlFetching: (control?: boolean) => void;
+}
+
 /** 中间件next函数 */
 interface MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH> {
-  force?: UseHookConfig<S, E, R, T, RC, RE, RH>['force'];
-  method?: Method;
+  force?: UseHookConfig['force'];
+  method?: Method<S, E, R, T, RC, RE, RH>;
 }
 interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
   (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH>): Promise<R>;
 }
 
-/** alova中间件类型 */
-interface AlovaMiddleware<S, E, R, T, RC, RE, RH> {
-  (context: AlovaMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): Promise<any>;
+/**
+ * alova useRequest/useWatcher中间件
+ */
+interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH> {
+  (
+    context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>,
+    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
+  ): Promise<any>;
+}
+/**
+ * alova useRequest/useWatcher中间件
+ */
+interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH> {
+  (
+    context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>,
+    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
+  ): Promise<any>;
 }
 
 /** hook通用配置 */
-interface UseHookConfig<S, E, R, T, RC, RE, RH> {
+interface UseHookConfig {
   /** 是否强制请求 */
   force?: boolean | ((...args: any[]) => boolean);
-
-  /** 中间件 */
-  middleware?: AlovaMiddleware<S, E, R, T, RC, RE, RH>;
 }
 
 /** useRequest和useWatcher都有的类型 */
-interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig<S, E, R, T, RC, RE, RH> {
+interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
   /** 开启immediate后，useRequest会立即发起一次请求 */
   immediate?: boolean;
 
@@ -440,6 +502,9 @@ interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig<S
 
   /** 额外的监管状态，可通过updateState更新 */
   managedStates?: Record<string | number | symbol, S>;
+
+  /** 中间件 */
+  middleware?: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>;
 }
 
 /** useRequest config type */
@@ -452,7 +517,10 @@ interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConf
 }
 
 /** useFetcher config type */
-type FetcherHookConfig = UseHookConfig<any, any, any, any, any, any, any>;
+interface FetcherHookConfig extends UseHookConfig {
+  /** 中间件 */
+  middleware?: AlovaFetcherMiddleware<any, any, any, any, any, any, any>;
+}
 
 /** 调用useFetcher时需要传入的类型，否则会导致状态类型错误 */
 type FetcherType<A extends Alova<any, any, any, any, any>> = {
@@ -471,6 +539,7 @@ interface VueRef {
   value: any;
 }
 type ExportedType<R, S> = S extends VueRef ? Ref<R> : S extends SvelteWritable ? Writable<R> : R;
+type SendHandler<R> = (...args: any[]) => Promise<R>;
 type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,
@@ -479,23 +548,26 @@ type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, R
   ExportedType<Progress, S>
 > & {
   abort: () => void;
-  update: ExportedUpdate<R>;
-  send: (...args: any[]) => Promise<R>;
+  update: FrontExportedUpdate<R>;
+  send: SendHandler<R>;
   onSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH>) => void;
   onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
   onComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
 };
-interface UseFetchHookReturnType<S> {
-  fetching: UseHookReturnType<any, S>['loading'];
-  error: UseHookReturnType<any, S>['error'];
-  downloading: UseHookReturnType<any, S>['downloading'];
-  uploading: UseHookReturnType<any, S>['uploading'];
-  fetch: <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>, ...args: any[]) => void;
+type FetchHandler = (matcher: MethodMatcher<any, any, any, any, any, any, any>, ...args: any[]) => void;
+type UseFetchHookReturnType<S> = FetchRequestState<
+  ExportedType<boolean, S>,
+  ExportedType<Error | undefined, S>,
+  ExportedType<Progress, S>,
+  ExportedType<Progress, S>
+> & {
+  fetch: FetchHandler;
+  update: FetcherExportedUpdate;
   abort: UseHookReturnType<any, S>['abort'];
   onSuccess: UseHookReturnType<any, S>['onSuccess'];
   onError: UseHookReturnType<any, S>['onError'];
   onComplete: UseHookReturnType<any, S>['onComplete'];
-}
+};
 
 interface MethodFilterHandler {
   (method: Method, index: number, methods: Method[]): boolean;

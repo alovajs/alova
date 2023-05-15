@@ -1,8 +1,8 @@
 import { alovas } from '@/Alova';
 import createRequestState from '@/functions/createRequestState';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
-import { noop } from '@/utils/helper';
-import myAssert, { assertAlovaCreation } from '@/utils/myAssert';
+import { exportFetchStates, noop } from '@/utils/helper';
+import { assertAlovaCreation, assertMethodMatcher } from '@/utils/myAssert';
 import { falseValue, trueValue } from '@/utils/variables';
 import { FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
 
@@ -18,14 +18,12 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
     config
   );
   return {
-    fetching: props.loading,
-    error: props.error,
-    downloading: props.downloading,
-    uploading: props.uploading,
+    ...exportFetchStates(props),
     onSuccess: props.onSuccess,
     onError: props.onError,
     onComplete: props.onComplete,
     abort: props.abort,
+    update: props.update,
 
     /**
      * 拉取数据
@@ -34,7 +32,7 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
      */
     fetch: <S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>, ...args: any[]) => {
       const methodInstance = filterSnapshotMethods(matcher, falseValue);
-      myAssert(!!methodInstance, 'method instance is not found');
+      assertMethodMatcher(methodInstance);
       props.send(args, methodInstance, trueValue);
     }
   };

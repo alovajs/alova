@@ -152,7 +152,7 @@ export default {
 
   testMatch: [
     '**/?(*.)+(spec|test).[tj]s?(x)'
-    // '**/test/browser/hooks/useRequest-method.spec.ts(x)?'
+    // '**/test/browser/hooks/useFetcher-vue.spec.ts(x)?'
     // '**/test/browser/behavior/share-request.spec.ts'
     // '**/test/browser/batch/parallel-request.spec.ts'
     // '**/test/browser/stateManager/manipulate-cache.spec.ts(x)?'

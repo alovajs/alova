@@ -402,4 +402,65 @@ describe('useRequet middleware', function () {
     await untilCbCalled(state2.onSuccess);
     expect(state2.loading.value).toBeTruthy();
   });
+
+  test('should send request like send function in returns when call send in middleware', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json(),
+      // 设置不缓存，重复发起请求时才可以观察loading状态
+      localCache: null
+    });
+    const getGetter = (d?: { a: string; b: string }) =>
+      alova.Get('/unit-test', {
+        timeout: 10000,
+        transformData: ({ data }: Result) => data,
+        params: {
+          a: d?.a,
+          b: d?.b
+        }
+      });
+
+    // 调用了controlLoading后将自定义控制loading状态
+    let sendInMiddleware: any = undefined;
+    const { loading, data, onSuccess } = useRequest(getGetter, {
+      middleware: ({ send }, next) => {
+        sendInMiddleware = send;
+        return next();
+      }
+    });
+    expect(sendInMiddleware).toBeInstanceOf(Function);
+    await untilCbCalled(onSuccess);
+    expect(data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
+
+    // 使用sendInMiddleware发送请求，效果应该与send相同
+    const resPromise = sendInMiddleware({ a: 'a', b: 'b' });
+    expect(loading.value).toBeTruthy();
+    const res = await resPromise;
+    expect(res).toStrictEqual({ path: '/unit-test', method: 'GET', params: { a: 'a', b: 'b' } });
+    expect(data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: { a: 'a', b: 'b' } });
+  });
+
+  test('should abort request like abort function in returns when call abort in middleware', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: error => {
+        expect(error.message).toMatch(/user aborted a request/);
+        return Promise.reject(error);
+      }
+    });
+    const Get = alova.Get<string, Result<string>>('/unit-test-10s');
+    const { loading, data, error, onError } = useRequest(Get, {
+      async middleware({ abort }, next) {
+        await next();
+        setTimeout(abort, 100);
+      }
+    });
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    const err = await untilCbCalled(onError);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBe(err.error);
+  });
 });

@@ -1,6 +1,6 @@
 import { onDestroy } from 'svelte';
 import { writable, Writable } from 'svelte/store';
-import { EffectRequestParams, FrontRequestState } from '~/typings';
+import { EffectRequestParams } from '~/typings';
 import {
   clearTimeoutTimer,
   falseValue,
@@ -21,14 +21,10 @@ export default {
     state.subscribe(value => (raw = value))();
     return raw;
   },
-  update: (
-    newVal: Partial<FrontRequestState>,
-    states: FrontRequestState<UnknownWritable, UnknownWritable, UnknownWritable, UnknownWritable, UnknownWritable>
-  ) =>
+  update: (newVal: Record<string, any>, states: Record<string, UnknownWritable>) =>
     forEach(objectKeys(newVal), key => {
-      type Keys = keyof FrontRequestState;
-      const sItem = states[key as Keys];
-      sItem.set(newVal[key as Keys]);
+      const sItem = states[key];
+      sItem.set(newVal[key]);
     }),
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<Writable<any>>) {
     // 组件卸载时移除对应状态

@@ -69,4 +69,33 @@ describe('useFetcher middleware', function () {
     expect(mockFn).toBeCalledTimes(0);
     expect(fetching.value).toBeFalsy();
   });
+
+  test('should fetch data like fetch function in returns when call fetch in middleware', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      localCache: null,
+      responseExpect: r => r.json()
+    });
+
+    let fetchInMiddleware: any;
+    const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
+      middleware: ({ fetch }, next) => {
+        fetchInMiddleware = fetch;
+        return next();
+      }
+    });
+    const getGetterObj = alova.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+
+    expect(fetchInMiddleware).toBeUndefined(); // 未发起请求时不会调用middleware
+    fetch(getGetterObj);
+    expect(fetching.value).toBeTruthy();
+    await untilCbCalled(onSuccess);
+    expect(fetching.value).toBeFalsy();
+
+    fetchInMiddleware(getGetterObj);
+    expect(fetching.value).toBeTruthy();
+    await untilCbCalled(onSuccess);
+    expect(fetching.value).toBeFalsy();
+  });
 });

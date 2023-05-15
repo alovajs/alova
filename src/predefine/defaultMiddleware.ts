@@ -1,5 +1,5 @@
-import { AlovaMiddleware } from '~/typings';
+import { AlovaGuardNext } from '~/typings';
 
-const defaultMiddleware: AlovaMiddleware<any, any, any, any, any, any, any> = (_, next) => next();
+const defaultMiddleware = (_: any, next: AlovaGuardNext<any, any, any, any, any, any, any>) => next();
 
 export default defaultMiddleware;
