@@ -1,9 +1,10 @@
-import { debounce, getHandlerMethod, isNumber, noop } from '@/utils/helper';
+import { debounce, isNumber, noop } from '@/utils/helper';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
+  FetchRequestState,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -14,6 +15,7 @@ import {
 import Alova from '../Alova';
 import Method from '../Method';
 import {
+  deleteAttr,
   falseValue,
   getStatesHook,
   isArray,
@@ -26,18 +28,19 @@ import useHookToSendRequest from './useHookToSendRequest';
 
 export type SaveStateFn = (frontStates: FrontRequestState) => void;
 /**
- * 创建请求状态，统一处理useRequest、useWatcher、useEffectWatcher中一致的逻辑
+ * 创建请求状态，统一处理useRequest、useWatcher、useFetcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
  * 当该值为空时，表示useFetcher进入的，此时不需要data状态和缓存状态
- * @param method 请求方法对象
- * @param handleRequest 请求处理的回调函数
- * @param methodKey 请求方法的key
- * @param watchingStates 被监听的状态，如果未传入，直接调用handleRequest
+ * @param alovaInstance alova对象
+ * @param methodInstance 请求方法对象
+ * @param useHookConfig hook请求配置对象
+ * @param initialData 初始data数据
  * @param immediate 是否立即发起请求
+ * @param watchingStates 被监听的状态，如果未传入，直接调用handleRequest
  * @param debounceDelay 请求发起的延迟时间
- * @returns 当前的请求状态
+ * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig<S, E, R, T, RC, RE, RH>>(
+export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig>(
   alovaInstance: Alova<S, E, RC, RE, RH>,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   useHookConfig: UC,
@@ -67,45 +70,40 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   const successHandlers = [] as SuccessHandler<S, E, R, T, RC, RE, RH>[];
   const errorHandlers = [] as ErrorHandler<S, E, R, T, RC, RE, RH>[];
   const completeHandlers = [] as CompleteHandler<S, E, R, T, RC, RE, RH>[];
-  let abortFn: typeof noop | undefined = undefinedValue;
+  let abortFn = noop;
   let removeStatesFn = noop;
   let saveStatesFn = noop as SaveStateFn;
   const hasWatchingStates = watchingStates !== undefinedValue;
 
   // 统一处理请求发送
   const handleRequest = (
-    methodInstance: Method<S, E, R, T, RC, RE, RH>,
+    handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
     useHookConfigParam = useHookConfig,
     sendCallingArgs?: any[],
     updateCacheState?: boolean
-  ) => {
-    const {
-      abort,
-      p: responseHandlePromise,
-      r: removeStates,
-      s: saveStates
-    } = useHookToSendRequest(
-      methodInstance,
+  ) =>
+    useHookToSendRequest(
+      handler,
       frontStates,
       useHookConfigParam,
       successHandlers,
       errorHandlers,
       completeHandlers,
+      ({ abort, r: removeStates, s: saveStates }) => {
+        // 每次发送请求都需要保存最新的控制器
+        abortFn = abort;
+        removeStatesFn = removeStates;
+        saveStatesFn = saveStates;
+      },
       sendCallingArgs,
       updateCacheState
     );
-    // 每次发送请求都需要保存最新的控制器
-    abortFn = abort;
-    removeStatesFn = removeStates;
-    saveStatesFn = saveStates;
-    return responseHandlePromise;
-  };
 
   // 调用请求处理回调函数
   const wrapEffectRequest = () => {
-    // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续往外跑
-    const methodInstance = getHandlerMethod(methodHandler);
-    promiseCatch(handleRequest(methodInstance), noop);
+    // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续向外抛出
+    // const methodInstance = getHandlerMethod(methodHandler);
+    promiseCatch(handleRequest(), noop);
   };
 
   effectRequest({
@@ -141,26 +139,29 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(completeHandlers, handler);
     },
-    update(newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>) {
-      update(newFrontStates, frontStates);
+    update(
+      newStates:
+        | Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
+        | Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
+    ) {
+      // 当useFetcher调用时，其fetching使用的是loading，更新时需要转换过来
+      const { fetching } = newStates;
+      if (fetching) {
+        newStates.loading = fetching;
+        deleteAttr(newStates, 'fetching');
+      }
+      update(newStates, frontStates);
     },
-    abort: () => (abortFn || noop)(),
+    abort: () => abortFn(),
 
     /**
      * 通过执行该方法来手动发起请求
-     * @param methodInstance 方法对象
-     * @param useHookConfig useHook配置参数对象
      * @param sendCallingArgs 调用send函数时传入的参数
-     * @param updateCacheState 是否更新缓存状态，此为fetch传入
+     * @param methodInstance 方法对象
+     * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send(sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, updateCacheState?: boolean) {
-      return handleRequest(
-        methodInstance || getHandlerMethod(methodHandler, sendCallingArgs),
-        useHookConfig,
-        sendCallingArgs,
-        updateCacheState
-      );
-    }
+    send: (sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
+      handleRequest(methodInstance, useHookConfig, sendCallingArgs, isFetcher)
   };
 }

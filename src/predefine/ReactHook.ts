@@ -1,6 +1,6 @@
 import { forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { EffectRequestParams, FrontRequestState } from '~/typings';
+import { EffectRequestParams } from '~/typings';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 const stateToData = <D>([state]: ReactState<D>) => state;
@@ -14,13 +14,9 @@ export default {
   create: (data: any) => useState(data),
   export: stateToData,
   dehydrate: stateToData,
-  update: (
-    newVal: Partial<FrontRequestState>,
-    states: FrontRequestState<UnknownState, UnknownState, UnknownState, UnknownState, UnknownState>
-  ) =>
+  update: (newVal: Record<string, any>, states: Record<string, UnknownState>) =>
     forEach(objectKeys(newVal), key => {
-      type Keys = keyof FrontRequestState;
-      states[key as Keys][1](newVal[key as Keys] as any);
+      states[key][1](newVal[key] as any);
     }),
   effectRequest({
     handler,

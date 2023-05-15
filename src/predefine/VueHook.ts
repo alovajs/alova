@@ -1,6 +1,6 @@
 import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
-import { onUnmounted, ref, Ref, watch, WatchSource } from 'vue';
-import { EffectRequestParams, FrontRequestState } from '~/typings';
+import { Ref, WatchSource, onUnmounted, ref, watch } from 'vue';
+import { EffectRequestParams } from '~/typings';
 
 type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks
@@ -8,13 +8,9 @@ export default {
   create: <D>(data: D) => ref(data),
   export: <D>(state: Ref<D>) => state,
   dehydrate: <D>(state: Ref<D>) => state.value,
-  update: (
-    newVal: Partial<FrontRequestState>,
-    states: FrontRequestState<UnknownRef, UnknownRef, UnknownRef, UnknownRef, UnknownRef>
-  ) =>
+  update: (newVal: Record<string, any>, states: Record<string, UnknownRef>) =>
     forEach(objectKeys(newVal), key => {
-      type Keys = keyof FrontRequestState;
-      states[key as Keys].value = newVal[key as Keys];
+      states[key].value = newVal[key];
     }),
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<WatchSource>) {
     // 组件卸载时移除对应状态

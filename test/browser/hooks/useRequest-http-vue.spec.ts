@@ -228,13 +228,13 @@ describe('use useRequest hook to send GET with vue', function () {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
-    const getGetter = (data: { a: string; b: string }) =>
+    const getGetter = (d: { a: string; b: string }) =>
       alova.Get('/unit-test', {
         timeout: 10000,
         transformData: ({ data }: Result<true>) => data,
         params: {
-          a: data.a,
-          b: data.b
+          a: d.a,
+          b: d.b
         }
       });
 
@@ -350,5 +350,21 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(data.value.params.b).toBe('~~');
     const cacheData = getResponseCache(alova.id, key(getGetterObj));
     expect(cacheData.params).toEqual({ a: '~', b: '~~' });
+  });
+
+  test('should update states when call update returns in useFetcher', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+
+    const { loading, data, error, update } = useRequest(alova.Get('/unit-test'));
+    update({
+      loading: true,
+      error: new Error('custom request error'),
+      data: 111
+    });
+    expect(loading.value).toBeTruthy();
+    expect(error.value?.message).toBe('custom request error');
+    expect(data.value).toBe(111);
   });
 });
