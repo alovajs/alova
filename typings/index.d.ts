@@ -86,7 +86,7 @@ type DetailLocalCacheConfig = {
   tag?: string | number;
 };
 type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
-type LocalCacheController<R> = () => R | Promise<R>;
+type LocalCacheController<R> = () => R | undefined | Promise<R | undefined>;
 interface MethodRequestConfig {
   /**
    * url参数
