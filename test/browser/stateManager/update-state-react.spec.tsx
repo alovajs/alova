@@ -5,7 +5,7 @@ import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
 (isSSR ? xdescribe : describe)('update cached response data by user in react', function () {
@@ -78,13 +78,14 @@ import React, { ReactElement, useState } from 'react';
     fireEvent.click(screen.getByRole('count'));
     await screen.findByText('1');
 
-    updateState(Get, data => {
-      return {
-        ...data,
-        path: '/unit-test-updated'
-      };
+    await act(() => {
+      updateState(Get, data => {
+        return {
+          ...data,
+          path: '/unit-test-updated'
+        };
+      });
     });
-    await screen.findByText(/unit-test-updated/);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
     expect(screen.getByRole('count')).toHaveTextContent('1');
   });
@@ -138,11 +139,12 @@ import React, { ReactElement, useState } from 'react';
       });
     }).toThrow();
 
-    // 更新成功
-    updateState(Get, {
-      extraData: () => 1
+    await act(() => {
+      // 更新成功
+      updateState(Get, {
+        extraData: () => 1
+      });
     });
-    await untilCbCalled(setTimeout, 50);
     expect(screen.getByRole('extraData')).toHaveTextContent('1');
   });
 });
