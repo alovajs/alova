@@ -24,4 +24,4 @@ export const assertAlovaCreation = () => myAssert(len(alovas) > 0, 'please creat
  * @param methodInstance method实例
  */
 export const assertMethodMatcher = (methodInstance?: Method) =>
-  myAssert(!!methodInstance, "Didn't match any method instance");
+  myAssert(!!methodInstance, "didn't match any method instance");

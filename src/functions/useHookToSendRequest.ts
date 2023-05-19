@@ -77,6 +77,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   isFetcher = falseValue
 ) {
   const methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
+  myAssert(
+    instanceOf(methodInstance, Method),
+    'hook handler must be a method instance or a function that returns method instance'
+  );
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
     | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
     | FetcherHookConfig;

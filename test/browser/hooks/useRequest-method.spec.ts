@@ -8,6 +8,23 @@ import { baseURL } from '~/test/mockServer';
 
 // 其他请求方式测试
 describe('Test other methods without GET', function () {
+  test("should throws a throw when hook handler didn't get a method instance", () => {
+    getAlovaInstance(VueHook);
+    const errMsg = '[alova]hook handler must be a method instance or a function that returns method instance';
+    expect(() => {
+      (useRequest as any)();
+    }).toThrow(errMsg);
+    expect(() => {
+      (useRequest as any)('123');
+    }).toThrow(errMsg);
+    expect(() => {
+      (useRequest as any)(() => {});
+    }).toThrow(errMsg);
+    expect(() => {
+      (useRequest as any)(() => 456);
+    }).toThrow(errMsg);
+  });
+
   test('send POST', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
