@@ -75,11 +75,26 @@
     "node": ">= 0.12.0"
   },
   "exports": {
-    ".": "./dist/alova.esm.js",
-    "./vue": "./dist/hooks/vuehook.esm.js",
-    "./react": "./dist/hooks/reacthook.esm.js",
-    "./svelte": "./dist/hooks/sveltehook.esm.js",
-    "./GlobalFetch": "./dist/adapter/globalfetch.esm.js"
+    ".": {
+      "types": "./typings/index.d.ts",
+      "default": "./dist/alova.esm.js"
+    },
+    "./vue": {
+      "types": "./typings/vuehook.d.ts",
+      "default": "./dist/hooks/vuehook.esm.js"
+    },
+    "./react": {
+      "types": "./typings/reacthook.d.ts",
+      "default": "./dist/hooks/reacthook.esm.js"
+    },
+    "./svelte": {
+      "types": "./typings/sveltehook.d.ts",
+      "default": "./dist/hooks/sveltehook.esm.js"
+    },
+    "./GlobalFetch": {
+      "types": "./typings/globalfetch.d.ts",
+      "default": "./dist/adapter/globalfetch.esm.js"
+    }
   },
   "typesVersions": {
     "*": {
