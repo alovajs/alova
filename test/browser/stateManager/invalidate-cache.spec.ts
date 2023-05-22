@@ -1,8 +1,9 @@
 import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { invalidateCache, queryCache, useRequest } from '@/index';
+import { getMethodKey, invalidateCache, queryCache, useRequest } from '@/index';
 import Method from '@/Method';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
+import { getPersistentResponse } from '@/storage/responseStorage';
 import { key } from '@/utils/helper';
 
 describe('invalitate cached response data', () => {
@@ -91,6 +92,51 @@ describe('invalitate cached response data', () => {
       method: 'GET',
       params: { count: 1, countKey: 'c' }
     });
+  });
+
+  test('persistent cache should also be cleard when invalidateCache is called without params', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get1 = alova.Get('/unit-test', {
+      localCache: {
+        mode: 'restore',
+        expire: Infinity
+      },
+      transformData: ({ data }: Result) => data
+    });
+    const Get2 = alova.Get('/unit-test-count', {
+      params: { countKey: 'ccc' },
+      localCache: {
+        mode: 'restore',
+        expire: Infinity
+      },
+      transformData: ({ data }: Result) => data
+    });
+
+    const firstState = useRequest(Get1);
+    const secondState = useRequest(Get2);
+    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+
+    // 检查缓存情况
+    const cacheGet1 = { path: '/unit-test', method: 'GET', params: {} };
+    const cacheGet2 = {
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { count: 0, countKey: 'ccc' }
+    };
+    expect(queryCache(Get1)).toStrictEqual(cacheGet1);
+    expect(queryCache(Get2)).toStrictEqual(cacheGet2);
+    expect(getPersistentResponse(alova.id, getMethodKey(Get1), alova.storage)).toStrictEqual(cacheGet1);
+    expect(getPersistentResponse(alova.id, getMethodKey(Get2), alova.storage)).toStrictEqual(cacheGet2);
+
+    invalidateCache(); // 清空缓存
+
+    // 缓存清空
+    expect(queryCache(Get1)).toBeUndefined();
+    expect(queryCache(Get2)).toBeUndefined();
+    expect(getPersistentResponse(alova.id, getMethodKey(Get1), alova.storage)).toBeUndefined();
+    expect(getPersistentResponse(alova.id, getMethodKey(Get2), alova.storage)).toBeUndefined();
   });
 
   test('cache in method array will be removed', async () => {

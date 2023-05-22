@@ -1,7 +1,12 @@
 import Method from '@/Method';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { clearResponseCache, getResponseCache, removeResponseCache, setResponseCache } from '@/storage/responseCache';
-import { getPersistentResponse, persistResponse, removePersistentResponse } from '@/storage/responseStorage';
+import {
+  clearPersistentResponse,
+  getPersistentResponse,
+  persistResponse,
+  removePersistentResponse
+} from '@/storage/responseStorage';
 import { getLocalCacheConfigParam, isFn, key } from '@/utils/helper';
 import { falseValue, forEach, getContext, trueValue, undefinedValue } from '@/utils/variables';
 import { MethodMatcher } from '~/typings';
@@ -68,6 +73,7 @@ export const invalidateCache = <S, E, R, T, RC, RE, RH>(
 ) => {
   if (!matcher) {
     clearResponseCache();
+    clearPersistentResponse();
     return;
   }
   const methodInstances = filterSnapshotMethods(matcher, trueValue);

@@ -1,8 +1,21 @@
-import { getTime, nullValue } from '@/utils/variables';
+import { alovas } from '@/Alova';
+import { forEach, getTime, nullValue, pushItem } from '@/utils/variables';
 import { AlovaGlobalStorage } from '~/typings';
 
-const responseStorageKey = 'alova.';
-const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKey + namespace + key;
+const responseStorageKeyPrefix = 'alova.';
+const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKeyPrefix + namespace + key;
+
+const responseStorageAllKey = 'alova.resp.keys';
+const updateAllResponseStorageKeys = (completedKey: string, operateCode: 0 | 1, storage: AlovaGlobalStorage) => {
+  const allKeys: string[] = storage.get(responseStorageAllKey) || [];
+  const index = allKeys.indexOf(completedKey);
+  if (operateCode === 0 && index >= 0) {
+    allKeys.splice(index, 1);
+  } else if (operateCode === 1 && index < 0) {
+    pushItem(allKeys, completedKey);
+  }
+  storage.set(responseStorageAllKey, allKeys);
+};
 
 /**
  * 持久化响应数据
@@ -23,11 +36,9 @@ export const persistResponse = (
 ) => {
   // 小于0则不持久化了
   if (expireTimestamp > 0 && response) {
-    storage.set(buildNamespacedStorageKey(namespace, key), [
-      response,
-      expireTimestamp === Infinity ? nullValue : expireTimestamp,
-      tag
-    ]);
+    const methodStoreKey = buildNamespacedStorageKey(namespace, key);
+    storage.set(methodStoreKey, [response, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag]);
+    updateAllResponseStorageKeys(methodStoreKey, 1, storage);
   }
 };
 
@@ -63,5 +74,21 @@ export const getPersistentResponse = (
  * @param storage 存储对象
  */
 export const removePersistentResponse = (namespace: string, key: string, storage: AlovaGlobalStorage) => {
-  storage.remove(buildNamespacedStorageKey(namespace, key));
+  const methodStoreKey = buildNamespacedStorageKey(namespace, key);
+  storage.remove(methodStoreKey);
+  updateAllResponseStorageKeys(methodStoreKey, 0, storage);
+};
+
+/**
+ * 清空所有存储的响应数据
+ */
+export const clearPersistentResponse = () => {
+  forEach(alovas, alovaInst => {
+    const { storage } = alovaInst;
+    const allKeys: string[] = storage.get(responseStorageAllKey) || [];
+    forEach(allKeys, keyItem => {
+      storage.remove(keyItem);
+    });
+    storage.remove(responseStorageAllKey);
+  });
 };

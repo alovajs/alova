@@ -232,15 +232,14 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   beforeRequest?: (method: Method<S, E, any, any, RC, RE, RH>) => void | Promise<void>;
 
   /**
-   * 全局的响应钩子，可传一个也可以设置为带onSuccess和onError的对象，表示请求成功和请求错误的钩子
-   * 如果在全局onSuccess中抛出错误不会触发全局onError，而是会触发请求位置的onError
-   * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
+   * @deprecated 因单词拼写错误并计划废弃，建议使用responded字段
    */
   responsed?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
 
   /**
-   * 由于responsed单词写错，使用responded这个正确的单词进行兼容处理
-   * 计划将在3.0中废弃responsed字段并正式使用此字段
+   * 全局的响应钩子，可传一个也可以设置为带onSuccess和onError的对象，表示请求成功和请求错误的钩子
+   * 如果在全局onSuccess中抛出错误不会触发全局onError，而是会触发请求位置的onError
+   * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
    * @version 2.1.0
    */
   responded?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
