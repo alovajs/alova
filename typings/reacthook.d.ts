@@ -8,7 +8,7 @@ interface ReactHook {
   export: <D>(state: ReactState<D>) => D;
   dehydrate: <D>(state: ReactState<D>) => D;
   update: (newVal: Record<string, any>, states: Record<string, UnknownState>) => void;
-  effectRequest(effectRequestParams: EffectRequestParams): void;
+  effectRequest(effectRequestParams: EffectRequestParams<any>): void;
 }
 declare const reactHook: ReactHook;
 export default reactHook;

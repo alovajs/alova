@@ -432,7 +432,7 @@ interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH> extends AlovaMiddl
  */
 interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH> extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 发送请求函数 */
-  fetch: FetchHandler;
+  fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: any[]): Promise<R>;
 
   /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
   fetchArgs: any[];
@@ -553,14 +553,13 @@ type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, R
   onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
   onComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
 };
-type FetchHandler = (matcher: MethodMatcher<any, any, any, any, any, any, any>, ...args: any[]) => void;
 type UseFetchHookReturnType<S> = FetchRequestState<
   ExportedType<boolean, S>,
   ExportedType<Error | undefined, S>,
   ExportedType<Progress, S>,
   ExportedType<Progress, S>
 > & {
-  fetch: FetchHandler;
+  fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: any[]): Promise<R>;
   update: FetcherExportedUpdate;
   abort: UseHookReturnType<any, S>['abort'];
   onSuccess: UseHookReturnType<any, S>['onSuccess'];
