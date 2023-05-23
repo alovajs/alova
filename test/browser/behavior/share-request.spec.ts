@@ -210,6 +210,28 @@ describe('Request shared', function () {
     });
   });
 
+  test('request shared promise will remove when abort request manually', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      localCache: {
+        GET: 0
+      }
+    });
+    const Get = alova.Get('/unit-test');
+    const { abort, onError, error, onSuccess, send, data } = useRequest(Get);
+
+    // 手动中断请求，将抛出错误
+    abort();
+    await untilCbCalled(onError);
+    expect(error.value?.message).toBe('[alova]The user aborted a request.');
+    expect(!!data.value).toBeFalsy();
+
+    // 再次发送请求，此时应该成功
+    send();
+    await untilCbCalled(onSuccess);
+    expect(error.value).toBeUndefined();
+    expect(!!data.value).toBeTruthy();
+  });
+
   test("shouldn't share request when close in global config", async () => {
     const requestMockFn = jest.fn();
     const alova = createAlova({

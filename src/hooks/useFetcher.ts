@@ -33,7 +33,7 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
     fetch: <S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>, ...args: any[]) => {
       const methodInstance = filterSnapshotMethods(matcher, falseValue);
       assertMethodMatcher(methodInstance);
-      props.send(args, methodInstance, trueValue);
+      return props.send(args, methodInstance, trueValue);
     }
   };
 }

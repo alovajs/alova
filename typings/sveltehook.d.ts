@@ -7,7 +7,7 @@ interface SvelteHook {
   export: <D>(state: Writable<D>) => Writable<D>;
   dehydrate: <D>(state: Writable<D>) => D;
   update: (newVal: Record<string, any>, states: Record<string, UnknownWritable>) => void;
-  effectRequest(effectRequestParams: EffectRequestParams): void;
+  effectRequest(effectRequestParams: EffectRequestParams<Writable<any>>): void;
 }
 declare const svelteHook: SvelteHook;
 export default svelteHook;
