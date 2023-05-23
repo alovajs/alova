@@ -281,8 +281,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
           cachedState && update({ data }, cachedState);
         }
 
+        const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
         // loading状态受控时将不再更改为false
-        !controlledLoading && update({ loading: falseValue }, frontStates);
+        !controlledLoading && (newStates.loading = falseValue);
+        update(newStates, frontStates);
         // 在请求后触发对应回调函数
         runArgsHandler(
           successHandlers,
