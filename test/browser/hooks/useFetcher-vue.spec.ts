@@ -152,6 +152,39 @@ describe('use useFetcher hook to fetch data', function () {
     expect(mockFn).toBeCalled();
   });
 
+  test('should returns a promise when call function fetch', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const createGet = (params: Record<string, string>) =>
+      alova.Get('/unit-test-count', {
+        params,
+        localCache: 0,
+        transformData(result: Result) {
+          return result.data;
+        }
+      });
+
+    const get1 = createGet({ a: '1', b: '2', countKey: 'gg' });
+    const { data, onSuccess } = useRequest(get1);
+    await untilCbCalled(onSuccess);
+    expect(data.value).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { a: '1', b: '2', countKey: 'gg', count: 0 }
+    });
+
+    const { fetch } = useFetcher<FetcherType<typeof alova>>();
+    const res = await fetch(get1);
+
+    expect(data.value).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { a: '1', b: '2', countKey: 'gg', count: 1 }
+    });
+    expect(res).toStrictEqual(data.value);
+  });
+
   test('should update states when call update returns in useFetcher', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
