@@ -214,8 +214,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
           fetch: (matcher, ...args) => {
             const methodInstance = filterSnapshotMethods(matcher, falseValue);
             assertMethodMatcher(methodInstance);
-            useHookToSendRequest(
-              methodInstance as NonNullable<typeof methodInstance>,
+            return useHookToSendRequest(
+              methodInstance as Method,
               frontStates,
               useHookConfig,
               successHandlers,
