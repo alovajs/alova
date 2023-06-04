@@ -104,6 +104,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续向外抛出
     // const methodInstance = getHandlerMethod(methodHandler);
     promiseCatch(handleRequest(), noop);
+    // handleRequest();
   };
 
   effectRequest({
