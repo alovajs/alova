@@ -5,9 +5,10 @@ import ReactHook from '@/predefine/ReactHook';
 import { getStateCache } from '@/storage/stateCache';
 import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
-import React, { ReactElement, useState } from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React, { ReactElement, StrictMode, useState } from 'react';
 
+const StrictModeReact = StrictMode as any;
 function getAlovaInstanceSyncResponded() {
   return createAlova({
     baseURL: 'http://localhost:3000',
@@ -81,6 +82,48 @@ function getAlovaInstanceSyncResponded() {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('method')).toHaveTextContent('');
+    fireEvent.click(screen.getByRole('btn'));
+    await screen.findByText(/unit-test/);
+    expect(screen.getByRole('method')).toHaveTextContent('GET');
+  });
+
+  test("shouldn't send request when set `immediate=false` in react StrictMode", async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      timeout: 10000,
+      transformData: ({ data }: Result<true>) => data,
+      localCache: 100 * 1000
+    });
+    function Page() {
+      const { loading, data = { path: '', method: '' }, send } = useRequest(Get, { immediate: false });
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="method">{data.method}</span>
+          <button
+            role="btn"
+            onClick={send}>
+            send request
+          </button>
+        </div>
+      );
+    }
+
+    render(
+      (
+        <StrictModeReact>
+          <Page />
+        </StrictModeReact>
+      ) as ReactElement<any, any>
+    );
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('path')).toHaveTextContent('');
+      expect(screen.getByRole('method')).toHaveTextContent('');
+    });
     fireEvent.click(screen.getByRole('btn'));
     await screen.findByText(/unit-test/);
     expect(screen.getByRole('method')).toHaveTextContent('GET');

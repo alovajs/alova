@@ -2,7 +2,7 @@ import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
 (isSSR ? xdescribe : describe)('useWatcher hook with react', () => {
@@ -53,18 +53,22 @@ import React, { ReactElement, useState } from 'react';
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button'));
-    await screen.findByText('loaded');
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('1');
-    expect(screen.getByRole('id2')).toHaveTextContent('11');
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(mockfn).toBeCalledTimes(1);
+    });
 
     fireEvent.click(screen.getByRole('button'));
-    await screen.findByText('loaded');
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('2');
-    expect(screen.getByRole('id2')).toHaveTextContent('12');
-    expect(mockfn).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(mockfn).toBeCalledTimes(2);
+    });
   });
 
   test('should send request when init', async () => {
@@ -93,7 +97,7 @@ import React, { ReactElement, useState } from 'react';
           params: { id1: '', id2: '' }
         }
       });
-      onSuccess(ev => {
+      onSuccess(() => {
         mockfn();
       });
       return (
@@ -217,6 +221,8 @@ import React, { ReactElement, useState } from 'react';
         transformData: ({ data }: Result<true>) => data,
         localCache: 100 * 1000
       });
+
+    const successMockFn = jest.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -230,6 +236,7 @@ import React, { ReactElement, useState } from 'react';
         debounce: [500, 200]
       });
       onSuccess(() => {
+        successMockFn();
         setPending(false);
       });
       return (
@@ -260,45 +267,54 @@ import React, { ReactElement, useState } from 'react';
     }
 
     render((<Page />) as ReactElement<any, any>);
-    await screen.findByText('loaded');
-    // 暂没发送请求
-    expect(screen.getByRole('path')).toHaveTextContent('');
-    expect(screen.getByRole('id1')).toHaveTextContent('');
-    expect(screen.getByRole('id2')).toHaveTextContent('');
+    await waitFor(() => {
+      // 暂没发送请求
+      expect(screen.getByRole('path')).toHaveTextContent('');
+      expect(screen.getByRole('id1')).toHaveTextContent('');
+      expect(screen.getByRole('id2')).toHaveTextContent('');
+      expect(successMockFn).not.toBeCalled();
+    });
 
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('btn1'));
     let startTs = Date.now();
-    await screen.findByText('pended');
-    // 请求已响应
-    let endTs = Date.now();
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('1');
-    expect(screen.getByRole('id2')).toHaveTextContent('10');
-    expect(endTs - startTs).toBeLessThan(600);
+    await waitFor(() => {
+      // 请求已响应
+      const endTs = Date.now();
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('10');
+      expect(endTs - startTs).toBeLessThan(600);
+      expect(successMockFn).toBeCalledTimes(1);
+    });
 
     fireEvent.click(screen.getByRole('btn2'));
     startTs = Date.now();
-    await screen.findByText('pended');
-    endTs = Date.now();
-    // 请求已响应
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('1');
-    expect(screen.getByRole('id2')).toHaveTextContent('11');
-    expect(endTs - startTs).toBeLessThan(300);
+    await waitFor(() => {
+      const endTs = Date.now();
+      // 请求已响应
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(endTs - startTs).toBeLessThan(300);
+      expect(successMockFn).toBeCalledTimes(2);
+    });
 
     // 同时改变，以后一个为准
     fireEvent.click(screen.getByRole('btn1'));
     fireEvent.click(screen.getByRole('btn2'));
     startTs = Date.now();
-    await screen.findByText('pended');
-    endTs = Date.now();
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('2');
-    expect(screen.getByRole('id2')).toHaveTextContent('12');
-    expect(endTs - startTs).toBeLessThan(300);
+    await waitFor(() => {
+      const endTs = Date.now();
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(endTs - startTs).toBeLessThan(300);
+      expect(successMockFn).toBeCalledTimes(3);
+    });
   });
 
-  test('set param debounce to be a array that contain a item', async () => {
+  test('set param debounce to be a array that contains an item', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
     });
@@ -312,6 +328,8 @@ import React, { ReactElement, useState } from 'react';
         transformData: ({ data }: Result<true>) => data,
         localCache: 100 * 1000
       });
+
+    const successMockFn = jest.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -325,6 +343,7 @@ import React, { ReactElement, useState } from 'react';
         debounce: [300]
       });
       onSuccess(() => {
+        successMockFn();
         setPending(false);
       });
       return (
@@ -355,38 +374,47 @@ import React, { ReactElement, useState } from 'react';
     }
 
     render((<Page />) as ReactElement<any, any>);
-    await screen.findByText('pended');
-    // 暂没发送请求
-    expect(screen.getByRole('path')).toHaveTextContent('');
-    expect(screen.getByRole('id1')).toHaveTextContent('');
-    expect(screen.getByRole('id2')).toHaveTextContent('');
+    await waitFor(() => {
+      // 暂没发送请求
+      expect(screen.getByRole('path')).toHaveTextContent('');
+      expect(screen.getByRole('id1')).toHaveTextContent('');
+      expect(screen.getByRole('id2')).toHaveTextContent('');
+      expect(successMockFn).not.toBeCalled();
+    });
 
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('btn1'));
     let startTs = Date.now();
-    await screen.findByText('pended');
-    let endTs = Date.now();
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('1');
-    expect(screen.getByRole('id2')).toHaveTextContent('10');
-    expect(endTs - startTs).toBeLessThan(450);
+    await waitFor(() => {
+      const endTs = Date.now();
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('10');
+      expect(endTs - startTs).toBeLessThan(450);
+      expect(successMockFn).toBeCalledTimes(1);
+    });
 
     fireEvent.click(screen.getByRole('btn2'));
     startTs = Date.now();
-    await screen.findByText('pended');
-    endTs = Date.now();
-    // 第二个值未设置防抖，请求将很快响应
-    expect(screen.getByRole('id1')).toHaveTextContent('1');
-    expect(screen.getByRole('id2')).toHaveTextContent('11');
-    expect(endTs - startTs).toBeLessThan(100);
+    await waitFor(() => {
+      const endTs = Date.now();
+      // 第二个值未设置防抖，请求将很快响应
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(endTs - startTs).toBeLessThan(100);
+      expect(successMockFn).toBeCalledTimes(2);
+    });
 
     // 同时改变，以后一个为准
     fireEvent.click(screen.getByRole('btn1'));
     fireEvent.click(screen.getByRole('btn2'));
     startTs = Date.now();
-    await screen.findByText('pended');
-    endTs = Date.now();
-    expect(screen.getByRole('id1')).toHaveTextContent('2');
-    expect(screen.getByRole('id2')).toHaveTextContent('12');
-    expect(endTs - startTs).toBeLessThan(100);
+    await waitFor(() => {
+      const endTs = Date.now();
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(endTs - startTs).toBeLessThan(100);
+      expect(successMockFn).toBeCalledTimes(3);
+    });
   });
 });
