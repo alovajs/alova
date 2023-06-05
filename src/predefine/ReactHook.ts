@@ -1,4 +1,4 @@
-import { forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
+import { forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { EffectRequestParams } from '~/typings';
 
@@ -38,7 +38,11 @@ export default {
           oldStates[i].current = newState;
         }
       });
-      refCurrent(needEmit) ? handler(changedIndex) : setRef(needEmit, trueValue);
+      refCurrent(needEmit)
+        ? handler(changedIndex)
+        : setTimeoutFn(() => {
+            setRef(needEmit, trueValue);
+          });
       return removeStates; // 组件卸载时移除对应状态
     }, watchingStates);
 
