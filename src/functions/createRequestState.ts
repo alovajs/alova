@@ -75,7 +75,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   let saveStatesFn = noop as SaveStateFn;
   const hasWatchingStates = watchingStates !== undefinedValue;
 
-  // 统一处理请求发送
+  // 统一的发送请求函数
   const handleRequest = (
     handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
     useHookConfigParam = useHookConfig,
@@ -99,10 +99,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       updateCacheState
     );
 
-  // 调用请求处理回调函数
+  // 以捕获异常的方式调用handleRequest
+  // 捕获异常避免异常继续向外抛出
   const wrapEffectRequest = () => {
-    // 此参数是在send中使用的，在这边需要捕获异常，避免异常继续向外抛出
-    // const methodInstance = getHandlerMethod(methodHandler);
     promiseCatch(handleRequest(), noop);
   };
 

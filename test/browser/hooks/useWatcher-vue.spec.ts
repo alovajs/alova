@@ -83,6 +83,43 @@ describe('use useWatcher hook to send GET with vue', function () {
     });
   });
 
+  test('should work when receive a method instance', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const mutateStr = ref('a');
+    const currentGet = alova.Get('/unit-test', {
+      params: { num: mutateNum.value, str: mutateStr.value },
+      transformData: (result: Result) => result.data,
+      localCache: 0
+    });
+    const { data, downloading, error, onSuccess } = useWatcher(currentGet, [mutateNum, mutateStr], {
+      immediate: true
+    });
+    const successMockFn = jest.fn();
+    onSuccess(successMockFn);
+
+    await untilCbCalled(onSuccess);
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('0');
+    expect(data.value.params.str).toBe('a');
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    expect(successMockFn).toBeCalledTimes(1);
+
+    mutateNum.value = 2;
+    mutateStr.value = 'c';
+    await untilCbCalled(onSuccess);
+
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('0');
+    expect(data.value.params.str).toBe('a');
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    expect(successMockFn).toBeCalledTimes(2);
+  });
+
   test('should also send request when nest value changed', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

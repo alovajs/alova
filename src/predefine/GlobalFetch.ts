@@ -1,9 +1,9 @@
 import alovaError from '@/utils/alovaError';
 import { isSpecialRequestBody, isString } from '@/utils/helper';
 import {
+  JSONStringify,
   clearTimeoutTimer,
   falseValue,
-  JSONStringify,
   len,
   promiseReject,
   promiseThen,
@@ -20,7 +20,7 @@ export default function GlobalFetch() {
     const adapterConfig = method.config;
     const timeout = adapterConfig.timeout || 0;
     const ctrl = new AbortController();
-    let abortTimer: NodeJS.Timeout;
+    let abortTimer: NodeJS.Timeout | number;
     let isTimeout = falseValue;
     if (timeout > 0) {
       abortTimer = setTimeoutFn(() => {

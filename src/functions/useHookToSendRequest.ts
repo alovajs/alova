@@ -1,4 +1,5 @@
 import Method from '@/Method';
+import defaultErrorLogger from '@/predefine/defaultErrorLogger';
 import defaultMiddleware from '@/predefine/defaultMiddleware';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '@/storage/responseCache';
@@ -24,6 +25,7 @@ import {
   getContext,
   len,
   MEMORY,
+  nullValue,
   promiseCatch,
   PromiseCls,
   promiseReject,
@@ -316,6 +318,15 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
     // catch回调函数
     (error: Error) => {
+      // 控制在输出错误消息
+      let errorLogger = options.errorLogger;
+      errorLogger = isFn(errorLogger)
+        ? errorLogger
+        : ![falseValue, nullValue].includes(errorLogger as any)
+        ? defaultErrorLogger
+        : undefinedValue;
+      errorLogger && errorLogger(error, methodInstance);
+
       const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
       // loading状态受控时将不再更改为false
       !controlledLoading && (newStates.loading = falseValue);
@@ -330,6 +341,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         completeHandlerDecorator,
         createAlovaEvent(2, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error, 'error')
       );
+
       return promiseReject(error);
     }
   );

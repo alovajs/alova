@@ -250,6 +250,16 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * @default true
    */
   shareRequest?: boolean;
+
+  /**
+   * 错误日志打印
+   * 当请求错误，或者在全局的响应回调函数、请求级的transformData、localCache函数抛出错误时，将会触发onError，同时在控制台输出错误信息（默认）
+   * 设置为false、null值时将不打印错误日志
+   * 设置为自定义函数时将自定义接管输出任务
+   * @version 2.6.0
+   * @default true
+   */
+  errorLogger?: boolean | null | ResponseErrorHandler<any, any, RC, RE, RH>;
 }
 
 /** 请求方法类型 */
@@ -273,8 +283,24 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
    * js项目中可使用任意字段
    */
   extra?: any;
+
+  /**
+   * 使用此method实例直接发送请求
+   * @param forceRequest 强制请求
+   * @returns 请求Promise实例
+   */
   send(forceRequest?: boolean): Promise<R>;
+
+  /**
+   * 设置名称
+   * @param name 名称
+   */
   setName(name: string | number): void;
+
+  /**
+   * 中断此method实例直接发送的请求
+   */
+  abort(): void;
 }
 interface MethodConstructor {
   new <S, E, R, T, RC, RE, RH>(
@@ -595,7 +621,7 @@ export declare function useRequest<S, E, R, T, RC, RE, RH>(
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;
 declare function useWatcher<S, E, R, T, RC, RE, RH>(
-  handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   watchingStates: S extends VueRef ? (WatchSource<any> | object)[] : S extends SvelteWritable ? Writable<any>[] : any[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;

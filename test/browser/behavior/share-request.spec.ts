@@ -108,6 +108,7 @@ describe('Request shared', function () {
       localCache: {
         GET: 0
       },
+      errorLogger: false,
       statesHook: VueHook,
       requestAdapter() {
         const promise = new Promise((resolve, reject) => {

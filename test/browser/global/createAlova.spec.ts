@@ -132,6 +132,7 @@ describe('createAlova', function () {
         }
         throw new Error('error in beforeRequest');
       },
+      errorLogger: false,
       responded: r => r.json()
     });
     const Get = (async = true) =>
@@ -229,7 +230,7 @@ describe('createAlova', function () {
     expect(mockFn).toBeCalled();
   });
 
-  test('should throw async error in `responded-onError` hook', async () => {
+  test('should throws a async error in `responded-onError` hook', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: async () => {
         await new Promise(resolve => {
@@ -286,7 +287,7 @@ describe('createAlova', function () {
     expect(mockFn).not.toBeCalled();
   });
 
-  test("shouldn't emit responded instead onError when request error", async () => {
+  test("shouldn't emit responded instead of onError when request error", async () => {
     const mockFn = jest.fn();
     const alova = getAlovaInstance(VueHook, {
       responseExpect: () => {
@@ -304,5 +305,117 @@ describe('createAlova', function () {
     });
     await expect(Get.send()).rejects.toThrow('onError called');
     expect(mockFn).not.toBeCalled();
+  });
+
+  test('should prints error message by `console.error` by default when get a error in useHooks', async () => {
+    const errorConsoleMockFn = jest.fn();
+    console.error = errorConsoleMockFn; // 重写以便监听
+    const alova1 = createAlova({
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: r => r.json()
+    });
+
+    const state1 = useRequest(alova1.Get<string, Result<string>>('/unit-test-error'));
+    await untilCbCalled(state1.onError);
+    expect(errorConsoleMockFn).toBeCalledTimes(1);
+
+    const state2 = useRequest(
+      alova1.Get<string, Result<string>>('/unit-test', {
+        transformData: () => {
+          throw new Error('error in transform data');
+        }
+      })
+    );
+    await untilCbCalled(state2.onError);
+    expect(errorConsoleMockFn).toBeCalledTimes(2);
+
+    const state3 = useRequest(
+      alova1.Get<string, Result<string>>('/unit-test', {
+        localCache() {
+          throw new Error('error in custom localCache');
+        }
+      })
+    );
+    await untilCbCalled(state3.onError);
+    expect(errorConsoleMockFn).toBeCalledTimes(3);
+  });
+
+  test("shouldn't prints error message when set errorLogger to false", async () => {
+    const errorConsoleMockFn = jest.fn();
+    console.error = errorConsoleMockFn;
+    const alova = createAlova({
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: r => r.json(),
+      errorLogger: false
+    });
+
+    const state1 = useRequest(alova.Get<string, Result<string>>('/unit-test-error'));
+    await untilCbCalled(state1.onError);
+    expect(errorConsoleMockFn).not.toBeCalled();
+
+    const state2 = useRequest(
+      alova.Get<string, Result<string>>('/unit-test', {
+        transformData: () => {
+          throw new Error('error in transform data');
+        }
+      })
+    );
+    await untilCbCalled(state2.onError);
+    expect(errorConsoleMockFn).not.toBeCalled();
+
+    const state3 = useRequest(
+      alova.Get<string, Result<string>>('/unit-test', {
+        localCache() {
+          throw new Error('error in custom localCache');
+        }
+      })
+    );
+    await untilCbCalled(state3.onError);
+    expect(errorConsoleMockFn).not.toBeCalled();
+  });
+
+  test('should emit custom function errorLogger when set errorLogger to a custom function', async () => {
+    const errorConsoleMockFn = jest.fn();
+    console.error = errorConsoleMockFn;
+    const customLoggerMockFn = jest.fn();
+    const alova = createAlova({
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: r => r.json(),
+      errorLogger(error, methodInstance) {
+        customLoggerMockFn();
+        expect(error).toBeInstanceOf(Error);
+        expect(methodInstance).toBeInstanceOf(Method);
+      }
+    });
+
+    const state1 = useRequest(alova.Get<string, Result<string>>('/unit-test-error'));
+    await untilCbCalled(state1.onError);
+    expect(errorConsoleMockFn).not.toBeCalled();
+    expect(customLoggerMockFn).toBeCalledTimes(1);
+
+    const state2 = useRequest(
+      alova.Get<string, Result<string>>('/unit-test', {
+        transformData: () => {
+          throw new Error('error in transform data');
+        }
+      })
+    );
+    await untilCbCalled(state2.onError);
+    expect(errorConsoleMockFn).not.toBeCalled();
+    expect(customLoggerMockFn).toBeCalledTimes(2);
+
+    const state3 = useRequest(
+      alova.Get<string, Result<string>>('/unit-test', {
+        localCache() {
+          throw new Error('error in custom localCache');
+        }
+      })
+    );
+    await untilCbCalled(state3.onError);
+    expect(errorConsoleMockFn).not.toBeCalled();
+    expect(customLoggerMockFn).toBeCalledTimes(3);
   });
 });

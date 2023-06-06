@@ -442,15 +442,16 @@ describe('useRequet middleware', function () {
   test('should abort request like abort function in returns when call abort in middleware', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
-        expect(error.message).toMatch(/user aborted a request/);
         return Promise.reject(error);
       }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-10s');
     const { loading, data, error, onError } = useRequest(Get, {
-      async middleware({ abort }, next) {
-        await next();
-        setTimeout(abort, 100);
+      middleware({ abort }, next) {
+        setTimeout(() => {
+          abort();
+        }, 100);
+        return next();
       }
     });
     expect(loading.value).toBeTruthy();
@@ -462,5 +463,6 @@ describe('useRequet middleware', function () {
     expect(data.value).toBeUndefined();
     expect(error.value).toBeInstanceOf(Object);
     expect(error.value).toBe(err.error);
+    expect(error.value?.message).toBe('[alova]The user aborted a request.');
   });
 });
