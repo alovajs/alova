@@ -595,7 +595,7 @@ export declare function useRequest<S, E, R, T, RC, RE, RH>(
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;
 declare function useWatcher<S, E, R, T, RC, RE, RH>(
-  handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   watchingStates: S extends VueRef ? (WatchSource<any> | object)[] : S extends SvelteWritable ? Writable<any>[] : any[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;
