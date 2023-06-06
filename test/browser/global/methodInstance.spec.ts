@@ -77,10 +77,17 @@ describe('method instance', function () {
     await expect(Get(false).send()).rejects.toThrow('error in transformData');
   });
 
-  test('should set method name dynamically when call `method.setName`', async () => {
+  test('should set method name dynamically when call `method.setName`', () => {
     const Get = alova.Get('/unit-test');
     expect(Get.config.name).toBeUndefined();
     Get.setName('name-test');
     expect(Get.config.name).toBe('name-test');
+  });
+
+  test('request should be aborted request by method instance when call function abort', async () => {
+    const Get = alova.Get('/unit-test');
+    const p = Get.send(true);
+    Get.abort();
+    await expect(p).rejects.toThrow('[alova]The user aborted a request.');
   });
 });

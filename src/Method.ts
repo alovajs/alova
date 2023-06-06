@@ -1,7 +1,7 @@
 import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '~/typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
-import { instanceOf, isPlainObject, key } from './utils/helper';
+import { instanceOf, isPlainObject, key, noop } from './utils/helper';
 import {
   deleteAttr,
   falseValue,
@@ -29,6 +29,9 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public context: Alova<S, E, RC, RE, RH>;
   public response: R;
   public __key__?: string;
+
+  // 直接发送请求的中断函数
+  public abort = noop;
   constructor(
     type: MethodType,
     context: Alova<S, E, RC, RE, RH>,
@@ -83,7 +86,9 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
    * 直接发出请求，返回promise对象
    */
   public send(forceRequest = falseValue): Promise<R> {
-    return sendRequest(this, forceRequest).response();
+    const { response, abort } = sendRequest(this, forceRequest);
+    this.abort = abort;
+    return response();
   }
 
   /**
