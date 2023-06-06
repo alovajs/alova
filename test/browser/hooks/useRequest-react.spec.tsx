@@ -15,6 +15,7 @@ function getAlovaInstanceSyncResponded() {
     timeout: 3000,
     statesHook: ReactHook,
     requestAdapter: GlobalFetch(),
+    errorLogger: false,
     responded: () => {
       return {
         mock: 'mockdata'

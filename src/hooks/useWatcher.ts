@@ -1,6 +1,6 @@
 import Alova, { alovas } from '@/Alova';
-import Method from '@/Method';
 import createRequestState from '@/functions/createRequestState';
+import Method from '@/Method';
 import myAssert, { assertAlovaCreation } from '@/utils/myAssert';
 import { len } from '@/utils/variables';
 import { Writable } from 'svelte/store';
