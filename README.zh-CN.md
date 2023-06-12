@@ -9,6 +9,7 @@
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/alovajs/alova/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/release.yml)
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
+[![stars](https://img.shields.io/github/stars/alovajs/alova?style=social)](https://github.com/alovajs/alova)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
@@ -21,32 +22,47 @@
 
 ## 🚀 特点
 
-- 🎪 交互式文档和演示
-- 🕶 支持 vue、react、svelte
+- 🕶 在 vue、react、svelte 3 个 UI 框架，以及 uniapp、taro 环境下提供统一的使用体验，无缝移植
+- 📑 与 axios 相似的 api 设计，更简单熟悉
+- 🍵 开箱即用的高性能场景化请求策略，让应用更流畅
+- 🐦 4kb+，只有 axios 的 30%+
+- 🔩 高灵活性，兼容任意请求库，如 axios、superagent 或 fetch-api
+- 🔋 3 种数据缓存模式，提升请求性能，同时降低服务端压力
+- 🔌 丰富的扩展功能，可以自定义请求适配器、存储适配器、中间件，以及 states hook
+- 🖥️ [2.2.0+]服务端渲染（SSR）
+- 💕 请求共享，避免同时发送相同请求
+- 🪑 数据预拉取，这意味着用户可以更快看到信息，无需等待
 - 🦾 实时自动状态管理
-- 📑 类似 axios 的 api 设计，更简单
-- 🐦 4kb，只有 axios 的 30%+
-- 👄 声明式场景请求
-- 🔩 灵活：使用任何请求库，如 axios、superagent 或 fetch-api
-- 🔋 3 种响应数据缓存模式
-- ✨ 界面数据在任何情况下都是预取的，这意味着用户可以更快地看到信息
-- 🖥️ 服务端渲染（SSR）
+- 🎪 交互式文档和示例
 - 🎈 Typescript 支持
-- 📴 静默/离线提交
-- ⚡ 完全支持 Tree shaking：只拿你想要的，捆绑大小
-- 🔌 丰富的扩展功能，可以自定义请求适配器、存储适配器、请求中间件、状态钩子等
+- ⚡ 支持 tree shaking，这意味着 alova 的生产体积往往小于 4kb
+
+## alova 请求策略表
+
+alova 是核心库，它提供了缓存策略、请求共享策略，以及状态管理等通用功能，能满足 95%以上的请求需求。同时，alova 还提供了业务逻辑的，高频使用的请求策略 hook，可以直接用于特定场景。以下为 alova 提供的请求策略 hook 列表。
+
+| 名称                  | 描述                                                                                                                                               | 文档                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 分页请求策略          | 自动管理分页数据，数据预加载，减少不必要的数据刷新，流畅性提高 300%，编码难度降低 50%                                                              | [usePagination](https://alova.js.org/strategy/usePagination)                           |
+| 无感数据交互策略      | 全新的交互体验，提交即响应，大幅降低网络波动造成的影响，让你的应用在网络不稳定，甚至断网状态下依然可用                                             | [useSQRequest](https://alova.js.org/strategy/sensorless-data-interaction/overview)     |
+| 表单提交策略          | 为表单提交而设计的 hook，通过此 hook 你可以很方便地实现表单草稿、多页面（多步骤）表单，除此以外还提供了表单重置等常用功能                          | [useForm](https://alova.js.org/strategy/useForm)                                       |
+| 发送验证码            | 验证码发送 hook，减掉你在开发验证码发送功能时的繁琐。                                                                                              | [useCaptcha](https://alova.js.org/strategy/useCaptcha)                                 |
+| 跨组件触发请求        | 一个 alova 中间件，消除组件层级的限制，在任意组件中快速地触发任意请求的操作函数                                                                    | [actionDelegationMiddleware](https://alova.js.org/strategy/actionDelegationMiddleware) |
+| 串行请求的 useRequest | 比[alova 的串行请求方式](https://alova.js.org/next-step/serial-request)更加简洁易用的串行请求 use hook，提供统一的 loading 状态、error、回调函数   | [useSerialRequest](https://alova.js.org/strategy/useSerialRequest)                     |
+| 串行请求的 useWatcher | 比[alova 的串行请求方式](https://alova.js.org/next-step/serial-request)更加简洁易用的串行请求 use hook，提供统一的 loading 状态、error、回调函数。 | [useSerialWatcher](https://alova.js.org/strategy/useSerialWatcher)                     |
+| 请求重试策略          | 请求失败自动重试，它在重要的请求和轮询请求上发挥重要作用                                                                                           | [useRetriableRequest](https://alova.js.org/strategy/useRetriableRequest)               |
+
+### 更多请求相关的业务场景征集中...
+
+如果你还有特定且典型的业务请求场景，但我们还未实现的，可以在这边 [提交 issue](https://github.com/alovajs/scene/issues/new/choose) 告诉我们，我们会实现它提供给更多人使用。同时也可以自定义请求 hook，请看 [高级](/category/advanced) 部分。
 
 ## 例子
 
 [这里的例子将展示 alova 的力量](https://alova.js.org/category/examples)
 
-## 和请求库的关系是什么？
-
-alova 的创建初衷是对不同请求场景提出的一个解决方案，它可以更简洁优雅地实现体验更好，性能更好的请求功能，是一个 RSM 实现库，而例如$.ajax、axios 和 fetch-api 等对请求发送和响应接收提供了很好的支持，它们是 RSM 流程中必不可少的一个环节（请求事件环节），alova 仍然需要依靠它们进行请求，因此我们可以将 alova 看作是请求库的一种武装，让请求库变得更加强大。
-
 ## 库稳定性
 
-alova 从第一个版本的开发到现在已经过去将近一年时间了，在这一年中我们也在持续发现问题优化，到目前为止 alova 已通过了 153 项单元测试，覆盖率为 99%。即便如此，alova 还属于新秀，因此我也建议你可以先保守使用。
+alova 从第一个版本的开发到现在已经过去将近一年时间了，在这一年中我们也在持续发现问题优化，到目前为止 alova 已通过了 160+ 项单元测试，覆盖率为 99%。即便如此，alova 还属于新秀，因此我也建议你可以先保守使用。
 
 **我保证会在收到 issue 后，第一时间解决**
 
@@ -54,68 +70,23 @@ alova 从第一个版本的开发到现在已经过去将近一年时间了，�
 
 如果你喜欢 alova，我们非常感谢您在右上角给我们 star，这是对我们工作的认可。
 
+## 替代请求库？
+
+alova 是一个请求策略库，它的创建初衷是对不同请求场景提供特定的请求策略解决方案，从而更简洁优雅地实现流畅的请求体验，而例如`$.ajax`、`axios`和`fetch-api`等对请求发送和响应接收提供了很好的支持，它们是 [RSM](/get-started/RSM) 流程中必不可少的一个环节（请求事件），alova 仍然需要依靠它们进行请求，因此我们可以将 alova 看作是请求库的一种武装，让请求库变得更加强大。
+
+## 为什么要深度绑定 UI 框架？
+
+对一个 js 库来说解耦意味着更多场景下的使用，例如 axios 可以在 nodejs 中使用，但同时意味着开发者需要写更多的模板代码，比如使用 useHooks 封装 axios 等。而 alova 摒弃了解耦带来的更多使用场景，将使用范围定位在与 UI 框架配合使用，以最精简的方式使用 alova，这是为了开发者的收益方面而考量的，在一个 UI 框架盛行的时候，深度绑定可以为开发者提供直接使用的功能，提升开发者的使用体验，而不需要太多的模板代码。
+
 ## 与其他库的大小比较
 
 | alova                                                                                             | axios                                                                                             | react-query                                                                                                   | vue-request                                                                                                   | vue                                                                                           | react                                                                                                     |
 | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [![minzip](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzip](https://badgen.net/bundlephobia/minzip/axios)](https://bundlephobia.com/package/axios) | [![minzip](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzip](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzip](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzip](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
 
-## 什么是请求场景模型
+## 什么是请求场景模型（RSM）
 
-请求场景模型是以客户端视角的，描述客户端从触发请求意图到接收请求结果的抽象模型，分别由请求时机、请求行为、请求事件以及响应管理四个阶段组成。例如在进行一次请求时经常需要思考以下问题，
-
-1. 什么时候发出请求；
-2. 是否要展示请求状态；
-3. 是否需要对请求进行失败重试；
-4. 要如何加工响应数据；
-5. 是否需要对请求参数加密；
-6. 是否要对高频使用的响应数据做缓存；
-7. 如何进行跨页面操作数据；
-8. 弱网或断网环境下需要如何处理请求；
-9. ...
-
-`fetch`或`axios`往往更专注于如何与服务端交互，但对于上面的问题我们总是需要自己处理，这些有利于应用性能和稳定性的功能，总会让程序员们编写出低维护性的代码。请求场景模型就是从准备请求到响应数据加工完毕的所有环节进行抽象，从而覆盖以前端为视角的，整个 CS 交互生命周期的模型。`alova`就是一个以请求场景模型的库，它是对`axios`等请求库的一种补充，而非替代品。
-
-> CS 交互：泛指所有客户端类型和服务端的数据交互
-
-## 请求场景模型
-
-![RSM](https://alova.js.org/img/rsm-cn.png)
-
-## 请求时机
-
-描述在什么时候需要发出请求，在`alova`中以`useHook`实现。
-
-- 初始化展示数据，如刚进入某个界面或子界面；
-- 人机交互触发 CS 交互，需要变更数据重新发出请求，如翻页、筛选、排序、模糊搜索等；
-- 以防抖方式发送请求，避免视图数据闪动，以及降低服务端压力
-- 预加载数据，如分页内预先加载下一页内容、预测用户点击某个按钮后预先拉取数据；
-- 操作服务端数据，需发出增删改查请求，如提交数据、删除数据等；
-- 同步服务端状态，如数据变化较快的场景下轮询请求、操作了某个数据后重新拉取数据；
-
-## 请求行为
-
-描述以怎样的方式处理请求，在`alova`中以 Method 抽象实现。
-
-- 占位请求，请求时展示 loading、骨架图、或者是上次使用的真实数据；
-- 缓存高频响应，多次执行请求会使用保鲜数据；
-- 多请求串行与并行；
-- 重要接口的重试机制，降低网络不稳定造成的请求失败概率；
-- 静默提交，当只关心提交数据时，提交请求后直接响应成功事件，后台保证请求成功；
-- 离线提交，离线时将提交数据暂存到本地，网络连接后再提交；
-
-## 请求事件
-
-表示携带请求参数发送请求，获得响应，`alova`可以与`axios`、`fetch`、`XMLHttpRequest`等任意请求库或原生方案共同协作。
-
-## 响应管理
-
-`alova`将响应数据状态化并统一管理，以请求层面的方式刷新视图数据、操作缓存，避免了在组件层面的操作，更加优雅和统一。
-
-- 移除缓存响应数据，再次发起请求时将从服务端拉取；
-- 更新缓存响应数据，可更新任意位置响应数据，非常有利于跨页面更新数据；
-- 刷新响应数据，可重新刷新任意位置的响应数据，也非常有利于跨页面更新数据；
-- 自定义设置缓存，在请求批量数据时，可手动对批量数据一一设置缓存，从而满足后续单条数据的缓存命中；
+[点此查看请求场景模型详细介绍](https://alova.js.org/get-started/RSM)
 
 ## 安装
 
