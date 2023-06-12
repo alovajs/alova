@@ -9,6 +9,7 @@
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/alovajs/alova/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/release.yml)
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
+[![stars](https://img.shields.io/github/stars/alovajs/alova?style=social)](https://github.com/alovajs/alova)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
@@ -21,20 +22,39 @@
 
 ## 🚀 Features
 
-- 🎪 Interactive docs & demos
-- 🕶 Support vue, react, svelte
+- 🕶 Provide a unified experience in the vue, react, and svelte, and seamlessly transplant
+- 📑 The api design is similar to axios, more simple and familiar
+- 🍵 Out-of-the-box high-performance request strategy, making the application smoother
+- 🐦 4kb+, only 30% of axios+
+- 🔩 High flexibility, compatible with any request library, such as axios, superagent or fetch-api
+- 🔋 3 data cache modes to improve request performance and reduce server pressure
+- 🔌 Rich extension functions, you can customize request adapter, storage adapter, middleware, and states hook
+- 🖥️ [2.2.0+]Server-side rendering(SSR)
+- 💕 Request sharing to avoid sending the same request at the same time
+- 🪑 Data pre-fetching, which means users can see information faster without waiting
 - 🦾 Real-time automatic status management
-- 📑 Similar api design to axios, easier
-- 🐦 4kb, only 30%+ of axios
-- 👄 Declarative Scenario Request
-- 🔩 Flexible: Work with any request library like axios, superagent, or fetch-api
-- 🔋 3 response data caching modes
-- ✨ Interface data is pre-fetched in any case, which means users can see information faster
-- 🖥️ Server-side rendering(SSR)
-- 🎈 Typescript support
-- 📴 Offline submition
-- ⚡ Fully tree shakeable: Only take what you want, bundle size
-- 🔌 Rich extension functions, you can customize request adapter, storage adapter, request middleware, states hook
+- 🎪 Interactive documentation and examples
+- 🎈Typescript support
+- ⚡ Support tree shaking, which means that the production volume of alova is often less than 4kb
+
+## alova request strategy table
+
+Alova is the core library, which provides common functions such as caching strategy, request sharing strategy, and state management, and can meet more than 95% of request requirements. At the same time, alova also provides business logic and frequently used request strategy hooks, which can be directly used in specific scenarios. The following is a list of request policy hooks provided by alova.
+
+| Name                                    | Description                                                                                                                                                                                               | Documentation                                                                          |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Paging request strategy                 | Automatically manage paging data, data preloading, reduce unnecessary data refresh, improve fluency by 300%, reduce coding difficulty by 50%                                                              | [usePagination](https://alova.js.org/strategy/usePagination)                           |
+| Non-inductive data interaction strategy | A new interactive experience, submitting and responding, greatly reducing the impact of network fluctuations, making your application still available when the network is unstable or even disconnected   | [useSQRequest](https://alova .js.org/strategy/sensorless-data-interaction/overview)    |
+| Form Submission Strategy                | A hook designed for form submission, through which you can easily implement form drafts, multi-page (multi-step) forms, in addition to providing common functions such as form reset                      | [useForm](https://alova.js.org/strategy/useForm)                                       |
+| Send Verification Code                  | Verification code sending hook, which saves you the trouble of developing the verification code sending function.                                                                                         | [useCaptcha](https://alova.js.org/strategy/useCaptcha)                                 |
+| Cross-component trigger request         | An alova middleware that removes the limitation of component hierarchy and quickly triggers the operation function of any request in any component                                                        | [actionDelegationMiddleware](https://alova.js.org/strategy/actionDelegationMiddleware) |
+| serial request useRequest               | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/next-step/serial-request), providing a unified loading Status, error, callback function  | [useSerialRequest](https://alova.js.org/strategy/useSerialRequest)                     |
+| Serial request useWatcher               | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/next-step/serial-request), providing a unified loading Status, error, callback function. | [useSerialWatcher](https://alova.js.org/strategy/useSerialWatcher)                     |
+| Request Retry Strategy                  | Automatic retry on request failure, it plays an important role in important requests and polling requests                                                                                                 | [useRetriableRequest](https://alova.js.org/strategy/useRetriableRequest)               |
+
+### More request-related business scenarios are being collected...
+
+If you still have a specific and typical business request scenario, but we have not implemented it yet, you can [submit an issue](https://github.com/alovajs/scene/issues/new/choose) to tell us here, we Will make it available to more people. You can also customize the request hook, please see the [Advanced](/category/advanced) section.
 
 ## Examples
 
@@ -46,7 +66,7 @@ The original intention of alova is to propose a solution for different request s
 
 ## Library Stability
 
-It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 153 unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
+It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 160+ unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
 
 **I promise to solve it as soon as possible after receiving your issue**
 
@@ -54,68 +74,23 @@ It has been nearly a year since the development of the first version of alova. D
 
 If you like alova. we are very appreciate your star at the topright. it's a approval of our work.
 
+## Alternative to the requests library?
+
+alova is a request strategy library, which was originally created to provide specific request strategy solutions for different request scenarios, so as to achieve a smooth request experience more concisely and elegantly, such as `$.ajax`, `axios` and `fetch- api`, etc. provide good support for request sending and response receiving, they are an essential link (request event) in the [RSM](/get-started/RSM) process, alova still needs to rely on them to make requests, Therefore, we can regard alova as an arm of the request library, making the request library more powerful.
+
+## Why binding UI framework?
+
+Decoupling a js library means using it in more scenarios. For example, axios can be used in nodejs, but it also means that developers need to write more template code, such as using useHooks to encapsulate axios. However, alova abandons more usage scenarios brought about by decoupling, and positions the scope of use in conjunction with the UI framework to use alova in the most streamlined way. This is for the benefit of developers and is prevalent in a UI framework. Sometimes, deep binding can provide developers with direct-use functions and improve the developer's experience without requiring too much template code.
+
 ## Size comparison with other libraries
 
 | alova                                                                                             | axios                                                                                             | react-query                                                                                                   | vue-request                                                                                                   | vue                                                                                           | react                                                                                                     |
 | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [![minzip](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzip](https://badgen.net/bundlephobia/minzip/axios)](https://bundlephobia.com/package/axios) | [![minzip](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzip](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzip](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzip](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
 
-## What is the request scene model
+## What is Request Scene Model (RSM)
 
-The request scenario model is based on the perspective of the client. It describes the abstract model of the client from triggering the request intent to receiving the request result. It consists of four stages: request timing, request behavior, request event, and response management. For example, when making a request, you often need to think about the following questions,
-
-1. When the request is made;
-2. Whether to display the request status;
-3. Do you need to retry the request on failure;
-4. How to process the response data;
-5. Do you need to encrypt the request parameters;
-6. Whether to cache the frequently used response data;
-7. How to operate data across pages;
-8. How to process requests in a weak or disconnected network environment;
-9. ...
-
-`fetch` or `axios` are often more focused on how to interact with the server, but we always need to deal with the above problems by ourselves. These functions that are beneficial to application performance and stability will always allow programmers to write low-maintenance sexual code. The request scene model is to abstract all links from preparing the request to processing the response data, so as to cover the model of the entire CS interaction life cycle from the perspective of the front end. `alova` is a library that requests scene models, it is a supplement to request libraries such as `axios`, not a substitute.
-
-> CS interaction: generally refers to data interaction between all client types and servers
-
-## Request scene model
-
-![RSM](https://alova.js.org/img/rsm-en.png)
-
-## request timing
-
-Describe when a request needs to be made, implemented with `useHook` in `alova`.
-
-- Initialize display data, such as just entering a certain interface or sub-interface;
-- Human-computer interaction triggers CS interaction, and the request needs to be changed again, such as page turning, filtering, sorting, fuzzy search, etc.;
-- Send requests in an anti-shake manner, avoid view data flickering, and reduce server pressure
-- Preloading data, such as preloading the content of the next page in a page, predicting that the user clicks a button to pre-fetch data;
-- To operate server data, it is necessary to issue a request for addition, deletion, modification and query, such as submitting data, deleting data, etc.;
-- Synchronize server status, such as polling requests in scenarios where data changes rapidly, and re-pull data after operating a certain data;
-
-## Request Behavior
-
-Describes how to process the request, implemented as a Method abstraction in `alova`.
-
-- Placeholder request, when requesting, display loading, skeleton diagram, or real data used last time;
-- Cache high-frequency responses, multiple execution requests will use fresh data;
-- Multi-request serial and parallel;
-- The retry mechanism of important interfaces reduces the probability of request failure caused by network instability;
-- Submit silently. When you only care about submitting data, directly respond to the success event after submitting the request, and the background guarantees that the request is successful;
-- Offline submission, the submitted data will be temporarily stored locally when offline, and then submitted after the network connection;
-
-## request event
-
-Indicates sending a request with request parameters and getting a response. `alova` can work with any request library or native solution such as `axios`, `fetch`, `XMLHttpRequest`.
-
-## Response management
-
-`alova` makes the response data stateful and manages it in a unified manner, refreshes the view data and operates the cache at the request level, avoids operations at the component level, and is more elegant and unified.
-
-- Remove the cached response data, which will be pulled from the server when the request is made again;
-- Update the cached response data, which can update the response data at any location, which is very helpful for updating data across pages;
-- Refresh the response data, which can re-refresh the response data at any position, and is also very helpful for updating data across pages;
-- Customize the cache setting. When requesting batch data, you can manually set the cache for the batch data one by one, so as to meet the cache hit of subsequent single data;
+[Click here to view the detailed introduction](https://alova.js.org/get-started/RSM)
 
 ## Install
 
