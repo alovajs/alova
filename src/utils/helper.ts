@@ -128,7 +128,7 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
 export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const _localCache = getConfig(methodInstance).localCache;
   const getCacheExpireTs = (_localCache: CacheExpire) =>
-    isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache);
+    isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache || undefinedValue);
   let cacheMode = MEMORY;
   let expire = 0;
   let storage = falseValue;
