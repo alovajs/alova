@@ -44,7 +44,7 @@ describe('cache data', function () {
     });
   });
 
-  test('should hit the cache data when rerequest the same url with the same arguments', async () => {
+  test('should hit the cache data when re-request the same url with the same arguments', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -121,6 +121,22 @@ describe('cache data', function () {
     });
     const Get = alova.Get('/unit-test', {
       localCache: 0,
+      transformData: ({ data }: Result) => data
+    });
+    const firstState = useRequest(Get);
+    await untilCbCalled(firstState.onSuccess);
+
+    const secondState = useRequest(Get);
+    // 未设置缓存，会再次发起请求
+    expect(secondState.loading.value).toBeTruthy();
+  });
+
+  test('cache data will be invalid when set localCache to null', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      localCache: null,
       transformData: ({ data }: Result) => data
     });
     const firstState = useRequest(Get);

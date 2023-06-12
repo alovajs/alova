@@ -77,7 +77,7 @@ interface AlovaGlobalStorage {
  *  2. 当设置为Date对象时，表示
  * mode: 缓存模式，可选值为memory、placeholder、restore
  */
-type CacheExpire = number | Date;
+type CacheExpire = number | Date | null;
 type DetailLocalCacheConfig = {
   expire: CacheExpire;
   mode?: 'memory' | 'placeholder' | 'restore';
@@ -457,10 +457,10 @@ interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH> extends AlovaMiddl
  * useFetcher中间件的context参数
  */
 interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH> extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
-  /** 发送请求函数 */
+  /** 数据预加载函数 */
   fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: any[]): Promise<R>;
 
-  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
+  /** fetchArgs 响应处理回调的参数，该参数由useFetcher的fetch传入 */
   fetchArgs: any[];
 
   /** fetch状态集合 */
@@ -519,7 +519,7 @@ interface UseHookConfig {
 
 /** useRequest和useWatcher都有的类型 */
 interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
-  /** 开启immediate后，useRequest会立即发起一次请求 */
+  /** 是否立即发起一次请求 */
   immediate?: boolean;
 
   /** 初始数据 */

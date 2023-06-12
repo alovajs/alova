@@ -89,7 +89,7 @@ describe('persist data', function () {
     removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);
 
-    // 设置为restore后，即使本地缓存失效了，也会自动将持久化数据恢复到缓存在宏，因此会命中缓存
+    // 设置为restore后，即使本地缓存失效了，也会自动将持久化数据恢复到缓存中，因此会命中缓存
     expect(secondState.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
     expect(secondState.loading.value).toBeFalsy();
   });
