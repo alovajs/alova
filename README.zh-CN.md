@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="200px" src="https://alova.js.org/img/logo-text-vertical.png" />
+  <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
 <p align="center"><b>轻量级的请求策略库，它针对不同请求场景分别提供了具有针对性的请求策略，来提升应用可用性、流畅性，降低服务端压力，让应用如智者一般具备卓越的策略思维。</b></p>

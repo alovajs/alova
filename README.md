@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="200px" src="https://alova.js.org/img/logo-text-vertical.png" />
+  <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
 <p align="center"><b>A lightweight request strategy library, which provides targeted request strategies for different request scenarios to improve application availability and fluency, reduce server pressure, and enable applications to have excellent strategic thinking like a wise man.</b></p>
