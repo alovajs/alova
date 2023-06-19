@@ -31,7 +31,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public __key__?: string;
 
   // 直接发送请求的中断函数
-  public abort = noop;
+  // public abort = noop;
   constructor(
     type: MethodType,
     context: Alova<S, E, RC, RE, RH>,
