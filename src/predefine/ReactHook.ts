@@ -3,11 +3,11 @@ import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, use
 import { EffectRequestParams } from '~/typings';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
-const stateToData = <D>([state]: ReactState<D>) => state;
 type UnknownState = ReactState<unknown>;
 
-const refCurrent = <T>(ref: MutableRefObject<T>) => ref.current;
-const setRef = <T>(ref: MutableRefObject<T>, newVal: T) => (ref.current = newVal);
+const stateToData = <D>([state]: ReactState<D>) => state,
+  refCurrent = <T>(ref: MutableRefObject<T>) => ref.current,
+  setRef = <T>(ref: MutableRefObject<T>, newVal: T) => (ref.current = newVal);
 
 // React的预定义hooks
 export default {
@@ -27,8 +27,8 @@ export default {
     watchingStates = []
   }: EffectRequestParams<any>) {
     // 当有监听状态时，状态变化再触发
-    const needEmit = useRef(immediate);
-    const oldStates = watchingStates.map(s => useRef(s)); // 用于对比新旧值
+    const needEmit = useRef(immediate),
+      oldStates = watchingStates.map(s => useRef(s)); // 用于对比新旧值
     useEffect(() => {
       // 对比新旧状态，获取变化的状态索引
       let changedIndex: number | undefined = undefinedValue;
@@ -48,8 +48,8 @@ export default {
 
     // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
     // 因此每次都需要更新管理的状态
-    const needSave = useRef(false);
-    const saveStatesFn = useCallback(saveStates, []);
+    const needSave = useRef(false),
+      saveStatesFn = useCallback(saveStates, []);
     useEffect(() => {
       refCurrent(needSave) ? saveStatesFn(frontStates) : setRef(needSave, trueValue);
     });

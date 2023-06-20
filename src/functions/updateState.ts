@@ -18,25 +18,25 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
   handleUpdate: ((data: R) => any) | UpdateStateCollection<R>,
   options: updateOptions = {}
 ) {
-  const { onMatch = noop } = options;
-  const methodInstance = filterSnapshotMethods(matcher, falseValue);
+  const { onMatch = noop } = options,
+    methodInstance = filterSnapshotMethods(matcher, falseValue);
   let updated = falseValue;
 
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
   if (methodInstance) {
     onMatch(methodInstance); // 触发onMatch事件
     const {
-      statesHook: { dehydrate, update }
-    } = getOptions(methodInstance);
-    const methodKey = methodInstance.__key__ || key(methodInstance);
-    const { id, storage } = getContext(methodInstance);
-    const frontStates = getStateCache(id, methodKey);
+        statesHook: { dehydrate, update }
+      } = getOptions(methodInstance),
+      methodKey = methodInstance.__key__ || key(methodInstance),
+      { id, storage } = getContext(methodInstance),
+      frontStates = getStateCache(id, methodKey);
 
     if (frontStates) {
-      const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
-      const updateStateCollection = isFn(handleUpdate)
-        ? ({ data: handleUpdate } as UpdateStateCollection<R>)
-        : handleUpdate;
+      const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance),
+        updateStateCollection = isFn(handleUpdate)
+          ? ({ data: handleUpdate } as UpdateStateCollection<R>)
+          : handleUpdate;
       // 循环遍历更新数据，并赋值给受监管的状态
       forEach(objectKeys(updateStateCollection), stateName => {
         myAssert(frontStates[stateName] !== undefinedValue, `can not find state named \`${stateName}\``);

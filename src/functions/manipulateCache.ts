@@ -48,9 +48,9 @@ export const setCache = <R = any, S = any, E = any, T = any, RC = any, RE = any,
 ) => {
   const methodInstances = filterSnapshotMethods(matcher, trueValue);
   forEach(methodInstances, methodInstance => {
-    const { id, storage } = getContext(methodInstance);
-    const methodKey = methodInstance.__key__ || key(methodInstance);
-    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
+    const { id, storage } = getContext(methodInstance),
+      methodKey = methodInstance.__key__ || key(methodInstance),
+      { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
       const cachedData = getResponseCache(id, methodKey) || getPersistentResponse(id, methodKey, storage, tag);
@@ -78,8 +78,9 @@ export const invalidateCache = <S, E, R, T, RC, RE, RH>(
   }
   const methodInstances = filterSnapshotMethods(matcher, trueValue);
   forEach(methodInstances, methodInstance => {
-    const { id, storage } = getContext(methodInstance);
-    const methodKey = methodInstance.__key__ || key(methodInstance);
+    const { id, storage } = getContext(methodInstance),
+      methodKey = methodInstance.__key__ || key(methodInstance);
+
     removeResponseCache(id, methodKey);
     removePersistentResponse(id, methodKey, storage);
   });

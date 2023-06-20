@@ -37,7 +37,7 @@
 - 🎈Typescript support
 - ⚡ Support tree shaking, which means that the production volume of alova is often less than 4kb
 
-## alova request strategy table
+## alova request strategy list
 
 Alova is the core library, which provides common functions such as caching strategy, request sharing strategy, and state management, and can meet more than 95% of request requirements. At the same time, alova also provides business logic and frequently used request strategy hooks, which can be directly used in specific scenarios. The following is a list of request policy hooks provided by alova.
 
@@ -66,7 +66,7 @@ The original intention of alova is to propose a solution for different request s
 
 ## Library Stability
 
-It has been nearly a year since the development of the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 160+ unit tests, with a coverage rate of 99%. Even so, alova is still a rookie, so I suggest you use it conservatively.
+It has been more then one year since the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 160+ unit tests, with a coverage rate of 99%. and it almost in a stable state. Even so, alova is still a rookie, it still has a large development space.
 
 **I promise to solve it as soon as possible after receiving your issue**
 
@@ -74,9 +74,9 @@ It has been nearly a year since the development of the first version of alova. D
 
 If you like alova. we are very appreciate your star at the topright. it's a approval of our work.
 
-## Alternative to the requests library?
+## To replace other request libraries?
 
-alova is a request strategy library, which was originally created to provide specific request strategy solutions for different request scenarios, so as to achieve a smooth request experience more concisely and elegantly, such as `$.ajax`, `axios` and `fetch- api`, etc. provide good support for request sending and response receiving, they are an essential link (request event) in the [RSM](/get-started/RSM) process, alova still needs to rely on them to make requests, Therefore, we can regard alova as an arm of the request library, making the request library more powerful.
+alova is a request strategy library, which was originally created to provide specific request strategy solutions for different request scenarios, so as to achieve a smooth request experience more concisely and elegantly, such as `$.ajax`, `axios` and `fetch- api`, etc. they has provided a good support for network communication, they are an essential link (request event) in the [RSM](/get-started/RSM) process, alova still needs to depend them to send requests, Therefore, we can regard alova as an arm of the request library, making the request library more powerful.
 
 ## Why binding UI framework?
 
@@ -130,13 +130,14 @@ If you have thought of some specific and typical business request scenarios, you
 - ✅ The storage time can be set as a date object, indicating that it expires at a certain point in time
 - ✅ You can set the default cache for different request methods globally. The current default is 500 seconds of memory cache for GET requests
 - ✅ Additional state management, get and update additional state across pages and modules
-- request error log printing
+- ✅ request error log printing
 - ✅ Complete offline submission function, you can submit when you are offline, and you can read offline information when you enter again
 - ✅ Request middleware design, which can manually control sending requests, status modification, etc.
 - ✅ Retry interval, maximum number of retries, etc. when silent submission fails
 - ✅ Request to share
 - ✅ Server-side rendering support
 - Performance improvements
+- openapi generate request functions automatically
 
 ### Extensions
 

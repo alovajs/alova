@@ -84,18 +84,23 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     'hook handler must be a method instance or a function that returns method instance'
   );
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-    | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
-    | FetcherHookConfig;
-  const { id, options, storage } = getContext(methodInstance);
-  const { update } = options.statesHook;
-  // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
-  const methodKey = key(methodInstance);
+      | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
+      | FetcherHookConfig,
+    { id, options, storage } = getContext(methodInstance),
+    { update } = options.statesHook,
+    // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
+    methodKey = key(methodInstance),
+    { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
 
   // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
-  let removeStates = noop;
-  let saveStates = noop as SaveStateFn;
-  const { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
-  let cachedResponse: R | undefined = getResponseCache(id, methodKey);
+  let removeStates = noop,
+    saveStates = noop as SaveStateFn,
+    cachedResponse: R | undefined = getResponseCache(id, methodKey),
+    isNextCalled = falseValue,
+    responseHandlePromise = promiseResolve<any>(undefinedValue),
+    fromCache = () => !!cachedResponse,
+    // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
+    controlledLoading = falseValue;
   if (!isFetcher) {
     // 当缓存模式为memory时不获取缓存，减少缓存获取
     const persistentResponse =
@@ -126,21 +131,27 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     removeStates = () => removeStateCache(id, methodKey);
   }
 
-  let isNextCalled = falseValue;
-  let responseHandlePromise = promiseResolve<any>(undefinedValue);
-  let fromCache = () => !!cachedResponse;
-  // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
-  let controlledLoading = falseValue;
-
   // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
   const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
     isNextCalled = trueValue;
     const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
-      guardNextConfig || {};
-    const forceRequestFinally = sloughConfig(guardNextForceRequest, sendCallingArgs);
-    const requestCtrl = sendRequest(guardNextReplacingMethod, forceRequestFinally);
+        guardNextConfig || {},
+      forceRequestFinally = sloughConfig(guardNextForceRequest, sendCallingArgs),
+      requestCtrl = sendRequest(guardNextReplacingMethod, forceRequestFinally),
+      { response, onDownload = noop, onUpload = noop, fromCache: getFromCacheValue, abort } = requestCtrl,
+      progressUpdater = (stage: 'downloading' | 'uploading') => (loaded: number, total: number) => {
+        update(
+          {
+            [stage]: {
+              loaded,
+              total
+            }
+          },
+          frontStates
+        );
+      };
+
     onRequest({ ...requestCtrl, r: removeStates, s: saveStates }); // 通知外部发起了请求
-    const { response, onDownload = noop, onUpload = noop, fromCache: getFromCacheValue, abort } = requestCtrl;
     abortFn = abort;
     fromCache = getFromCacheValue;
 
@@ -151,18 +162,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     }
 
     responseHandlePromise = response();
-    const progressUpdater = (stage: 'downloading' | 'uploading') => (loaded: number, total: number) => {
-      update(
-        {
-          [stage]: {
-            loaded,
-            total
-          }
-        },
-        frontStates
-      );
-    };
-
     const { enableDownload, enableUpload } = getConfig(methodInstance);
     enableDownload && onDownload(progressUpdater('downloading'));
     enableUpload && onUpload(progressUpdater('uploading'));

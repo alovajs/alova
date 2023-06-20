@@ -1,9 +1,9 @@
 import alovaError from '@/utils/alovaError';
 import { isSpecialRequestBody, isString } from '@/utils/helper';
 import {
-  JSONStringify,
   clearTimeoutTimer,
   falseValue,
+  JSONStringify,
   len,
   promiseReject,
   promiseThen,
@@ -16,26 +16,26 @@ import { FetchRequestInit } from '~/typings/globalfetch';
 const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
 export default function GlobalFetch() {
   return function (elements: RequestElements, method: Method<any, any, any, any, FetchRequestInit, Response, Headers>) {
+    const adapterConfig = method.config,
+      timeout = adapterConfig.timeout || 0,
+      ctrl = new AbortController(),
+      data = elements.data,
+      fetchPromise = fetch(elements.url, {
+        ...adapterConfig,
+        method: elements.type,
+        signal: ctrl.signal,
+        body: isBodyData(data) ? data : JSONStringify(data)
+      });
+
     // 设置了中断时间，则在指定时间后中断请求
-    const adapterConfig = method.config;
-    const timeout = adapterConfig.timeout || 0;
-    const ctrl = new AbortController();
-    let abortTimer: NodeJS.Timeout | number;
-    let isTimeout = falseValue;
+    let abortTimer: NodeJS.Timeout | number,
+      isTimeout = falseValue;
     if (timeout > 0) {
       abortTimer = setTimeoutFn(() => {
         isTimeout = trueValue;
         ctrl.abort();
       }, timeout);
     }
-
-    const data = elements.data;
-    const fetchPromise = fetch(elements.url, {
-      ...adapterConfig,
-      method: elements.type,
-      signal: ctrl.signal,
-      body: isBodyData(data) ? data : JSONStringify(data)
-    });
 
     return {
       response: () =>
@@ -62,9 +62,9 @@ export default function GlobalFetch() {
       /* c8 ignore start */
       onDownload: (cb: (total: number, loaded: number) => void) => {
         promiseThen(fetchPromise, response => {
-          const { headers, body } = response.clone();
-          const reader = body?.getReader().read();
-          const total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
+          const { headers, body } = response.clone(),
+            reader = body?.getReader().read(),
+            total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
           if (total <= 0) {
             return;
           }

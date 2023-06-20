@@ -10,8 +10,8 @@ export default function useRequest<S, E, R, T, RC, RE, RH>(
   config: RequestHookConfig<S, E, R, T, RC, RE, RH> = {}
 ) {
   assertAlovaCreation();
-  const { immediate = trueValue, initialData } = config;
-  const props = createRequestState(alovas[0] as Alova<S, E, RC, RE, RH>, handler, config, initialData, !!immediate);
+  const { immediate = trueValue, initialData } = config,
+    props = createRequestState(alovas[0] as Alova<S, E, RC, RE, RH>, handler, config, initialData, !!immediate);
   return {
     ...props,
     send: (...args: any[]) => props.send(args)
