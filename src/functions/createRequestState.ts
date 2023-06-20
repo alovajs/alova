@@ -49,61 +49,58 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   watchingStates?: E[],
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
-  const { create, export: stateExport, effectRequest, update } = getStatesHook(alovaInstance);
-  const progress: Progress = {
-    total: 0,
-    loaded: 0
-  };
+  let abortFn = noop,
+    removeStatesFn = noop,
+    saveStatesFn = noop as SaveStateFn;
 
-  // 将外部传入的受监管的状态一同放到frontStates集合中
-  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
-  const frontStates = {
-    ...managedStates,
-    data: create(initialData),
-    loading: create(falseValue),
-    error: create(undefinedValue as Error | undefined),
-    downloading: create({ ...progress }),
-    uploading: create({ ...progress })
-  };
-
-  // 请求事件
-  const successHandlers = [] as SuccessHandler<S, E, R, T, RC, RE, RH>[];
-  const errorHandlers = [] as ErrorHandler<S, E, R, T, RC, RE, RH>[];
-  const completeHandlers = [] as CompleteHandler<S, E, R, T, RC, RE, RH>[];
-  let abortFn = noop;
-  let removeStatesFn = noop;
-  let saveStatesFn = noop as SaveStateFn;
-  const hasWatchingStates = watchingStates !== undefinedValue;
-
-  // 统一的发送请求函数
-  const handleRequest = (
-    handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
-    useHookConfigParam = useHookConfig,
-    sendCallingArgs?: any[],
-    updateCacheState?: boolean
-  ) =>
-    useHookToSendRequest(
-      handler,
-      frontStates,
-      useHookConfigParam,
-      successHandlers,
-      errorHandlers,
-      completeHandlers,
-      ({ abort, r: removeStates, s: saveStates }) => {
-        // 每次发送请求都需要保存最新的控制器
-        abortFn = abort;
-        removeStatesFn = removeStates;
-        saveStatesFn = saveStates;
-      },
-      sendCallingArgs,
-      updateCacheState
-    );
-
-  // 以捕获异常的方式调用handleRequest
-  // 捕获异常避免异常继续向外抛出
-  const wrapEffectRequest = () => {
-    promiseCatch(handleRequest(), noop);
-  };
+  const { create, export: stateExport, effectRequest, update } = getStatesHook(alovaInstance),
+    progress: Progress = {
+      total: 0,
+      loaded: 0
+    },
+    // 将外部传入的受监管的状态一同放到frontStates集合中
+    { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>,
+    frontStates = {
+      ...managedStates,
+      data: create(initialData),
+      loading: create(falseValue),
+      error: create(undefinedValue as Error | undefined),
+      downloading: create({ ...progress }),
+      uploading: create({ ...progress })
+    },
+    // 请求事件
+    successHandlers = [] as SuccessHandler<S, E, R, T, RC, RE, RH>[],
+    errorHandlers = [] as ErrorHandler<S, E, R, T, RC, RE, RH>[],
+    completeHandlers = [] as CompleteHandler<S, E, R, T, RC, RE, RH>[],
+    hasWatchingStates = watchingStates !== undefinedValue,
+    // 统一的发送请求函数
+    handleRequest = (
+      handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
+      useHookConfigParam = useHookConfig,
+      sendCallingArgs?: any[],
+      updateCacheState?: boolean
+    ) =>
+      useHookToSendRequest(
+        handler,
+        frontStates,
+        useHookConfigParam,
+        successHandlers,
+        errorHandlers,
+        completeHandlers,
+        ({ abort, r: removeStates, s: saveStates }) => {
+          // 每次发送请求都需要保存最新的控制器
+          abortFn = abort;
+          removeStatesFn = removeStates;
+          saveStatesFn = saveStates;
+        },
+        sendCallingArgs,
+        updateCacheState
+      ),
+    // 以捕获异常的方式调用handleRequest
+    // 捕获异常避免异常继续向外抛出
+    wrapEffectRequest = () => {
+      promiseCatch(handleRequest(), noop);
+    };
 
   effectRequest({
     handler:
