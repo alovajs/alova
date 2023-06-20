@@ -84,10 +84,21 @@ describe('method instance', function () {
     expect(Get.config.name).toBe('name-test');
   });
 
-  test('request should be aborted request by method instance when call function abort', async () => {
+  test('request should be aborted with `method.abort`', async () => {
     const Get = alova.Get('/unit-test');
     const p = Get.send(true);
     Get.abort();
+    await expect(p).rejects.toThrow('[alova]The user aborted a request.');
+  });
+
+  test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
+    const Get = getAlovaInstance(VueHook, {
+      beforeRequestExpect(methodInstance) {
+        methodInstance.abort();
+      },
+      responseExpect: r => r.json()
+    }).Get('/unit-test');
+    const p = Get.send(true);
     await expect(p).rejects.toThrow('[alova]The user aborted a request.');
   });
 });

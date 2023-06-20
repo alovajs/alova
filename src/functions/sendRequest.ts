@@ -79,6 +79,13 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   const requestAdapterCtrlsPromise = newInstance(PromiseCls, resolve => {
       requestAdapterCtrlsPromiseResolveFn = resolve;
     }) as Promise<RequestAdapterReturnType | undefined>,
+    // 请求中断函数
+    abort = () => {
+      promiseThen(
+        requestAdapterCtrlsPromise,
+        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
+      );
+    },
     response = () => {
       const { beforeRequest = noop, responsed, responded, requestAdapter } = getOptions(methodInstance),
         // 使用克隆之前的method key，以免在beforeRequest中method被改动而导致method key改变
@@ -86,6 +93,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         methodKey = key(methodInstance),
         clonedMethod = cloneMethod(methodInstance);
 
+      // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
+      methodInstance.abort = clonedMethod.abort = abort;
       // 发送请求前调用钩子函数
       // beforeRequest支持同步函数和异步函数
       return promisify(beforeRequest)(clonedMethod)
@@ -211,12 +220,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     };
 
   return {
-    abort: () => {
-      promiseThen(
-        requestAdapterCtrlsPromise,
-        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
-      );
-    },
+    abort,
     onDownload: (handler: ProgressUpdater) => {
       promiseThen(
         requestAdapterCtrlsPromise,

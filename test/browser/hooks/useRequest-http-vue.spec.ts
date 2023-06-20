@@ -203,7 +203,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(error.value).toBe(err.error);
   });
 
-  test('manual abort request', async () => {
+  test('abort request manually with abort function returns in useRequeset', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
         expect(error.message).toMatch(/user aborted a request/);
@@ -216,6 +216,51 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     setTimeout(abort, 100);
+
+    const err = await untilCbCalled(onError);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBe(err.error);
+  });
+
+  test('abort request manually with abort function in method instance', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: error => {
+        expect(error.message).toMatch(/user aborted a request/);
+        return Promise.reject(error);
+      }
+    });
+    const Get = alova.Get<string, Result<string>>('/unit-test-10s');
+    const { loading, data, error, onError } = useRequest(Get);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+    setTimeout(Get.abort, 100);
+
+    const err = await untilCbCalled(onError);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBe(err.error);
+  });
+
+  test('abort request manually with cloned method instance in beforeRequest', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect(methodInstance) {
+        // 在这边中断请求
+        setTimeout(methodInstance.abort, 100);
+      },
+      resErrorExpect: error => {
+        expect(error.message).toMatch(/user aborted a request/);
+        return Promise.reject(error);
+      }
+    });
+    const Get = alova.Get<string, Result<string>>('/unit-test-10s');
+    const { loading, data, error, onError } = useRequest(Get);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
 
     const err = await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();

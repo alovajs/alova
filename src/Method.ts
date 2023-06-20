@@ -83,12 +83,10 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   }
 
   /**
-   * 直接发出请求，返回promise对象
+   * 通过method实例发送请求，返回promise对象
    */
   public send(forceRequest = falseValue): Promise<R> {
-    const { response, abort } = sendRequest(this, forceRequest);
-    this.abort = abort;
-    return response();
+    return sendRequest(this, forceRequest).response();
   }
 
   /**
