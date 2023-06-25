@@ -1,19 +1,26 @@
 import Method from '@/Method';
 import { newInstance } from './helper';
-import { getContext } from './variables';
+import { getContext, ObjectCls } from './variables';
 
 export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const { data, config } = methodInstance,
     newConfig = { ...config },
-    { headers = {}, params = {} } = newConfig;
+    { headers = {}, params = {} } = newConfig,
+    ctx = getContext(methodInstance);
   newConfig.headers = { ...headers };
   newConfig.params = { ...params };
-  return newInstance(
+  const newMethod = newInstance(
     Method<S, E, R, T, RC, RE, RH>,
     methodInstance.type,
-    getContext(methodInstance),
+    ctx,
     methodInstance.url,
     newConfig,
     data
   );
+
+  ObjectCls.assign(newMethod, {
+    ...methodInstance,
+    config: newConfig
+  });
+  return newMethod;
 };

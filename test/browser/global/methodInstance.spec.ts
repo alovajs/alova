@@ -101,4 +101,45 @@ describe('method instance', function () {
     const p = Get.send(true);
     await expect(p).rejects.toThrow('[alova]The user aborted a request.');
   });
+
+  test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
+    const Get = getAlovaInstance(VueHook, {
+      beforeRequestExpect(methodInstance) {
+        methodInstance.abort();
+      },
+      responseExpect: r => r.json()
+    }).Get('/unit-test');
+    await expect(Get.send(true)).rejects.toThrow('[alova]The user aborted a request.');
+  });
+
+  test('should receive method metadata', async () => {
+    const alovaInst = getAlovaInstance(VueHook, {
+      beforeRequestExpect(methodInstance) {
+        throw new Error(
+          JSON.stringify({
+            meta: methodInstance.meta,
+            showMsg: (methodInstance as any).showMsg
+          })
+        );
+      },
+      responseExpect: r => r.json()
+    });
+    const Get = alovaInst.Get('/unit-test');
+    (Get as any).meta = {
+      a: 1,
+      b: 2
+    };
+    (Get as any).showMsg = false;
+
+    // 从beforeRequest中抛出json字符串
+    await expect(Get.send(true)).rejects.toThrow(
+      JSON.stringify({
+        meta: {
+          a: 1,
+          b: 2
+        },
+        showMsg: false
+      })
+    );
+  });
 });

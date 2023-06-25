@@ -157,7 +157,7 @@ describe('createAlova', function () {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
-        method.extra = {
+        method.meta = {
           a: 1,
           b: 2
         };
@@ -166,7 +166,7 @@ describe('createAlova', function () {
         const result = await r.json();
         expect(result.data.path).toBe('/unit-test');
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.extra).toEqual({ a: 1, b: 2 });
+        expect(method.meta).toEqual({ a: 1, b: 2 });
       }
     });
     const Get = alova.Get('/unit-test', {
@@ -187,7 +187,7 @@ describe('createAlova', function () {
       requestAdapter: GlobalFetch(),
       beforeRequest: method => {
         expect(method).toBeInstanceOf(Method);
-        method.extra = {
+        method.meta = {
           a: 1,
           b: 2
         };
@@ -196,7 +196,7 @@ describe('createAlova', function () {
         const result = await r.json();
         expect(result.data.path).toBe('/unit-test');
         expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.extra).toEqual({ a: 1, b: 2 });
+        expect(method.meta).toEqual({ a: 1, b: 2 });
       }
     });
     const Get = alova.Get('/unit-test', {
@@ -214,14 +214,14 @@ describe('createAlova', function () {
     const mockFn = jest.fn();
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
-        method.extra = {
+        method.meta = {
           a: 1,
           b: 2
         };
       },
       resErrorExpect: (error, method) => {
         expect(error).not.toBeUndefined();
-        expect(method.extra).toEqual({ a: 1, b: 2 });
+        expect(method.meta).toEqual({ a: 1, b: 2 });
         mockFn();
       }
     });

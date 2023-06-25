@@ -282,7 +282,7 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
    * 用于在全局的request和response钩子函数中传递额外信息所用
    * js项目中可使用任意字段
    */
-  extra?: any;
+  meta?: any;
 
   /**
    * 使用此method实例直接发送请求
