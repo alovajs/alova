@@ -31,24 +31,9 @@ export const createAlova = <S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE
 
 /* c8 ignore start */
 if (process.env.NODE_ENV === 'development') {
-  const consoleInfo = () => {
-    console.log(`[alova tips]
--> Powerful request strategies: https://alova.js.org//category/strategy
--> Using mock data: https://alova.js.org/extension/alova-mock
--> Please give alova a star if you like it: https://github.com/alovajs/alova
--> This tips will remove in production environment. hide it in development: https://alova.js.org/others/hide-recommend-tips`);
-  };
-
-  try {
-    // @ts-ignore
-    if (import.meta.env.VITE_ALOVA_TIPS !== '0') {
-      consoleInfo();
-    }
-  } catch (e) {}
-  try {
-    if (process.env.VUE_APP_ALOVA_TIPS !== '0' && process.env.REACT_APP_ALOVA_TIPS !== '0') {
-      consoleInfo();
-    }
-  } catch (e) {}
+  console.log(`powerful alova request strategies: https://alova.js.org/category/strategy
+use mock data: https://alova.js.org/extension/alova-mock
+please star alova if you like it: https://github.com/alovajs/alova
+this tips will be removed in production environment`);
 }
 /* c8 ignore stop */
