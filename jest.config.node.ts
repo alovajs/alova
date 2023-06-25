@@ -179,33 +179,7 @@ export default {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      // mock import.meta, see https://www.npmjs.com/package/ts-jest-mock-import-meta
-      {
-        diagnostics: {
-          ignoreCodes: [1343]
-        },
-        astTransformers: {
-          // 转换import.meta
-          before: [
-            {
-              path: 'node_modules/ts-jest-mock-import-meta',
-              options: {
-                metaObjectReplacement: {
-                  url: 'https://xxx',
-                  env: {
-                    PROD: false,
-                    DEV: true
-                  },
-                  status: 2
-                }
-              }
-            }
-          ]
-        }
-      }
-    ],
+    '^.+\\.tsx?$': 'ts-jest',
     '^.+\\.svelte$': 'svelte-jester'
   }
 
