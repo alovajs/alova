@@ -5,7 +5,7 @@ import { key } from '@/utils/helper';
 
 // 其他请求方式测试
 describe('Request by other data', function () {
-  (isSSR ? xtest : test)('send POST with FormData', async () => {
+  test('send POST with FormData', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         method.config.params.p1 = 'a';
@@ -69,7 +69,7 @@ describe('Request by other data', function () {
     expect(queryCache(Post)).toStrictEqual(data);
   });
 
-  (isSSR ? xtest : test)('send POST with Blob', async () => {
+  test('send POST with Blob', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: async r => r.json()
     });

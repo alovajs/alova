@@ -151,7 +151,7 @@ export default {
   testEnvironment: 'jsdom',
 
   testMatch: [
-    '**/?(*.)+(spec|test).[tj]s?(x)'
+    '**/test/browser/**/*.[jt]s?(x)'
     // '**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?'
     // '**/test/browser/behavior/share-request.spec.ts'
     // '**/test/browser/batch/parallel-request.spec.ts'

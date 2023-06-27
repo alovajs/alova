@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
-(isSSR ? xdescribe : describe)('update cached response data by user in react', function () {
+describe('update cached response data by user in react', function () {
   test('the cached response data should be changed and the screen should be update', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

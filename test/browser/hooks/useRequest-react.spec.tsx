@@ -24,7 +24,7 @@ function getAlovaInstanceSyncResponded() {
   });
 }
 
-(isSSR ? xdescribe : describe)('useRequet hook with react', () => {
+describe('useRequet hook with react', () => {
   test('send GET', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

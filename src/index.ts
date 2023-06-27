@@ -1,7 +1,7 @@
 import { AlovaOptions } from '~/typings';
 import Alova, { alovas } from './Alova';
-import { buildErrorMsg } from './utils/alovaError';
 import { getStatesHook, newInstance } from './utils/helper';
+import myAssert from './utils/myAssert';
 import { pushItem } from './utils/variables';
 export * from './functions/manipulateCache';
 export { default as updateState } from './functions/updateState';
@@ -18,13 +18,11 @@ export { key as getMethodKey } from './utils/helper';
  * @returns Alova实例
  */
 export const createAlova = <S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) => {
-  const alovaInstance = newInstance(Alova<S, E, RC, RE, RH>, options),
-    newStatesHook = getStatesHook(alovaInstance);
-  if (alovas[0] && getStatesHook(alovas[0]) !== newStatesHook) {
-    console.warn(
-      buildErrorMsg('the statesHook'),
-      newStatesHook,
-      ' is different with previous one, which may cause some error'
+  const alovaInstance = newInstance(Alova<S, E, RC, RE, RH>, options);
+  if (alovas[0]) {
+    myAssert(
+      getStatesHook(alovas[0]) === getStatesHook(alovaInstance),
+      'must use the same `statesHook` in single project'
     );
   }
   pushItem(alovas, alovaInstance);

@@ -150,17 +150,7 @@ export default {
   // The test environment that will be used for testing
   // testEnvironment: 'node',
 
-  testMatch: [
-    '**/?(*.)+(spec|test).[tj]s?(x)'
-    // '**/test/browser/hooks/useRequest-react.spec.ts(x)?'
-    // '**/test/browser/behavior/share-request.spec.ts'
-    // '**/test/browser/batch/parallel-request.spec.ts'
-    // '**/test/browser/stateManager/manipulate-cache.spec.ts(x)?'
-    // '**/test/browser/global/createAlova.spec.ts(x)?'
-    // '**/test/browser/fn/matchSnapshotMethod.spec.ts(x)?'
-    // '**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?'
-    // '**/test/browser/middleware/useRequest.spec.ts(x)?'
-  ],
+  testMatch: ['**/test/server/**/*.[jt]s?(x)'],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [

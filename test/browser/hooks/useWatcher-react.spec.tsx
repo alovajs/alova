@@ -5,7 +5,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
-(isSSR ? xdescribe : describe)('useWatcher hook with react', () => {
+describe('useWatcher hook with react', () => {
   test('should send request when change value', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

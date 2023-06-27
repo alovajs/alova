@@ -6,7 +6,7 @@ import { untilCbCalled } from '#/utils';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
-(isSSR ? xdescribe : describe)('useWatcher hook with svelte', () => {
+describe('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {
     render(page);
     // 需要暂停一段时间再触发事件和检查响应数据
