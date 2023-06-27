@@ -1,16 +1,8 @@
 import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '~/typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
-import { instanceOf, isPlainObject, key, noop } from './utils/helper';
-import {
-  deleteAttr,
-  falseValue,
-  forEach,
-  getConfig,
-  getContextOptions,
-  isArray,
-  undefinedValue
-} from './utils/variables';
+import { getConfig, getContextOptions, instanceOf, isPlainObject, key, noop } from './utils/helper';
+import { deleteAttr, falseValue, forEach, isArray, undefinedValue } from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';

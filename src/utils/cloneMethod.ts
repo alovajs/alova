@@ -1,6 +1,6 @@
 import Method from '@/Method';
-import { newInstance } from './helper';
-import { getContext, ObjectCls } from './variables';
+import { getContext, newInstance } from './helper';
+import { ObjectCls } from './variables';
 
 export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const { data, config } = methodInstance,

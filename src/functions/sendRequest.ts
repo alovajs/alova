@@ -5,7 +5,10 @@ import { persistResponse } from '@/storage/responseStorage';
 import cloneMethod from '@/utils/cloneMethod';
 import { AlovaRequestAdapter, Arg, ProgressUpdater, ResponsedHandler, ResponseErrorHandler } from '~/typings';
 import {
+  getConfig,
+  getContext,
   getLocalCacheConfigParam,
+  getOptions,
   instanceOf,
   isFn,
   isPlainObject,
@@ -19,9 +22,6 @@ import {
 import {
   deleteAttr,
   falseValue,
-  getConfig,
-  getContext,
-  getOptions,
   len,
   objectKeys,
   PromiseCls,

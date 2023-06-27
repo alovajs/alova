@@ -1,9 +1,12 @@
-import { debounce, isNumber, noop } from '@/utils/helper';
+import { getResponseCache } from '@/storage/responseCache';
+import { debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
+import myAssert from '@/utils/myAssert';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
+  FetcherHookConfig,
   FetchRequestState,
   FrontRequestHookConfig,
   FrontRequestState,
@@ -14,16 +17,7 @@ import {
 } from '~/typings';
 import Alova from '../Alova';
 import Method from '../Method';
-import {
-  deleteAttr,
-  falseValue,
-  getStatesHook,
-  isArray,
-  promiseCatch,
-  pushItem,
-  trueValue,
-  undefinedValue
-} from '../utils/variables';
+import { deleteAttr, falseValue, isArray, promiseCatch, pushItem, trueValue, undefinedValue } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
 export type SaveStateFn = (frontStates: FrontRequestState) => void;
@@ -49,11 +43,25 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   watchingStates?: E[],
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
+  const statesHook = getStatesHook(alovaInstance);
+  myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
   let abortFn = noop,
     removeStatesFn = noop,
-    saveStatesFn = noop as SaveStateFn;
+    saveStatesFn = noop as SaveStateFn,
+    initialLoading = falseValue;
 
-  const { create, export: stateExport, effectRequest, update } = getStatesHook(alovaInstance),
+  // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
+  // 1. 在react下立即发送请求可以少渲染一次
+  // 2. SSR渲染的html中，其初始视图为loading状态的，避免在客户端展现时的loading视图闪动
+  if (immediate) {
+    const cachedResponse: R | undefined = getResponseCache(alovaInstance.id, key(getHandlerMethod(methodHandler))),
+      forceRequestFinally = sloughConfig(
+        (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
+      );
+    initialLoading = !!forceRequestFinally || !cachedResponse;
+  }
+
+  const { create, export: stateExport, effectRequest, update } = statesHook,
     progress: Progress = {
       total: 0,
       loaded: 0
@@ -63,7 +71,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     frontStates = {
       ...managedStates,
       data: create(initialData),
-      loading: create(falseValue),
+      loading: create(initialLoading),
       error: create(undefinedValue as Error | undefined),
       downloading: create({ ...progress }),
       uploading: create({ ...progress })

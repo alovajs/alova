@@ -2,9 +2,9 @@ import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { setResponseCache } from '@/storage/responseCache';
 import { persistResponse } from '@/storage/responseStorage';
 import { getStateCache } from '@/storage/stateCache';
-import { getLocalCacheConfigParam, isFn, key, noop } from '@/utils/helper';
+import { getContext, getLocalCacheConfigParam, getOptions, isFn, key, noop } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
-import { falseValue, forEach, getContext, getOptions, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
+import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
 import { MethodMatcher, updateOptions, UpdateStateCollection } from '~/typings';
 
 /**

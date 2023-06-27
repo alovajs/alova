@@ -1,10 +1,9 @@
-import { AlovaMethodHandler, CacheExpire, FrontRequestState } from '~/typings';
+import { Alova, AlovaMethodHandler, CacheExpire, FrontRequestState } from '~/typings';
 import Method from '../Method';
+import myAssert from './myAssert';
 import {
   clearTimeoutTimer,
   falseValue,
-  getConfig,
-  getTime,
   JSONStringify,
   MEMORY,
   nullValue,
@@ -65,6 +64,38 @@ export const noop = () => {},
    * @returns 判断结果
    */
   instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls,
+  /**
+   * 统一的时间戳获取函数
+   * @returns 时间戳
+   */
+  getTime = (date?: Date) => (date ? date.getTime() : Date.now()),
+  /**
+   * 通过method实例获取alova实例
+   * @returns alova实例
+   */
+  getContext = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.context,
+  /**
+   * 获取method实例配置数据
+   * @returns 配置对象
+   */
+  getConfig = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.config,
+  /**
+   * 获取alova配置数据
+   * @returns alova配置对象
+   */
+  getContextOptions = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) => alovaInstance.options,
+  /**
+   * 通过method实例获取alova配置数据
+   * @returns alova配置对象
+   */
+  getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
+    getContextOptions(getContext(methodInstance)),
+  /**
+   * 获取alova实例的statesHook
+   * @returns statesHook对象
+   */
+  getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
+    getContextOptions(alovaInstance).statesHook,
   /**
    * 是否为特殊数据
    * @param data 提交数据
@@ -149,7 +180,14 @@ export const noop = () => {},
   getHandlerMethod = <S, E, R, T, RC, RE, RH>(
     methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
     args: any[] = []
-  ) => (isFn(methodHandler) ? methodHandler(...args) : methodHandler),
+  ) => {
+    const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
+    myAssert(
+      instanceOf(methodInstance, Method),
+      'hook handler must be a method instance or a function that returns method instance'
+    );
+    return methodInstance;
+  },
   /**
    * 统一配置
    * @param 数据

@@ -1,5 +1,3 @@
-import Alova from '@/Alova';
-import Method from '@/Method';
 import { GeneralFn } from './helper';
 
 // 以下为减少编译代码量而添加的统一处理函数或变量
@@ -17,14 +15,6 @@ export const PromiseCls = Promise as typeof Promise<any>,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
   ): Promise<TResult1 | TResult2> => promise.then(onFulfilled, onrejected),
   promiseCatch = <T, O>(promise: Promise<T>, onrejected: (reason: any) => O) => promise.catch(onrejected),
-  getTime = (date?: Date) => (date ? date.getTime() : Date.now()),
-  getContext = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.context,
-  getConfig = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.config,
-  getContextOptions = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) => alovaInstance.options,
-  getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
-    getContextOptions(getContext(methodInstance)),
-  getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
-    getContextOptions(alovaInstance).statesHook,
   JSONStringify = <T>(value: T) => JSON.stringify(value),
   JSONParse = (value: string) => JSON.parse(value),
   setTimeoutFn = (fn: GeneralFn, delay = 0) => setTimeout(fn, delay),

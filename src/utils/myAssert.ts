@@ -17,11 +17,9 @@ export default function myAssert(expression: boolean, msg: string) {
 /**
  * 断言是否创建了alova实例
  */
-export const assertAlovaCreation = () => myAssert(len(alovas) > 0, 'please create a alova instance first.');
-
-/**
- * 断言method实例是否存在
- * @param methodInstance method实例
- */
-export const assertMethodMatcher = (methodInstance?: Method) =>
-  myAssert(!!methodInstance, "didn't match any method instance");
+export const assertAlovaCreation = () => myAssert(len(alovas) > 0, 'please create a alova instance first.'),
+  /**
+   * 断言是否匹配到method实例
+   * @param methodInstance method实例
+   */
+  assertMethodMatcher = (methodInstance?: Method) => myAssert(!!methodInstance, "didn't match any method instance");

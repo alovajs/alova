@@ -242,4 +242,34 @@ function getAlovaInstanceSyncResponded() {
     expect(screen.getByRole('downloading')).toHaveTextContent('1_1000');
     expect(screen.getByRole('uploading')).toHaveTextContent('100_2000');
   });
+
+  // 如果立即发送请求，react的loading状态将初始为true
+  test('should render twice instead of third', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      timeout: 10000,
+      transformData: ({ data }: Result<true>) => data,
+      localCache: 100 * 1000
+    });
+
+    const renderMockFn = jest.fn();
+    function Page() {
+      const { loading, data = { path: '', method: '' } } = useRequest(Get);
+      renderMockFn();
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="method">{data.method}</span>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    await waitFor(() => {
+      expect(renderMockFn).toBeCalledTimes(2);
+    });
+  });
 });

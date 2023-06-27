@@ -9,6 +9,8 @@ import createAlovaEvent from '@/utils/createAlovaEvent';
 import {
   exportFetchStates,
   GeneralFn,
+  getConfig,
+  getContext,
   getHandlerMethod,
   getLocalCacheConfigParam,
   instanceOf,
@@ -21,8 +23,6 @@ import myAssert, { assertMethodMatcher } from '@/utils/myAssert';
 import {
   falseValue,
   forEach,
-  getConfig,
-  getContext,
   len,
   MEMORY,
   nullValue,
@@ -79,10 +79,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   isFetcher = falseValue
 ) {
   const methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
-  myAssert(
-    instanceOf(methodInstance, Method),
-    'hook handler must be a method instance or a function that returns method instance'
-  );
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
       | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
       | FetcherHookConfig,
@@ -155,11 +151,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     abortFn = abort;
     fromCache = getFromCacheValue;
 
-    // 命中缓存，或强制请求时需要更新loading状态
-    // loading状态受控时将不再更改为false
-    if ((forceRequestFinally || !cachedResponse) && !controlledLoading) {
-      update({ loading: trueValue }, frontStates);
-    }
+    // loading状态受控时将不更改loading
+    // 命中缓存，或强制请求时需要设置loading为true
+    !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse }, frontStates);
 
     responseHandlePromise = response();
     const { enableDownload, enableUpload } = getConfig(methodInstance);

@@ -7,8 +7,8 @@ import {
   persistResponse,
   removePersistentResponse
 } from '@/storage/responseStorage';
-import { getLocalCacheConfigParam, isFn, key } from '@/utils/helper';
-import { falseValue, forEach, getContext, trueValue, undefinedValue } from '@/utils/variables';
+import { getContext, getLocalCacheConfigParam, isFn, key } from '@/utils/helper';
+import { falseValue, forEach, trueValue, undefinedValue } from '@/utils/variables';
 import { MethodMatcher } from '~/typings';
 
 /*
