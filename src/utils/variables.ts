@@ -1,3 +1,4 @@
+import { Alova } from '~/typings';
 import { GeneralFn } from './helper';
 
 // 以下为减少编译代码量而添加的统一处理函数或变量
@@ -35,4 +36,5 @@ export const PromiseCls = Promise as typeof Promise<any>,
   // 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
   STORAGE_RESTORE = 'restore',
   // 是否为服务端渲染
-  isSSR = typeof window === 'undefined';
+  isSSR = typeof window === 'undefined',
+  alovas = [] as Alova<any, any, any, any, any>[];

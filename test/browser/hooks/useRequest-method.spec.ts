@@ -324,7 +324,8 @@ describe('Test other methods without GET', function () {
       statesHook: VueHook,
       responded({ data }) {
         return data;
-      }
+      },
+      cacheLogger: null
     });
 
     const Get = alovaInst.Get('/unit-test-download', {

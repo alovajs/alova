@@ -1,8 +1,8 @@
 import { AlovaOptions } from '~/typings';
-import Alova, { alovas } from './Alova';
+import Alova from './Alova';
 import { getStatesHook, newInstance } from './utils/helper';
 import myAssert from './utils/myAssert';
-import { pushItem } from './utils/variables';
+import { alovas, pushItem } from './utils/variables';
 export * from './functions/manipulateCache';
 export { default as updateState } from './functions/updateState';
 export { default as useFetcher } from './hooks/useFetcher';

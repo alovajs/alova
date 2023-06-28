@@ -1,4 +1,5 @@
 import Method from '@/Method';
+import defaultCacheLogger from '@/predefine/defaultCacheLogger';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '@/storage/responseCache';
 import { persistResponse } from '@/storage/responseStorage';
@@ -17,6 +18,7 @@ import {
   newInstance,
   noop,
   promisify,
+  sloughFunction,
   _self
 } from '../utils/helper';
 import {
@@ -89,7 +91,13 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
     response = () => {
       // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
       methodInstance.abort = abort;
-      const { beforeRequest = noop, responsed, responded, requestAdapter } = getOptions(methodInstance),
+      const {
+          beforeRequest = noop,
+          responsed,
+          responded,
+          requestAdapter,
+          cacheLogger = defaultCacheLogger
+        } = getOptions(methodInstance),
         // 使用克隆之前的method key，以免在beforeRequest中method被改动而导致method key改变
         // method key在beforeRequest中被改变将会致使使用method 实例操作缓存时匹配失败
         methodKey = key(methodInstance),
@@ -116,8 +124,12 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         })
         .then(cachedResponse => {
           // 如果没有缓存则发起请求
+          const { e: expireTimestamp, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(clonedMethod);
           if (cachedResponse !== undefinedValue) {
             requestAdapterCtrlsPromiseResolveFn(); // 遇到缓存将不传入ctrls
+
+            // 打印缓存日志
+            sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod, cacheMode, tag);
             return cachedResponse;
           }
           fromCache = falseValue;
@@ -130,7 +142,6 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
               name: methodInstanceName = '',
               shareRequest
             } = getConfig(clonedMethod),
-            { e: expireTimestamp, s: toStorage, t: tag } = getLocalCacheConfigParam(clonedMethod),
             namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {}),
             // responsed是一个错误的单词，正确的单词是responded
             // 在2.1.0+添加了responded的支持，并和responsed做了兼容处理

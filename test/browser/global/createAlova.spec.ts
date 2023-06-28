@@ -2,6 +2,7 @@ import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { createAlova, Method, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import VueHook from '@/predefine/VueHook';
+import { baseURL } from '~/test/mockServer';
 
 describe('createAlova', function () {
   test('baseURL can not be set and use complete url set in method to send request', async () => {
@@ -307,7 +308,7 @@ describe('createAlova', function () {
     expect(mockFn).not.toBeCalled();
   });
 
-  test('should prints error message by `console.error` by default when get a error in useHooks', async () => {
+  test('should print error message by `console.error` by default when get a error in useHooks', async () => {
     const errorConsoleMockFn = jest.fn();
     console.error = errorConsoleMockFn; // 重写以便监听
     const alova1 = createAlova({
@@ -341,7 +342,7 @@ describe('createAlova', function () {
     expect(errorConsoleMockFn).toBeCalledTimes(3);
   });
 
-  test("shouldn't prints error message when set errorLogger to false", async () => {
+  test("shouldn't print error message when set errorLogger to false", async () => {
     const errorConsoleMockFn = jest.fn();
     console.error = errorConsoleMockFn;
     const alova = createAlova({
@@ -376,7 +377,7 @@ describe('createAlova', function () {
     expect(errorConsoleMockFn).not.toBeCalled();
   });
 
-  test('should emit custom function errorLogger when set errorLogger to a custom function', async () => {
+  test('should emit custom errorLogger function  when set errorLogger to a custom function', async () => {
     const errorConsoleMockFn = jest.fn();
     console.error = errorConsoleMockFn;
     const customLoggerMockFn = jest.fn();
@@ -417,5 +418,173 @@ describe('createAlova', function () {
     await untilCbCalled(state3.onError);
     expect(errorConsoleMockFn).not.toBeCalled();
     expect(customLoggerMockFn).toBeCalledTimes(3);
+  });
+
+  test('should print cache hit message defaultly when hit response cache', async () => {
+    const logConsoleMockFn = jest.fn();
+    console.log = logConsoleMockFn; // 重写以便监听
+    const alova1 = createAlova({
+      baseURL,
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: r => r.json()
+    });
+
+    const getter1 = alova1.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    // 请求一次缓存数据
+    const state1 = useRequest(getter1);
+    await untilCbCalled(state1.onSuccess);
+
+    const state2 = useRequest(getter1);
+    await untilCbCalled(state2.onSuccess);
+    expect(logConsoleMockFn).toBeCalledTimes(3); // 每次缓存会调用3次console.log
+    const calls1 = logConsoleMockFn.mock.calls.slice(0);
+    expect(calls1[0][0]).toBe('%c[Mode]');
+    expect(calls1[0][2]).toBe('memory');
+    expect(calls1[1][0]).toBe('%c[Method]');
+    expect(calls1[1][2]).toBeInstanceOf(Method);
+    expect(calls1[2][0]).toBe('%c[Cache]');
+    expect(calls1[2][2]).toStrictEqual({
+      method: 'GET',
+      params: {},
+      path: '/unit-test'
+    });
+
+    const getter2 = alova1.Get('/unit-test', {
+      params: { restore: '1' },
+      localCache: {
+        mode: 'restore',
+        expire: 200000,
+        tag: 'v1'
+      },
+      transformData: ({ data }: Result) => data
+    });
+    // 请求一次缓存数据
+    const state3 = useRequest(getter2);
+    await untilCbCalled(state3.onSuccess);
+    const state4 = useRequest(getter2);
+    await untilCbCalled(state4.onSuccess);
+    expect(logConsoleMockFn).toBeCalledTimes(7); // restore缓存还会打印tag
+    const calls2 = logConsoleMockFn.mock.calls.slice(3);
+    expect(calls2[0][0]).toBe('%c[Mode]');
+    expect(calls2[0][2]).toBe('restore');
+    expect(calls2[1][0]).toBe('%c[Tag]');
+    expect(calls2[1][2]).toBe('v1');
+    expect(calls2[2][0]).toBe('%c[Method]');
+    expect(calls2[2][2]).toBeInstanceOf(Method);
+    expect(calls2[3][0]).toBe('%c[Cache]');
+    expect(calls2[3][2]).toStrictEqual({
+      method: 'GET',
+      params: {
+        restore: '1'
+      },
+      path: '/unit-test'
+    });
+  });
+
+  test("shouldn't print cache hit message when set cacheLogger to false or null", async () => {
+    const logConsoleMockFn = jest.fn();
+    console.log = logConsoleMockFn; // 重写以便监听
+    const alova1 = createAlova({
+      baseURL,
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: r => r.json(),
+      cacheLogger: false
+    });
+
+    const getter1 = alova1.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    // 请求一次缓存数据
+    const state1 = useRequest(getter1);
+    await untilCbCalled(state1.onSuccess);
+    const state2 = useRequest(getter1);
+    await untilCbCalled(state2.onSuccess);
+    expect(logConsoleMockFn).toBeCalledTimes(0);
+
+    const alova2 = createAlova({
+      baseURL,
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: r => r.json(),
+      cacheLogger: null
+    });
+    const getter2 = alova2.Get('/unit-test', {
+      params: { restore: '1' },
+      localCache: {
+        mode: 'restore',
+        expire: 200000,
+        tag: 'v1'
+      },
+      transformData: ({ data }: Result) => data
+    });
+    // 请求一次缓存数据
+    const state3 = useRequest(getter2);
+    await untilCbCalled(state3.onSuccess);
+    const state4 = useRequest(getter2);
+    await untilCbCalled(state4.onSuccess);
+    expect(logConsoleMockFn).toBeCalledTimes(0);
+  });
+
+  test('should emit custom cacheLogger function when set cacheLogger to a custom function', async () => {
+    const loggerMockFn = jest.fn();
+    const alova1 = createAlova({
+      baseURL,
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: r => r.json(),
+      cacheLogger(response, methodInstance, mode, tag) {
+        loggerMockFn(response, methodInstance, mode, tag);
+      }
+    });
+
+    const getter1 = alova1.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    // 请求一次缓存数据
+    const state1 = useRequest(getter1);
+    await untilCbCalled(state1.onSuccess);
+    const state2 = useRequest(getter1);
+    await untilCbCalled(state2.onSuccess);
+    expect(loggerMockFn).toBeCalledTimes(1);
+    const calls1 = loggerMockFn.mock.calls[0];
+    expect(calls1[3]).toBeUndefined();
+    expect(calls1[2]).toBe('memory');
+    expect(calls1[1]).toBeInstanceOf(Method);
+    expect(calls1[0]).toStrictEqual({
+      method: 'GET',
+      params: {},
+      path: '/unit-test'
+    });
+
+    const getter2 = alova1.Get('/unit-test', {
+      params: { restore: '1' },
+      localCache: {
+        mode: 'restore',
+        expire: 200000,
+        tag: 'v1'
+      },
+      transformData: ({ data }: Result) => data
+    });
+    // 请求一次缓存数据
+    const state3 = useRequest(getter2);
+    await untilCbCalled(state3.onSuccess);
+    const state4 = useRequest(getter2);
+    await untilCbCalled(state4.onSuccess);
+    expect(loggerMockFn).toBeCalledTimes(2);
+    const calls2 = loggerMockFn.mock.calls[1];
+    expect(calls2[3]).toBe('v1');
+    expect(calls2[2]).toBe('restore');
+    expect(calls2[1]).toBeInstanceOf(Method);
+    expect(calls2[0]).toStrictEqual({
+      method: 'GET',
+      params: {
+        restore: '1'
+      },
+      path: '/unit-test'
+    });
   });
 });

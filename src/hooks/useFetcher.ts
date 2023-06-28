@@ -1,9 +1,8 @@
-import { alovas } from '@/Alova';
 import createRequestState from '@/functions/createRequestState';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { exportFetchStates, noop } from '@/utils/helper';
 import { assertAlovaCreation, assertMethodMatcher } from '@/utils/myAssert';
-import { falseValue, trueValue } from '@/utils/variables';
+import { alovas, falseValue, trueValue } from '@/utils/variables';
 import { FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
 
 /**

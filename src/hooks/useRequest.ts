@@ -1,8 +1,8 @@
-import Alova, { alovas } from '@/Alova';
+import Alova from '@/Alova';
 import createRequestState from '@/functions/createRequestState';
 import Method from '@/Method';
 import { assertAlovaCreation } from '@/utils/myAssert';
-import { trueValue } from '@/utils/variables';
+import { alovas, trueValue } from '@/utils/variables';
 import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
 
 export default function useRequest<S, E, R, T, RC, RE, RH>(

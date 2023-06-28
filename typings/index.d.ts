@@ -78,9 +78,10 @@ interface AlovaGlobalStorage {
  * mode: 缓存模式，可选值为memory、placeholder、restore
  */
 type CacheExpire = number | Date | null;
+type CacheMode = 'memory' | 'placeholder' | 'restore';
 type DetailLocalCacheConfig = {
   expire: CacheExpire;
-  mode?: 'memory' | 'placeholder' | 'restore';
+  mode?: CacheMode;
 
   /** 持久化缓存标签，标签改变后原有持久化数据将会失效 */
   tag?: string | number;
@@ -195,6 +196,12 @@ interface StatesHook<S, E> {
 }
 
 type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>> | null;
+type CacheLoggerHandler<RC, RE, RH> = (
+  response: any,
+  methodInstance: Method<any, any, any, any, RC, RE, RH>,
+  cacheMode: CacheMode,
+  tag: DetailLocalCacheConfig['tag']
+) => void | Promise<void>;
 /**
  * 泛型类型解释：
  * S: create函数创建的状态组的类型
@@ -255,11 +262,21 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * 错误日志打印
    * 当请求错误，或者在全局的响应回调函数、请求级的transformData、localCache函数抛出错误时，将会触发onError，同时在控制台输出错误信息（默认）
    * 设置为false、null值时将不打印错误日志
-   * 设置为自定义函数时将自定义接管输出任务
+   * 设置为自定义函数时将自定义接管错误信息的任务
    * @version 2.6.0
    * @default true
    */
   errorLogger?: boolean | null | ResponseErrorHandler<any, any, RC, RE, RH>;
+
+  /**
+   * 缓存日志打印
+   * 当命中响应缓存时将默认在控制台打印匹配的缓存信息，以提醒开发者
+   * 设置为false、null值时将不打印日志
+   * 设置为自定义函数时将自定义接管缓存匹配的任务
+   * @version 2.8.0
+   * @default true
+   */
+  cacheLogger?: boolean | null | CacheLoggerHandler<RC, RE, RH>;
 }
 
 /** 请求方法类型 */

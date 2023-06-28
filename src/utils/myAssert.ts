@@ -1,7 +1,6 @@
-import { alovas } from '@/Alova';
 import { Method } from '..';
 import alovaError from './alovaError';
-import { len } from './variables';
+import { alovas, len } from './variables';
 
 /**
  * 自定义断言函数，表达式为false时抛出错误

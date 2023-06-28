@@ -74,7 +74,8 @@ export const getAlovaInstance = <S, E>(
             onError: resErrorExpect
           }
         : undefined,
-    errorLogger: false
+    errorLogger: false,
+    cacheLogger: false
   });
   if (localCache !== undefined) {
     alovaInst.options.localCache = localCache;

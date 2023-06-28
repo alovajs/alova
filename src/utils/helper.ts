@@ -1,4 +1,4 @@
-import { Alova, AlovaMethodHandler, CacheExpire, FrontRequestState } from '~/typings';
+import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } from '~/typings';
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
@@ -149,7 +149,7 @@ export const noop = () => {},
     const _localCache = getConfig(methodInstance).localCache,
       getCacheExpireTs = (_localCache: CacheExpire) =>
         isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache || undefinedValue);
-    let cacheMode = MEMORY,
+    let cacheMode: CacheMode = MEMORY,
       expire = 0,
       storage = falseValue,
       tag: undefined | string = undefinedValue;
@@ -195,6 +195,8 @@ export const noop = () => {},
    */
   sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) =>
     isFn(config) ? config(...args) : config,
+  sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
+    isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop,
   /**
    * 将targetFn转换为异步函数
    * @param targetFn 目标函数
