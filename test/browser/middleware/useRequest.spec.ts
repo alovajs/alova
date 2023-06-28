@@ -211,14 +211,13 @@ describe('useRequet middleware', function () {
       mockFn2();
     });
 
-    expect(loading.value).toBeFalsy();
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     await untilCbCalled(setTimeout, 500);
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeInstanceOf(Error);
     expect(data.value).toBeUndefined();
-
     expect(mockFn).toBeCalledTimes(2);
     expect(mockFn2).toBeCalledTimes(1);
   });
@@ -240,7 +239,7 @@ describe('useRequet middleware', function () {
     });
 
     // 错误在middleware中捕获后，外部不再接收到错误
-    expect(loading.value).toBeFalsy();
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     await untilCbCalled(onSuccess);

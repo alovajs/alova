@@ -7,31 +7,31 @@ import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
 import createAlovaEvent from '@/utils/createAlovaEvent';
 import {
-  exportFetchStates,
   GeneralFn,
+  exportFetchStates,
+  getConfig,
+  getContext,
   getHandlerMethod,
   getLocalCacheConfigParam,
   instanceOf,
   isFn,
   key,
   noop,
-  sloughConfig
+  sloughConfig,
+  sloughFunction
 } from '@/utils/helper';
 import myAssert, { assertMethodMatcher } from '@/utils/myAssert';
 import {
+  MEMORY,
+  PromiseCls,
+  STORAGE_RESTORE,
   falseValue,
   forEach,
-  getConfig,
-  getContext,
   len,
-  MEMORY,
-  nullValue,
   promiseCatch,
-  PromiseCls,
   promiseReject,
   promiseResolve,
   promiseThen,
-  STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '@/utils/variables';
@@ -79,15 +79,14 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   isFetcher = falseValue
 ) {
   const methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
-  myAssert(
-    instanceOf(methodInstance, Method),
-    'hook handler must be a method instance or a function that returns method instance'
-  );
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
       | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
       | FetcherHookConfig,
     { id, options, storage } = getContext(methodInstance),
-    { update } = options.statesHook,
+    {
+      statesHook: { update },
+      errorLogger
+    } = options,
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = key(methodInstance),
     { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
@@ -155,11 +154,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     abortFn = abort;
     fromCache = getFromCacheValue;
 
-    // 命中缓存，或强制请求时需要更新loading状态
-    // loading状态受控时将不再更改为false
-    if ((forceRequestFinally || !cachedResponse) && !controlledLoading) {
-      update({ loading: trueValue }, frontStates);
-    }
+    // loading状态受控时将不更改loading
+    // 命中缓存，或强制请求时需要设置loading为true
+    !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse }, frontStates);
 
     responseHandlePromise = response();
     const { enableDownload, enableUpload } = getConfig(methodInstance);
@@ -318,13 +315,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     // catch回调函数
     (error: Error) => {
       // 控制在输出错误消息
-      let errorLogger = options.errorLogger;
-      errorLogger = isFn(errorLogger)
-        ? errorLogger
-        : ![falseValue, nullValue].includes(errorLogger as any)
-        ? defaultErrorLogger
-        : undefinedValue;
-      errorLogger && errorLogger(error, methodInstance);
+      sloughFunction(errorLogger, defaultErrorLogger)(error, methodInstance);
 
       const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
       // loading状态受控时将不再更改为false

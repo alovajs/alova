@@ -5,6 +5,7 @@ import {
   clearTimeoutTimer,
   falseValue,
   forEach,
+  isSSR,
   objectKeys,
   setTimeoutFn,
   trueValue,
@@ -27,10 +28,14 @@ export default {
       sItem.set(newVal[key]);
     }),
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<Writable<any>>) {
+    // 在服务端渲染时不发送请求
+    if (isSSR) {
+      return;
+    }
+
     // 组件卸载时移除对应状态
     onDestroy(removeStates);
     immediate && handler();
-
     let timer: any,
       needEmit = falseValue;
     forEach(watchingStates || [], (state, i) => {

@@ -1,4 +1,5 @@
-import { deleteAttr, getTime } from '@/utils/variables';
+import { getTime } from '@/utils/helper';
+import { deleteAttr } from '@/utils/variables';
 
 // 响应数据缓存
 let responseCache: Record<string, Record<string, [data: any, expireTime: number]>> = {};

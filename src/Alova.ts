@@ -6,7 +6,6 @@ import { trueValue } from './utils/variables';
 
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 
-export const alovas = [] as Alova<any, any, any, any, any>[];
 const defaultAlovaOptions = {
   /**
    * GET请求默认缓存5分钟（300000毫秒），其他请求默认不缓存

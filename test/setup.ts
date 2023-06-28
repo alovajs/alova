@@ -3,7 +3,6 @@ import 'web-streams-polyfill';
 import mockServer from './mockServer';
 
 (global as any).fetch = nodeFetch;
-(global as any).isSSR = typeof window === 'undefined';
 
 // 防止Vue warn打印
 const warn = console.warn;

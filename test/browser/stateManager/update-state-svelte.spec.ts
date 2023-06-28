@@ -3,7 +3,7 @@ import { untilCbCalled } from '#/utils';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
-(isSSR ? xdescribe : describe)('update cached response data by user in Svelte', () => {
+describe('update cached response data by user in Svelte', () => {
   test('the cached response data should be changed and the screen should be update', async () => {
     render(page);
     await screen.findByText(/loaded/);

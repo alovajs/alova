@@ -1,8 +1,8 @@
 import { AlovaOptions } from '~/typings';
-import Alova, { alovas } from './Alova';
-import { newInstance } from './utils/helper';
+import Alova from './Alova';
+import { getStatesHook, newInstance } from './utils/helper';
 import myAssert from './utils/myAssert';
-import { getStatesHook, pushItem } from './utils/variables';
+import { alovas, pushItem } from './utils/variables';
 export * from './functions/manipulateCache';
 export { default as updateState } from './functions/updateState';
 export { default as useFetcher } from './hooks/useFetcher';
@@ -22,7 +22,7 @@ export const createAlova = <S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE
   if (alovas[0]) {
     myAssert(
       getStatesHook(alovas[0]) === getStatesHook(alovaInstance),
-      'must use the same statesHook in one environment'
+      'must use the same `statesHook` in single project'
     );
   }
   pushItem(alovas, alovaInstance);

@@ -1,5 +1,5 @@
-import { alovas } from '@/Alova';
-import { forEach, getTime, nullValue, pushItem } from '@/utils/variables';
+import { getTime } from '@/utils/helper';
+import { alovas, forEach, nullValue, pushItem } from '@/utils/variables';
 import { AlovaGlobalStorage } from '~/typings';
 
 const responseStorageKeyPrefix = 'alova.';

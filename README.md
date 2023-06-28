@@ -66,7 +66,7 @@ The original intention of alova is to propose a solution for different request s
 
 ## Library Stability
 
-It has been more then one year since the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 160+ unit tests, with a coverage rate of 99%. and it almost in a stable state. Even so, alova is still a rookie, it still has a large development space.
+It has been more then one year since the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 170+ unit tests, with a coverage rate of 99%. and it almost in a stable state. Even so, alova is still a rookie, it still has a large development space.
 
 **I promise to solve it as soon as possible after receiving your issue**
 
