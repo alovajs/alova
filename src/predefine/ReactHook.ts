@@ -1,10 +1,10 @@
-import { forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
+import { isNumber } from '@/utils/helper';
+import { forEach, mapItem, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { EffectRequestParams } from '~/typings';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 type UnknownState = ReactState<unknown>;
-
 const stateToData = <D>([state]: ReactState<D>) => state,
   refCurrent = <T>(ref: MutableRefObject<T>) => ref.current,
   setRef = <T>(ref: MutableRefObject<T>, newVal: T) => (ref.current = newVal);
@@ -27,23 +27,22 @@ export default {
     watchingStates = []
   }: EffectRequestParams<any>) {
     // 当有监听状态时，状态变化再触发
-    const needEmit = useRef(immediate),
-      oldStates = watchingStates.map(s => useRef(s)); // 用于对比新旧值
+    const oldStates = mapItem(watchingStates, s => useRef(s)); // 用于对比新旧值
     useEffect(() => {
       // 对比新旧状态，获取变化的状态索引
       let changedIndex: number | undefined = undefinedValue;
       forEach(watchingStates, (newState, i) => {
         if (!Object.is(refCurrent(oldStates[i]), newState)) {
           changedIndex = i;
-          oldStates[i].current = newState;
+          setRef(oldStates[i], newState);
         }
       });
-      refCurrent(needEmit)
-        ? handler(changedIndex)
-        : setTimeoutFn(() => {
-            setRef(needEmit, trueValue);
-          });
-      return removeStates; // 组件卸载时移除对应状态
+
+      if (immediate || isNumber(changedIndex)) {
+        handler(changedIndex);
+      }
+      // 组件卸载时移除对应状态
+      return removeStates;
     }, watchingStates);
 
     // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效

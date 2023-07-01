@@ -2,7 +2,7 @@ import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from 
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { getConfig, getContextOptions, instanceOf, isPlainObject, key, noop } from './utils/helper';
-import { deleteAttr, falseValue, forEach, isArray, undefinedValue } from './utils/variables';
+import { deleteAttr, falseValue, forEach, isArray, mapItem, undefinedValue } from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -59,7 +59,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
 
     // 将hitSource统一处理成数组，且当有method实例时将它们转换为methodKey
     if (hitSource) {
-      this.hitSource = (isArray(hitSource) ? hitSource : [hitSource]).map(sourceItem =>
+      this.hitSource = mapItem(isArray(hitSource) ? hitSource : [hitSource], sourceItem =>
         instanceOf(sourceItem, Method) ? key(sourceItem) : (sourceItem as string | RegExp)
       );
       deleteAttr(config, 'hitSource');
