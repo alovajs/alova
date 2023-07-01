@@ -25,6 +25,7 @@ import {
   deleteAttr,
   falseValue,
   len,
+  mapItem,
   objectKeys,
   PromiseCls,
   promiseThen,
@@ -54,10 +55,10 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
 
   // 将params对象转换为get字符串
   // 过滤掉值为undefined的
-  const paramsStr = objectKeys(params)
-    .filter(key => params[key] !== undefinedValue)
-    .map(key => `${key}=${params[key]}`)
-    .join('&');
+  const paramsStr = mapItem(
+    objectKeys(params).filter(key => params[key] !== undefinedValue),
+    key => `${key}=${params[key]}`
+  ).join('&');
   // 将get参数拼接到url后面，注意url可能已存在参数
   return paramsStr
     ? +completeURL.includes('?')
