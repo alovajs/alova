@@ -1,5 +1,5 @@
-import { isNumber } from '@/utils/helper';
-import { forEach, mapItem, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
+import { isNumber, noop } from '@/utils/helper';
+import { falseValue, forEach, mapItem, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { EffectRequestParams } from '~/typings';
 
@@ -18,6 +18,16 @@ export default {
     forEach(objectKeys(newVal), key => {
       states[key][1](newVal[key] as any);
     }),
+  wrap: (fn: (...args: any[]) => any, isAbort = falseValue) => {
+    // abort函数在react下需要使用同一个函数，否则会访问不到原abort函数
+    // 其他函数使用可以访问最新状态的同一个函数
+    if (!isAbort) {
+      const fnRef = useRef(noop as typeof fn);
+      setRef(fnRef, fn);
+      fn = (...args: any[]) => refCurrent(fnRef)(...args);
+    }
+    return useCallback(fn, []);
+  },
   effectRequest({
     handler,
     removeStates,

@@ -185,6 +185,15 @@ interface StatesHook<S, E> {
   update: (newVal: Record<string, any>, state: Record<string, S>) => void;
 
   /**
+   * 包装send、abort等use hooks操作函数
+   * 这主要用于优化在react中，每次渲染都会生成新函数的问题，优化性能
+   * @param fn use hook操作函数
+   * @param isAbort 是否为abort函数，abort函数在react需要不同的处理
+   * @returns 包装后的操作函数
+   */
+  wrap?: (fn: (...args: any[]) => any, isAbort?: boolean) => (...args: any[]) => any;
+
+  /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
    * 在useFetcher中的fetch函数中执行一次
    * 当watchedStates为空数组时，执行一次handleRequest函数
