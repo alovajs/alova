@@ -272,4 +272,53 @@ describe('useRequet hook with react', () => {
       expect(renderMockFn).toBeCalledTimes(2);
     });
   });
+
+  test('should abort function when call function abort', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test-10s', {
+      timeout: 10000,
+      transformData: ({ data }: Result<true>) => data,
+      localCache: 100 * 1000
+    });
+
+    function Page() {
+      const { loading, abort, error, data = { path: '', method: '' }, update } = useRequest(Get);
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          {error ? <span role="error">{error.message}</span> : null}
+          <button
+            role="btnUpd"
+            onClick={() => {
+              update({
+                data: {
+                  path: '/abc',
+                  method: 'GET'
+                }
+              });
+            }}>
+            update
+          </button>
+          <button
+            role="btnAbort"
+            onClick={abort}>
+            abort
+          </button>
+        </div>
+      );
+    }
+    render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 100);
+    fireEvent.click(screen.getByRole('btnUpd'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/abc');
+    });
+    fireEvent.click(screen.getByRole('btnAbort'));
+    await waitFor(() => {
+      expect(screen.getByRole('error')).toHaveTextContent('user aborted a request');
+    });
+  });
 });

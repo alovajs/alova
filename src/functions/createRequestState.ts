@@ -1,13 +1,13 @@
 import { getResponseCache } from '@/storage/responseCache';
-import { debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
+import { _self, debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
-  FetcherHookConfig,
   FetchRequestState,
+  FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -61,7 +61,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     initialLoading = !!forceRequestFinally || !cachedResponse;
   }
 
-  const { create, export: stateExport, effectRequest, update } = statesHook,
+  const { create, export: stateExport, effectRequest, update, wrap = _self } = statesHook,
     progress: Progress = {
       total: 0,
       loaded: 0
@@ -143,20 +143,22 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(completeHandlers, handler);
     },
-    update(
-      newStates:
-        | Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
-        | Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
-    ) {
-      // 当useFetcher调用时，其fetching使用的是loading，更新时需要转换过来
-      const { fetching } = newStates;
-      if (fetching) {
-        newStates.loading = fetching;
-        deleteAttr(newStates, 'fetching');
+    update: wrap(
+      (
+        newStates:
+          | Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
+          | Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
+      ) => {
+        // 当useFetcher调用时，其fetching使用的是loading，更新时需要转换过来
+        const { fetching } = newStates;
+        if (fetching) {
+          newStates.loading = fetching;
+          deleteAttr(newStates, 'fetching');
+        }
+        update(newStates, frontStates);
       }
-      update(newStates, frontStates);
-    },
-    abort: () => abortFn(),
+    ),
+    abort: wrap(() => abortFn(), trueValue),
 
     /**
      * 通过执行该方法来手动发起请求
@@ -165,7 +167,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: (sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
+    send: wrap((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
       handleRequest(methodInstance, useHookConfig, sendCallingArgs, isFetcher)
+    )
   };
 }
