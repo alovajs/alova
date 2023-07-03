@@ -1,21 +1,33 @@
 {
-  // 使用 IntelliSense 了解相关属性。 
+  // 使用 IntelliSense 了解相关属性。
   // 悬停以查看现有属性的描述。
   // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-    { 
+    {
       "type": "node",
       "request": "launch",
-      "name": "Unit Test",
+      "name": "browser unit test",
       "runtimeExecutable": "npm",
       "windows": {
         "runtimeExecutable": "npm.cmd"
       },
-      "runtimeArgs": [
-        "run",
-        "test"
-      ],
+      "runtimeArgs": ["run", "test:browser"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceRoot}",
+      "env": {
+        "NODE_ENV": "test"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "server unit test",
+      "runtimeExecutable": "npm",
+      "windows": {
+        "runtimeExecutable": "npm.cmd"
+      },
+      "runtimeArgs": ["run", "test:node"],
       "console": "integratedTerminal",
       "cwd": "${workspaceRoot}",
       "env": {

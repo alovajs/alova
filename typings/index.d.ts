@@ -224,7 +224,7 @@ interface StatesHook<S, E> {
    * @param initialValue 初始值
    * @returns 包含初始值的引用对象
    */
-  ref?: <D>(initialValue: D) => { v: D };
+  ref?: <D>(initialValue: D) => { current: D };
 }
 
 type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>> | null;
