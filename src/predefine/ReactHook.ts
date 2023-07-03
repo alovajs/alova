@@ -25,8 +25,8 @@ export default {
     return useCallback((...args: any[]) => refCurrent(fnRef)(...args), []);
   },
   ref: (initialValue: any) => {
-    const refObj = useRef(initialValue) as any;
-    refObj.v === undefinedValue && (refObj.v = initialValue);
+    const refObj = useRef(initialValue);
+    refCurrent(refObj) === undefinedValue && setRef(refObj, initialValue);
     return refObj;
   },
   effectRequest({

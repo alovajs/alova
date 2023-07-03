@@ -29,6 +29,7 @@ import {
 } from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
+const refCurrent = <T>(ref: { current: T }) => ref.current;
 export type SaveStateFn = (frontStates: FrontRequestState) => void;
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useFetcher中一致的逻辑
@@ -60,7 +61,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       effectRequest,
       update,
       memorize = _self,
-      ref = val => ({ v: val })
+      ref = val => ({ current: val })
     } = statesHook,
     abortFn = ref(noop),
     removeStatesFns = ref([] as (typeof noop)[]),
@@ -113,9 +114,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         completeHandlers,
         ({ abort, r: removeStates, s: saveStates }) => {
           // 每次发送请求都需要保存最新的控制器
-          abortFn.v = abort;
-          pushItem(removeStatesFns.v, removeStates);
-          pushItem(saveStatesFns.v, saveStates);
+          abortFn.current = abort;
+          pushItem(refCurrent(removeStatesFns), removeStates);
+          pushItem(refCurrent(saveStatesFns), saveStates);
         },
         sendCallingArgs,
         updateCacheState
@@ -134,8 +135,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
             isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
           )
         : wrapEffectRequest,
-    removeStates: () => forEach(removeStatesFns.v, fn => fn()),
-    saveStates: (states: FrontRequestState) => forEach(saveStatesFns.v, fn => fn(states)),
+    removeStates: () => forEach(refCurrent(removeStatesFns), fn => fn()),
+    saveStates: (states: FrontRequestState) => forEach(refCurrent(saveStatesFns), fn => fn(states)),
     frontStates: frontStates,
     watchingStates,
     immediate: immediate ?? trueValue
@@ -174,7 +175,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         update(newStates, frontStates);
       }
     ),
-    abort: memorize(() => abortFn.v(), trueValue),
+    abort: memorize(() => refCurrent(abortFn)(), trueValue),
 
     /**
      * 通过执行该方法来手动发起请求
