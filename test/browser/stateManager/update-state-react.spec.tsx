@@ -1,11 +1,12 @@
 import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { updateState, useRequest } from '@/index';
+import { updateState, useRequest, useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
+import { getStateCache } from '@/storage/stateCache';
 import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
 describe('update cached response data by user in react', function () {
@@ -45,7 +46,7 @@ describe('update cached response data by user in react', function () {
     expect(storageData.path).toBe('/unit-test-updated'); // 持久化数据也将被更新
   });
 
-  test('front states would be valid when not changed theirs value', async () => {
+  test('front states would be valid when not change their value', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
     });
@@ -55,7 +56,6 @@ describe('update cached response data by user in react', function () {
 
     function Page() {
       const [count, setCount] = useState(0);
-
       const { data } = useRequest(Get, {
         initialData: { path: '' }
       });
@@ -65,7 +65,7 @@ describe('update cached response data by user in react', function () {
           <div role="path">{data.path}</div>
           <span
             role="count"
-            onClick={() => setCount(count + 1)}>
+            onClick={() => setCount(v => v + 1)}>
             {count}
           </span>
         </div>
@@ -78,7 +78,7 @@ describe('update cached response data by user in react', function () {
     fireEvent.click(screen.getByRole('count'));
     await screen.findByText('1');
 
-    await act(() => {
+    act(() => {
       updateState(Get, data => {
         return {
           ...data,
@@ -139,12 +139,132 @@ describe('update cached response data by user in react', function () {
       });
     }).toThrow();
 
-    await act(() => {
+    act(() => {
       // 更新成功
       updateState(Get, {
         extraData: () => 1
       });
     });
     expect(screen.getByRole('extraData')).toHaveTextContent('1');
+  });
+
+  test('the request sent by the same use hook should have the same saved states', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (str1: string) =>
+      alova.Get('/unit-test', {
+        params: { str1 },
+        transformData: ({ data }: Result) => data
+      });
+
+    const successMockFn = jest.fn();
+    function Page() {
+      const [strState, setStrState] = useState('a');
+      const { data, loading, onSuccess } = useWatcher(() => getter(strState), [strState], {
+        initialData: { path: '', method: '', params: {} },
+        immediate: true
+      });
+      onSuccess(successMockFn);
+      return (
+        <div>
+          <div>{loading ? 'loading...' : 'loaded'}</div>
+          <div role="path">{data.path}</div>
+          <div>{strState}</div>
+          <button
+            role="btnUpd"
+            onClick={() => setStrState('b')}>
+            update state
+          </button>
+        </div>
+      );
+    }
+    render((<Page />) as ReactElement<any, any>);
+    await waitFor(() => {
+      expect(successMockFn).toBeCalledTimes(1);
+    });
+    fireEvent.click(screen.getByRole('btnUpd'));
+    await waitFor(() => {
+      expect(successMockFn).toBeCalledTimes(2);
+    });
+
+    // 执行了两次不同参数的请求后，验证两次请求是否缓存了相同的states
+    act(() => {
+      updateState(getter('a'), {
+        data: d => {
+          return {
+            ...d,
+            path: '/path-str-a'
+          };
+        }
+      });
+    });
+    expect(screen.getByRole('path')).toHaveTextContent('/path-str-a');
+    act(() => {
+      updateState(getter('b'), {
+        data: d => {
+          return {
+            ...d,
+            path: '/path-str-b'
+          };
+        }
+      });
+    });
+    expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');
+
+    // 两处缓存的状态应该都是最新值
+    expect(getStateCache(alova.id, key(getter('a')))?.data[0].path).toBe('/path-str-b');
+    expect(getStateCache(alova.id, key(getter('b')))?.data[0].path).toBe('/path-str-b');
+  });
+
+  test('all saved states in unmounted component will be removed', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (str1: string) =>
+      alova.Get('/unit-test', {
+        params: { str1 },
+        transformData: ({ data }: Result) => data
+      });
+
+    const successMockFn = jest.fn();
+    function Page() {
+      const [strState, setStrState] = useState('a');
+      const { data, loading, onSuccess } = useWatcher(() => getter(strState), [strState], {
+        initialData: { path: '', method: '', params: {} },
+        immediate: true
+      });
+      onSuccess(successMockFn);
+      return (
+        <div>
+          <div>{loading ? 'loading...' : 'loaded'}</div>
+          <div role="path">{data.path}</div>
+          <div>{strState}</div>
+          <button
+            role="btnUpd"
+            onClick={() => setStrState('b')}>
+            update state
+          </button>
+        </div>
+      );
+    }
+
+    const { unmount } = render((<Page />) as ReactElement<any, any>);
+    await waitFor(() => {
+      expect(successMockFn).toBeCalledTimes(1);
+      expect(getStateCache(alova.id, key(getter('a')))).not.toBeUndefined();
+    });
+    fireEvent.click(screen.getByRole('btnUpd'));
+    await waitFor(() => {
+      expect(successMockFn).toBeCalledTimes(2);
+      expect(getStateCache(alova.id, key(getter('b')))).not.toBeUndefined();
+    });
+
+    // 组件卸载后，对应缓存状态会被删除
+    unmount();
+    await waitFor(() => {
+      expect(getStateCache(alova.id, key(getter('a')))).toBeUndefined();
+      expect(getStateCache(alova.id, key(getter('b')))).toBeUndefined();
+    });
   });
 });

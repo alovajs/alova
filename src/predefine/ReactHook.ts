@@ -1,5 +1,5 @@
 import { isNumber, noop } from '@/utils/helper';
-import { falseValue, forEach, mapItem, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
+import { forEach, mapItem, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { EffectRequestParams } from '~/typings';
 
@@ -11,22 +11,23 @@ const stateToData = <D>([state]: ReactState<D>) => state,
 
 // React的预定义hooks
 export default {
-  create: (data: any) => useState(data),
+  create: (initialValue: any) => useState(initialValue),
   export: stateToData,
   dehydrate: stateToData,
   update: (newVal: Record<string, any>, states: Record<string, UnknownState>) =>
     forEach(objectKeys(newVal), key => {
       states[key][1](newVal[key] as any);
     }),
-  wrap: (fn: (...args: any[]) => any, isAbort = falseValue) => {
-    // abort函数在react下需要使用同一个函数，否则会访问不到原abort函数
-    // 其他函数使用可以访问最新状态的同一个函数
-    if (!isAbort) {
-      const fnRef = useRef(noop as typeof fn);
-      setRef(fnRef, fn);
-      fn = (...args: any[]) => refCurrent(fnRef)(...args);
-    }
-    return useCallback(fn, []);
+  memorize: (fn: (...args: any[]) => any) => {
+    // 使用useCallback使用同一个引用，同事通过useRef来引用最新函数
+    const fnRef = useRef(noop as typeof fn);
+    setRef(fnRef, fn);
+    return useCallback((...args: any[]) => refCurrent(fnRef)(...args), []);
+  },
+  ref: (initialValue: any) => {
+    const refObj = useRef(initialValue) as any;
+    refObj.v === undefinedValue && (refObj.v = initialValue);
+    return refObj;
   },
   effectRequest({
     handler,
@@ -57,10 +58,9 @@ export default {
 
     // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
     // 因此每次都需要更新管理的状态
-    const needSave = useRef(false),
-      saveStatesFn = useCallback(saveStates, []);
+    const needSave = useRef(false);
     useEffect(() => {
-      refCurrent(needSave) ? saveStatesFn(frontStates) : setRef(needSave, trueValue);
+      refCurrent(needSave) ? saveStates(frontStates) : setRef(needSave, trueValue);
     });
   }
 };

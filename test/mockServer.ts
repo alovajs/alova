@@ -35,8 +35,8 @@ export const baseURL = 'http://localhost:3000';
 const countMap = {} as Record<string, number>;
 const mockServer = setupServer(
   rest.get(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx)),
-  rest.get(baseURL + '/unit-test-10s', (req, res, ctx) => {
-    return new Promise(r => setTimeout(() => r(result(200, req, res, ctx)), 10000));
+  rest.get(baseURL + '/unit-test-1s', (req, res, ctx) => {
+    return new Promise(r => setTimeout(() => r(result(200, req, res, ctx)), 1000));
   }),
   rest.get(baseURL + '/unit-test-count', (req, res, ctx) => {
     const key = req.url.searchParams.get('countKey') || '';

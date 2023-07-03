@@ -40,7 +40,7 @@ describe('update cached response data by user in vue', function () {
       mockfn();
       return data;
     });
-    expect(mockfn.mock.calls.length).toBe(0);
+    expect(mockfn).not.toBeCalled();
     expect(updated).toBeFalsy();
   });
 
@@ -161,7 +161,7 @@ describe('update cached response data by user in vue', function () {
     expect(extraData.value).toBe(1);
   });
 
-  test('shouldn return false when matched method instance but has no cached states', async () => {
+  test("shouldn't return false when matched method instance but has no cached states", async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });

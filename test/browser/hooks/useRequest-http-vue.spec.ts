@@ -190,7 +190,7 @@ describe('use useRequest hook to send GET with vue', function () {
         throw error;
       }
     });
-    const Get = alova.Get<string, Result<string>>('/unit-test-10s', { timeout: 500 });
+    const Get = alova.Get<string, Result<string>>('/unit-test-1s', { timeout: 500 });
     const { loading, data, error, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
@@ -210,7 +210,7 @@ describe('use useRequest hook to send GET with vue', function () {
         return Promise.reject(error);
       }
     });
-    const Get = alova.Get<string, Result<string>>('/unit-test-10s');
+    const Get = alova.Get<string, Result<string>>('/unit-test-1s');
     const { loading, data, error, abort, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
@@ -231,7 +231,7 @@ describe('use useRequest hook to send GET with vue', function () {
         return Promise.reject(error);
       }
     });
-    const Get = alova.Get<string, Result<string>>('/unit-test-10s');
+    const Get = alova.Get<string, Result<string>>('/unit-test-1s');
     const { loading, data, error, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
@@ -256,7 +256,7 @@ describe('use useRequest hook to send GET with vue', function () {
         return Promise.reject(error);
       }
     });
-    const Get = alova.Get<string, Result<string>>('/unit-test-10s');
+    const Get = alova.Get<string, Result<string>>('/unit-test-1s');
     const { loading, data, error, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();

@@ -4,6 +4,8 @@
     <div role="path">{$data.path}</div>
     <div role="id1">{$data.params.id1}</div>
     <div role="id2">{$data.params.id2}</div>
+    <div role="alovaId">{alova.id}</div>
+    <div role="methodKey">{methodKey}</div>
   {/if}
   <button on:click={handleClick}>button</button>
 </div>
@@ -12,10 +14,10 @@
 import { createAlova, useWatcher } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import SvelteHook from '@/predefine/SvelteHook';
+import { key } from '@/utils/helper';
 import { writable } from 'svelte/store';
 const stateId1 = writable(0);
 const stateId2 = writable(10);
-
 
 const alova = createAlova({
   baseURL: 'http://localhost:3000',
@@ -37,12 +39,16 @@ const handleClick = () => {
   $stateId2++;
 };
 
-
+let methodKey = '';
 const {
   loading,
   data,
   onSuccess,
-} = useWatcher(() => getter($stateId1, $stateId2), [stateId1, stateId2], {
+} = useWatcher(() => {
+  const methodItem = getter($stateId1, $stateId2);
+  methodKey = key(methodItem);
+  return methodItem;
+}, [stateId1, stateId2], {
   immediate: true,
   initialData: {
     path: '',

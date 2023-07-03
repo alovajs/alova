@@ -277,14 +277,15 @@ describe('useRequet hook with react', () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
     });
-    const Get = alova.Get('/unit-test-10s', {
+    const Get = alova.Get('/unit-test-1s', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
       localCache: 100 * 1000
     });
 
+    let i = 0;
     function Page() {
-      const { loading, abort, error, data = { path: '', method: '' }, update } = useRequest(Get);
+      const { loading, abort, send, error, data = { path: '', method: '' }, update } = useRequest(Get);
       return (
         <div role="wrap">
           <span role="status">{loading ? 'loading' : 'loaded'}</span>
@@ -295,12 +296,18 @@ describe('useRequet hook with react', () => {
             onClick={() => {
               update({
                 data: {
-                  path: '/abc',
+                  path: '/abc' + i++,
                   method: 'GET'
-                }
+                },
+                error: undefined
               });
             }}>
             update
+          </button>
+          <button
+            role="btnSend"
+            onClick={() => send().catch(() => {})}>
+            send
           </button>
           <button
             role="btnAbort"
@@ -314,11 +321,23 @@ describe('useRequet hook with react', () => {
     await untilCbCalled(setTimeout, 100);
     fireEvent.click(screen.getByRole('btnUpd'));
     await waitFor(() => {
-      expect(screen.getByRole('path')).toHaveTextContent('/abc');
+      expect(screen.getByRole('path')).toHaveTextContent('/abc0');
     });
     fireEvent.click(screen.getByRole('btnAbort'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('user aborted a request');
+      expect(screen.getByRole('error')).toHaveTextContent('[alova]The user aborted a request.');
+    });
+
+    // 再一次进行中断
+    fireEvent.click(screen.getByRole('btnSend'));
+    await untilCbCalled(setTimeout, 100);
+    fireEvent.click(screen.getByRole('btnUpd'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/abc1');
+    });
+    fireEvent.click(screen.getByRole('btnAbort'));
+    await waitFor(() => {
+      expect(screen.getByRole('error')).toHaveTextContent('[alova]The user aborted a request.');
     });
   });
 });
