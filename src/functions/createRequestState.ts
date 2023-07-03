@@ -1,13 +1,13 @@
 import { getResponseCache } from '@/storage/responseCache';
-import { _self, debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
+import { debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig, _self } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
-  FetchRequestState,
   FetcherHookConfig,
+  FetchRequestState,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -17,7 +17,16 @@ import {
 } from '~/typings';
 import Alova from '../Alova';
 import Method from '../Method';
-import { deleteAttr, falseValue, isArray, promiseCatch, pushItem, trueValue, undefinedValue } from '../utils/variables';
+import {
+  deleteAttr,
+  falseValue,
+  forEach,
+  isArray,
+  promiseCatch,
+  pushItem,
+  trueValue,
+  undefinedValue
+} from '../utils/variables';
 import useHookToSendRequest from './useHookToSendRequest';
 
 export type SaveStateFn = (frontStates: FrontRequestState) => void;
@@ -45,10 +54,18 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
 ) {
   const statesHook = getStatesHook(alovaInstance);
   myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
-  let abortFn = noop,
-    removeStatesFn = noop,
-    saveStatesFn = noop as SaveStateFn,
-    initialLoading = falseValue;
+  const {
+      create,
+      export: stateExport,
+      effectRequest,
+      update,
+      memorize = _self,
+      ref = val => ({ v: val })
+    } = statesHook,
+    abortFn = ref(noop),
+    removeStatesFns = ref([] as (typeof noop)[]),
+    saveStatesFns = ref([] as SaveStateFn[]);
+  let initialLoading = falseValue;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
   // 1. 在react下立即发送请求可以少渲染一次
@@ -61,8 +78,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     initialLoading = !!forceRequestFinally || !cachedResponse;
   }
 
-  const { create, export: stateExport, effectRequest, update, wrap = _self } = statesHook,
-    progress: Progress = {
+  const progress: Progress = {
       total: 0,
       loaded: 0
     },
@@ -97,9 +113,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         completeHandlers,
         ({ abort, r: removeStates, s: saveStates }) => {
           // 每次发送请求都需要保存最新的控制器
-          abortFn = abort;
-          removeStatesFn = removeStates;
-          saveStatesFn = saveStates;
+          abortFn.v = abort;
+          pushItem(removeStatesFns.v, removeStates);
+          pushItem(saveStatesFns.v, saveStates);
         },
         sendCallingArgs,
         updateCacheState
@@ -118,8 +134,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
             isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
           )
         : wrapEffectRequest,
-    removeStates: () => removeStatesFn(),
-    saveStates: (states: FrontRequestState) => saveStatesFn(states),
+    removeStates: () => forEach(removeStatesFns.v, fn => fn()),
+    saveStates: (states: FrontRequestState) => forEach(saveStatesFns.v, fn => fn(states)),
     frontStates: frontStates,
     watchingStates,
     immediate: immediate ?? trueValue
@@ -143,7 +159,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(completeHandlers, handler);
     },
-    update: wrap(
+    update: memorize(
       (
         newStates:
           | Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
@@ -158,7 +174,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         update(newStates, frontStates);
       }
     ),
-    abort: wrap(() => abortFn(), trueValue),
+    abort: memorize(() => abortFn.v(), trueValue),
 
     /**
      * 通过执行该方法来手动发起请求
@@ -167,7 +183,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: wrap((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
+    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
       handleRequest(methodInstance, useHookConfig, sendCallingArgs, isFetcher)
     )
   };

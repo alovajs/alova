@@ -177,21 +177,28 @@ interface EffectRequestParams<E> {
 }
 
 interface StatesHook<S, E> {
-  create: <D>(data: D) => S;
+  /**
+   * 创建状态
+   * @param initialValue 初始数据
+   * @returns 状态值
+   */
+  create: <D>(initialValue: D) => S;
+
+  /**
+   * 导出给开发者使用的值
+   * @param state 状态值
+   * @returns 导出的值
+   */
   export: (state: S) => E;
 
   /** 将状态转换为普通数据 */
   dehydrate: (state: S) => any;
-  update: (newVal: Record<string, any>, state: Record<string, S>) => void;
-
   /**
-   * 包装send、abort等use hooks操作函数
-   * 这主要用于优化在react中，每次渲染都会生成新函数的问题，优化性能
-   * @param fn use hook操作函数
-   * @param isAbort 是否为abort函数，abort函数在react需要不同的处理
-   * @returns 包装后的操作函数
+   * 更新状态值
+   * @param newVal 新的数据集合
+   * @param state 原状态值
    */
-  wrap?: (fn: (...args: any[]) => any, isAbort?: boolean) => (...args: any[]) => any;
+  update: (newVal: Record<string, any>, state: Record<string, S>) => void;
 
   /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
@@ -202,6 +209,22 @@ interface StatesHook<S, E> {
    * removeStates函数为清除当前状态的函数，应该在组件卸载时调用
    */
   effectRequest: (effectParams: EffectRequestParams<E>) => void;
+
+  /**
+   * 包装send、abort等use hooks操作函数
+   * 这主要用于优化在react中，每次渲染都会生成新函数的问题，优化性能
+   * @param fn use hook操作函数
+   * @param isAbort 是否为abort函数，abort函数在react需要不同的处理
+   * @returns 包装后的操作函数
+   */
+  memorize?: (fn: (...args: any[]) => any, isAbort?: boolean) => (...args: any[]) => any;
+
+  /**
+   * 创建引用对象
+   * @param initialValue 初始值
+   * @returns 包含初始值的引用对象
+   */
+  ref?: <D>(initialValue: D) => { v: D };
 }
 
 type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>> | null;

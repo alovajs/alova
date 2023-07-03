@@ -444,7 +444,7 @@ describe('useRequet middleware', function () {
         return Promise.reject(error);
       }
     });
-    const Get = alova.Get<string, Result<string>>('/unit-test-10s');
+    const Get = alova.Get<string, Result<string>>('/unit-test-1s');
     const { loading, data, error, onError } = useRequest(Get, {
       middleware({ abort }, next) {
         setTimeout(() => {

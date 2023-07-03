@@ -152,10 +152,10 @@ export default {
 
   testMatch: [
     '**/test/browser/**/*.[jt]s?(x)'
-    // '**/test/browser/hooks/useRequest-http-vue.spec.ts(x)?'
+    // '**/test/browser/hooks/useRequest-react.spec.ts(x)?'
     // '**/test/browser/behavior/share-request.spec.ts'
     // '**/test/browser/batch/parallel-request.spec.ts'
-    // '**/test/browser/stateManager/invalidate-cache.spec.ts(x)?'
+    // '**/test/browser/stateManager/update-state-svelte.spec.ts(x)?'
     // '**/test/browser/global/methodInstance.spec.ts(x)?'
     // '**/test/browser/fn/matchSnapshotMethod.spec.ts(x)?'
     // '**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?'
