@@ -36,6 +36,6 @@ export const PromiseCls = Promise as typeof Promise<any>,
   STORAGE_PLACEHOLDER = 'placeholder',
   // 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
   STORAGE_RESTORE = 'restore',
-  // 是否为服务端渲染
-  isSSR = typeof window === 'undefined',
+  // 是否为服务端渲染，为了兼容浏览器、小程序以及其他客户端环境，需要再判断一下process，
+  isSSR = typeof window === 'undefined' && typeof process !== 'undefined',
   alovas = [] as Alova<any, any, any, any, any>[];
