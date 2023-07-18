@@ -30,13 +30,11 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
       } = getOptions(methodInstance),
       methodKey = methodInstance.__key__ || key(methodInstance),
       { id, storage } = getContext(methodInstance),
-      frontStates = getStateCache(id, methodKey);
+      frontStates = getStateCache(id, methodKey),
+      updateStateCollection = isFn(handleUpdate) ? ({ data: handleUpdate } as UpdateStateCollection<R>) : handleUpdate;
 
+    let updatedDataColumnData = undefinedValue as any;
     if (frontStates) {
-      const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance),
-        updateStateCollection = isFn(handleUpdate)
-          ? ({ data: handleUpdate } as UpdateStateCollection<R>)
-          : handleUpdate;
       // 循环遍历更新数据，并赋值给受监管的状态
       forEach(objectKeys(updateStateCollection), stateName => {
         myAssert(frontStates[stateName] !== undefinedValue, `can not find state named \`${stateName}\``);
@@ -44,17 +42,26 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
         const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
           dehydrate(frontStates[stateName])
         );
+
+        // 记录data字段的更新值，用于更新缓存数据
+        if (stateName === 'data') {
+          updatedDataColumnData = updatedData;
+        }
         update(
           {
             [stateName]: updatedData
           },
           frontStates
         );
-        // 同时需要更新缓存和持久化数据
-        setResponseCache(id, methodKey, updatedData, expireMilliseconds);
-        toStorage && persistResponse(id, methodKey, updatedData, expireMilliseconds, storage, tag);
       });
       updated = trueValue;
+    }
+
+    // 如果更新了data，则需要同时更新缓存和持久化数据
+    if (updatedDataColumnData !== undefinedValue) {
+      const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
+      setResponseCache(id, methodKey, updatedDataColumnData, expireMilliseconds);
+      toStorage && persistResponse(id, methodKey, updatedDataColumnData, expireMilliseconds, storage, tag);
     }
   }
   return updated;

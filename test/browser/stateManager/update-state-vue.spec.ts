@@ -1,5 +1,5 @@
 import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { updateState, useRequest } from '@/index';
+import { queryCache, updateState, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { removeStateCache } from '@/storage/stateCache';
 import { key } from '@/utils/helper';
@@ -125,7 +125,7 @@ describe('update cached response data by user in vue', function () {
 
     const extraData = ref(0);
     const extraData2 = 1;
-    const { onSuccess } = useRequest(Get, {
+    const { onSuccess, data } = useRequest(Get, {
       managedStates: {
         extraData,
         extraData2: extraData2 as unknown as Ref<number>
@@ -138,7 +138,7 @@ describe('update cached response data by user in vue', function () {
       updateState(Get, {
         loading: () => true
       });
-    }).toThrow();
+    }).toThrow('can not update preset states');
 
     // 非状态数据不能更新
     expect(() => {
@@ -152,13 +152,16 @@ describe('update cached response data by user in vue', function () {
       updateState(Get, {
         extraData3: () => 1
       });
-    }).toThrow();
+    }).toThrow('can not find state named `extraData3`');
 
     // 更新成功
     updateState(Get, {
       extraData: () => 1
     });
     expect(extraData.value).toBe(1);
+
+    // 更新额外管理的状态时，不会涉及它的缓存
+    expect(queryCache(Get)).toStrictEqual(data.value);
   });
 
   test("shouldn't return false when matched method instance but has no cached states", async () => {
