@@ -1,29 +1,40 @@
-name: 我想要一个 alova 的新功能
-description: 通过标准模板描述一下你的功能需求。
-title: "[Feature Request] 请在此填写标题"
-labels: ["feature: need confirm"]
+name: 🚀新特性提案
+description: 你对alova的新特性或优化提案
+labels: ["feature-request"]
 body:
   - type: markdown
     attributes:
       value: |
-        在提交功能需求前，请注意：
+        👋🏻👋🏻👋🏻Hi你好，非常感谢你对alova的支持，它真的很重要！
 
-        - 确认这是一个通用功能，并且无法通过现有的 API 实现。
-        - 确认你搜索过 [历史 issue](https://github.com/alovajs/alova/issues)，并且没有发现同样的需求。
-        - 可以先到 [Discussions 讨论区](https://github.com/alovajs/alova/discussions) 发帖，讨论一下需求是否合理。
+        **我们期望将alova打造成大家共同的项目，以开放包容的态度鼓励每位开发者成为alova社区的贡献者，如果你愿意，可尝试通过提交PR参与贡献，您将获得一定的alova社区特权，具体贡献请[参阅贡献指南](../../CONTRIBUTING.zh-CN.md)！**
+
+        ⚠️⚠️⚠️在提交新特性提案前，请阅读以下内容：
+        - 确认目前无法通过 API 实现，可先在[官方文档](https://alova.js.org)中搜索，一般来说，我们只考虑现有 API 无法轻松解决的问题的情况下添加新特性，而不仅仅是做已经可以完成的事情的替代方法
+        - 确认符合alova的发展方向，请[参阅alova的发展方向](../../CONTRIBUTING.zh-CN.md#alova的发展方向)
+        - 确认在 [历史 issue](https://github.com/alovajs/alova/issues)或[Discussion](https://github.com/alovajs/alova/discussions)没有发现重复内容。
 
   - type: textarea
     id: description
     attributes:
-      label: 你在什么情况下，需要这个功能解决什么问题？
-      description: 请尽可能详细地说明这个功能的使用场景。
+      label: 需要新特性解决什么问题？
+      description: 确定提交前，请确保已阅读[alova的发展方向](../../CONTRIBUTING.zh-CN.md#alova的发展方向)。
     validations:
       required: true
 
   - type: textarea
     id: api
     attributes:
-      label: 你期望的 API 是什么样子的？
-      description: 描述一下这个新功能的 API，并提供一些代码示例。
+      label: 你期望的新特性应该如何呈现？
+      description: 可提供一段新特性的代码设计片段，以表达你期望的新特性如何呈现在新版本中。
+
+  - type: dropdown
+    id: importance
+    attributes:
+      label: 它对你有多重要？
+      options:
+        - 有就更好了
+        - 可以让我更便于开发
+        - 没有它我就要弃坑了
     validations:
       required: true
