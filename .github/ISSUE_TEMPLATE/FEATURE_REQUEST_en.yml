@@ -1,29 +1,40 @@
-name: I want a new feature in alova
-description: Describe your functional requirements through standard templates.
-title: "[Feature Request] Please fill in the title here"
-labels: ["feature: need confirm"]
+name: 🚀 new feature proposal
+description: Your new feature or optimization proposal for alova
+labels: ["feature-request"]
 body:
   - type: markdown
     attributes:
       value: |
-        Before submitting a feature request, please note:
+        👋🏻👋🏻👋🏻Hi, thank you so much for supporting alova, it's really IMPORTANT!
 
-        - Confirm that this is a generic feature and cannot be implemented through the existing API.
-        - Make sure you searched for [historical issues](https://github.com/alovajs/alova/issues) and didn't find the same requirement.
-        - You can first post in the [Discussions discussion area](https://github.com/alovajs/alova/discussions) to discuss whether the demand is reasonable.
+        **We expect to build alova into a common project for everyone, and encourage every developer to become a contributor to the alova community with an open and inclusive attitude. If you want, you can try to contribute by submitting a PR, and you will get certain privileges in the alova community , please [see CONTRIBUTING](../../CONTRIBUTING.md) for more details! **
+
+        ⚠️⚠️⚠️Please read the following before submitting a new feature proposal:
+        - Confirm that it cannot be implemented through the existing APIs, you can search in the [official document](https://alova.js.org) first, generally speaking, we only add new features when considering problems that cannot be easily solved by the existing APIs, not just an alternative way of doing what can already be done
+        - Confirm that it is in line with alova's goal, please [see the goal of alova](../../CONTRIBUTING.md#goal-of-alova)
+        - Make sure no duplicates are found in [Historical issues](https://github.com/alovajs/alova/issues) or [Discussion](https://github.com/alovajs/alova/discussions).
 
   - type: textarea
     id: description
     attributes:
-      label: In what situation do you need this function to solve the problem?
-      description: Please describe the usage scenarios of this feature in as much detail as possible.
+      label: What problem does the new feature need to solve?
+      description: Before committing, please make sure to read [alova's development direction](../../CONTRIBUTING.md#goal-of-alova).
     validations:
       required: true
 
   - type: textarea
     id: api
     attributes:
-      label: What do you expect the API to look like?
-      description: Describe the API of this new feature and provide some code examples.
+      label: How should the new features you expect looks like?
+      description: You can provide a code design snippet of a new feature to express how the new feature you expect looks like in the new version.
+
+  - type: dropdown
+    id: importance
+    attributes:
+      label: How important is it to you?
+      options:
+        - better to have
+        - can make it easier to develop
+        - I'd give up without it
     validations:
       required: true

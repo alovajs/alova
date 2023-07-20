@@ -1,0 +1,68 @@
+name: 🐞用中文反馈bug[react]
+description: 使用中文反馈一个在react项目中使用alova时遇到的bug
+labels: ["bug:need-confirm", "react"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        👋🏻👋🏻👋🏻Hi你好，非常感谢你对alova的支持，它真的很重要！
+
+        **我们期望将alova打造成大家共同的项目，以开放包容的态度鼓励每位开发者成为alova社区的贡献者，如果你愿意，可尝试通过提交PR参与贡献，您将获得一定的alova社区特权，具体贡献请[参阅贡献指南](../../CONTRIBUTING.zh-CN.md)！**
+
+        ⚠️⚠️⚠️在提交 bug 报告前，请阅读以下内容：
+        - 提交bug前可先通过 [官方文档](https://alova.js.org) 寻找解决办法;
+        - 确认你搜索过 [历史 issue](https://github.com/alovajs/alova/issues)，并且没有发现同样的问题。
+        - 如果是一个问题或疑惑，可移步到 [Discussions](https://github.com/alovajs/alova/discussions) 发帖，这有助于作者更好地打理alova社区。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 请详细描述bug
+      description: 请尽量详细地描述你在什么情况下，遇到了什么问题，以及你尝试过什么解决方法，可提供关键代码片段。
+    validations:
+      required: true
+
+  - type: input
+    id: reproduce
+    attributes:
+      label: 复现链接
+      description: 这有助于解决者更快地解决问题，你可以在 [官方示例集](https://alova.js.org/category/examples/) 中选择一个作为模板复现问题，也可以自行在 [codesandbox](https://codesandbox.io)、[stackBlitz](https://stackblitz.com) 或 GitHub 仓库链接。请不要填写无效的链接。
+
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: 复现步骤
+      description: 请提供一个最简单的操作步骤，方便我们快速复现问题。
+      placeholder: |
+        比如：
+        1. 点击按钮
+        2. 请求未发出
+    validations:
+      required: true
+  
+  - type: textarea
+    id: expect
+    attributes:
+      label: 期望的表现
+      description: 请使用清晰简洁地语言描述一下期望达成什么效果
+
+  - type: input
+    id: version
+    attributes:
+      label: alova 版本
+      description: 请填写 node_modules/alova/package.json 里的版本号
+      placeholder: 比如 2.9.0
+    validations:
+      required: true
+
+  - type: input
+    id: browsers
+    attributes:
+      label: 设备/浏览器/浏览器版本
+      description: 在哪些设备/浏览器以及哪个浏览器版本上能重现这个问题？
+
+  - type: textarea
+    id: remark
+    attributes:
+      label: 额外的说明
+      description: 如果还有额外的说明或备注，请在此填写。

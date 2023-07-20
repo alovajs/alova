@@ -1,0 +1,68 @@
+name: 🐞Report a bug in English[react]
+description: Use English to report a bug when using alova in react project
+labels: ["bug:need-confirm", "react"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        👋🏻👋🏻👋🏻Hi, thank you very much for supporting alova, that is really IMPORTANT!
+        
+        **we hope to make alova a common project for everyone, and encourage every developer to become a contributor to the alova community with an open and inclusive attitude. If you want, you can try to participate by submitting a PR Contributing, you will get certain alova community privileges, please [see CONTRIBUTING](../../CONTRIBUTING.md) for more details! **
+
+        ⚠️⚠️⚠️Please read the following before submitting a bug report:
+        - Before submitting bugs, you can find solutions through [official documents](https://alova.js.org);
+        - Make sure you searched for [historical issues](https://github.com/alovajs/alova/issues) and found no similar issues.
+        - If you have a question or doubt, you can move to the [Discussions](https://github.com/alovajs/alova/discussions) to post, which will help the author to better manage the alova community.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Please describe the bug in detail
+      description: Please describe in as much detail as possible under what circumstances, what problems you encountered, and what solutions you have tried, including key code snippets if possible.
+    validations:
+      required: true
+
+  - type: input
+    id: reproduce
+    attributes:
+      label: Reproduce link
+      description: This helps solvers to solve problem faster. You can choose one of the [official examples](https://alova.js.org/category/examples/) as a template to reproduce the problem, or you can do it yourself Links to [codesandbox](https://codesandbox.io), [stackBlitz](https://stackblitz.com) or GitHub repositories. Please do not fill in a invalid link.
+
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: steps to reproduce
+      description: Please provide the simplest operation steps so that we can quickly reproduce the problem.
+      placeholder: |
+        for example:
+        1. Click the button
+        2. Request not sent
+    validations:
+      required: true
+
+  - type: textarea
+    id: expect
+    attributes:
+      label: expected performance
+      description: Please use clear and concise language to describe what effect you want to achieve
+
+  - type: input
+    id: version
+    attributes:
+      label: alova version
+      description: Please fill in the version number in node_modules/alova/package.json
+      placeholder: e.g. 2.9.0
+    validations:
+      required: true
+
+  - type: input
+    id: browsers
+    attributes:
+      label: device/browser/browser version
+      description: On which devices/browsers and which browser versions can this issue be reproduced?
+
+  - type: textarea
+    id: remark
+    attributes:
+      label: additional content
+      description: If there are additional content or notes, please fill them in here.
