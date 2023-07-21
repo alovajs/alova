@@ -7,7 +7,7 @@ body:
       value: |
         👋🏻👋🏻👋🏻Hi你好，非常感谢你对alova的支持，它真的很重要！
 
-        **我们期望将alova打造成大家共同的项目，以开放包容的态度鼓励每位开发者成为alova社区的贡献者，如果你愿意，可尝试通过提交PR参与贡献，让你的代码为全世界的开发者提供价值，具体贡献请[参阅贡献指南](../CONTRIBUTING.zh-CN.md)！**
+        **我们期望将alova打造成大家共同的项目，以开放包容的态度鼓励每位开发者成为alova社区的贡献者，如果你愿意，可尝试通过提交PR参与贡献，让你的代码为全世界的开发者提供价值，具体贡献请[参阅贡献指南](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.zh-CN.md)！**
 
         ⚠️⚠️⚠️在提交 bug 报告前，请阅读以下内容：
         - 提交bug前可先通过 [官方文档](https://alova.js.org) 寻找解决办法;

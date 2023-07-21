@@ -1,17 +1,17 @@
 name: 🚀 new feature proposal
 description: Your new feature or optimization proposal for alova
-labels: ["feature-request"]
+labels: ['feature-request']
 body:
   - type: markdown
     attributes:
       value: |
         👋🏻👋🏻👋🏻Hi, thank you so much for supporting alova, it's really IMPORTANT!
 
-        **We expect to build alova into a common project for everyone, and encourage every developer to become a contributor to the alova community with an open and inclusive attitude. If you want, you can try to contribute by submitting a PR, and you will get certain privileges in the alova community , please [see CONTRIBUTING](../../CONTRIBUTING.md) for more details! **
+        **We expect to build alova into a common project for everyone, and encourage every developer to become a contributor to the alova community with an open and inclusive attitude. If you want, you can try to contribute by submitting a PR, it will let developers all over the world to use your code, please [see CONTRIBUTING](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md) for more details!**
 
         ⚠️⚠️⚠️Please read the following before submitting a new feature proposal:
         - Confirm that it cannot be implemented through the existing APIs, you can search in the [official document](https://alova.js.org) first, generally speaking, we only add new features when considering problems that cannot be easily solved by the existing APIs, not just an alternative way of doing what can already be done
-        - Confirm that it is in line with alova's goal, please [see the goal of alova](../../CONTRIBUTING.md#goal-of-alova)
+        - Confirm that it is in line with alova's goal, please [see the goal of alova](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md#goal-of-alova)
         - Make sure no duplicates are found in [Historical issues](https://github.com/alovajs/alova/issues) or [Discussion](https://github.com/alovajs/alova/discussions).
 
   - type: textarea
