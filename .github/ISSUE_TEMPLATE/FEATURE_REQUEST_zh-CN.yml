@@ -1,17 +1,17 @@
 name: 🚀新特性提案
 description: 你对alova的新特性或优化提案
-labels: ["feature-request"]
+labels: ['feature-request']
 body:
   - type: markdown
     attributes:
       value: |
         👋🏻👋🏻👋🏻Hi你好，非常感谢你对alova的支持，它真的很重要！
 
-        **我们期望将alova打造成大家共同的项目，以开放包容的态度鼓励每位开发者成为alova社区的贡献者，如果你愿意，可尝试通过提交PR参与贡献，您将获得一定的alova社区特权，具体贡献请[参阅贡献指南](../../CONTRIBUTING.zh-CN.md)！**
+        **我们期望将alova打造成大家共同的项目，以开放包容的态度鼓励每位开发者成为alova社区的贡献者，如果你愿意，可尝试通过提交PR参与贡献，让你的代码为全世界的开发者提供价值，具体贡献请[参阅贡献指南](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.zh-CN.md)！**
 
         ⚠️⚠️⚠️在提交新特性提案前，请阅读以下内容：
         - 确认目前无法通过 API 实现，可先在[官方文档](https://alova.js.org)中搜索，一般来说，我们只考虑现有 API 无法轻松解决的问题的情况下添加新特性，而不仅仅是做已经可以完成的事情的替代方法
-        - 确认符合alova的发展方向，请[参阅alova的发展方向](../../CONTRIBUTING.zh-CN.md#alova的发展方向)
+        - 确认符合alova的发展方向，请[参阅alova的发展方向](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.zh-CN.md#alova-%E7%9A%84%E5%8F%91%E5%B1%95%E6%96%B9%E5%90%91)
         - 确认在 [历史 issue](https://github.com/alovajs/alova/issues)或[Discussion](https://github.com/alovajs/alova/discussions)没有发现重复内容。
 
   - type: textarea
