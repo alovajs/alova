@@ -12,6 +12,8 @@ If you like alova, you are welcome to contribute.
 
 I would like to thank all developers for their liking and support of alova. I hope you can become a core contributor to alova and work together to create a better applet development framework! 🍾🎉
 
+## Goal of alova
+
 ## Issue submission
 
 ### For contributors

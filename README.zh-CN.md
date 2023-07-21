@@ -54,7 +54,7 @@ alova 是核心库，它提供了缓存策略、请求共享策略，以及状�
 
 ### 更多请求相关的业务场景征集中...
 
-如果你还有特定且典型的业务请求场景，但我们还未实现的，可以在这边 [提交 issue](https://github.com/alovajs/scene/issues/new/choose) 告诉我们，我们会实现它提供给更多人使用。同时也可以自定义请求 hook，请看 [高级](/category/advanced) 部分。
+如果你还有特定且典型的业务请求场景，但我们还未实现的，可以在这边 [提交 issue](https://github.com/alovajs/scene/issues/new/choose) 告诉我们，我们会实现它提供给更多人使用。同时也可以自定义请求 hook，请看 [高级](https://alova.js.org/advanced/overview) 部分。
 
 ## 例子
 
@@ -64,11 +64,9 @@ alova 是核心库，它提供了缓存策略、请求共享策略，以及状�
 
 alova 从第一个版本的开发到现在已经过去将近一年时间了，在这一年中我们也在持续发现问题优化，到目前为止 alova 已通过了 170+ 项单元测试，覆盖率为 99%，目前几乎处于一个稳定状态。即便如此，alova 还属于新秀，它依然还有很长一段路需要走。
 
-**我保证会在收到 issue 后，第一时间解决**
-
 ## 我们真的需要你的 star
 
-如果你喜欢 alova，我们非常感谢您在右上角给我们 star，这是对我们工作的认可。
+如果你喜欢 alova，我们非常感谢您在右上角给我们 star，这是对我们工作的认可和鼓励。
 
 ## 替代请求库？
 
@@ -119,34 +117,39 @@ yarn add alova
 | [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | alova.js 的 axios 适配器          |
 | [@alova/adapter-xhr](https://github.com/alovajs/adapter-xhr)       | alova.js 的 XMLHttpRequest 适配器 |
 
-## 接下来要做什么
+## 欢迎参与贡献
 
-### 关于 alova
+alova 自从 2023 年 4 月份正式对外发布以来，在 3 个月内已收到了 1500+star。
 
-- ✅ 存储时间可以设置一个 date 对象，表示某个时间点过期
-- ✅ 可全局分别设置不同请求方法的默认缓存，当前默认为 GET 请求 500 秒内存缓存
-- ✅ 额外的状态管理，可跨页面和模块获取并更新额外的状态
-- ✅ 请求错误日志打印
-- ✅ 完整的离线提交功能，当离线状态可提交，再次进入时可读取离线信息等
-- ✅ 请求中间件设计，可手动控制发送请求、状态修改等
-- ✅ 静默提交失败时的重试间隔时间、最大重试次数等
-- ✅ 请求共享
-- ✅ 服务端渲染支持
-- 性能提升
-- openapi 自动生成请求函数
+我们在 Issues 和 Disscussion 中收到了来自世界各地的开发者积极参与的信息，深感荣幸。
 
-### 扩展
+我们期望将 alova 打造成每位愿意参与的人的共同项目，而不是 alova 团队的，我们以开放包容的态度鼓励每个人成为 alova 社区的贡献者，即使你是一位初级开发者，只要想法符合 alova 的发展准则，也请大方地参与进来。
 
-- ✅ 各运行环境下的适配器（Uniapp、Taro）
-- 通过 [**alova/scene**](https://github.com/alovajs/scene) 库开发不同请求场景下的扩展 hooks，提供开箱即用的高性能和高体验功能 [[参考 usePagination](https://alova.js.org/strategy/usePagination)]
+alova 还属于新秀，它依然还有很长一段路需要走，现在参与贡献可以为你赢得更多的有效贡献机会，它可以让你为全世界的开发者提供你的价值。
 
-## 贡献指南
+我们认为贡献 alova 不局限于代码贡献，而是参与任何有利于 alova 发展的活动都属于贡献 alova，具体包括以下 13 项，但不局限于这些：
 
-在提出拉取请求之前，请务必阅读 [贡献指南](./CONTRIBUTING.zh-CN.md)。
+1. 在项目中使用 alova
+2. 为 alova 点星
+3. 报告 bug
+4. 提供新特性想法
+5. 贡献代码
+6. 基于 alova 编写适配器和策略库
+7. 参与社区交流、PR review
+8. 编写 demo
+9. 更正或编写文档
+10. 翻译文档
+11. 在社交平台发布有利于 alova 发展的文章、视频等信息
+12. 项目合作
+13. 项目捐赠
+
+> 以及你能想到的其他正向发展的活动
+
+有效的贡献将为你赢得一定的 alova 社区名望。在参与贡献前，请务必详细阅读 [贡献指南](./CONTRIBUTING.zh-CN.md)，以保证你的有效贡献。
 
 ## 欢迎提交问题
 
-如果您在使用 alova 时遇到困难，无论是 bug，还是未满足的功能，都可以[提交问题](https://github.com/alovajs/alova/issues)。
+如果您在使用 alova 时遇到困难，无论是 bug，还是新功能，都可以[提交问题](https://github.com/alovajs/alova/issues)。
 
 ## LICENSE
 

@@ -1,8 +1,3 @@
-/*
- * @Date: 2020-04-09 11:06:01
- * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2022-06-12 09:51:56
- */
 // rollup.config.js
 // commonjs
 const config = require('./rollup.cjs');

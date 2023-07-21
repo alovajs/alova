@@ -150,17 +150,7 @@ export default {
   // The test environment that will be used for testing
   testEnvironment: 'jsdom',
 
-  testMatch: [
-    '**/test/browser/**/*.[jt]s?(x)'
-    // '**/test/browser/hooks/useRequest-react.spec.ts(x)?'
-    // '**/test/browser/behavior/share-request.spec.ts'
-    // '**/test/browser/batch/parallel-request.spec.ts'
-    // '**/test/browser/stateManager/update-state-svelte.spec.ts(x)?'
-    // '**/test/browser/global/methodInstance.spec.ts(x)?'
-    // '**/test/browser/fn/matchSnapshotMethod.spec.ts(x)?'
-    // '**/test/browser/requestAdapter/GlobalFetch.spec.ts(x)?'
-    // '**/test/browser/middleware/useRequest.spec.ts(x)?'
-  ],
+  testMatch: ['**/test/browser/**/*.[jt]s?(x)'],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [

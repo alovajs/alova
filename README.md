@@ -54,7 +54,7 @@ Alova is the core library, which provides common functions such as caching strat
 
 ### More request-related business scenarios are being collected...
 
-If you still have a specific and typical business request scenario, but we have not implemented it yet, you can [submit an issue](https://github.com/alovajs/scene/issues/new/choose) to tell us here, we Will make it available to more people. You can also customize the request hook, please see the [Advanced](/category/advanced) section.
+If you still have a specific and typical business request scene which we havn't implemented yet, you can [submit an issue](https://github.com/alovajs/scene/issues/new/choose) here, or you can also customize the request hook, please see the [Advanced](/category/advanced) section.
 
 ## Examples
 
@@ -68,11 +68,9 @@ The original intention of alova is to propose a solution for different request s
 
 It has been more then one year since the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 170+ unit tests, with a coverage rate of 99%. and it almost in a stable state. Even so, alova is still a rookie, it still has a large development space.
 
-**I promise to solve it as soon as possible after receiving your issue**
-
 ## We really need your star
 
-If you like alova. we are very appreciate your star at the topright. it's a approval of our work.
+If you like alova. we are very appreciate your star at the topright. it's a approval and encourage of our work.
 
 ## To replace other request libraries?
 
@@ -123,30 +121,35 @@ If you have thought of some specific and typical business request scenarios, you
 | [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | axios adapter for alova.js                   |
 | [@alova/adapter-xhr](https://github.com/alovajs/adapter-xhr)       | XMLHttpRequest adapter for alova.js          |
 
-## What is next?
+## Welcome to contribute
 
-### Alova core
+Since its official propaganda in April 2023, alova has received 1500+ stars within 3 months.
 
-- ✅ The storage time can be set as a date object, indicating that it expires at a certain point in time
-- ✅ You can set the default cache for different request methods globally. The current default is 500 seconds of memory cache for GET requests
-- ✅ Additional state management, get and update additional state across pages and modules
-- ✅ request error log printing
-- ✅ Complete offline submission function, you can submit when you are offline, and you can read offline information when you enter again
-- ✅ Request middleware design, which can manually control sending requests, status modification, etc.
-- ✅ Retry interval, maximum number of retries, etc. when silent submission fails
-- ✅ Request to share
-- ✅ Server-side rendering support
-- Performance improvements
-- openapi generate request functions automatically
+We're honored to hear from developers around the world in Issues and Discussions.
 
-### Extensions
+We expect to make alova a common project for everyone who is willing to participate, instead of the alova team. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your idea is in line with alova's goal, please generously participate.
 
-- ✅ Adapters for each operating environment (Uniapp, Taro)
-- Develop extended hooks under different request scenarios through [**alova/scene**](https://github.com/alovajs/scene) library, providing out-of-the-box high-performance and high-experience functions [[Refer to usePagination ](https://alova.js.org/strategy/usePagination)]
+Now alova is still a rookie, and it still has a long way to go. Participating in contributions now can let you win more effective contribution opportunities, and it will let developers all over the world to use your code.
 
-## Contribution Guide
+We believe that contributing to alova is not only limited to code contributions, but also participating in any activities that are conducive to the development of alova is considered to contribute to alova, including the following 13 items, but not limited to these:
 
-Please make sure to read the [Contributing Guide](./CONTRIBUTING.md) before making a pull request.
+1. Use alova in your project.
+2. Star alova in Github.
+3. Report bugs.
+4. Provide new feature ideas.
+5. Contribute code.
+6. Code adapter and stritegy library based on alova.
+7. Participate in community communication and PR review.
+8. Code a demo.
+9. Correct documentation or add new content.
+10. Translate documents.
+11. Publish articles, videos and other information that are conducive to the development of alova on social platforms.
+12. Project cooperation.
+13. Project donation.
+
+> and any other positive development you can think of
+
+Contributing effectively will let you win some fame of alova community. Before participating in the contribution, please be sure to read the [CONTRIBUTING](./CONTRIBUTING.md) in detail to ensure your effective contribution.
 
 ## Welcome to submit a issue
 
