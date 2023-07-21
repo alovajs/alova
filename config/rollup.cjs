@@ -1,8 +1,3 @@
-/*
- * @Date: 2020-04-09 11:06:01
- * @LastEditors: JOU(wx: huzhen555)
- * @LastEditTime: 2023-04-09 14:37:26
- */
 // 设置环境变量
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 

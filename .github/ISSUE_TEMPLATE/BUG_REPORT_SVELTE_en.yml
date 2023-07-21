@@ -1,14 +1,14 @@
 name: 🐞Report a bug in English[svelte]
 description: Use English to report a bug when using alova in svelte project
-labels: ["bug:need-confirm", "svelte"]
+labels: ['bug:need-confirm', 'svelte']
 body:
   - type: markdown
     attributes:
       value: |
         👋🏻👋🏻👋🏻Hi, thank you very much for supporting alova, that is really IMPORTANT!
-        
-        **we hope to make alova a common project for everyone, and encourage every developer to become a contributor to the alova community with an open and inclusive attitude. If you want, you can try to participate by submitting a PR Contributing, you will get certain alova community privileges, please [see CONTRIBUTING](../../CONTRIBUTING.md) for more details! **
-      
+
+        **we hope to make alova a common project for everyone, and encourage every developer to become a contributor to the alova community with an open and inclusive attitude. If you want, you can try to participate by submitting a PR Contributing, it will let developers all over the world to use your code, please [see CONTRIBUTING](../CONTRIBUTING.md) for more details! **
+
         ⚠️⚠️⚠️Please read the following before submitting a bug report:
         - Before submitting bugs, you can find solutions through [official documents](https://alova.js.org);
         - Make sure you searched for [historical issues](https://github.com/alovajs/alova/issues) and found no similar issues.
