@@ -1,4 +1,4 @@
-name: 🐞Report a bug in English[vue]
+name: 🐛Report a bug in English[vue]
 description: Use English to report a bug when using alova in vue project
 labels: ['bug:need-confirm', 'vue']
 body:

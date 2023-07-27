@@ -1,4 +1,4 @@
-name: 🐞用中文反馈bug[svelte]
+name: 🐛用中文反馈bug[svelte]
 description: 使用中文反馈一个在svelte项目中使用alova时遇到的bug
 labels: ['bug:need-confirm', 'svelte']
 body:

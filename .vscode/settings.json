@@ -2,13 +2,11 @@
   "editor.formatOnSave": true, // 保存是格式化
   "editor.tabSize": 2, // Tab 的大小2个空格
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[vue]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "editor.suggestSelection": "recentlyUsedByPrefix", // 自动补全
   "editor.codeActionsOnSave": {
     "source.organizeImports": true,
     "source.fixAll.eslint": true // 修复所有代码
   },
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "jest.autoRun": "off"
 }

@@ -1,4 +1,4 @@
-name: 🐞用中文反馈bug[react]
+name: 🐛用中文反馈bug[react]
 description: 使用中文反馈一个在react项目中使用alova时遇到的bug
 labels: ['bug:need-confirm', 'react']
 body:
