@@ -1,5 +1,7 @@
 # alova Contribution Guidelines
 
+English | [📑 中文](./CONTRIBUTING.zh-CN.md)
+
 Hello, I'm glad to meet you here. This is a detailed alova contribution guidelines, which includes detailed guidance on contributing to all aspects of alova. Please continue reading.
 
 ## Preface
