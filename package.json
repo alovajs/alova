@@ -56,7 +56,8 @@
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
-    "commit": "git-cz && git push"
+    "commit": "git-cz && git push",
+    "format": "prettier . --write"
   },
   "author": "JOU-amjs",
   "license": "MIT",

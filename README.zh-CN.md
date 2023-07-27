@@ -20,7 +20,7 @@
 
 [https://alova.js.org](https://alova.js.org)
 
-## 🚀 特点
+## 🚀 特性
 
 - 🕶 在 vue、react、svelte 3 个 UI 框架，以及 uniapp、taro 环境下提供统一的使用体验，无缝移植
 - 📑 与 axios 相似的 api 设计，更简单熟悉

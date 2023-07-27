@@ -1,4 +1,4 @@
-name: 🐞用中文反馈bug[vue]
+name: 🐛用中文反馈bug[vue]
 description: 使用中文反馈一个在vue项目中使用alova时遇到的bug
 labels: ['bug:need-confirm', 'vue']
 body:

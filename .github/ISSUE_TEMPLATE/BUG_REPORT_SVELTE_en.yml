@@ -1,4 +1,4 @@
-name: 🐞Report a bug in English[svelte]
+name: 🐛Report a bug in English[svelte]
 description: Use English to report a bug when using alova in svelte project
 labels: ['bug:need-confirm', 'svelte']
 body:

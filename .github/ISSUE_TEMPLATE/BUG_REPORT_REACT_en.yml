@@ -1,4 +1,4 @@
-name: 🐞Report a bug in English[react]
+name: 🐛Report a bug in English[react]
 description: Use English to report a bug when using alova in react project
 labels: ['bug:need-confirm', 'react']
 body:

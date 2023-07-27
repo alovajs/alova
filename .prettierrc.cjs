@@ -21,7 +21,7 @@ module.exports = {
   bracketSpacing: true,
 
   // jsx > Whether to take another line
-  jsxBracketSameLine: true,
+  bracketSameLine: true,
 
   // No need to automatically add @prettier at the beginning of the file
   insertPragma: false,
