@@ -100,12 +100,10 @@ If you have an idea for adding a new feature, please also [submit an issue of a 
 
 If you are very good at project configuration and find deficiencies in the alova project, such as incomplete configuration, too old configuration version, insufficient automation (including project development automation and Github warehouse management automation), you can also press [New Feature development](#new-feature-development) process to contribute.
 
-:::caution IMPORTANT
-
-1. Please read the [Developing Guidelines](https://alova.js.org/contributing/developing-guidelines) carefully before developing, it can guide you step by step on how to contribute code.
-2. When you identify an issue that needs to be resolved, please make sure that it has not been flagged by someone else's pull request, which means that it has been pre-occupied.
-
-:::
+> IMPORTANT
+>
+> 1. Please read the [Developing Guidelines](https://alova.js.org/contributing/developing-guidelines) carefully before developing, it can guide you step by step on how to contribute code.
+> 2. When you identify an issue that needs to be resolved, please make sure that it has not been flagged by someone else's pull request, which means that it has been pre-occupied.
 
 ### Create an adapter or strategy library based on alova
 
@@ -124,11 +122,7 @@ Customize various adapters to meet the operating requirements in different envir
 
 Request strategies can help developers write high-performance functions more efficiently. Although the official [alova/scene](https://alova.js.org/category/strategy) provides some common request strategies, it is not enough It is a good choice to customize your own reusable request strategy based on alova to meet the business scenarios related to various requests of developers, and you can also publish them on npm for everyone to use.
 
-:::tip Submit your project
-
-If you have written an alova-based js library, please submit your project in [this issue](https://github.com/alovajs/alova/issues/165), which will allow your project to be displayed on the alova official website Opportunity.
-
-:::
+> If you have written an alova-based js library, please submit your project in [this issue](https://github.com/alovajs/alova/issues/165), which will allow your project to be displayed on the alova official website Opportunity.
 
 ### Participate in community/PR review
 

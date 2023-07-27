@@ -100,12 +100,10 @@ alova 是一个轻量级的请求策略库，**它的使命就是让开发者在
 
 如果你很擅长项目配置，并发现了 alova 项目的不足之处，例如不够完整的配置、配置版本太老旧、自动化不足（包含项目开发自动化和 Github 仓库管理的自动化），你也可以按[新特性开发](#新特性开发)的流程进行贡献。
 
-:::caution 重要
-
-1. 在开发前请仔细阅读[开发指南](https://alova.js.org/contributing/development-guide)，它可以一步步地指导你如何贡献代码。
-2. 在你确定了一个需要解决的 issue 时，请确保它没有被其他人的 pull request 标记，它表示已被人先占有。
-
-:::
+> 重要
+>
+> 1. 在开发前请仔细阅读[开发指南](https://alova.js.org/contributing/development-guide)，它可以一步步地指导你如何贡献代码。
+> 2. 在你确定了一个需要解决的 issue 时，请确保它没有被其他人的 pull request 标记，它表示已被人先占有。
 
 ### 基于 alova 编写适配器和策略库
 
@@ -124,11 +122,7 @@ alova 提供了高扩展特性，你可以基于它编写自己的 js 库。
 
 请求策略可以帮助开发者更高效地编写出高性能功能，虽然官方的 [alova/scene](https://alova.js.org/category/strategy) 提供了一些常用的请求策略，但还不足以满足广大开发者各种请求相关的业务场景，基于 alova 自定义你自己的可复用请求策略是一个不错的选择，也可以将它们发布到 npm 上给大家使用。
 
-:::tip 提交你的项目
-
-如果你编写了基于 alova 的 js 库，请在[这个 issue](https://github.com/alovajs/alova/issues/165)中提交你的项目，这可以让你的项目获得在 alova 官网展示的机会。
-
-:::
+> 如果你编写了基于 alova 的 js 库，请在[这个 issue](https://github.com/alovajs/alova/issues/165)中提交你的项目，这可以让你的项目获得在 alova 官网展示的机会。
 
 ### 参与社区交流/PR review
 
