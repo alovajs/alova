@@ -338,7 +338,7 @@ describe('Test other methods without GET', function () {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeInstanceOf(Blob);
     expect(uploading.value).toEqual({ total: 0, loaded: 0 });
-    expect(downloading.value).toEqual({ total: 3273178, loaded: 3273178 });
+    expect(downloading.value).toEqual({ total: 451272, loaded: 451272 });
     expect(error.value).toBeUndefined();
 
     // 有缓存的情况下，不再有下载信息

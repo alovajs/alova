@@ -57,7 +57,7 @@ const mockServer = setupServer(
   rest.options(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
   rest.get(baseURL + '/unit-test-download', (_, res, ctx) => {
     // Read the image from the file system using the "fs" module.
-    const imageBuffer = readFileSync(path.resolve(__dirname, './img.jpg'));
+    const imageBuffer = readFileSync(path.resolve(__dirname, './image.jpg'));
     return res(
       ctx.set('Content-Length', imageBuffer.byteLength.toString()),
       ctx.set('Content-Type', 'image/jpeg'),
