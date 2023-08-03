@@ -35,7 +35,8 @@ export default {
     saveStates,
     immediate,
     frontStates,
-    watchingStates = []
+    watchingStates = [],
+    sendable
   }: EffectRequestParams<any>) {
     // 当有监听状态时，状态变化再触发
     const oldStates = mapItem(watchingStates, s => useRef(s)); // 用于对比新旧值
@@ -49,7 +50,8 @@ export default {
         }
       });
 
-      if (immediate || isNumber(changedIndex)) {
+      const _sendable = sendable();
+      if ((immediate || isNumber(changedIndex)) && _sendable) {
         handler(changedIndex);
       }
       // 组件卸载时移除对应状态

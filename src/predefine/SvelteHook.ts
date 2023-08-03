@@ -27,7 +27,7 @@ export default {
       const sItem = states[key];
       sItem.set(newVal[key]);
     }),
-  effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<Writable<any>>) {
+  effectRequest({ handler, removeStates, immediate, watchingStates, sendable }: EffectRequestParams<Writable<any>>) {
     // 在服务端渲染时不发送请求
     if (isSSR) {
       return;
@@ -36,6 +36,7 @@ export default {
     // 组件卸载时移除对应状态
     onDestroy(removeStates);
     immediate && handler();
+    const _sendable = sendable();
     let timer: any,
       needEmit = falseValue;
     forEach(watchingStates || [], (state, i) => {
@@ -43,7 +44,7 @@ export default {
         timer && clearTimeoutTimer(timer);
         timer = setTimeoutFn(() => {
           // svelte的writable默认会触发一次，因此当immediate为false时需要过滤掉第一次触发调用
-          needEmit ? handler(i) : (needEmit = trueValue);
+          needEmit ? _sendable && handler(i) : (needEmit = trueValue);
           timer = undefinedValue;
         }, 10);
       });

@@ -1,16 +1,17 @@
 import { getResponseCache } from '@/storage/responseCache';
-import { debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig, _self } from '@/utils/helper';
+import { _self, debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
-  FetcherHookConfig,
   FetchRequestState,
+  FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
+  SendableConfig,
   SuccessHandler,
   UseHookConfig,
   WatcherHookConfig
@@ -51,7 +52,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
-  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
+  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0,
+  sendable: SendableConfig = () => trueValue
 ) {
   const statesHook = getStatesHook(alovaInstance);
   myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
@@ -83,6 +85,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       total: 0,
       loaded: 0
     },
+    sendArgs: any[] = [],
     // 将外部传入的受监管的状态一同放到frontStates集合中
     { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>,
     frontStates = {
@@ -139,7 +142,17 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     saveStates: (states: FrontRequestState) => forEach(refCurrent(saveStatesFns), fn => fn(states)),
     frontStates: frontStates,
     watchingStates,
-    immediate: immediate ?? trueValue
+    immediate: immediate ?? trueValue,
+    sendable: () => {
+      try {
+        return !!sendable({
+          methodHandler,
+          sendArgs
+        });
+      } catch (err) {
+        return falseValue;
+      }
+    }
   });
 
   const exportedStates = {
@@ -184,8 +197,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
-      handleRequest(methodInstance, useHookConfig, sendCallingArgs, isFetcher)
-    )
+    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) => {
+      (sendArgs.length = 0), pushItem(sendArgs, sendCallingArgs);
+      return handleRequest(methodInstance, useHookConfig, sendCallingArgs, isFetcher);
+    })
   };
 }
