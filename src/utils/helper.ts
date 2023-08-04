@@ -2,16 +2,16 @@ import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } 
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
-  clearTimeoutTimer,
-  falseValue,
   JSONStringify,
   MEMORY,
-  nullValue,
   ObjectCls,
   PromiseCls,
-  setTimeoutFn,
   STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
+  clearTimeoutTimer,
+  falseValue,
+  nullValue,
+  setTimeoutFn,
   undefinedValue
 } from './variables';
 

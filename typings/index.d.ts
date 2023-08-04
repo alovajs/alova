@@ -174,7 +174,6 @@ interface EffectRequestParams<E> {
   frontStates: FrontRequestState;
   watchingStates?: E[];
   immediate: boolean;
-  sendable: () => boolean;
 }
 
 interface StatesHook<S, E> {
@@ -585,7 +584,7 @@ interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
 /** useRequest config type */
 type RequestHookConfig<S, E, R, T, RC, RE, RH> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
 
-type SendableConfig = (alovaEvent: AlovaEvent) => boolean | number;
+type SendableConfig = (alovaEvent: AlovaEvent) => boolean;
 
 /** useWatcher config type */
 interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH> {
