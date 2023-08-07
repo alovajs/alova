@@ -79,9 +79,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   isFetcher = falseValue
 ) {
   const methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
-  const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-      | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
-      | FetcherHookConfig,
+  const {
+      force: forceRequest = falseValue,
+      middleware = defaultMiddleware,
+      sendable = () => trueValue
+    } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig,
     { id, options, storage } = getContext(methodInstance),
     {
       statesHook: { update },
@@ -90,6 +92,17 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = key(methodInstance),
     { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
+
+  let _sendable: boolean;
+
+  try {
+    _sendable = !!sendable(createAlovaEvent(3, methodInstance, sendCallingArgs, falseValue));
+  } catch (error) {
+    console.error(error);
+    _sendable = trueValue;
+  }
+
+  if (!_sendable) return promiseResolve(undefinedValue);
 
   // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
   let removeStates = noop,

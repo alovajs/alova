@@ -1,5 +1,5 @@
 import { AlovaCompleteEvent, Method } from '~/typings';
-import { forEach, ObjectCls, objectKeys, undefinedValue } from './variables';
+import { ObjectCls, forEach, objectKeys, undefinedValue } from './variables';
 
 /**
  * 创建统一的事件对象
@@ -42,7 +42,7 @@ export default <S, E, R, T, RC, RE, RH>(
 
   // 将此类的对象重新命名，让它看上去是由不同的类生成的对象
   // 以此来对应typescript中定义的类型
-  const typeName = ['AlovaSuccessEvent', 'AlovaErrorEvent', 'AlovaCompleteEvent'][eventType];
+  const typeName = ['AlovaSuccessEvent', 'AlovaErrorEvent', 'AlovaCompleteEvent', 'AlovaSendableEvent'][eventType];
   typeName &&
     ObjectCls.defineProperty(eventInstance, Symbol.toStringTag, {
       value: typeName

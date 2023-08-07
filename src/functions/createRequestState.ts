@@ -1,5 +1,4 @@
 import { getResponseCache } from '@/storage/responseCache';
-import createAlovaEvent from '@/utils/createAlovaEvent';
 import { _self, debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import {
@@ -12,7 +11,6 @@ import {
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
-  SendableConfig,
   SuccessHandler,
   UseHookConfig,
   WatcherHookConfig
@@ -53,8 +51,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
-  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0,
-  sendable: SendableConfig = () => trueValue
+  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
   const statesHook = getStatesHook(alovaInstance);
   myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
@@ -107,39 +104,23 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       useHookConfigParam = useHookConfig,
       sendCallingArgs?: any[],
       updateCacheState?: boolean
-    ) => {
-      const methodInstance = createAlovaEvent(
-        0,
-        getHandlerMethod(handler, sendCallingArgs),
-        sendCallingArgs || [],
-        falseValue
-      );
-      let _sendable: boolean;
-      try {
-        _sendable = !!sendable(methodInstance);
-      } catch (error) {
-        console.error(error);
-        _sendable = trueValue;
-      }
-      return _sendable
-        ? useHookToSendRequest(
-            handler,
-            frontStates,
-            useHookConfigParam,
-            successHandlers,
-            errorHandlers,
-            completeHandlers,
-            ({ abort, r: removeStates, s: saveStates }) => {
-              // 每次发送请求都需要保存最新的控制器
-              abortFn.current = abort;
-              pushItem(refCurrent(removeStatesFns), removeStates);
-              pushItem(refCurrent(saveStatesFns), saveStates);
-            },
-            sendCallingArgs,
-            updateCacheState
-          )
-        : Promise.resolve();
-    },
+    ) =>
+      useHookToSendRequest(
+        handler,
+        frontStates,
+        useHookConfigParam,
+        successHandlers,
+        errorHandlers,
+        completeHandlers,
+        ({ abort, r: removeStates, s: saveStates }) => {
+          // 每次发送请求都需要保存最新的控制器
+          abortFn.current = abort;
+          pushItem(refCurrent(removeStatesFns), removeStates);
+          pushItem(refCurrent(saveStatesFns), saveStates);
+        },
+        sendCallingArgs,
+        updateCacheState
+      ),
     // 以捕获异常的方式调用handleRequest
     // 捕获异常避免异常继续向外抛出
     wrapEffectRequest = () => {
