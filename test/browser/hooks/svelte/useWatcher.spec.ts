@@ -1,7 +1,8 @@
 import pageDebounceImmediate from '#/components/svelte/page-useWatcher-debounce-immediate.svelte';
 import pageDifferentDebounce from '#/components/svelte/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
-import pageSentable from '#/components/svelte/page-useWatcher-sentable.svelte';
+import pageSendableError from '#/components/svelte/page-useWatcher-sentable-error.svelte';
+import pageSendable from '#/components/svelte/page-useWatcher-sentable.svelte';
 import page from '#/components/svelte/page-useWatcher.svelte';
 import { untilCbCalled } from '#/utils';
 import '@testing-library/jest-dom';
@@ -25,10 +26,26 @@ describe('useWatcher hook with svelte', () => {
   });
 
   test('should not send request when change value but sentable false', async () => {
-    render(pageSentable);
+    render(pageSendable);
     // 需要暂停一段时间再触发事件和检查响应数据
     await untilCbCalled(setTimeout, 100);
-    fireEvent.click(screen.getByRole('btn2'));
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 500);
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('id1')).toHaveTextContent('1');
+    expect(screen.getByRole('id2')).toHaveTextContent('10');
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 500);
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('id1')).toHaveTextContent('1');
+    expect(screen.getByRole('id2')).toHaveTextContent('10');
+  });
+
+  test('should not send request when change value but sentable error', async () => {
+    render(pageSendableError);
+    // 需要暂停一段时间再触发事件和检查响应数据
+    await untilCbCalled(setTimeout, 100);
+    fireEvent.click(screen.getByRole('btn1'));
     await untilCbCalled(setTimeout, 500);
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('id1')).toHaveTextContent('');

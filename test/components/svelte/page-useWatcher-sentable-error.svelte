@@ -40,7 +40,9 @@
       path: '',
       params: { id1: '', id2: '' }
     },
-    sendable: () => $stateId1 === 1
+    sendable: () => {
+      throw Error('')
+    }
   });
 </script>
 

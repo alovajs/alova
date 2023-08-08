@@ -50,7 +50,8 @@ import {
   FrontRequestHookConfig,
   FrontRequestState,
   SuccessHandler,
-  UseHookConfig
+  UseHookConfig,
+  WatcherHookConfig
 } from '~/typings';
 import { SaveStateFn } from './createRequestState';
 import sendRequest from './sendRequest';
@@ -79,11 +80,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   isFetcher = falseValue
 ) {
   const methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
-  const {
-      force: forceRequest = falseValue,
-      middleware = defaultMiddleware,
-      sendable = () => trueValue
-    } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig,
+  const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
+      | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
+      | FetcherHookConfig,
     { id, options, storage } = getContext(methodInstance),
     {
       statesHook: { update },
@@ -93,13 +92,13 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     methodKey = key(methodInstance),
     { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
 
+  const { sendable = () => trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
   let _sendable: boolean;
 
   try {
     _sendable = !!sendable(createAlovaEvent(3, methodInstance, sendCallingArgs, falseValue));
   } catch (error) {
-    console.error(error);
-    _sendable = trueValue;
+    _sendable = falseValue;
   }
 
   if (!_sendable) return promiseResolve(undefinedValue);
