@@ -1,5 +1,5 @@
 import { AlovaCompleteEvent, Method } from '~/typings';
-import { ObjectCls, forEach, objectKeys, undefinedValue } from './variables';
+import { forEach, ObjectCls, objectKeys, undefinedValue } from './variables';
 
 /**
  * 创建统一的事件对象
@@ -9,7 +9,7 @@ export default <S, E, R, T, RC, RE, RH>(
   eventType: number,
   method: Method<S, E, R, T, RC, RE, RH>,
   sendArgs: any[],
-  fromCache: boolean,
+  fromCache?: boolean,
   data?: R,
   error?: any,
   status?: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>['status']
