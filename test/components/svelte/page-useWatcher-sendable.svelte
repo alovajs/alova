@@ -1,8 +1,13 @@
 <script>
+  export let sendableFn;
+  export let immediate = undefined;
+  export let errorInSendable = false;
+
   import { createAlova, useWatcher } from '@/index';
   import GlobalFetch from '@/predefine/GlobalFetch';
   import SvelteHook from '@/predefine/SvelteHook';
   import { writable } from 'svelte/store';
+
   const stateId1 = writable(0);
   const stateObj = writable({
     id: 10
@@ -40,8 +45,13 @@
       path: '',
       params: { id1: '', id2: '' }
     },
+    immediate,
     sendable: () => {
-      throw Error('')
+      sendableFn();
+      if (errorInSendable) {
+        throw new Error('');
+      }
+      return $stateId1 === 1;
     }
   });
 </script>
