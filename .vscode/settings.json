@@ -8,5 +8,8 @@
     "source.fixAll.eslint": true // 修复所有代码
   },
   "typescript.tsdk": "node_modules\\typescript\\lib",
-  "jest.autoRun": "off"
+  "jest.autoRun": "off",
+  "[svelte]": {
+    "editor.defaultFormatter": "svelte.svelte-vscode"
+  }
 }

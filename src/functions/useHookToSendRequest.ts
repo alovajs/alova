@@ -7,8 +7,8 @@ import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
 import createAlovaEvent from '@/utils/createAlovaEvent';
 import {
-  GeneralFn,
   exportFetchStates,
+  GeneralFn,
   getConfig,
   getContext,
   getHandlerMethod,
@@ -22,16 +22,16 @@ import {
 } from '@/utils/helper';
 import myAssert, { assertMethodMatcher } from '@/utils/myAssert';
 import {
-  MEMORY,
-  PromiseCls,
-  STORAGE_RESTORE,
   falseValue,
   forEach,
   len,
+  MEMORY,
   promiseCatch,
+  PromiseCls,
   promiseReject,
   promiseResolve,
   promiseThen,
+  STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '@/utils/variables';
@@ -50,7 +50,8 @@ import {
   FrontRequestHookConfig,
   FrontRequestState,
   SuccessHandler,
-  UseHookConfig
+  UseHookConfig,
+  WatcherHookConfig
 } from '~/typings';
 import { SaveStateFn } from './createRequestState';
 import sendRequest from './sendRequest';
@@ -89,7 +90,20 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     } = options,
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = key(methodInstance),
-    { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
+    { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
+    { sendable = () => trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
+  let _sendable: boolean;
+
+  try {
+    _sendable = !!sendable(createAlovaEvent(3, methodInstance, sendCallingArgs));
+  } catch (error) {
+    _sendable = falseValue;
+  }
+
+  if (!_sendable) {
+    update({ loading: falseValue }, frontStates);
+    return promiseResolve(undefinedValue);
+  }
 
   // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
   let removeStates = noop,

@@ -584,10 +584,13 @@ interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
 /** useRequest config type */
 type RequestHookConfig<S, E, R, T, RC, RE, RH> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
 
+type SendableConfig = (alovaEvent: AlovaEvent) => boolean;
+
 /** useWatcher config type */
 interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH> {
   /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
   debounce?: number | number[];
+  sendable?: SendableConfig;
 }
 
 /** useFetcher config type */

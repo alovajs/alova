@@ -5,6 +5,7 @@ import page from '#/components/svelte/page-useWatcher.svelte';
 import { untilCbCalled } from '#/utils';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/svelte';
+import pageSendable from '~/test/components/svelte/page-useWatcher-sendable.svelte';
 
 describe('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {
@@ -21,6 +22,64 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
+  });
+
+  test('should not send request when change value but returns false in sentable', async () => {
+    const sendableFn = jest.fn();
+    render(pageSendable, { sendableFn } as any);
+
+    // 需要暂停一段时间再触发事件和检查响应数据
+    await untilCbCalled(setTimeout, 100);
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 500);
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('id1')).toHaveTextContent('1');
+    expect(screen.getByRole('id2')).toHaveTextContent('10');
+    expect(sendableFn).toBeCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 500);
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('id1')).toHaveTextContent('1');
+    expect(screen.getByRole('id2')).toHaveTextContent('10');
+    expect(sendableFn).toBeCalledTimes(2);
+  });
+
+  test('should not send request when change value but throws error in sentable', async () => {
+    const sendableFn = jest.fn();
+    render(pageSendable, {
+      sendableFn,
+      errorInSendable: true
+    } as any);
+
+    // 需要暂停一段时间再触发事件和检查响应数据
+    await untilCbCalled(setTimeout, 100);
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 500);
+    expect(screen.getByRole('path')).toHaveTextContent('');
+    expect(screen.getByRole('id1')).toHaveTextContent('');
+    expect(screen.getByRole('id2')).toHaveTextContent('');
+    expect(sendableFn).toBeCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('btn2'));
+    await untilCbCalled(setTimeout, 500);
+    expect(screen.getByRole('path')).toHaveTextContent('');
+    expect(screen.getByRole('id1')).toHaveTextContent('');
+    expect(screen.getByRole('id2')).toHaveTextContent('');
+    expect(sendableFn).toBeCalledTimes(2);
+  });
+
+  test('the loading state should be recovered to false when send request immediately', async () => {
+    const sendableFn = jest.fn();
+    render(pageSendable, {
+      sendableFn,
+      immediate: true
+    } as any);
+
+    expect(screen.getByRole('path')).toHaveTextContent('');
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('id2')).toHaveTextContent('');
+    expect(sendableFn).toBeCalledTimes(1);
   });
 
   test('should send request when init', async () => {

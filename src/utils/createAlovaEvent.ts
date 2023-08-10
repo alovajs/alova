@@ -9,7 +9,7 @@ export default <S, E, R, T, RC, RE, RH>(
   eventType: number,
   method: Method<S, E, R, T, RC, RE, RH>,
   sendArgs: any[],
-  fromCache: boolean,
+  fromCache?: boolean,
   data?: R,
   error?: any,
   status?: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>['status']
@@ -42,7 +42,7 @@ export default <S, E, R, T, RC, RE, RH>(
 
   // 将此类的对象重新命名，让它看上去是由不同的类生成的对象
   // 以此来对应typescript中定义的类型
-  const typeName = ['AlovaSuccessEvent', 'AlovaErrorEvent', 'AlovaCompleteEvent'][eventType];
+  const typeName = ['AlovaSuccessEvent', 'AlovaErrorEvent', 'AlovaCompleteEvent', 'AlovaEvent'][eventType];
   typeName &&
     ObjectCls.defineProperty(eventInstance, Symbol.toStringTag, {
       value: typeName

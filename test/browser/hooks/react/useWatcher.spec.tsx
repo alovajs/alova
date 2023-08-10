@@ -71,6 +71,198 @@ describe('useWatcher hook with react', () => {
     });
   });
 
+  test('should not send request when change value but returns false in sendable', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (id1: number, id2: number) =>
+      alova.Get('/unit-test', {
+        params: {
+          id1,
+          id2
+        },
+        transformData: ({ data }: Result<true>) => data
+      });
+    const mockfn = jest.fn();
+    const sendableFn = jest.fn();
+    function Page() {
+      const [stateId1, setStateId1] = useState(0);
+      const [stateId2, setStateId2] = useState(10);
+
+      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
+        },
+        sendable: () => {
+          sendableFn();
+          return stateId1 === 1 && stateId2 === 11;
+        }
+      });
+      onSuccess(mockfn);
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            onClick={() => {
+              setStateId1(stateId1 + 1);
+              setStateId2(stateId2 + 1);
+            }}>
+            btn
+          </button>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('');
+
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    fireEvent.click(screen.getByRole('button'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(mockfn).toBeCalledTimes(1);
+      expect(sendableFn).toBeCalledTimes(1);
+    });
+
+    fireEvent.click(screen.getByRole('button'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(mockfn).toBeCalledTimes(1);
+      expect(sendableFn).toBeCalledTimes(2);
+    });
+  });
+
+  test('should not send request when change value but throws error in sendable', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (id1: number, id2: number) =>
+      alova.Get('/unit-test', {
+        params: {
+          id1,
+          id2
+        },
+        transformData: ({ data }: Result<true>) => data
+      });
+    const mockfn = jest.fn();
+    const sendableFn = jest.fn();
+    function Page() {
+      const [stateId1, setStateId1] = useState(0);
+      const [stateId2, setStateId2] = useState(10);
+
+      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
+        },
+        sendable: () => {
+          sendableFn();
+          throw Error('');
+        }
+      });
+      onSuccess(mockfn);
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            onClick={() => {
+              setStateId1(stateId1 + 1);
+              setStateId2(stateId2 + 1);
+            }}>
+            btn
+          </button>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('');
+
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    fireEvent.click(screen.getByRole('button'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('');
+      expect(screen.getByRole('id1')).toHaveTextContent('');
+      expect(screen.getByRole('id2')).toHaveTextContent('');
+      expect(mockfn).not.toBeCalled();
+      expect(sendableFn).toBeCalledTimes(1);
+    });
+
+    fireEvent.click(screen.getByRole('button'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('');
+      expect(screen.getByRole('id1')).toHaveTextContent('');
+      expect(screen.getByRole('id2')).toHaveTextContent('');
+      expect(mockfn).not.toBeCalled();
+      expect(sendableFn).toBeCalledTimes(2);
+    });
+  });
+
+  test('the loading state should be recovered to false when send request immediately', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (id1: number, id2: number) =>
+      alova.Get('/unit-test', {
+        params: {
+          id1,
+          id2
+        },
+        transformData: ({ data }: Result<true>) => data
+      });
+    const mockfn = jest.fn();
+    const sendableFn = jest.fn();
+    function Page() {
+      const [stateId1, setStateId1] = useState(0);
+      const [stateId2, setStateId2] = useState(10);
+
+      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
+        },
+        immediate: true,
+        sendable: () => {
+          sendableFn();
+          throw Error('');
+        }
+      });
+      onSuccess(mockfn);
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            onClick={() => {
+              setStateId1(stateId1 + 1);
+              setStateId2(stateId2 + 1);
+            }}>
+            btn
+          </button>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('');
+  });
+
   test('should send request when init', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

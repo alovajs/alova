@@ -69,6 +69,154 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(mockCallback).toBeCalledTimes(2);
   });
 
+  test('should not send request when change value but returns false in sendable', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const mutateStr = ref('a');
+    const sendableFn = jest.fn();
+    const { loading, data, downloading, error, onSuccess } = useWatcher(
+      () =>
+        alova.Get('/unit-test', {
+          params: { num: mutateNum.value, str: mutateStr.value },
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          transformData: (result: Result) => result.data,
+          localCache: 100 * 1000
+        }),
+      [mutateNum, mutateStr],
+      {
+        sendable: () => {
+          sendableFn();
+          return mutateNum.value === 1 && mutateStr.value === 'b';
+        }
+      }
+    );
+
+    const mockCallback = jest.fn(() => {});
+    onSuccess(mockCallback);
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    expect(sendableFn).not.toBeCalled();
+
+    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    await untilCbCalled(setTimeout, 10);
+    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    mutateNum.value = 1;
+    mutateStr.value = 'b';
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('b');
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    expect(sendableFn).toBeCalledTimes(1);
+    expect(mockCallback).toBeCalledTimes(1);
+
+    mutateNum.value = 2;
+    mutateStr.value = 'c';
+    await untilCbCalled(setTimeout, 50); // 修改值后不会发出请求，使用setTimeout延迟查看是否发起了请求
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('b');
+    expect(sendableFn).toBeCalledTimes(2);
+    expect(mockCallback).toBeCalledTimes(1);
+  });
+
+  test('should not send request when change value but throws error in sendable', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const mutateStr = ref('a');
+    const sendableFn = jest.fn();
+    const { loading, data, downloading, error, onSuccess } = useWatcher(
+      () =>
+        alova.Get('/unit-test', {
+          params: { num: mutateNum.value, str: mutateStr.value },
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          transformData: (result: Result) => result.data,
+          localCache: 100 * 1000
+        }),
+      [mutateNum, mutateStr],
+      {
+        sendable: () => {
+          sendableFn();
+          throw Error('');
+        }
+      }
+    );
+
+    const mockCallback = jest.fn();
+    onSuccess(mockCallback);
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    expect(sendableFn).not.toBeCalled();
+
+    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    await untilCbCalled(setTimeout, 10);
+    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    mutateNum.value = 1;
+    mutateStr.value = 'b';
+    await untilCbCalled(setTimeout, 50);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    expect(sendableFn).toBeCalledTimes(1);
+    expect(mockCallback).not.toBeCalled();
+
+    mutateNum.value = 2;
+    mutateStr.value = 'c';
+    await untilCbCalled(setTimeout, 50);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(error.value).toBeUndefined();
+    expect(sendableFn).toBeCalledTimes(2);
+    expect(mockCallback).not.toBeCalled();
+  });
+
+  test('the loading state should be recovered to false when send request immediately', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const mutateStr = ref('a');
+    const sendableFn = jest.fn();
+    const { loading } = useWatcher(
+      () =>
+        alova.Get('/unit-test', {
+          params: { num: mutateNum.value, str: mutateStr.value },
+          transformData: (result: Result) => result.data
+        }),
+      [mutateNum, mutateStr],
+      {
+        immediate: true,
+        sendable: () => {
+          sendableFn();
+          return false;
+        }
+      }
+    );
+
+    expect(loading.value).toBeFalsy();
+    expect(sendableFn).toBeCalledTimes(1);
+  });
+
   test('should work when receive a method instance', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
