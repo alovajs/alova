@@ -43,14 +43,14 @@ Alova is the core library, which provides common functions such as caching strat
 
 | Name                                    | Description                                                                                                                                                                                               | Documentation                                                                          |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Paging request strategy                 | Automatically manage paging data, data preloading, reduce unnecessary data refresh, improve fluency by 300%, reduce coding difficulty by 50%                                                              | [usePagination](https://alova.js.org/strategy/usePagination)                           |
-| Non-inductive data interaction strategy | A new interactive experience, submitting and responding, greatly reducing the impact of network fluctuations, making your application still available when the network is unstable or even disconnected   | [useSQRequest](https://alova.js.org/strategy/sensorless-data-interaction/overview)     |
-| Form Submission Strategy                | A hook designed for form submission, through which you can easily implement form drafts, multi-page (multi-step) forms, in addition to providing common functions such as form reset                      | [useForm](https://alova.js.org/strategy/useForm)                                       |
-| Send Verification Code                  | Verification code sending hook, which saves you the trouble of developing the verification code sending function.                                                                                         | [useCaptcha](https://alova.js.org/strategy/useCaptcha)                                 |
-| Cross-component trigger request         | An alova middleware that removes the limitation of component hierarchy and quickly triggers the operation function of any request in any component                                                        | [actionDelegationMiddleware](https://alova.js.org/strategy/actionDelegationMiddleware) |
-| serial request useRequest               | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/next-step/serial-request), providing a unified loading Status, error, callback function  | [useSerialRequest](https://alova.js.org/strategy/useSerialRequest)                     |
-| Serial request useWatcher               | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/next-step/serial-request), providing a unified loading Status, error, callback function. | [useSerialWatcher](https://alova.js.org/strategy/useSerialWatcher)                     |
-| Request Retry Strategy                  | Automatic retry on request failure, it plays an important role in important requests and polling requests                                                                                                 | [useRetriableRequest](https://alova.js.org/strategy/useRetriableRequest)               |
+| Paging request strategy                 | Automatically manage paging data, data preloading, reduce unnecessary data refresh, improve fluency by 300%, reduce coding difficulty by 50%                                                              | [usePagination](https://alova.js.org/tutorial/strategy/usePagination)                           |
+| Non-inductive data interaction strategy | A new interactive experience, submitting and responding, greatly reducing the impact of network fluctuations, making your application still available when the network is unstable or even disconnected   | [useSQRequest](https://alova.js.org/tutorial/strategy/sensorless-data-interaction/overview)     |
+| Form Submission Strategy                | A hook designed for form submission, through which you can easily implement form drafts, multi-page (multi-step) forms, in addition to providing common functions such as form reset                      | [useForm](https://alova.js.org/tutorial/strategy/useForm)                                       |
+| Send Verification Code                  | Verification code sending hook, which saves you the trouble of developing the verification code sending function.                                                                                         | [useCaptcha](https://alova.js.org/tutorial/strategy/useCaptcha)                                 |
+| Cross-component trigger request         | An alova middleware that removes the limitation of component hierarchy and quickly triggers the operation function of any request in any component                                                        | [actionDelegationMiddleware](https://alova.js.org/tutorial/strategy/actionDelegationMiddleware) |
+| serial request useRequest               | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/tutorial/next-step/serial-request), providing a unified loading Status, error, callback function  | [useSerialRequest](https://alova.js.org/tutorial/strategy/useSerialRequest)                     |
+| Serial request useWatcher               | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/tutorial/next-step/serial-request), providing a unified loading Status, error, callback function. | [useSerialWatcher](https://alova.js.org/tutorial/strategy/useSerialWatcher)                     |
+| Request Retry Strategy                  | Automatic retry on request failure, it plays an important role in important requests and polling requests                                                                                                 | [useRetriableRequest](https://alova.js.org/tutorial/strategy/useRetriableRequest)               |
 
 ### More request-related business scenarios are being collected...
 
@@ -74,7 +74,7 @@ If you like alova. we are very appreciate your star at the topright. it's a appr
 
 ## To replace other request libraries?
 
-alova is a request strategy library, which was originally created to provide specific request strategy solutions for different request scenarios, so as to achieve a smooth request experience more concisely and elegantly, such as `$.ajax`, `axios` and `fetch- api`, etc. they has provided a good support for network communication, they are an essential link (request event) in the [RSM](/get-started/RSM) process, alova still needs to depend them to send requests, Therefore, we can regard alova as an arm of the request library, making the request library more powerful.
+alova is a request strategy library, which was originally created to provide specific request strategy solutions for different request scenarios, so as to achieve a smooth request experience more concisely and elegantly, such as `$.ajax`, `axios` and `fetch- api`, etc. they has provided a good support for network communication, they are an essential link (request event) in the [RSM](https://alova.js.org/tutorial/get-started/RSM) process, alova still needs to depend them to send requests, Therefore, we can regard alova as an arm of the request library, making the request library more powerful.
 
 ## Why binding UI framework?
 
@@ -88,7 +88,7 @@ Decoupling a js library means using it in more scenarios. For example, axios can
 
 ## What is Request Scene Model (RSM)
 
-[Click here to view the detailed introduction](https://alova.js.org/get-started/RSM)
+[Click here to view the detailed introduction](https://alova.js.org/tutorial/get-started/RSM)
 
 ## Install
 
@@ -102,7 +102,7 @@ yarn add alova
 
 ## Usage
 
-[Usage is here](https://alova.js.org/getting-started/start)
+[Usage is here](https://alova.js.org/tutorial/get-started/quick-start)
 
 ## Request scene collection
 
