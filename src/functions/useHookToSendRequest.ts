@@ -31,6 +31,7 @@ import {
   promiseReject,
   promiseResolve,
   promiseThen,
+  STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
   trueValue,
   undefinedValue
@@ -126,11 +127,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       cachedResponse = persistentResponse;
     }
 
-    // 如果命中持久化数据，则更新数据
-    if (cachedResponse || persistentResponse) {
+    // 当缓存模式为placeholder时，先更新data再去发送请求
+    if (cacheMode === STORAGE_PLACEHOLDER && persistentResponse) {
       update(
         {
-          data: cachedResponse || persistentResponse
+          data: persistentResponse
         },
         frontStates
       );
