@@ -591,6 +591,7 @@ interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConf
   /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
   debounce?: number | number[];
   sendable?: SendableConfig;
+  abortLast?: boolean;
 }
 
 /** useFetcher config type */
