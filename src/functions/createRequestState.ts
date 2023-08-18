@@ -51,7 +51,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
-  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
+  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0,
+  abortLast: boolean = falseValue
 ) {
   const statesHook = getStatesHook(alovaInstance);
   myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
@@ -124,6 +125,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     // 以捕获异常的方式调用handleRequest
     // 捕获异常避免异常继续向外抛出
     wrapEffectRequest = () => {
+      abortLast && abortFn.current();
       promiseCatch(handleRequest(), noop);
     };
 

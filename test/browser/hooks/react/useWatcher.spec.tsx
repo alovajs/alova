@@ -2,7 +2,7 @@ import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
 describe('useWatcher hook with react', () => {
@@ -68,6 +68,72 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
       expect(mockfn).toBeCalledTimes(2);
+    });
+  });
+
+  test('should get last response when change value', async () => {
+    let i = 0;
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (id1: number, id2: number) =>
+      alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
+        params: {
+          id1,
+          id2
+        },
+        timeout: 10000,
+        transformData: ({ data }: Result<true>) => data,
+        localCache: 100 * 1000
+      });
+    const mockfn = jest.fn();
+    function Page() {
+      const [stateId1, setStateId1] = useState(0);
+      const [stateId2, setStateId2] = useState(10);
+
+      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
+        }
+      });
+      onSuccess(mockfn);
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            onClick={() => {
+              ++i;
+              setStateId1(stateId1 + 1);
+              setStateId2(stateId2 + 1);
+            }}>
+            btn
+          </button>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('');
+
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await act(() => {
+      fireEvent.click(screen.getByRole('button'));
+    });
+
+    await act(() => {
+      fireEvent.click(screen.getByRole('button'));
+    });
+    await untilCbCalled(setTimeout, 1100);
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(mockfn).toBeCalledTimes(1);
     });
   });
 

@@ -1,3 +1,4 @@
+import pageAbortLast from '#/components/svelte/page-useWatcher-abortLast.svelte';
 import pageDebounceImmediate from '#/components/svelte/page-useWatcher-debounce-immediate.svelte';
 import pageDifferentDebounce from '#/components/svelte/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
@@ -22,6 +23,19 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
+  });
+
+  test('should get last response when change value', async () => {
+    render(pageAbortLast);
+    // 需要暂停一段时间再触发事件和检查响应数据
+    await untilCbCalled(setTimeout, 100);
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 10);
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 1100);
+    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+    expect(screen.getByRole('id1')).toHaveTextContent('2');
+    expect(screen.getByRole('id2')).toHaveTextContent('10');
   });
 
   test('should not send request when change value but returns false in sentable', async () => {
