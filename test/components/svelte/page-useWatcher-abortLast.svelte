@@ -1,6 +1,4 @@
 <script>
-  export let immediate = undefined;
-
   import { createAlova, useWatcher } from '@/index';
   import GlobalFetch from '@/predefine/GlobalFetch';
   import SvelteHook from '@/predefine/SvelteHook';
@@ -10,10 +8,6 @@
   const stateObj = writable({
     id: 10
   });
-
-  const test = {
-    id: $stateId1
-  };
 
   const alova = createAlova({
     baseURL: 'http://localhost:3000',
@@ -34,16 +28,12 @@
   const handleClick1 = () => {
     $stateId1++;
   };
-  const handleClick2 = () => {
-    $stateObj.id++;
-  };
 
   const { loading, data, onSuccess } = useWatcher(() => getter($stateId1, $stateObj.id), [stateId1, stateObj], {
     initialData: {
       path: '',
       params: { id1: '', id2: '' }
-    },
-    immediate
+    }
   });
 </script>
 
@@ -57,7 +47,4 @@
   <button
     role="btn1"
     on:click={handleClick1}>button1</button>
-  <button
-    role="btn2"
-    on:click={handleClick2}>button2</button>
 </div>

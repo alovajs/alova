@@ -52,7 +52,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   immediate = falseValue,
   watchingStates?: E[],
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0,
-  abortLast: boolean = trueValue
+  abortLast: boolean = falseValue
 ) {
   const statesHook = getStatesHook(alovaInstance);
   myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
