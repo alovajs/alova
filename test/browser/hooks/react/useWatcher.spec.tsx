@@ -2,7 +2,7 @@ import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import '@testing-library/jest-dom';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
 
 describe('useWatcher hook with react', () => {
@@ -71,7 +71,7 @@ describe('useWatcher hook with react', () => {
     });
   });
 
-  test('should get last response when change value', async () => {
+  test('should get the response that request at last when change value', async () => {
     let i = 0;
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
@@ -82,9 +82,8 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        timeout: 10000,
         transformData: ({ data }: Result<true>) => data,
-        localCache: 100 * 1000
+        localCache: null
       });
     const mockfn = jest.fn();
     function Page() {
@@ -105,10 +104,20 @@ describe('useWatcher hook with react', () => {
           <span role="id1">{data.params.id1}</span>
           <span role="id2">{data.params.id2}</span>
           <button
+            role="button1"
             onClick={() => {
-              ++i;
-              setStateId1(stateId1 + 1);
-              setStateId2(stateId2 + 1);
+              i++;
+              setStateId1(1);
+              setStateId2(11);
+            }}>
+            btn
+          </button>
+          <button
+            role="button2"
+            onClick={() => {
+              i++;
+              setStateId1(2);
+              setStateId2(12);
             }}>
             btn
           </button>
@@ -121,19 +130,176 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('path')).toHaveTextContent('');
 
     await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
-    await act(() => {
-      fireEvent.click(screen.getByRole('button'));
-    });
+    fireEvent.click(screen.getByRole('button1'));
 
-    await act(() => {
-      fireEvent.click(screen.getByRole('button'));
-    });
-    await untilCbCalled(setTimeout, 1100);
+    await untilCbCalled(setTimeout);
+    fireEvent.click(screen.getByRole('button2'));
     await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockfn).toBeCalledTimes(1);
+      expect(mockfn).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+    });
+  });
+
+  test('should ignore the error which is not the last request', async () => {
+    let i = 0;
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (id1: number, id2: number) =>
+      alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
+        params: {
+          id1,
+          id2
+        },
+        transformData: ({ data }: Result<true>) => {
+          if (data.path === '/unit-test-1s') {
+            throw new Error('error');
+          }
+          return data;
+        },
+        localCache: null
+      });
+    const mockfn = jest.fn();
+    const mockErrorfn = jest.fn();
+    function Page() {
+      const [stateId1, setStateId1] = useState(0);
+      const [stateId2, setStateId2] = useState(10);
+
+      const { loading, error, data, onSuccess, onError } = useWatcher(
+        () => getter(stateId1, stateId2),
+        [stateId1, stateId2],
+        {
+          initialData: {
+            path: '',
+            params: { id1: '', id2: '' }
+          }
+        }
+      );
+      onSuccess(mockfn);
+      onError(mockErrorfn);
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="error">{error?.message || ''}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            role="button1"
+            onClick={() => {
+              i++;
+              setStateId1(1);
+              setStateId2(11);
+            }}>
+            btn
+          </button>
+          <button
+            role="button2"
+            onClick={() => {
+              i++;
+              setStateId1(2);
+              setStateId2(12);
+            }}>
+            btn
+          </button>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('');
+
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    fireEvent.click(screen.getByRole('button1'));
+
+    await untilCbCalled(setTimeout);
+    fireEvent.click(screen.getByRole('button2'));
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(mockfn).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+      expect(mockErrorfn).not.toBeCalled(); // unit-test-1s因为后面才响应，不会触发回调
+      expect(screen.getByRole('error')).toHaveTextContent(''); // 对应的error也不会有值
+    });
+  });
+
+  test('should receive last response when set abortLast to false', async () => {
+    let i = 0;
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (id1: number, id2: number) =>
+      alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
+        params: {
+          id1,
+          id2
+        },
+        transformData: ({ data }: Result<true>) => data,
+        localCache: null
+      });
+    const mockfn = jest.fn();
+    function Page() {
+      const [stateId1, setStateId1] = useState(0);
+      const [stateId2, setStateId2] = useState(10);
+
+      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
+        },
+        abortLast: false
+      });
+      onSuccess(mockfn);
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            role="button1"
+            onClick={() => {
+              i++;
+              setStateId1(3);
+              setStateId2(13);
+            }}>
+            btn
+          </button>
+          <button
+            role="button2"
+            onClick={() => {
+              i++;
+              setStateId1(4);
+              setStateId2(14);
+            }}>
+            btn
+          </button>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    expect(screen.getByRole('path')).toHaveTextContent('');
+
+    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    fireEvent.click(screen.getByRole('button1'));
+
+    await untilCbCalled(setTimeout);
+    fireEvent.click(screen.getByRole('button2'));
+    await untilCbCalled(setTimeout, 1000);
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
+      expect(screen.getByRole('id1')).toHaveTextContent('3');
+      expect(screen.getByRole('id2')).toHaveTextContent('13');
+      expect(mockfn).toBeCalledTimes(2); // 请求已发出，但数据只更新最新的
     });
   });
 
@@ -582,7 +748,6 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        timeout: 10000,
         transformData: ({ data }: Result<true>) => data,
         localCache: 100 * 1000
       });

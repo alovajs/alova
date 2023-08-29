@@ -2,7 +2,7 @@ import createRequestState from '@/functions/createRequestState';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { exportFetchStates, noop } from '@/utils/helper';
 import { assertAlovaCreation, assertMethodMatcher } from '@/utils/myAssert';
-import { alovas, falseValue, trueValue } from '@/utils/variables';
+import { alovas, falseValue, HOOK_FETCHER, trueValue } from '@/utils/variables';
 import { FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
 
 /**
@@ -12,6 +12,7 @@ import { FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
 export default function useFetcher<SE extends FetcherType<any>>(config: FetcherHookConfig = {}) {
   assertAlovaCreation();
   const props = createRequestState<SE['state'], SE['export'], any, any, any, any, any, FetcherHookConfig>(
+    HOOK_FETCHER,
     alovas[0],
     noop as any,
     config

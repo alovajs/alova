@@ -5,7 +5,7 @@ import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte'
 import page from '#/components/svelte/page-useWatcher.svelte';
 import { untilCbCalled } from '#/utils';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import pageSendable from '~/test/components/svelte/page-useWatcher-sendable.svelte';
 
 describe('useWatcher hook with svelte', () => {
@@ -25,17 +25,55 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('id2')).toHaveTextContent('11');
   });
 
-  test('should get last response when change value', async () => {
-    render(pageAbortLast);
+  test('should get the response that request at last when change value', async () => {
+    const mockSuccessFn = jest.fn();
+    render(pageAbortLast, { successFn: mockSuccessFn });
     // 需要暂停一段时间再触发事件和检查响应数据
-    await untilCbCalled(setTimeout, 100);
-    fireEvent.click(screen.getByRole('btn1'));
     await untilCbCalled(setTimeout, 10);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 1100);
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('id1')).toHaveTextContent('2');
-    expect(screen.getByRole('id2')).toHaveTextContent('10');
+    await untilCbCalled(setTimeout, 10);
+    fireEvent.click(screen.getByRole('btn2'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(mockSuccessFn).toBeCalledTimes(1);
+    });
+  });
+
+  test('should ignore the error which is not the last request', async () => {
+    const mockSuccessFn = jest.fn();
+    const mockErrorFn = jest.fn();
+    render(pageAbortLast, { successFn: mockSuccessFn, throwError: true, errorFn: mockErrorFn });
+    // 需要暂停一段时间再触发事件和检查响应数据
+    await untilCbCalled(setTimeout, 10);
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 10);
+    fireEvent.click(screen.getByRole('btn2'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(mockSuccessFn).toBeCalledTimes(1);
+      expect(mockErrorFn).not.toBeCalled();
+      expect(screen.getByRole('error')).toHaveTextContent('');
+    });
+  });
+
+  test('should receive last response when set abortLast to false', async () => {
+    const mockSuccessFn = jest.fn();
+    render(pageAbortLast, { successFn: mockSuccessFn, abortLast: false });
+    // 需要暂停一段时间再触发事件和检查响应数据
+    await untilCbCalled(setTimeout, 10);
+    fireEvent.click(screen.getByRole('btn1'));
+    await untilCbCalled(setTimeout, 10);
+    fireEvent.click(screen.getByRole('btn2'));
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(mockSuccessFn).toBeCalledTimes(2);
+    });
   });
 
   test('should not send request when change value but returns false in sentable', async () => {
