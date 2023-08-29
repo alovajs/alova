@@ -69,51 +69,141 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(mockCallback).toBeCalledTimes(2);
   });
 
-  test('should get last response when change value', async () => {
+  test('should get the response that request at last when change value', async () => {
     let i = 0;
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const { loading, data, downloading, error, onSuccess } = useWatcher(
+    const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
-          timeout: 10000,
-          headers: {
-            'Content-Type': 'application/json'
-          },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          localCache: null
         }),
       [mutateNum, mutateStr]
     );
 
-    const mockCallback = jest.fn(() => {});
+    const mockCallback = jest.fn();
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
-    await untilCbCalled(setTimeout, 10);
+    await untilCbCalled(setTimeout);
     // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
     ++i;
     mutateNum.value = 1;
     mutateStr.value = 'b';
 
+    await untilCbCalled(setTimeout);
+
+    ++i;
+    mutateNum.value = 2;
+    mutateStr.value = 'c';
+    await untilCbCalled(onSuccess);
+    expect(data.value.params.num).toBe('2');
+    expect(data.value.params.str).toBe('c');
+    expect(mockCallback).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+  });
+
+  test('should ignore the error which is not the last request', async () => {
+    let i = 0;
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const mutateStr = ref('a');
+    const { loading, data, error, onSuccess, onError } = useWatcher(
+      () =>
+        alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
+          params: { num: mutateNum.value, str: mutateStr.value },
+          transformData: ({ data }: Result) => {
+            if (data.path === '/unit-test-1s') {
+              throw new Error('error');
+            }
+            return data;
+          },
+          localCache: null
+        }),
+      [mutateNum, mutateStr]
+    );
+
+    const mockCallback = jest.fn();
+    onSuccess(mockCallback);
+    const mockErrorCallback = jest.fn();
+    onError(mockErrorCallback);
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    await untilCbCalled(setTimeout);
+    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    ++i;
+    mutateNum.value = 1;
+    mutateStr.value = 'b';
+
+    await untilCbCalled(setTimeout);
+
+    ++i;
+    mutateNum.value = 2;
+    mutateStr.value = 'c';
+    await untilCbCalled(onSuccess);
+    expect(data.value.params.num).toBe('2');
+    expect(data.value.params.str).toBe('c');
+    expect(mockCallback).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+    expect(mockErrorCallback).not.toBeCalled(); // unit-test-1s因为后面才响应，不会触发回调
+    expect(error.value).toBeUndefined(); // 对应的error也不会有值
+  });
+
+  test('should receive last response when set abortLast to false', async () => {
+    let i = 0;
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const mutateStr = ref('a');
+    const { loading, data, error, onSuccess } = useWatcher(
+      () =>
+        alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
+          params: { num: mutateNum.value, str: mutateStr.value },
+          transformData: ({ data }: Result) => data,
+          localCache: null
+        }),
+      [mutateNum, mutateStr],
+      {
+        abortLast: false
+      }
+    );
+
+    const mockCallback = jest.fn();
+    onSuccess(mockCallback);
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    await untilCbCalled(setTimeout);
+    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    ++i;
+    mutateNum.value = 1;
+    mutateStr.value = 'b';
     await untilCbCalled(setTimeout, 10);
 
     ++i;
     mutateNum.value = 2;
     mutateStr.value = 'c';
     await untilCbCalled(setTimeout, 1100);
-    expect(data.value.params.num).toBe('2');
-    expect(data.value.params.str).toBe('c');
-    expect(mockCallback).toBeCalledTimes(1);
+    expect(data.value.params.num).toBe('1');
+    expect(data.value.params.str).toBe('b');
+    expect(mockCallback).toBeCalledTimes(2); // 请求已发出，但数据只更新最新的
   });
 
   test('should not send request when change value but returns false in sendable', async () => {

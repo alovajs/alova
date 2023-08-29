@@ -4,6 +4,13 @@
   import SvelteHook from '@/predefine/SvelteHook';
   import { writable } from 'svelte/store';
 
+  export let throwError = false;
+  export let successFn;
+  export let errorFn = () => {};
+
+  /** @type {boolean|undefined} */
+  export let abortLast = undefined;
+
   const stateId1 = writable(0);
   const stateObj = writable({
     id: 10
@@ -11,7 +18,6 @@
 
   const alova = createAlova({
     baseURL: 'http://localhost:3000',
-    timeout: 3000,
     statesHook: SvelteHook,
     requestAdapter: GlobalFetch(),
     responded: response => response.json()
@@ -22,29 +28,46 @@
         id1,
         id2
       },
-      transformData: ({ data }) => data
+      transformData: ({ data }) => {
+        if (throwError && data.path === '/unit-test-1s') {
+          throw new Error('error');
+        }
+        return data;
+      }
     });
 
-  const handleClick1 = () => {
-    $stateId1++;
+  const handleClick = (n1, n2) => {
+    $stateId1 = n1;
+    $stateObj.id = n2;
   };
 
-  const { loading, data, onSuccess } = useWatcher(() => getter($stateId1, $stateObj.id), [stateId1, stateObj], {
-    initialData: {
-      path: '',
-      params: { id1: '', id2: '' }
+  const { loading, data, error, onSuccess, onError } = useWatcher(
+    () => getter($stateId1, $stateObj.id),
+    [stateId1, stateObj],
+    {
+      initialData: {
+        path: '',
+        params: { id1: '', id2: '' }
+      },
+      abortLast
     }
-  });
+  );
+  onSuccess(successFn);
+  onError(errorFn);
 </script>
 
 <div>
   <div role="status">{$loading ? 'loading' : 'loaded'}</div>
   {#if !$loading}
     <div role="path">{$data.path}</div>
+    <div role="error">{$error?.message || ''}</div>
     <div role="id1">{$data.params.id1}</div>
     <div role="id2">{$data.params.id2}</div>
   {/if}
   <button
     role="btn1"
-    on:click={handleClick1}>button1</button>
+    on:click={() => handleClick(1, 11)}>button1</button>
+  <button
+    role="btn2"
+    on:click={() => handleClick(2, 12)}>button1</button>
 </div>

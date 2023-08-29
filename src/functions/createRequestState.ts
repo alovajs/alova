@@ -1,13 +1,24 @@
+import Hook from '@/Hook';
 import { getResponseCache } from '@/storage/responseCache';
-import { _self, debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
+import {
+  debounce,
+  getHandlerMethod,
+  getStatesHook,
+  isNumber,
+  key,
+  newInstance,
+  noop,
+  sloughConfig,
+  _self
+} from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
-  FetchRequestState,
   FetcherHookConfig,
+  FetchRequestState,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -30,7 +41,6 @@ import {
 import useHookToSendRequest from './useHookToSendRequest';
 
 const refCurrent = <T>(ref: { current: T }) => ref.current;
-export type SaveStateFn = (frontStates: FrontRequestState) => void;
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useFetcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -45,28 +55,25 @@ export type SaveStateFn = (frontStates: FrontRequestState) => void;
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
 export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig>(
+  hookType: 1 | 2 | 3,
   alovaInstance: Alova<S, E, RC, RE, RH>,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   useHookConfig: UC,
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
-  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0,
-  abortLast: boolean = falseValue
+  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
   const statesHook = getStatesHook(alovaInstance);
   myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
   const {
-      create,
-      export: stateExport,
-      effectRequest,
-      update,
-      memorize = _self,
-      ref = val => ({ current: val })
-    } = statesHook,
-    abortFn = ref(noop),
-    removeStatesFns = ref([] as (typeof noop)[]),
-    saveStatesFns = ref([] as SaveStateFn[]);
+    create,
+    export: stateExport,
+    effectRequest,
+    update,
+    memorize = _self,
+    ref = val => ({ current: val })
+  } = statesHook;
   let initialLoading = falseValue;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
@@ -80,24 +87,21 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     initialLoading = !!forceRequestFinally || !cachedResponse;
   }
 
-  const progress: Progress = {
+  const hookInstance = refCurrent(ref(newInstance(Hook, hookType) as Hook<S, E, R, T, RC, RE, RH>)),
+    progress: Progress = {
       total: 0,
       loaded: 0
     },
     // 将外部传入的受监管的状态一同放到frontStates集合中
     { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>,
-    frontStates = {
+    frontStates = (hookInstance.fs = {
       ...managedStates,
       data: create(initialData),
       loading: create(initialLoading),
       error: create(undefinedValue as Error | undefined),
       downloading: create({ ...progress }),
       uploading: create({ ...progress })
-    },
-    // 请求事件
-    successHandlers = [] as SuccessHandler<S, E, R, T, RC, RE, RH>[],
-    errorHandlers = [] as ErrorHandler<S, E, R, T, RC, RE, RH>[],
-    completeHandlers = [] as CompleteHandler<S, E, R, T, RC, RE, RH>[],
+    }),
     hasWatchingStates = watchingStates !== undefinedValue,
     // 统一的发送请求函数
     handleRequest = (
@@ -105,30 +109,17 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       useHookConfigParam = useHookConfig,
       sendCallingArgs?: any[],
       updateCacheState?: boolean
-    ) =>
-      useHookToSendRequest(
-        handler,
-        frontStates,
-        useHookConfigParam,
-        successHandlers,
-        errorHandlers,
-        completeHandlers,
-        ({ abort, r: removeStates, s: saveStates }) => {
-          // 每次发送请求都需要保存最新的控制器
-          abortFn.current = abort;
-          pushItem(refCurrent(removeStatesFns), removeStates);
-          pushItem(refCurrent(saveStatesFns), saveStates);
-        },
-        sendCallingArgs,
-        updateCacheState
-      ),
+    ) => useHookToSendRequest(hookInstance, handler, useHookConfigParam, sendCallingArgs, updateCacheState),
     // 以捕获异常的方式调用handleRequest
     // 捕获异常避免异常继续向外抛出
     wrapEffectRequest = () => {
-      abortLast && abortFn.current();
       promiseCatch(handleRequest(), noop);
     };
 
+  // 初始化请求事件
+  hookInstance.sh = [];
+  hookInstance.eh = [];
+  hookInstance.ch = [];
   effectRequest({
     handler:
       // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
@@ -137,8 +128,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
             isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
           )
         : wrapEffectRequest,
-    removeStates: () => forEach(refCurrent(removeStatesFns), fn => fn()),
-    saveStates: (states: FrontRequestState) => forEach(refCurrent(saveStatesFns), fn => fn(states)),
+    removeStates: () => forEach(hookInstance.rf, fn => fn()),
+    saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),
     frontStates: frontStates,
     watchingStates,
     immediate: immediate ?? trueValue
@@ -154,13 +145,13 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   return {
     ...exportedStates,
     onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
-      pushItem(successHandlers, handler);
+      pushItem(hookInstance.sh, handler);
     },
     onError(handler: ErrorHandler<S, E, R, T, RC, RE, RH>) {
-      pushItem(errorHandlers, handler);
+      pushItem(hookInstance.eh, handler);
     },
     onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
-      pushItem(completeHandlers, handler);
+      pushItem(hookInstance.ch, handler);
     },
     update: memorize(
       (
@@ -177,7 +168,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         update(newStates, frontStates);
       }
     ),
-    abort: memorize(() => refCurrent(abortFn)(), trueValue),
+    abort: memorize(() => hookInstance.ar(), trueValue),
 
     /**
      * 通过执行该方法来手动发起请求

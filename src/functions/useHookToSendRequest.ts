@@ -1,3 +1,4 @@
+import Hook, { SaveStateFn } from '@/Hook';
 import Method from '@/Method';
 import defaultErrorLogger from '@/predefine/defaultErrorLogger';
 import defaultMiddleware from '@/predefine/defaultMiddleware';
@@ -24,6 +25,7 @@ import myAssert, { assertMethodMatcher } from '@/utils/myAssert';
 import {
   falseValue,
   forEach,
+  HOOK_WATCHER,
   len,
   MEMORY,
   promiseCatch,
@@ -31,6 +33,7 @@ import {
   promiseReject,
   promiseResolve,
   promiseThen,
+  pushItem,
   STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
   trueValue,
@@ -54,7 +57,6 @@ import {
   UseHookConfig,
   WatcherHookConfig
 } from '~/typings';
-import { SaveStateFn } from './createRequestState';
 import sendRequest from './sendRequest';
 
 /**
@@ -70,18 +72,15 @@ import sendRequest from './sendRequest';
  * @returns 请求状态
  */
 export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends UseHookConfig>(
+  hookInstance: Hook<S, E, R, T, RC, RE, RH>,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  frontStates: FrontRequestState,
   useHookConfig: UC,
-  successHandlers: SuccessHandler<S, E, R, T, RC, RE, RH>[],
-  errorHandlers: ErrorHandler<S, E, R, T, RC, RE, RH>[],
-  completeHandlers: CompleteHandler<S, E, R, T, RC, RE, RH>[],
-  onRequest: (reqOpts: ReturnType<typeof sendRequest> & { s: SaveStateFn; r: () => void }) => void,
   sendCallingArgs: any[] = [],
   isFetcher = falseValue
 ) {
-  const methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
-  const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
+  const { fs: frontStates, sh: successHandlers, eh: errorHandlers, ch: completeHandlers, ht } = hookInstance,
+    methodInstance = getHandlerMethod(methodHandler, sendCallingArgs),
+    { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
       | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
       | FetcherHookConfig,
     { id, options, storage } = getContext(methodInstance),
@@ -92,9 +91,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = key(methodInstance),
     { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
-    { sendable = () => trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
-  let _sendable: boolean;
+    { sendable = () => trueValue, abortLast = trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
+  hookInstance.m = methodInstance;
 
+  let _sendable: boolean;
   try {
     _sendable = !!sendable(createAlovaEvent(3, methodInstance, sendCallingArgs));
   } catch (error) {
@@ -165,8 +165,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         );
       };
 
-    onRequest({ ...requestCtrl, r: removeStates, s: saveStates }); // 通知外部发起了请求
-    abortFn = abort;
+    // 每次发送请求都需要保存最新的控制器
+    pushItem(hookInstance.sf, saveStates);
+    pushItem(hookInstance.rf, removeStates);
+    hookInstance.ar = abort;
     fromCache = getFromCacheValue;
 
     // loading状态受控时将不更改loading
@@ -200,12 +202,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
     length: number
   ) => void | void;
 
-  let abortFn = noop;
   const commonContext = {
     method: methodInstance,
     cachedResponse,
     config: useHookConfig,
-    abort: () => abortFn(),
+    abort: () => hookInstance.ar(),
     decorateSuccess(decorator: NonNullable<typeof successHandlerDecorator>) {
       isFn(decorator) && (successHandlerDecorator = decorator);
     },
@@ -227,17 +228,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
           fetch: (matcher, ...args) => {
             const methodInstance = filterSnapshotMethods(matcher, falseValue);
             assertMethodMatcher(methodInstance);
-            return useHookToSendRequest(
-              methodInstance as Method,
-              frontStates,
-              useHookConfig,
-              successHandlers,
-              errorHandlers,
-              completeHandlers,
-              onRequest,
-              args,
-              trueValue
-            );
+            return useHookToSendRequest(hookInstance, methodInstance as Method, useHookConfig, args, trueValue);
           },
           fetchStates,
           update: newFetchStates => update(newFetchStates, fetchStates),
@@ -251,17 +242,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         {
           ...commonContext,
           sendArgs: sendCallingArgs,
-          send: (...args) =>
-            useHookToSendRequest(
-              methodHandler,
-              frontStates,
-              useHookConfig,
-              successHandlers,
-              errorHandlers,
-              completeHandlers,
-              onRequest,
-              args
-            ),
+          send: (...args) => useHookToSendRequest(hookInstance, methodHandler, useHookConfig, args),
           frontStates,
           update: newFrontStates => update(newFrontStates, frontStates),
           controlLoading(control = trueValue) {
@@ -281,75 +262,81 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
       isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)
     );
   };
-  // 统一处理响应
-  const responseCompletePromise = promiseCatch(
-    promiseThen(middlewareCompletePromise, middlewareReturnedData => {
-      const afterSuccess = (data: any) => {
-        // 更新缓存响应数据
-        if (!isFetcher) {
-          update({ data }, frontStates);
-        } else {
-          // 更新缓存内的状态，一般为useFetcher中进入
-          const cachedState = getStateCache(id, methodKey);
-          cachedState && update({ data }, cachedState);
+
+  const // 是否需要更新响应数据，以及调用响应回调
+    toUpdateResponse = () => ht !== HOOK_WATCHER || !abortLast || hookInstance.m === methodInstance,
+    // 统一处理响应
+    responseCompletePromise = promiseCatch(
+      promiseThen(middlewareCompletePromise, middlewareReturnedData => {
+        const afterSuccess = (data: any) => {
+          // 更新缓存响应数据
+          if (!isFetcher) {
+            toUpdateResponse() && update({ data }, frontStates);
+          } else {
+            // 更新缓存内的状态，一般为useFetcher中进入
+            const cachedState = getStateCache(id, methodKey);
+            cachedState && update({ data }, cachedState);
+          }
+
+          // 如果需要更新响应数据，则在请求后触发对应回调函数
+          if (toUpdateResponse()) {
+            const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
+            // loading状态受控时将不再更改为false
+            !controlledLoading && (newStates.loading = falseValue);
+            update(newStates, frontStates);
+            runArgsHandler(
+              successHandlers,
+              successHandlerDecorator,
+              createAlovaEvent(0, methodInstance, sendCallingArgs, fromCache(), data)
+            );
+            runArgsHandler(
+              completeHandlers,
+              completeHandlerDecorator,
+              createAlovaEvent(2, methodInstance, sendCallingArgs, fromCache(), data, undefinedValue, 'success')
+            );
+          }
+          return data;
+        };
+
+        // 中间件中未返回数据或返回undefined时，去获取真实的响应数据
+        // 否则使用返回数据并不再等待响应promise，此时也需要调用响应回调
+        if (middlewareReturnedData !== undefinedValue) {
+          return afterSuccess(middlewareReturnedData);
+        }
+        if (!isNextCalled) {
+          return;
         }
 
-        const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
-        // loading状态受控时将不再更改为false
-        !controlledLoading && (newStates.loading = falseValue);
-        update(newStates, frontStates);
-        // 在请求后触发对应回调函数
-        runArgsHandler(
-          successHandlers,
-          successHandlerDecorator,
-          createAlovaEvent(0, methodInstance, sendCallingArgs, fromCache(), data)
-        );
-        runArgsHandler(
-          completeHandlers,
-          completeHandlerDecorator,
-          createAlovaEvent(2, methodInstance, sendCallingArgs, fromCache(), data, undefinedValue, 'success')
-        );
-        return data;
-      };
+        // 当middlewareCompletePromise为resolve时有两种可能
+        // 1. 请求正常
+        // 2. 请求错误，但错误被中间件函数捕获了，此时也将调用成功回调，即afterSuccess(undefinedValue)
+        return promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue));
+      }),
 
-      // 中间件中未返回数据或返回undefined时，去获取真实的响应数据
-      // 否则使用返回数据并不再等待响应promise，此时也需要调用响应回调
-      if (middlewareReturnedData !== undefinedValue) {
-        return afterSuccess(middlewareReturnedData);
+      // catch回调函数
+      (error: Error) => {
+        if (toUpdateResponse()) {
+          // 控制在输出错误消息
+          sloughFunction(errorLogger, defaultErrorLogger)(error, methodInstance);
+          const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
+          // loading状态受控时将不再更改为false
+          !controlledLoading && (newStates.loading = falseValue);
+          update(newStates, frontStates);
+          runArgsHandler(
+            errorHandlers,
+            errorHandlerDecorator,
+            createAlovaEvent(1, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error)
+          );
+          runArgsHandler(
+            completeHandlers,
+            completeHandlerDecorator,
+            createAlovaEvent(2, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error, 'error')
+          );
+        }
+
+        return promiseReject(error);
       }
-      if (!isNextCalled) {
-        return;
-      }
-
-      // 当middlewareCompletePromise为resolve时有两种可能
-      // 1. 请求正常
-      // 2. 请求错误，但错误被中间件函数捕获了，此时也将调用成功回调，即afterSuccess(undefinedValue)
-      return promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue));
-    }),
-
-    // catch回调函数
-    (error: Error) => {
-      // 控制在输出错误消息
-      sloughFunction(errorLogger, defaultErrorLogger)(error, methodInstance);
-
-      const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
-      // loading状态受控时将不再更改为false
-      !controlledLoading && (newStates.loading = falseValue);
-      update(newStates, frontStates);
-      runArgsHandler(
-        errorHandlers,
-        errorHandlerDecorator,
-        createAlovaEvent(1, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error)
-      );
-      runArgsHandler(
-        completeHandlers,
-        completeHandlerDecorator,
-        createAlovaEvent(2, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error, 'error')
-      );
-
-      return promiseReject(error);
-    }
-  );
+    );
 
   return responseCompletePromise;
 }

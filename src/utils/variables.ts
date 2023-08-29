@@ -28,6 +28,10 @@ export const PromiseCls = Promise as typeof Promise<any>,
   len = (data: any[] | Uint8Array | string) => data.length,
   isArray = (arg: any): arg is any[] => Array.isArray(arg),
   deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) => delete arg[attr],
+  /** hook类型 */
+  HOOK_REQUEST = 1,
+  HOOK_WATCHER = 2,
+  HOOK_FETCHER = 3,
   /** 三种缓存模式 */
   // 只在内存中缓存，默认是此选项
   MEMORY = 'memory',
