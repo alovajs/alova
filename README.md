@@ -76,8 +76,8 @@ If you like alova. we are very appreciate your star at the topright. it's a appr
 
 ## Join the channel community
 
-- [Join QQ channel community](https://pd.qq.com/s/1cdjx0nnw)
 - [Join Discord community](https://discord.gg/S47QGJgkVb)
+- [Join QQ channel community](https://pd.qq.com/s/1cdjx0nnw)
 
 ## To replace other request libraries?
 
