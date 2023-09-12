@@ -11,6 +11,8 @@
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
 [![stars](https://img.shields.io/github/stars/alovajs/alova?style=social)](https://github.com/alovajs/alova)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
+[![discord](https://img.shields.io/badge/chat-Discord-515ff1)](https://discord.gg/S47QGJgkVb)
+[![qq](https://img.shields.io/badge/chat_with_CH-QQ-0094f7)](https://pd.qq.com/s/1cdjx0nnw)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
@@ -71,6 +73,11 @@ It has been more then one year since the first version of alova. During this yea
 ## We really need your star
 
 If you like alova. we are very appreciate your star at the topright. it's a approval and encourage of our work.
+
+## Join the channel community
+
+- [Join Discord community](https://discord.gg/S47QGJgkVb)
+- [Join QQ channel community](https://pd.qq.com/s/1cdjx0nnw)
 
 ## To replace other request libraries?
 

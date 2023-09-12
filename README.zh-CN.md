@@ -11,6 +11,8 @@
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
 [![stars](https://img.shields.io/github/stars/alovajs/alova?style=social)](https://github.com/alovajs/alova)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
+[![discord](https://img.shields.io/badge/chat-Discord-515ff1)](https://discord.gg/S47QGJgkVb)
+[![qq](https://img.shields.io/badge/chat_with_CH-QQ-0094f7)](https://pd.qq.com/s/1cdjx0nnw)
 [![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
@@ -67,6 +69,11 @@ alova 从第一个版本的开发到现在已经过去将近一年时间了，�
 ## 我们真的需要你的 star
 
 如果你喜欢 alova，我们非常感谢您在右上角给我们 star，这是对我们工作的认可和鼓励。
+
+## 加入交流社区
+
+- [加入在 Discord 社区参与交流](https://discord.gg/S47QGJgkVb)
+- [加入 QQ 频道社区参与交流](https://pd.qq.com/s/1cdjx0nnw)
 
 ## 替代请求库？
 
