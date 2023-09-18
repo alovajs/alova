@@ -1,13 +1,5 @@
-import {
-  clearTimeoutTimer,
-  forEach,
-  isSSR,
-  objectKeys,
-  setTimeoutFn,
-  trueValue,
-  undefinedValue
-} from '@/utils/variables';
-import { onUnmounted, Ref, ref, watch, WatchSource } from 'vue';
+import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
+import { Ref, WatchSource, onUnmounted, ref, watch } from 'vue';
 import { EffectRequestParams } from '~/typings';
 
 type UnknownRef = Ref<unknown>;
@@ -21,11 +13,6 @@ export default {
       states[key].value = newVal[key];
     }),
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<WatchSource>) {
-    // 在服务端渲染时不发送请求
-    if (isSSR) {
-      return;
-    }
-
     // 组件卸载时移除对应状态
     onUnmounted(removeStates);
     immediate && handler();
