@@ -39,8 +39,9 @@ describe('update cached response data by user in svelte', () => {
     // 组件卸载后，对应缓存状态会被删除
     unmount();
     await waitFor(() => {
-      expect(getStateCache(alovaId, methodKey1)).toBeUndefined();
-      expect(getStateCache(alovaId, methodKey2)).toBeUndefined();
+      // 空对象表示未匹配到状态缓存
+      expect(getStateCache(alovaId, methodKey1)).toStrictEqual({});
+      expect(getStateCache(alovaId, methodKey2)).toStrictEqual({});
     });
   });
 });

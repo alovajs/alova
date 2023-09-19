@@ -1,14 +1,14 @@
 import createHook from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
-import { _self, debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
+import { debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig, _self } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
-  FetchRequestState,
   FetcherHookConfig,
+  FetchRequestState,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -85,14 +85,14 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     },
     // 将外部传入的受监管的状态一同放到frontStates集合中
     { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>,
-    frontStates = (hookInstance.fs = {
+    frontStates = {
       ...managedStates,
       data: create(initialData, hookInstance),
       loading: create(initialLoading, hookInstance),
       error: create(undefinedValue as Error | undefined, hookInstance),
       downloading: create({ ...progress }, hookInstance),
       uploading: create({ ...progress }, hookInstance)
-    }),
+    },
     hasWatchingStates = watchingStates !== undefinedValue,
     // 初始化请求事件
     // 统一的发送请求函数
@@ -107,6 +107,12 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       promiseCatch(handleRequest(), noop);
     };
 
+  // react中每次执行函数都需要重置以下项
+  hookInstance.fs = frontStates;
+  hookInstance.sh = [];
+  hookInstance.eh = [];
+  hookInstance.ch = [];
+  hookInstance.c = useHookConfig;
   // 在服务端渲染时不发送请求
   if (!isSSR) {
     effectRequest(

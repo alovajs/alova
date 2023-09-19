@@ -174,13 +174,13 @@ interface Hook {
   m: any;
 
   /** abortRequest */
-  ar: typeof noop;
+  ar: () => void;
 
   /** saveStatesFns */
   sf: ((frontStates: FrontRequestState) => void)[];
 
   /** removeStatesFns */
-  rf: typeof noop[];
+  rf: (() => void)[];
 
   /** frontStates */
   fs: FrontRequestState;
@@ -209,13 +209,17 @@ interface EffectRequestParams<E> {
   immediate: boolean;
 }
 
+// create阶段，hook中的fs(frontStates)还未创建，此时的值为object类型
+interface CreateStageHook extends Hook {
+  fs: object;
+}
 interface StatesHook<S, E> {
   /**
    * 创建状态
    * @param initialValue 初始数据
    * @returns 状态值
    */
-  create: <D>(initialValue: D, hook: Hook) => S;
+  create: <D>(initialValue: D, hook: CreateStageHook) => S;
 
   /**
    * 导出给开发者使用的值
