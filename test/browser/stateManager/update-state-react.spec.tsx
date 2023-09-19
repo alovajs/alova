@@ -213,8 +213,8 @@ describe('update cached response data by user in react', function () {
     expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');
 
     // 两处缓存的状态应该都是最新值
-    expect(getStateCache(alova.id, key(getter('a')))?.data[0].path).toBe('/path-str-b');
-    expect(getStateCache(alova.id, key(getter('b')))?.data[0].path).toBe('/path-str-b');
+    expect(getStateCache(alova.id, key(getter('a'))).s.data[0].path).toBe('/path-str-b');
+    expect(getStateCache(alova.id, key(getter('b'))).s.data[0].path).toBe('/path-str-b');
   });
 
   test('all saved states in unmounted component will be removed', async () => {
@@ -263,8 +263,9 @@ describe('update cached response data by user in react', function () {
     // 组件卸载后，对应缓存状态会被删除
     unmount();
     await waitFor(() => {
-      expect(getStateCache(alova.id, key(getter('a')))).toBeUndefined();
-      expect(getStateCache(alova.id, key(getter('b')))).toBeUndefined();
+      // 空对象表示未匹配到
+      expect(getStateCache(alova.id, key(getter('a')))).toStrictEqual({});
+      expect(getStateCache(alova.id, key(getter('b')))).toStrictEqual({});
     });
   });
 });

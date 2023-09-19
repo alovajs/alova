@@ -175,7 +175,7 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('successTimes')).toHaveTextContent('2');
   });
 
-  test('in different debounce time when set param debounce to be a array', async () => {
+  test('should perform different debounce time in listening states when set param debounce to be an array', async () => {
     render(pageDifferentDebounce);
     // 暂没发送请求
     expect(screen.getByRole('path')).toHaveTextContent('');

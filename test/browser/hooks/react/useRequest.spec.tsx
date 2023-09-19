@@ -175,13 +175,13 @@ describe('useRequet hook with react', () => {
     await screen.findByText(/unit-test/);
 
     // useRequest内会缓存状态
-    const { data } = getStateCache(alova.id, key(Get)) || { data: null };
+    const { s: { data } = { data: null } } = getStateCache(alova.id, key(Get));
     expect(data[0].path).toBe('/unit-test');
     fireEvent.click(screen.getByRole('btn'));
     await untilCbCalled(setTimeout, 100);
 
-    // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露
-    expect(getStateCache(alova.id, key(Get))).toBeUndefined();
+    // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
+    expect(getStateCache(alova.id, key(Get))).toStrictEqual({});
   });
 
   test('should change states built in by using function `update` which return in `useRequest`', async () => {

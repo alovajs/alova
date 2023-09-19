@@ -1,21 +1,22 @@
-import { deleteAttr, undefinedValue } from '@/utils/variables';
-import { FrontRequestState } from '~/typings';
+import { deleteAttr } from '@/utils/variables';
+import { FrontRequestState, Hook } from '~/typings';
 
 // 状态数据缓存
-const stateCache: Record<string, Record<string, FrontRequestState>> = {};
+type CacheItem = {
+  s: FrontRequestState;
+  h: Hook;
+};
+const stateCache: Record<string, Record<string, CacheItem>> = {};
 
 /**
  * @description 获取State缓存数据
  * @param baseURL 基础URL
  * @param key 请求key值
- * @returns 缓存的响应数据，如果没有则返回undefined
+ * @returns 缓存的响应数据，如果没有则返回{}
  */
 export const getStateCache = (namespace: string, key: string) => {
-  const cachedState = stateCache[namespace];
-  if (!cachedState) {
-    return undefinedValue;
-  }
-  return cachedState[key];
+  const cachedState = stateCache[namespace] || {};
+  return cachedState[key] || {};
 };
 
 /**
@@ -24,9 +25,12 @@ export const getStateCache = (namespace: string, key: string) => {
  * @param key 请求key值
  * @param data 缓存数据
  */
-export const setStateCache = (namespace: string, key: string, data: FrontRequestState) => {
+export const setStateCache = (namespace: string, key: string, data: FrontRequestState, hookInstance: Hook) => {
   const cachedState = (stateCache[namespace] = stateCache[namespace] || {});
-  cachedState[key] = data;
+  cachedState[key] = {
+    s: data,
+    h: hookInstance
+  };
 };
 
 /**

@@ -1,4 +1,3 @@
-import Hook, { SaveStateFn } from '@/Hook';
 import Method from '@/Method';
 import defaultErrorLogger from '@/predefine/defaultErrorLogger';
 import defaultMiddleware from '@/predefine/defaultMiddleware';
@@ -53,8 +52,8 @@ import {
   FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
+  Hook,
   SuccessHandler,
-  UseHookConfig,
   WatcherHookConfig
 } from '~/typings';
 import sendRequest from './sendRequest';
@@ -71,14 +70,20 @@ import sendRequest from './sendRequest';
  * @param isFetcher 是否更新缓存状态，一般在useFetcher时设置为true
  * @returns 请求状态
  */
-export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends UseHookConfig>(
-  hookInstance: Hook<S, E, R, T, RC, RE, RH>,
+export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
+  hookInstance: Hook,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  useHookConfig: UC,
   sendCallingArgs: any[] = [],
   isFetcher = falseValue
 ) {
-  const { fs: frontStates, sh: successHandlers, eh: errorHandlers, ch: completeHandlers, ht } = hookInstance,
+  const {
+      fs: frontStates,
+      sh: successHandlers,
+      eh: errorHandlers,
+      ch: completeHandlers,
+      ht,
+      c: useHookConfig
+    } = hookInstance,
     methodInstance = getHandlerMethod(methodHandler, sendCallingArgs),
     { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
       | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
@@ -102,13 +107,13 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
   }
 
   if (!_sendable) {
-    update({ loading: falseValue }, frontStates);
+    update({ loading: falseValue }, frontStates, hookInstance);
     return promiseResolve(undefinedValue);
   }
 
   // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
   let removeStates = noop,
-    saveStates = noop as SaveStateFn,
+    saveStates = noop as Hook['sf'][number],
     cachedResponse: R | undefined = getResponseCache(id, methodKey),
     isNextCalled = falseValue,
     responseHandlePromise = promiseResolve<any>(undefinedValue),
@@ -133,12 +138,13 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         {
           data: persistentResponse
         },
-        frontStates
+        frontStates,
+        hookInstance
       );
     }
 
     // 将初始状态存入缓存以便后续更新
-    saveStates = (frontStates: FrontRequestState) => setStateCache(id, methodKey, frontStates);
+    saveStates = (frontStates: FrontRequestState) => setStateCache(id, methodKey, frontStates, hookInstance);
     saveStates(frontStates);
 
     // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
@@ -161,7 +167,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
               total
             }
           },
-          frontStates
+          frontStates,
+          hookInstance
         );
       };
 
@@ -173,7 +180,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
 
     // loading状态受控时将不更改loading
     // 命中缓存，或强制请求时需要设置loading为true
-    !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse }, frontStates);
+    !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse }, frontStates, hookInstance);
 
     responseHandlePromise = response();
     const { enableDownload, enableUpload } = getConfig(methodInstance);
@@ -228,10 +235,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
           fetch: (matcher, ...args) => {
             const methodInstance = filterSnapshotMethods(matcher, falseValue);
             assertMethodMatcher(methodInstance);
-            return useHookToSendRequest(hookInstance, methodInstance as Method, useHookConfig, args, trueValue);
+            return useHookToSendRequest(hookInstance, methodInstance as Method, args, trueValue);
           },
           fetchStates,
-          update: newFetchStates => update(newFetchStates, fetchStates),
+          update: newFetchStates => update(newFetchStates, fetchStates, hookInstance),
           controlFetching(control = trueValue) {
             controlledLoading = control;
           }
@@ -242,9 +249,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         {
           ...commonContext,
           sendArgs: sendCallingArgs,
-          send: (...args) => useHookToSendRequest(hookInstance, methodHandler, useHookConfig, args),
+          send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args),
           frontStates,
-          update: newFrontStates => update(newFrontStates, frontStates),
+          update: newFrontStates => update(newFrontStates, frontStates, hookInstance),
           controlLoading(control = trueValue) {
             controlledLoading = control;
           }
@@ -271,11 +278,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
         const afterSuccess = (data: any) => {
           // 更新缓存响应数据
           if (!isFetcher) {
-            toUpdateResponse() && update({ data }, frontStates);
+            toUpdateResponse() && update({ data }, frontStates, hookInstance);
           } else {
             // 更新缓存内的状态，一般为useFetcher中进入
-            const cachedState = getStateCache(id, methodKey);
-            cachedState && update({ data }, cachedState);
+            const cachedState = getStateCache(id, methodKey).s;
+            cachedState && update({ data }, cachedState, hookInstance);
           }
 
           // 如果需要更新响应数据，则在请求后触发对应回调函数
@@ -283,7 +290,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
             const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
             // loading状态受控时将不再更改为false
             !controlledLoading && (newStates.loading = falseValue);
-            update(newStates, frontStates);
+            update(newStates, frontStates, hookInstance);
             runArgsHandler(
               successHandlers,
               successHandlerDecorator,
@@ -321,7 +328,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, UC extends 
           const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
           // loading状态受控时将不再更改为false
           !controlledLoading && (newStates.loading = falseValue);
-          update(newStates, frontStates);
+          update(newStates, frontStates, hookInstance);
           runArgsHandler(
             errorHandlers,
             errorHandlerDecorator,

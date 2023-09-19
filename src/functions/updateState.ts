@@ -5,7 +5,7 @@ import { getStateCache } from '@/storage/stateCache';
 import { getContext, getLocalCacheConfigParam, getOptions, isFn, key, noop } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
-import { MethodMatcher, updateOptions, UpdateStateCollection } from '~/typings';
+import { MethodMatcher, UpdateStateCollection, updateOptions } from '~/typings';
 
 /**
  * 更新对应method的状态
@@ -30,17 +30,17 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
       } = getOptions(methodInstance),
       methodKey = methodInstance.__key__ || key(methodInstance),
       { id, storage } = getContext(methodInstance),
-      frontStates = getStateCache(id, methodKey),
+      { s: frontStates, h: hookInstance } = getStateCache(id, methodKey),
       updateStateCollection = isFn(handleUpdate) ? ({ data: handleUpdate } as UpdateStateCollection<R>) : handleUpdate;
 
     let updatedDataColumnData = undefinedValue as any;
     if (frontStates) {
       // 循环遍历更新数据，并赋值给受监管的状态
       forEach(objectKeys(updateStateCollection), stateName => {
-        myAssert(frontStates[stateName] !== undefinedValue, `can not find state named \`${stateName}\``);
+        myAssert(stateName in frontStates, `can not find state named \`${stateName}\``);
         myAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
         const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
-          dehydrate(frontStates[stateName])
+          dehydrate(frontStates[stateName], stateName, hookInstance)
         );
 
         // 记录data字段的更新值，用于更新缓存数据
@@ -51,7 +51,8 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
           {
             [stateName]: updatedData
           },
-          frontStates
+          frontStates,
+          hookInstance
         );
       });
       updated = trueValue;

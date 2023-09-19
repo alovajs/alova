@@ -167,6 +167,39 @@ type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
    */
   onError?: ResponseErrorHandler<R, T, RC, RE, RH>;
 };
+
+type HookType = 1 | 2 | 3;
+interface Hook {
+  /** 最后一次请求的method实例 */
+  m: any;
+
+  /** abortRequest */
+  ar: () => void;
+
+  /** saveStatesFns */
+  sf: ((frontStates: FrontRequestState) => void)[];
+
+  /** removeStatesFns */
+  rf: (() => void)[];
+
+  /** frontStates */
+  fs: FrontRequestState;
+
+  /** successHandlers */
+  sh: SuccessHandler<any, any, any, any, any, any, any>[];
+
+  /** errorHandlers */
+  eh: ErrorHandler<any, any, any, any, any, any, any>[];
+
+  /** completeHandlers */
+  ch: CompleteHandler<any, any, any, any, any, any, any>[];
+
+  /** hookType, useRequest=1, useWatcher=2, useFetcher=3 */
+  ht: HookType;
+
+  /** hook config */
+  c: UseHookConfig;
+}
 interface EffectRequestParams<E> {
   handler: (...args: any[]) => void;
   removeStates: () => void;
@@ -176,39 +209,45 @@ interface EffectRequestParams<E> {
   immediate: boolean;
 }
 
+// create阶段，hook中的fs(frontStates)还未创建，此时的值为object类型
+interface CreateStageHook extends Hook {
+  fs: object;
+}
 interface StatesHook<S, E> {
   /**
    * 创建状态
    * @param initialValue 初始数据
    * @returns 状态值
    */
-  create: <D>(initialValue: D) => S;
+  create: <D>(initialValue: D, hook: CreateStageHook) => S;
 
   /**
    * 导出给开发者使用的值
    * @param state 状态值
    * @returns 导出的值
    */
-  export: (state: S) => E;
+  export: (state: S, hook: Hook) => E;
 
   /** 将状态转换为普通数据 */
-  dehydrate: (state: S) => any;
+  dehydrate: (state: S, key: string | symbol, hook: Hook) => any;
   /**
    * 更新状态值
    * @param newVal 新的数据集合
    * @param state 原状态值
+   * @param hook use hook实例，每次use hook调用时都将生成一个hook实例
    */
-  update: (newVal: Record<string, any>, state: Record<string, S>) => void;
+  update: (newVal: Record<string, any>, state: Record<string, S>, hook: Hook) => void;
 
   /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
    * 在useFetcher中的fetch函数中执行一次
-   * 当watchedStates为空数组时，执行一次handleRequest函数
-   * 当watchedStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
+   * 当watchingStates为空数组时，执行一次handleRequest函数
+   * 当watchingStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
+   * hook是use hook的实例，每次use hook调用时都将生成一个hook实例
    * 在vue中直接执行即可，而在react中需要在useEffect中执行
    * removeStates函数为清除当前状态的函数，应该在组件卸载时调用
    */
-  effectRequest: (effectParams: EffectRequestParams<E>) => void;
+  effectRequest: (effectParams: EffectRequestParams<E>, hook: Hook) => void;
 
   /**
    * 包装send、abort等use hooks操作函数
@@ -564,6 +603,8 @@ interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH> {
 interface UseHookConfig {
   /** 是否强制请求 */
   force?: boolean | ((...args: any[]) => boolean);
+
+  [attr: string]: any;
 }
 
 /** useRequest和useWatcher都有的类型 */
@@ -575,7 +616,7 @@ interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
   initialData?: any;
 
   /** 额外的监管状态，可通过updateState更新 */
-  managedStates?: Record<string | number | symbol, S>;
+  managedStates?: Record<string | symbol, S>;
 
   /** 中间件 */
   middleware?: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>;
