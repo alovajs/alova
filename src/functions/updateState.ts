@@ -5,7 +5,7 @@ import { getStateCache } from '@/storage/stateCache';
 import { getContext, getLocalCacheConfigParam, getOptions, isFn, key, noop } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
-import { MethodMatcher, UpdateStateCollection, updateOptions } from '~/typings';
+import { MethodMatcher, updateOptions, UpdateStateCollection } from '~/typings';
 
 /**
  * 更新对应method的状态
@@ -40,7 +40,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
         myAssert(stateName in frontStates, `can not find state named \`${stateName}\``);
         myAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
         const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
-          dehydrate(frontStates[stateName], stateName, hookInstance)
+          dehydrate((frontStates as Record<string, any>)[stateName], stateName, hookInstance)
         );
 
         // 记录data字段的更新值，用于更新缓存数据

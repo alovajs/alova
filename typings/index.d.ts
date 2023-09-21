@@ -37,14 +37,12 @@ type FrontRequestState<L = any, R = any, E = any, D = any, U = any> = {
   error: E;
   downloading: D;
   uploading: U;
-  [x: string | number | symbol]: any;
 };
 type FetchRequestState<F = any, E = any, D = any, U = any> = {
   fetching: F;
   error: E;
   downloading: D;
   uploading: U;
-  [x: string | number | symbol]: any;
 };
 type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
@@ -211,7 +209,7 @@ interface EffectRequestParams<E> {
 
 // create阶段，hook中的fs(frontStates)还未创建，此时的值为object类型
 interface CreateStageHook extends Hook {
-  fs: object;
+  fs: FrontRequestState;
 }
 interface StatesHook<S, E> {
   /**
@@ -625,13 +623,13 @@ interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
 /** useRequest config type */
 type RequestHookConfig<S, E, R, T, RC, RE, RH> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
 
-type SendableConfig = (alovaEvent: AlovaEvent) => boolean;
+type SendableConfig<S, E, R, T, RC, RE, RH> = (alovaEvent: AlovaEvent<S, E, R, T, RC, RE, RH>) => boolean;
 
 /** useWatcher config type */
 interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH> {
   /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
   debounce?: number | number[];
-  sendable?: SendableConfig;
+  sendable?: SendableConfig<S, E, R, T, RC, RE, RH>;
   abortLast?: boolean;
 }
 
