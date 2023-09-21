@@ -141,6 +141,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     downloading: stateExport(frontStates.downloading, hookInstance) as unknown as ExportedType<Progress, S>,
     uploading: stateExport(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>
   };
+
+  type PartialFrontRequestState = Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>;
+  type PartialFetchRequestState = Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>;
   return {
     ...exportedStates,
     onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
@@ -152,21 +155,15 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(hookInstance.ch, handler);
     },
-    update: memorize(
-      (
-        newStates:
-          | Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
-          | Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
-      ) => {
-        // 当useFetcher调用时，其fetching使用的是loading，更新时需要转换过来
-        const { fetching } = newStates;
-        if (fetching) {
-          newStates.loading = fetching;
-          deleteAttr(newStates, 'fetching');
-        }
-        update(newStates, frontStates, hookInstance);
+    update: memorize((newStates: PartialFrontRequestState | PartialFetchRequestState) => {
+      // 当useFetcher调用时，其fetching使用的是loading，更新时需要转换过来
+      const { fetching } = newStates as PartialFetchRequestState;
+      if (fetching) {
+        (newStates as PartialFrontRequestState).loading = fetching;
+        deleteAttr(newStates as PartialFetchRequestState, 'fetching');
       }
-    ),
+      update(newStates, frontStates, hookInstance);
+    }),
     abort: memorize(() => hookInstance.ar(), trueValue),
 
     /**
