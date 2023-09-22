@@ -1,14 +1,14 @@
 import createHook from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
-import { debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig, _self } from '@/utils/helper';
+import { _self, debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
-  FetcherHookConfig,
   FetchRequestState,
+  FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -175,6 +175,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      */
     send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
       handleRequest(methodInstance, sendCallingArgs, isFetcher)
-    )
+    ),
+
+    /** 为兼容options框架，如vue2、原生小程序等，将config对象原样导出 */
+    _$c: useHookConfig
   };
 }
