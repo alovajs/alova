@@ -1,5 +1,5 @@
 import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
-import { Ref, WatchSource, onUnmounted, ref, watch } from 'vue';
+import { getCurrentInstance, onUnmounted, Ref, ref, watch, WatchSource } from 'vue';
 import { EffectRequestParams } from '~/typings';
 
 type UnknownRef = Ref<unknown>;
@@ -13,8 +13,10 @@ export default {
       states[key].value = newVal[key];
     }),
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<WatchSource>) {
-    // 组件卸载时移除对应状态
-    onUnmounted(removeStates);
+    if (getCurrentInstance()) {
+      // 当在组件内部使用时，组件卸载时移除对应状态
+      onUnmounted(removeStates);
+    }
     immediate && handler();
 
     let timer: any;
