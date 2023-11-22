@@ -342,6 +342,93 @@ describe('createAlova', function () {
     expect(errorConsoleMockFn).toBeCalledTimes(3);
   });
 
+  test('`responded-onComplete` hook will receive the method param', async () => {
+    const mockFn = jest.fn();
+    const alova = getAlovaInstance(VueHook, {
+      beforeRequestExpect: method => {
+        method.meta = {
+          a: 1,
+          b: 2
+        };
+      },
+      resCompleteExpect: method => {
+        expect(method.meta).toEqual({ a: 1, b: 2 });
+        mockFn();
+      }
+    });
+    const Get = alova.Get('/unit-test', {
+      params: { a: 'a', b: 'str' },
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      localCache: 100 * 1000
+    });
+    await Get.send();
+  });
+
+  test('should emit onComplete when `beforeRequest` hook throws a error', async () => {
+    const alova = createAlova({
+      baseURL: 'http://localhost:3000',
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      beforeRequest: method => {
+        if (method.config.params.async) {
+          return Promise.reject(new Error('reject in beforeRequest'));
+        }
+        throw new Error('error in beforeRequest');
+      },
+      errorLogger: false,
+      responded: r => r.json()
+    });
+    const Get = (async = true) =>
+      alova.Get<Result>('/unit-test', {
+        params: { async }
+      });
+
+    // beforeRequest异步函数测试
+    const { onComplete } = useRequest(Get);
+    let completeEvent = await untilCbCalled(onComplete);
+    expect(completeEvent.error.message).toBe('reject in beforeRequest');
+    await expect(Get().send()).rejects.toThrow('reject in beforeRequest');
+
+    // beforeRequest同步函数测试
+    const { onComplete: onComplete2 } = useRequest(Get(false));
+    completeEvent = await untilCbCalled(onComplete2);
+    expect(completeEvent.error.message).toBe('error in beforeRequest');
+    await expect(Get(false).send()).rejects.toThrow('error in beforeRequest');
+  });
+
+  test('should emit onComplete when hit response cache', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      resCompleteExpect: method => {
+        expect(method).toBeInstanceOf(Method);
+        expect(method.type).toBe('GET');
+        expect(method.config.localCache).toBe(1000 * 100);
+      }
+    });
+    const Get = alova.Get('/unit-test', {
+      localCache: 1000 * 100
+    });
+
+    await Get.send();
+    await Get.send();
+  });
+
+  test('should throws a async error in `responded-onComplete` hook', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: async () => {},
+      resCompleteExpect: async () => {
+        await new Promise(resolve => {
+          setTimeout(resolve, 200);
+        });
+        throw new Error('async error');
+      }
+    });
+    const Get = alova.Get('/unit-test-error');
+    await expect(Get.send()).rejects.toThrow('async error');
+  });
+
   test("shouldn't print error message when set errorLogger to false", async () => {
     const errorConsoleMockFn = jest.fn();
     console.error = errorConsoleMockFn;

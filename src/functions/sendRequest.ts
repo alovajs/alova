@@ -4,7 +4,7 @@ import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapSho
 import { getResponseCache, setResponseCache } from '@/storage/responseCache';
 import { persistResponse } from '@/storage/responseStorage';
 import cloneMethod from '@/utils/cloneMethod';
-import { AlovaRequestAdapter, Arg, ProgressUpdater, ResponsedHandler, ResponseErrorHandler } from '~/typings';
+import { AlovaRequestAdapter, Arg, ProgressUpdater, ResponsedHandler, ResponseErrorHandler, ResponseCompleteHandler } from '~/typings';
 import {
   getConfig,
   getContext,
@@ -150,7 +150,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             responseUnified = responded || responsed;
           let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey],
             responseHandler: ResponsedHandler<any, any, RC, RE, RH> = _self,
-            responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue;
+            responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue,
+            responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = _self;
 
           if (!shareRequest || !requestAdapterCtrls) {
             // 请求数据
@@ -171,9 +172,10 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           if (isFn(responseUnified)) {
             responseHandler = responseUnified;
           } else if (isPlainObject(responseUnified)) {
-            const { onSuccess: successHandler, onError: errorHandler } = responseUnified;
+            const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responseUnified;
             responseHandler = isFn(successHandler) ? successHandler : responseHandler;
             responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
+            responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;
           }
           return (
             PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()])
@@ -226,7 +228,10 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
                 }
               )
               // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
-              .finally(() => deleteAttr(namespacedAdapterReturnMap, methodKey))
+              .finally(() => {
+                deleteAttr(namespacedAdapterReturnMap, methodKey);
+                return responseCompleteHandler(clonedMethod);
+              })
           );
         });
     };
