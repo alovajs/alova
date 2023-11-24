@@ -152,6 +152,7 @@ type ResponseErrorHandler<R, T, RC, RE, RH> = (
   error: any,
   methodInstance: Method<any, any, R, T, RC, RE, RH>
 ) => void | Promise<void>;
+type ResponseCompleteHandler<R, T, RC, RE, RH> = (methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
 type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
   /**
    * 全局的请求成功钩子函数
@@ -164,6 +165,12 @@ type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
    * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
    */
   onError?: ResponseErrorHandler<R, T, RC, RE, RH>;
+
+  /**
+   * 请求完成钩子函数
+   * 请求成功、缓存匹配成功、请求失败都将触发此钩子函数
+   */
+  onComplete?: ResponseCompleteHandler<R, T, RC, RE, RH>;
 };
 
 type HookType = 1 | 2 | 3;

@@ -48,13 +48,15 @@ export const getAlovaInstance = <S, E>(
     localCache,
     beforeRequestExpect,
     responseExpect,
-    resErrorExpect
+    resErrorExpect,
+    resCompleteExpect
   }: {
     endWithSlash?: boolean;
     localCache?: GlobalLocalCacheConfig;
     beforeRequestExpect?: (methodInstance: FetchMethod) => void;
     responseExpect?: (response: Response, method: FetchMethod) => void;
     resErrorExpect?: (err: Error, method: FetchMethod) => void;
+    resCompleteExpect?: (method: FetchMethod) => void;
   } = {}
 ) => {
   const alovaInst = createAlova({
@@ -71,7 +73,8 @@ export const getAlovaInstance = <S, E>(
         : resErrorExpect
         ? {
             onSuccess: responseExpect,
-            onError: resErrorExpect
+            onError: resErrorExpect,
+            onComplete: resCompleteExpect
           }
         : undefined,
     errorLogger: false,
