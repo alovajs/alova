@@ -4,7 +4,14 @@ import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapSho
 import { getResponseCache, setResponseCache } from '@/storage/responseCache';
 import { persistResponse } from '@/storage/responseStorage';
 import cloneMethod from '@/utils/cloneMethod';
-import { AlovaRequestAdapter, Arg, ProgressUpdater, ResponsedHandler, ResponseErrorHandler, ResponseCompleteHandler } from '~/typings';
+import {
+  AlovaRequestAdapter,
+  Arg,
+  ProgressUpdater,
+  ResponsedHandler,
+  ResponseErrorHandler,
+  ResponseCompleteHandler
+} from '~/typings';
 import {
   getConfig,
   getContext,
@@ -124,16 +131,6 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           }
         })
         .then(cachedResponse => {
-          // 如果没有缓存则发起请求
-          const { e: expireTimestamp, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(clonedMethod);
-          if (cachedResponse !== undefinedValue) {
-            requestAdapterCtrlsPromiseResolveFn(); // 遇到缓存将不传入ctrls
-
-            // 打印缓存日志
-            sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod, cacheMode, tag);
-            return cachedResponse;
-          }
-          fromCache = falseValue;
           const { baseURL, url: newUrl, type, data } = clonedMethod,
             { id, storage } = getContext(clonedMethod),
             {
@@ -152,6 +149,25 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             responseHandler: ResponsedHandler<any, any, RC, RE, RH> = _self,
             responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue,
             responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = _self;
+          if (isFn(responseUnified)) {
+            responseHandler = responseUnified;
+          } else if (isPlainObject(responseUnified)) {
+            const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responseUnified;
+            responseHandler = isFn(successHandler) ? successHandler : responseHandler;
+            responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
+            responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;
+          }
+          // 如果没有缓存则发起请求
+          const { e: expireTimestamp, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(clonedMethod);
+          if (cachedResponse !== undefinedValue) {
+            requestAdapterCtrlsPromiseResolveFn(); // 遇到缓存将不传入ctrls
+
+            // 打印缓存日志
+            sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod, cacheMode, tag);
+            responseCompleteHandler(clonedMethod);
+            return cachedResponse;
+          }
+          fromCache = falseValue;
 
           if (!shareRequest || !requestAdapterCtrls) {
             // 请求数据
@@ -168,15 +184,6 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           }
           // 将requestAdapterCtrls传到promise中供onDownload、onUpload及abort中使用
           requestAdapterCtrlsPromiseResolveFn(requestAdapterCtrls);
-
-          if (isFn(responseUnified)) {
-            responseHandler = responseUnified;
-          } else if (isPlainObject(responseUnified)) {
-            const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responseUnified;
-            responseHandler = isFn(successHandler) ? successHandler : responseHandler;
-            responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
-            responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;
-          }
           return (
             PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()])
               .then(

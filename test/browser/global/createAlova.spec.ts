@@ -400,11 +400,16 @@ describe('createAlova', function () {
   });
 
   test('should emit onComplete when hit response cache', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      resCompleteExpect: method => {
-        expect(method).toBeInstanceOf(Method);
-        expect(method.type).toBe('GET');
-        expect(method.config.localCache).toBe(1000 * 100);
+    const MockFn = jest.fn();
+    const alova = createAlova({
+      baseURL,
+      statesHook: VueHook,
+      requestAdapter: GlobalFetch(),
+      responded: {
+        onComplete: method => {
+          expect(method).toBeInstanceOf(Method);
+          MockFn();
+        }
       }
     });
     const Get = alova.Get('/unit-test', {
@@ -413,6 +418,8 @@ describe('createAlova', function () {
 
     await Get.send();
     await Get.send();
+    await Get.send();
+    expect(MockFn).toBeCalledTimes(3);
   });
 
   test('should throws a async error in `responded-onComplete` hook', async () => {
