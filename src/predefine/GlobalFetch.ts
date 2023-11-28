@@ -1,9 +1,10 @@
 import alovaError from '@/utils/alovaError';
 import { isSpecialRequestBody, isString } from '@/utils/helper';
 import {
+  JSONStringify,
+  ObjectCls,
   clearTimeoutTimer,
   falseValue,
-  JSONStringify,
   len,
   promiseReject,
   promiseThen,
@@ -19,13 +20,20 @@ export default function GlobalFetch() {
     const adapterConfig = method.config,
       timeout = adapterConfig.timeout || 0,
       ctrl = new AbortController(),
-      data = elements.data,
-      fetchPromise = fetch(elements.url, {
-        ...adapterConfig,
-        method: elements.type,
-        signal: ctrl.signal,
-        body: isBodyData(data) ? data : JSONStringify(data)
-      });
+      { data, headers } = elements,
+      isContentTypeSet = /content-type/i.test(ObjectCls.keys(headers).join()),
+      isDataFormData = data && data.toString() === '[object FormData]';
+
+    // 未设置Content-Type并且data不是FormData对象时，默认设置Content-Type为application/json
+    if (!isContentTypeSet && !isDataFormData) {
+      headers['Content-Type'] = 'application/json;charset=UTF-8';
+    }
+    const fetchPromise = fetch(elements.url, {
+      ...adapterConfig,
+      method: elements.type,
+      signal: ctrl.signal,
+      body: isBodyData(data) ? data : JSONStringify(data)
+    });
 
     // 设置了中断时间，则在指定时间后中断请求
     let abortTimer: NodeJS.Timeout | number,
