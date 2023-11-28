@@ -33,14 +33,14 @@ describe('cache data', function () {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: '{}'
+      data: {}
     });
     const postCache = getResponseCache(alova.id, key(Post));
     expect(postCache).toStrictEqual({
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: '{}'
+      data: {}
     });
   });
 

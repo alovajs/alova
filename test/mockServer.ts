@@ -64,6 +64,17 @@ const mockServer = setupServer(
       // Respond with the "ArrayBuffer".
       ctx.body(imageBuffer)
     );
+  }),
+  rest.post(baseURL + '/unit-test-headers', (req, res, ctx) => {
+    return res(
+      ctx.json({
+        code: 200,
+        msg: '',
+        data: {
+          requestHeaders: req.headers.raw()
+        }
+      })
+    );
   })
 );
 
