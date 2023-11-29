@@ -41,7 +41,7 @@
 
 ## 打破 useHook 使用边界
 
-现在，alova 已经完美兼容了[vue options，尽情使用吧！](/tutorial/framework/vue-options)
+现在，alova 已经完美兼容了[vue options，尽情使用吧！](https://alova.js.org/zh-CN/tutorial/framework/vue-options/)
 
 ## alova 请求策略表
 
