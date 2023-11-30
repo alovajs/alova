@@ -142,6 +142,7 @@ If you have thought of some specific and typical business request scenarios, you
 | [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | taro adapter for alova.js                    |
 | [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | axios adapter for alova.js                   |
 | [@alova/adapter-xhr](https://github.com/alovajs/adapter-xhr)       | XMLHttpRequest adapter for alova.js          |
+| [@alova/vue-options](https://github.com/alovajs/vue-options)       | vue options style adapter for alova.js       |
 
 ## Welcome to contribute
 
