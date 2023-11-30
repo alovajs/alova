@@ -41,25 +41,25 @@
 
 ## 打破 useHook 使用边界
 
-现在，alova 已经完美兼容了[vue options，尽情使用吧！](https://alova.js.org/zh-CN/tutorial/framework/vue-options/)
+现在，alova 已经完美兼容了[vue options，尽情使用吧！](https://alova.js.org/tutorial/framework/vue-options/)
 
 ## alova 请求策略表
 
 alova 是核心库，它提供了缓存策略、请求共享策略，以及状态管理等通用功能，能满足 99%以上的请求需求。同时，alova 还提供了业务逻辑的，高频使用的请求策略 hook，可以直接用于特定场景。以下为 alova 提供的请求策略 hook 列表。
 
-| 名称                  | 描述                                                                                                                                                      | 文档                                                                                          |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 分页请求策略          | 自动管理分页数据，数据预加载，减少不必要的数据刷新，流畅性提高 300%，编码难度降低 50%                                                                     | [usePagination](https://alova.js.org/zh-CN/tutorial/strategy/usePagination)                           |
-| 无感数据交互策略      | 全新的交互体验，提交即响应，大幅降低网络波动造成的影响，让你的应用在网络不稳定，甚至断网状态下依然可用                                                    | [useSQRequest](https://alova.js.org/zh-CN/tutorial/strategy/sensorless-data-interaction/overview)     |
-| 表单提交策略          | 为表单提交而设计的 hook，通过此 hook 你可以很方便地实现表单草稿、多页面（多步骤）表单，除此以外还提供了表单重置等常用功能                                 | [useForm](https://alova.js.org/zh-CN/tutorial/strategy/useForm)                                       |
-| 文件上传策略          | 更简单的文件上传策略，支持对 base64、Blob、ArrayBuffer、Canvas 数据的自动识别和转换                                                                       | [useUploader](https://alova.js.org/zh-CN/tutorial/strategy/useUploader)                               |
-| 发送验证码            | 验证码发送 hook，减掉你在开发验证码发送功能时的繁琐。                                                                                                     | [useCaptcha](https://alova.js.org/zh-CN/tutorial/strategy/useCaptcha)                                 |
-| 自动重新拉取数据      | 在一定条件下自动重新拉取数据，保证始终展示最新数据。                                                                                                      | [useAutoRequest](https://alova.js.org/zh-CN/tutorial/strategy/useAutoRequest)                         |
-| 跨组件触发请求        | 一个 alova 中间件，消除组件层级的限制，在任意组件中快速地触发任意请求的操作函数                                                                           | [actionDelegationMiddleware](https://alova.js.org/zh-CN/tutorial/strategy/actionDelegationMiddleware) |
-| 串行请求的 useRequest | 比[alova 的串行请求方式](https://alova.js.org/zh-CN/tutorial/next-step/serial-request)更加简洁易用的串行请求 use hook，提供统一的 loading 状态、error、回调函数   | [useSerialRequest](https://alova.js.org/zh-CN/tutorial/strategy/useSerialRequest)                     |
-| 串行请求的 useWatcher | 比[alova 的串行请求方式](https://alova.js.org/zh-CN/tutorial/next-step/serial-request)更加简洁易用的串行请求 use hook，提供统一的 loading 状态、error、回调函数。 | [useSerialWatcher](https://alova.js.org/zh-CN/tutorial/strategy/useSerialWatcher)                     |
-| 请求重试策略          | 请求失败自动重试，它在重要的请求和轮询请求上发挥重要作用                                                                                                  | [useRetriableRequest](https://alova.js.org/zh-CN/tutorial/strategy/useRetriableRequest)               |
-| SSE 请求              | 通过 Server-sent Events 进行请求                                                                                                                          | [useSSE](https://alova.js.org/zh-CN/tutorial/strategy/useSSE)                                         |
+| 名称                  | 描述                                                                                                                                                        | 文档                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 分页请求策略          | 自动管理分页数据，数据预加载，减少不必要的数据刷新，流畅性提高 300%，编码难度降低 50%                                                                       | [usePagination](https://alova.js.org/tutorial/strategy/usePagination)                           |
+| 无感数据交互策略      | 全新的交互体验，提交即响应，大幅降低网络波动造成的影响，让你的应用在网络不稳定，甚至断网状态下依然可用                                                      | [useSQRequest](https://alova.js.org/tutorial/strategy/sensorless-data-interaction/overview)     |
+| 表单提交策略          | 为表单提交而设计的 hook，通过此 hook 你可以很方便地实现表单草稿、多页面（多步骤）表单，除此以外还提供了表单重置等常用功能                                   | [useForm](https://alova.js.org/tutorial/strategy/useForm)                                       |
+| 文件上传策略          | 更简单的文件上传策略，支持对 base64、Blob、ArrayBuffer、Canvas 数据的自动识别和转换                                                                         | [useUploader](https://alova.js.org/tutorial/strategy/useUploader)                               |
+| 发送验证码            | 验证码发送 hook，减掉你在开发验证码发送功能时的繁琐。                                                                                                       | [useCaptcha](https://alova.js.org/tutorial/strategy/useCaptcha)                                 |
+| 自动重新拉取数据      | 在一定条件下自动重新拉取数据，保证始终展示最新数据。                                                                                                        | [useAutoRequest](https://alova.js.org/tutorial/strategy/useAutoRequest)                         |
+| 跨组件触发请求        | 一个 alova 中间件，消除组件层级的限制，在任意组件中快速地触发任意请求的操作函数                                                                             | [actionDelegationMiddleware](https://alova.js.org/tutorial/strategy/actionDelegationMiddleware) |
+| 串行请求的 useRequest | 比[alova 的串行请求方式](https://alova.js.org/tutorial/next-step/serial-request)更加简洁易用的串行请求 use hook，提供统一的 loading 状态、error、回调函数   | [useSerialRequest](https://alova.js.org/tutorial/strategy/useSerialRequest)                     |
+| 串行请求的 useWatcher | 比[alova 的串行请求方式](https://alova.js.org/tutorial/next-step/serial-request)更加简洁易用的串行请求 use hook，提供统一的 loading 状态、error、回调函数。 | [useSerialWatcher](https://alova.js.org/tutorial/strategy/useSerialWatcher)                     |
+| 请求重试策略          | 请求失败自动重试，它在重要的请求和轮询请求上发挥重要作用                                                                                                    | [useRetriableRequest](https://alova.js.org/tutorial/strategy/useRetriableRequest)               |
+| SSE 请求              | 通过 Server-sent Events 进行请求                                                                                                                            | [useSSE](https://alova.js.org/tutorial/strategy/useSSE)                                         |
 
 ### 更多请求相关的业务场景征集中...
 
@@ -94,7 +94,7 @@ alova 从第一个版本的开发到现在已经过去将近一年时间了，�
 
 ## 替代请求库？
 
-alova 是一个请求策略库，它的创建初衷是对不同请求场景提供特定的请求策略解决方案，从而更简洁优雅地实现流畅的请求体验，而例如`$.ajax`、`axios`和`fetch-api`等对请求发送和响应接收提供了很好的支持，它们是 [RSM](/get-started/RSM) 流程中必不可少的一个环节（请求事件），alova 仍然需要依靠它们进行请求，因此我们可以将 alova 看作是请求库的一种武装，让请求库变得更加强大。
+alova 是一个请求策略库，它的创建初衷是对不同请求场景提供特定的请求策略解决方案，从而更简洁优雅地实现流畅的请求体验，而例如`$.ajax`、`axios`和`fetch-api`等对请求发送和响应接收提供了很好的支持，它们是 [RSM](https://alova.js.org/tutorial/get-started/RSM) 流程中必不可少的一个环节（请求事件），alova 仍然需要依靠它们进行请求，因此我们可以将 alova 看作是请求库的一种武装，让请求库变得更加强大。
 
 ## 为什么要深度绑定 UI 框架？
 
@@ -140,6 +140,7 @@ yarn add alova
 | [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | alova.js 的 taro 适配器           |
 | [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | alova.js 的 axios 适配器          |
 | [@alova/adapter-xhr](https://github.com/alovajs/adapter-xhr)       | alova.js 的 XMLHttpRequest 适配器 |
+| [@alova/vue-options](https://github.com/alovajs/vue-options)       | alova.js 的 vue options 适配器    |
 
 ## 欢迎参与贡献
 
