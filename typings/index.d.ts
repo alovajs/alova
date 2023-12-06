@@ -252,7 +252,7 @@ interface StatesHook<S, E> {
    * 在vue中直接执行即可，而在react中需要在useEffect中执行
    * removeStates函数为清除当前状态的函数，应该在组件卸载时调用
    */
-  effectRequest: (effectParams: EffectRequestParams<E>, hook: Hook) => void;
+  effectRequest: (effectParams: EffectRequestParams<any>, hook: Hook) => void;
 
   /**
    * 包装send、abort等use hooks操作函数
