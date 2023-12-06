@@ -18,99 +18,37 @@
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## 🔥Documentation
+## What is alova
 
-[https://alova.js.org](https://alova.js.org)
+alova is a lightweight request strategy library that use and manage APIs easily. It is mainly divided into the following two parts:
 
-## 🚀 Features
+**Complete complex requests declaratively**
 
-- 🕶 Provide a unified experience in the vue(composition/options), react, and svelte, and seamlessly transplant
-- 📑 The api design is similar to axios, more simple and familiar
-- 🍵 Out-of-the-box high-performance request strategy, making the application smoother
-- 🐦 4kb+, only 30% of axios+
-- 🔩 High flexibility, compatible with any request library, such as axios, superagent or fetch-api
-- 🔋 3 data cache modes to improve request performance and reduce server pressure
-- 🔌 Rich extension functions, you can customize request adapter, storage adapter, middleware, and states hook
-- 🖥️ [2.2.0+]Server-side rendering(SSR)
-- 💕 Request sharing to avoid sending the same request at the same time
-- 🪑 Data pre-fetching, which means users can see information faster without waiting
-- 🦾 Real-time automatic status management
-- 🎪 Interactive documentation and examples
-- 🎈Typescript support
-- ⚡ Support tree shaking, which means that the production volume of alova is often less than 4kb
+It supports developers to use declarative way for various complex requests such as request sharing, paging requests, form submission, breakpoint resumption, etc., allowing developers to use little code to complete high availability and high fluency network interaction. This means that you no longer need to write the codes about request logic, and no longer need to maintain relevant data and states yourself. You only need to select and use the request useHook, alova will take over it for you. This will improve development efficiency, application operation efficiency, and reduces server pressure.
 
-## Breaking boundary of the usage of useHook
+**API automatic management and maintenance(future)**
 
-NOW, alova has perfect compatibility with [vue options, let's enjoy it!](https://alova.js.org/tutorial/framework/vue-options)
+It can automatically generate complete and fully described request functions with full typescript type. You no longer need to consult the API documentation. Instead, you can find the request functions you need through keywords in the IDE, and then use them like accessing `location.reload` , allowing seamless connection between client side and server side. Whether it is a js project or a ts project, you can enjoy type hints for response data.When the server updates the API, the front-end project will also receive a change notification and the project will be blocked from publishing.
 
-## alova request strategy list
+Learn more at the [alovajs website](https://alova.js.org), or try it out in [runnable examples](https://alova.js.org/category/examples).
 
-Alova is the core library, which provides common functions such as caching strategy, request sharing strategy, and state management, and can meet more than 99% of request requirements. At the same time, alova also provides business logic and frequently used request strategy hooks, which can be directly used in specific scenarios. The following is a list of request policy hooks provided by alova.
+## Reasons for choosing alova
 
-| Name                                | Description                                                                                                                                                                                                           | Documentation                                                                                   |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Pagination request strategy         | Automatically manage paging data, data preloading, reduce unnecessary data refresh, improve fluency by 300%, and reduce coding difficulty by 50%                                                                      | [usePagination](https://alova.js.org/tutorial/strategy/usePagination)                           |
-| Non-sense data interaction strategy | A new interactive experience, submission and response, greatly reducing the impact of network fluctuations, allowing your application to still be available when the network is unstable or even disconnected         | [useSQRequest](https://alova.js.org/tutorial/strategy/sensorless-data-interaction/overview)     |
-| Form submission strategy            | A hook designed for form submission. Through this hook, you can easily implement form drafts and multi-page (multi-step) forms. In addition, it also provides common functions such as form reset                     | [useForm](https://alova.js.org/tutorial/strategy/useForm)                                       |
-| File upload strategy                | A simpler file upload strategy that supports automatic identification and conversion of base64, Blob, ArrayBuffer, and Canvas data                                                                                    | [useUploader](https://alova.js.org/tutorial/strategy/useUploader)                               |
-| Send verification code              | Verification code sending hook reduces the complexity of developing the verification code sending function.                                                                                                           | [useCaptcha](https://alova.js.org/tutorial/strategy/useCaptcha)                                 |
-| Automatically re-pull data          | Automatically re-pull data under certain conditions to ensure that the latest data is always displayed.                                                                                                               | [useAutoRequest](https://alova.js.org/tutorial/strategy/useAutoRequest)                         |
-| Trigger requests across components  | An alova middleware that eliminates component-level restrictions and quickly triggers the operation function of any request in any component                                                                          | [actionDelegationMiddleware](https://alova.js.org/tutorial/strategy/actionDelegationMiddleware) |
-| UseRequest for serial requests      | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/tutorial/next-step/serial-request), providing unified loading status, error, and callback functions  | [useSerialRequest](https://alova.js.org/tutorial/strategy/useSerialRequest)                     |
-| UseWatcher for serial requests      | A more concise and easy-to-use serial request use hook than [alova's serial request method](https://alova.js.org/tutorial/next-step/serial-request), providing unified loading status, error, and callback functions. | [useSerialWatcher](https://alova.js.org/tutorial/strategy/useSerialWatcher)                     |
-| Request retry strategy              | Automatic retry on request failure, which plays an important role on important requests and polling requests                                                                                                          | [useRetriableRequest](https://alova.js.org/tutorial/strategy/useRetriableRequest)               |
-| SSE Requests                        | Requests via Server-sent Events                                                                                                                                                                                       | [useSSE](https://alova.js.org/tutorial/strategy/useSSE)                                         |
+Alova is also committed to solving the problem of client network requests, but unlike other request libraries, alova chooses the direction of business scenario request strategy, and it also provides rich Advanced Features.
 
-### More request-related business scenarios are being collected...
-
-If you still have a specific and typical business request scene which we havn't implemented yet, you can [submit an issue](https://github.com/alovajs/scene/issues/new/choose) here, or you can also customize the request hook, please see the [Advanced](https://alova.js.org/tutorial/advanced/overview) section.
-
-## Examples
-
-[The examples here will show the power of alova.](https://alova.js.org/category/examples)
-
-## We really need your star
-
-If you like alova. we are very appreciate your star at the topright. it's a approval and encourage of our work.
-
-## What relationship with request libraries
-
-The original intention of alova is to propose a solution for different request scenarios. It can implement request functions with better experience and performance more concisely and elegantly. It is an RSM implementation library, such as $.ajax, axios and fetch-api. It provides good support for request sending and response receiving. They are an indispensable part of the RSM process (request event link), and alova still needs to rely on them for requests, so we can regard alova as a request library. An armament that makes the request library even more powerful.
-
-## Library Stability
-
-It has been more then one year since the first version of alova. During this year, we have been continuously discovering and optimizing problems. So far, alova has passed 190+ unit tests, with a coverage rate of 99%. and it almost in a stable state. Even so, alova is still a rookie, it still has a large development space.
-
-## More framework support
-
-Now, alova is available in [vue options (vue2 and vue3)](https://vuejs.org/guide/introduction.html#api-styles), [click here to view details](/tutorial/framework/vue-options). In the future, the following frameworks will be supported:
-
-- Function style such as `solid/preact/qwik`.
-- class style such as `angular/lit/stencil`.
-- options style such as `native mini Program (China🇨🇳)`.
+- You may have been thinking about how to wrap `fetch` and `axios`. Now you no longer need to do this. alova complete complex requests with declarative style, such as request sharing, paging requests, form submissions, breakpoint uploads, etc, as well as automated cache management, request sharing, cross-component status update, etc.
+- alova is lightweight, only 4kb+, which is 30%+ of axios.
+- alova is low-coupling, you can make alova work with any UI framework in any js environment through different adapters (built-in supported UI framework is `vue/react/svelte`), and provides a unified experience and perfect code migration.
+- alova can also achieve a highly aggregated organization of APIs. The request parameters, cache behavior, and response data transform of each API will be in the same code block, which has great advantages for managing a large number of APIs.
 
 ## Join the channel community
 
 - [Join Discord community](https://discord.gg/S47QGJgkVb)
 - [Join QQ channel community](https://pd.qq.com/s/1cdjx0nnw)
 
-## To replace other request libraries?
+## Breaking the useage's boundary of useHook
 
-alova is a request strategy library, which was originally created to provide specific request strategy solutions for different request scenarios, so as to achieve a smooth request experience more concisely and elegantly, such as `$.ajax`, `axios` and `fetch- api`, etc. they has provided a good support for network communication, they are an essential link (request event) in the [RSM](https://alova.js.org/tutorial/get-started/RSM) process, alova still needs to depend them to send requests, Therefore, we can regard alova as an arm of the request library, making the request library more powerful.
-
-## Why binding UI framework?
-
-Decoupling a js library means using it in more scenarios. For example, axios can be used in nodejs, but it also means that developers need to write more template code, such as using useHooks to encapsulate axios. However, alova abandons more usage scenarios brought about by decoupling, and positions the scope of use in conjunction with the UI framework to use alova in the most streamlined way. This is for the benefit of developers and is prevalent in a UI framework. Sometimes, deep binding can provide developers with direct-use functions and improve the developer's experience without requiring too much template code.
-
-## Size comparison with other libraries
-
-| alova                                                                                             | axios                                                                                             | react-query                                                                                                   | vue-request                                                                                                   | vue                                                                                           | react                                                                                                     |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [![minzip](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova) | [![minzip](https://badgen.net/bundlephobia/minzip/axios)](https://bundlephobia.com/package/axios) | [![minzip](https://badgen.net/bundlephobia/minzip/react-query)](https://bundlephobia.com/package/react-query) | [![minzip](https://badgen.net/bundlephobia/minzip/vue-request)](https://bundlephobia.com/package/vue-request) | [![minzip](https://badgen.net/bundlephobia/minzip/vue)](https://bundlephobia.com/package/vue) | [![minzip](https://badgen.net/bundlephobia/minzip/react-dom)](https://bundlephobia.com/package/react-dom) |
-
-## What is Request Scene Model (RSM)
-
-[Click here to view the detailed introduction](https://alova.js.org/tutorial/get-started/RSM)
+NOW, alova has perfect compatibility with [vue options, let's enjoy it!](https://alova.js.org/tutorial/framework/vue-options)
 
 ## Install
 
@@ -122,31 +60,11 @@ npm install alova --save
 yarn add alova
 ```
 
-## Usage
+## We need your support
 
-[Usage is here](https://alova.js.org/tutorial/get-started/quick-start)
-
-## Request scene collection
-
-If you have thought of some specific and typical business request scenarios, you can [submit an issue](https://github.com/alovajs/scene/issues/new/choose) to tell us here, and we will implement it for More people use.
-
-## Official Ecosystem
-
-| Resources                                                          | Description                                  |
-| ------------------------------------------------------------------ | -------------------------------------------- |
-| [@alova/mock](https://github.com/alovajs/mock)                     | Mock request adapter for alova.js            |
-| [@alova/scene-react](https://github.com/alovajs/scene)             | react request strategy library for alova.js  |
-| [@alova/scene-vue](https://github.com/alovajs/scene)               | vue request strategy library for alova.js    |
-| [@alova/scene-svelte](https://github.com/alovajs/scene)            | svelte request strategy library for alova.js |
-| [@alova/adapter-uniapp](https://github.com/alovajs/adapter-uniapp) | uniapp adapter for alova.js                  |
-| [@alova/adapter-taro](https://github.com/alovajs/adapter-taro)     | taro adapter for alova.js                    |
-| [@alova/adapter-axios](https://github.com/alovajs/adapter-axios)   | axios adapter for alova.js                   |
-| [@alova/adapter-xhr](https://github.com/alovajs/adapter-xhr)       | XMLHttpRequest adapter for alova.js          |
-| [@alova/vue-options](https://github.com/alovajs/vue-options)       | vue options style adapter for alova.js       |
+If you like alova. we are very appreciate your star at the topright. it's a approval and encourage of our work.
 
 ## Welcome to contribute
-
-Since its official propaganda in April 2023, alova has received 1500+ stars within 3 months.
 
 We're honored to hear from developers around the world in Issues and Discussions.
 
@@ -174,9 +92,9 @@ We believe that contributing to alova is not only limited to code contributions,
 
 Contributing effectively will let you win some fame of alova community. Before participating in the contribution, please be sure to read the [CONTRIBUTING](./CONTRIBUTING.md) in detail to ensure your effective contribution.
 
-## Welcome to submit a issue
+## Changelog
 
-If you encounter difficulties when using alova, whether it is a bug, or an unmet feature, you can [submit an issue](https://github.com/alovajs/alova/issues).
+[View all Changelog of alovajs on GitHub](https://github.com/alovajs/alova/releases)
 
 ## LICENSE
 
