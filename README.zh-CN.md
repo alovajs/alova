@@ -37,7 +37,7 @@ alova 也致力于解决客户端网络请求的问题，但与其他请求库�
 ## 加入交流社区
 
 - [加入在 Discord 社区参与交流](https://discord.gg/S47QGJgkVb)
-- [加入 QQ 频道社区参与交流](https://pd.qq.com/s/1cdjx0nnw)
+- [加入微信群参与交流](https://alova.js.org/img/wechat_qrcode.jpg)
 
 ## 打破 useHook 使用边界
 
