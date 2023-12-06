@@ -36,7 +36,7 @@ Alova is also committed to solving the problem of client network requests, but u
 ## Join the channel community
 
 - [Join Discord community](https://discord.gg/S47QGJgkVb)
-- [Join Wechat group](https://alova.js.org/img/wechat_group.jpg)
+- [Join Wechat group](https://alova.js.org/img/wechat_qrcode.jpg)
 
 ## Breaking the useage's boundary of useHook
 
