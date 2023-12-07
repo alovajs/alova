@@ -59,7 +59,7 @@ describe('useRequet middleware', function () {
     expect(loading.value).toBeTruthy();
     expect(error.value).toBeUndefined();
     const { error: errRaw } = await untilCbCalled(onError);
-    expect(mockFn).toBeCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledTimes(1);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBe(errorObj);
@@ -70,7 +70,7 @@ describe('useRequet middleware', function () {
     } catch (error) {
       mockFn2();
     }
-    expect(mockFn2).toBeCalledTimes(1);
+    expect(mockFn2).toHaveBeenCalledTimes(1);
   });
 
   test('should send request until async middleware function is called', async () => {
@@ -116,7 +116,7 @@ describe('useRequet middleware', function () {
     // middleware中未调用next，因此不会发送请求
     expect(loading.value).toBeFalsy();
     await untilCbCalled(setTimeout, 1000);
-    expect(mockFn).toBeCalledTimes(0);
+    expect(mockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
 
@@ -163,7 +163,7 @@ describe('useRequet middleware', function () {
     const rawData = await send();
     expect(rawData.params.a).toBe('a');
     expect(rawData.params.b).toBe('b');
-    expect(mockFn).toBeCalledTimes(2);
+    expect(mockFn).toHaveBeenCalledTimes(2);
   });
 
   test('the behavior will be the same as normal when request error', async () => {
@@ -218,8 +218,8 @@ describe('useRequet middleware', function () {
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeInstanceOf(Error);
     expect(data.value).toBeUndefined();
-    expect(mockFn).toBeCalledTimes(2);
-    expect(mockFn2).toBeCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledTimes(2);
+    expect(mockFn2).toHaveBeenCalledTimes(1);
   });
 
   test('can catch error in middleware function when request error', async () => {
@@ -252,7 +252,7 @@ describe('useRequet middleware', function () {
     } catch (error) {
       mockFn();
     }
-    expect(mockFn).toBeCalledTimes(0);
+    expect(mockFn).toHaveBeenCalledTimes(0);
   });
 
   test('should change response data when return custom data in middleware', async () => {
@@ -323,8 +323,8 @@ describe('useRequet middleware', function () {
       expect(customNum).toBe(1);
     });
     await untilCbCalled(setTimeout, 100);
-    expect(mockFn).toBeCalledTimes(2);
-    expect(mockFn2).toBeCalledTimes(2);
+    expect(mockFn).toHaveBeenCalledTimes(2);
+    expect(mockFn2).toHaveBeenCalledTimes(2);
   });
 
   test('the behavior should be the same as normal when return another promise instance', async () => {

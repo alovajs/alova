@@ -59,7 +59,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
-      expect(mockfn).toBeCalledTimes(1);
+      expect(mockfn).toHaveBeenCalledTimes(1);
     });
 
     fireEvent.click(screen.getByRole('button'));
@@ -67,7 +67,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockfn).toBeCalledTimes(2);
+      expect(mockfn).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -139,7 +139,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockfn).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+      expect(mockfn).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
     });
   });
 
@@ -223,7 +223,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockfn).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+      expect(mockfn).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
       expect(mockErrorfn).not.toBeCalled(); // unit-test-1s因为后面才响应，不会触发回调
       expect(screen.getByRole('error')).toHaveTextContent(''); // 对应的error也不会有值
     });
@@ -299,7 +299,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
       expect(screen.getByRole('id1')).toHaveTextContent('3');
       expect(screen.getByRole('id2')).toHaveTextContent('13');
-      expect(mockfn).toBeCalledTimes(2); // 请求已发出，但数据只更新最新的
+      expect(mockfn).toHaveBeenCalledTimes(2); // 请求已发出，但数据只更新最新的
     });
   });
 
@@ -359,8 +359,8 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
-      expect(mockfn).toBeCalledTimes(1);
-      expect(sendableFn).toBeCalledTimes(1);
+      expect(mockfn).toHaveBeenCalledTimes(1);
+      expect(sendableFn).toHaveBeenCalledTimes(1);
     });
 
     fireEvent.click(screen.getByRole('button'));
@@ -368,8 +368,8 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
-      expect(mockfn).toBeCalledTimes(1);
-      expect(sendableFn).toBeCalledTimes(2);
+      expect(mockfn).toHaveBeenCalledTimes(1);
+      expect(sendableFn).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -430,7 +430,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
       expect(mockfn).not.toBeCalled();
-      expect(sendableFn).toBeCalledTimes(1);
+      expect(sendableFn).toHaveBeenCalledTimes(1);
     });
 
     fireEvent.click(screen.getByRole('button'));
@@ -439,7 +439,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
       expect(mockfn).not.toBeCalled();
-      expect(sendableFn).toBeCalledTimes(2);
+      expect(sendableFn).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -709,7 +709,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('10');
       expect(endTs - startTs).toBeLessThan(600);
-      expect(successMockFn).toBeCalledTimes(1);
+      expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
     fireEvent.click(screen.getByRole('btn2'));
@@ -721,7 +721,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
       expect(endTs - startTs).toBeLessThan(300);
-      expect(successMockFn).toBeCalledTimes(2);
+      expect(successMockFn).toHaveBeenCalledTimes(2);
     });
 
     // 同时改变，以后一个为准
@@ -734,7 +734,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
       expect(endTs - startTs).toBeLessThan(300);
-      expect(successMockFn).toBeCalledTimes(3);
+      expect(successMockFn).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -814,7 +814,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('10');
       expect(endTs - startTs).toBeLessThan(450);
-      expect(successMockFn).toBeCalledTimes(1);
+      expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
     fireEvent.click(screen.getByRole('btn2'));
@@ -825,7 +825,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
       expect(endTs - startTs).toBeLessThan(100);
-      expect(successMockFn).toBeCalledTimes(2);
+      expect(successMockFn).toHaveBeenCalledTimes(2);
     });
 
     // 同时改变，以后一个为准
@@ -837,7 +837,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
       expect(endTs - startTs).toBeLessThan(100);
-      expect(successMockFn).toBeCalledTimes(3);
+      expect(successMockFn).toHaveBeenCalledTimes(3);
     });
   });
 });

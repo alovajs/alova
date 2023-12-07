@@ -22,7 +22,7 @@ describe('useFetcher middleware', function () {
     onSuccess(mockFn);
     expect(fetching.value).toBeTruthy();
     await untilCbCalled(onSuccess);
-    expect(mockFn).toBeCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledTimes(1);
     expect(fetching.value).toBeFalsy();
   });
 
@@ -66,7 +66,7 @@ describe('useFetcher middleware', function () {
     // middleware中未调用next，因此不会发送请求
     expect(fetching.value).toBeFalsy();
     await untilCbCalled(setTimeout, 1000);
-    expect(mockFn).toBeCalledTimes(0);
+    expect(mockFn).toHaveBeenCalledTimes(0);
     expect(fetching.value).toBeFalsy();
   });
 

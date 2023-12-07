@@ -354,7 +354,7 @@ describe('use useRequest hook to send GET with vue', function () {
       const data = await send(3);
       expect(data.path).toBe('/unit-test');
       expect(data.params.index).toEqual('3');
-      expect(mockFn).toBeCalledTimes(2);
+      expect(mockFn).toHaveBeenCalledTimes(2);
     } catch (err: any) {
       expect(err.message).toMatch(/404/);
     }

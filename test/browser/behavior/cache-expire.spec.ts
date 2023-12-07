@@ -1,6 +1,6 @@
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
-import { getResponseCache } from '@/storage/responseCache';
+import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
 // import mockServer from '../../mockServer';
 import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
@@ -49,7 +49,7 @@ describe('cache data', function () {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      localCache: 50,
+      localCache: 1000,
       transformData: ({ data }: Result) => data
     });
     const firstState = useRequest(Get);
@@ -65,9 +65,9 @@ describe('cache data', function () {
     // 使用缓存时，将会立即获得数据
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
 
-    await untilCbCalled(setTimeout, 60);
+    removeResponseCache(alova.id, key(Get));
     const thirdState = useRequest(Get);
-    expect(thirdState.loading.value).toBeTruthy(); // 因为缓存已过期，所以会重新发起请求，loading会改变
+    expect(thirdState.loading.value).toBeTruthy(); // 因为缓存已删除，所以会重新发起请求，loading会改变
   });
 
   test('param localCache can also set to be a Date instance', async () => {

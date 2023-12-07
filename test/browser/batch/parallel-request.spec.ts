@@ -40,7 +40,7 @@ describe('parallel request', function () {
     Promise.all([firstState.send(), secondState.send()])
       .catch(mockFn)
       .then(() => {
-        expect(mockFn).toBeCalledTimes(1);
+        expect(mockFn).toHaveBeenCalledTimes(1);
       });
   });
 
@@ -101,7 +101,7 @@ describe('parallel request', function () {
     Promise.all([firstPromise, secondPromise])
       .catch(mockFn)
       .then(() => {
-        expect(mockFn).toBeCalledTimes(1);
+        expect(mockFn).toHaveBeenCalledTimes(1);
       });
   });
 });

@@ -319,7 +319,7 @@ describe('createAlova', function () {
 
     const state1 = useRequest(alova1.Get<string, Result<string>>('/unit-test-error'));
     await untilCbCalled(state1.onError);
-    expect(errorConsoleMockFn).toBeCalledTimes(1);
+    expect(errorConsoleMockFn).toHaveBeenCalledTimes(1);
 
     const state2 = useRequest(
       alova1.Get<string, Result<string>>('/unit-test', {
@@ -329,7 +329,7 @@ describe('createAlova', function () {
       })
     );
     await untilCbCalled(state2.onError);
-    expect(errorConsoleMockFn).toBeCalledTimes(2);
+    expect(errorConsoleMockFn).toHaveBeenCalledTimes(2);
 
     const state3 = useRequest(
       alova1.Get<string, Result<string>>('/unit-test', {
@@ -339,7 +339,7 @@ describe('createAlova', function () {
       })
     );
     await untilCbCalled(state3.onError);
-    expect(errorConsoleMockFn).toBeCalledTimes(3);
+    expect(errorConsoleMockFn).toHaveBeenCalledTimes(3);
   });
 
   test('`responded-onComplete` hook will receive the method param', async () => {
@@ -365,6 +365,7 @@ describe('createAlova', function () {
       localCache: 100 * 1000
     });
     await Get.send();
+    expect(mockFn).toHaveBeenCalled();
   });
 
   test('should emit onComplete when `beforeRequest` hook throws a error', async () => {
@@ -419,21 +420,22 @@ describe('createAlova', function () {
     await Get.send();
     await Get.send();
     await Get.send();
-    expect(MockFn).toBeCalledTimes(3);
+    expect(MockFn).toHaveBeenCalledTimes(3);
   });
 
   test('should throws a async error in `responded-onComplete` hook', async () => {
+    const mockFn = jest.fn();
     const alova = getAlovaInstance(VueHook, {
-      resErrorExpect: async () => {},
-      resCompleteExpect: async () => {
-        await new Promise(resolve => {
-          setTimeout(resolve, 200);
-        });
-        throw new Error('async error');
+      resErrorExpect: () => {
+        return 'error response';
+      },
+      resCompleteExpect: () => {
+        mockFn();
       }
     });
-    const Get = alova.Get('/unit-test-error');
-    await expect(Get.send()).rejects.toThrow('async error');
+    const res = await alova.Get('/unit-test-error').send();
+    expect(res).toBe('error response');
+    expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
   test("shouldn't print error message when set errorLogger to false", async () => {
@@ -489,7 +491,7 @@ describe('createAlova', function () {
     const state1 = useRequest(alova.Get<string, Result<string>>('/unit-test-error'));
     await untilCbCalled(state1.onError);
     expect(errorConsoleMockFn).not.toBeCalled();
-    expect(customLoggerMockFn).toBeCalledTimes(1);
+    expect(customLoggerMockFn).toHaveBeenCalledTimes(1);
 
     const state2 = useRequest(
       alova.Get<string, Result<string>>('/unit-test', {
@@ -500,7 +502,7 @@ describe('createAlova', function () {
     );
     await untilCbCalled(state2.onError);
     expect(errorConsoleMockFn).not.toBeCalled();
-    expect(customLoggerMockFn).toBeCalledTimes(2);
+    expect(customLoggerMockFn).toHaveBeenCalledTimes(2);
 
     const state3 = useRequest(
       alova.Get<string, Result<string>>('/unit-test', {
@@ -511,7 +513,7 @@ describe('createAlova', function () {
     );
     await untilCbCalled(state3.onError);
     expect(errorConsoleMockFn).not.toBeCalled();
-    expect(customLoggerMockFn).toBeCalledTimes(3);
+    expect(customLoggerMockFn).toHaveBeenCalledTimes(3);
   });
 
   test('should print cache hit message defaultly when hit response cache', async () => {
@@ -533,7 +535,7 @@ describe('createAlova', function () {
 
     const state2 = useRequest(getter1);
     await untilCbCalled(state2.onSuccess);
-    expect(logConsoleMockFn).toBeCalledTimes(3); // 每次缓存会调用3次console.log
+    expect(logConsoleMockFn).toHaveBeenCalledTimes(3); // 每次缓存会调用3次console.log
     const calls1 = logConsoleMockFn.mock.calls.slice(0);
     expect(calls1[0][0]).toBe('%c[Mode]');
     expect(calls1[0][2]).toBe('memory');
@@ -560,7 +562,7 @@ describe('createAlova', function () {
     await untilCbCalled(state3.onSuccess);
     const state4 = useRequest(getter2);
     await untilCbCalled(state4.onSuccess);
-    expect(logConsoleMockFn).toBeCalledTimes(7); // restore缓存还会打印tag
+    expect(logConsoleMockFn).toHaveBeenCalledTimes(7); // restore缓存还会打印tag
     const calls2 = logConsoleMockFn.mock.calls.slice(3);
     expect(calls2[0][0]).toBe('%c[Mode]');
     expect(calls2[0][2]).toBe('restore');
@@ -597,7 +599,7 @@ describe('createAlova', function () {
     await untilCbCalled(state1.onSuccess);
     const state2 = useRequest(getter1);
     await untilCbCalled(state2.onSuccess);
-    expect(logConsoleMockFn).toBeCalledTimes(0);
+    expect(logConsoleMockFn).toHaveBeenCalledTimes(0);
 
     const alova2 = createAlova({
       baseURL,
@@ -620,7 +622,7 @@ describe('createAlova', function () {
     await untilCbCalled(state3.onSuccess);
     const state4 = useRequest(getter2);
     await untilCbCalled(state4.onSuccess);
-    expect(logConsoleMockFn).toBeCalledTimes(0);
+    expect(logConsoleMockFn).toHaveBeenCalledTimes(0);
   });
 
   test('should emit custom cacheLogger function when set cacheLogger to a custom function', async () => {
@@ -643,7 +645,7 @@ describe('createAlova', function () {
     await untilCbCalled(state1.onSuccess);
     const state2 = useRequest(getter1);
     await untilCbCalled(state2.onSuccess);
-    expect(loggerMockFn).toBeCalledTimes(1);
+    expect(loggerMockFn).toHaveBeenCalledTimes(1);
     const calls1 = loggerMockFn.mock.calls[0];
     expect(calls1[3]).toBeUndefined();
     expect(calls1[2]).toBe('memory');
@@ -668,7 +670,7 @@ describe('createAlova', function () {
     await untilCbCalled(state3.onSuccess);
     const state4 = useRequest(getter2);
     await untilCbCalled(state4.onSuccess);
-    expect(loggerMockFn).toBeCalledTimes(2);
+    expect(loggerMockFn).toHaveBeenCalledTimes(2);
     const calls2 = loggerMockFn.mock.calls[1];
     expect(calls2[3]).toBe('v1');
     expect(calls2[2]).toBe('restore');

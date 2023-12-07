@@ -2,7 +2,7 @@ import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from 
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { getConfig, getContextOptions, instanceOf, isPlainObject, key, noop } from './utils/helper';
-import { deleteAttr, falseValue, forEach, isArray, mapItem, undefinedValue } from './utils/variables';
+import { deleteAttr, falseValue, forEach, isArray, mapItem, promiseThen, undefinedValue } from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -87,5 +87,36 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
    */
   public setName(name: string | number) {
     getConfig(this).name = name;
+  }
+
+  /**
+   * 绑定resolve和/或reject Promise的callback
+   * @param onfullified resolve Promise时要执行的回调
+   * @param onrejected 当Promise被reject时要执行的回调
+   * @returns 返回一个Promise，用于执行任何回调
+   */
+  public then<TResult1 = R, TResult2 = never>(
+    onfulfilled?: (value: R) => TResult1 | PromiseLike<TResult1>,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+  ) {
+    return promiseThen(this.send(), onfulfilled, onrejected);
+  }
+
+  /**
+   * 绑定一个仅用于reject Promise的回调
+   * @param onrejected 当Promise被reject时要执行的回调
+   * @returns 返回一个完成回调的Promise
+   */
+  public catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null) {
+    return this.send().catch(onrejected);
+  }
+
+  /**
+   * 绑定一个回调，该回调在Promise结算（resolve或reject）时调用
+   * @param onfinally Promise结算（resolve或reject）时执行的回调。
+   * @return 返回一个完成回调的Promise。
+   */
+  public finally(onfinally?: (() => void) | undefined | null) {
+    return this.send().finally(onfinally);
   }
 }
