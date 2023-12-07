@@ -58,11 +58,11 @@ describe('Request shared', function () {
     expect(state2.downloading.value).toEqual({ total: 0, loaded: 0 });
 
     // 因为请求共享了，因此只执行一次
-    expect(requestMockFn).toBeCalledTimes(1);
+    expect(requestMockFn).toHaveBeenCalledTimes(1);
 
     // 全局请求钩子调用次数不变
-    expect(beforeRequestMockFn).toBeCalledTimes(2);
-    expect(responseMockFn).toBeCalledTimes(2);
+    expect(beforeRequestMockFn).toHaveBeenCalledTimes(2);
+    expect(responseMockFn).toHaveBeenCalledTimes(2);
   });
 
   test('should also share request when send request directly', async () => {
@@ -98,7 +98,7 @@ describe('Request shared', function () {
     expect(rawData2).toBe(300);
 
     // 因为请求共享了，因此只执行一次
-    expect(requestMockFn).toBeCalledTimes(1);
+    expect(requestMockFn).toHaveBeenCalledTimes(1);
   });
 
   test('request shared promise will also remove when request error', async () => {
@@ -265,7 +265,7 @@ describe('Request shared', function () {
     expect(rawData2).toBe(200);
 
     // 请求共享关闭了，执行了两次
-    expect(requestMockFn).toBeCalledTimes(2);
+    expect(requestMockFn).toHaveBeenCalledTimes(2);
   });
 
   test("shouldn't share request when close in method config", async () => {
@@ -300,6 +300,6 @@ describe('Request shared', function () {
     expect(rawData2).toBe(200);
 
     // 共享请求在method配置中关闭了，执行了两次
-    expect(requestMockFn).toBeCalledTimes(2);
+    expect(requestMockFn).toHaveBeenCalledTimes(2);
   });
 });

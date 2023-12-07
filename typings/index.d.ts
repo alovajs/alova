@@ -394,6 +394,33 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
    * 中断此method实例直接发送的请求
    */
   abort(): void;
+
+  /**
+   * 绑定resolve和/或reject Promise的callback
+   * @param onfullified resolve Promise时要执行的回调
+   * @param onrejected 当Promise被reject时要执行的回调
+   * @returns 返回一个Promise，用于执行任何回调
+   */
+  then<TResult1 = R, TResult2 = never>(
+    onfulfilled?: (value: R) => TResult1 | PromiseLike<TResult1>,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+  ): Promise<TResult1 | TResult2>;
+
+  /**
+   * 绑定一个仅用于reject Promise的回调
+   * @param onrejected 当Promise被reject时要执行的回调
+   * @returns 返回一个完成回调的Promise
+   */
+  catch<TResult = never>(
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
+  ): Promise<R | TResult>;
+
+  /**
+   * 绑定一个回调，该回调在Promise结算（resolve或reject）时调用
+   * @param onfinally Promise结算（resolve或reject）时执行的回调。
+   * @return 返回一个完成回调的Promise。
+   */
+  finally(onfinally?: (() => void) | undefined | null): Promise<R>;
 }
 interface MethodConstructor {
   new <S, E, R, T, RC, RE, RH>(

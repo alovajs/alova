@@ -181,11 +181,11 @@ describe('update cached response data by user in react', function () {
     }
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      expect(successMockFn).toBeCalledTimes(1);
+      expect(successMockFn).toHaveBeenCalledTimes(1);
     });
     fireEvent.click(screen.getByRole('btnUpd'));
     await waitFor(() => {
-      expect(successMockFn).toBeCalledTimes(2);
+      expect(successMockFn).toHaveBeenCalledTimes(2);
     });
 
     // 执行了两次不同参数的请求后，验证两次请求是否缓存了相同的states
@@ -251,12 +251,12 @@ describe('update cached response data by user in react', function () {
 
     const { unmount } = render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      expect(successMockFn).toBeCalledTimes(1);
+      expect(successMockFn).toHaveBeenCalledTimes(1);
       expect(getStateCache(alova.id, key(getter('a')))).not.toBeUndefined();
     });
     fireEvent.click(screen.getByRole('btnUpd'));
     await waitFor(() => {
-      expect(successMockFn).toBeCalledTimes(2);
+      expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(getStateCache(alova.id, key(getter('b')))).not.toBeUndefined();
     });
 

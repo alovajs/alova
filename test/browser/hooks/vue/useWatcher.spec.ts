@@ -66,7 +66,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.str).toBe('c');
     cacheData = getResponseCache(alova.id, key(method2));
     expect(cacheData.params).toEqual({ num: '2', str: 'c' });
-    expect(mockCallback).toBeCalledTimes(2);
+    expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
   test('should get the response that request at last when change value', async () => {
@@ -108,7 +108,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     await untilCbCalled(onSuccess);
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    expect(mockCallback).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+    expect(mockCallback).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
   });
 
   test('should ignore the error which is not the last request', async () => {
@@ -157,7 +157,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     await untilCbCalled(onSuccess);
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    expect(mockCallback).toBeCalledTimes(1); // 请求已发出，但数据只更新最新的
+    expect(mockCallback).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
     expect(mockErrorCallback).not.toBeCalled(); // unit-test-1s因为后面才响应，不会触发回调
     expect(error.value).toBeUndefined(); // 对应的error也不会有值
   });
@@ -203,7 +203,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     await untilCbCalled(setTimeout, 1100);
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
-    expect(mockCallback).toBeCalledTimes(2); // 请求已发出，但数据只更新最新的
+    expect(mockCallback).toHaveBeenCalledTimes(2); // 请求已发出，但数据只更新最新的
   });
 
   test('should not send request when change value but returns false in sendable', async () => {
@@ -255,16 +255,16 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.str).toBe('b');
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    expect(sendableFn).toBeCalledTimes(1);
-    expect(mockCallback).toBeCalledTimes(1);
+    expect(sendableFn).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
     await untilCbCalled(setTimeout, 50); // 修改值后不会发出请求，使用setTimeout延迟查看是否发起了请求
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
-    expect(sendableFn).toBeCalledTimes(2);
-    expect(mockCallback).toBeCalledTimes(1);
+    expect(sendableFn).toHaveBeenCalledTimes(2);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
   test('should not send request when change value but throws error in sendable', async () => {
@@ -313,7 +313,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    expect(sendableFn).toBeCalledTimes(1);
+    expect(sendableFn).toHaveBeenCalledTimes(1);
     expect(mockCallback).not.toBeCalled();
 
     mutateNum.value = 2;
@@ -323,7 +323,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    expect(sendableFn).toBeCalledTimes(2);
+    expect(sendableFn).toHaveBeenCalledTimes(2);
     expect(mockCallback).not.toBeCalled();
   });
 
@@ -351,7 +351,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     );
 
     expect(loading.value).toBeFalsy();
-    expect(sendableFn).toBeCalledTimes(1);
+    expect(sendableFn).toHaveBeenCalledTimes(1);
   });
 
   test('should work when receive a method instance', async () => {
@@ -377,7 +377,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.str).toBe('a');
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    expect(successMockFn).toBeCalledTimes(1);
+    expect(successMockFn).toHaveBeenCalledTimes(1);
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
@@ -388,7 +388,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.str).toBe('a');
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    expect(successMockFn).toBeCalledTimes(2);
+    expect(successMockFn).toHaveBeenCalledTimes(2);
   });
 
   test('should also send request when nest value changed', async () => {
@@ -533,7 +533,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     const cacheData = getResponseCache(alova.id, key(method));
     expect(cacheData.path).toBe('/unit-test');
     expect(cacheData.params).toEqual({ num: '2', str: 'c' });
-    expect(mockCallback).toBeCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
   test('in different debounce time when set param debounce to be a array', async () => {
@@ -799,7 +799,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 缓存没有值
     let cacheData = getResponseCache(alova.id, key(method));
     expect(cacheData).toBeUndefined();
-    expect(mockCallback).toBeCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
@@ -808,7 +808,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.str).toBe('c');
     cacheData = getResponseCache(alova.id, key(method2));
     expect(cacheData).toBeUndefined();
-    expect(mockCallback).toBeCalledTimes(2);
+    expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
   test("initial request shouldn't delay when set the `immediate` and `debounce`", async () => {
@@ -850,7 +850,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 缓存有值
     let cacheData = getResponseCache(alova.id, key(method));
     expect(cacheData).toBeUndefined();
-    expect(mockCallback).toBeCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
@@ -865,7 +865,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.str).toBe('c');
     cacheData = getResponseCache(alova.id, key(method2));
     expect(cacheData).toBeUndefined();
-    expect(mockCallback).toBeCalledTimes(2);
+    expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
   test('should force request when force param set to a function which returns truthy value', async () => {

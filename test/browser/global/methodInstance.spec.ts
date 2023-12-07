@@ -142,4 +142,61 @@ describe('method instance', function () {
       })
     );
   });
+
+  // 2.16.0+ 已将method实例转换为PromiseLike
+  test('should send request when call `method.then` or await method instance', async () => {
+    const rawData = await alova.Get('/unit-test', {
+      params: { e: 'e', f: 'gty' },
+      transformData: (result: Result) => result.data
+    });
+    expect(rawData.path).toBe('/unit-test');
+    expect(rawData.params).toStrictEqual({ e: 'e', f: 'gty' });
+
+    const rawDataParams = await alova
+      .Get('/unit-test', {
+        params: { e2: 'gg', f: 'gty2' },
+        transformData: (result: Result) => result.data
+      })
+      .then(result => result.params);
+    expect(rawDataParams).toStrictEqual({ e2: 'gg', f: 'gty2' });
+
+    await expect(alova.Get<Result>('/unit-test-error')).rejects.toThrow();
+  });
+  test('should send request when call `method.catch`', async () => {
+    const catchMockFn = jest.fn();
+    const errorReason = await alova.Get<Result>('/unit-test-error').catch(reason => {
+      catchMockFn(reason);
+      return reason;
+    });
+    expect(errorReason.message).toMatch(/server error/);
+    expect(catchMockFn).toHaveBeenCalledTimes(1);
+    expect(catchMockFn).toHaveBeenCalledWith(errorReason);
+  });
+
+  test('should send request when call `method.finally`', async () => {
+    const finallyMockFn = jest.fn();
+    const finallyPromiseMockFn = jest.fn();
+    const rawData = await alova
+      .Get('/unit-test', {
+        params: { gb: 'gb', f: 'gty' },
+        transformData: (result: Result) => result.data
+      })
+      .finally(() => {
+        finallyMockFn();
+        return Promise.resolve().then(finallyPromiseMockFn);
+      });
+    expect(rawData.path).toBe('/unit-test');
+    expect(rawData.params).toStrictEqual({ gb: 'gb', f: 'gty' });
+    expect(finallyMockFn).toHaveBeenCalledTimes(1);
+    expect(finallyPromiseMockFn).toHaveBeenCalledTimes(1);
+
+    await expect(
+      alova.Get<Result>('/unit-test-error').finally(() => {
+        finallyMockFn();
+        return Promise.resolve().then(finallyPromiseMockFn);
+      })
+    ).rejects.toThrow();
+    expect(finallyMockFn).toHaveBeenCalledTimes(2);
+    expect(finallyPromiseMockFn).toHaveBeenCalledTimes(2);
+  });
 });

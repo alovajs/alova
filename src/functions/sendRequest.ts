@@ -8,9 +8,9 @@ import {
   AlovaRequestAdapter,
   Arg,
   ProgressUpdater,
+  ResponseCompleteHandler,
   ResponsedHandler,
-  ResponseErrorHandler,
-  ResponseCompleteHandler
+  ResponseErrorHandler
 } from '~/typings';
 import {
   getConfig,
@@ -148,7 +148,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey],
             responseHandler: ResponsedHandler<any, any, RC, RE, RH> = _self,
             responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue,
-            responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = _self;
+            responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = noop;
           if (isFn(responseUnified)) {
             responseHandler = responseUnified;
           } else if (isPlainObject(responseUnified)) {
@@ -237,7 +237,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
               // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
               .finally(() => {
                 deleteAttr(namespacedAdapterReturnMap, methodKey);
-                return responseCompleteHandler(clonedMethod);
+                responseCompleteHandler(clonedMethod);
               })
           );
         });

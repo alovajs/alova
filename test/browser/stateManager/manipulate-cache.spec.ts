@@ -168,7 +168,7 @@ describe('manipulate cache', function () {
         a: 'update'
       }
     });
-    expect(mockfn).toBeCalledTimes(2); // 只有两个被匹配
+    expect(mockfn).toHaveBeenCalledTimes(2); // 只有两个被匹配
 
     const mockfn2 = jest.fn();
     await Get2.send();
@@ -180,7 +180,7 @@ describe('manipulate cache', function () {
       mockfn2();
       return cache;
     });
-    expect(mockfn).toBeCalledTimes(2); // 相同的Method请求不会被多次匹配
+    expect(mockfn).toHaveBeenCalledTimes(2); // 相同的Method请求不会被多次匹配
   });
 
   test('update will be canceled when callback return undefined', async () => {
@@ -211,7 +211,7 @@ describe('manipulate cache', function () {
         a: '200'
       }
     });
-    expect(mockfn).toBeCalledTimes(1); // 执行了一次
+    expect(mockfn).toHaveBeenCalledTimes(1); // 执行了一次
   });
 
   test('should also replace storaged data when using method instance with `placeholder`', async () => {

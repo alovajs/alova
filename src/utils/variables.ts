@@ -15,7 +15,10 @@ export const PromiseCls = Promise as typeof Promise<any>,
     onFulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
   ): Promise<TResult1 | TResult2> => promise.then(onFulfilled, onrejected),
-  promiseCatch = <T, O>(promise: Promise<T>, onrejected: (reason: any) => O) => promise.catch(onrejected),
+  promiseCatch = <T, TResult = never>(
+    promise: Promise<T>,
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
+  ) => promise.catch(onrejected),
   JSONStringify = <T>(value: T) => JSON.stringify(value),
   JSONParse = (value: string) => JSON.parse(value),
   setTimeoutFn = (fn: GeneralFn, delay = 0) => setTimeout(fn, delay),

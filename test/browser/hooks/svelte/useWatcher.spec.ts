@@ -37,7 +37,7 @@ describe('useWatcher hook with svelte', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockSuccessFn).toBeCalledTimes(1);
+      expect(mockSuccessFn).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -54,7 +54,7 @@ describe('useWatcher hook with svelte', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockSuccessFn).toBeCalledTimes(1);
+      expect(mockSuccessFn).toHaveBeenCalledTimes(1);
       expect(mockErrorFn).not.toBeCalled();
       expect(screen.getByRole('error')).toHaveTextContent('');
     });
@@ -72,7 +72,7 @@ describe('useWatcher hook with svelte', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
-      expect(mockSuccessFn).toBeCalledTimes(2);
+      expect(mockSuccessFn).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -87,14 +87,14 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
-    expect(sendableFn).toBeCalledTimes(1);
+    expect(sendableFn).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('btn1'));
     await untilCbCalled(setTimeout, 500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
-    expect(sendableFn).toBeCalledTimes(2);
+    expect(sendableFn).toHaveBeenCalledTimes(2);
   });
 
   test('should not send request when change value but throws error in sentable', async () => {
@@ -111,14 +111,14 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('id1')).toHaveTextContent('');
     expect(screen.getByRole('id2')).toHaveTextContent('');
-    expect(sendableFn).toBeCalledTimes(1);
+    expect(sendableFn).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('btn2'));
     await untilCbCalled(setTimeout, 500);
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('id1')).toHaveTextContent('');
     expect(screen.getByRole('id2')).toHaveTextContent('');
-    expect(sendableFn).toBeCalledTimes(2);
+    expect(sendableFn).toHaveBeenCalledTimes(2);
   });
 
   test('the loading state should be recovered to false when send request immediately', async () => {
@@ -131,7 +131,7 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('id2')).toHaveTextContent('');
-    expect(sendableFn).toBeCalledTimes(1);
+    expect(sendableFn).toHaveBeenCalledTimes(1);
   });
 
   test('should send request when init', async () => {

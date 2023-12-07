@@ -6,7 +6,7 @@ import { getStateCache } from '@/storage/stateCache';
 import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { ReactElement, StrictMode, useState } from 'react';
+import React, { ReactElement, StrictMode } from 'react';
 
 const StrictModeReact = StrictMode as any;
 function getAlovaInstanceSyncResponded() {
@@ -154,34 +154,22 @@ describe('useRequet hook with react', () => {
     const Get = alova.Get('unit-test', {
       transformData: ({ data }: Result) => data
     });
-    function DataConsole() {
+    function Page() {
       const { data, loading } = useRequest(Get);
       return <div role="cell">{loading ? 'loading...' : JSON.stringify(data)}</div>;
     }
-    function Page() {
-      const [showData, setShowData] = useState(true);
-      return (
-        <div>
-          {showData ? <DataConsole /> : <div>no data</div>}
-          <button
-            role="btn"
-            onClick={() => setShowData(!showData)}>
-            toggle data
-          </button>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
-    await screen.findByText(/unit-test/);
+    const { unmount } = render((<Page />) as ReactElement<any, any>);
 
     // useRequest内会缓存状态
-    const { s: { data } = { data: null } } = getStateCache(alova.id, key(Get));
-    expect(data[0].path).toBe('/unit-test');
-    fireEvent.click(screen.getByRole('btn'));
-    await untilCbCalled(setTimeout, 100);
-
-    // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
-    expect(getStateCache(alova.id, key(Get))).toStrictEqual({});
+    await waitFor(() => {
+      const { s: { data } = { data: null } } = getStateCache(alova.id, key(Get));
+      expect(data[0].path).toBe('/unit-test');
+    });
+    unmount();
+    await waitFor(() => {
+      // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
+      expect(getStateCache(alova.id, key(Get))).toStrictEqual({});
+    });
   });
 
   test('should change states built in by using function `update` which return in `useRequest`', async () => {
@@ -269,7 +257,7 @@ describe('useRequet hook with react', () => {
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      expect(renderMockFn).toBeCalledTimes(2);
+      expect(renderMockFn).toHaveBeenCalledTimes(2);
     });
   });
 

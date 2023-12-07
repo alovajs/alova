@@ -79,13 +79,13 @@ describe('useWatcher middleware', function () {
     // middleware中未调用next，因此不会发送请求
     expect(loading.value).toBeFalsy();
     await untilCbCalled(setTimeout, 1000);
-    expect(mockFn).toBeCalledTimes(0);
+    expect(mockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
 
     stateA.value++;
     await untilCbCalled(setTimeout, 1000);
-    expect(mockFn).toBeCalledTimes(0);
+    expect(mockFn).toHaveBeenCalledTimes(0);
 
     const rawData = await send();
     expect(rawData).toBeUndefined();
