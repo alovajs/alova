@@ -146,14 +146,14 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
             // 计划将在3.0中正式使用responded
             responseUnified = responded || responsed;
           let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey],
-            responseHandler: ResponsedHandler<any, any, RC, RE, RH> = _self,
+            responseSuccessHandler: ResponsedHandler<any, any, RC, RE, RH> = _self,
             responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue,
             responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = noop;
           if (isFn(responseUnified)) {
-            responseHandler = responseUnified;
+            responseSuccessHandler = responseUnified;
           } else if (isPlainObject(responseUnified)) {
             const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responseUnified;
-            responseHandler = isFn(successHandler) ? successHandler : responseHandler;
+            responseSuccessHandler = isFn(successHandler) ? successHandler : responseSuccessHandler;
             responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
             responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;
           }
@@ -184,54 +184,65 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           }
           // 将requestAdapterCtrls传到promise中供onDownload、onUpload及abort中使用
           requestAdapterCtrlsPromiseResolveFn(requestAdapterCtrls);
+
+          /**
+           * 处理响应任务，失败时不缓存数据
+           * @param responsePromise 响应promise实例
+           * @param headers 请求头
+           * @param isSuccess 是否处理成功任务
+           * @returns 处理后的response
+           */
+          const handleResponseTask = (responsePromise: Promise<any>, headers: any, isSuccess: boolean) =>
+            responsePromise
+              .then(data => transformData(data, headers))
+              .then(transformedData => {
+                saveMethodSnapshot(id, methodKey, methodInstance);
+                // 当requestBody为特殊数据时不保存缓存
+                // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
+                // 原因2：特殊数据不便于生成缓存key
+                const requestBody = clonedMethod.data,
+                  toCache = !requestBody || !isSpecialRequestBody(requestBody);
+                if (toCache && isSuccess) {
+                  setResponseCache(id, methodKey, transformedData, expireTimestamp);
+                  toStorage && persistResponse(id, methodKey, transformedData, expireTimestamp, storage, tag);
+                }
+
+                // 查找hitTarget，让它的缓存失效
+                const hitMethods = matchSnapshotMethod({
+                  filter: cachedMethod => {
+                    let isHit = falseValue;
+                    const hitSource = cachedMethod.hitSource;
+                    if (hitSource) {
+                      for (const i in hitSource) {
+                        const sourceMatcher = hitSource[i];
+                        if (
+                          instanceOf(sourceMatcher, RegExp)
+                            ? sourceMatcher.test(methodInstanceName as string)
+                            : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
+                        ) {
+                          isHit = trueValue;
+                          break;
+                        }
+                      }
+                    }
+                    return isHit;
+                  }
+                });
+                len(hitMethods) > 0 && invalidateCache(hitMethods);
+                return transformedData;
+              });
+
           return (
             PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()])
               .then(
                 ([rawResponse, headers]) =>
-                  promisify(responseHandler)(rawResponse, clonedMethod)
-                    .then(data => transformData(data, headers))
-                    .then(transformedData => {
-                      saveMethodSnapshot(id, methodKey, methodInstance);
-                      // 当requestBody为特殊数据时不保存缓存
-                      // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
-                      // 原因2：特殊数据不便于生成缓存key
-                      const requestBody = clonedMethod.data,
-                        toCache = !requestBody || !isSpecialRequestBody(requestBody);
-                      if (toCache) {
-                        setResponseCache(id, methodKey, transformedData, expireTimestamp);
-                        toStorage && persistResponse(id, methodKey, transformedData, expireTimestamp, storage, tag);
-                      }
-
-                      // 查找hitTarget，让它的缓存失效
-                      const hitMethods = matchSnapshotMethod({
-                        filter: cachedMethod => {
-                          let isHit = falseValue;
-                          const hitSource = cachedMethod.hitSource;
-                          if (hitSource) {
-                            for (const i in hitSource) {
-                              const sourceMatcher = hitSource[i];
-                              if (
-                                instanceOf(sourceMatcher, RegExp)
-                                  ? sourceMatcher.test(methodInstanceName as string)
-                                  : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-                              ) {
-                                isHit = trueValue;
-                                break;
-                              }
-                            }
-                          }
-                          return isHit;
-                        }
-                      });
-                      len(hitMethods) > 0 && invalidateCache(hitMethods);
-                      return transformedData;
-                    }),
+                  handleResponseTask(promisify(responseSuccessHandler)(rawResponse, clonedMethod), headers, trueValue),
                 (error: any) => {
                   if (!isFn(responseErrorHandler)) {
                     throw error;
                   }
-                  // 可能返回Promise.reject
-                  return responseErrorHandler(error, clonedMethod);
+                  // 响应错误时，如果未抛出错误也将会处理响应成功的流程，但不缓存数据
+                  return handleResponseTask(promisify(responseErrorHandler)(error, clonedMethod), {}, falseValue);
                 }
               )
               // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求

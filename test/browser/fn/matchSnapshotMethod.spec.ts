@@ -78,7 +78,7 @@ describe('matchSnapshotMethod', function () {
       falseValue
     );
     expect(matchedMethod).toBeUndefined();
-    expect(mockFn).not.toBeCalled();
+    expect(mockFn).not.toHaveBeenCalled();
   });
 
   test('match with name regexp', () => {
@@ -170,6 +170,6 @@ describe('matchSnapshotMethod', function () {
       falseValue
     );
     expect(matchedMethod).toBeUndefined();
-    expect(mockFn).not.toBeCalled();
+    expect(mockFn).not.toHaveBeenCalled();
   });
 });

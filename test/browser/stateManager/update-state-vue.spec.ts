@@ -40,7 +40,7 @@ describe('update cached response data by user in vue', function () {
       mockfn();
       return data;
     });
-    expect(mockfn).not.toBeCalled();
+    expect(mockfn).not.toHaveBeenCalled();
     expect(updated).toBeFalsy();
   });
 
@@ -196,8 +196,8 @@ describe('update cached response data by user in vue', function () {
       }
     );
 
-    expect(mockMatchFn).toBeCalled();
-    expect(mockUpdateFn).not.toBeCalled();
+    expect(mockMatchFn).toHaveBeenCalled();
+    expect(mockUpdateFn).not.toHaveBeenCalled();
     expect(updated).toBeFalsy();
   });
 });

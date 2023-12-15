@@ -147,30 +147,30 @@ type AlovaMethodConfig<R, T, RC, RH> = {
 } & RC;
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 
-type ResponsedHandler<R, T, RC, RE, RH> = (response: RE, methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
-type ResponseErrorHandler<R, T, RC, RE, RH> = (
+type ResponsedHandler<S, E, RC, RE, RH> = (response: RE, methodInstance: Method<S, E, any, any, RC, RE, RH>) => any;
+type ResponseErrorHandler<S, E, RC, RE, RH> = (
   error: any,
-  methodInstance: Method<any, any, R, T, RC, RE, RH>
+  methodInstance: Method<S, E, any, any, RC, RE, RH>
 ) => void | Promise<void>;
-type ResponseCompleteHandler<R, T, RC, RE, RH> = (methodInstance: Method<any, any, R, T, RC, RE, RH>) => any;
-type ResponsedHandlerRecord<R, T, RC, RE, RH> = {
+type ResponseCompleteHandler<S, E, RC, RE, RH> = (methodInstance: Method<S, E, any, any, RC, RE, RH>) => any;
+type ResponsedHandlerRecord<S, E, RC, RE, RH> = {
   /**
    * 全局的请求成功钩子函数
    * 如果在全局onSuccess中抛出错误不会触发全局onError，而是会触发请求位置的onError
    */
-  onSuccess?: ResponsedHandler<R, T, RC, RE, RH>;
+  onSuccess?: ResponsedHandler<S, E, RC, RE, RH>;
 
   /**
    * 全局的请求错误钩子函数，请求错误是指网络请求失败，服务端返回404、500等错误代码不会进入此钩子函数
    * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
    */
-  onError?: ResponseErrorHandler<R, T, RC, RE, RH>;
+  onError?: ResponseErrorHandler<S, E, RC, RE, RH>;
 
   /**
    * 请求完成钩子函数
    * 请求成功、缓存匹配成功、请求失败都将触发此钩子函数
    */
-  onComplete?: ResponseCompleteHandler<R, T, RC, RE, RH>;
+  onComplete?: ResponseCompleteHandler<S, E, RC, RE, RH>;
 };
 
 type HookType = 1 | 2 | 3;
@@ -272,9 +272,9 @@ interface StatesHook<S, E> {
 }
 
 type GlobalLocalCacheConfig = Partial<Record<MethodType, LocalCacheConfig>> | null;
-type CacheLoggerHandler<RC, RE, RH> = (
+type CacheLoggerHandler<S, E, RC, RE, RH> = (
   response: any,
-  methodInstance: Method<any, any, any, any, RC, RE, RH>,
+  methodInstance: Method<S, E, any, any, RC, RE, RH>,
   cacheMode: CacheMode,
   tag: DetailLocalCacheConfig['tag']
 ) => void | Promise<void>;
@@ -317,7 +317,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   /**
    * @deprecated 因单词拼写错误并计划废弃，建议使用responded字段
    */
-  responsed?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
+  responsed?: ResponsedHandler<S, E, RC, RE, RH> | ResponsedHandlerRecord<S, E, RC, RE, RH>;
 
   /**
    * 全局的响应钩子，可传一个也可以设置为带onSuccess和onError的对象，表示请求成功和请求错误的钩子
@@ -325,7 +325,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
    * @version 2.1.0
    */
-  responded?: ResponsedHandler<any, any, RC, RE, RH> | ResponsedHandlerRecord<any, any, RC, RE, RH>;
+  responded?: ResponsedHandler<S, E, RC, RE, RH> | ResponsedHandlerRecord<S, E, RC, RE, RH>;
 
   /**
    * 全局的共享请求开关
@@ -342,7 +342,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * @version 2.6.0
    * @default true
    */
-  errorLogger?: boolean | null | ResponseErrorHandler<any, any, RC, RE, RH>;
+  errorLogger?: boolean | null | ResponseErrorHandler<S, E, RC, RE, RH>;
 
   /**
    * 缓存日志打印
@@ -352,7 +352,7 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * @version 2.8.0
    * @default true
    */
-  cacheLogger?: boolean | null | CacheLoggerHandler<RC, RE, RH>;
+  cacheLogger?: boolean | null | CacheLoggerHandler<S, E, RC, RE, RH>;
 }
 
 /** 请求方法类型 */
@@ -758,13 +758,13 @@ declare function invalidateCache<S, E, R, T, RC, RE, RH>(
   matcher?: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
 ): void;
 
-interface updateOptions {
+interface UpdateOptions {
   onMatch?: (method: Method) => void;
 }
 declare function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
   handleUpdate: UpdateStateCollection<R>['data'] | UpdateStateCollection<R>,
-  options?: updateOptions
+  options?: UpdateOptions
 ): boolean;
 
 /** 设置缓存 */
