@@ -55,7 +55,7 @@ describe('useWatcher hook with svelte', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
       expect(mockSuccessFn).toHaveBeenCalledTimes(1);
-      expect(mockErrorFn).not.toBeCalled();
+      expect(mockErrorFn).not.toHaveBeenCalled();
       expect(screen.getByRole('error')).toHaveTextContent('');
     });
   });

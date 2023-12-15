@@ -149,7 +149,7 @@ describe('use useFetcher hook to fetch data', function () {
     expect(fetching.value).toBeFalsy();
     cacheData = getResponseCache(alova.id, key(Get1));
     expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 1 });
-    expect(mockFn).toBeCalled();
+    expect(mockFn).toHaveBeenCalled();
   });
 
   test('should returns a promise when call function fetch', async () => {

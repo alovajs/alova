@@ -5,7 +5,7 @@ import { getStateCache } from '@/storage/stateCache';
 import { getContext, getLocalCacheConfigParam, getOptions, isFn, key, noop } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
-import { MethodMatcher, updateOptions, UpdateStateCollection } from '~/typings';
+import { MethodMatcher, UpdateOptions, UpdateStateCollection } from '~/typings';
 
 /**
  * 更新对应method的状态
@@ -16,7 +16,7 @@ import { MethodMatcher, updateOptions, UpdateStateCollection } from '~/typings';
 export default function updateState<R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
   matcher: MethodMatcher<S, E, R, T, RC, RE, RH>,
   handleUpdate: ((data: R) => any) | UpdateStateCollection<R>,
-  options: updateOptions = {}
+  options: UpdateOptions = {}
 ) {
   const { onMatch = noop } = options,
     methodInstance = filterSnapshotMethods(matcher, falseValue);

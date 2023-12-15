@@ -2,7 +2,16 @@ import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from 
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { getConfig, getContextOptions, instanceOf, isPlainObject, key, noop } from './utils/helper';
-import { deleteAttr, falseValue, forEach, isArray, mapItem, promiseThen, undefinedValue } from './utils/variables';
+import {
+  deleteAttr,
+  falseValue,
+  forEach,
+  isArray,
+  mapItem,
+  promiseCatch,
+  promiseThen,
+  undefinedValue
+} from './utils/variables';
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -108,7 +117,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
    * @returns 返回一个完成回调的Promise
    */
   public catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null) {
-    return this.send().catch(onrejected);
+    return promiseCatch(this.send(), onrejected);
   }
 
   /**

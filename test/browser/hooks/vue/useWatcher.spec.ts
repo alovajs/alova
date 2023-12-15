@@ -158,7 +158,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
     expect(mockCallback).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
-    expect(mockErrorCallback).not.toBeCalled(); // unit-test-1s因为后面才响应，不会触发回调
+    expect(mockErrorCallback).not.toHaveBeenCalled(); // unit-test-1s因为后面才响应，不会触发回调
     expect(error.value).toBeUndefined(); // 对应的error也不会有值
   });
 
@@ -240,7 +240,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    expect(sendableFn).not.toBeCalled();
+    expect(sendableFn).not.toHaveBeenCalled();
 
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     await untilCbCalled(setTimeout, 10);
@@ -301,7 +301,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    expect(sendableFn).not.toBeCalled();
+    expect(sendableFn).not.toHaveBeenCalled();
 
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     await untilCbCalled(setTimeout, 10);
@@ -314,7 +314,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(1);
-    expect(mockCallback).not.toBeCalled();
+    expect(mockCallback).not.toHaveBeenCalled();
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
@@ -324,7 +324,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(2);
-    expect(mockCallback).not.toBeCalled();
+    expect(mockCallback).not.toHaveBeenCalled();
   });
 
   test('the loading state should be recovered to false when send request immediately', async () => {
@@ -507,7 +507,7 @@ describe('use useWatcher hook to send GET with vue', function () {
       expect(data.value).toBeUndefined();
       expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
-      expect(mockCallback).not.toBeCalled();
+      expect(mockCallback).not.toHaveBeenCalled();
     };
     mutateNum.value = 1;
     mutateStr.value = 'b';

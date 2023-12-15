@@ -224,7 +224,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
       expect(mockfn).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
-      expect(mockErrorfn).not.toBeCalled(); // unit-test-1s因为后面才响应，不会触发回调
+      expect(mockErrorfn).not.toHaveBeenCalled(); // unit-test-1s因为后面才响应，不会触发回调
       expect(screen.getByRole('error')).toHaveTextContent(''); // 对应的error也不会有值
     });
   });
@@ -429,7 +429,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('');
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
-      expect(mockfn).not.toBeCalled();
+      expect(mockfn).not.toHaveBeenCalled();
       expect(sendableFn).toHaveBeenCalledTimes(1);
     });
 
@@ -438,7 +438,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('');
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
-      expect(mockfn).not.toBeCalled();
+      expect(mockfn).not.toHaveBeenCalled();
       expect(sendableFn).toHaveBeenCalledTimes(2);
     });
   });
@@ -696,7 +696,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('');
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
-      expect(successMockFn).not.toBeCalled();
+      expect(successMockFn).not.toHaveBeenCalled();
     });
 
     await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
@@ -802,7 +802,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('');
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
-      expect(successMockFn).not.toBeCalled();
+      expect(successMockFn).not.toHaveBeenCalled();
     });
 
     await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求

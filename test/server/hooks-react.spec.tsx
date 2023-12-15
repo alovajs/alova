@@ -35,6 +35,6 @@ describe('[react]use hooks in SSR', function () {
 
     // 200ms后依然为请求前状态
     await untilCbCalled(setTimeout, 200);
-    expect(successMockFn).not.toBeCalled();
+    expect(successMockFn).not.toHaveBeenCalled();
   });
 });
