@@ -66,17 +66,19 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     memorize = _self,
     ref = val => ({ current: val })
   } = statesHook;
-  let initialLoading = falseValue;
+  let initialLoading = immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
   // 1. 在react下立即发送请求可以少渲染一次
   // 2. SSR渲染的html中，其初始视图为loading状态的，避免在客户端展现时的loading视图闪动
   if (immediate) {
-    const cachedResponse: R | undefined = getResponseCache(alovaInstance.id, key(getHandlerMethod(methodHandler))),
-      forceRequestFinally = sloughConfig(
-        (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
-      );
-    initialLoading = !!forceRequestFinally || !cachedResponse;
+    try {
+      const cachedResponse: R | undefined = getResponseCache(alovaInstance.id, key(getHandlerMethod(methodHandler))),
+        forceRequestFinally = sloughConfig(
+          (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
+        );
+      initialLoading = !!forceRequestFinally || !cachedResponse;
+    } catch (error) {}
   }
 
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig))),
