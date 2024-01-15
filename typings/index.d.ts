@@ -616,19 +616,13 @@ interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
  * alova useRequest/useWatcher中间件
  */
 interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH> {
-  (
-    context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>,
-    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
-  ): Promise<any>;
+  (context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
 }
 /**
  * alova useRequest/useWatcher中间件
  */
 interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH> {
-  (
-    context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>,
-    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
-  ): Promise<any>;
+  (context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
 }
 
 /** hook通用配置 */

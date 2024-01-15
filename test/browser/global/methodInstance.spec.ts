@@ -55,7 +55,7 @@ describe('method instance', function () {
     expect(data.params).toEqual({ a: 'a', b: 'str' });
   });
 
-  test('should emit onError event when `method.config.transformData` throws a error', async () => {
+  test('should emit onError event when `method.config.transformData` throws an error', async () => {
     const Get = (async = true) =>
       alova.Get('/unit-test', {
         transformData() {

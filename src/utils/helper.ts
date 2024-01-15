@@ -2,16 +2,15 @@ import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } 
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
-  JSONStringify,
-  MEMORY,
-  ObjectCls,
-  PromiseCls,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   clearTimeoutTimer,
   falseValue,
+  JSONStringify,
+  MEMORY,
   nullValue,
+  ObjectCls,
   setTimeoutFn,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   undefinedValue
 } from './variables';
 
@@ -197,21 +196,6 @@ export const noop = () => {},
     isFn(config) ? config(...args) : config,
   sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
     isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop,
-  /**
-   * 将targetFn转换为异步函数
-   * @param targetFn 目标函数
-   * @returns 异步函数
-   */
-  promisify =
-    <T extends any[], R>(targetFn: (...args: T) => R) =>
-    (...args: T) =>
-      newInstance(PromiseCls, (resolve, reject) => {
-        try {
-          resolve(targetFn(...args));
-        } catch (error) {
-          reject(error);
-        }
-      }),
   /**
    * 创建类实例
    * @param cls 构造函数
