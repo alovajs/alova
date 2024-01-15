@@ -287,14 +287,14 @@ type CacheLoggerHandler<S, E, RC, RE, RH> = (
  * RH(ResponseHeader): requestAdapter的响应头类型，自动推断
  */
 interface AlovaOptions<S, E, RC, RE, RH> {
+  /** base地址 */
+  baseURL?: string;
+
   /** 状态hook函数，用于定义和更新指定MVVM库的状态 */
-  statesHook: StatesHook<S, E>;
+  statesHook?: StatesHook<S, E>;
 
   /** 请求适配器 */
   requestAdapter: AlovaRequestAdapter<any, any, RC, RE, RH>;
-
-  /** base地址 */
-  baseURL?: string;
 
   /** 请求超时时间 */
   timeout?: number;
@@ -669,8 +669,8 @@ interface FetcherHookConfig extends UseHookConfig {
 
 /** 调用useFetcher时需要传入的类型，否则会导致状态类型错误 */
 type FetcherType<A extends Alova<any, any, any, any, any>> = {
-  state: ReturnType<A['options']['statesHook']['create']>;
-  export: ReturnType<A['options']['statesHook']['export']>;
+  state: ReturnType<NonNullable<A['options']['statesHook']>['create']>;
+  export: ReturnType<NonNullable<A['options']['statesHook']>['export']>;
 };
 
 /**

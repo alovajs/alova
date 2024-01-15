@@ -1,7 +1,15 @@
 import createHook from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
-import { debounce, getHandlerMethod, getStatesHook, isNumber, key, noop, sloughConfig, _self } from '@/utils/helper';
-import myAssert from '@/utils/myAssert';
+import {
+  debounce,
+  getHandlerMethod,
+  isNumber,
+  key,
+  noop,
+  promiseStatesHook,
+  sloughConfig,
+  _self
+} from '@/utils/helper';
 import {
   AlovaMethodHandler,
   CompleteHandler,
@@ -56,16 +64,15 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
   useHookConfig = { ...useHookConfig }; // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
-  const statesHook = getStatesHook(alovaInstance);
-  myAssert(!!statesHook, '`statesHook` is not found on alova instance.');
-  const {
-    create,
-    export: stateExport,
-    effectRequest,
-    update,
-    memorize = _self,
-    ref = val => ({ current: val })
-  } = statesHook;
+  const statesHook = promiseStatesHook(alovaInstance, 'useHooks'),
+    {
+      create,
+      export: stateExport,
+      effectRequest,
+      update,
+      memorize = _self,
+      ref = val => ({ current: val })
+    } = statesHook;
   let initialLoading = immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：

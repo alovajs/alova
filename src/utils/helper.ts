@@ -214,4 +214,9 @@ export const noop = () => {},
     error: frontStates.error,
     downloading: frontStates.downloading,
     uploading: frontStates.uploading
-  });
+  }),
+  promiseStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>, functionName = '') => {
+    const statesHook = getStatesHook(alovaInstance);
+    myAssert(!!statesHook, `can not call ${functionName} until set the \`statesHook\` at alova instance`);
+    return statesHook as NonNullable<typeof statesHook>;
+  };

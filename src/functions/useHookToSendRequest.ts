@@ -16,6 +16,7 @@ import {
   isFn,
   key,
   noop,
+  promiseStatesHook,
   sloughConfig,
   sloughFunction
 } from '@/utils/helper';
@@ -84,11 +85,13 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
     { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
       | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
       | FetcherHookConfig,
-    { id, options, storage } = getContext(methodInstance),
+    alovaInstance = getContext(methodInstance),
     {
-      statesHook: { update },
-      errorLogger
-    } = options,
+      id,
+      options: { errorLogger },
+      storage
+    } = alovaInstance,
+    { update } = promiseStatesHook(alovaInstance),
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = key(methodInstance),
     { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
