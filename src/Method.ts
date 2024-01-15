@@ -1,4 +1,4 @@
-import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '~/typings';
+import { AlovaMethodConfig, MethodRequestConfig, MethodType, ProgressHandler, RequestBody } from '~/typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { getConfig, getContextOptions, instanceOf, isPlainObject, key, noop } from './utils/helper';
@@ -10,8 +10,14 @@ import {
   mapItem,
   promiseCatch,
   promiseThen,
+  pushItem,
   undefinedValue
 } from './utils/variables';
+
+const offEventCallback = (offHandler: any, handlers: any[]) => () => {
+  const index = handlers.indexOf(offHandler);
+  index >= 0 && handlers.splice(index, 1);
+};
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -29,6 +35,8 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public hitSource?: (string | RegExp)[];
   public context: Alova<S, E, RC, RE, RH>;
   public response: R;
+  public dhs: ProgressHandler[] = [];
+  public uhs: ProgressHandler[] = [];
   public __key__?: string;
 
   // 直接发送请求的中断函数
@@ -84,10 +92,35 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   }
 
   /**
+   * 绑定下载进度回调函数
+   * @param progressHandler 下载进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  public onDownload(downloadHandler: ProgressHandler) {
+    pushItem(this.dhs, downloadHandler);
+    return offEventCallback(downloadHandler, this.dhs);
+  }
+
+  /**
+   * 绑定上传进度回调函数
+   * @param progressHandler 上传进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  public onUpload(uploadHandler: ProgressHandler) {
+    pushItem(this.uhs, uploadHandler);
+    return offEventCallback(uploadHandler, this.uhs);
+  }
+
+  /**
    * 通过method实例发送请求，返回promise对象
    */
   public send(forceRequest = falseValue): Promise<R> {
-    return sendRequest(this, forceRequest).response();
+    const ctrls = sendRequest(this, forceRequest);
+    ctrls.onDownload((loaded, total) => forEach(this.dhs, handler => handler({ loaded, total })));
+    ctrls.onUpload((loaded, total) => forEach(this.uhs, handler => handler({ loaded, total })));
+    return ctrls.response();
   }
 
   /**

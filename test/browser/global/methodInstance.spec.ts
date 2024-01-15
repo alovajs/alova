@@ -1,6 +1,8 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { useRequest } from '@/index';
+import { AlovaXHRAdapter, Result, getAlovaInstance, untilCbCalled } from '#/utils';
+import { createAlova, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
+import { xhrRequestAdapter } from '@alova/adapter-xhr';
+import { baseURL } from '~/test/mockServer';
 
 const alova = getAlovaInstance(VueHook, {
   responseExpect: r => r.json()
@@ -198,5 +200,28 @@ describe('method instance', function () {
     ).rejects.toThrow();
     expect(finallyMockFn).toHaveBeenCalledTimes(2);
     expect(finallyPromiseMockFn).toHaveBeenCalledTimes(2);
+  });
+
+  test('should download file and pass the right args', async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter() as AlovaXHRAdapter,
+      statesHook: VueHook,
+      responded: ({ data }) => data,
+      cacheLogger: null
+    });
+
+    const Get = alovaInst.Get('/unit-test-download', {
+      responseType: 'blob'
+    });
+
+    const downloadFn = jest.fn();
+    let progress = { total: 0, loaded: 0 };
+    Get.onDownload(p => {
+      downloadFn();
+      progress = p;
+    });
+    await Get;
+    expect(progress).toStrictEqual({ total: 451268, loaded: 451268 });
   });
 });

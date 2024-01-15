@@ -355,21 +355,60 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   cacheLogger?: boolean | null | CacheLoggerHandler<S, E, RC, RE, RH>;
 }
 
-/** 请求方法类型 */
+type ProgressHandler = (progress: Progress) => void;
+/**
+ * 请求方法类型
+ */
 interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
+  /**
+   * baseURL of alova instance
+   */
   baseURL: string;
+  /**
+   * 请求地址
+   */
   url: string;
+  /**
+   * 请求类型
+   */
   type: MethodType;
+  /**
+   * method配置
+   */
   config: MethodRequestConfig & AlovaMethodConfig<R, T, RC, RH>;
+  /**
+   * requestBody
+   */
   data?: RequestBody;
+  /**
+   * 缓存打击源
+   */
   hitSource?: (string | RegExp)[];
+  /**
+   * alova实例
+   */
   context: Alova<S, E, RC, RE, RH>;
+  /**
+   * 响应数据
+   */
   response: R;
 
   /**
    * 存储临时的key
    */
   __key__?: string;
+
+  /**
+   * 下载事件
+   * @version 2.17.0
+   */
+  dhs: ProgressHandler[];
+
+  /**
+   * 上传事件
+   * @version 2.17.0
+   */
+  uhs: ProgressHandler[];
 
   /**
    * 用于在全局的request和response钩子函数中传递额外信息所用
@@ -421,6 +460,22 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
    * @return 返回一个完成回调的Promise。
    */
   finally(onfinally?: (() => void) | undefined | null): Promise<R>;
+
+  /**
+   * 绑定下载进度回调函数
+   * @param progressHandler 下载进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  onDownload(progressHandler: ProgressHandler): () => void;
+
+  /**
+   * 绑定上传进度回调函数
+   * @param progressHandler 上传进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  onUpload(progressHandler: ProgressHandler): () => void;
 }
 interface MethodConstructor {
   new <S, E, R, T, RC, RE, RH>(
