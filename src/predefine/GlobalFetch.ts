@@ -1,11 +1,10 @@
 import alovaError from '@/utils/alovaError';
 import { isSpecialRequestBody, isString } from '@/utils/helper';
 import {
-  JSONStringify,
-  ObjectCls,
   clearTimeoutTimer,
   falseValue,
-  len,
+  JSONStringify,
+  ObjectCls,
   promiseReject,
   promiseThen,
   setTimeoutFn,
@@ -68,24 +67,27 @@ export default function GlobalFetch() {
         ),
       // 因nodeFetch库限制，这块代码无法进行单元测试，但已在浏览器中通过测试
       /* c8 ignore start */
-      onDownload: (cb: (total: number, loaded: number) => void) => {
-        promiseThen(fetchPromise, response => {
-          const { headers, body } = response.clone(),
-            reader = body?.getReader().read(),
-            total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
-          if (total <= 0) {
-            return;
-          }
-          let loaded = 0;
+      onDownload: async (cb: (total: number, loaded: number) => void) => {
+        const response = await fetchPromise;
+        const { headers, body } = response.clone(),
+          reader = body?.getReader(),
+          total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
+        if (total <= 0) {
+          return;
+        }
+        let loaded = 0;
+        if (reader) {
           const progressTimer = setInterval(() => {
-            reader &&
-              promiseThen(reader, ({ done, value = new Uint8Array() }) => {
-                done && clearInterval(progressTimer);
-                loaded += len(value);
+            promiseThen(reader.read(), ({ done, value = new Uint8Array() }) => {
+              if (done) {
+                clearInterval(progressTimer);
+              } else {
+                loaded += value.byteLength;
                 cb(total, loaded);
-              });
+              }
+            });
           }, 0);
-        });
+        }
       },
       /* c8 ignore start */
       abort: () => {

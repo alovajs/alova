@@ -1,4 +1,4 @@
-import { AlovaMethodConfig, MethodRequestConfig, MethodType, RequestBody } from '~/typings';
+import { AlovaMethodConfig, MethodRequestConfig, MethodType, ProgressHandler, RequestBody } from '~/typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
 import { getConfig, getContextOptions, instanceOf, isPlainObject, key, noop } from './utils/helper';
@@ -7,11 +7,19 @@ import {
   falseValue,
   forEach,
   isArray,
+  len,
   mapItem,
   promiseCatch,
+  promiseFinally,
   promiseThen,
+  pushItem,
   undefinedValue
 } from './utils/variables';
+
+const offEventCallback = (offHandler: any, handlers: any[]) => () => {
+  const index = handlers.indexOf(offHandler);
+  index >= 0 && handlers.splice(index, 1);
+};
 
 export const typeGet = 'GET';
 export const typeHead = 'HEAD';
@@ -28,11 +36,15 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public data?: RequestBody;
   public hitSource?: (string | RegExp)[];
   public context: Alova<S, E, RC, RE, RH>;
-  public response: R;
+  public dhs: ProgressHandler[] = [];
+  public uhs: ProgressHandler[] = [];
   public __key__?: string;
 
-  // 直接发送请求的中断函数
+  /**
+   * 请求中断函数，每次请求都会更新这个函数
+   */
   public abort = noop;
+  public fromCache: boolean | undefined = undefinedValue;
   constructor(
     type: MethodType,
     context: Alova<S, E, RC, RE, RH>,
@@ -84,10 +96,44 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   }
 
   /**
+   * 绑定下载进度回调函数
+   * @param progressHandler 下载进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  public onDownload(downloadHandler: ProgressHandler) {
+    pushItem(this.dhs, downloadHandler);
+    return offEventCallback(downloadHandler, this.dhs);
+  }
+
+  /**
+   * 绑定上传进度回调函数
+   * @param progressHandler 上传进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  public onUpload(uploadHandler: ProgressHandler) {
+    pushItem(this.uhs, uploadHandler);
+    return offEventCallback(uploadHandler, this.uhs);
+  }
+
+  /**
    * 通过method实例发送请求，返回promise对象
    */
   public send(forceRequest = falseValue): Promise<R> {
-    return sendRequest(this, forceRequest).response();
+    const instance = this,
+      { response, onDownload, onUpload, abort, fromCache } = sendRequest(instance, forceRequest);
+    len(instance.dhs) > 0 &&
+      onDownload((total, loaded) => forEach(instance.dhs, handler => handler({ total, loaded })));
+    len(instance.uhs) > 0 && onUpload((total, loaded) => forEach(instance.uhs, handler => handler({ total, loaded })));
+
+    // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
+    instance.abort = abort;
+    instance.fromCache = undefinedValue;
+    return promiseThen(response(), r => {
+      instance.fromCache = fromCache();
+      return r;
+    });
   }
 
   /**
@@ -126,6 +172,6 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
    * @return 返回一个完成回调的Promise。
    */
   public finally(onfinally?: (() => void) | undefined | null) {
-    return this.send().finally(onfinally);
+    return promiseFinally(this.send(), onfinally);
   }
 }

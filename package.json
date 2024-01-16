@@ -37,6 +37,7 @@
     "lint": "eslint --ext .ts,.js src",
     "lint:fix": "npm run lint -- --fix",
     "build:esm": "rollup -c config/rollup.config.esm.cjs",
+    "build:cjs": "rollup -c config/rollup.config.cjs",
     "build:umd": "cross-env rollup -c config/rollup.config.umd.cjs",
     "build:umd.min": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.cjs",
     "build:vuehook:esm": "cross-env MODULE=vue rollup -c config/rollup.config.esm.cjs",
@@ -49,10 +50,11 @@
     "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
     "build:sveltehook:esm": "cross-env MODULE=svelte rollup -c config/rollup.config.esm.cjs",
     "build:globalfetch:esm": "cross-env MODULE=globalFetch rollup -c config/rollup.config.esm.cjs",
+    "build:globalfetch:cjs": "cross-env MODULE=globalFetch rollup -c config/rollup.config.cjs",
     "build:globalfetch:umd": "cross-env MODULE=globalFetch rollup -c config/rollup.config.umd.cjs",
     "build:globalfetch:umd.min": "cross-env NODE_ENV=production MODULE=globalFetch rollup -c config/rollup.config.umd.cjs",
-    "build:globalfetch": "npm run build:globalfetch:esm && npm run build:globalfetch:umd && npm run build:globalfetch:umd.min",
-    "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook:esm && npm run build:globalfetch",
+    "build:globalfetch": "npm run build:globalfetch:esm && npm run build:globalfetch:cjs && npm run build:globalfetch:umd && npm run build:globalfetch:umd.min",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook:esm && npm run build:globalfetch",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
@@ -78,6 +80,7 @@
   "exports": {
     ".": {
       "types": "./typings/index.d.ts",
+      "require": "./dist/alova.common.cjs",
       "default": "./dist/alova.esm.js"
     },
     "./vue": {
@@ -94,6 +97,7 @@
     },
     "./GlobalFetch": {
       "types": "./typings/globalfetch.d.ts",
+      "require": "./dist/adapter/globalfetch.common.cjs",
       "default": "./dist/adapter/globalfetch.esm.js"
     }
   },
@@ -114,7 +118,6 @@
     }
   },
   "devDependencies": {
-    "@alova/adapter-xhr": "1.0.0",
     "@babel/core": "^7.18.2",
     "@commitlint/cli": "^17.2.0",
     "@commitlint/config-conventional": "^17.2.0",

@@ -1,14 +1,14 @@
-import { AlovaXHRAdapter, getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import xhrRequestAdapter from '#/xhrRequestAdapter';
 import { createAlova, Method, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
-import { xhrRequestAdapter } from '@alova/adapter-xhr';
 import { baseURL } from '~/test/mockServer';
 
 // 其他请求方式测试
 describe('Test other methods without GET', function () {
-  test("should throws a throw when hook handler didn't get a method instance", () => {
+  test("should throws an error when hook handler didn't get a method instance", () => {
     getAlovaInstance(VueHook);
     const errMsg = '[alova]hook handler must be a method instance or a function that returns method instance';
     expect(() => {
@@ -31,10 +31,10 @@ describe('Test other methods without GET', function () {
         expect(method).toBeInstanceOf(Method);
         const config = method.config;
         expect(method.url).toBe('/unit-test');
-        expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.data).toEqual({ post1: 'a' });
+        expect(config.params).toStrictEqual({ a: 'a', b: 'str' });
+        expect(method.data).toStrictEqual({ post1: 'a' });
         (method.data as Record<string, any>).post2 = 'b';
-        expect(config.headers).toEqual({
+        expect(config.headers).toStrictEqual({
           'Content-Type': 'application/json'
         });
         expect(config.timeout).toBe(10000);
@@ -44,8 +44,8 @@ describe('Test other methods without GET', function () {
         const res = await r.json();
         const { data } = res;
         expect(data.path).toBe('/unit-test');
-        expect(data.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(data.params).toEqual({ a: 'a', b: 'str' });
+        expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
+        expect(data.params).toStrictEqual({ a: 'a', b: 'str' });
         return res;
       }
     });
@@ -61,8 +61,8 @@ describe('Test other methods without GET', function () {
         transformData({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
-          expect(data.params).toEqual({ a: 'a', b: 'str' });
-          expect(data.data).toEqual({ post1: 'a', post2: 'b' });
+          expect(data.params).toStrictEqual({ a: 'a', b: 'str' });
+          expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
           return data;
         },
         localCache: {
@@ -79,8 +79,8 @@ describe('Test other methods without GET', function () {
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
-    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-    expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
+    expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
+    expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
     expect(error.value).toBeUndefined();
 
     // 缓存有值
@@ -93,10 +93,10 @@ describe('Test other methods without GET', function () {
       beforeRequestExpect: method => {
         const config = method.config;
         expect(method.url).toBe('/unit-test');
-        expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.data).toEqual({ post1: 'a' });
+        expect(config.params).toStrictEqual({ a: 'a', b: 'str' });
+        expect(method.data).toStrictEqual({ post1: 'a' });
         (method.data as Record<string, any>).post2 = 'b';
-        expect(config.headers).toEqual({
+        expect(config.headers).toStrictEqual({
           'Content-Type': 'application/json'
         });
         expect(config.timeout).toBe(10000);
@@ -105,8 +105,8 @@ describe('Test other methods without GET', function () {
         const res = await r.json();
         const { data } = res;
         expect(data.path).toBe('/unit-test');
-        expect(data.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(data.params).toEqual({ a: 'a', b: 'str' });
+        expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
+        expect(data.params).toStrictEqual({ a: 'a', b: 'str' });
         return res;
       }
     });
@@ -122,8 +122,8 @@ describe('Test other methods without GET', function () {
         transformData({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
-          expect(data.params).toEqual({ a: 'a', b: 'str' });
-          expect(data.data).toEqual({ post1: 'a', post2: 'b' });
+          expect(data.params).toStrictEqual({ a: 'a', b: 'str' });
+          expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
           return data;
         },
         localCache: 100 * 1000
@@ -132,15 +132,15 @@ describe('Test other methods without GET', function () {
     const { loading, data, downloading, error, onSuccess } = useRequest(Delete);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
-    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-    expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
+    expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 缓存有值
@@ -153,10 +153,10 @@ describe('Test other methods without GET', function () {
       beforeRequestExpect: method => {
         const config = method.config;
         expect(method.url).toBe('/unit-test?c=3');
-        expect(config.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.data).toEqual({ post1: 'a' });
+        expect(config.params).toStrictEqual({ a: 'a', b: 'str' });
+        expect(method.data).toStrictEqual({ post1: 'a' });
         (method.data as Record<string, any>).post2 = 'b';
-        expect(config.headers).toEqual({
+        expect(config.headers).toStrictEqual({
           'Content-Type': 'application/json'
         });
         expect(config.timeout).toBe(10000);
@@ -165,8 +165,8 @@ describe('Test other methods without GET', function () {
         const res = await r.json();
         const { data } = res;
         expect(data.path).toBe('/unit-test');
-        expect(data.data).toEqual({ post1: 'a', post2: 'b' });
-        expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
+        expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
+        expect(data.params).toStrictEqual({ a: 'a', b: 'str', c: '3' });
         return res;
       }
     });
@@ -182,8 +182,8 @@ describe('Test other methods without GET', function () {
         transformData({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
-          expect(data.params).toEqual({ a: 'a', b: 'str', c: '3' });
-          expect(data.data).toEqual({ post1: 'a', post2: 'b' });
+          expect(data.params).toStrictEqual({ a: 'a', b: 'str', c: '3' });
+          expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
           return data;
         },
         localCache: 100 * 1000
@@ -192,15 +192,15 @@ describe('Test other methods without GET', function () {
     const { loading, data, downloading, error, onSuccess } = useRequest(Put);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
-    expect(data.value.params).toEqual({ a: 'a', b: 'str', c: '3' });
-    expect(data.value.data).toEqual({ post1: 'a', post2: 'b' });
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(data.value.params).toStrictEqual({ a: 'a', b: 'str', c: '3' });
+    expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 缓存有值
@@ -230,13 +230,13 @@ describe('Test other methods without GET', function () {
 
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
-    expect(data.value).toEqual({});
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(data.value).toStrictEqual({});
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, key(Head));
@@ -264,13 +264,13 @@ describe('Test other methods without GET', function () {
     const { loading, data, downloading, error, onSuccess } = useRequest(Options);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
-    expect(data.value).toEqual({});
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(data.value).toStrictEqual({});
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, key(Options));
@@ -302,15 +302,15 @@ describe('Test other methods without GET', function () {
     const { loading, data, downloading, error, onSuccess } = useRequest(Patch);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
-    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
-    expect(data.value.data).toEqual({ patch1: 'p' });
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
+    expect(data.value.data).toStrictEqual({ patch1: 'p' });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, key(Patch));
@@ -320,7 +320,7 @@ describe('Test other methods without GET', function () {
   test('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter() as AlovaXHRAdapter,
+      requestAdapter: xhrRequestAdapter,
       statesHook: VueHook,
       responded({ data }) {
         return data;
@@ -337,13 +337,17 @@ describe('Test other methods without GET', function () {
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeInstanceOf(Blob);
-    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
-    expect(downloading.value).toEqual({ total: 451268, loaded: 451268 });
+    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 451268, loaded: 451268 });
     expect(error.value).toBeUndefined();
+
+    // 上传/下载回调解绑会在事件响应后触发，所以等10ms再验证是否解绑
+    await untilCbCalled(setTimeout, 10);
+    expect(Get.dhs).toHaveLength(0);
 
     // 有缓存的情况下，不再有下载信息
     const { downloading: downloading2, onSuccess: onSuccess2 } = useRequest(Get);
     await untilCbCalled(onSuccess2);
-    expect(downloading2.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading2.value).toStrictEqual({ total: 0, loaded: 0 });
   });
 });

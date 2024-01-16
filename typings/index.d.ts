@@ -176,10 +176,7 @@ type ResponsedHandlerRecord<S, E, RC, RE, RH> = {
 type HookType = 1 | 2 | 3;
 interface Hook {
   /** 最后一次请求的method实例 */
-  m: any;
-
-  /** abortRequest */
-  ar: () => void;
+  m: Method;
 
   /** saveStatesFns */
   sf: ((frontStates: FrontRequestState) => void)[];
@@ -287,14 +284,14 @@ type CacheLoggerHandler<S, E, RC, RE, RH> = (
  * RH(ResponseHeader): requestAdapter的响应头类型，自动推断
  */
 interface AlovaOptions<S, E, RC, RE, RH> {
+  /** base地址 */
+  baseURL?: string;
+
   /** 状态hook函数，用于定义和更新指定MVVM库的状态 */
-  statesHook: StatesHook<S, E>;
+  statesHook?: StatesHook<S, E>;
 
   /** 请求适配器 */
   requestAdapter: AlovaRequestAdapter<any, any, RC, RE, RH>;
-
-  /** base地址 */
-  baseURL?: string;
 
   /** 请求超时时间 */
   timeout?: number;
@@ -355,21 +352,62 @@ interface AlovaOptions<S, E, RC, RE, RH> {
   cacheLogger?: boolean | null | CacheLoggerHandler<S, E, RC, RE, RH>;
 }
 
-/** 请求方法类型 */
+type ProgressHandler = (progress: Progress) => void;
+/**
+ * 请求方法类型
+ */
 interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
+  /**
+   * baseURL of alova instance
+   */
   baseURL: string;
+  /**
+   * 请求地址
+   */
   url: string;
+  /**
+   * 请求类型
+   */
   type: MethodType;
+  /**
+   * method配置
+   */
   config: MethodRequestConfig & AlovaMethodConfig<R, T, RC, RH>;
+  /**
+   * requestBody
+   */
   data?: RequestBody;
+  /**
+   * 缓存打击源
+   */
   hitSource?: (string | RegExp)[];
+  /**
+   * alova实例
+   */
   context: Alova<S, E, RC, RE, RH>;
-  response: R;
 
   /**
    * 存储临时的key
    */
   __key__?: string;
+
+  /**
+   * 下载事件
+   * @version 2.17.0
+   */
+  dhs: ProgressHandler[];
+
+  /**
+   * 上传事件
+   * @version 2.17.0
+   */
+  uhs: ProgressHandler[];
+
+  /**
+   * 本次响应数据是否来自缓存
+   * @version 2.17.0
+   */
+  fromCache: boolean | undefined;
 
   /**
    * 用于在全局的request和response钩子函数中传递额外信息所用
@@ -421,6 +459,22 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
    * @return 返回一个完成回调的Promise。
    */
   finally(onfinally?: (() => void) | undefined | null): Promise<R>;
+
+  /**
+   * 绑定下载进度回调函数
+   * @param progressHandler 下载进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  onDownload(progressHandler: ProgressHandler): () => void;
+
+  /**
+   * 绑定上传进度回调函数
+   * @param progressHandler 上传进度回调函数
+   * @version 2.17.0
+   * @return 解绑函数
+   */
+  onUpload(progressHandler: ProgressHandler): () => void;
 }
 interface MethodConstructor {
   new <S, E, R, T, RC, RE, RH>(
@@ -616,19 +670,13 @@ interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
  * alova useRequest/useWatcher中间件
  */
 interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH> {
-  (
-    context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>,
-    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
-  ): Promise<any>;
+  (context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
 }
 /**
  * alova useRequest/useWatcher中间件
  */
 interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH> {
-  (
-    context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>,
-    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
-  ): Promise<any>;
+  (context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
 }
 
 /** hook通用配置 */
@@ -675,8 +723,8 @@ interface FetcherHookConfig extends UseHookConfig {
 
 /** 调用useFetcher时需要传入的类型，否则会导致状态类型错误 */
 type FetcherType<A extends Alova<any, any, any, any, any>> = {
-  state: ReturnType<A['options']['statesHook']['create']>;
-  export: ReturnType<A['options']['statesHook']['export']>;
+  state: ReturnType<NonNullable<A['options']['statesHook']>['create']>;
+  export: ReturnType<NonNullable<A['options']['statesHook']>['export']>;
 };
 
 /**
@@ -741,8 +789,8 @@ type UpdateStateCollection<R> = {
 type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 
 // ************ 导出类型 ***************
-export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
-export declare function useRequest<S, E, R, T, RC, RE, RH>(
+declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
+declare function useRequest<S, E, R, T, RC, RE, RH>(
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;

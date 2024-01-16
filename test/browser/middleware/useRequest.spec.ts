@@ -3,7 +3,7 @@ import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 
 describe('useRequet middleware', function () {
-  test('middleware function must be set with a async function', async () => {
+  test('middleware function can set with a common function', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -11,14 +11,15 @@ describe('useRequet middleware', function () {
       transformData: ({ data }: Result<true>) => data
     });
 
-    expect(() => {
-      useRequest(getGetterObj, {
-        middleware: ((context: any, next: any) => {
-          expect(context.method).toBe(getGetterObj);
-          next();
-        }) as any
-      });
-    }).toThrowError();
+    const { loading, onSuccess } = useRequest(getGetterObj, {
+      middleware: (context: any, next: any) => {
+        expect(context.method).toBe(getGetterObj);
+        next();
+      }
+    });
+    const { data: rawData } = await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(!!rawData).toBeTruthy();
   });
 
   test('the behavior would be the same as the behavior not set middleware', async () => {
@@ -33,7 +34,7 @@ describe('useRequet middleware', function () {
     });
 
     expect(loading.value).toBeTruthy();
-    const rawData = await untilCbCalled(onSuccess);
+    const { data: rawData } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(!!rawData).toBeTruthy();
   });

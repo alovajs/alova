@@ -7,5 +7,5 @@ export type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
  */
 export type GlobalFetchRequestAdapter = AlovaRequestAdapter<any, any, FetchRequestInit, Response, Headers>;
 
-declare function GlobalFetch(): GlobalFetchRequestAdapter;
-export default GlobalFetch;
+function GlobalFetch(): GlobalFetchRequestAdapter;
+export = GlobalFetch;
