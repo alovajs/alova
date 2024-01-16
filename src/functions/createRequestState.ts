@@ -174,7 +174,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       }
       update(newStates, frontStates, hookInstance);
     }),
-    abort: memorize(() => hookInstance.ar(), trueValue),
+    abort: memorize(() => hookInstance.m.abort(), trueValue),
 
     /**
      * 通过执行该方法来手动发起请求

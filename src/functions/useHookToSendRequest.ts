@@ -50,10 +50,10 @@ import {
   FrontRequestHookConfig,
   FrontRequestState,
   Hook,
+  Progress,
   SuccessHandler,
   WatcherHookConfig
 } from '~/typings';
-import sendRequest from './sendRequest';
 
 /**
  * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
@@ -73,6 +73,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
   sendCallingArgs: any[] = [],
   isFetcher = falseValue
 ) {
+  let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
   const {
       fs: frontStates,
       sh: successHandlers,
@@ -81,7 +82,6 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       ht,
       c: useHookConfig
     } = hookInstance,
-    methodInstance = getHandlerMethod(methodHandler, sendCallingArgs),
     { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
       | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
       | FetcherHookConfig,
@@ -115,6 +115,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       cachedResponse: R | undefined = getResponseCache(id, methodKey),
       isNextCalled = falseValue,
       responseHandlePromise = promiseResolve<any>(undefinedValue),
+      offDownloadEvent = noop,
+      offUploadEvent = noop,
       fromCache = () => !!cachedResponse,
       // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
       controlledLoading = falseValue;
@@ -155,35 +157,34 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
           guardNextConfig || {},
         forceRequestFinally = sloughConfig(guardNextForceRequest, sendCallingArgs),
-        requestCtrl = sendRequest(guardNextReplacingMethod, forceRequestFinally),
-        { response, onDownload = noop, onUpload = noop, fromCache: getFromCacheValue, abort } = requestCtrl,
-        progressUpdater = (stage: 'downloading' | 'uploading') => (loaded: number, total: number) => {
-          update(
-            {
-              [stage]: {
-                loaded,
-                total
-              }
-            },
-            frontStates,
-            hookInstance
-          );
-        };
+        progressUpdater =
+          (stage: 'downloading' | 'uploading') =>
+          ({ loaded, total }: Progress) =>
+            update(
+              {
+                [stage]: {
+                  loaded,
+                  total
+                }
+              },
+              frontStates,
+              hookInstance
+            );
 
+      methodInstance = guardNextReplacingMethod;
       // 每次发送请求都需要保存最新的控制器
       pushItem(hookInstance.sf, saveStates);
       pushItem(hookInstance.rf, removeStates);
-      hookInstance.ar = abort;
-      fromCache = getFromCacheValue;
 
       // loading状态受控时将不更改loading
       // 命中缓存，或强制请求时需要设置loading为true
       !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse }, frontStates, hookInstance);
 
-      responseHandlePromise = response();
       const { enableDownload, enableUpload } = getConfig(methodInstance);
-      enableDownload && onDownload(progressUpdater('downloading'));
-      enableUpload && onUpload(progressUpdater('uploading'));
+      offDownloadEvent = enableDownload ? methodInstance.onDownload(progressUpdater('downloading')) : offDownloadEvent;
+      offUploadEvent = enableUpload ? methodInstance.onUpload(progressUpdater('uploading')) : offUploadEvent;
+      responseHandlePromise = methodInstance.send(forceRequestFinally);
+      fromCache = () => methodInstance.fromCache || falseValue;
       return responseHandlePromise;
     };
 
@@ -217,7 +218,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         method: methodInstance,
         cachedResponse,
         config: useHookConfig,
-        abort: () => hookInstance.ar(),
+        abort: () => methodInstance.abort(),
         decorateSuccess(decorator: NonNullable<typeof successHandlerDecorator>) {
           isFn(decorator) && (successHandlerDecorator = decorator);
         },
@@ -340,6 +341,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       }
       throw error;
     }
+    // 响应后解绑下载和上传事件
+    offDownloadEvent();
+    offUploadEvent();
     return finallyResponse;
   })();
 }

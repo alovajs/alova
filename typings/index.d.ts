@@ -176,10 +176,7 @@ type ResponsedHandlerRecord<S, E, RC, RE, RH> = {
 type HookType = 1 | 2 | 3;
 interface Hook {
   /** 最后一次请求的method实例 */
-  m: any;
-
-  /** abortRequest */
-  ar: () => void;
+  m: Method;
 
   /** saveStatesFns */
   sf: ((frontStates: FrontRequestState) => void)[];
@@ -388,10 +385,6 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
    * alova实例
    */
   context: Alova<S, E, RC, RE, RH>;
-  /**
-   * 响应数据
-   */
-  response: R;
 
   /**
    * 存储临时的key
@@ -409,6 +402,12 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
    * @version 2.17.0
    */
   uhs: ProgressHandler[];
+
+  /**
+   * 本次响应数据是否来自缓存
+   * @version 2.17.0
+   */
+  fromCache: boolean | undefined;
 
   /**
    * 用于在全局的request和response钩子函数中传递额外信息所用
@@ -790,8 +789,8 @@ type UpdateStateCollection<R> = {
 type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 
 // ************ 导出类型 ***************
-export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
-export declare function useRequest<S, E, R, T, RC, RE, RH>(
+declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>): Alova<S, E, RC, RE, RH>;
+declare function useRequest<S, E, R, T, RC, RE, RH>(
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;

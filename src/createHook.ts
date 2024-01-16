@@ -1,14 +1,11 @@
 import { FrontRequestState, Hook, HookType, UseHookConfig } from '~/typings';
-import { noop } from './utils/helper';
+import { Method } from '.';
 import { undefinedValue } from './utils/variables';
 
 export default (ht: HookType, c: UseHookConfig) =>
   ({
     /** 最后一次请求的method实例 */
-    m: undefinedValue,
-
-    /** abortRequest */
-    ar: noop,
+    m: undefinedValue as unknown as Method,
 
     /** saveStatesFns */
     sf: [],

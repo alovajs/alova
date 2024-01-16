@@ -34,6 +34,7 @@ import {
   mapItem,
   objectKeys,
   PromiseCls,
+  promiseFinally,
   promiseThen,
   trueValue,
   undefinedValue
@@ -88,16 +89,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
   const requestAdapterCtrlsPromise = newInstance(PromiseCls, resolve => {
       requestAdapterCtrlsPromiseResolveFn = resolve;
     }) as Promise<RequestAdapterReturnType | undefined>,
-    // 请求中断函数
-    abort = () => {
-      promiseThen(
-        requestAdapterCtrlsPromise,
-        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
-      );
-    },
     response = async () => {
-      // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
-      methodInstance.abort = abort;
       const {
           beforeRequest = noop,
           responsed,
@@ -225,25 +217,34 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         return transformedData;
       };
 
-      return promiseThen(
-        PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()]),
-        ([rawResponse, headers]) => handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), headers),
-        (error: any) => {
-          if (!isFn(responseErrorHandler)) {
-            throw error;
+      return promiseFinally(
+        promiseThen(
+          PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()]),
+          ([rawResponse, headers]) => handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), headers),
+          (error: any) => {
+            if (!isFn(responseErrorHandler)) {
+              throw error;
+            }
+            // 响应错误时，如果未抛出错误也将会处理响应成功的流程，但不缓存数据
+            return handleResponseTask(responseErrorHandler(error, clonedMethod));
           }
-          // 响应错误时，如果未抛出错误也将会处理响应成功的流程，但不缓存数据
-          return handleResponseTask(responseErrorHandler(error, clonedMethod));
+        ),
+        () => {
+          // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
+          deleteAttr(namespacedAdapterReturnMap, methodKey);
+          responseCompleteHandler(clonedMethod);
         }
-      ).finally(() => {
-        // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
-        deleteAttr(namespacedAdapterReturnMap, methodKey);
-        responseCompleteHandler(clonedMethod);
-      });
+      );
     };
 
   return {
-    abort,
+    // 请求中断函数
+    abort: () => {
+      promiseThen(
+        requestAdapterCtrlsPromise,
+        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
+      );
+    },
     onDownload: (handler: ProgressUpdater) => {
       promiseThen(
         requestAdapterCtrlsPromise,

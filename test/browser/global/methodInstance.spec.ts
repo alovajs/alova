@@ -1,7 +1,9 @@
-import { AlovaXHRAdapter, Result, getAlovaInstance, untilCbCalled } from '#/utils';
+import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import xhrRequestAdapter from '#/xhrRequestAdapter';
 import { createAlova, useRequest } from '@/index';
+import GlobalFetch from '@/predefine/GlobalFetch';
 import VueHook from '@/predefine/VueHook';
-import { xhrRequestAdapter } from '@alova/adapter-xhr';
+import { alovas } from '@/utils/variables';
 import { baseURL } from '~/test/mockServer';
 
 const alova = getAlovaInstance(VueHook, {
@@ -9,6 +11,14 @@ const alova = getAlovaInstance(VueHook, {
 });
 describe('method instance', function () {
   test('should send request when call `method.send` and return promise', async () => {
+    // 先清空下已创建的alova实例缓存，否则会报错
+    const alovasCloned = [...alovas];
+    alovas.splice(0, alovas.length);
+    const alova = createAlova({
+      baseURL,
+      requestAdapter: GlobalFetch(),
+      responded: response => response.json()
+    });
     const Get1 = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
@@ -36,6 +46,24 @@ describe('method instance', function () {
       }
     });
     await expect(Get2.send()).rejects.toThrow();
+    alovas.splice(0, alovasCloned.length, ...alovasCloned); // 恢复alovas实例
+  });
+
+  test('fromCache should be true when request with cache', async () => {
+    const Get1 = alova.Get('/unit-test', {
+      params: { aa1: 'aa1', b: 'str' },
+      timeout: 10000,
+      transformData(result: Result) {
+        return result.data;
+      },
+      localCache: 100 * 1000
+    });
+
+    await Get1;
+    expect(Get1.fromCache).toBeFalsy();
+
+    await Get1;
+    expect(Get1.fromCache).toBeTruthy();
   });
 
   test('`method.config.transformData` can also support async function', async () => {
@@ -112,6 +140,7 @@ describe('method instance', function () {
       responseExpect: r => r.json()
     }).Get('/unit-test');
     await expect(Get.send(true)).rejects.toThrow('[alova]The user aborted a request.');
+    expect(Get.fromCache).toBeFalsy();
   });
 
   test('should receive method metadata', async () => {
@@ -205,7 +234,7 @@ describe('method instance', function () {
   test('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter() as AlovaXHRAdapter,
+      requestAdapter: xhrRequestAdapter,
       statesHook: VueHook,
       responded: ({ data }) => data,
       cacheLogger: null
@@ -215,13 +244,14 @@ describe('method instance', function () {
       responseType: 'blob'
     });
 
-    const downloadFn = jest.fn();
     let progress = { total: 0, loaded: 0 };
-    Get.onDownload(p => {
-      downloadFn();
+    const offEvent = Get.onDownload(p => {
       progress = p;
     });
     await Get;
     expect(progress).toStrictEqual({ total: 451268, loaded: 451268 });
+    expect(Get.dhs).toHaveLength(1);
+    offEvent();
+    expect(Get.dhs).toHaveLength(0);
   });
 });
