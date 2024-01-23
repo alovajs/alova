@@ -89,6 +89,12 @@ alova 还属于新秀，它依然还有很长一段路需要走，现在参与�
 
 [前往 GitHub 上查看 alovajs 的所有 Changelog](https://github.com/alovajs/alova/releases)
 
+## Contributors
+
+<a href="https://github.com/alovajs/alova/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=alovajs/alova&max=30&columns=10" />
+</a>
+
 ## LICENSE
 
 [MIT](https://en.wikipedia.org/wiki/MIT_License)
