@@ -88,6 +88,12 @@ Contributing effectively will let you win some fame of alova community. Before p
 
 [View all Changelog of alovajs on GitHub](https://github.com/alovajs/alova/releases)
 
+## Contributors
+
+<a href="https://github.com/alovajs/alova/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=alovajs/alova&max=30&columns=10" />
+</a>
+
 ## LICENSE
 
 [MIT](https://en.wikipedia.org/wiki/MIT_License)
