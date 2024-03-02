@@ -533,6 +533,8 @@ describe('createAlova', function () {
     expect(customLoggerMockFn).toHaveBeenCalledTimes(3);
   });
 
+  const groupCollapsed = console.groupCollapsed;
+  const groupEnd = console.groupEnd;
   test('should print cache hit message defaultly when hit response cache', async () => {
     const logConsoleMockFn = jest.fn();
     console.log = logConsoleMockFn; // 重写以便监听
@@ -554,16 +556,16 @@ describe('createAlova', function () {
     await untilCbCalled(state2.onSuccess);
     expect(logConsoleMockFn).toHaveBeenCalledTimes(3); // 每次缓存会调用3次console.log
     const calls1 = logConsoleMockFn.mock.calls.slice(0);
-    expect(calls1[0][0]).toBe('%c[Mode]');
-    expect(calls1[0][2]).toBe('memory');
-    expect(calls1[1][0]).toBe('%c[Method]');
-    expect(calls1[1][2]).toBeInstanceOf(Method);
-    expect(calls1[2][0]).toBe('%c[Cache]');
-    expect(calls1[2][2]).toStrictEqual({
+    expect(calls1[0][0]).toBe('%c[Cache]');
+    expect(calls1[0][2]).toStrictEqual({
       method: 'GET',
       params: {},
       path: '/unit-test'
     });
+    expect(calls1[1][0]).toBe('%c[Mode]');
+    expect(calls1[1][2]).toBe('memory');
+    expect(calls1[2][0]).toBe('%c[Method]');
+    expect(calls1[2][2]).toBeInstanceOf(Method);
 
     const getter2 = alova1.Get('/unit-test', {
       params: { restore: '1' },
@@ -581,20 +583,46 @@ describe('createAlova', function () {
     await untilCbCalled(state4.onSuccess);
     expect(logConsoleMockFn).toHaveBeenCalledTimes(7); // restore缓存还会打印tag
     const calls2 = logConsoleMockFn.mock.calls.slice(3);
-    expect(calls2[0][0]).toBe('%c[Mode]');
-    expect(calls2[0][2]).toBe('restore');
-    expect(calls2[1][0]).toBe('%c[Tag]');
-    expect(calls2[1][2]).toBe('v1');
-    expect(calls2[2][0]).toBe('%c[Method]');
-    expect(calls2[2][2]).toBeInstanceOf(Method);
-    expect(calls2[3][0]).toBe('%c[Cache]');
-    expect(calls2[3][2]).toStrictEqual({
+    expect(calls2[0][0]).toBe('%c[Cache]');
+    expect(calls2[0][2]).toStrictEqual({
       method: 'GET',
       params: {
         restore: '1'
       },
       path: '/unit-test'
     });
+    expect(calls2[1][0]).toBe('%c[Mode]');
+    expect(calls2[1][2]).toBe('restore');
+    expect(calls2[2][0]).toBe('%c[Tag]');
+    expect(calls2[2][2]).toBe('v1');
+    expect(calls2[3][0]).toBe('%c[Method]');
+    expect(calls2[3][2]).toBeInstanceOf(Method);
+
+    // 当console.groupCollapsed为空时将以另一种形式打印
+    (console as any).groupCollapsed = (console as any).groupEnd = undefined;
+    const state5 = useRequest(getter2);
+    await untilCbCalled(state5.onSuccess);
+    expect(logConsoleMockFn).toHaveBeenCalledTimes(13);
+    const calls3 = logConsoleMockFn.mock.calls.slice(7);
+    const startSep = ` [HitCache]${getter2.url} `;
+    expect(calls3[0][1]).toBe(startSep);
+    expect(calls3[1][0]).toBe('%c[Cache]');
+    expect(calls3[1][2]).toStrictEqual({
+      method: 'GET',
+      params: {
+        restore: '1'
+      },
+      path: '/unit-test'
+    });
+    expect(calls3[2][0]).toBe('%c[Mode]');
+    expect(calls3[2][2]).toBe('restore');
+    expect(calls3[3][0]).toBe('%c[Tag]');
+    expect(calls3[3][2]).toBe('v1');
+    expect(calls3[4][0]).toBe('%c[Method]');
+    expect(calls3[4][2]).toBeInstanceOf(Method);
+    expect(calls3[5][1]).toBe(Array(startSep.length + 1).join('^'));
+    console.groupCollapsed = groupCollapsed;
+    console.groupEnd = groupEnd;
   });
 
   test("shouldn't print cache hit message when set cacheLogger to false or null", async () => {

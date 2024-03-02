@@ -2,13 +2,13 @@ import Method from '@/Method';
 import defaultErrorLogger from '@/predefine/defaultErrorLogger';
 import defaultMiddleware from '@/predefine/defaultMiddleware';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
-import { getResponseCache, setResponseCache } from '@/storage/responseCache';
+import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
 import createAlovaEvent from '@/utils/createAlovaEvent';
 import {
-  exportFetchStates,
   GeneralFn,
+  exportFetchStates,
   getConfig,
   getContext,
   getHandlerMethod,
@@ -22,16 +22,16 @@ import {
 } from '@/utils/helper';
 import { assertMethodMatcher } from '@/utils/myAssert';
 import {
+  HOOK_WATCHER,
+  MEMORY,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   falseValue,
   forEach,
-  HOOK_WATCHER,
   len,
-  MEMORY,
   promiseResolve,
   promiseThen,
   pushItem,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '@/utils/variables';
@@ -94,7 +94,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
     { update } = promiseStatesHook(alovaInstance),
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = key(methodInstance),
-    { e: expireMilliseconds, m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
+    { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
     { sendable = () => trueValue, abortLast = trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
   hookInstance.m = methodInstance;
 
@@ -126,11 +126,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         cacheMode !== MEMORY ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue;
 
       // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
-      // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
-      if (cacheMode === STORAGE_RESTORE && !cachedResponse && persistentResponse) {
-        setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
-        cachedResponse = persistentResponse;
-      }
+      cachedResponse =
+        cacheMode === STORAGE_RESTORE && !cachedResponse && persistentResponse ? persistentResponse : cachedResponse;
 
       // 当缓存模式为placeholder时，先更新data再去发送请求
       if (cacheMode === STORAGE_PLACEHOLDER && persistentResponse) {
