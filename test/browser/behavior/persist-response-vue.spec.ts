@@ -96,6 +96,32 @@ describe('persist data', function () {
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
   });
 
+  test('restore mode is valid even if using method instance', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      params: {
+        vv: 10
+      },
+      localCache: {
+        expire: 10 * 1000,
+        mode: 'restore',
+        tag: 'v1'
+      },
+      transformData: ({ data }: Result) => data
+    });
+
+    await Get;
+    expect(Get.fromCache).toBeFalsy();
+    // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
+    removeResponseCache(alova.id, key(Get));
+
+    await Get;
+    // 设置为restore后，即使本地缓存失效了，也会自动将持久化数据恢复到缓存中，因此会命中缓存
+    expect(Get.fromCache).toBeTruthy();
+  });
+
   test('expire param can also be set a Date instance', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

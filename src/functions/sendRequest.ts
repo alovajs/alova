@@ -2,17 +2,18 @@ import Method from '@/Method';
 import defaultCacheLogger from '@/predefine/defaultCacheLogger';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '@/storage/responseCache';
-import { persistResponse } from '@/storage/responseStorage';
+import { getPersistentResponse, persistResponse } from '@/storage/responseStorage';
 import cloneMethod from '@/utils/cloneMethod';
 import {
   AlovaRequestAdapter,
   Arg,
   ProgressUpdater,
   ResponseCompleteHandler,
-  ResponsedHandler,
-  ResponseErrorHandler
+  ResponseErrorHandler,
+  ResponsedHandler
 } from '~/typings';
 import {
+  _self,
   getConfig,
   getContext,
   getLocalCacheConfigParam,
@@ -24,16 +25,16 @@ import {
   key,
   newInstance,
   noop,
-  sloughFunction,
-  _self
+  sloughFunction
 } from '../utils/helper';
 import {
+  PromiseCls,
+  STORAGE_RESTORE,
   deleteAttr,
   falseValue,
   len,
   mapItem,
   objectKeys,
-  PromiseCls,
   promiseFinally,
   promiseThen,
   trueValue,
@@ -100,25 +101,34 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         // 使用克隆之前的method key，以免在beforeRequest中method被改动而导致method key改变
         // method key在beforeRequest中被改变将会致使使用method 实例操作缓存时匹配失败
         methodKey = key(methodInstance),
-        clonedMethod = cloneMethod(methodInstance);
-
-      // 发送请求前调用钩子函数
-      // beforeRequest支持同步函数和异步函数
-      await beforeRequest(clonedMethod);
-      // 获取受控缓存或非受控缓存
-      const { localCache } = getConfig(clonedMethod);
+        { e: expireMilliseconds, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(methodInstance),
+        { id, storage } = getContext(methodInstance),
+        // 获取受控缓存或非受控缓存
+        clonedMethod = cloneMethod(methodInstance),
+        { localCache } = getConfig(methodInstance);
 
       // 如果当前method设置了受控缓存，则看是否有自定义的数据
-      const cachedResponse = isFn(localCache)
+      let cachedResponse = isFn(localCache)
         ? await localCache()
         : // 如果是强制请求的，则跳过从缓存中获取的步骤
         // 否则判断是否使用缓存数据
         !forceRequest
-        ? getResponseCache(getContext(clonedMethod).id, methodKey)
+        ? getResponseCache(id, methodKey)
         : undefinedValue;
 
+      // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
+      if (cacheMode === STORAGE_RESTORE && !cachedResponse) {
+        const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);
+        if (persistentResponse) {
+          persistentResponse && setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
+          cachedResponse = persistentResponse;
+        }
+      }
+
+      // 发送请求前调用钩子函数
+      // beforeRequest支持同步函数和异步函数
+      await beforeRequest(clonedMethod);
       const { baseURL, url: newUrl, type, data } = clonedMethod,
-        { id, storage } = getContext(clonedMethod),
         {
           params = {},
           headers = {},
@@ -144,7 +154,6 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;
       }
       // 如果没有缓存则发起请求
-      const { e: expireTimestamp, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(clonedMethod);
       if (cachedResponse !== undefinedValue) {
         requestAdapterCtrlsPromiseResolveFn(); // 遇到缓存将不传入ctrls
 
@@ -188,8 +197,8 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         const requestBody = clonedMethod.data,
           toCache = !requestBody || !isSpecialRequestBody(requestBody);
         if (toCache && headers) {
-          setResponseCache(id, methodKey, transformedData, expireTimestamp);
-          toStorage && persistResponse(id, methodKey, transformedData, expireTimestamp, storage, tag);
+          setResponseCache(id, methodKey, transformedData, expireMilliseconds);
+          toStorage && persistResponse(id, methodKey, transformedData, expireMilliseconds, storage, tag);
         }
 
         // 查找hitTarget，让它的缓存失效
