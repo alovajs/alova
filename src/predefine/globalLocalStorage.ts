@@ -1,4 +1,4 @@
-import { deleteAttr, isSSR, JSONParse, JSONStringify } from '@/utils/variables';
+import { deleteAttr, JSONParse, JSONStringify, noBrowserWin } from '@/utils/variables';
 import { AlovaGlobalStorage } from '~/typings';
 
 /**
@@ -9,15 +9,14 @@ const session = {} as Record<string, string>,
     getItem: (key: string) => session[key],
     setItem: (key: string, value: string) => (session[key] = value),
     removeItem: (key: string) => deleteAttr(session, key)
-  };
-export default () => {
-  const storage = isSSR ? sessionStorage : window.localStorage;
-  return {
-    set: (key, value) => storage.setItem(key, JSONStringify(value)),
-    get: key => {
-      const data = storage.getItem(key);
-      return data ? JSONParse(data) : data;
-    },
-    remove: key => storage.removeItem(key)
-  } as AlovaGlobalStorage;
-};
+  },
+  // 设置为函数防止在初始化时报错
+  storage = () => (noBrowserWin ? sessionStorage : window.localStorage);
+export default {
+  set: (key, value) => storage().setItem(key, JSONStringify(value)),
+  get: key => {
+    const data = storage().getItem(key);
+    return data ? JSONParse(data) : data;
+  },
+  remove: key => storage().removeItem(key)
+} as AlovaGlobalStorage;

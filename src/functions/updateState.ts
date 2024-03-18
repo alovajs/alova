@@ -2,7 +2,14 @@ import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { setResponseCache } from '@/storage/responseCache';
 import { persistResponse } from '@/storage/responseStorage';
 import { getStateCache } from '@/storage/stateCache';
-import { getContext, getLocalCacheConfigParam, isFn, key, noop, promiseStatesHook } from '@/utils/helper';
+import {
+  getContext,
+  getLocalCacheConfigParam,
+  getMethodInternalKey,
+  isFn,
+  noop,
+  promiseStatesHook
+} from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
 import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
 import { MethodMatcher, UpdateOptions, UpdateStateCollection } from '~/typings';
@@ -26,7 +33,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
   if (methodInstance) {
     onMatch(methodInstance); // 触发onMatch事件
     const { dehydrate, update } = promiseStatesHook(getContext(methodInstance), 'updateState'),
-      methodKey = methodInstance.__key__ || key(methodInstance),
+      methodKey = getMethodInternalKey(methodInstance),
       { id, storage } = getContext(methodInstance),
       { s: frontStates, h: hookInstance } = getStateCache(id, methodKey),
       updateStateCollection = isFn(handleUpdate) ? ({ data: handleUpdate } as UpdateStateCollection<R>) : handleUpdate;

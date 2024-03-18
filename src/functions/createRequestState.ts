@@ -1,22 +1,22 @@
 import createHook from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
 import {
+  _self,
   debounce,
   getHandlerMethod,
+  getMethodInternalKey,
   isNumber,
-  key,
   noop,
   promiseStatesHook,
-  sloughConfig,
-  _self
+  sloughConfig
 } from '@/utils/helper';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   ErrorHandler,
   ExportedType,
-  FetcherHookConfig,
   FetchRequestState,
+  FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -80,7 +80,10 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   // 2. SSR渲染的html中，其初始视图为loading状态的，避免在客户端展现时的loading视图闪动
   if (immediate) {
     try {
-      const cachedResponse: R | undefined = getResponseCache(alovaInstance.id, key(getHandlerMethod(methodHandler))),
+      const cachedResponse: R | undefined = getResponseCache(
+          alovaInstance.id,
+          getMethodInternalKey(getHandlerMethod(methodHandler))
+        ),
         forceRequestFinally = sloughConfig(
           (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
         );

@@ -7,7 +7,7 @@ import {
   persistResponse,
   removePersistentResponse
 } from '@/storage/responseStorage';
-import { getContext, getLocalCacheConfigParam, isFn, key } from '@/utils/helper';
+import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn } from '@/utils/helper';
 import { falseValue, forEach, trueValue, undefinedValue } from '@/utils/variables';
 import { MethodMatcher } from '~/typings';
 
@@ -28,8 +28,8 @@ export const queryCache = <R = any, S = any, E = any, T = any, RC = any, RE = an
 ) => {
   const methodInstance = filterSnapshotMethods(matcher, falseValue);
   if (methodInstance) {
-    const { id, storage } = getContext(methodInstance);
-    const methodKey = methodInstance.__key__ || key(methodInstance);
+    const { id, storage } = getContext(methodInstance),
+      methodKey = getMethodInternalKey(methodInstance);
     return (
       getResponseCache(id, methodKey) ||
       getPersistentResponse(id, methodKey, storage, getLocalCacheConfigParam(methodInstance).t)
@@ -49,7 +49,7 @@ export const setCache = <R = any, S = any, E = any, T = any, RC = any, RE = any,
   const methodInstances = filterSnapshotMethods(matcher, trueValue);
   forEach(methodInstances, methodInstance => {
     const { id, storage } = getContext(methodInstance),
-      methodKey = methodInstance.__key__ || key(methodInstance),
+      methodKey = getMethodInternalKey(methodInstance),
       { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
@@ -79,8 +79,7 @@ export const invalidateCache = <S, E, R, T, RC, RE, RH>(
   const methodInstances = filterSnapshotMethods(matcher, trueValue);
   forEach(methodInstances, methodInstance => {
     const { id, storage } = getContext(methodInstance),
-      methodKey = methodInstance.__key__ || key(methodInstance);
-
+      methodKey = getMethodInternalKey(methodInstance);
     removeResponseCache(id, methodKey);
     removePersistentResponse(id, methodKey, storage);
   });

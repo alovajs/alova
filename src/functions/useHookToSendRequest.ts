@@ -13,8 +13,8 @@ import {
   getContext,
   getHandlerMethod,
   getLocalCacheConfigParam,
+  getMethodInternalKey,
   isFn,
-  key,
   noop,
   promiseStatesHook,
   sloughConfig,
@@ -93,7 +93,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
     } = alovaInstance,
     { update } = promiseStatesHook(alovaInstance),
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
-    methodKey = key(methodInstance),
+    methodKey = getMethodInternalKey(methodInstance),
     { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
     { sendable = () => trueValue, abortLast = trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
   hookInstance.m = methodInstance;
