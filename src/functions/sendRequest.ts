@@ -2,41 +2,42 @@ import Method from '@/Method';
 import defaultCacheLogger from '@/predefine/defaultCacheLogger';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '@/storage/responseCache';
-import { getPersistentResponse, persistResponse } from '@/storage/responseStorage';
+import { getPersistentRawData, persistResponse } from '@/storage/responseStorage';
 import cloneMethod from '@/utils/cloneMethod';
 import {
   AlovaRequestAdapter,
   Arg,
   ProgressUpdater,
   ResponseCompleteHandler,
-  ResponseErrorHandler,
-  ResponsedHandler
+  ResponsedHandler,
+  ResponseErrorHandler
 } from '~/typings';
 import {
-  _self,
   getConfig,
   getContext,
   getLocalCacheConfigParam,
+  getMethodInternalKey,
   getOptions,
   instanceOf,
   isFn,
   isPlainObject,
   isSpecialRequestBody,
-  key,
   newInstance,
   noop,
-  sloughFunction
+  sloughFunction,
+  _self
 } from '../utils/helper';
 import {
-  PromiseCls,
-  STORAGE_RESTORE,
   deleteAttr,
   falseValue,
+  filterItem,
   len,
   mapItem,
   objectKeys,
+  PromiseCls,
   promiseFinally,
   promiseThen,
+  STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '../utils/variables';
@@ -64,7 +65,7 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
   // 将params对象转换为get字符串
   // 过滤掉值为undefined的
   const paramsStr = mapItem(
-    objectKeys(params).filter(key => params[key] !== undefinedValue),
+    filterItem(objectKeys(params), key => params[key] !== undefinedValue),
     key => `${key}=${params[key]}`
   ).join('&');
   // 将get参数拼接到url后面，注意url可能已存在参数
@@ -100,7 +101,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         } = getOptions(methodInstance),
         // 使用克隆之前的method key，以免在beforeRequest中method被改动而导致method key改变
         // method key在beforeRequest中被改变将会致使使用method 实例操作缓存时匹配失败
-        methodKey = key(methodInstance),
+        methodKey = getMethodInternalKey(methodInstance),
         { e: expireMilliseconds, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(methodInstance),
         { id, storage } = getContext(methodInstance),
         // 获取受控缓存或非受控缓存
@@ -112,15 +113,16 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         ? await localCache()
         : // 如果是强制请求的，则跳过从缓存中获取的步骤
         // 否则判断是否使用缓存数据
-        !forceRequest
-        ? getResponseCache(id, methodKey)
-        : undefinedValue;
+        forceRequest
+        ? undefinedValue
+        : getResponseCache(id, methodKey);
 
-      // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中
+      // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中，过期时间要使用缓存的
       if (cacheMode === STORAGE_RESTORE && !cachedResponse) {
-        const persistentResponse = getPersistentResponse(id, methodKey, storage, tag);
-        if (persistentResponse) {
-          persistentResponse && setResponseCache(id, methodKey, persistentResponse, expireMilliseconds);
+        const rawPersistentData = getPersistentRawData(id, methodKey, storage, tag);
+        if (rawPersistentData) {
+          const [persistentResponse, persistentExpireMilliseconds] = rawPersistentData;
+          setResponseCache(id, methodKey, persistentResponse, persistentExpireMilliseconds);
           cachedResponse = persistentResponse;
         }
       }
@@ -190,7 +192,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         const data = await handlerReturns,
           transformedData = await transformData(data, headers || {});
 
-        saveMethodSnapshot(id, methodKey, methodInstance);
+        saveMethodSnapshot(methodInstance);
         // 当requestBody为特殊数据时不保存缓存
         // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
         // 原因2：特殊数据不便于生成缓存key
@@ -203,24 +205,12 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
 
         // 查找hitTarget，让它的缓存失效
         const hitMethods = matchSnapshotMethod({
-          filter: cachedMethod => {
-            let isHit = falseValue;
-            const hitSource = cachedMethod.hitSource;
-            if (hitSource) {
-              for (const i in hitSource) {
-                const sourceMatcher = hitSource[i];
-                if (
-                  instanceOf(sourceMatcher, RegExp)
-                    ? sourceMatcher.test(methodInstanceName as string)
-                    : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-                ) {
-                  isHit = trueValue;
-                  break;
-                }
-              }
-            }
-            return isHit;
-          }
+          filter: cachedMethod =>
+            (cachedMethod.hitSource || []).some(sourceMatcher =>
+              instanceOf(sourceMatcher, RegExp)
+                ? sourceMatcher.test(methodInstanceName as string)
+                : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
+            )
         });
         len(hitMethods) > 0 && invalidateCache(hitMethods);
         return transformedData;
