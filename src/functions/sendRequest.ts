@@ -192,7 +192,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         const data = await handlerReturns,
           transformedData = await transformData(data, headers || {});
 
-        saveMethodSnapshot(methodInstance);
+        saveMethodSnapshot(id, methodKey, methodInstance);
         // 当requestBody为特殊数据时不保存缓存
         // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
         // 原因2：特殊数据不便于生成缓存key

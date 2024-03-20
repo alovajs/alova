@@ -47,7 +47,7 @@ export const PromiseCls = Promise as typeof Promise<any>,
   STORAGE_PLACEHOLDER = 'placeholder',
   // 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
   STORAGE_RESTORE = 'restore',
-  noBrowserWin = typeOf(window) === undefStr || !window.location,
+  noBrowserWin = typeof window === undefStr || !window.location,
   // 是否为服务端运行，为了兼容浏览器以及非web客户端环境（如小程序），需要再判断一下process
-  isSSR = noBrowserWin && typeOf(process) !== undefStr,
+  isSSR = noBrowserWin && typeof process !== undefStr,
   alovas = [] as Alova<any, any, any, any, any>[];

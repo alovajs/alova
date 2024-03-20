@@ -5,13 +5,6 @@ import { deleteAttr } from '@/utils/variables';
 let responseCache: Record<string, Record<string, [data: any, expireTime: number]>> = {};
 
 /**
- * 检查给定时间是否过期，如果没有过期时间则表示数据永不过期，否则需要判断是否过期
- * @param expireTime 过期时间
- * @returns 是否过期
- */
-const isExpired = (expireTime: number) => expireTime < getTime();
-
-/**
  * @description 获取Response缓存数据
  * @param baseURL 基础URL
  * @param key 请求key值
@@ -22,7 +15,7 @@ export const getResponseCache = (namespace: string, key: string) => {
   if (cachedResponse) {
     const cachedItem = cachedResponse[key];
     if (cachedItem) {
-      if (!isExpired(cachedItem[1])) {
+      if (cachedItem[1] > getTime()) {
         return cachedItem[0];
       }
       // 如果过期，则删除缓存

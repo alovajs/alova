@@ -59,7 +59,7 @@ interface AlovaGlobalStorage {
    * 获取存储值
    * @param key 存储key
    */
-  get(key: string): any | undefined | null;
+  get(key: string): any;
 
   /**
    * 移除存储值
@@ -144,6 +144,11 @@ type AlovaMethodConfig<R, T, RC, RH> = {
    * 当这边设置后将覆盖全局的设置
    */
   shareRequest?: boolean;
+
+  /**
+   * method元数据
+   */
+  meta?: any;
 } & RC;
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 
@@ -350,13 +355,6 @@ interface AlovaOptions<S, E, RC, RE, RH> {
    * @default true
    */
   cacheLogger?: boolean | null | CacheLoggerHandler<S, E, RC, RE, RH>;
-
-  /**
-   * 内存缓存适配器
-   * @version 2.18.0
-   * @default defaultMemoryAdapter
-   */
-  memoryAdapter?: any;
 }
 
 type ProgressHandler = (progress: Progress) => void;

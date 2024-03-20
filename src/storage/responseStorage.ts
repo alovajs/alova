@@ -80,7 +80,7 @@ export const getPersistentResponse = (
   storage: AlovaGlobalStorage,
   tag: string | null = null
 ) => {
-  const rawData = getPersistentRawData(namespace, key, storage, tag)?.[0];
+  const rawData = getPersistentRawData(namespace, key, storage, tag);
   return rawData ? rawData[0] : undefinedValue;
 };
 

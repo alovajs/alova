@@ -1,7 +1,15 @@
 import { AlovaMethodConfig, MethodRequestConfig, MethodType, ProgressHandler, RequestBody } from '~/typings';
 import Alova from './Alova';
 import sendRequest from './functions/sendRequest';
-import { getConfig, getContextOptions, instanceOf, isPlainObject, key, noop } from './utils/helper';
+import {
+  getConfig,
+  getContextOptions,
+  getMethodInternalKey,
+  instanceOf,
+  isPlainObject,
+  key,
+  noop
+} from './utils/helper';
 import {
   deleteAttr,
   falseValue,
@@ -38,6 +46,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   public context: Alova<S, E, RC, RE, RH>;
   public dhs: ProgressHandler[] = [];
   public uhs: ProgressHandler[] = [];
+  public meta?: any;
   public __key__: string;
 
   /**
@@ -65,7 +74,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
       globalLocalCache = isPlainObject(contextOptions[mergedLocalCacheKey])
         ? contextOptions[mergedLocalCacheKey][type]
         : undefinedValue,
-      hitSource = config?.hitSource;
+      hitSource = config && config.hitSource;
 
     // 合并参数
     forEach(['timeout', 'shareRequest'], mergedKey => {
@@ -82,14 +91,10 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     // 将hitSource统一处理成数组，且当有method实例时将它们转换为methodKey
     if (hitSource) {
       instance.hitSource = mapItem(isArray(hitSource) ? hitSource : [hitSource], sourceItem =>
-        instanceOf(sourceItem, Method) ? key(sourceItem) : (sourceItem as string | RegExp)
+        instanceOf(sourceItem, Method) ? getMethodInternalKey(sourceItem) : (sourceItem as string | RegExp)
       );
       deleteAttr(config, 'hitSource');
     }
-
-    // 在外部需要使用原始的key，而不是实时生成key
-    // 原因是，method的参数可能传入引用类型值，但引用类型值在外部改变时，实时生成的key也随之改变，因此使用最开始的key更准确
-    instance.__key__ = key(instance);
     instance.config = {
       ...contextConcatConfig,
       headers: {},
@@ -97,6 +102,11 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
       ...(config || {})
     };
     instance.data = data;
+    instance.meta = config && config.meta;
+
+    // 在外部需要使用原始的key，而不是实时生成key
+    // 原因是，method的参数可能传入引用类型值，但引用类型值在外部改变时，实时生成的key也随之改变，因此使用最开始的key更准确
+    instance.__key__ = key(instance);
   }
 
   /**

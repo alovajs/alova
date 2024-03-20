@@ -1,7 +1,7 @@
 import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
-import { removeResponseCache } from '@/storage/responseCache';
+import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { key } from '@/utils/helper';
 import { DetailLocalCacheConfig } from '~/typings';
@@ -94,6 +94,29 @@ describe('persist data', function () {
     await untilCbCalled(setTimeout);
     // data是异步更新
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
+  });
+
+  test('should use the same expire timestamp when restore cache to memory', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      localCache: {
+        expire: 500,
+        mode: 'restore',
+        tag: 'v10'
+      },
+      transformData: ({ data }: Result) => data
+    });
+    const firstState = useRequest(Get);
+    await untilCbCalled(firstState.onSuccess);
+
+    // 清除缓存后再过400毫秒请求让它恢复到内存缓存中，如果缓存时间一致的话，内存缓存将会在100毫秒后失效
+    removeResponseCache(alova.id, key(Get));
+    await untilCbCalled(setTimeout, 400);
+    useRequest(Get);
+    await untilCbCalled(setTimeout, 200);
+    expect(getResponseCache(alova.id, key(Get))).toBeUndefined();
   });
 
   test('restore mode is valid even if using method instance', async () => {

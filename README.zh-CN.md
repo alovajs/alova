@@ -2,7 +2,7 @@
   <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>轻量级的请求策略库，它针对不同请求场景分别提供了具有针对性的请求策略，来提升应用可用性、流畅性，降低服务端压力，让应用如智者一般具备卓越的策略思维</b></p>
+<p align="center"><b>一行代码完成各种复杂场景的网络请求，别再花时间在请求这件小事上了，交给我们</b></p>
 
 <p align="center">中文 | <a href="./README.md">📑English</a></p>
 
@@ -20,38 +20,36 @@
 
 ## alova 是什么
 
-alova 是一个轻量级的请求策略库，支持开发者使用声明式实现例如请求共享、分页请求、表单提交、断点续传等各种较复杂的请求，让开发者使用非常少量的代码就可以实现高可用性和高流畅性的请求功能，这意味着，你再也不需要自己绞尽脑汁编写请求优化代码，再也不需要自己维护请求数据和相关状态，你只需要选择并使用请求模块，设置参数后，alova 帮你搞定。从而提升开发效率、应用运行效率，还能降低服务端压力。
+alova 是一个轻量级的请求策略库，它提供了一套完整的应对复杂请求场景的方案，我们称之为**请求策略**，只需一行代码就能快速实现各种复杂的请求逻辑，不仅能帮你提升开发效率，还能帮你提升 App 的运行效率，降低服务端压力。
 
-请访问[alova 网站](https://alova.js.org)了解更多信息，或[查尝试运行的示例](https://alova.js.org/category/examples)。
+## 有什么不同吗？
 
-## 选择 alova 的理由
+与其他请求库不同的是，alova 的目标是让请求变得更简单并保持更高效的数据交互。
 
-alova 也致力于解决客户端网络请求的问题，但与其他请求库不同的是，alova 选择了业务场景化请求策略的方向，它配合`axios/fetch api`等请求库后能满足你绝大部分请求需求（99%）的同时，还提供了丰富的高级功能。
+我们为开发者和 App 使用者双方考虑，对于开发者来说，alova 为他们提供了简单的请求 api，和开箱即用的高性能请求策略模块，对于应用的用户来说，他们可以享受到 alova 的高性能数据交互带来的流畅体验。
 
-- 你可能曾经也在思考着应该封装`fetch`和`axios`，现在你不再需要这么做了，通过 alova 使用声明的方式完成请求，例如请求共享、分页请求、表单提交、断点上传等各种较复杂的请求，以及自动化缓存管理、请求共享、跨组件更新状态等。
-- alova 是轻量级的，只有 4kb+，是 axios 的 30%+。
-- 目前支持`vue/react/react-native/svelte`，以及`next/nuxt/sveltekit`等 SSR 框架，同时也支持`Uniapp/Taro`多端统一框架。
-- alova 是低耦合的，你可以通过不同的适配器让 alova 在任何 js 环境下，与任何 UI 框架协作使用（内置支持的 UI 框架为`vue/react/svelte`），并且提供了统一的使用体验和完美的代码迁移。
-- 使用 alova 还能实现 api 代码的高聚合组织方式，每个 api 的请求参数、缓存行为、响应数据转换等都将聚集在相同的代码块中，这对于管理大量的 api 有很大的优势。
+此外，再从具体的特性来看看：
+
+- 与 axios 相似的 api 设计，让使用者学习成本更低；
+- 10+个开箱即用的高性能请求策略，让应用更流畅；
+- alova 是轻量级的，只有 4kb+，是 axios 的 30%+；
+- 灵活性高，alova 的适配器可以让 alova 在任何 js 环境下，与任何 UI 框架协作使用（内置支持的 UI 框架为`vue/react/svelte`），并且提供了统一的使用体验和完美的代码迁移；
+- 3 种缓存模式和请求共享机制，提升请求性能并降低服务端压力；
+- api 代码的高聚合组织，每个 api 的请求参数、缓存行为、响应数据转换等都将聚集在相同的代码块中，这对于管理大量的 api 有很大的优势；
+
+在[alova 的未来](https://alova.js.org/tutorial/others/future)中，将实现更进一步的请求简单化。
+
+> 你还可以查看请[与其他请求库比较](https://alova.js.org/tutorial/others/comparison)详细了解 alova 的不同之处。
+
+## 文档
+
+访问[alova 网站](https://alova.js.org)了解更多信息，或[查尝试运行的示例](https://alova.js.org/category/examples)。
 
 ## 加入交流社区
 
+- [在 X 上关注我们，持续获得最新动态](https://x.com/alovajs)
 - [加入在 Discord 社区参与交流](https://discord.gg/S47QGJgkVb)
 - [加入微信群参与交流](https://alova.js.org/img/wechat_qrcode.jpg)
-
-## 打破 useHook 使用边界
-
-现在，alova 已经完美兼容了[vue options，尽情使用吧！](/tutorial/framework/vue-options)
-
-## 安装
-
-```bash
-# 使用 npm
-npm install alova --save
-
-# 使用 yarn
-yarn add alova
-```
 
 ## 我们需要你的支持
 
@@ -87,7 +85,7 @@ alova 还属于新秀，它依然还有很长一段路需要走，现在参与�
 
 ## Changelog
 
-[前往 GitHub 上查看 alovajs 的所有 Changelog](https://github.com/alovajs/alova/releases)
+[前往查看](https://github.com/alovajs/alova/releases)
 
 ## Contributors
 
