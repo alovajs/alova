@@ -146,6 +146,14 @@ describe('method instance', function () {
   test('should receive method metadata', async () => {
     const alovaInst = getAlovaInstance(VueHook, {
       beforeRequestExpect(methodInstance) {
+        expect(methodInstance.meta).toBeUndefined();
+      },
+      responseExpect: r => r.json()
+    });
+    await alovaInst.Get('/unit-test');
+
+    const alovaInst2 = getAlovaInstance(VueHook, {
+      beforeRequestExpect(methodInstance) {
         throw new Error(
           JSON.stringify({
             meta: methodInstance.meta,
@@ -155,21 +163,49 @@ describe('method instance', function () {
       },
       responseExpect: r => r.json()
     });
-    const Get = alovaInst.Get('/unit-test');
-    (Get as any).meta = {
+    const Get2 = alovaInst2.Get('/unit-test');
+    (Get2 as any).meta = {
       a: 1,
       b: 2
     };
-    (Get as any).showMsg = false;
+    (Get2 as any).showMsg = false;
 
     // 从beforeRequest中抛出json字符串
-    await expect(Get.send(true)).rejects.toThrow(
+    await expect(Get2.send(true)).rejects.toThrow(
       JSON.stringify({
         meta: {
           a: 1,
           b: 2
         },
         showMsg: false
+      })
+    );
+  });
+
+  test('should receive method metadata in a shorthand', async () => {
+    const alovaInst = getAlovaInstance(VueHook, {
+      beforeRequestExpect(methodInstance) {
+        throw new Error(
+          JSON.stringify({
+            meta: methodInstance.meta
+          })
+        );
+      },
+      responseExpect: r => r.json()
+    });
+    const Get = alovaInst.Get('/unit-test', {
+      meta: {
+        a: 1,
+        b: 2
+      }
+    });
+    // 从beforeRequest中抛出json字符串
+    await expect(Get.send(true)).rejects.toThrow(
+      JSON.stringify({
+        meta: {
+          a: 1,
+          b: 2
+        }
       })
     );
   });

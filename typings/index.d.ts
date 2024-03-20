@@ -19,7 +19,7 @@ interface RequestElements {
   readonly headers: Arg;
   readonly data?: RequestBody;
 }
-type ProgressUpdater = (loaded: number, total: number) => void;
+type ProgressUpdater = (total: number, loaded: number) => void;
 type AlovaRequestAdapter<R, T, RC, RE, RH> = (
   elements: RequestElements,
   method: Method<any, any, R, T, RC, RE, RH>
@@ -59,7 +59,7 @@ interface AlovaGlobalStorage {
    * 获取存储值
    * @param key 存储key
    */
-  get(key: string): any | undefined | null;
+  get(key: string): any;
 
   /**
    * 移除存储值
@@ -144,6 +144,11 @@ type AlovaMethodConfig<R, T, RC, RH> = {
    * 当这边设置后将覆盖全局的设置
    */
   shareRequest?: boolean;
+
+  /**
+   * method元数据
+   */
+  meta?: any;
 } & RC;
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 
@@ -389,7 +394,7 @@ interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = an
   /**
    * 存储临时的key
    */
-  __key__?: string;
+  __key__: string;
 
   /**
    * 下载事件
@@ -770,14 +775,13 @@ type UseFetchHookReturnType<S> = FetchRequestState<
 interface MethodFilterHandler {
   (method: Method, index: number, methods: Method[]): boolean;
 }
-type MethodFilter =
-  | string
-  | RegExp
-  | {
-      name?: string | RegExp;
-      filter?: MethodFilterHandler;
-      alova?: Alova<any, any, any, any, any>;
-    };
+
+type MethodDetaiedFilter = {
+  name?: string | RegExp;
+  filter?: MethodFilterHandler;
+  alova?: Alova<any, any, any, any, any>;
+};
+type MethodFilter = string | RegExp | MethodDetaiedFilter;
 type MethodMatcher<S, E, R, T, RC, RE, RH> = Method<S, E, R, T, RC, RE, RH> | MethodFilter;
 
 type UpdateStateCollection<R> = {

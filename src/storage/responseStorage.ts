@@ -1,20 +1,20 @@
 import { getTime } from '@/utils/helper';
-import { alovas, forEach, nullValue, pushItem } from '@/utils/variables';
+import { alovas, forEach, nullValue, pushItem, undefinedValue } from '@/utils/variables';
 import { AlovaGlobalStorage } from '~/typings';
 
 const responseStorageKeyPrefix = 'alova.';
 const buildNamespacedStorageKey = (namespace: string, key: string) => responseStorageKeyPrefix + namespace + key;
 
-const responseStorageAllKey = 'alova.resp.keys';
+const storageNameMethodKey = responseStorageKeyPrefix + 'resp.keys';
 const updateAllResponseStorageKeys = (completedKey: string, operateCode: 0 | 1, storage: AlovaGlobalStorage) => {
-  const allKeys: string[] = storage.get(responseStorageAllKey) || [];
-  const index = allKeys.indexOf(completedKey);
+  const allKeys: string[] = storage.get(storageNameMethodKey) || [],
+    index = allKeys.indexOf(completedKey);
   if (operateCode === 0 && index >= 0) {
     allKeys.splice(index, 1);
   } else if (operateCode === 1 && index < 0) {
     pushItem(allKeys, completedKey);
   }
-  storage.set(responseStorageAllKey, allKeys);
+  storage.set(storageNameMethodKey, allKeys);
 };
 
 /**
@@ -49,7 +49,7 @@ export const persistResponse = (
  * @param storage 存储对象
  * @param tag 存储标签，标记改变了数据将会失效
  */
-export const getPersistentResponse = (
+export const getPersistentRawData = (
   namespace: string,
   key: string,
   storage: AlovaGlobalStorage,
@@ -57,14 +57,31 @@ export const getPersistentResponse = (
 ) => {
   const storagedData = storage.get(buildNamespacedStorageKey(namespace, key));
   if (storagedData) {
-    const [response, expireTimestamp, storedTag = nullValue] = storagedData;
+    const [_, expireTimestamp, storedTag = nullValue] = storagedData;
     // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
     if (storedTag === tag && (!expireTimestamp || expireTimestamp > getTime())) {
-      return response;
+      return storagedData;
     }
     // 如果过期，则删除缓存
     removePersistentResponse(namespace, key, storage);
   }
+};
+
+/**
+ * 获取存储的响应数据
+ * @param namespace 命名空间
+ * @param key 存储的key
+ * @param storage 存储对象
+ * @param tag 存储标签，标记改变了数据将会失效
+ */
+export const getPersistentResponse = (
+  namespace: string,
+  key: string,
+  storage: AlovaGlobalStorage,
+  tag: string | null = null
+) => {
+  const rawData = getPersistentRawData(namespace, key, storage, tag);
+  return rawData ? rawData[0] : undefinedValue;
 };
 
 /**
@@ -85,10 +102,10 @@ export const removePersistentResponse = (namespace: string, key: string, storage
 export const clearPersistentResponse = () => {
   forEach(alovas, alovaInst => {
     const { storage } = alovaInst;
-    const allKeys: string[] = storage.get(responseStorageAllKey) || [];
+    const allKeys: string[] = storage.get(storageNameMethodKey) || [];
     forEach(allKeys, keyItem => {
       storage.remove(keyItem);
     });
-    storage.remove(responseStorageAllKey);
+    storage.remove(storageNameMethodKey);
   });
 };

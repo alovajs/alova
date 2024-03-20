@@ -2,15 +2,16 @@ import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } 
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
-  clearTimeoutTimer,
-  falseValue,
   JSONStringify,
   MEMORY,
-  nullValue,
   ObjectCls,
-  setTimeoutFn,
   STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
+  clearTimeoutTimer,
+  falseValue,
+  nullValue,
+  setTimeoutFn,
+  typeOf,
   undefinedValue
 } from './variables';
 
@@ -32,19 +33,19 @@ export const noop = () => {},
    * @param fn 任意参数
    * @returns 该参数是否为函数
    */
-  isFn = (arg: any): arg is GeneralFn => typeof arg === 'function',
+  isFn = (arg: any): arg is GeneralFn => typeOf(arg) === 'function',
   /**
    * 判断参数是否为数字
    * @param arg 任意参数
    * @returns 该参数是否为数字
    */
-  isNumber = (arg: any): arg is number => typeof arg === 'number' && !isNaN(arg),
+  isNumber = (arg: any): arg is number => typeOf(arg) === 'number' && !isNaN(arg),
   /**
    * 判断参数是否为字符串
    * @param arg 任意参数
    * @returns 该参数是否为字符串
    */
-  isString = (arg: any): arg is string => typeof arg === 'string',
+  isString = (arg: any): arg is string => typeOf(arg) === 'string',
   /**
    * 全局的toString
    * @param arg 任意参数
@@ -95,6 +96,12 @@ export const noop = () => {},
    */
   getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
     getContextOptions(alovaInstance).statesHook,
+  /**
+   * 获取method实例的key值
+   * @param methodInstance method实例
+   * @returns {string} 此method实例的key值
+   */
+  getMethodInternalKey = (methodInstance: Method) => methodInstance.__key__,
   /**
    * 是否为特殊数据
    * @param data 提交数据
