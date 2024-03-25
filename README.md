@@ -93,6 +93,6 @@ Effective contributions will earn you a certain reputation in the alova communit
    <img src="https://contrib.rocks/image?repo=alovajs/alova&max=30&columns=10" />
 </a>
 
-##LICENSE
+## LICENSE
 
 [MIT](https://en.wikipedia.org/wiki/MIT_License)
