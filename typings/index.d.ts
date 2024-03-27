@@ -181,7 +181,7 @@ type ResponsedHandlerRecord<S, E, RC, RE, RH> = {
 type HookType = 1 | 2 | 3;
 interface Hook {
   /** 最后一次请求的method实例 */
-  m: Method;
+  m?: Method;
 
   /** saveStatesFns */
   sf: ((frontStates: FrontRequestState) => void)[];
