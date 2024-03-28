@@ -465,4 +465,36 @@ describe('useRequet middleware', function () {
     expect(error.value).toBe(err.error);
     expect(error.value?.message).toBe('[alova]The user aborted a request.');
   });
+
+  test('should abort request like abort function in returns when call abort in middleware(non-immediate)', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: error => {
+        return Promise.reject(error);
+      }
+    });
+    const Get = alova.Get<string, Result<string>>('/unit-test-1s');
+    const { loading, data, error, onError } = useRequest(Get, {
+      immediate: false,
+      middleware({ abort }, next) {
+        setTimeout(() => {
+          // fix #314
+          expect(abort).not.toThrow();
+        }, 100);
+        return next();
+      }
+    });
+
+    const errFn = jest.fn();
+    onError(errFn);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    await untilCbCalled(setTimeout, 200);
+    expect(errFn).not.toHaveBeenCalled();
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+  });
 });
