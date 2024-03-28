@@ -92,20 +92,13 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       requestAdapterCtrlsPromiseResolveFn = resolve;
     }) as Promise<RequestAdapterReturnType | undefined>,
     response = async () => {
-      const {
-          beforeRequest = noop,
-          responsed,
-          responded,
-          requestAdapter,
-          cacheLogger = defaultCacheLogger
-        } = getOptions(methodInstance),
-        // 使用克隆之前的method key，以免在beforeRequest中method被改动而导致method key改变
-        // method key在beforeRequest中被改变将会致使使用method 实例操作缓存时匹配失败
-        methodKey = getMethodInternalKey(methodInstance),
+      const { beforeRequest = noop, responsed, responded, requestAdapter, cacheLogger } = getOptions(methodInstance),
+        // 使用克隆的methodKey，防止用户使用克隆的method实例再次发起请求，导致key重复
+        clonedMethod = cloneMethod(methodInstance),
+        methodKey = getMethodInternalKey(clonedMethod),
         { e: expireMilliseconds, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(methodInstance),
         { id, storage } = getContext(methodInstance),
         // 获取受控缓存或非受控缓存
-        clonedMethod = cloneMethod(methodInstance),
         { localCache } = getConfig(methodInstance);
 
       // 如果当前method设置了受控缓存，则看是否有自定义的数据
@@ -219,8 +212,14 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       return promiseFinally(
         promiseThen(
           PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()]),
-          ([rawResponse, headers]) => handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), headers),
+          ([rawResponse, headers]) => {
+            // 无论请求成功、失败，都需要首先移除共享的请求
+            deleteAttr(namespacedAdapterReturnMap, methodKey);
+            return handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), headers);
+          },
           (error: any) => {
+            // 无论请求成功、失败，都需要首先移除共享的请求
+            deleteAttr(namespacedAdapterReturnMap, methodKey);
             if (!isFn(responseErrorHandler)) {
               throw error;
             }
@@ -229,8 +228,6 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           }
         ),
         () => {
-          // 请求成功、失败，以及在成功后处理报错，都需要移除共享的请求
-          deleteAttr(namespacedAdapterReturnMap, methodKey);
           responseCompleteHandler(clonedMethod);
         }
       );
