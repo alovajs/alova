@@ -11,8 +11,8 @@ import {
   trueValue
 } from '@/utils/variables';
 import { Method, RequestElements } from '~/typings';
-import { FetchRequestInit } from '~/typings/globalfetch';
 
+type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
 export default function GlobalFetch() {
   return function (elements: RequestElements, method: Method<any, any, any, any, FetchRequestInit, Response, Headers>) {
