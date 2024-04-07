@@ -224,6 +224,28 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(error.value).toBe(err.error);
   });
 
+  test('abort request manually with abort function returns in useRequest(non-immediate)', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get<string, Result<string>>('/will-never-request');
+    const { loading, data, error, abort, onError } = useRequest(Get, { immediate: false });
+    const errFn = jest.fn();
+    onError(errFn);
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    // fix #314
+    expect(abort).not.toThrow();
+    expect(errFn).not.toHaveBeenCalled();
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+  });
+
   test('abort request manually with abort function in method instance', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
