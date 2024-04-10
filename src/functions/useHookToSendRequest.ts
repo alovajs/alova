@@ -23,6 +23,7 @@ import {
 import { assertMethodMatcher } from '@/utils/myAssert';
 import {
   HOOK_WATCHER,
+  HOOK_FETCHER,
   MEMORY,
   STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
@@ -281,16 +282,20 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
           toUpdateResponse() && update({ data }, frontStates, hookInstance);
         } else {
           // 更新缓存内的状态，一般为useFetcher中进入
-          const cachedState = getStateCache(id, methodKey).s;
-          cachedState && update({ data }, cachedState, hookInstance);
+          if (hookInstance.c.updateState !== falseValue) {
+            const cachedState = getStateCache(id, methodKey).s;
+            cachedState && update({ data }, cachedState, hookInstance);
+          }
         }
 
         // 如果需要更新响应数据，则在请求后触发对应回调函数
         if (toUpdateResponse()) {
-          const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
-          // loading状态受控时将不再更改为false
-          !controlledLoading && (newStates.loading = falseValue);
-          update(newStates, frontStates, hookInstance);
+          if (ht !== HOOK_FETCHER || (ht === HOOK_FETCHER && hookInstance.c.updateState !== falseValue)) {
+            const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
+            // loading状态受控时将不再更改为false
+            !controlledLoading && (newStates.loading = falseValue);
+            update(newStates, frontStates, hookInstance);
+          }
           runArgsHandler(
             successHandlers,
             successHandlerDecorator,
