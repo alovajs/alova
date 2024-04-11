@@ -729,6 +729,8 @@ export interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestH
 export interface FetcherHookConfig extends UseHookConfig {
   /** 中间件 */
   middleware?: AlovaFetcherMiddleware<any, any, any, any, any, any, any>;
+  /** fetch是否同步更新data状态 */
+  updateState?: boolean;
 }
 
 /** 调用useFetcher时需要传入的类型，否则会导致状态类型错误 */

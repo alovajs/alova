@@ -198,4 +198,98 @@ describe('use useFetcher hook to fetch data', function () {
     expect(fetching.value).toBeTruthy();
     expect(error.value?.message).toBe('custom fetch error');
   });
+
+  test('should not update states when useFetcher with updateState is false', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const createGet = (params: Record<string, string>) =>
+      alova.Get('/unit-test-count', {
+        params,
+        localCache: 5 * 60 * 1000,
+        transformData(result: Result) {
+          return result.data;
+        }
+      });
+
+    const { data, onSuccess, send } = useRequest(params => createGet(params || { page: '1', countKey: 'pagination' }));
+    await untilCbCalled(onSuccess);
+    const { fetch, fetching, error } = useFetcher<FetcherType<typeof alova>>({ updateState: false });
+    let res = await fetch(createGet({ page: '2', countKey: 'pagination' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
+
+    expect(data.value).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { page: '1', countKey: 'pagination', count: 0 }
+    });
+
+    expect(res).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { page: '2', countKey: 'pagination', count: 1 }
+    });
+
+    send({ page: '2', countKey: 'pagination' });
+    await untilCbCalled(onSuccess);
+    send({ page: '1', countKey: 'pagination' });
+    await untilCbCalled(onSuccess);
+    res = await fetch(createGet({ page: '2', countKey: 'pagination' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
+
+    expect(data.value).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { page: '1', countKey: 'pagination', count: 0 }
+    });
+  });
+
+  test('should update states when useFetcher without updateState', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const createGet = (params: Record<string, string>) =>
+      alova.Get('/unit-test-count', {
+        params,
+        localCache: 5 * 60 * 1000,
+        transformData(result: Result) {
+          return result.data;
+        }
+      });
+
+    const { data, onSuccess, send } = useRequest(params => createGet(params || { page: '1', countKey: 'pagination1' }));
+    await untilCbCalled(onSuccess);
+    const { fetch, fetching, error } = useFetcher<FetcherType<typeof alova>>();
+    let res = await fetch(createGet({ page: '2', countKey: 'pagination1' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
+
+    expect(data.value).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { page: '1', countKey: 'pagination1', count: 0 }
+    });
+
+    expect(res).toStrictEqual({
+      path: '/unit-test-count',
+      method: 'GET',
+      params: { page: '2', countKey: 'pagination1', count: 1 }
+    });
+
+    send({ page: '2', countKey: 'pagination1' });
+    await untilCbCalled(onSuccess);
+    send({ page: '1', countKey: 'pagination1' });
+    await untilCbCalled(onSuccess);
+    res = await fetch(createGet({ page: '2', countKey: 'pagination1' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
+
+    expect(res).toStrictEqual(data.value);
+  });
 });

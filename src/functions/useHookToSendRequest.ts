@@ -279,7 +279,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         // 更新缓存响应数据
         if (!isFetcher) {
           toUpdateResponse() && update({ data }, frontStates, hookInstance);
-        } else {
+        } else if (hookInstance.c.updateState !== falseValue) {
           // 更新缓存内的状态，一般为useFetcher中进入
           const cachedState = getStateCache(id, methodKey).s;
           cachedState && update({ data }, cachedState, hookInstance);
