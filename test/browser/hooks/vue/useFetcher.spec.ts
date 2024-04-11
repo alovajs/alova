@@ -214,8 +214,11 @@ describe('use useFetcher hook to fetch data', function () {
 
     const { data, onSuccess, send } = useRequest(params => createGet(params || { page: '1', countKey: 'pagination' }));
     await untilCbCalled(onSuccess);
-    const { fetch } = useFetcher<FetcherType<typeof alova>>({ updateState: false });
+    const { fetch, fetching, error } = useFetcher<FetcherType<typeof alova>>({ updateState: false });
     let res = await fetch(createGet({ page: '2', countKey: 'pagination' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
 
     expect(data.value).toStrictEqual({
       path: '/unit-test-count',
@@ -234,6 +237,10 @@ describe('use useFetcher hook to fetch data', function () {
     send({ page: '1', countKey: 'pagination' });
     await untilCbCalled(onSuccess);
     res = await fetch(createGet({ page: '2', countKey: 'pagination' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
+
     expect(data.value).toStrictEqual({
       path: '/unit-test-count',
       method: 'GET',
@@ -256,8 +263,11 @@ describe('use useFetcher hook to fetch data', function () {
 
     const { data, onSuccess, send } = useRequest(params => createGet(params || { page: '1', countKey: 'pagination1' }));
     await untilCbCalled(onSuccess);
-    const { fetch } = useFetcher<FetcherType<typeof alova>>();
+    const { fetch, fetching, error } = useFetcher<FetcherType<typeof alova>>();
     let res = await fetch(createGet({ page: '2', countKey: 'pagination1' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
 
     expect(data.value).toStrictEqual({
       path: '/unit-test-count',
@@ -276,6 +286,10 @@ describe('use useFetcher hook to fetch data', function () {
     send({ page: '1', countKey: 'pagination1' });
     await untilCbCalled(onSuccess);
     res = await fetch(createGet({ page: '2', countKey: 'pagination1' }));
+
+    expect(fetching.value).toBeFalsy();
+    expect(error.value).toBeFalsy();
+
     expect(res).toStrictEqual(data.value);
   });
 });
