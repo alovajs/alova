@@ -179,9 +179,10 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
        * 处理响应任务，失败时不缓存数据
        * @param responsePromise 响应promise实例
        * @param headers 请求头
+       * @param callInSuccess 是否在成功回调中调用
        * @returns 处理后的response
        */
-      const handleResponseTask = async (handlerReturns: any, headers?: any) => {
+      const handleResponseTask = async (handlerReturns: any, headers: any, callInSuccess = trueValue) => {
         const data = await handlerReturns,
           transformedData = await transformData(data, headers || {});
 
@@ -191,7 +192,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         // 原因2：特殊数据不便于生成缓存key
         const requestBody = clonedMethod.data,
           toCache = !requestBody || !isSpecialRequestBody(requestBody);
-        if (toCache && headers) {
+        if (toCache && callInSuccess) {
           setResponseCache(id, methodKey, transformedData, expireMilliseconds);
           toStorage && persistResponse(id, methodKey, transformedData, expireMilliseconds, storage, tag);
         }
@@ -224,7 +225,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
               throw error;
             }
             // 响应错误时，如果未抛出错误也将会处理响应成功的流程，但不缓存数据
-            return handleResponseTask(responseErrorHandler(error, clonedMethod));
+            return handleResponseTask(responseErrorHandler(error, clonedMethod), undefinedValue, falseValue);
           }
         ),
         () => {
