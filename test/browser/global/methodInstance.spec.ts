@@ -290,4 +290,38 @@ describe('method instance', function () {
     offEvent();
     expect(Get.dhs).toHaveLength(0);
   });
+
+  test('should hit cache whatever params are given when set the custom key', async () => {
+    const createCustomKeyGetter = (paramA: string) => {
+      const getter = alova.Get<Result>('/unit-test', {
+        params: {
+          paramA
+        }
+      });
+      getter.__key__ = 'custom key';
+      return getter;
+    };
+
+    const getterA = createCustomKeyGetter('a');
+    const dataA = await getterA;
+    expect(dataA.data).toStrictEqual({
+      path: '/unit-test',
+      method: 'GET',
+      params: {
+        paramA: 'a'
+      }
+    });
+    expect(getterA.fromCache).toBeFalsy();
+
+    const getterB = createCustomKeyGetter('b');
+    const dataB = await getterB;
+    expect(dataB.data).toStrictEqual({
+      path: '/unit-test',
+      method: 'GET',
+      params: {
+        paramA: 'a'
+      }
+    });
+    expect(getterB.fromCache).toBeTruthy();
+  });
 });
