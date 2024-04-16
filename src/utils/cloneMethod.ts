@@ -1,5 +1,5 @@
 import Method from '@/Method';
-import { getContext, getMethodInternalKey, newInstance } from './helper';
+import { getContext, newInstance } from './helper';
 import { ObjectCls } from './variables';
 
 export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
@@ -20,7 +20,6 @@ export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, R
 
   ObjectCls.assign(newMethod, {
     ...methodInstance,
-    __key__: getMethodInternalKey(newMethod),
     config: newConfig
   });
   return newMethod;
