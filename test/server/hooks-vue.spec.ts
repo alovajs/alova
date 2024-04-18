@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 
@@ -21,7 +21,7 @@ describe('[vue]use hooks in SSR', function () {
     expect(error.value).toBeUndefined();
 
     // 200ms后依然为请求前状态
-    await untilCbCalled(setTimeout, 200);
+    await delay(200);
     expect(loading.value).toBeTruthy();
     expect(data.value).toStrictEqual({});
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });

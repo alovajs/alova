@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { setCache, useWatcher } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
@@ -41,7 +41,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(error.value).toBeUndefined();
 
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
     mutateNum.value = 1;
     mutateStr.value = 'b';
@@ -195,12 +195,12 @@ describe('use useWatcher hook to send GET with vue', function () {
     ++i;
     mutateNum.value = 1;
     mutateStr.value = 'b';
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
 
     ++i;
     mutateNum.value = 2;
     mutateStr.value = 'c';
-    await untilCbCalled(setTimeout, 1100);
+    await delay(1100);
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(mockCallback).toHaveBeenCalledTimes(2); // 请求已发出，但数据只更新最新的
@@ -243,7 +243,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(sendableFn).not.toHaveBeenCalled();
 
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
     mutateNum.value = 1;
     mutateStr.value = 'b';
@@ -260,7 +260,7 @@ describe('use useWatcher hook to send GET with vue', function () {
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
-    await untilCbCalled(setTimeout, 50); // 修改值后不会发出请求，使用setTimeout延迟查看是否发起了请求
+    await delay(50); // 修改值后不会发出请求，使用setTimeout延迟查看是否发起了请求
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(sendableFn).toHaveBeenCalledTimes(2);
@@ -304,11 +304,11 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(sendableFn).not.toHaveBeenCalled();
 
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
     mutateNum.value = 1;
     mutateStr.value = 'b';
-    await untilCbCalled(setTimeout, 50);
+    await delay(50);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
@@ -318,7 +318,7 @@ describe('use useWatcher hook to send GET with vue', function () {
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
-    await untilCbCalled(setTimeout, 50);
+    await delay(50);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
@@ -327,7 +327,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(mockCallback).not.toHaveBeenCalled();
   });
 
-  test('the loading state should be recovered to false when send request immediately', async () => {
+  test('the loading state should be covered to false when send request immediately', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -350,6 +350,7 @@ describe('use useWatcher hook to send GET with vue', function () {
       }
     );
 
+    await delay();
     expect(loading.value).toBeFalsy();
     expect(sendableFn).toHaveBeenCalledTimes(1);
   });
@@ -501,7 +502,7 @@ describe('use useWatcher hook to send GET with vue', function () {
 
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     const checkInitData = () => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
@@ -514,7 +515,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     checkInitData();
 
     // 还没到防抖时间，请求相关数据不变
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     mutateNum.value = 2;
     mutateStr.value = 'c';
     checkInitData();
@@ -536,7 +537,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
-  test('in different debounce time when set param debounce to be a array', async () => {
+  test('in different debounce time when set param debounce to be an array', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -563,7 +564,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     mutateNum.value = 1;
     let startTs = Date.now();
     await untilCbCalled(onSuccess);
@@ -619,7 +620,7 @@ describe('use useWatcher hook to send GET with vue', function () {
       { debounce: [100] }
     );
 
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     mutateNum.value = 1;
     let startTs = Date.now();
     // 请求已响应
@@ -677,7 +678,7 @@ describe('use useWatcher hook to send GET with vue', function () {
       { debounce: 200 }
     );
 
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     mutateObj.value.num = 1;
     let startTs = Date.now();
     await untilCbCalled(onSuccess);
@@ -732,7 +733,7 @@ describe('use useWatcher hook to send GET with vue', function () {
       { debounce: [200, 100] }
     );
 
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     mutateObj.value.num = 1;
     let startTs = Date.now();
     await untilCbCalled(onSuccess);
@@ -856,7 +857,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     mutateStr.value = 'c';
 
     // 因为值改变后延迟200毫秒发出请求，因此150毫秒后应该还是原数据
-    await untilCbCalled(setTimeout, 150);
+    await delay(150);
     expect(data.value.params.num).toBe('0');
     expect(data.value.params.str).toBe('a');
 

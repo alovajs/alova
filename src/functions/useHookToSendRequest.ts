@@ -5,11 +5,10 @@ import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
-import createAlovaEvent from '@/utils/createAlovaEvent';
+import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
 import {
-  GeneralFn,
   exportFetchStates,
-  getConfig,
+  GeneralFn,
   getContext,
   getHandlerMethod,
   getLocalCacheConfigParam,
@@ -22,16 +21,15 @@ import {
 } from '@/utils/helper';
 import { assertMethodMatcher } from '@/utils/myAssert';
 import {
-  HOOK_WATCHER,
-  MEMORY,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   falseValue,
   forEach,
   len,
+  MEMORY,
   promiseResolve,
   promiseThen,
   pushItem,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '@/utils/variables';
@@ -45,6 +43,7 @@ import {
   AlovaMethodHandler,
   AlovaSuccessEvent,
   CompleteHandler,
+  EnumHookType,
   ErrorHandler,
   FetcherHookConfig,
   FrontRequestHookConfig,
@@ -56,22 +55,16 @@ import {
 } from '~/typings';
 
 /**
- * 统一处理useRequest/useWatcher/useController等请求钩子函数的请求逻辑
+ * 统一处理useRequest/useWatcher/useFetcher等请求钩子函数的请求逻辑
+ * @param hookInstance hook实例
  * @param methodHandler 请求方法对象或获取函数
- * @param frontStates 前端状态集合
- * @param useHookConfig useHook配置对象
- * @param successHandlers 成功回调
- * @param errorHandlers 失败回调
- * @param completeHandlers 完成回调
  * @param sendCallingArgs send函数参数
- * @param isFetcher 是否更新缓存状态，一般在useFetcher时设置为true
  * @returns 请求状态
  */
 export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
   hookInstance: Hook,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  sendCallingArgs: any[] = [],
-  isFetcher = falseValue
+  sendCallingArgs: any[] = []
 ) {
   let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
   const {
@@ -82,6 +75,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       ht,
       c: useHookConfig
     } = hookInstance,
+    isFetcher = ht === EnumHookType.USE_FETCHER,
     { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
       | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
       | FetcherHookConfig,
@@ -91,7 +85,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       options: { errorLogger },
       storage
     } = alovaInstance,
-    { update } = promiseStatesHook(alovaInstance),
+    { update } = promiseStatesHook(),
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = getMethodInternalKey(methodInstance),
     { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
@@ -101,7 +95,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
   return (async () => {
     let sendableValue = falseValue;
     try {
-      sendableValue = !!sendable(createAlovaEvent(3, methodInstance, sendCallingArgs));
+      sendableValue = !!sendable(createAlovaEvent(AlovaEventType.AlovaEvent, methodInstance, sendCallingArgs));
     } catch (error) {}
 
     if (!sendableValue) {
@@ -174,10 +168,10 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       pushItem(hookInstance.rf, removeStates);
 
       // loading状态受控时将不更改loading
-      // 命中缓存，或强制请求时需要设置loading为true
+      // 未命中缓存，或强制请求时需要设置loading为true
       !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse }, frontStates, hookInstance);
 
-      const { enableDownload, enableUpload } = getConfig(methodInstance);
+      const { ed: enableDownload, eu: enableUpload } = hookInstance;
       offDownloadEvent = enableDownload ? methodInstance.onDownload(progressUpdater('downloading')) : offDownloadEvent;
       offUploadEvent = enableUpload ? methodInstance.onUpload(progressUpdater('uploading')) : offUploadEvent;
       responseHandlePromise = methodInstance.send(forceRequestFinally);
@@ -236,7 +230,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         );
       },
       // 是否需要更新响应数据，以及调用响应回调
-      toUpdateResponse = () => ht !== HOOK_WATCHER || !abortLast || hookInstance.m === methodInstance,
+      toUpdateResponse = () => ht !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance,
       fetchStates = exportFetchStates(frontStates),
       // 调用中间件函数
       middlewareCompletePromise = isFetcher
@@ -247,7 +241,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
               fetch: (matcher, ...args) => {
                 const methodInstance = filterSnapshotMethods(matcher, falseValue);
                 assertMethodMatcher(methodInstance);
-                return useHookToSendRequest(hookInstance, methodInstance as Method, args, trueValue);
+                return useHookToSendRequest(hookInstance, methodInstance as Method, args);
               },
               fetchStates,
               update: newFetchStates => update(newFetchStates, fetchStates, hookInstance),
@@ -294,12 +288,20 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
           runArgsHandler(
             successHandlers,
             successHandlerDecorator,
-            createAlovaEvent(0, methodInstance, sendCallingArgs, fromCache(), data)
+            createAlovaEvent(AlovaEventType.AlovaSuccessEvent, methodInstance, sendCallingArgs, fromCache(), data)
           );
           runArgsHandler(
             completeHandlers,
             completeHandlerDecorator,
-            createAlovaEvent(2, methodInstance, sendCallingArgs, fromCache(), data, undefinedValue, 'success')
+            createAlovaEvent(
+              AlovaEventType.AlovaCompleteEvent,
+              methodInstance,
+              sendCallingArgs,
+              fromCache(),
+              data,
+              undefinedValue,
+              'success'
+            )
           );
         }
         return data;
@@ -317,6 +319,9 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
             await promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue))
           : // 如果isNextCalled未被调用，则不返回数据
             undefinedValue;
+
+      // 未调用next函数时，更新loading为false
+      !isNextCalled && !controlledLoading && update({ loading: falseValue }, frontStates, hookInstance);
     } catch (error: any) {
       if (toUpdateResponse()) {
         // 控制在输出错误消息
@@ -328,12 +333,27 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         runArgsHandler(
           errorHandlers,
           errorHandlerDecorator,
-          createAlovaEvent(1, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error)
+          createAlovaEvent(
+            AlovaEventType.AlovaErrorEvent,
+            methodInstance,
+            sendCallingArgs,
+            fromCache(),
+            undefinedValue,
+            error
+          )
         );
         runArgsHandler(
           completeHandlers,
           completeHandlerDecorator,
-          createAlovaEvent(2, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error, 'error')
+          createAlovaEvent(
+            AlovaEventType.AlovaCompleteEvent,
+            methodInstance,
+            sendCallingArgs,
+            fromCache(),
+            undefinedValue,
+            error,
+            'error'
+          )
         );
       }
       throw error;

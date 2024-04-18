@@ -1,6 +1,5 @@
 import Method from '@/Method';
-import { getContext, newInstance } from './helper';
-import { ObjectCls } from './variables';
+import { getContext, newInstance, objAssign } from './helper';
 
 export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const { data, config } = methodInstance,
@@ -17,10 +16,8 @@ export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, R
     newConfig,
     data
   );
-
-  ObjectCls.assign(newMethod, {
+  return objAssign(newMethod, {
     ...methodInstance,
     config: newConfig
   });
-  return newMethod;
 };

@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import '@testing-library/jest-dom';
@@ -293,7 +293,7 @@ describe('useWatcher hook with react', () => {
 
     await untilCbCalled(setTimeout);
     fireEvent.click(screen.getByRole('button2'));
-    await untilCbCalled(setTimeout, 1000);
+    await delay(1000);
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
@@ -567,7 +567,7 @@ describe('useWatcher hook with react', () => {
 
     fireEvent.click(screen.getByRole('btn2'));
     // 将会命中缓存，因此不能再使用await screen.findByText('loaded')判断请求成功了
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('2');
     expect(screen.getByRole('id2')).toHaveTextContent('12');

@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { createAlova, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 
@@ -23,10 +23,13 @@ describe('Request shared', function () {
       requestAdapter() {
         requestMockFn();
         return {
-          response: async () => ({
-            status: 200,
-            data: { id: 1 }
-          }),
+          response: async () => {
+            await delay(5);
+            return {
+              status: 200,
+              data: { id: 1 }
+            };
+          },
           headers: async () => ({}),
           abort() {}
         };
@@ -38,24 +41,24 @@ describe('Request shared', function () {
     const state2 = useRequest(Get);
     expect(state1.loading.value).toBeTruthy();
     expect(state1.data.value).toBeUndefined();
-    expect(state1.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(state1.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(state1.error.value).toBeUndefined();
     expect(state2.loading.value).toBeTruthy();
     expect(state2.data.value).toBeUndefined();
-    expect(state2.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(state2.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(state2.error.value).toBeUndefined();
 
-    const { data: rawData } = await untilCbCalled(state1.onSuccess);
+    const [{ data: rawData }] = await Promise.all([untilCbCalled(state1.onSuccess), untilCbCalled(state2.onSuccess)]);
     expect(state1.loading.value).toBeFalsy();
     expect(state1.data.value.status).toBe(200);
     expect(state1.data.value.data).toStrictEqual({ id: 1 });
     expect(rawData.status).toBe(200);
     expect(rawData.data).toStrictEqual({ id: 1 });
-    expect(state1.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(state1.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(state2.loading.value).toBeFalsy();
     expect(state2.data.value.status).toBe(200);
     expect(state2.data.value.data).toStrictEqual({ id: 1 });
-    expect(state2.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(state2.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
 
     // 因为请求共享了，因此只执行一次
     expect(requestMockFn).toHaveBeenCalledTimes(1);
@@ -211,7 +214,7 @@ describe('Request shared', function () {
     });
   });
 
-  test('request shared promise will remove when abort request manually', async () => {
+  test('request shared promise will be removed when abort request manually', async () => {
     const alova = getAlovaInstance(VueHook, {
       localCache: {
         GET: 0
@@ -221,9 +224,10 @@ describe('Request shared', function () {
     const { abort, onError, error, onSuccess, send, data } = useRequest(Get);
 
     // 手动中断请求，将抛出错误
+    await delay(0);
     abort();
     await untilCbCalled(onError);
-    expect(error.value?.message).toBe('[alova]The user aborted a request.');
+    expect(error.value?.message).toBe('The user aborted a request.');
     expect(!!data.value).toBeFalsy();
 
     // 再次发送请求，此时应该成功

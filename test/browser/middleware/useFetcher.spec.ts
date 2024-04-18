@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useFetcher } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { FetcherType } from '~/typings';
@@ -32,7 +32,7 @@ describe('useFetcher middleware', function () {
     });
     const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
       middleware: async (_, next) => {
-        await untilCbCalled(setTimeout, 1000);
+        await delay(1000);
         await next();
       }
     });
@@ -65,7 +65,7 @@ describe('useFetcher middleware', function () {
     onSuccess(mockFn);
     // middleware中未调用next，因此不会发送请求
     expect(fetching.value).toBeFalsy();
-    await untilCbCalled(setTimeout, 1000);
+    await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
     expect(fetching.value).toBeFalsy();
   });

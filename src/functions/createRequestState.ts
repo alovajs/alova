@@ -1,31 +1,17 @@
-import createHook from '@/createHook';
+import { createHook } from '@/createHook';
+import Method from '@/Method';
 import { getResponseCache } from '@/storage/responseCache';
 import {
-  _self,
   debounce,
+  getContext,
   getHandlerMethod,
   getMethodInternalKey,
   isNumber,
   noop,
   promiseStatesHook,
-  sloughConfig
+  sloughConfig,
+  _self
 } from '@/utils/helper';
-import {
-  AlovaMethodHandler,
-  CompleteHandler,
-  ErrorHandler,
-  ExportedType,
-  FetchRequestState,
-  FetcherHookConfig,
-  FrontRequestHookConfig,
-  FrontRequestState,
-  Progress,
-  SuccessHandler,
-  UseHookConfig,
-  WatcherHookConfig
-} from '~/typings';
-import Alova from '../Alova';
-import Method from '../Method';
 import {
   deleteAttr,
   falseValue,
@@ -36,7 +22,22 @@ import {
   pushItem,
   trueValue,
   undefinedValue
-} from '../utils/variables';
+} from '@/utils/variables';
+import {
+  AlovaMethodHandler,
+  CompleteHandler,
+  EnumHookType,
+  ErrorHandler,
+  ExportedType,
+  FetcherHookConfig,
+  FetchRequestState,
+  FrontRequestHookConfig,
+  FrontRequestState,
+  Progress,
+  SuccessHandler,
+  UseHookConfig,
+  WatcherHookConfig
+} from '~/typings';
 import useHookToSendRequest from './useHookToSendRequest';
 
 const refCurrent = <T>(ref: { current: T }) => ref.current;
@@ -44,7 +45,6 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * 创建请求状态，统一处理useRequest、useWatcher、useFetcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
  * 当该值为空时，表示useFetcher进入的，此时不需要data状态和缓存状态
- * @param alovaInstance alova对象
  * @param methodInstance 请求方法对象
  * @param useHookConfig hook请求配置对象
  * @param initialData 初始data数据
@@ -54,8 +54,7 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
 export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig>(
-  hookType: 1 | 2 | 3,
-  alovaInstance: Alova<S, E, RC, RE, RH>,
+  hookType: EnumHookType,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   useHookConfig: UC,
   initialData?: any,
@@ -63,8 +62,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   watchingStates?: E[],
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
-  useHookConfig = { ...useHookConfig }; // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
-  const statesHook = promiseStatesHook(alovaInstance, 'useHooks'),
+  // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
+  useHookConfig = { ...useHookConfig };
+  const statesHook = promiseStatesHook('useHooks'),
     {
       create,
       export: stateExport,
@@ -72,18 +72,20 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       update,
       memorize = _self,
       ref = val => ({ current: val })
-    } = statesHook;
-  let initialLoading = immediate;
+    } = statesHook,
+    middleware = useHookConfig.middleware;
+  let initialLoading = middleware ? falseValue : !!immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
   // 1. 在react下立即发送请求可以少渲染一次
   // 2. SSR渲染的html中，其初始视图为loading状态的，避免在客户端展现时的loading视图闪动
-  if (immediate) {
+  // 3. 如果config.middleware中设置了`controlLoading`时，需要默认为false，但这边无法确定middleware中是否有调用`controlLoading`，因此条件只能放宽点，当有`config.middleware`时则初始`loading`为false
+  if (immediate && !middleware) {
+    // 调用getHandlerMethod时可能会报错，需要try/catch
     try {
-      const cachedResponse: R | undefined = getResponseCache(
-          alovaInstance.id,
-          getMethodInternalKey(getHandlerMethod(methodHandler))
-        ),
+      const methodInstance = getHandlerMethod(methodHandler),
+        alovaInstance = getContext(methodInstance),
+        cachedResponse: R | undefined = getResponseCache(alovaInstance.id, getMethodInternalKey(methodInstance)),
         forceRequestFinally = sloughConfig(
           (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
         );
@@ -111,16 +113,17 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     // 统一的发送请求函数
     handleRequest = (
       handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
-      sendCallingArgs?: any[],
-      updateCacheState?: boolean
-    ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs, updateCacheState),
+      sendCallingArgs?: any[]
+    ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs),
     // 以捕获异常的方式调用handleRequest
     // 捕获异常避免异常继续向外抛出
     wrapEffectRequest = () => {
       promiseCatch(handleRequest(), noop);
     };
 
-  // react中每次执行函数都需要重置以下项
+  /**
+   * ## react ##每次执行函数都需要重置以下项
+   **/
   hookInstance.fs = frontStates;
   hookInstance.sh = [];
   hookInstance.eh = [];
@@ -147,18 +150,20 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     );
   }
 
-  const exportedStates = {
-    loading: stateExport(frontStates.loading, hookInstance) as unknown as ExportedType<boolean, S>,
-    data: stateExport(frontStates.data, hookInstance) as unknown as ExportedType<R, S>,
-    error: stateExport(frontStates.error, hookInstance) as unknown as ExportedType<Error | null, S>,
-    downloading: stateExport(frontStates.downloading, hookInstance) as unknown as ExportedType<Progress, S>,
-    uploading: stateExport(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>
-  };
-
   type PartialFrontRequestState = Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>;
   type PartialFetchRequestState = Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>;
   return {
-    ...exportedStates,
+    loading: stateExport(frontStates.loading, hookInstance) as unknown as ExportedType<boolean, S>,
+    data: stateExport(frontStates.data, hookInstance) as unknown as ExportedType<R, S>,
+    error: stateExport(frontStates.error, hookInstance) as unknown as ExportedType<Error | null, S>,
+    get downloading() {
+      hookInstance.ed = trueValue;
+      return stateExport(frontStates.downloading, hookInstance) as unknown as ExportedType<Progress, S>;
+    },
+    get uploading() {
+      hookInstance.ed = trueValue;
+      return stateExport(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>;
+    },
     onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
       pushItem(hookInstance.sh, handler);
     },
@@ -177,7 +182,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       }
       update(newStates, frontStates, hookInstance);
     }),
-    abort: memorize(() => hookInstance.m && hookInstance.m.abort(), trueValue),
+    abort: memorize(() => hookInstance.m && hookInstance.m.abort()),
 
     /**
      * 通过执行该方法来手动发起请求
@@ -186,8 +191,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>, isFetcher?: boolean) =>
-      handleRequest(methodInstance, sendCallingArgs, isFetcher)
+    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>) =>
+      handleRequest(methodInstance, sendCallingArgs)
     ),
 
     /** 为兼容options框架，如vue2、原生小程序等，将config对象原样导出 */

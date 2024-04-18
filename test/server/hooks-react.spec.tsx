@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result } from '#/utils';
 import { useRequest } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import React, { ReactElement } from 'react';
@@ -34,7 +34,7 @@ describe('[react]use hooks in SSR', function () {
     expect(html).toMatch('<span role="method"></span>');
 
     // 200ms后依然为请求前状态
-    await untilCbCalled(setTimeout, 200);
+    await delay(200);
     expect(successMockFn).not.toHaveBeenCalled();
   });
 });

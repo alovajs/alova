@@ -3,7 +3,7 @@ import VueHook from '@/predefine/VueHook';
 import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
 // import mockServer from '../../mockServer';
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 
 describe('cache data', function () {
   test("change the default localCache's setting Globally", async () => {
@@ -88,7 +88,7 @@ describe('cache data', function () {
     // 使用缓存时，将会立即获得数据
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
 
-    await untilCbCalled(setTimeout, 600);
+    await delay(600);
     const thirdState = useRequest(Get);
     expect(thirdState.loading.value).toBeTruthy(); // 因为缓存已过期，所以会重新发起请求，loading会改变
   });
@@ -110,7 +110,7 @@ describe('cache data', function () {
     // 使用缓存时，将会立即获得数据
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
 
-    await untilCbCalled(setTimeout, 1000);
+    await delay(1000);
     const thirdState = useRequest(Get);
     expect(thirdState.loading.value).toBeFalsy(); // 因为缓存未过期，所以继续使用缓存数据，loading不会改变
   });

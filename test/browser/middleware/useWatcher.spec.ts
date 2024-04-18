@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useWatcher } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { ref } from 'vue';
@@ -41,12 +41,12 @@ describe('useWatcher middleware', function () {
     const stateA = ref(0);
     const { loading, onSuccess } = useWatcher(() => getGetterObj, [stateA], {
       middleware: async (_, next) => {
-        await untilCbCalled(setTimeout, 500);
+        await delay(500);
         await next();
       },
       immediate: true
     });
-    expect(loading.value).toBeFalsy(); // 延迟1秒发送请求，表示异步发送请求，因此loading为false
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
     let startTs = Date.now();
     const rawData = await untilCbCalled(onSuccess);
     let endTs = Date.now();
@@ -77,14 +77,14 @@ describe('useWatcher middleware', function () {
     const mockFn = jest.fn();
     onSuccess(mockFn);
     // middleware中未调用next，因此不会发送请求
-    expect(loading.value).toBeFalsy();
-    await untilCbCalled(setTimeout, 1000);
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
 
     stateA.value++;
-    await untilCbCalled(setTimeout, 1000);
+    await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
 
     const rawData = await send();

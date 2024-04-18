@@ -1,19 +1,17 @@
 import createRequestState from '@/functions/createRequestState';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { exportFetchStates, noop } from '@/utils/helper';
-import { assertAlovaCreation, assertMethodMatcher } from '@/utils/myAssert';
-import { HOOK_FETCHER, alovas, falseValue, trueValue } from '@/utils/variables';
-import { FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
+import { assertMethodMatcher } from '@/utils/myAssert';
+import { falseValue } from '@/utils/variables';
+import { EnumHookType, FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
 
 /**
  * 获取请求数据并缓存
  * @param method 请求方法对象
  */
 export default function useFetcher<SE extends FetcherType<any>>(config: FetcherHookConfig = {}) {
-  assertAlovaCreation();
   const props = createRequestState<SE['state'], SE['export'], any, any, any, any, any, FetcherHookConfig>(
-    HOOK_FETCHER,
-    alovas[0],
+    EnumHookType.USE_FETCHER,
     noop as any,
     config
   );
@@ -34,7 +32,7 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
     fetch: <S, E, R, T, RC, RE, RH>(matcher: MethodMatcher<S, E, R, T, RC, RE, RH>, ...args: any[]) => {
       const methodInstance = filterSnapshotMethods(matcher, falseValue);
       assertMethodMatcher(methodInstance);
-      return props.send(args, methodInstance, trueValue);
+      return props.send(args, methodInstance);
     }
   };
 }
