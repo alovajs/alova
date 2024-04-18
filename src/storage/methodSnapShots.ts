@@ -1,9 +1,11 @@
+import { globalConfigMap } from '@/globalConfig';
 import { getConfig, instanceOf, isPlainObject, isString } from '@/utils/helper';
 import { forEach, isArray, objectKeys, pushItem, trueValue, undefinedValue } from '@/utils/variables';
 import { Method, MethodFilter, MethodFilterHandler, MethodMatcher } from '~/typings';
 
 /** method实例快照集合，发送过请求的method实例将会被保存 */
 const methodSnapshots: Record<string, Record<string, Method>> = {};
+let snapshotCount = 0;
 
 /**
  * 保存method实例快照
@@ -11,8 +13,11 @@ const methodSnapshots: Record<string, Record<string, Method>> = {};
  * @param methodInstance method实例
  */
 export const saveMethodSnapshot = (namespace: string, key: string, methodInstance: Method) => {
-  const namespacedSnapshots = (methodSnapshots[namespace] = methodSnapshots[namespace] || {});
-  namespacedSnapshots[key] = methodInstance;
+  if (snapshotCount < globalConfigMap.limitSnapshots) {
+    const namespacedSnapshots = (methodSnapshots[namespace] = methodSnapshots[namespace] || {});
+    namespacedSnapshots[key] = methodInstance;
+    snapshotCount++;
+  }
 };
 
 /**
