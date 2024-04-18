@@ -6,7 +6,6 @@ import {
   JSONStringify,
   ObjectCls,
   promiseReject,
-  promiseThen,
   setTimeoutFn,
   trueValue
 } from '@/utils/variables';
@@ -46,8 +45,7 @@ export default function GlobalFetch() {
 
     return {
       response: () =>
-        promiseThen(
-          fetchPromise,
+        fetchPromise.then(
           response => {
             // 请求成功后清除中断处理
             clearTimeoutTimer(abortTimer);
@@ -55,22 +53,26 @@ export default function GlobalFetch() {
             // Response的Readable只能被读取一次，需要克隆才可重复使用
             return response.clone();
           },
-          err => promiseReject(alovaError(isTimeout ? 'fetchError: network timeout' : err.message))
+          err => promiseReject(isTimeout ? alovaError('fetchError: network timeout') : err)
         ),
 
       // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
       headers: () =>
-        promiseThen(
-          fetchPromise,
+        fetchPromise.then(
           ({ headers }) => headers,
           () => ({} as Headers)
         ),
       // 因nodeFetch库限制，这块代码无法进行单元测试，但已在浏览器中通过测试
       /* c8 ignore start */
       onDownload: async (cb: (total: number, loaded: number) => void) => {
-        const response = await fetchPromise;
+        let isAborted = falseValue;
+        const response = await fetchPromise.catch(() => {
+          isAborted = trueValue;
+        });
+        if (!response) return;
+
         const { headers, body } = response.clone(),
-          reader = body?.getReader(),
+          reader = body?.getReader?.(),
           total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
         if (total <= 0) {
           return;
@@ -78,8 +80,9 @@ export default function GlobalFetch() {
         let loaded = 0;
         if (reader) {
           const progressTimer = setInterval(() => {
-            promiseThen(reader.read(), ({ done, value = new Uint8Array() }) => {
-              if (done) {
+            reader.read().then(({ done, value = new Uint8Array() }) => {
+              if (done || isAborted) {
+                isAborted && cb(total, 0);
                 clearInterval(progressTimer);
               } else {
                 loaded += value.byteLength;
