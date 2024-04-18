@@ -1,5 +1,6 @@
+import { usingStorageAdapters } from '@/alova';
 import { getTime } from '@/utils/helper';
-import { alovas, forEach, nullValue, pushItem, undefinedValue } from '@/utils/variables';
+import { forEach, nullValue, pushItem, undefinedValue } from '@/utils/variables';
 import { AlovaGlobalStorage } from '~/typings';
 
 const responseStorageKeyPrefix = 'alova.';
@@ -100,8 +101,7 @@ export const removePersistentResponse = (namespace: string, key: string, storage
  * 清空所有存储的响应数据
  */
 export const clearPersistentResponse = () => {
-  forEach(alovas, alovaInst => {
-    const { storage } = alovaInst;
+  forEach(usingStorageAdapters, storage => {
     const allKeys: string[] = storage.get(storageNameMethodKey) || [];
     forEach(allKeys, keyItem => {
       storage.remove(keyItem);

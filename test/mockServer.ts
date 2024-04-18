@@ -2,10 +2,12 @@ import { readFileSync } from 'fs';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import path from 'path';
+import { delay } from './utils';
 
 // -------------------
 // 服务模拟
-const result = (code: number, req: any, res: any, ctx: any, hasBody = false, extraParams = {}) => {
+const result = async (code: number, req: any, res: any, ctx: any, hasBody = false, extraParams = {}) => {
+  await delay(10);
   const ret = {
     code,
     msg: '',
@@ -35,8 +37,9 @@ export const baseURL = 'http://localhost:3000';
 const countMap = {} as Record<string, number>;
 const mockServer = setupServer(
   rest.get(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx)),
-  rest.get(baseURL + '/unit-test-1s', (req, res, ctx) => {
-    return new Promise(r => setTimeout(() => r(result(200, req, res, ctx)), 1000));
+  rest.get(baseURL + '/unit-test-1s', async (req, res, ctx) => {
+    await delay(900);
+    return result(200, req, res, ctx);
   }),
   rest.get(baseURL + '/unit-test-count', (req, res, ctx) => {
     const key = req.url.searchParams.get('countKey') || '';
@@ -55,7 +58,8 @@ const mockServer = setupServer(
   rest.head(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
   rest.patch(baseURL + '/unit-test', (req, res, ctx) => result(200, req, res, ctx, true)),
   rest.options(baseURL + '/unit-test', (_, res, ctx) => res(ctx.json({}))),
-  rest.get(baseURL + '/unit-test-download', (_, res, ctx) => {
+  rest.get(baseURL + '/unit-test-download', async (_, res, ctx) => {
+    await delay(10);
     // Read the image from the file system using the "fs" module.
     const imageBuffer = readFileSync(path.resolve(__dirname, './image.jpg'));
     return res(

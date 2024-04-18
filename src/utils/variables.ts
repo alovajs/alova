@@ -1,4 +1,3 @@
-import { Alova } from '~/typings';
 import { GeneralFn } from './helper';
 
 const undefStr = 'undefined';
@@ -35,10 +34,6 @@ export const PromiseCls = Promise as typeof Promise<any>,
   isArray = (arg: any): arg is any[] => Array.isArray(arg),
   deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) => delete arg[attr],
   typeOf = (arg: any) => typeof arg,
-  /** hook类型 */
-  HOOK_REQUEST = 1,
-  HOOK_WATCHER = 2,
-  HOOK_FETCHER = 3,
   /** 三种缓存模式 */
   // 只在内存中缓存，默认是此选项
   MEMORY = 'memory',
@@ -49,5 +44,4 @@ export const PromiseCls = Promise as typeof Promise<any>,
   STORAGE_RESTORE = 'restore',
   noBrowserWin = typeof window === undefStr || !window.location,
   // 是否为服务端运行，为了兼容浏览器以及非web客户端环境（如小程序），需要再判断一下process
-  isSSR = noBrowserWin && typeof process !== undefStr,
-  alovas = [] as Alova<any, any, any, any, any>[];
+  isSSR = noBrowserWin && typeof process !== undefStr;

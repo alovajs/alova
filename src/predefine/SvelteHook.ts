@@ -1,4 +1,4 @@
-import { onDestroy } from 'svelte';
+import { onDestroy, onMount } from 'svelte';
 import { writable, Writable } from 'svelte/store';
 import { EffectRequestParams } from '~/typings';
 import {
@@ -29,7 +29,8 @@ export default {
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<Writable<any>>) {
     // 组件卸载时移除对应状态
     onDestroy(removeStates);
-    immediate && handler();
+    onMount(() => immediate && handler());
+
     let timer: any,
       needEmit = falseValue;
     forEach(watchingStates || [], (state, i) => {

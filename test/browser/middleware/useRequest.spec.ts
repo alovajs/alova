@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 
@@ -33,7 +33,9 @@ describe('useRequet middleware', function () {
       middleware: (_, next) => next()
     });
 
-    expect(loading.value).toBeTruthy();
+    expect(loading.value).toBeFalsy(); // 设置了middleware后默认为false
+    await delay();
+    expect(loading.value).toBeTruthy(); // 开始请求
     const { data: rawData } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(!!rawData).toBeTruthy();
@@ -57,8 +59,10 @@ describe('useRequet middleware', function () {
 
     const mockFn = jest.fn();
     onError(mockFn);
-    expect(loading.value).toBeTruthy();
+    expect(loading.value).toBeFalsy(); // 设置了middleware后默认为false
     expect(error.value).toBeUndefined();
+    await delay();
+    expect(loading.value).toBeTruthy(); // 开始请求
     const { error: errRaw } = await untilCbCalled(onError);
     expect(mockFn).toHaveBeenCalledTimes(1);
     expect(loading.value).toBeFalsy();
@@ -84,7 +88,7 @@ describe('useRequet middleware', function () {
     const { loading, onSuccess } = useRequest(getGetterObj, {
       middleware: async (context, next) => {
         expect(context.method).toBe(getGetterObj);
-        await untilCbCalled(setTimeout, 500);
+        await delay(500);
         const resp = await next();
         expect(resp).toEqual({
           path: '/unit-test',
@@ -93,7 +97,7 @@ describe('useRequet middleware', function () {
         });
       }
     });
-    expect(loading.value).toBeFalsy(); // 延迟1秒发送请求，表示异步发送请求，因此loading为false
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
     const startTs = Date.now();
     const rawData = await untilCbCalled(onSuccess);
     const endTs = Date.now();
@@ -114,9 +118,10 @@ describe('useRequet middleware', function () {
 
     const mockFn = jest.fn();
     onSuccess(mockFn);
+
     // middleware中未调用next，因此不会发送请求
-    expect(loading.value).toBeFalsy();
-    await untilCbCalled(setTimeout, 1000);
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
@@ -156,7 +161,9 @@ describe('useRequet middleware', function () {
     });
     const mockFn = jest.fn();
     onSuccess(mockFn);
-    expect(loading.value).toBeTruthy();
+    expect(loading.value).toBeFalsy(); // 设置了middleware后默认为false
+    await delay();
+    expect(loading.value).toBeTruthy(); // 开始请求
     await untilCbCalled(onSuccess);
     expect(data.value.params.a).toBe('a');
     expect(data.value.params.b).toBe('b');
@@ -194,7 +201,7 @@ describe('useRequet middleware', function () {
           expect(event.sendArgs).toStrictEqual([]);
           mockFn2();
         });
-        await untilCbCalled(setTimeout, 400);
+        await delay(400);
         await next();
       }
     });
@@ -212,10 +219,10 @@ describe('useRequet middleware', function () {
       mockFn2();
     });
 
-    expect(loading.value).toBeTruthy();
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeInstanceOf(Error);
     expect(data.value).toBeUndefined();
@@ -232,7 +239,7 @@ describe('useRequet middleware', function () {
     });
     const { loading, error, onSuccess, data, send } = useRequest(getGetterObj, {
       middleware: async (_, next) => {
-        await untilCbCalled(setTimeout, 400);
+        await delay(400);
         try {
           await next();
         } catch (e) {}
@@ -240,7 +247,7 @@ describe('useRequet middleware', function () {
     });
 
     // 错误在middleware中捕获后，外部不再接收到错误
-    expect(loading.value).toBeTruthy();
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     await untilCbCalled(onSuccess);
@@ -271,7 +278,7 @@ describe('useRequet middleware', function () {
     });
 
     // 只有在中间件中未返回数据或返回undefined时才继续获取真实的响应数据，否则使用返回数据并不再等待响应promise
-    expect(loading.value).toBeFalsy();
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     await untilCbCalled(onSuccess);
@@ -323,7 +330,7 @@ describe('useRequet middleware', function () {
       mockFn2();
       expect(customNum).toBe(1);
     });
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(mockFn).toHaveBeenCalledTimes(2);
     expect(mockFn2).toHaveBeenCalledTimes(2);
   });
@@ -344,7 +351,7 @@ describe('useRequet middleware', function () {
         });
       }
     });
-    expect(loading.value).toBeFalsy(); // loading是需要调用next才会改变
+    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
     const { data: dataRaw } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({ anotherData: '123' });
@@ -359,6 +366,7 @@ describe('useRequet middleware', function () {
     } = useRequest(getGetterObj, {
       middleware: ({ update }) => {
         update({ loading: true });
+        expect(loadingFail.value).toBeTruthy();
         return new Promise((_, reject) => {
           setTimeout(() => {
             reject(new Error('middleware custom error'));
@@ -366,7 +374,9 @@ describe('useRequet middleware', function () {
         });
       }
     });
-    expect(loadingFail.value).toBeTruthy(); // middleware函数中手动更改了loading值
+    expect(loadingFail.value).toBeFalsy(); // 设置了middleware后默认为false
+    await delay();
+    expect(loadingFail.value).toBeTruthy(); // 开始请求
     const { error: errorRaw } = await untilCbCalled(onError);
     expect(loadingFail.value).toBeFalsy();
     expect(failData.value).toBeUndefined();
@@ -395,10 +405,13 @@ describe('useRequet middleware', function () {
       middleware: ({ controlLoading, update }, next) => {
         controlLoading();
         update({ loading: true });
+        expect(state2.loading.value).toBeTruthy();
         return next();
       }
     });
-    expect(state2.loading.value).toBeTruthy(); // loading已受控
+    expect(state2.loading.value).toBeFalsy(); // 默认为false
+    await delay();
+    expect(state2.loading.value).toBeTruthy(); // 开始请求，但loading已受控
     await untilCbCalled(state2.onSuccess);
     expect(state2.loading.value).toBeTruthy();
   });
@@ -427,6 +440,7 @@ describe('useRequet middleware', function () {
         return next();
       }
     });
+    await delay();
     expect(sendInMiddleware).toBeInstanceOf(Function);
     await untilCbCalled(onSuccess);
     expect(data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
@@ -454,16 +468,19 @@ describe('useRequet middleware', function () {
         return next();
       }
     });
-    expect(loading.value).toBeTruthy();
+    expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
+
+    await delay();
+    expect(loading.value).toBeTruthy();
 
     const err = await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeInstanceOf(Object);
-    expect(error.value).toBe(err.error);
-    expect(error.value?.message).toBe('[alova]The user aborted a request.');
+    expect(error.value).toStrictEqual(err.error);
+    expect(error.value?.message).toBe('The user aborted a request.');
   });
 
   test('should abort request like abort function in returns when call abort in middleware(non-immediate)', async () => {
@@ -490,7 +507,7 @@ describe('useRequet middleware', function () {
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
-    await untilCbCalled(setTimeout, 200);
+    await delay(200);
     expect(errFn).not.toHaveBeenCalled();
 
     expect(loading.value).toBeFalsy();

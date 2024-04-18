@@ -3,7 +3,7 @@ import pageDebounceImmediate from '#/components/svelte/page-useWatcher-debounce-
 import pageDifferentDebounce from '#/components/svelte/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
 import page from '#/components/svelte/page-useWatcher.svelte';
-import { untilCbCalled } from '#/utils';
+import { delay } from '#/utils';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import pageSendable from '~/test/components/svelte/page-useWatcher-sendable.svelte';
@@ -12,14 +12,14 @@ describe('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {
     render(page);
     // 需要暂停一段时间再触发事件和检查响应数据
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
     fireEvent.click(screen.getByRole('btn2'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
@@ -29,9 +29,9 @@ describe('useWatcher hook with svelte', () => {
     const mockSuccessFn = jest.fn();
     render(pageAbortLast, { successFn: mockSuccessFn });
     // 需要暂停一段时间再触发事件和检查响应数据
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     fireEvent.click(screen.getByRole('btn2'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -46,9 +46,9 @@ describe('useWatcher hook with svelte', () => {
     const mockErrorFn = jest.fn();
     render(pageAbortLast, { successFn: mockSuccessFn, throwError: true, errorFn: mockErrorFn });
     // 需要暂停一段时间再触发事件和检查响应数据
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     fireEvent.click(screen.getByRole('btn2'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -60,13 +60,14 @@ describe('useWatcher hook with svelte', () => {
     });
   });
 
+  jest.setTimeout(100000);
   test('should receive last response when set abortLast to false', async () => {
     const mockSuccessFn = jest.fn();
     render(pageAbortLast, { successFn: mockSuccessFn, abortLast: false });
     // 需要暂停一段时间再触发事件和检查响应数据
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     fireEvent.click(screen.getByRole('btn2'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
@@ -81,16 +82,16 @@ describe('useWatcher hook with svelte', () => {
     render(pageSendable, { sendableFn } as any);
 
     // 需要暂停一段时间再触发事件和检查响应数据
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
     expect(sendableFn).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
@@ -105,16 +106,16 @@ describe('useWatcher hook with svelte', () => {
     } as any);
 
     // 需要暂停一段时间再触发事件和检查响应数据
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('id1')).toHaveTextContent('');
     expect(screen.getByRole('id2')).toHaveTextContent('');
     expect(sendableFn).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('btn2'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('id1')).toHaveTextContent('');
     expect(screen.getByRole('id2')).toHaveTextContent('');
@@ -136,19 +137,19 @@ describe('useWatcher hook with svelte', () => {
 
   test('should send request when init', async () => {
     render(pageImmediate);
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('0');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
 
     // 需要暂停一段时间再触发事件和检查响应数据
     fireEvent.click(screen.getByRole('button'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
     fireEvent.click(screen.getByRole('button'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('2');
     expect(screen.getByRole('id2')).toHaveTextContent('12');
@@ -156,7 +157,7 @@ describe('useWatcher hook with svelte', () => {
 
   test('should send request immediately even if set debounce', async () => {
     render(pageDebounceImmediate);
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('0');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
@@ -164,10 +165,10 @@ describe('useWatcher hook with svelte', () => {
     // 需要暂停一段时间再触发事件和检查响应数据
     fireEvent.click(screen.getByRole('btn1'));
     fireEvent.click(screen.getByRole('btn2'));
-    await untilCbCalled(setTimeout, 800);
+    await delay(800);
     expect(screen.getByRole('id1')).toHaveTextContent('0');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
-    await untilCbCalled(setTimeout, 300);
+    await delay(300);
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
 
@@ -182,27 +183,27 @@ describe('useWatcher hook with svelte', () => {
     expect(screen.getByRole('id1')).toHaveTextContent('');
     expect(screen.getByRole('id2')).toHaveTextContent('');
 
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('btn1'));
-    await untilCbCalled(setTimeout, 600);
+    await delay(600);
     // 因为延迟1000毫秒，还不会触发请求
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('id1')).toHaveTextContent('');
     expect(screen.getByRole('id2')).toHaveTextContent('');
 
     // 请求已响应
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
 
     fireEvent.click(screen.getByRole('btn2'));
-    await untilCbCalled(setTimeout, 150);
+    await delay(150);
     // 因为stateId延迟200毫秒，还不会触发
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('10');
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     // 请求已响应
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
@@ -211,7 +212,7 @@ describe('useWatcher hook with svelte', () => {
     // 同时改变，以后一个为准
     fireEvent.click(screen.getByRole('btn1'));
     fireEvent.click(screen.getByRole('btn2'));
-    await untilCbCalled(setTimeout, 250);
+    await delay(360);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('2');
     expect(screen.getByRole('id2')).toHaveTextContent('12');

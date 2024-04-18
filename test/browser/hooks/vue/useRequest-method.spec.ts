@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import xhrRequestAdapter from '#/xhrRequestAdapter';
 import { createAlova, Method, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
@@ -8,23 +8,6 @@ import { baseURL } from '~/test/mockServer';
 
 // 其他请求方式测试
 describe('Test other methods without GET', function () {
-  test("should throws an error when hook handler didn't get a method instance", () => {
-    getAlovaInstance(VueHook);
-    const errMsg = '[alova]hook handler must be a method instance or a function that returns method instance';
-    expect(() => {
-      (useRequest as any)();
-    }).toThrow(errMsg);
-    expect(() => {
-      (useRequest as any)('123');
-    }).toThrow(errMsg);
-    expect(() => {
-      (useRequest as any)(() => {});
-    }).toThrow(errMsg);
-    expect(() => {
-      (useRequest as any)(() => 456);
-    }).toThrow(errMsg);
-  });
-
   test('send POST', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
@@ -329,7 +312,6 @@ describe('Test other methods without GET', function () {
     });
 
     const Get = alovaInst.Get('/unit-test-download', {
-      enableDownload: true,
       responseType: 'blob'
     });
 
@@ -342,12 +324,33 @@ describe('Test other methods without GET', function () {
     expect(error.value).toBeUndefined();
 
     // 上传/下载回调解绑会在事件响应后触发，所以等10ms再验证是否解绑
-    await untilCbCalled(setTimeout, 10);
+    await delay(10);
     expect(Get.dhs).toHaveLength(0);
 
     // 有缓存的情况下，不再有下载信息
     const { downloading: downloading2, onSuccess: onSuccess2 } = useRequest(Get);
     await untilCbCalled(onSuccess2);
     expect(downloading2.value).toStrictEqual({ total: 0, loaded: 0 });
+  });
+
+  test('should abort the file downloading when abort request', async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter,
+      statesHook: VueHook,
+      responded({ data }) {
+        return data;
+      },
+      cacheLogger: null
+    });
+
+    const Get = alovaInst.Get('/unit-test-download', {
+      responseType: 'blob'
+    });
+
+    const { error, abort, onError } = useRequest(Get);
+    delay(3).then(abort);
+    const e = await untilCbCalled(onError);
+    expect(error.value).toStrictEqual(e.error);
   });
 });

@@ -1,11 +1,18 @@
-import { AlovaGlobalStorage, AlovaMethodConfig, AlovaOptions, MethodRequestConfig, RequestBody } from '~/typings';
+import {
+  AlovaGlobalStorage,
+  AlovaMethodConfig,
+  AlovaOptions,
+  MethodRequestConfig,
+  RequestBody,
+  StatesHook
+} from '~/typings';
 import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 import globalLocalStorage from './predefine/globalLocalStorage';
-import { newInstance } from './utils/helper';
-import { trueValue } from './utils/variables';
+import { getStatesHook, newInstance } from './utils/helper';
+import myAssert from './utils/myAssert';
+import { pushItem, trueValue, undefinedValue } from './utils/variables';
 
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
-
 const defaultAlovaOptions = {
   /**
    * GET请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
@@ -21,7 +28,7 @@ const defaultAlovaOptions = {
 };
 
 let idCounter = 0;
-export default class Alova<S, E, RC, RE, RH> {
+export class Alova<S, E, RC, RE, RH> {
   public options: AlovaOptions<S, E, RC, RE, RH>;
   public id = ++idCounter + '';
   public storage: AlovaGlobalStorage;
@@ -57,3 +64,23 @@ export default class Alova<S, E, RC, RE, RH> {
     return newInstance(Method<S, E, R, T, RC, RE, RH>, typeOptions, this, url, config);
   }
 }
+
+export let boundStatesHook: StatesHook<any, any> | undefined = undefinedValue;
+export const usingStorageAdapters: AlovaGlobalStorage[] = [];
+
+/**
+ * 创建Alova实例
+ * @param options alova配置参数
+ * @returns Alova实例
+ */
+export const createAlova = <S, E, RC, RE, RH>(options: AlovaOptions<S, E, RC, RE, RH>) => {
+  const alovaInstance = newInstance(Alova<S, E, RC, RE, RH>, options),
+    newStatesHook = getStatesHook(alovaInstance);
+  if (boundStatesHook) {
+    myAssert(boundStatesHook === newStatesHook, 'must use the same `statesHook` in single project');
+  }
+  boundStatesHook = newStatesHook;
+  const storageAdapter = alovaInstance.storage;
+  !usingStorageAdapters.includes(storageAdapter) && pushItem(usingStorageAdapters, storageAdapter);
+  return alovaInstance;
+};

@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { setCache, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
@@ -221,7 +221,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeInstanceOf(Object);
-    expect(error.value).toBe(err.error);
+    expect(error.value).toStrictEqual(err.error);
   });
 
   test('abort request manually with abort function returns in useRequest(non-immediate)', async () => {
@@ -263,8 +263,8 @@ describe('use useRequest hook to send GET with vue', function () {
     const err = await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeInstanceOf(Object);
-    expect(error.value).toBe(err.error);
+    expect(error.value).toBeInstanceOf(Error);
+    expect(error.value).toStrictEqual(err.error);
   });
 
   test('abort request manually with cloned method instance in beforeRequest', async () => {
@@ -288,7 +288,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeInstanceOf(Object);
-    expect(error.value).toBe(err.error);
+    expect(error.value).toStrictEqual(err.error);
   });
 
   test('it can pass custom params when call `send` function, and the function will return a Promise instance', async () => {
@@ -323,7 +323,7 @@ describe('use useRequest hook to send GET with vue', function () {
     });
 
     // 延迟一会儿发送请求
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     const sendObj = { a: '~', b: '~' };
     let rawData = await send(sendObj);
     expect(rawData.path).toBe('/unit-test');
@@ -371,7 +371,7 @@ describe('use useRequest hook to send GET with vue', function () {
     });
 
     // 延迟一会儿发送请求
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     try {
       const data = await send(3);
       expect(data.path).toBe('/unit-test');

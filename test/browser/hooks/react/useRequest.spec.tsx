@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result } from '#/utils';
 import { createAlova, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import ReactHook from '@/predefine/ReactHook';
@@ -306,26 +306,26 @@ describe('useRequet hook with react', () => {
       );
     }
     render((<Page />) as ReactElement<any, any>);
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('btnUpd'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/abc0');
     });
     fireEvent.click(screen.getByRole('btnAbort'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova]The user aborted a request.');
+      expect(screen.getByRole('error')).toHaveTextContent('The user aborted a request.');
     });
 
     // 再一次进行中断
     fireEvent.click(screen.getByRole('btnSend'));
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('btnUpd'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/abc1');
     });
     fireEvent.click(screen.getByRole('btnAbort'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova]The user aborted a request.');
+      expect(screen.getByRole('error')).toHaveTextContent('The user aborted a request.');
     });
   });
 });

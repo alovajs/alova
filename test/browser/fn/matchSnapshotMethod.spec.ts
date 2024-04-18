@@ -1,10 +1,49 @@
 import { getAlovaInstance } from '#/utils';
+import { globalConfig } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
 import { key } from '@/utils/helper';
 import { falseValue } from '@/utils/variables';
 
 describe('matchSnapshotMethod', function () {
+  test('should change snapshot limitation when set `limitSnapshots` in globalConfig', () => {
+    globalConfig({
+      limitSnapshots: 0
+    });
+
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 1 },
+      name: 'limitation-method-test'
+    });
+    const Get2 = alova.Get('/unit-test', {
+      params: { a: 2 },
+      name: 'limitation-method-test'
+    });
+    saveMethodSnapshot(alova.id, key(Get1), Get1);
+    saveMethodSnapshot(alova.id, key(Get2), Get2);
+
+    // 由于限制为了0个，不能匹配到
+    let matchedMethods = matchSnapshotMethod('limitation-method-test');
+    expect(matchedMethods).toHaveLength(0);
+
+    globalConfig({
+      limitSnapshots: 1
+    });
+    saveMethodSnapshot(alova.id, key(Get1), Get1);
+    saveMethodSnapshot(alova.id, key(Get2), Get2);
+    matchedMethods = matchSnapshotMethod('limitation-method-test');
+    // 由于限制为了1个，只能匹配到1个
+    expect(matchedMethods).toHaveLength(1);
+
+    // 恢复限制
+    globalConfig({
+      limitSnapshots: 1000
+    });
+  });
+
   test('match with name string', () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

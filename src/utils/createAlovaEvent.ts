@@ -2,11 +2,20 @@ import { AlovaCompleteEvent, Method } from '~/typings';
 import { forEach, ObjectCls, objectKeys, undefinedValue } from './variables';
 
 /**
+ * 事件类型枚举
+ */
+export const enum AlovaEventType {
+  AlovaSuccessEvent,
+  AlovaErrorEvent,
+  AlovaCompleteEvent,
+  AlovaEvent
+}
+
+/**
  * 创建统一的事件对象
- *
  */
 export default <S, E, R, T, RC, RE, RH>(
-  eventType: number,
+  eventType: AlovaEventType,
   method: Method<S, E, R, T, RC, RE, RH>,
   sendArgs: any[],
   fromCache?: boolean,

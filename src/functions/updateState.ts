@@ -32,7 +32,7 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
   if (methodInstance) {
     onMatch(methodInstance); // 触发onMatch事件
-    const { dehydrate, update } = promiseStatesHook(getContext(methodInstance), 'updateState'),
+    const { dehydrate, update } = promiseStatesHook('updateState'),
       methodKey = getMethodInternalKey(methodInstance),
       { id, storage } = getContext(methodInstance),
       { s: frontStates, h: hookInstance } = getStateCache(id, methodKey),

@@ -1,5 +1,5 @@
 import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
-import { getCurrentInstance, onUnmounted, Ref, ref, watch, WatchSource } from 'vue';
+import { getCurrentInstance, onMounted, onUnmounted, Ref, ref, watch, WatchSource } from 'vue';
 import { EffectRequestParams } from '~/typings';
 
 type UnknownRef = Ref<unknown>;
@@ -13,11 +13,16 @@ export default {
       states[key].value = newVal[key];
     }),
   effectRequest({ handler, removeStates, immediate, watchingStates }: EffectRequestParams<WatchSource>) {
+    // 当在组件内部使用时，组件卸载时移除对应状态
     if (getCurrentInstance()) {
-      // 当在组件内部使用时，组件卸载时移除对应状态
       onUnmounted(removeStates);
+      onMounted(() => immediate && handler());
+    } else {
+      // 在非组件内部使用时，使用定时器延迟执行
+      setTimeoutFn(() => {
+        immediate && handler();
+      });
     }
-    immediate && handler();
 
     let timer: any;
     forEach(watchingStates || [], (state, i) => {

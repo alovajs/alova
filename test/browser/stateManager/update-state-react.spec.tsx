@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result } from '#/utils';
 import { updateState, useRequest, useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import { getResponseCache } from '@/storage/responseCache';
@@ -38,7 +38,7 @@ describe('update cached response data by user in react', function () {
     await screen.findByText(/unit-test/);
 
     // 延迟检查页面是否有更新
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
     const cacheData = getResponseCache(alova.id, key(Get));
     expect(cacheData.path).toBe('/unit-test-updated'); // 除了状态数据被更新外，缓存也将会被更新

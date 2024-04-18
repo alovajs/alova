@@ -124,12 +124,14 @@ export type AlovaMethodConfig<R, T, RC, RH> = {
   /**
    * 是否启用下载进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
    * @default false
+   * @deprecated [v2.20.0+]自动判断是否启用下载进度
    */
   enableDownload?: boolean;
 
   /**
    * 是否启用上传进度信息，启用后每次请求progress才会有进度值，否则一致为0，默认不开启
    * @default false
+   * @deprecated [v2.20.0+]自动判断是否启用上传进度
    */
   enableUpload?: boolean;
 
@@ -181,7 +183,11 @@ export type ResponsedHandlerRecord<S, E, RC, RE, RH> = {
   onComplete?: ResponseCompleteHandler<S, E, RC, RE, RH>;
 };
 
-export type HookType = 1 | 2 | 3;
+export const enum EnumHookType {
+  USE_REQUEST = 1,
+  USE_WATCHER = 2,
+  USE_FETCHER = 3
+}
 export interface Hook {
   /** 最后一次请求的method实例 */
   m?: Method;
@@ -205,10 +211,16 @@ export interface Hook {
   ch: CompleteHandler<any, any, any, any, any, any, any>[];
 
   /** hookType, useRequest=1, useWatcher=2, useFetcher=3 */
-  ht: HookType;
+  ht: EnumHookType;
 
   /** hook config */
   c: UseHookConfig;
+
+  /** enableDownload */
+  ed: boolean;
+
+  /** enableUpload */
+  eu: boolean;
 }
 export interface EffectRequestParams<E> {
   handler: (...args: any[]) => void;
@@ -263,10 +275,9 @@ export interface StatesHook<S, E> {
    * 包装send、abort等use hooks操作函数
    * 这主要用于优化在react中，每次渲染都会生成新函数的问题，优化性能
    * @param fn use hook操作函数
-   * @param isAbort 是否为abort函数，abort函数在react需要不同的处理
    * @returns 包装后的操作函数
    */
-  memorize?: (fn: (...args: any[]) => any, isAbort?: boolean) => (...args: any[]) => any;
+  memorize?: (fn: (...args: any[]) => any) => (...args: any[]) => any;
 
   /**
    * 创建引用对象
@@ -361,6 +372,12 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
 }
 
 export type ProgressHandler = (progress: Progress) => void;
+
+export interface AbortFunction {
+  (): void;
+  a: () => void;
+}
+
 /**
  * 请求方法类型
  */
@@ -439,7 +456,7 @@ export interface Method<S = any, E = any, R = any, T = any, RC = any, RE = any, 
   /**
    * 中断此method实例直接发送的请求
    */
-  abort(): void;
+  abort: AbortFunction;
 
   /**
    * 绑定resolve和/或reject Promise的callback
@@ -799,6 +816,17 @@ export type UpdateStateCollection<R> = {
 
 export type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 
+/**
+ * alova全局配置
+ */
+export interface AlovaGlobalConfig {
+  /**
+   * method快照数量限制，设置为0表示关闭保存快照，关闭后method快照匹配器将不可用
+   * @default 1000
+   */
+  limitSnapshots?: number;
+}
+
 // ************ 导出类型 ***************
 
 /**
@@ -949,3 +977,9 @@ export declare function matchSnapshotMethod<M extends boolean = true>(
  * @returns — 此请求方式的key值
  */
 export declare function getMethodKey<S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>): string;
+
+/**
+ * 全局设置
+ * @param config 配置项
+ */
+export declare function globalConfig(config: AlovaGlobalConfig): void;

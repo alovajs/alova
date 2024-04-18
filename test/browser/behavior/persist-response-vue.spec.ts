@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
@@ -33,6 +33,8 @@ describe('persist data', function () {
     // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
     removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);
+
+    await untilCbCalled(setTimeout);
     expect(secondState.data.value).toStrictEqual({
       path: '/unit-test-count',
       method: 'GET',
@@ -40,7 +42,7 @@ describe('persist data', function () {
     }); // 因为有持久化数据，因此直接带出了持久化的数据
     expect(secondState.loading.value).toBeTruthy(); // 即使有持久化数据，loading的状态也照样会是true
 
-    await untilCbCalled(setTimeout, 600);
+    await delay(600);
     const thirdState = useRequest(Get);
     expect(thirdState.data.value).toBeUndefined(); // 持久化数据过期，所以data没有值
   });
@@ -62,11 +64,13 @@ describe('persist data', function () {
     // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
     removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);
+    await untilCbCalled(setTimeout);
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} }); // 因为有持久化数据，因此直接带出了持久化的数据
     expect(secondState.loading.value).toBeTruthy(); // 即使有持久化数据，loading的状态也照样会是true
 
-    await untilCbCalled(setTimeout, 1000);
+    await delay(1000);
     const thirdState = useRequest(Get);
+    await untilCbCalled(setTimeout);
     expect(thirdState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} }); // 持久化数据用不过期
   });
 
@@ -90,8 +94,9 @@ describe('persist data', function () {
     const secondState = useRequest(Get);
 
     // 设置为restore后，即使本地缓存失效了，也会自动将持久化数据恢复到缓存中，因此会命中缓存
-    expect(secondState.loading.value).toBeFalsy();
+    expect(secondState.loading.value).toBeTruthy(); // 刚开始会是true，恢复缓存后会改为false
     await untilCbCalled(setTimeout);
+    expect(secondState.loading.value).toBeFalsy();
     // data是异步更新
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
   });
@@ -113,9 +118,9 @@ describe('persist data', function () {
 
     // 清除缓存后再过400毫秒请求让它恢复到内存缓存中，如果缓存时间一致的话，内存缓存将会在100毫秒后失效
     removeResponseCache(alova.id, key(Get));
-    await untilCbCalled(setTimeout, 400);
+    await delay(400);
     useRequest(Get);
-    await untilCbCalled(setTimeout, 200);
+    await delay(200);
     expect(getResponseCache(alova.id, key(Get))).toBeUndefined();
   });
 
@@ -167,8 +172,9 @@ describe('persist data', function () {
     const secondState = useRequest(Get);
 
     // 设置为restore后，即使本地缓存失效了，也会自动将持久化数据恢复到缓存在宏，因此会命中缓存
-    expect(secondState.loading.value).toBeFalsy();
+    expect(secondState.loading.value).toBeTruthy(); // 开始会是true，恢复缓存后会改为false
     await untilCbCalled(setTimeout);
+    expect(secondState.loading.value).toBeFalsy();
     // data是异步更新
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
   });

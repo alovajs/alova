@@ -1,9 +1,7 @@
 import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import xhrRequestAdapter from '#/xhrRequestAdapter';
 import { createAlova, useRequest } from '@/index';
-import GlobalFetch from '@/predefine/GlobalFetch';
 import VueHook from '@/predefine/VueHook';
-import { alovas } from '@/utils/variables';
 import { baseURL } from '~/test/mockServer';
 
 const alova = getAlovaInstance(VueHook, {
@@ -11,14 +9,6 @@ const alova = getAlovaInstance(VueHook, {
 });
 describe('method instance', function () {
   test('should send request when call `method.send` and return promise', async () => {
-    // 先清空下已创建的alova实例缓存，否则会报错
-    const alovasCloned = [...alovas];
-    alovas.splice(0, alovas.length);
-    const alova = createAlova({
-      baseURL,
-      requestAdapter: GlobalFetch(),
-      responded: response => response.json()
-    });
     const Get1 = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
       timeout: 10000,
@@ -46,7 +36,6 @@ describe('method instance', function () {
       }
     });
     await expect(Get2.send()).rejects.toThrow();
-    alovas.splice(0, alovasCloned.length, ...alovasCloned); // 恢复alovas实例
   });
 
   test('fromCache should be true when request with cache', async () => {
@@ -118,7 +107,7 @@ describe('method instance', function () {
     const Get = alova.Get('/unit-test');
     const p = Get.send(true);
     Get.abort();
-    await expect(p).rejects.toThrow('[alova]The user aborted a request.');
+    await expect(p).rejects.toThrow('The user aborted a request.');
   });
 
   test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
@@ -129,7 +118,7 @@ describe('method instance', function () {
       responseExpect: r => r.json()
     }).Get('/unit-test');
     const p = Get.send(true);
-    await expect(p).rejects.toThrow('[alova]The user aborted a request.');
+    await expect(p).rejects.toThrow('The user aborted a request.');
   });
 
   test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
@@ -139,7 +128,7 @@ describe('method instance', function () {
       },
       responseExpect: r => r.json()
     }).Get('/unit-test');
-    await expect(Get.send(true)).rejects.toThrow('[alova]The user aborted a request.');
+    await expect(Get.send(true)).rejects.toThrow('The user aborted a request.');
     expect(Get.fromCache).toBeFalsy();
   });
 

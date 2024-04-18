@@ -1,4 +1,4 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { delay, getAlovaInstance, Result } from '#/utils';
 import { useRequest } from '@/index';
 import SvelteHook from '@/predefine/SvelteHook';
 
@@ -30,7 +30,7 @@ describe('[svelte]use hooks in SSR', function () {
     });
 
     // 200ms后依然为请求前状态
-    await untilCbCalled(setTimeout, 200);
+    await delay(200);
     loading.subscribe(val => {
       expect(val).toBeTruthy();
     });

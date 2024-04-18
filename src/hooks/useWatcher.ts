@@ -1,11 +1,11 @@
-import Alova from '@/Alova';
 import createRequestState from '@/functions/createRequestState';
 import Method from '@/Method';
-import myAssert, { assertAlovaCreation } from '@/utils/myAssert';
-import { alovas, HOOK_WATCHER, len } from '@/utils/variables';
+import { objAssign } from '@/utils/helper';
+import myAssert from '@/utils/myAssert';
+import { len } from '@/utils/variables';
 import { Writable } from 'svelte/store';
 import { WatchSource } from 'vue';
-import { AlovaMethodHandler, SvelteWritable, VueRef, WatcherHookConfig } from '~/typings';
+import { AlovaMethodHandler, EnumHookType, SvelteWritable, VueRef, WatcherHookConfig } from '~/typings';
 
 export default function useWatcher<S, E, R, T, RC, RE, RH>(
   handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
@@ -13,21 +13,18 @@ export default function useWatcher<S, E, R, T, RC, RE, RH>(
   config: WatcherHookConfig<S, E, R, T, RC, RE, RH> = {}
 ) {
   myAssert(watchingStates && len(watchingStates) > 0, 'must specify at least one watching state');
-  assertAlovaCreation();
   const { immediate, debounce = 0, initialData } = config,
     props = createRequestState(
-      HOOK_WATCHER,
-      alovas[0] as Alova<S, E, RC, RE, RH>,
+      EnumHookType.USE_WATCHER,
       handler,
       config,
       initialData,
       !!immediate, // !!immediate可以使immediate为falsy值时传入false，即不立即发送请求
       watchingStates,
       debounce
-    );
-
-  return {
-    ...props,
-    send: (...args: any[]) => props.send(args)
-  };
+    ),
+    send = props.send;
+  return objAssign(props, {
+    send: (...args: any[]) => send(args)
+  });
 }

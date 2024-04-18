@@ -329,6 +329,7 @@ describe('createAlova', function () {
     const errorConsoleMockFn = jest.fn();
     console.error = errorConsoleMockFn; // 重写以便监听
     const alova1 = createAlova({
+      baseURL,
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       responded: r => r.json()
@@ -459,6 +460,7 @@ describe('createAlova', function () {
     const errorConsoleMockFn = jest.fn();
     console.error = errorConsoleMockFn;
     const alova = createAlova({
+      baseURL,
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       responded: r => r.json(),
@@ -495,6 +497,7 @@ describe('createAlova', function () {
     console.error = errorConsoleMockFn;
     const customLoggerMockFn = jest.fn();
     const alova = createAlova({
+      baseURL,
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       responded: r => r.json(),

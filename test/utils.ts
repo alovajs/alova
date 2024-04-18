@@ -28,6 +28,8 @@ export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[])
     }, ...args);
   });
 
+export const delay = (ts = 0) => new Promise<void>(resolve => setTimeout(resolve, ts));
+
 type FetchMethod = Method<any, any, any, any, FetchRequestInit, Response, Headers>;
 export const getAlovaInstance = <S, E>(
   statesHook: StatesHook<S, E>,

@@ -1,16 +1,17 @@
+import { boundStatesHook } from '@/alova';
 import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } from '~/typings';
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
-  JSONStringify,
-  MEMORY,
-  ObjectCls,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   clearTimeoutTimer,
   falseValue,
+  JSONStringify,
+  MEMORY,
   nullValue,
+  ObjectCls,
   setTimeoutFn,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   typeOf,
   undefinedValue
 } from './variables';
@@ -122,6 +123,9 @@ export const noop = () => {},
     const { params, headers } = getConfig(methodInstance);
     return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
   },
+  objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
+    return ObjectCls.assign(target, ...sources);
+  },
   /**
    * 创建防抖函数，当delay为0时立即触发函数
    * 场景：在调用useWatcher并设置了immediate为true时，首次调用需立即执行，否则会造成延迟调用
@@ -222,8 +226,7 @@ export const noop = () => {},
     downloading: frontStates.downloading,
     uploading: frontStates.uploading
   }),
-  promiseStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>, functionName = '') => {
-    const statesHook = getStatesHook(alovaInstance);
-    myAssert(!!statesHook, `can not call ${functionName} until set the \`statesHook\` at alova instance`);
-    return statesHook as NonNullable<typeof statesHook>;
+  promiseStatesHook = (functionName = '') => {
+    myAssert(!!boundStatesHook, `can not call ${functionName} until set the \`statesHook\` at alova instance`);
+    return boundStatesHook as NonNullable<typeof boundStatesHook>;
   };

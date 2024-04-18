@@ -1,5 +1,12 @@
-import { AlovaMethodConfig, MethodRequestConfig, MethodType, ProgressHandler, RequestBody } from '~/typings';
-import Alova from './Alova';
+import {
+  AbortFunction,
+  AlovaMethodConfig,
+  MethodRequestConfig,
+  MethodType,
+  ProgressHandler,
+  RequestBody
+} from '~/typings';
+import { Alova } from './alova';
 import sendRequest from './functions/sendRequest';
 import {
   getConfig,
@@ -36,6 +43,12 @@ export const typePut = 'PUT';
 export const typePatch = 'PATCH';
 export const typeDelete = 'DELETE';
 export const typeOptions = 'OPTIONS';
+
+const abortRequest: AbortFunction = () => {
+  abortRequest.a();
+};
+abortRequest.a = noop;
+
 export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
   public type: MethodType;
   public baseURL: string;
@@ -52,7 +65,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   /**
    * 请求中断函数，每次请求都会更新这个函数
    */
-  public abort = noop;
+  public abort = abortRequest;
   public fromCache: boolean | undefined = undefinedValue;
   constructor(
     type: MethodType,
@@ -142,7 +155,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     len(instance.uhs) > 0 && onUpload((total, loaded) => forEach(instance.uhs, handler => handler({ total, loaded })));
 
     // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
-    instance.abort = abort;
+    instance.abort.a = abort;
     instance.fromCache = undefinedValue;
     return promiseThen(response(), r => {
       instance.fromCache = fromCache();

@@ -36,6 +36,7 @@ import {
   objectKeys,
   PromiseCls,
   promiseFinally,
+  promiseReject,
   promiseThen,
   STORAGE_RESTORE,
   trueValue,
@@ -221,11 +222,10 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           (error: any) => {
             // 无论请求成功、失败，都需要首先移除共享的请求
             deleteAttr(namespacedAdapterReturnMap, methodKey);
-            if (!isFn(responseErrorHandler)) {
-              throw error;
-            }
-            // 响应错误时，如果未抛出错误也将会处理响应成功的流程，但不缓存数据
-            return handleResponseTask(responseErrorHandler(error, clonedMethod), undefinedValue, falseValue);
+            return isFn(responseErrorHandler)
+              ? // 响应错误时，如果未抛出错误也将会处理响应成功的流程，但不缓存数据
+                handleResponseTask(responseErrorHandler(error, clonedMethod), undefinedValue, falseValue)
+              : promiseReject(error);
           }
         ),
         () => {
