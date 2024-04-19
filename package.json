@@ -1,67 +1,47 @@
 {
-  "name": "alova",
-  "version": "2.19.1",
-  "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
-  "main": "dist/alova.esm.js",
-  "module": "dist/alova.esm.js",
-  "types": "typings/index.d.ts",
-  "type": "module",
-  "sideEffects": false,
+  "name": "alova-root",
+  "version": "0.0.0",
   "homepage": "https://alova.js.org",
   "keywords": [
+    "alova",
     "react",
-    "hooks",
-    "xmlhttprequest",
-    "vuejs",
-    "typescript",
     "vue",
-    "reactjs",
     "svelte",
+    "nodejs",
+    "deno",
+    "bun",
+    "hooks",
+    "vue-options",
+    "next",
+    "nuxt",
+    "sveltekit",
+    "solidjs",
+    "preact",
+    "angular",
+    "qwik",
+    "lit",
+    "stencil",
+    "miniproject",
+    "uniapp",
+    "taro",
+    "typescript",
+    "xmlhttprequest",
     "axios",
     "request",
+    "graphql",
     "fetch-api",
-    "vue3",
-    "react-hooks",
-    "superagent",
-    "alova"
+    "superagent"
   ],
-  "jsdelivr": "dist/alova.umd.min.js",
-  "unpkg": "dist/alova.umd.min.js",
   "scripts": {
-    "clean": "rimraf ./dist",
-    "test:browser": "jest",
-    "test:node": "jest --config=jest.config.node.ts",
-    "test": "npm run test:browser && npm run test:node",
-    "test:coverage": "jest --coverage",
     "release": "semantic-release",
     "lint": "eslint --ext .ts,.js src",
     "lint:fix": "npm run lint -- --fix",
-    "build:esm": "rollup -c config/rollup.config.esm.cjs",
-    "build:cjs": "rollup -c config/rollup.config.cjs",
-    "build:umd": "cross-env rollup -c config/rollup.config.umd.cjs",
-    "build:umd.min": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.cjs",
-    "build:vuehook:esm": "cross-env MODULE=vue rollup -c config/rollup.config.esm.cjs",
-    "build:vuehook:umd": "cross-env MODULE=vue rollup -c config/rollup.config.umd.cjs",
-    "build:vuehook:umd.min": "cross-env NODE_ENV=production MODULE=vue rollup -c config/rollup.config.umd.cjs",
-    "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
-    "build:reacthook:esm": "cross-env MODULE=react rollup -c config/rollup.config.esm.cjs",
-    "build:reacthook:umd": "cross-env MODULE=react rollup -c config/rollup.config.umd.cjs",
-    "build:reacthook:umd.min": "cross-env NODE_ENV=production MODULE=react rollup -c config/rollup.config.umd.cjs",
-    "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
-    "build:sveltehook:esm": "cross-env MODULE=svelte rollup -c config/rollup.config.esm.cjs",
-    "build:globalfetch:esm": "cross-env MODULE=globalFetch rollup -c config/rollup.config.esm.cjs",
-    "build:globalfetch:cjs": "cross-env MODULE=globalFetch rollup -c config/rollup.config.cjs",
-    "build:globalfetch:umd": "cross-env MODULE=globalFetch rollup -c config/rollup.config.umd.cjs",
-    "build:globalfetch:umd.min": "cross-env NODE_ENV=production MODULE=globalFetch rollup -c config/rollup.config.umd.cjs",
-    "build:globalfetch": "npm run build:globalfetch:esm && npm run build:globalfetch:cjs && npm run build:globalfetch:umd && npm run build:globalfetch:umd.min",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook:esm && npm run build:globalfetch",
-    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
     "commit": "git-cz && git push",
     "format": "prettier . --write"
   },
-  "author": "JOU-amjs",
+  "author": "Scott Hu",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -70,61 +50,17 @@
   "bugs": {
     "url": "https://github.com/alovajs/alova/issues"
   },
-  "files": [
-    "dist",
-    "typings/*.d.ts"
-  ],
-  "engines": {
-    "node": ">= 0.12.0"
-  },
-  "exports": {
-    ".": {
-      "types": "./typings/index.d.ts",
-      "require": "./dist/alova.common.cjs",
-      "default": "./dist/alova.esm.js"
-    },
-    "./vue": {
-      "types": "./typings/vuehook.d.ts",
-      "default": "./dist/hooks/vuehook.esm.js"
-    },
-    "./react": {
-      "types": "./typings/reacthook.d.ts",
-      "default": "./dist/hooks/reacthook.esm.js"
-    },
-    "./svelte": {
-      "types": "./typings/sveltehook.d.ts",
-      "default": "./dist/hooks/sveltehook.esm.js"
-    },
-    "./GlobalFetch": {
-      "types": "./typings/globalfetch.d.ts",
-      "require": "./dist/adapter/globalfetch.common.cjs",
-      "default": "./dist/adapter/globalfetch.esm.js"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "vue": [
-        "typings/vuehook.d.ts"
-      ],
-      "react": [
-        "typings/reacthook.d.ts"
-      ],
-      "svelte": [
-        "typings/sveltehook.d.ts"
-      ],
-      "GlobalFetch": [
-        "typings/globalfetch.d.ts"
-      ]
-    }
-  },
   "devDependencies": {
-    "@babel/core": "^7.18.2",
-    "@commitlint/cli": "^17.2.0",
-    "@commitlint/config-conventional": "^17.2.0",
-    "@rollup/plugin-commonjs": "^22.0.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "@rollup/plugin-replace": "^4.0.0",
+    "@babel/core": "^7.24.4",
+    "@babel/preset-env": "^7.24.4",
+    "@commitlint/cli": "^19.2.2",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.5",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@testing-library/jest-dom": "^5.16.4",
@@ -132,7 +68,6 @@
     "@testing-library/svelte": "^3.1.3",
     "@testing-library/vue": "^6.6.0",
     "@types/jest": "^29.2.4",
-    "@types/node-fetch": "^2.6.1",
     "@types/react": "^17.0.60",
     "@types/react-dom": "^17.0.20",
     "@types/testing-library__jest-dom": "^5.14.5",
@@ -147,28 +82,25 @@
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.0",
+    "husky": "^9.0.11",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "msw": "^0.49.3",
-    "node-fetch": "^2.6.7",
+    "msw": "^2.2.14",
     "prettier": "^2.7.1",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "rimraf": "2.6.2",
-    "rollup": "^2.74.1",
-    "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.31.2",
+    "rollup": "^4.14.3",
     "semantic-release": "^21.0.1",
     "svelte": "^3.49.0",
     "svelte-jester": "^2.3.2",
-    "ts-jest": "^29.0.3",
-    "ts-jest-mock-import-meta": "^1.0.0",
-    "ts-node": "^10.8.0",
-    "tslib": "^2.4.1",
-    "typescript": "^4.7.2",
-    "vue": "^3.3.4",
-    "web-streams-polyfill": "^3.2.1"
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5",
+    "undici": "^6.13.0",
+    "vue": "^3.4.21",
+    "web-streams-polyfill": "^4.0.0"
   },
   "config": {
     "commitizen": {

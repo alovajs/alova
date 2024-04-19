@@ -1,0 +1,11 @@
+{
+  "name": "alova-scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "alova-scripts": "./dist/index.js"
+  },
+  "devDependencies": {}
+}

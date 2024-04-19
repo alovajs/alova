@@ -1,0 +1,47 @@
+{
+  "name": "@alova/mock",
+  "version": "1.5.0",
+  "description": "mock request adapter for alova.js",
+  "homepage": "https://github.com/alovajs/mock",
+  "main": "dist/alova-mock.esm.js",
+  "module": "dist/alova-mock.esm.js",
+  "types": "typings/index.d.ts",
+  "type": "module",
+  "jsdelivr": "dist/alova-mock.umd.min.js",
+  "unpkg": "dist/alova-mock.umd.min.js",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "test:browser": "jest",
+    "test:node": "jest --config=jest.config.node.ts",
+    "test": "npm run test:browser && npm run test:node",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint --ext .ts,.js src/**",
+    "lint:fix": "eslint --ext .ts,.js src/** --fix",
+    "build:esm": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.esm.cjs",
+    "build:umd": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.umd.cjs",
+    "build:umd.min": "cross-env NODE_ENV=production rollup -c ./config/rollup.config.umd.cjs",
+    "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min",
+    "release": "semantic-release",
+    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
+    "commit": "git add . && git-cz && git push"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Scott Hu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alovajs/alova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alovajs/alova/issues"
+  },
+  "files": [
+    "dist",
+    "typings/*.d.ts"
+  ],
+  "devDependencies": {
+    "alova": "workspace:*"
+  }
+}

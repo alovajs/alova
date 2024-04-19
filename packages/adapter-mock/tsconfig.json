@@ -2,7 +2,7 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "target": "es2018",
-    "module": "CommonJS",
+    "module": "commonjs",
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
@@ -10,7 +10,6 @@
     "noEmitOnError": false,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "declaration": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "strictPropertyInitialization": false,
@@ -19,8 +18,13 @@
     "skipDefaultLibCheck": false,
     "inlineSourceMap": false,
     "importHelpers": true,
-    "removeComments": false,
+    "removeComments": true,
     "esModuleInterop": true,
-    "jsx": "react"
-  }
+    "allowJs": true
+  },
+  "paths": {
+    "@/*": ["src/*"]
+  },
+  "include": ["src/**/*.ts", "typings/*.d.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "**.d.ts"]
 }

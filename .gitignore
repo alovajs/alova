@@ -1,5 +1,7 @@
 # dependencies
 /node_modules
+/packages/*/node_modules
+/examples/*/node_modules
 
 # testing
 /coverage
@@ -9,7 +11,7 @@
 
 # misc
 .DS_Store
-.idea
+.idea 
 .coveralls.yml
 
 npm-debug.log*
