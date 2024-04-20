@@ -1,9 +1,8 @@
+import { Result, delay, getAlovaInstance, untilCbCalled } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
-// import mockServer from '../../mockServer';
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 
 describe('cache data', function () {
   test('change the global default localCache setting', async () => {

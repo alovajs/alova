@@ -10,7 +10,6 @@
     "noEmitOnError": false,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "declaration": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "strictPropertyInitialization": false,

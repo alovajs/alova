@@ -29,7 +29,7 @@ export default {
   coveragePathIgnorePatterns: [
     '\\\\node_modules\\\\',
     '/node_modules/',
-    'test/mockServer',
+    '../../internal/mockServer',
     'test/utils.ts',
     'test/components'
   ],

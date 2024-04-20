@@ -2,8 +2,8 @@
   import { createAlova, useWatcher } from '@/index';
   import GlobalFetch from '@/predefine/GlobalFetch';
   import SvelteHook from '@/predefine/SvelteHook';
+  import { baseURL } from '^/mockServer';
   import { writable } from 'svelte/store';
-  import { baseURL } from '~/test/mockServer';
   const stateId1 = writable(0);
   const stateId2 = writable(10);
 

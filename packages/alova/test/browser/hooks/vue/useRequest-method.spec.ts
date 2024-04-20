@@ -4,7 +4,7 @@ import { createAlova, Method, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
-import { baseURL } from '~/test/mockServer';
+import { baseURL } from '^/mockServer';
 
 // 其他请求方式测试
 describe('Test other methods without GET', function () {

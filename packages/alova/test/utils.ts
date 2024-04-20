@@ -1,7 +1,7 @@
 import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
+import { baseURL } from '^/mockServer';
 import { GlobalLocalCacheConfig, Method, StatesHook } from '~/typings';
-import { baseURL } from '../../shared/src/mockServer';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 type GetData = {

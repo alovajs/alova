@@ -37,7 +37,7 @@ const config: Config = {
   coveragePathIgnorePatterns: [
     '\\\\node_modules\\\\',
     '/node_modules/',
-    'test/mockServer',
+    '../../internal/mockServer',
     'test/utils.ts',
     'test/components'
   ],
@@ -99,7 +99,8 @@ const config: Config = {
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',
     '~/(.*)': '<rootDir>/$1',
-    '#/(.*)': '<rootDir>/test/$1'
+    '#/(.*)': '<rootDir>/test/$1',
+    '^/(.*)': '../../internal/$1'
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

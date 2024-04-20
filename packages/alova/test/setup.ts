@@ -7,7 +7,7 @@ Object.defineProperties(globalThis, {
 });
 
 import { Blob, File } from 'node:buffer';
-import { fetch, Headers, Request, Response } from 'undici';
+import { Headers, Request, Response, fetch } from 'undici';
 Object.defineProperties(global, {
   fetch: { value: fetch, writable: true },
   Response: { value: Response },
@@ -17,7 +17,7 @@ Object.defineProperties(global, {
   File: { value: File }
 });
 
-import mockServer from '../../shared/src/mockServer';
+import mockServer from '^/mockServer';
 beforeAll(() => mockServer.listen());
 afterEach(() => mockServer.resetHandlers());
 afterAll(() => mockServer.close());

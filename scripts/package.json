@@ -1,11 +1,12 @@
 {
-  "name": "alova-scripts",
-  "version": "0.0.0",
+  "name": "@alova/scripts",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
+  "main": "./index.js",
   "bin": {
-    "alova-scripts": "./dist/index.js"
+    "alova-scripts": "./index.js"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "ora": "^5.4.1"
+  }
 }

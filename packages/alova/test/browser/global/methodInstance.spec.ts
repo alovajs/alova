@@ -2,7 +2,7 @@ import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import xhrRequestAdapter from '#/xhrRequestAdapter';
 import { createAlova, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
-import { baseURL } from '~/test/mockServer';
+import { baseURL } from '^/mockServer';
 
 const alova = getAlovaInstance(VueHook, {
   responseExpect: r => r.json()
