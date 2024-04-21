@@ -4,7 +4,7 @@ module.exports = {
   core: {
     packageName: pkg.name,
     input: 'src/index.ts',
-    output: `./dist/${pkg.name}.{format}.js`
+    output: `./dist/${pkg.name}.{suffix}.{ext}`
   },
   vuehook: {
     packageName: 'VueHook',
@@ -13,8 +13,7 @@ module.exports = {
     external: {
       vue: 'Vue'
     },
-    output: './dist/hooks/vuehook.{format}.js',
-    formats: ['esm', 'umd', 'umd.min']
+    output: './dist/hooks/vuehook.{suffix}.{ext}'
   },
   reacthook: {
     packageName: 'ReactHook',
@@ -22,8 +21,7 @@ module.exports = {
     external: {
       react: 'React'
     },
-    output: './dist/hooks/reacthook.{format}.js',
-    formats: ['esm', 'umd', 'umd.min']
+    output: './dist/hooks/reacthook.{suffix}.{ext}'
   },
   sveltehook: {
     external: {
@@ -33,12 +31,12 @@ module.exports = {
     },
     packageName: 'SvelteHook',
     input: 'src/predefine/SvelteHook.ts',
-    output: './dist/hooks/sveltehook.{format}.js',
+    output: './dist/hooks/sveltehook.{suffix}.{ext}',
     formats: ['esm', 'cjs']
   },
   globalfetch: {
     packageName: 'GlobalFetch',
     input: 'src/predefine/GlobalFetch.ts',
-    output: './dist/adapter/globalfetch.{format}.js'
+    output: './dist/adapter/globalfetch.{suffix}.{ext}'
   }
 };

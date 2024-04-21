@@ -1,6 +1,5 @@
 import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
-import { baseURL } from '^/mockServer';
 import { GlobalLocalCacheConfig, Method, StatesHook } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
@@ -50,7 +49,7 @@ export const getAlovaInstance = <S, E>(
   } = {}
 ) => {
   const alovaInst = createAlova({
-    baseURL: baseURL + (endWithSlash ? '/' : ''),
+    baseURL: process.env.NODE_BASE_URL + (endWithSlash ? '/' : ''),
     timeout: 3000,
     statesHook: statesHook,
     requestAdapter: GlobalFetch(),

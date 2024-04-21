@@ -2,8 +2,8 @@ import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import { createAlova, Method, queryCache, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import VueHook from '@/predefine/VueHook';
-import { baseURL } from '^/mockServer';
 
+const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', function () {
   test('baseURL can not be set and use complete url set in method to send request', async () => {
     const alova = createAlova({

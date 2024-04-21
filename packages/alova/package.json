@@ -62,7 +62,7 @@
     "typings/*.d.ts"
   ],
   "engines": {
-    "node": ">= 0.12.0"
+    "node": ">= 16.0.0"
   },
   "exports": {
     ".": {
@@ -72,14 +72,17 @@
     },
     "./vue": {
       "types": "./typings/vuehook.d.ts",
+      "require": "./dist/hooks/vuehook.common.cjs",
       "default": "./dist/hooks/vuehook.esm.js"
     },
     "./react": {
       "types": "./typings/reacthook.d.ts",
+      "require": "./dist/hooks/reacthook.common.cjs",
       "default": "./dist/hooks/reacthook.esm.js"
     },
     "./svelte": {
       "types": "./typings/sveltehook.d.ts",
+      "require": "./dist/hooks/sveltehook.common.cjs",
       "default": "./dist/hooks/sveltehook.esm.js"
     },
     "./GlobalFetch": {

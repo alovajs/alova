@@ -14,10 +14,6 @@ Object.defineProperties(global, {
   Request: { value: Request },
   Headers: { value: Headers },
   Blob: { value: Blob },
-  File: { value: File }
+  File: { value: File },
+  isSSR: { value: typeof window === 'undefined' }
 });
-
-import mockServer from '^/mockServer';
-beforeAll(() => mockServer.listen());
-afterEach(() => mockServer.resetHandlers());
-afterAll(() => mockServer.close());

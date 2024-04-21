@@ -1,10 +1,10 @@
+import { axiosMockResponse, axiosRequestAdapter } from '@/index';
 import { createAlovaMockAdapter, defineMock } from '@alova/mock';
 import { createAlova, invalidateCache } from 'alova';
 import vueHook from 'alova/vue';
 import { AxiosError, AxiosResponse } from 'axios';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { axiosMockResponse, axiosRequestAdapter } from '../../src';
 
 const mocks = defineMock({
   '/unit-test': () => {

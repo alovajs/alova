@@ -1,1 +1,3 @@
-dist
+/dist
+/packages/*/dist
+/examples/*/dist

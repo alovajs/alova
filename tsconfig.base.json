@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "es2018",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "newLine": "LF",
+    "noImplicitAny": true,
+    "noEmitOnError": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "strictPropertyInitialization": false,
+    "noFallthroughCasesInSwitch": false,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": false,
+    "inlineSourceMap": false,
+    "importHelpers": true,
+    "removeComments": false,
+    "esModuleInterop": true,
+    "jsx": "react"
+  }
+}

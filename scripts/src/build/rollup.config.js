@@ -11,12 +11,24 @@ const pkgPath = resolve(basePath, './package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, { encoding: 'utf-8' }).toString());
 const author = pkg.author;
 const repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
+
+/**
+ * format默认与format相同
+ * suffix默认与format相同
+ * ext默认为js
+ */
 const formatMap = {
-  cjs: 'cjs',
+  cjs: {
+    suffix: 'common',
+    ext: 'cjs'
+  },
   esm: 'es',
   umd: 'umd',
-  'umd.min': 'umd'
+  'umd.min': {
+    format: 'umd'
+  }
 };
+
 const defaultFormat = Object.keys(formatMap);
 module.exports = function (bundleKey, version) {
   version = version || pkg.version;
@@ -28,7 +40,7 @@ module.exports = function (bundleKey, version) {
   */
 `;
   const bundles = require(resolve(basePath, './bundle.config.cjs'));
-  const bundleItem = bundles[bundleKey];
+  const bundleItem = bundleKey ? bundles[bundleKey] : bundles; // 如果没有bundleKey则表示只有一个bundle模块
   if (!bundleItem) {
     throw new Error(`Can not find compile config for module: ${bundleKey}`);
   }
@@ -60,11 +72,12 @@ module.exports = function (bundleKey, version) {
     },
     outputOptionsList: formats.map(fmt => {
       const isProd = fmt.endsWith('.min');
+      const { format = fmt, suffix = fmt, ext = 'js' } = formatMap[fmt];
       return {
         isProd,
         name: bundleItem.packageName,
-        file: bundleItem.output.replace('{format}', fmt),
-        format: formatMap[fmt],
+        file: bundleItem.output.replace('{suffix}', suffix).replace('{ext}', ext),
+        format,
         // When export and export default are not used at the same time, set legacy to true.
         // legacy: true,
         banner,

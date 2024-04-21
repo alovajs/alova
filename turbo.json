@@ -1,0 +1,48 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "//#lint": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "//#lint:fix": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "//#format": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "//#format:fix": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "tsconfig.tsbuildinfo"]
+    },
+    "clean:build": {
+      "dependsOn": ["build"]
+    },
+    "dev": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "lint:fix": {},
+    "format": {},
+    "format:fix": {},
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "typecheck": {
+      "outputs": ["tsconfig.tsbuildinfo"]
+    }
+  },
+  "globalDependencies": [
+    ".eslintrc.js",
+    ".eslintignore",
+    ".lintstagedrc.js",
+    ".prettierrc.yaml",
+    "tsconfig.base.json",
+    "tsconfig.build.json",
+    "tsconfig.json"
+  ]
+}

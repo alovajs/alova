@@ -4,8 +4,8 @@ import { createAlova, Method, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
-import { baseURL } from '^/mockServer';
 
+const baseURL = process.env.NODE_BASE_URL as string;
 // 其他请求方式测试
 describe('Test other methods without GET', function () {
   test('send POST', async () => {

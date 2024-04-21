@@ -12,14 +12,7 @@ module.exports = async function (bundleKey) {
     // create a bundle
     const bundles = {};
     bundles.dev = await rollup({
-      ...inputOptions,
-      plugins: [
-        ...inputOptions.plugins,
-        replace({
-          preventAssignment: true,
-          'process.env.NODE_ENV': JSON.stringify('development')
-        })
-      ]
+      ...inputOptions
     });
     bundles.prod = await rollup({
       ...inputOptions,

@@ -1,14 +1,8 @@
+import createAlovaMockAdapter from '@/createAlovaMockAdapter';
+import defineMock from '@/defineMock';
 import { createAlova, useRequest } from 'alova';
 import VueHook from 'alova/vue';
-import createAlovaMockAdapter from '../src/createAlovaMockAdapter';
-import defineMock from '../src/defineMock';
-
-export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[]) => void, ...args: any[]) =>
-  new Promise<T>(resolve => {
-    setCb(d => {
-      resolve(d);
-    }, ...args);
-  });
+import { untilCbCalled } from 'root/testUtils';
 
 describe('mock request', () => {
   test('response with plain body data', async () => {

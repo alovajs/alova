@@ -17,10 +17,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build:esm": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.esm.cjs",
-    "build:umd": "cross-env NODE_ENV=development rollup -c ./config/rollup.config.umd.cjs",
-    "build:umd.min": "cross-env NODE_ENV=production rollup -c ./config/rollup.config.umd.cjs",
-    "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:umd.min",
+    "build": "npm run clean && alova-scripts build",
     "release": "semantic-release",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "commit": "git add . && git-cz && git push"
@@ -41,7 +38,10 @@
     "dist",
     "typings/*.d.ts"
   ],
+  "peerDependencies": {
+    "alova": ">=2.0.0"
+  },
   "devDependencies": {
-    "alova": "workspace:*"
+    "@alova/scripts": "workspace:*"
   }
 }

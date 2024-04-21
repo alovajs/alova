@@ -1,6 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -9,6 +10,5 @@
       "root/*": ["../../internal/*"]
     }
   },
-  "include": ["src/**/*.ts", "typings/*.d.ts", "test/**/*.ts", "test/**/*.tsx"],
-  "exclude": ["node_modules", "**.d.ts"]
+  "include": ["src/**/*.ts", "typings/*.d.ts", "test/**/*.ts", "test/**/*.tsx"]
 }

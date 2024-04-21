@@ -1,8 +1,8 @@
 import { createAlova, updateState, useRequest } from '@/index';
 import defaultCacheLogger from '@/predefine/defaultCacheLogger';
 import GlobalFetch from '@/predefine/GlobalFetch';
-import { baseURL } from '^/mockServer';
 
+const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', function () {
   test('should throw error in useHooks when statesHook is not specific', async () => {
     const alova = createAlova({

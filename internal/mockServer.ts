@@ -3,38 +3,6 @@ import { setupServer } from 'msw/node';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-// -------------------
-// 服务模拟
-const result = async (code: number, req: StrictRequest<DefaultBodyType>, hasBody = false, extraParams = {}) => {
-  await delay(10);
-  const urlObj = new URL(req.url);
-  const data: Record<string, any> = {
-    path: urlObj.pathname,
-    method: req.method,
-    params: {
-      ...Object.fromEntries(urlObj.searchParams.entries()),
-      ...extraParams
-    }
-  };
-  if (hasBody) {
-    try {
-      data.data = await req.clone().json();
-    } catch (error) {
-      try {
-        const formData = Object.fromEntries((await req.clone().formData()).entries());
-        data.data = formData;
-      } catch (error) {
-        data.data = await (await req.blob()).text();
-      }
-    }
-  }
-  return HttpResponse.json({
-    code,
-    msg: '',
-    data
-  });
-};
-
 export const baseURL = 'http://localhost:3000';
 const countMap = {} as Record<string, number>;
 const mockServer = setupServer(
@@ -85,3 +53,35 @@ const mockServer = setupServer(
 );
 
 export default mockServer;
+
+// -------------------
+// 服务模拟
+async function result(code: number, req: StrictRequest<DefaultBodyType>, hasBody = false, extraParams = {}) {
+  await delay(10);
+  const urlObj = new URL(req.url);
+  const data: Record<string, any> = {
+    path: urlObj.pathname,
+    method: req.method,
+    params: {
+      ...Object.fromEntries(urlObj.searchParams.entries()),
+      ...extraParams
+    }
+  };
+  if (hasBody) {
+    try {
+      data.data = await req.clone().json();
+    } catch (error) {
+      try {
+        const formData = Object.fromEntries((await req.clone().formData()).entries());
+        data.data = formData;
+      } catch (error) {
+        data.data = await (await req.blob()).text();
+      }
+    }
+  }
+  return HttpResponse.json({
+    code,
+    msg: '',
+    data
+  });
+}

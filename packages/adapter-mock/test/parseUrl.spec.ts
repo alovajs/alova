@@ -1,4 +1,4 @@
-import { parseUrl } from '../src/helper';
+import { parseUrl } from '@/helper';
 
 describe('parseUrl', () => {
   test('parse full url', () => {
