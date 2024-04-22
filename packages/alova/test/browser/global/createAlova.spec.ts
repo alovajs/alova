@@ -1,7 +1,8 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { createAlova, Method, queryCache, useRequest } from '@/index';
+import { getAlovaInstance } from '#/utils';
+import { Method, createAlova, queryCache, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import VueHook from '@/predefine/VueHook';
+import { Result, untilCbCalled } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', function () {

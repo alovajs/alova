@@ -1,6 +1,7 @@
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
 import VueHook from '@/predefine/VueHook';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { ref } from 'vue';
 
 describe('useWatcher middleware', function () {

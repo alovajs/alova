@@ -54,12 +54,13 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": ">=2.0.0",
+    "alova": "^2.0.0",
     "axios": ">=0.4.0"
   },
   "devDependencies": {
     "@alova/mock": "workspace:*",
     "@alova/scripts": "workspace:*",
+    "alova": "workspace:*",
     "form-data": "^4.0.0"
   },
   "config": {

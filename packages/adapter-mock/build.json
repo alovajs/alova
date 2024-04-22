@@ -1,0 +1,8 @@
+{
+  "input": "src/index.ts",
+  "output": "dist/alova-mock.{suffix}.{ext}",
+  "packageName": "AlovaMock",
+  "external": {
+    "alova": "alova"
+  }
+}

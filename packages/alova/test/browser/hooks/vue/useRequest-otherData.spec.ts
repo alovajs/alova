@@ -1,7 +1,8 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { queryCache, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { key } from '@/utils/helper';
+import { Result, untilCbCalled } from 'root/testUtils';
 
 // 其他请求方式测试
 describe('Request by other data', function () {

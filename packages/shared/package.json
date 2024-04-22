@@ -1,9 +1,10 @@
 {
   "name": "@alova/shared",
   "version": "1.0.0",
-  "private": "true",
   "type": "module",
   "author": "Scott Hu",
+  "module": "dist/alova.esm.js",
+  "types": "typings/index.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
     "test": "jest",
@@ -28,7 +29,6 @@
     "typings/*.d.ts"
   ],
   "devDependencies": {
-    "alova": "workspace:*",
     "@alova/scripts": "workspace:*"
   }
 }

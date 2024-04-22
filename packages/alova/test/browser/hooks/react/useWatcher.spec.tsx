@@ -1,9 +1,10 @@
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('useWatcher hook with react', () => {
   test('should send request when change value', async () => {

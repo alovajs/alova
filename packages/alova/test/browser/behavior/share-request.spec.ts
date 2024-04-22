@@ -1,6 +1,7 @@
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { createAlova, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('Request shared', function () {
   test('should share request when use usehooks', async () => {

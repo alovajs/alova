@@ -1,9 +1,10 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { queryCache, updateState, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { removeStateCache } from '@/storage/stateCache';
 import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
+import { Result, untilCbCalled } from 'root/testUtils';
 import { Ref, ref } from 'vue';
 
 describe('update cached response data by user in vue', function () {

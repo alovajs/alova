@@ -1,7 +1,8 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import xhrRequestAdapter from '#/xhrRequestAdapter';
+import { getAlovaInstance } from '#/utils';
 import { createAlova, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
+import { Result, untilCbCalled } from 'root/testUtils';
+import { xhrRequestAdapter } from '../../../../adapter-xhr/src';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 const alova = getAlovaInstance(VueHook, {
@@ -259,7 +260,7 @@ describe('method instance', function () {
   test('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter,
+      requestAdapter: xhrRequestAdapter(),
       statesHook: VueHook,
       responded: ({ data }) => data,
       cacheLogger: null

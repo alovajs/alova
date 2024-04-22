@@ -32,14 +32,14 @@
     "fetch-api",
     "superagent"
   ],
+  "packageManager": "pnpm@8.14.0",
   "scripts": {
-    "release": "semantic-release",
-    "lint": "eslint --ext .ts,.js src",
+    "build": "turbo run build --filter=@alova/adapter-axios",
+    "lint": "eslint . --ext .js,.ts",
     "lint:fix": "npm run lint -- --fix",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
-    "commit": "git-cz && git push",
-    "format": "prettier . --write"
+    "commit": "git-cz && git push"
   },
   "author": "Scott Hu",
   "license": "MIT",
@@ -49,6 +49,14 @@
   },
   "bugs": {
     "url": "https://github.com/alovajs/alova/issues"
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown",
+    "*.js,*.ts": "pnpm run lint:fix"
+  },
+  "engines": {
+    "node": ">=18.19.0",
+    "pnpm": ">=8.6.12"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",

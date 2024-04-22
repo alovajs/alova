@@ -1,120 +1,26 @@
 import { boundStatesHook } from '@/alova';
+import {
+  JSONStringify,
+  clearTimeoutTimer,
+  falseValue,
+  getConfig,
+  getContextOption,
+  isNumber,
+  nullValue,
+  setTimeoutFn,
+  undefinedValue
+} from '@alova/shared';
 import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } from '~/typings';
 import Method from '../Method';
 import myAssert from './myAssert';
-import {
-  clearTimeoutTimer,
-  falseValue,
-  JSONStringify,
-  MEMORY,
-  nullValue,
-  ObjectCls,
-  setTimeoutFn,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
-  typeOf,
-  undefinedValue
-} from './variables';
-
-export type GeneralFn = (...args: any[]) => any;
+import { MEMORY, STORAGE_PLACEHOLDER, STORAGE_RESTORE } from './variables';
 
 /**
- * 空函数，做兼容处理
+ * 获取alova实例的statesHook
+ * @returns statesHook对象
  */
-export const noop = () => {},
-  /**
-   * 返回参数自身的函数，做兼容处理用
-   * 由于部分系统将self作为了保留字，故使用_self来区分
-   * @param arg 任意参数
-   * @returns 返回参数本身
-   */
-  _self = <T>(arg: T) => arg,
-  /**
-   * 判断参数是否为函数
-   * @param fn 任意参数
-   * @returns 该参数是否为函数
-   */
-  isFn = (arg: any): arg is GeneralFn => typeOf(arg) === 'function',
-  /**
-   * 判断参数是否为数字
-   * @param arg 任意参数
-   * @returns 该参数是否为数字
-   */
-  isNumber = (arg: any): arg is number => typeOf(arg) === 'number' && !isNaN(arg),
-  /**
-   * 判断参数是否为字符串
-   * @param arg 任意参数
-   * @returns 该参数是否为字符串
-   */
-  isString = (arg: any): arg is string => typeOf(arg) === 'string',
-  /**
-   * 全局的toString
-   * @param arg 任意参数
-   * @returns 字符串化的参数
-   */
-  globalToString = (arg: any) => ObjectCls.prototype.toString.call(arg),
-  /**
-   * 判断是否为普通对象
-   * @param arg 任意参数
-   * @returns 判断结果
-   */
-  isPlainObject = (arg: any): arg is Record<string, any> => globalToString(arg) === '[object Object]',
-  /**
-   * 判断是否为某个类的实例
-   * @param arg 任意参数
-   * @returns 判断结果
-   */
-  instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls,
-  /**
-   * 统一的时间戳获取函数
-   * @returns 时间戳
-   */
-  getTime = (date?: Date) => (date ? date.getTime() : Date.now()),
-  /**
-   * 通过method实例获取alova实例
-   * @returns alova实例
-   */
-  getContext = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.context,
-  /**
-   * 获取method实例配置数据
-   * @returns 配置对象
-   */
-  getConfig = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => methodInstance.config,
-  /**
-   * 获取alova配置数据
-   * @returns alova配置对象
-   */
-  getContextOptions = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) => alovaInstance.options,
-  /**
-   * 通过method实例获取alova配置数据
-   * @returns alova配置对象
-   */
-  getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
-    getContextOptions(getContext(methodInstance)),
-  /**
-   * 获取alova实例的statesHook
-   * @returns statesHook对象
-   */
-  getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
-    getContextOptions(alovaInstance).statesHook,
-  /**
-   * 获取method实例的key值
-   * @param methodInstance method实例
-   * @returns {string} 此method实例的key值
-   */
-  getMethodInternalKey = (methodInstance: Method) => methodInstance.__key__,
-  /**
-   * 是否为特殊数据
-   * @param data 提交数据
-   * @returns 判断结果
-   */
-  isSpecialRequestBody = (data: any) => {
-    const dataTypeString = globalToString(data);
-    return (
-      /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) ||
-      instanceOf(data, ArrayBuffer)
-    );
-  },
+export const getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
+    getContextOption(alovaInstance).statesHook,
   /**
    * 获取请求方式的key值
    * @returns {string} 此请求方式的key值
@@ -122,9 +28,6 @@ export const noop = () => {},
   key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
     const { params, headers } = getConfig(methodInstance);
     return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
-  },
-  objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
-    return ObjectCls.assign(target, ...sources);
   },
   /**
    * 创建防抖函数，当delay为0时立即触发函数
@@ -198,23 +101,6 @@ export const noop = () => {},
     );
     return methodInstance;
   },
-  /**
-   * 统一配置
-   * @param 数据
-   * @returns 统一的配置
-   */
-  sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) =>
-    isFn(config) ? config(...args) : config,
-  sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
-    isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop,
-  /**
-   * 创建类实例
-   * @param cls 构造函数
-   * @param args 构造函数参数
-   * @returns 类实例
-   */
-  newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(cls: T, ...args: ConstructorParameters<T>) =>
-    new cls(...args),
   /**
    * 导出fetchStates map
    * @param frontStates front states map

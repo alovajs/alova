@@ -1,4 +1,4 @@
-import { delay, getAlovaInstance, Result } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { updateState, useRequest, useWatcher } from '@/index';
 import ReactHook from '@/predefine/ReactHook';
 import { getResponseCache } from '@/storage/responseCache';
@@ -8,6 +8,7 @@ import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';
+import { Result, delay } from 'root/testUtils';
 
 describe('update cached response data by user in react', function () {
   test('the cached response data should be changed and the screen should be update', async () => {

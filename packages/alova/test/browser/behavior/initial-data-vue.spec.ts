@@ -1,6 +1,7 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { useRequest, useWatcher } from '@/index';
 import VueHook from '@/predefine/VueHook';
+import { Result, untilCbCalled } from 'root/testUtils';
 import { ref } from 'vue';
 
 describe('Initial data before request', function () {

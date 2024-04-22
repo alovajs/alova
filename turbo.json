@@ -15,34 +15,15 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "tsconfig.tsbuildinfo"]
-    },
-    "clean:build": {
-      "dependsOn": ["build"]
-    },
-    "dev": {
-      "dependsOn": ["build"],
-      "cache": false,
-      "persistent": true
+      "outputs": ["dist/**"]
     },
     "lint": {},
     "lint:fix": {},
     "format": {},
     "format:fix": {},
     "test": {
-      "dependsOn": ["build"]
-    },
-    "typecheck": {
-      "outputs": ["tsconfig.tsbuildinfo"]
+      "dependsOn": ["^build"]
     }
   },
-  "globalDependencies": [
-    ".eslintrc.js",
-    ".eslintignore",
-    ".lintstagedrc.js",
-    ".prettierrc.yaml",
-    "tsconfig.base.json",
-    "tsconfig.build.json",
-    "tsconfig.json"
-  ]
+  "globalDependencies": [".editorconfig", ".eslintrc.cjs", ".prettierrc.cjs", "tsconfig.base.json", "tsconfig.json"]
 }

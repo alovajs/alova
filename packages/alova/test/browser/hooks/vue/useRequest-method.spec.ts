@@ -1,9 +1,10 @@
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import xhrRequestAdapter from '#/xhrRequestAdapter';
-import { createAlova, Method, useRequest } from '@/index';
+import { getAlovaInstance } from '#/utils';
+import { Method, createAlova, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
+import { xhrRequestAdapter } from '../../../../../adapter-xhr/src';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 // 其他请求方式测试
@@ -303,7 +304,7 @@ describe('Test other methods without GET', function () {
   test('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter,
+      requestAdapter: xhrRequestAdapter(),
       statesHook: VueHook,
       responded({ data }) {
         return data;

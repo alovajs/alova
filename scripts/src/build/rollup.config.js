@@ -1,6 +1,7 @@
 const commonjs = require('@rollup/plugin-commonjs');
 const json = require('@rollup/plugin-json');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
+const { default: replace } = require('@rollup/plugin-replace');
 const terser = require('@rollup/plugin-terser');
 const typescript = require('@rollup/plugin-typescript');
 const { readFileSync } = require('node:fs');
@@ -31,6 +32,10 @@ const formatMap = {
 
 const defaultFormat = Object.keys(formatMap);
 module.exports = function (bundleKey, version) {
+  if (/^[0-9]+\.[0-9]+\.[0-9]+$/.test(bundleKey) && !version) {
+    version = bundleKey;
+    bundleKey = undefined;
+  }
   version = version || pkg.version;
   const banner = `/**
   * ${pkg.name} ${version} (${pkg.homepage})
@@ -39,7 +44,7 @@ module.exports = function (bundleKey, version) {
   * Licensed under MIT (${repository}/blob/main/LICENSE)
   */
 `;
-  const bundles = require(resolve(basePath, './bundle.config.cjs'));
+  const bundles = require(resolve(basePath, './build.json'));
   const bundleItem = bundleKey ? bundles[bundleKey] : bundles; // 如果没有bundleKey则表示只有一个bundle模块
   if (!bundleItem) {
     throw new Error(`Can not find compile config for module: ${bundleKey}`);
@@ -56,34 +61,57 @@ module.exports = function (bundleKey, version) {
     return g;
   }, {});
 
-  return {
-    inputOptions: {
-      input: bundleItem.input,
-      external,
-      plugins: [
-        nodeResolve({
-          browser: true,
-          extensions: ['.ts', '.js', 'tsx', 'jsx']
-        }),
-        commonjs(),
-        typescript({ module: 'es2015' }),
-        json() // 可允许import json文件
-      ]
-    },
-    outputOptionsList: formats.map(fmt => {
-      const isProd = fmt.endsWith('.min');
-      const { format = fmt, suffix = fmt, ext = 'js' } = formatMap[fmt];
-      return {
-        isProd,
-        name: bundleItem.packageName,
-        file: bundleItem.output.replace('{suffix}', suffix).replace('{ext}', ext),
-        format,
-        // When export and export default are not used at the same time, set legacy to true.
-        // legacy: true,
-        banner,
-        globals,
-        plugins: [isProd ? terser() : undefined]
-      };
-    })
-  };
+  const moduleGroup = ['cjs', 'esm'];
+  const groupTemp = [];
+  // 将moduleGroup分到同一个数组里
+  const groupedFormats = formats.reduce((group, fmt) => {
+    if (moduleGroup.includes(fmt)) {
+      groupTemp.push(fmt);
+    } else {
+      group.push([fmt]);
+    }
+    return group;
+  }, []);
+  groupTemp.length > 0 && groupedFormats.push(groupTemp);
+
+  return groupedFormats.map(formatGroup => {
+    const env = formatGroup.includes('umd.min')
+      ? 'production'
+      : formatGroup.includes('umd')
+      ? 'development'
+      : undefined;
+    return {
+      inputOptions: {
+        input: bundleItem.input,
+        external,
+        plugins: [
+          nodeResolve({
+            browser: true,
+            extensions: ['.ts', '.js', 'tsx', 'jsx']
+          }),
+          commonjs(),
+          typescript({ module: 'es2015' }),
+          env &&
+            replace({
+              preventAssignment: true,
+              'process.env.NODE_ENV': env ? JSON.stringify(env) : undefined
+            }),
+          json() // 可允许import json文件
+        ]
+      },
+      outputOptionsList: formatGroup.map(fmt => {
+        const { format = fmt, suffix = fmt, ext = 'js' } = formatMap[fmt];
+        return {
+          name: bundleItem.packageName,
+          file: bundleItem.output.replace('{suffix}', suffix).replace('{ext}', ext),
+          format,
+          // When export and export default are not used at the same time, set legacy to true.
+          // legacy: true,
+          banner,
+          globals,
+          plugins: [env === 'production' ? terser() : undefined].filter(Boolean)
+        };
+      })
+    };
+  });
 };

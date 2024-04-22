@@ -1,0 +1,38 @@
+{
+  "core": {
+    "packageName": "alova",
+    "input": "src/index.ts",
+    "output": "dist/alova.{suffix}.{ext}"
+  },
+  "vuehook": {
+    "packageName": "VueHook",
+    "input": "src/predefine/VueHook.ts",
+    "external": {
+      "vue": "Vue"
+    },
+    "output": "./dist/hooks/vuehook.{suffix}.{ext}"
+  },
+  "reacthook": {
+    "packageName": "ReactHook",
+    "input": "src/predefine/ReactHook.ts",
+    "external": {
+      "react": "React"
+    },
+    "output": "./dist/hooks/reacthook.{suffix}.{ext}"
+  },
+  "sveltehook": {
+    "external": {
+      "svelte": null,
+      "svelte/store": null
+    },
+    "packageName": "SvelteHook",
+    "input": "src/predefine/SvelteHook.ts",
+    "output": "./dist/hooks/sveltehook.{suffix}.{ext}",
+    "formats": ["esm", "cjs"]
+  },
+  "globalfetch": {
+    "packageName": "GlobalFetch",
+    "input": "src/predefine/GlobalFetch.ts",
+    "output": "./dist/adapter/globalfetch.{suffix}.{ext}"
+  }
+}

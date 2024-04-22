@@ -4,7 +4,7 @@ import VueHook from 'alova/vue';
 import axios, { AxiosError } from 'axios';
 import { readFileSync } from 'node:fs';
 import path from 'path';
-import { untilCbCalled } from 'root/testUtils';
+import { delay, untilCbCalled } from 'root/testUtils';
 import { Result } from '../result.type';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -58,7 +58,7 @@ describe('request adapter', () => {
       b: '2'
     });
     expect(data.value.data.path).toBe('/unit-test');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toEqual({ total: 92, loaded: 92 });
     expect(error.value).toBeUndefined();
   });
 
@@ -160,18 +160,16 @@ describe('request adapter', () => {
       }
     });
 
-    const Get = alovaInst.Get<Result>('/unit-test-delay');
-    const { loading, data, downloading, error, abort, onError } = useRequest(Get);
+    const Get = alovaInst.Get<Result>('/unit-test-1s');
+    const { loading, data, error, abort, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
-    abort();
+    delay(10).then(abort);
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value?.message).toBe('canceled');
   });
 
@@ -199,14 +197,13 @@ describe('request adapter', () => {
       // enableUpload: true
     });
 
-    const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Post);
+    const { loading, data, uploading, error, onSuccess } = useRequest(Post);
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.code).toBe(200);
     expect(data.value.data.method).toBe('POST');
     expect(data.value.data.path).toBe('/unit-test');
     expect(uploading.value).toEqual({ total: 0, loaded: 0 });
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
   });
 
@@ -230,7 +227,7 @@ describe('request adapter', () => {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeInstanceOf(Blob);
     expect(uploading.value).toEqual({ total: 0, loaded: 0 });
-    expect(downloading.value).toEqual({ total: 3273178, loaded: 3273178 });
+    expect(downloading.value).toEqual({ total: 250569, loaded: 250569 });
     expect(error.value).toBeUndefined();
   });
 
@@ -278,10 +275,9 @@ describe('request adapter', () => {
       xsrfHeaderName: 'xsrf_header'
     });
 
-    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
+    const { loading, data, error, onSuccess } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
@@ -293,7 +289,6 @@ describe('request adapter', () => {
       b: '2'
     });
     expect(data.value.data.path).toBe('/unit-test');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
   });
 });

@@ -1,6 +1,7 @@
-import { getAlovaInstance, Result } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
+import { Result } from 'root/testUtils';
 import { AlovaSuccessEvent } from '~/typings';
 
 type AnyAlovaSuccessEvent<R> = AlovaSuccessEvent<any, any, R, any, any, any, any>;

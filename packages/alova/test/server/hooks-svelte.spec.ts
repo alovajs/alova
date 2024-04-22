@@ -1,6 +1,7 @@
-import { delay, getAlovaInstance, Result } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import SvelteHook from '@/predefine/SvelteHook';
+import { Result, delay } from 'root/testUtils';
 
 // use hook在服务端不再发送请求
 describe('[svelte]use hooks in SSR', function () {

@@ -1,6 +1,7 @@
-import { delay, getAlovaInstance, Result } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
+import { Result, delay } from 'root/testUtils';
 
 // use hook在服务端不再发送请求
 describe('[vue]use hooks in SSR', function () {

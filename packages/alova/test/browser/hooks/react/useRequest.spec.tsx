@@ -1,4 +1,4 @@
-import { delay, getAlovaInstance, Result } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { createAlova, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import ReactHook from '@/predefine/ReactHook';
@@ -7,6 +7,7 @@ import { key } from '@/utils/helper';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, StrictMode } from 'react';
+import { Result, delay } from 'root/testUtils';
 
 const StrictModeReact = StrictMode as any;
 function getAlovaInstanceSyncResponded() {

@@ -1,10 +1,11 @@
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { getMethodKey, invalidateCache, queryCache, useRequest } from '@/index';
+import { getAlovaInstance } from '#/utils';
 import Method from '@/Method';
+import { getMethodKey, invalidateCache, queryCache, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { key } from '@/utils/helper';
+import { Result, untilCbCalled } from 'root/testUtils';
 
 describe('invalitate cached response data', () => {
   test('It will use the default cache time when not set the cache time with `GET`', async () => {

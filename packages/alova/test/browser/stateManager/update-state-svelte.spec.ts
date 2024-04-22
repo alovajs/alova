@@ -1,9 +1,9 @@
 import page from '#/components/svelte/page-updateState.svelte';
 import pageUserWatcherImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
-import { delay } from '#/utils';
 import { getStateCache } from '@/storage/stateCache';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { delay } from 'root/testUtils';
 
 describe('update cached response data by user in svelte', () => {
   test('the cached response data should be changed and the screen should be update', async () => {

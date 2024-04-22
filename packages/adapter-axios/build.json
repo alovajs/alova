@@ -1,0 +1,9 @@
+{
+  "input": "src/index.ts",
+  "output": "dist/alova-adapter-axios.{suffix}.{ext}",
+  "packageName": "AlovaAdapterAxios",
+  "external": {
+    "alova": "alova",
+    "axios": "axios"
+  }
+}

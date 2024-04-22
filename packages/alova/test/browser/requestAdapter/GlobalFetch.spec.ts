@@ -1,5 +1,6 @@
-import { getAlovaInstance, Result } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import VueHook from '@/predefine/VueHook';
+import { Result } from 'root/testUtils';
 
 describe('request adapter GlobalFetch', function () {
   test('the cache response data should be saved', async () => {

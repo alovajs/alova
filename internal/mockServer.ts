@@ -33,12 +33,18 @@ const mockServer = setupServer(
   http.get(baseURL + '/unit-test-download', async () => {
     await delay(200);
     // Read the image from the file system using the "fs" module.
-    const imageBuffer = readFileSync(path.resolve(__dirname, './image.jpg'));
+    const imageBuffer = readFileSync(path.resolve(__dirname, '../assets/img-test.jpg'));
     return new HttpResponse(imageBuffer, {
       headers: {
         'Content-Type': 'image/jpeg',
         'Content-Length': imageBuffer.byteLength.toString()
       }
+    });
+  }),
+  http.post(baseURL + '/unit-test-upload', ({ request }) => {
+    // Read the image from the file system using the "fs" module.
+    return result(200, request, true, {
+      contentType: request.headers.get('Content-Type')
     });
   }),
   http.post(baseURL + '/unit-test-headers', ({ request }) => {

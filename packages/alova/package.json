@@ -107,6 +107,9 @@
       ]
     }
   },
+  "dependencies": {
+    "@alova/shared": "workspace:*"
+  },
   "devDependencies": {
     "@alova/scripts": "workspace:*"
   },

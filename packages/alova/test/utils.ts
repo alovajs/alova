@@ -3,32 +3,6 @@ import GlobalFetch from '@/predefine/GlobalFetch';
 import { GlobalLocalCacheConfig, Method, StatesHook } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
-type GetData = {
-  path: string;
-  method: string;
-  params: Record<string, string>;
-};
-type PostData = {
-  path: string;
-  method: string;
-  params: Record<string, string>;
-  data: Record<string, string>;
-};
-export type Result<T = string> = {
-  code: number;
-  msg: string;
-  data: T extends string ? GetData : PostData;
-};
-
-export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[]) => void, ...args: any[]) =>
-  new Promise<T>(resolve => {
-    setCb(d => {
-      resolve(d);
-    }, ...args);
-  });
-
-export const delay = (ts = 0) => new Promise<void>(resolve => setTimeout(resolve, ts));
-
 type FetchMethod = Method<any, any, any, any, FetchRequestInit, Response, Headers>;
 export const getAlovaInstance = <S, E>(
   statesHook: StatesHook<S, E>,

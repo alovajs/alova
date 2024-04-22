@@ -3,9 +3,9 @@ import pageDebounceImmediate from '#/components/svelte/page-useWatcher-debounce-
 import pageDifferentDebounce from '#/components/svelte/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
 import page from '#/components/svelte/page-useWatcher.svelte';
-import { delay } from '#/utils';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { delay } from 'root/testUtils';
 import pageSendable from '~/test/components/svelte/page-useWatcher-sendable.svelte';
 
 describe('useWatcher hook with svelte', () => {

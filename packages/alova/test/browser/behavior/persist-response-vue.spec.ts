@@ -1,9 +1,10 @@
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { key } from '@/utils/helper';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { DetailLocalCacheConfig } from '~/typings';
 
 describe('persist data', function () {
