@@ -44,11 +44,6 @@ export const typePatch = 'PATCH';
 export const typeDelete = 'DELETE';
 export const typeOptions = 'OPTIONS';
 
-const abortRequest: AbortFunction = () => {
-  abortRequest.a();
-};
-abortRequest.a = noop;
-
 export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
   public type: MethodType;
   public baseURL: string;
@@ -65,7 +60,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   /**
    * 请求中断函数，每次请求都会更新这个函数
    */
-  public abort = abortRequest;
+  public abort: AbortFunction;
   public fromCache: boolean | undefined = undefinedValue;
   constructor(
     type: MethodType,
@@ -74,8 +69,14 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     config?: AlovaMethodConfig<R, T, RC, RH>,
     data?: RequestBody
   ) {
+    const abortRequest: AbortFunction = () => {
+      abortRequest.a();
+    };
+    abortRequest.a = noop;
+
     const instance = this,
       contextOptions = getContextOptions(context);
+    instance.abort = abortRequest;
     instance.baseURL = contextOptions.baseURL || '';
     instance.url = url;
     instance.type = type;
