@@ -1,17 +1,8 @@
-import { createHook } from '@/createHook';
 import Method from '@/Method';
+import { createHook } from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
-import {
-  debounce,
-  getContext,
-  getHandlerMethod,
-  getMethodInternalKey,
-  isNumber,
-  noop,
-  promiseStatesHook,
-  sloughConfig,
-  _self
-} from '@/utils/helper';
+import { debounce, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
+import { _self, getContext, getMethodInternalKey, isNumber, noop, sloughConfig } from '@alova/shared/function';
 import {
   deleteAttr,
   falseValue,
@@ -22,15 +13,15 @@ import {
   pushItem,
   trueValue,
   undefinedValue
-} from '@/utils/variables';
+} from '@alova/shared/vars';
 import {
   AlovaMethodHandler,
   CompleteHandler,
   EnumHookType,
   ErrorHandler,
   ExportedType,
-  FetcherHookConfig,
   FetchRequestState,
+  FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,

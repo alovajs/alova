@@ -11,7 +11,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build": "npm run clean && alova-scripts build",
+    "build": "npm run clean && tsc",
     "release": "semantic-release",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "commit": "git add . && git-cz && git push"
@@ -24,9 +24,29 @@
   "bugs": {
     "url": "https://github.com/alovajs/alova/issues"
   },
+  "exports": {
+    "./assert": "./dist/assert.js",
+    "./function": "./dist/function.js",
+    "./vars": "./dist/vars.js"
+  },
+  "typesVersions": {
+    "*": {
+      "assert": [
+        "./dist/assert.d.ts"
+      ],
+      "function": [
+        "./dist/function.d.ts"
+      ],
+      "vars": [
+        "./dist/vars.d.ts"
+      ]
+    }
+  },
   "files": [
-    "dist",
-    "typings/*.d.ts"
+    "dist"
+  ],
+  "files": [
+    "dist"
   ],
   "devDependencies": {
     "@alova/scripts": "workspace:*"

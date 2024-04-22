@@ -1,4 +1,4 @@
-import { newInstance } from './helper';
+import { newInstance } from './function';
 
 /**
  * 构建格式化的错误消息
@@ -13,7 +13,8 @@ export const buildErrorMsg = (prefix: string, msg: string) => `[alova${prefix ? 
  * @param expression 判断表达式，true或false
  * @param msg 断言消息
  */
-export default (prefix = '') =>
+export const createAssert =
+  (prefix = '') =>
   (expression: boolean, msg: string) => {
     if (!expression) {
       throw newInstance(Error, buildErrorMsg(prefix, msg));

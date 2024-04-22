@@ -32,7 +32,6 @@
     "fetch-api",
     "superagent"
   ],
-  "packageManager": "pnpm@8.14.0",
   "scripts": {
     "build": "turbo run build --filter=@alova/adapter-axios",
     "lint": "eslint . --ext .js,.ts",
