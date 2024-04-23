@@ -51,16 +51,6 @@ module.exports = function (bundleKey, version) {
   }
 
   const formats = bundleItem.formats || defaultFormat;
-  // 计算external、globals
-  const external = bundleItem.external ? Object.keys(bundleItem.external) : undefined;
-  const globals = (external || []).reduce((g, key) => {
-    const globalVal = bundleItem.external[key];
-    if (![undefined, null].includes(globalVal)) {
-      g[key] = globalVal;
-    }
-    return g;
-  }, {});
-
   const moduleGroup = ['cjs', 'esm'];
   const groupTemp = [];
   // 将moduleGroup分到同一个数组里
@@ -75,11 +65,23 @@ module.exports = function (bundleKey, version) {
   groupTemp.length > 0 && groupedFormats.push(groupTemp);
 
   return groupedFormats.map(formatGroup => {
+    // 计算环境变量
     const env = formatGroup.includes('umd.min')
       ? 'production'
       : formatGroup.includes('umd')
-      ? 'development'
-      : undefined;
+        ? 'development'
+        : undefined;
+    // 计算external、globals，当external的属性值设为null或undefined时，在umd中不会作为外部依赖。
+    const external = [];
+    const globals = bundleItem.external;
+    for (const key in bundleItem.external || {}) {
+      const globalVal = bundleItem.external[key];
+      globals[key] = globalVal;
+      if (![undefined, null].includes(globalVal) || !env) {
+        external.push(key);
+      }
+    }
+
     return {
       inputOptions: {
         input: bundleItem.input,

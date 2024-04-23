@@ -1,5 +1,5 @@
-import { isNumber, noop } from '@/utils/helper';
-import { forEach, mapItem, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
+import { isNumber, noop } from '@alova/shared/function';
+import { forEach, mapItem, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { EffectRequestParams } from '~/typings';
 

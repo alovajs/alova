@@ -3,7 +3,7 @@ import { createAlova, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import ReactHook from '@/predefine/ReactHook';
 import { getStateCache } from '@/storage/stateCache';
-import { key } from '@/utils/helper';
+import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, StrictMode } from 'react';

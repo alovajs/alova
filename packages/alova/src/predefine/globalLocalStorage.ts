@@ -1,4 +1,4 @@
-import { deleteAttr, JSONParse, JSONStringify, noBrowserWin } from '@/utils/variables';
+import { deleteAttr, JSONParse, JSONStringify, noBrowserWin } from '@alova/shared/vars';
 import { AlovaGlobalStorage } from '~/typings';
 
 /**

@@ -4,8 +4,7 @@ import VueHook from 'alova/vue';
 import axios, { AxiosError } from 'axios';
 import { readFileSync } from 'node:fs';
 import path from 'path';
-import { delay, untilCbCalled } from 'root/testUtils';
-import { Result } from '../result.type';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('request adapter', () => {
@@ -187,7 +186,7 @@ describe('request adapter', () => {
     const formData = new FormData();
     formData.append('f1', 'f1');
     formData.append('f2', 'f2');
-    const imageFile = new File([readFileSync(path.resolve(__dirname, '../image.jpg'))], 'file', {
+    const imageFile = new File([readFileSync(path.resolve(__dirname, '../../../assets/img-test.jpg'))], 'file', {
       type: 'image/jpeg'
     });
     formData.append('file', imageFile);

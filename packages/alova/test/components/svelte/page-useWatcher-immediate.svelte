@@ -14,7 +14,7 @@
 import { createAlova, useWatcher } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import SvelteHook from '@/predefine/SvelteHook';
-import { key } from '@/utils/helper';
+import { key } from '@alova/shared/function';
 import { writable } from 'svelte/store';
 const stateId1 = writable(0);
 const stateId2 = writable(10);

@@ -1,6 +1,3 @@
-import { onDestroy, onMount } from 'svelte';
-import { writable, Writable } from 'svelte/store';
-import { EffectRequestParams } from '~/typings';
 import {
   clearTimeoutTimer,
   falseValue,
@@ -9,7 +6,10 @@ import {
   setTimeoutFn,
   trueValue,
   undefinedValue
-} from '../utils/variables';
+} from '@alova/shared/vars';
+import { onDestroy, onMount } from 'svelte';
+import { Writable, writable } from 'svelte/store';
+import { EffectRequestParams } from '~/typings';
 
 type UnknownWritable = Writable<unknown>;
 export default {

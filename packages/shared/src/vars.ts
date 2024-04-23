@@ -1,4 +1,4 @@
-import { GeneralFn } from './function';
+import { GeneralFn } from './types';
 
 const undefStr = 'undefined';
 // 以下为减少编译代码量而添加的统一处理函数或变量
@@ -21,7 +21,11 @@ export const promiseCatch = <T, TResult = never>(
 ) => promise.catch(onrejected);
 export const promiseFinally = <T>(promise: Promise<T>, onfinally?: (() => void) | undefined | null) =>
   promise.finally(onfinally);
-export const JSONStringify = <T>(value: T) => JSON.stringify(value);
+export const JSONStringify = <T>(
+  value: T,
+  replacer?: (this: any, key: string, value: any) => any,
+  space?: string | number
+) => JSON.stringify(value, replacer, space);
 export const JSONParse = (value: string) => JSON.parse(value);
 export const setTimeoutFn = (fn: GeneralFn, delay = 0) => setTimeout(fn, delay);
 export const clearTimeoutTimer = (timer: NodeJS.Timeout | string | number) => clearTimeout(timer);
@@ -38,3 +42,13 @@ export const deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) =>
 export const typeOf = (arg: any) => typeof arg;
 export const noBrowserWin = typeof window === undefStr || !window.location; // 是否为服务端运行，为了兼容浏览器以及非web客户端环境（如小程序），需要再判断一下process
 export const isSSR = noBrowserWin && typeof process !== undefStr;
+
+/** 三种缓存模式 */
+// 只在内存中缓存，默认是此选项
+export const MEMORY = 'memory';
+
+// 缓存会持久化，但当内存中没有缓存时，持久化缓存只会作为响应数据的占位符，且还会发送请求更新缓存
+export const STORAGE_PLACEHOLDER = 'placeholder';
+
+// 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
+export const STORAGE_RESTORE = 'restore';

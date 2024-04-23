@@ -6,33 +6,31 @@ import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
 import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
+import { exportFetchStates, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
+import { assertMethodMatcher } from '@/utils/myAssert';
 import {
-  exportFetchStates,
-  GeneralFn,
   getContext,
-  getHandlerMethod,
   getLocalCacheConfigParam,
   getMethodInternalKey,
   isFn,
   noop,
-  promiseStatesHook,
   sloughConfig,
   sloughFunction
-} from '@/utils/helper';
-import { assertMethodMatcher } from '@/utils/myAssert';
+} from '@alova/shared/function';
+import type { GeneralFn } from '@alova/shared/types';
 import {
+  MEMORY,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   falseValue,
   forEach,
   len,
-  MEMORY,
   promiseResolve,
   promiseThen,
   pushItem,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   trueValue,
   undefinedValue
-} from '@/utils/variables';
+} from '@alova/shared/vars';
 import {
   AlovaCompleteEvent,
   AlovaErrorEvent,
@@ -313,12 +311,12 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         middlewareReturnedData !== undefinedValue
           ? afterSuccess(middlewareReturnedData)
           : isNextCalled
-          ? // 当middlewareCompletePromise为resolve时有两种可能
-            // 1. 请求正常
-            // 2. 请求错误，但错误被中间件函数捕获了，此时也将调用成功回调，即afterSuccess(undefinedValue)
-            await promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue))
-          : // 如果isNextCalled未被调用，则不返回数据
-            undefinedValue;
+            ? // 当middlewareCompletePromise为resolve时有两种可能
+              // 1. 请求正常
+              // 2. 请求错误，但错误被中间件函数捕获了，此时也将调用成功回调，即afterSuccess(undefinedValue)
+              await promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue))
+            : // 如果isNextCalled未被调用，则不返回数据
+              undefinedValue;
 
       // 未调用next函数时，更新loading为false
       !isNextCalled && !controlledLoading && update({ loading: falseValue }, frontStates, hookInstance);

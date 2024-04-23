@@ -3,6 +3,8 @@
   "output": "dist/alova-adapter-xhr.{suffix}.{ext}",
   "packageName": "AlovaAdapterXhr",
   "external": {
-    "alova": "alova"
+    "@alova/shared/function": null,
+    "@alova/shared/vars": null,
+    "@alova/shared/assert": null
   }
 }

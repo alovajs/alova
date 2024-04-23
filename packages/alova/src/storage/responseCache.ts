@@ -1,5 +1,5 @@
-import { getTime } from '@/utils/helper';
-import { deleteAttr } from '@/utils/variables';
+import { getTime } from '@alova/shared/function';
+import { deleteAttr } from '@alova/shared/vars';
 
 // 响应数据缓存
 let responseCache: Record<string, Record<string, [data: any, expireTime: number]>> = {};

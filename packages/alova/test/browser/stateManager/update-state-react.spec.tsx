@@ -4,7 +4,7 @@ import ReactHook from '@/predefine/ReactHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache } from '@/storage/stateCache';
-import { key } from '@/utils/helper';
+import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';

@@ -1,14 +1,4 @@
 import {
-  AbortFunction,
-  AlovaMethodConfig,
-  MethodRequestConfig,
-  MethodType,
-  ProgressHandler,
-  RequestBody
-} from '~/typings';
-import { Alova } from './alova';
-import sendRequest from './functions/sendRequest';
-import {
   getConfig,
   getContextOptions,
   getMethodInternalKey,
@@ -16,7 +6,7 @@ import {
   isPlainObject,
   key,
   noop
-} from './utils/helper';
+} from '@alova/shared/function';
 import {
   deleteAttr,
   falseValue,
@@ -29,7 +19,17 @@ import {
   promiseThen,
   pushItem,
   undefinedValue
-} from './utils/variables';
+} from '@alova/shared/vars';
+import {
+  AbortFunction,
+  AlovaMethodConfig,
+  MethodRequestConfig,
+  MethodType,
+  ProgressHandler,
+  RequestBody
+} from '~/typings';
+import { Alova } from './alova';
+import sendRequest from './functions/sendRequest';
 
 const offEventCallback = (offHandler: any, handlers: any[]) => () => {
   const index = handlers.indexOf(offHandler);

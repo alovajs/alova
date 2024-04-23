@@ -1,4 +1,4 @@
-import { STORAGE_RESTORE, isSSR, len } from '@/utils/variables';
+import { STORAGE_RESTORE, isSSR, len } from '@alova/shared/vars';
 import { CacheMode } from '~/typings';
 import { Method } from '..';
 

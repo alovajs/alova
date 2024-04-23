@@ -2,7 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { queryCache, updateState, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { removeStateCache } from '@/storage/stateCache';
-import { key } from '@/utils/helper';
+import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { Ref, ref } from 'vue';

@@ -1,14 +1,13 @@
 {
   "name": "@alova/shared",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "author": "Scott Hu",
   "module": "dist/alova.esm.js",
   "types": "typings/index.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test": "echo \"\"no tests.\"",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && tsc",
@@ -27,7 +26,8 @@
   "exports": {
     "./assert": "./dist/assert.js",
     "./function": "./dist/function.js",
-    "./vars": "./dist/vars.js"
+    "./vars": "./dist/vars.js",
+    "./types": "./dist/types.js"
   },
   "typesVersions": {
     "*": {
@@ -39,12 +39,12 @@
       ],
       "vars": [
         "./dist/vars.d.ts"
+      ],
+      "types": [
+        "./dist/types.d.ts"
       ]
     }
   },
-  "files": [
-    "dist"
-  ],
   "files": [
     "dist"
   ],

@@ -2,7 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { setCache, useWatcher } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@/utils/helper';
+import { key } from '@alova/shared/function';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { computed, reactive, ref } from 'vue';
 

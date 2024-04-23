@@ -1,7 +1,7 @@
 import createRequestState from '@/functions/createRequestState';
 import Method from '@/Method';
-import { objAssign } from '@/utils/helper';
-import { trueValue } from '@/utils/variables';
+import { objAssign } from '@alova/shared/function';
+import { trueValue } from '@alova/shared/vars';
 import { AlovaMethodHandler, EnumHookType, RequestHookConfig } from '~/typings';
 
 export default function useRequest<S, E, R, T, RC, RE, RH>(

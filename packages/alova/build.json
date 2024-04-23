@@ -2,7 +2,12 @@
   "core": {
     "packageName": "alova",
     "input": "src/index.ts",
-    "output": "dist/alova.{suffix}.{ext}"
+    "output": "dist/alova.{suffix}.{ext}",
+    "external": {
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    }
   },
   "vuehook": {
     "packageName": "VueHook",

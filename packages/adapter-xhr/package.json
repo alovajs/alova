@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-xhr",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "XMLHttpRequest adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-xhr.esm.js",
@@ -50,8 +50,10 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^2.0.0",
-    "axios": ">=0.4.0"
+    "alova": "^2.19.2"
+  },
+  "dependencies": {
+    "@alova/shared": "workspace:*"
   },
   "devDependencies": {
     "@alova/mock": "workspace:*",

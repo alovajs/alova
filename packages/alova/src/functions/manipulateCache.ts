@@ -7,8 +7,8 @@ import {
   persistResponse,
   removePersistentResponse
 } from '@/storage/responseStorage';
-import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn } from '@/utils/helper';
-import { falseValue, forEach, trueValue, undefinedValue } from '@/utils/variables';
+import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn } from '@alova/shared/function';
+import { falseValue, forEach, trueValue, undefinedValue } from '@alova/shared/vars';
 import { MethodMatcher } from '~/typings';
 
 /*

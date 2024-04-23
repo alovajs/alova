@@ -5,14 +5,7 @@ import { getResponseCache, setResponseCache } from '@/storage/responseCache';
 import { getPersistentRawData, persistResponse } from '@/storage/responseStorage';
 import cloneMethod from '@/utils/cloneMethod';
 import {
-  AlovaRequestAdapter,
-  Arg,
-  ProgressUpdater,
-  ResponseCompleteHandler,
-  ResponsedHandler,
-  ResponseErrorHandler
-} from '~/typings';
-import {
+  _self,
   getConfig,
   getContext,
   getLocalCacheConfigParam,
@@ -24,24 +17,31 @@ import {
   isSpecialRequestBody,
   newInstance,
   noop,
-  sloughFunction,
-  _self
-} from '../utils/helper';
+  sloughFunction
+} from '@alova/shared/function';
 import {
+  PromiseCls,
+  STORAGE_RESTORE,
   deleteAttr,
   falseValue,
   filterItem,
   len,
   mapItem,
   objectKeys,
-  PromiseCls,
   promiseFinally,
   promiseReject,
   promiseThen,
-  STORAGE_RESTORE,
   trueValue,
   undefinedValue
-} from '../utils/variables';
+} from '@alova/shared/vars';
+import {
+  AlovaRequestAdapter,
+  Arg,
+  ProgressUpdater,
+  ResponseCompleteHandler,
+  ResponseErrorHandler,
+  ResponsedHandler
+} from '~/typings';
 import { invalidateCache } from './manipulateCache';
 
 // 请求适配器返回信息暂存，用于实现请求共享
@@ -106,10 +106,10 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       let cachedResponse = isFn(localCache)
         ? await localCache()
         : // 如果是强制请求的，则跳过从缓存中获取的步骤
-        // 否则判断是否使用缓存数据
-        forceRequest
-        ? undefinedValue
-        : getResponseCache(id, methodKey);
+          // 否则判断是否使用缓存数据
+          forceRequest
+          ? undefinedValue
+          : getResponseCache(id, methodKey);
 
       // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中，过期时间要使用缓存的
       if (cacheMode === STORAGE_RESTORE && !cachedResponse) {

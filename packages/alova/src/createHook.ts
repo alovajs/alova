@@ -1,6 +1,6 @@
-import { EnumHookType as TEnumHookType, FrontRequestState, Hook, UseHookConfig } from '~/typings';
-import { Method } from '.';
-import { falseValue, undefinedValue } from './utils/variables';
+import Method from '@/Method';
+import { falseValue, undefinedValue } from '@alova/shared/vars';
+import { FrontRequestState, Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
 
 export const createHook = (ht: TEnumHookType, c: UseHookConfig) =>
   ({
@@ -36,4 +36,4 @@ export const createHook = (ht: TEnumHookType, c: UseHookConfig) =>
 
     /** enableUpload */
     eu: falseValue
-  } as Hook);
+  }) as Hook;

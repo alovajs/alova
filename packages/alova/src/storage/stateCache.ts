@@ -1,4 +1,4 @@
-import { deleteAttr } from '@/utils/variables';
+import { deleteAttr } from '@alova/shared/vars';
 import { FrontRequestState, Hook } from '~/typings';
 
 // 状态数据缓存

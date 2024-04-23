@@ -1,7 +1,16 @@
-import type { Alova, Method } from '../../alova/typings';
-import { ObjectCls, falseValue, nullValue, typeOf } from './vars';
-
-export type GeneralFn = (...args: any[]) => any;
+import type { Alova, CacheExpire, CacheMode, Method } from '../../alova/typings';
+import { GeneralFn } from './types';
+import {
+  JSONStringify,
+  MEMORY,
+  ObjectCls,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
+  falseValue,
+  nullValue,
+  typeOf,
+  undefinedValue
+} from './vars';
 
 /**
  * 空函数，做兼容处理
@@ -78,6 +87,15 @@ export const getContextOptions = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, R
  */
 export const getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
   getContextOptions(getContext(methodInstance));
+
+/**
+ * 获取请求方式的key值
+ * @returns {string} 此请求方式的key值
+ */
+export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
+  const { params, headers } = getConfig(methodInstance);
+  return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
+};
 /**
  * 获取method实例的key值
  * @param methodInstance method实例
@@ -98,6 +116,43 @@ export const isSpecialRequestBody = (data: any) => {
 export const objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
   return ObjectCls.assign(target, ...sources);
 };
+
+/**
+ * 获取缓存的配置参数，固定返回{ e: number, m: number, s: boolean, t: string }格式的对象
+ * e为expire缩写，表示缓存失效时间点（时间戳），单位为毫秒
+ * m为mode缩写，存储模式
+ * s为storage缩写，是否存储到本地
+ * t为tag缩写，持久化存储标签
+ * @param localCache 本地缓存参数
+ * @returns 统一的缓存参数对象
+ */
+export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
+  const _localCache = getConfig(methodInstance).localCache,
+    getCacheExpireTs = (_localCache: CacheExpire) =>
+      isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache || undefinedValue);
+  let cacheMode: CacheMode = MEMORY,
+    expire = 0,
+    storage = falseValue,
+    tag: undefined | string = undefinedValue;
+  if (!isFn(_localCache)) {
+    if (isNumber(_localCache) || instanceOf(_localCache, Date)) {
+      expire = getCacheExpireTs(_localCache);
+    } else {
+      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = _localCache || {};
+      cacheMode = mode;
+      expire = getCacheExpireTs(configExpire);
+      storage = [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode);
+      tag = configTag ? configTag.toString() : undefinedValue;
+    }
+  }
+  return {
+    e: expire,
+    m: cacheMode,
+    s: storage,
+    t: tag
+  };
+};
+
 /**
  * 创建类实例
  * @param cls 构造函数

@@ -1,5 +1,5 @@
-import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@/utils/variables';
-import { getCurrentInstance, onMounted, onUnmounted, Ref, ref, watch, WatchSource } from 'vue';
+import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { Ref, WatchSource, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 import { EffectRequestParams } from '~/typings';
 
 type UnknownRef = Ref<unknown>;

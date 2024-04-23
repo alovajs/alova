@@ -1,8 +1,8 @@
 import createRequestState from '@/functions/createRequestState';
 import Method from '@/Method';
-import { objAssign } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
-import { len } from '@/utils/variables';
+import { objAssign } from '@alova/shared/function';
+import { len } from '@alova/shared/vars';
 import { Writable } from 'svelte/store';
 import { WatchSource } from 'vue';
 import { AlovaMethodHandler, EnumHookType, SvelteWritable, VueRef, WatcherHookConfig } from '~/typings';

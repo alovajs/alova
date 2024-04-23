@@ -1,7 +1,8 @@
-import { ProgressUpdater } from 'alova';
+import { noop } from '@alova/shared/function';
+import { undefinedValue } from '@alova/shared/vars';
+import type { ProgressUpdater } from 'alova';
 import axios, { AxiosResponseHeaders } from 'axios';
-import { AdapterCreateOptions, AxiosRequestAdapter } from '../typings';
-import { noop, undefinedValue } from './helper';
+import { AdapterCreateOptions, AxiosRequestAdapter } from '~/typings';
 
 /**
  * axios请求适配器

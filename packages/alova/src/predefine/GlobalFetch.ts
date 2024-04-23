@@ -1,5 +1,4 @@
-import alovaError from '@/utils/alovaError';
-import { isSpecialRequestBody, isString } from '@/utils/helper';
+import { isSpecialRequestBody, isString, newInstance } from '@alova/shared/function';
 import {
   JSONStringify,
   ObjectCls,
@@ -8,7 +7,7 @@ import {
   promiseReject,
   setTimeoutFn,
   trueValue
-} from '@/utils/variables';
+} from '@alova/shared/vars';
 import { Method, RequestElements } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
@@ -53,14 +52,14 @@ export default function GlobalFetch() {
             // Response的Readable只能被读取一次，需要克隆才可重复使用
             return response.clone();
           },
-          err => promiseReject(isTimeout ? alovaError('fetchError: network timeout') : err)
+          err => promiseReject(isTimeout ? newInstance(Error, 'fetchError: network timeout') : err)
         ),
 
       // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
       headers: () =>
         fetchPromise.then(
           ({ headers }) => headers,
-          () => ({} as Headers)
+          () => ({}) as Headers
         ),
       // 因nodeFetch库限制，这块代码无法进行单元测试，但已在浏览器中通过测试
       /* c8 ignore start */

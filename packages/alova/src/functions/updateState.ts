@@ -2,16 +2,10 @@ import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { setResponseCache } from '@/storage/responseCache';
 import { persistResponse } from '@/storage/responseStorage';
 import { getStateCache } from '@/storage/stateCache';
-import {
-  getContext,
-  getLocalCacheConfigParam,
-  getMethodInternalKey,
-  isFn,
-  noop,
-  promiseStatesHook
-} from '@/utils/helper';
+import { promiseStatesHook } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
-import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@/utils/variables';
+import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn, noop } from '@alova/shared/function';
+import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
 import { MethodMatcher, UpdateOptions, UpdateStateCollection } from '~/typings';
 
 /**

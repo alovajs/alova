@@ -18,9 +18,12 @@ export type Result<T = string> = {
 // 辅助函数
 export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[]) => void, ...args: any[]) =>
   new Promise<T>(resolve => {
-    setCb(d => {
-      resolve(d);
-    }, ...args);
+    setCb(
+      d => {
+        resolve(d);
+      },
+      ...args
+    );
   });
 
 export const delay = (ts = 0) => new Promise<void>(resolve => setTimeout(resolve, ts));

@@ -1,34 +1,17 @@
 import { boundStatesHook } from '@/alova';
-import {
-  JSONStringify,
-  clearTimeoutTimer,
-  falseValue,
-  getConfig,
-  getContextOption,
-  isNumber,
-  nullValue,
-  setTimeoutFn,
-  undefinedValue
-} from '@alova/shared';
-import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } from '~/typings';
+import { getContextOptions, instanceOf, isFn, isNumber } from '@alova/shared/function';
+import type { GeneralFn } from '@alova/shared/types';
+import { clearTimeoutTimer, nullValue, setTimeoutFn } from '@alova/shared/vars';
+import { Alova, AlovaMethodHandler, FrontRequestState } from '~/typings';
 import Method from '../Method';
 import myAssert from './myAssert';
-import { MEMORY, STORAGE_PLACEHOLDER, STORAGE_RESTORE } from './variables';
 
 /**
  * 获取alova实例的statesHook
  * @returns statesHook对象
  */
 export const getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
-    getContextOption(alovaInstance).statesHook,
-  /**
-   * 获取请求方式的key值
-   * @returns {string} 此请求方式的key值
-   */
-  key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-    const { params, headers } = getConfig(methodInstance);
-    return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
-  },
+    getContextOptions(alovaInstance).statesHook,
   /**
    * 创建防抖函数，当delay为0时立即触发函数
    * 场景：在调用useWatcher并设置了immediate为true时，首次调用需立即执行，否则会造成延迟调用
@@ -47,41 +30,6 @@ export const getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, R
       } else {
         bindFn();
       }
-    };
-  },
-  /**
-   * 获取缓存的配置参数，固定返回{ e: number, m: number, s: boolean, t: string }格式的对象
-   * e为expire缩写，表示缓存失效时间点（时间戳），单位为毫秒
-   * m为mode缩写，存储模式
-   * s为storage缩写，是否存储到本地
-   * t为tag缩写，持久化存储标签
-   * @param localCache 本地缓存参数
-   * @returns 统一的缓存参数对象
-   */
-  getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-    const _localCache = getConfig(methodInstance).localCache,
-      getCacheExpireTs = (_localCache: CacheExpire) =>
-        isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache || undefinedValue);
-    let cacheMode: CacheMode = MEMORY,
-      expire = 0,
-      storage = falseValue,
-      tag: undefined | string = undefinedValue;
-    if (!isFn(_localCache)) {
-      if (isNumber(_localCache) || instanceOf(_localCache, Date)) {
-        expire = getCacheExpireTs(_localCache);
-      } else {
-        const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = _localCache || {};
-        cacheMode = mode;
-        expire = getCacheExpireTs(configExpire);
-        storage = [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode);
-        tag = configTag ? configTag.toString() : undefinedValue;
-      }
-    }
-    return {
-      e: expire,
-      m: cacheMode,
-      s: storage,
-      t: tag
     };
   },
   /**

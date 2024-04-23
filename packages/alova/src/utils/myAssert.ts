@@ -1,4 +1,4 @@
-import { createAssert } from '@alova/shared';
+import { createAssert } from '@alova/shared/assert';
 import type { Method } from '~/typings';
 
 // import { get } from '@alova/shared';

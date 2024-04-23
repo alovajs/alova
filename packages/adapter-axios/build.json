@@ -3,7 +3,9 @@
   "output": "dist/alova-adapter-axios.{suffix}.{ext}",
   "packageName": "AlovaAdapterAxios",
   "external": {
-    "alova": "alova",
-    "axios": "axios"
+    "axios": "axios",
+    "@alova/shared/function": null,
+    "@alova/shared/vars": null,
+    "@alova/shared/assert": null
   }
 }

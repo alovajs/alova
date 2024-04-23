@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-axios",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "axios adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-axios.common.cjs",
@@ -54,8 +54,11 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^2.0.0",
+    "alova": "^2.19.2",
     "axios": ">=0.4.0"
+  },
+  "dependencies": {
+    "@alova/shared": "workspace:*"
   },
   "devDependencies": {
     "@alova/mock": "workspace:*",

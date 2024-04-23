@@ -1,5 +1,5 @@
 import Method from '@/Method';
-import { getContext, newInstance, objAssign } from './helper';
+import { getContext, newInstance, objAssign } from '@alova/shared/function';
 
 export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
   const { data, config } = methodInstance,

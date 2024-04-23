@@ -1,3 +1,4 @@
 /dist
 /packages/*/dist
 /examples/*/dist
+pnpm-lock.yaml

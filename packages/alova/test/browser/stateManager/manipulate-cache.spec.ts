@@ -2,7 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { queryCache, setCache, useRequest } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { getPersistentResponse, persistResponse } from '@/storage/responseStorage';
-import { key } from '@/utils/helper';
+import { key } from '@alova/shared/function';
 import { Result, untilCbCalled } from 'root/testUtils';
 
 const alova = getAlovaInstance(VueHook, {

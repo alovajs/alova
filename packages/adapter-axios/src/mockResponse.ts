@@ -1,7 +1,7 @@
-import { MockError, MockResponse } from '@alova/mock';
+import type { MockError, MockResponse } from '@alova/mock';
+import { undefinedValue } from '@alova/shared/vars';
 import { AxiosError, AxiosHeaders, AxiosResponse, AxiosResponseHeaders } from 'axios';
-import { AlovaAxiosRequestConfig } from '../typings';
-import { undefinedValue } from './helper';
+import { AlovaAxiosRequestConfig } from '~/typings';
 
 const mockResponseHandler: MockResponse<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponseHeaders> = (
   { status, statusText, body },

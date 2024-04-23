@@ -1,3 +1,5 @@
+import { newInstance } from '@alova/shared/function';
+import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
   AlovaGlobalStorage,
   AlovaMethodConfig,
@@ -8,9 +10,8 @@ import {
 } from '~/typings';
 import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 import globalLocalStorage from './predefine/globalLocalStorage';
-import { getStatesHook, newInstance } from './utils/helper';
+import { getStatesHook } from './utils/helper';
 import myAssert from './utils/myAssert';
-import { pushItem, trueValue, undefinedValue } from './utils/variables';
 
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 const defaultAlovaOptions = {

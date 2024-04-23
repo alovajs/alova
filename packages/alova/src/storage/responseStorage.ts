@@ -1,6 +1,6 @@
 import { usingStorageAdapters } from '@/alova';
-import { getTime } from '@/utils/helper';
-import { forEach, nullValue, pushItem, undefinedValue } from '@/utils/variables';
+import { getTime } from '@alova/shared/function';
+import { forEach, nullValue, pushItem, undefinedValue } from '@alova/shared/vars';
 import { AlovaGlobalStorage } from '~/typings';
 
 const responseStorageKeyPrefix = 'alova.';

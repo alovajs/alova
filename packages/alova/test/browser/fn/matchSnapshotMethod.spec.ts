@@ -2,8 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { globalConfig } from '@/index';
 import VueHook from '@/predefine/VueHook';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
-import { key } from '@/utils/helper';
-import { falseValue } from '@/utils/variables';
+import { key } from '@alova/shared/function';
 
 describe('matchSnapshotMethod', function () {
   test('should change snapshot limitation when set `limitSnapshots` in globalConfig', () => {
@@ -86,7 +85,7 @@ describe('matchSnapshotMethod', function () {
     expect(matchedMethods).toHaveLength(0);
 
     // 匹配到两个，但默认取第一个
-    let matchedMethod = matchSnapshotMethod('get-method', falseValue);
+    let matchedMethod = matchSnapshotMethod('get-method', false);
     expect(matchedMethod).toBe(Get1);
 
     // 匹配到两个，并筛选出最后一个
@@ -102,7 +101,7 @@ describe('matchSnapshotMethod', function () {
     expect(matchedMethod).toBe(Get2);
 
     // 匹配不到
-    matchedMethod = matchSnapshotMethod('get-method555', falseValue);
+    matchedMethod = matchSnapshotMethod('get-method555', false);
     expect(matchedMethod).toBeUndefined();
     // 匹配不到，filter不会被调用
     const mockFn = jest.fn();
@@ -114,7 +113,7 @@ describe('matchSnapshotMethod', function () {
           return true;
         }
       },
-      falseValue
+      false
     );
     expect(matchedMethod).toBeUndefined();
     expect(mockFn).not.toHaveBeenCalled();
@@ -176,7 +175,7 @@ describe('matchSnapshotMethod', function () {
         name: /get-method/,
         alova
       },
-      falseValue
+      false
     );
     expect(matchedMethod).toBe(Get1);
 
@@ -194,7 +193,7 @@ describe('matchSnapshotMethod', function () {
     expect(matchedMethod).toBe(Get2);
 
     // 匹配不到
-    matchedMethod = matchSnapshotMethod(/get-method555/, falseValue);
+    matchedMethod = matchSnapshotMethod(/get-method555/, false);
     expect(matchedMethod).toBeUndefined();
     // 匹配不到，filter不会被调用
     const mockFn = jest.fn();
@@ -206,7 +205,7 @@ describe('matchSnapshotMethod', function () {
           return true;
         }
       },
-      falseValue
+      false
     );
     expect(matchedMethod).toBeUndefined();
     expect(mockFn).not.toHaveBeenCalled();

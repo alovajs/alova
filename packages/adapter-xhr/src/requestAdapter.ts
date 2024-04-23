@@ -1,18 +1,10 @@
-import { ProgressUpdater } from 'alova';
-import { AlovaXHRAdapter, AlovaXHRResponse } from '../typings';
-import {
-  data2QueryString,
-  err,
-  falseValue,
-  isPlainObject,
-  isSpecialRequestBody,
-  isString,
-  noop,
-  nullValue,
-  parseResponseHeaders,
-  trueValue
-} from './helper';
+import { data2QueryString, parseResponseHeaders } from '@/helper';
+import { isPlainObject, isSpecialRequestBody, isString, newInstance, noop } from '@alova/shared/function';
+import { falseValue, nullValue, trueValue } from '@alova/shared/vars';
+import type { ProgressUpdater } from 'alova';
+import { AlovaXHRAdapter, AlovaXHRResponse } from '~/typings';
 
+const err = (msg: string) => newInstance(Error, msg);
 const isBodyData = (data: any): data is XMLHttpRequestBodyInit => isString(data) || isSpecialRequestBody(data);
 /**
  * XMLHttpRequest请求适配器

@@ -1,5 +1,5 @@
 import { MockResponse } from '@alova/mock';
-import { AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders } from '../typings';
+import { AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders } from '~/typings';
 
 const mockResponseHandler: MockResponse<AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders> = ({
   status,
