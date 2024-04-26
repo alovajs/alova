@@ -1,0 +1,80 @@
+name: pull_request check
+
+# trigger condition: pull_request to any branch
+on:
+  push:
+    branches:
+      - beta
+
+jobs:
+  quality:
+    # server: ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install
+
+      - name: Lint check
+        run: pnpm run lint
+
+      - name: Format
+        run: pnpm run format
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [quality]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install
+
+      # - name: Test SSR
+      #   run: npm run test:node
+
+      # This has contained test and upload coverage
+      # - name: Coverage
+      #   run: npm run test:coveralls
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          # Note: pnpm install after versioning is necessary to refresh lockfile
+          version: pnpm run changeset:version
+          publish: pnpm run release
+          commit: '[ci] release'
+          title: '[ci] release'
+        env:
+          # Needs access to push to main
+          GITHUB_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
+          # Needs access to publish to npm
+          NPM_TOKEN: ${{ secrets.ALOVA_GITHUB_TOKEN }}
