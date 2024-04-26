@@ -19,7 +19,7 @@ export interface RequestElements {
   readonly headers: Arg;
   readonly data?: RequestBody;
 }
-export type ProgressUpdater = (total: number, loaded: number) => void;
+export type ProgressUpdater = (loaded: number, total: number) => void;
 export type AlovaRequestAdapter<R, T, RC, RE, RH> = (
   elements: RequestElements,
   method: Method<any, any, R, T, RC, RE, RH>

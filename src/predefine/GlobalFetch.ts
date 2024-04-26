@@ -1,10 +1,10 @@
 import alovaError from '@/utils/alovaError';
 import { isSpecialRequestBody, isString } from '@/utils/helper';
 import {
-  clearTimeoutTimer,
-  falseValue,
   JSONStringify,
   ObjectCls,
+  clearTimeoutTimer,
+  falseValue,
   promiseReject,
   setTimeoutFn,
   trueValue
@@ -64,7 +64,7 @@ export default function GlobalFetch() {
         ),
       // 因nodeFetch库限制，这块代码无法进行单元测试，但已在浏览器中通过测试
       /* c8 ignore start */
-      onDownload: async (cb: (total: number, loaded: number) => void) => {
+      onDownload: async (cb: (loaded: number, total: number) => void) => {
         let isAborted = falseValue;
         const response = await fetchPromise.catch(() => {
           isAborted = trueValue;
