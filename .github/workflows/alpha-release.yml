@@ -22,7 +22,7 @@ jobs:
           version: 8
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
@@ -52,7 +52,7 @@ jobs:
           version: 8
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
@@ -79,6 +79,6 @@ jobs:
           title: '[ci] release'
         env:
           # Needs access to push to main
-          GITHUB_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ALOVA_GITHUB_TOKEN }}
           # Needs access to publish to npm
-          NPM_TOKEN: ${{ secrets.ALOVA_GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
