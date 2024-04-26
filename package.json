@@ -46,7 +46,7 @@
     "changeset:alpha": "changeset enter pre alpha && changeset",
     "changeset:beta": "changeset enter pre beta && changeset",
     "changeset:version": "changeset version",
-    "release": "pnpm changeset:version && pnpm i && pnpm publish -r"
+    "release": "pnpm changeset publish"
   },
   "author": "Scott Hu",
   "license": "MIT",
