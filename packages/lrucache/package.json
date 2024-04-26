@@ -1,6 +1,6 @@
 {
   "name": "@alova/lrucache",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "larucache adapter for alova.js on nodejs, deno, bun",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-axios.common.cjs",
