@@ -161,7 +161,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       return stateExport(frontStates.downloading, hookInstance) as unknown as ExportedType<Progress, S>;
     },
     get uploading() {
-      hookInstance.ed = trueValue;
+      hookInstance.eu = trueValue;
       return stateExport(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>;
     },
     onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
