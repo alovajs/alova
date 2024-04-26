@@ -40,7 +40,7 @@
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "prepare": "husky install",
+    "prepare": "husky",
     "commit": "git-cz && git push",
     "changeset": "changeset",
     "changeset:alpha": "changeset enter pre alpha && changeset",
