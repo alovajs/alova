@@ -13,5 +13,5 @@
     "@alova/shared": "0.0.1",
     "@alova/scripts": "1.0.0"
   },
-  "changesets": []
+  "changesets": ["mighty-guests-invite", "tasty-owls-peel"]
 }
