@@ -1,10 +1,10 @@
-name: Release beta
+name: Release next
 
 # trigger condition: pull_request to any branch
 on:
   push:
     branches:
-      - beta
+      - alpha
 
 jobs:
   quality:
@@ -48,6 +48,8 @@ jobs:
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v3
+        with:
+          version: 8
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -73,10 +75,10 @@ jobs:
           # Note: pnpm install after versioning is necessary to refresh lockfile
           version: pnpm run changeset:version
           publish: pnpm run release
-          commit: '[ci] release'
-          title: '[ci] release'
+          commit: 'ci: release next'
+          title: 'ci: release next'
         env:
           # Needs access to push to main
-          GITHUB_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ALOVA_GITHUB_TOKEN }}
           # Needs access to publish to npm
-          NPM_TOKEN: ${{ secrets.ALOVA_GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_ALOVA_PUBLISH_TOKEN }}

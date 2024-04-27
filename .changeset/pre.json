@@ -1,0 +1,17 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@alova/adapter-axios": "1.1.2",
+    "@alova/adapter-graphql": "1.0.0",
+    "@alova/mock": "1.5.0",
+    "@alova/adapter-superagent": "1.0.0",
+    "@alova/adapter-xhr": "1.0.1",
+    "alova": "2.19.2",
+    "@alova/lrucache": "0.0.1",
+    "@alova/psm": "1.0.0",
+    "@alova/shared": "0.0.1",
+    "@alova/scripts": "1.0.0"
+  },
+  "changesets": []
+}

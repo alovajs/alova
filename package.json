@@ -43,8 +43,8 @@
     "prepare": "husky",
     "commit": "git-cz && git push",
     "changeset": "changeset",
-    "changeset:alpha": "changeset enter pre alpha && changeset",
-    "changeset:beta": "changeset enter pre beta && changeset",
+    "changeset:alpha": "changeset pre enter alpha",
+    "changeset:beta": "changeset pre enter beta",
     "changeset:version": "changeset version",
     "release": "pnpm changeset publish"
   },
