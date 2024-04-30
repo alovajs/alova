@@ -1,5 +1,5 @@
 import Method from '@/Method';
-import defaultCacheLogger from '@/predefine/defaultCacheLogger';
+import defaultCacheLogger from '@/defaults/defaultCacheLogger';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
 import { getResponseCache, setResponseCache } from '@/storage/responseCache';
 import { getPersistentRawData, persistResponse } from '@/storage/responseStorage';
@@ -38,9 +38,9 @@ import {
   AlovaRequestAdapter,
   Arg,
   ProgressUpdater,
+  RespondedHandler,
   ResponseCompleteHandler,
-  ResponseErrorHandler,
-  ResponsedHandler
+  ResponseErrorHandler
 } from '~/typings';
 import { invalidateCache } from './manipulateCache';
 
@@ -93,7 +93,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       requestAdapterCtrlsPromiseResolveFn = resolve;
     }) as Promise<RequestAdapterReturnType | undefined>,
     response = async () => {
-      const { beforeRequest = noop, responsed, responded, requestAdapter, cacheLogger } = getOptions(methodInstance),
+      const { beforeRequest = noop, responded, requestAdapter, cacheLogger } = getOptions(methodInstance),
         // 使用克隆的methodKey，防止用户使用克隆的method实例再次发起请求，导致key重复
         clonedMethod = cloneMethod(methodInstance),
         methodKey = getMethodInternalKey(clonedMethod),
@@ -132,19 +132,17 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
           name: methodInstanceName = '',
           shareRequest
         } = getConfig(clonedMethod),
-        namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {}),
-        // responsed是一个错误的单词，正确的单词是responded
-        // 在2.1.0+添加了responded的支持，并和responsed做了兼容处理
-        // 计划将在3.0中正式使用responded
-        responseUnified = responded || responsed;
+        namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
       let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey],
-        responseSuccessHandler: ResponsedHandler<any, any, RC, RE, RH> = _self,
+        responseSuccessHandler: RespondedHandler<any, any, RC, RE, RH> = _self,
         responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> | undefined = undefinedValue,
         responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = noop;
-      if (isFn(responseUnified)) {
-        responseSuccessHandler = responseUnified;
-      } else if (isPlainObject(responseUnified)) {
-        const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responseUnified;
+
+      // uniform handler of onSuccess, onError, onComplete
+      if (isFn(responded)) {
+        responseSuccessHandler = responded;
+      } else if (isPlainObject(responded)) {
+        const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responded;
         responseSuccessHandler = isFn(successHandler) ? successHandler : responseSuccessHandler;
         responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
         responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;

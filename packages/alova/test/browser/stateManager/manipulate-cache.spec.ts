@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { queryCache, setCache, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { getPersistentResponse, persistResponse } from '@/storage/responseStorage';
 import { key } from '@alova/shared/function';
 import { Result, untilCbCalled } from 'root/testUtils';

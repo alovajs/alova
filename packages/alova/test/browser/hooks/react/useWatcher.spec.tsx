@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
-import ReactHook from '@/predefine/ReactHook';
+import ReactHook from '@/statesHook/react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, useState } from 'react';

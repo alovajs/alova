@@ -1,9 +1,9 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
-import ReactHook from '@/predefine/ReactHook';
+import ReactHook from '@/statesHook/react';
 import React, { ReactElement } from 'react';
 import { renderToString } from 'react-dom/server';
-import { Result, delay } from 'root/testUtils';
+import { delay, Result } from 'root/testUtils';
 
 // use hook在服务端不再发送请求
 describe('[react]use hooks in SSR', function () {

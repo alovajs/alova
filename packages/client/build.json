@@ -1,0 +1,11 @@
+{
+  "input": "src/index.ts",
+  "output": "../alova/dist/clienthook/index.{suffix}.{ext}",
+  "packageName": "AlovaClientHook",
+  "external": {
+    "alova": "alova",
+    "@alova/shared/function": null,
+    "@alova/shared/vars": null,
+    "@alova/shared/assert": null
+  }
+}

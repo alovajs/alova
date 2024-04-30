@@ -3,12 +3,11 @@
   import GlobalFetch from '@/predefine/GlobalFetch';
   import SvelteHook from '@/predefine/SvelteHook';
   import { writable } from 'svelte/store';
-  const baseURL = process.env.NODE_BASE_URL;
-
   const stateId1 = writable(0);
   const stateId2 = writable(10);
+
   const alova = createAlova({
-    baseURL,
+    baseURL: process.env.NODE_BASE_URL,
     timeout: 3000,
     statesHook: SvelteHook,
     requestAdapter: GlobalFetch(),

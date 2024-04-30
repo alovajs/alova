@@ -8,10 +8,18 @@ import {
   RequestBody,
   StatesHook
 } from '~/typings';
-import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
-import globalLocalStorage from './predefine/globalLocalStorage';
+import Method from './Method';
+import globalLocalStorage from './defaults/globalLocalStorage';
 import { getStatesHook } from './utils/helper';
 import myAssert from './utils/myAssert';
+
+const typeGet = 'GET',
+  typeHead = 'HEAD',
+  typePost = 'POST',
+  typePut = 'PUT',
+  typePatch = 'PATCH',
+  typeDelete = 'DELETE',
+  typeOptions = 'OPTIONS';
 
 type AlovaMethodCreateConfig<R, T, RC, RH> = Partial<MethodRequestConfig> & AlovaMethodConfig<R, T, RC, RH>;
 const defaultAlovaOptions = {

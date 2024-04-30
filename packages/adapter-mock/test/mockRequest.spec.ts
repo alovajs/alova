@@ -4,6 +4,7 @@ import { createAlova, useRequest } from 'alova';
 import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 
+declare const isSSR: boolean;
 describe('mock request', () => {
   test('response with plain body data', async () => {
     const mockApi = jest.fn();

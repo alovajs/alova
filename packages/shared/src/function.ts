@@ -1,13 +1,16 @@
-import type { Alova, CacheExpire, CacheMode, Method } from '../../alova/typings';
-import { GeneralFn } from './types';
+import type { Alova, AlovaEvent, CacheExpire, CacheMode, Hook, Method, StatesHook } from '../../alova/typings';
+import { FrameworkState, GeneralFn } from './types';
 import {
   JSONStringify,
   MEMORY,
   ObjectCls,
-  STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
   falseValue,
+  forEach,
+  len,
   nullValue,
+  setTimeoutFn,
+  trueValue,
   typeOf,
   undefinedValue
 } from './vars';
@@ -141,7 +144,7 @@ export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance:
       const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = _localCache || {};
       cacheMode = mode;
       expire = getCacheExpireTs(configExpire);
-      storage = [STORAGE_PLACEHOLDER, STORAGE_RESTORE].includes(mode);
+      storage = [STORAGE_RESTORE].includes(mode);
       tag = configTag ? configTag.toString() : undefinedValue;
     }
   }
@@ -172,3 +175,100 @@ export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[]
   isFn(config) ? config(...args) : config;
 export const sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
   isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop;
+
+/**
+ * 创建同步多次调用只在异步执行一次的执行器
+ */
+export const createSyncOnceRunner = (delay = 0) => {
+  let timer: NodeJS.Timeout | number | undefined = undefinedValue;
+
+  // 执行多次调用此函数将异步执行一次
+  return (fn: () => void) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeoutFn(fn, delay);
+  };
+};
+
+/**
+ * run event handlers with event.
+ * @param handlers event handlers
+ * @param event event instance
+ * @param decorator event decorator defined on usehook middleware
+ */
+export const runEventHandlers = <
+  State,
+  Export,
+  ResponseTransformed,
+  MethodTransformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  handlers: GeneralFn[],
+  event?: AlovaEvent<State, Export, ResponseTransformed, MethodTransformed, RequestConfig, Response, ResponseHeader>,
+  decorator?: ((...args: any[]) => void) | undefined
+) => {
+  forEach(handlers, (handler, index) =>
+    isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)
+  );
+};
+
+/**
+ * 深层遍历目标对象
+ * @param target 目标对象
+ * @param callback 遍历回调
+ * @param preorder 是否前序遍历，默认为true
+ * @param key 当前遍历的key
+ * @param parent 当前遍历的父节点
+ */
+export const walkObject = (
+  target: any,
+  callback: (value: any, key: string | number | symbol, parent: any) => void,
+  preorder = trueValue,
+  key?: string | number | symbol,
+  parent?: any
+) => {
+  const callCallback = () => {
+    if (parent && key) {
+      target = callback(target, key, parent);
+      if (target !== parent[key]) {
+        parent[key] = target;
+      }
+    }
+  };
+
+  // 前序遍历
+  preorder && callCallback();
+  if (isPlainObject(target)) {
+    for (const i in target) {
+      if (!instanceOf(target, String)) {
+        walkObject(target[i], callback, preorder, i, target);
+      }
+    }
+  }
+  // 后序遍历
+  !preorder && callCallback();
+  return target;
+};
+
+type UnknownFrameworkState = FrameworkState<unknown>;
+export function statesHookHelper(statesHook: StatesHook<UnknownFrameworkState, UnknownFrameworkState>, hook: Hook) {
+  return {
+    create: <D>(initialValue: D, isRef = falseValue) =>
+      statesHook.create(initialValue, hook, isRef) as FrameworkState<D>,
+    computed: <D>(getter: () => D, depList: UnknownFrameworkState[], isRef = falseValue) =>
+      statesHook.computed(getter, depList, hook, isRef) as FrameworkState<D>,
+    export: (state: UnknownFrameworkState) => (statesHook.export ? statesHook.export(state, hook) : _self),
+    dehydrate: <D>(state: FrameworkState<D>) => statesHook.dehydrate(state, hook) as D,
+    update: (newVal: Record<string, any>, state: Record<string, UnknownFrameworkState>) =>
+      statesHook.update(newVal, state, hook),
+    memorize: <Callback extends (...args: any[]) => any>(fn: Callback) =>
+      statesHook.memorize ? statesHook.memorize(fn) : fn,
+    ref: <D>(initialValue: D) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue }),
+    watch: (source: UnknownFrameworkState[], callback: () => void) => statesHook.watch(source, callback, hook),
+    onMounted: (callback: () => void) => statesHook.onMounted(callback, hook),
+    onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, hook)
+  };
+}

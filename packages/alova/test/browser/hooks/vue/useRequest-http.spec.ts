@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { setCache, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@alova/shared/function';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
@@ -20,31 +20,29 @@ describe('use useRequest hook to send GET with vue', function () {
       transformData(result: Result) {
         expect(result.code).toBe(200);
         expect(result.data.path).toBe('/unit-test');
-        expect(result.data.params).toEqual({ a: 'a', b: 'str' });
+        expect(result.data.params).toStrictEqual({ a: 'a', b: 'str' });
         return result.data;
       },
       localCache: 100 * 1000
     });
-    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
+    const { loading, data, error, onSuccess } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     const { data: rawData, fromCache } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
-    expect(data.value.params).toEqual({ a: 'a', b: 'str' });
+    expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
     expect(rawData.path).toBe('/unit-test');
-    expect(rawData.params).toEqual({ a: 'a', b: 'str' });
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(rawData.params).toStrictEqual({ a: 'a', b: 'str' });
     expect(error.value).toBeUndefined();
     expect(fromCache).toBeFalsy();
 
     // 缓存有值
     const cacheData = getResponseCache(alova.id, key(Get));
     expect(cacheData.path).toBe('/unit-test');
-    expect(cacheData.params).toEqual({ a: 'a', b: 'str' });
+    expect(cacheData.params).toStrictEqual({ a: 'a', b: 'str' });
   });
 
   test("shouldn't emit onError of useRequest when global error cb don't throw Error at error request", async () => {
@@ -61,13 +59,13 @@ describe('use useRequest hook to send GET with vue', function () {
     const { loading, data, downloading, error, onSuccess } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 请求错误无缓存
@@ -93,7 +91,7 @@ describe('use useRequest hook to send GET with vue', function () {
     const { loading, data, downloading, error, onError, onComplete } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     onComplete(event => {
@@ -107,7 +105,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(errEvent.sendArgs).toStrictEqual([]);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeInstanceOf(Error);
     expect(error.value).toBe(errEvent.error);
     expect(error.value?.name).toBe('404');
@@ -130,13 +128,13 @@ describe('use useRequest hook to send GET with vue', function () {
     const secondState = useRequest(Get2);
     expect(secondState.loading.value).toBeTruthy();
     expect(secondState.data.value).toBeUndefined();
-    expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(secondState.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(secondState.error.value).toBeUndefined();
 
     const err2 = await untilCbCalled(secondState.onError);
     expect(secondState.loading.value).toBeFalsy();
     expect(secondState.data.value).toBeUndefined();
-    expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(secondState.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(secondState.error.value).toBeInstanceOf(Error);
     expect(secondState.error.value).toBe(err2.error);
     expect(secondState.error.value?.message).toBe('throwed in error2');
@@ -149,16 +147,14 @@ describe('use useRequest hook to send GET with vue', function () {
       }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test');
-    const { loading, data, downloading, error, onError } = useRequest(Get);
+    const { loading, data, error, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     const err = await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeInstanceOf(Object);
     expect(error.value).toBe(err.error);
     expect(error.value?.message).toBe('responseCallback error');
@@ -172,13 +168,13 @@ describe('use useRequest hook to send GET with vue', function () {
     const secondState = useRequest(Get2);
     expect(secondState.loading.value).toBeTruthy();
     expect(secondState.data.value).toBeUndefined();
-    expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(secondState.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(secondState.error.value).toBeUndefined();
 
     const err2 = await untilCbCalled(secondState.onError);
     expect(secondState.loading.value).toBeFalsy();
     expect(secondState.data.value).toBeUndefined();
-    expect(secondState.downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(secondState.downloading.value).toStrictEqual({ total: 77, loaded: 77 });
     expect(secondState.error.value).toBeInstanceOf(Object);
     expect(secondState.error.value).toBe(err2.error);
     expect(secondState.error.value?.message).toBe('responseCallback error2');
@@ -331,14 +327,14 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(rawData.params.a).toBe('~');
     expect(data.value.params.b).toBe('~');
     let cacheData: typeof data.value = getResponseCache(alova.id, key(getGetter(sendObj)));
-    expect(cacheData.params).toEqual(sendObj);
+    expect(cacheData.params).toStrictEqual(sendObj);
 
     const sendObj2 = { a: '.', b: '.' };
     rawData = await send(sendObj2);
     expect(rawData.params.a).toBe('.');
     expect(data.value.params.b).toBe('.');
     cacheData = getResponseCache(alova.id, key(getGetter(sendObj2)));
-    expect(cacheData.params).toEqual(sendObj2);
+    expect(cacheData.params).toStrictEqual(sendObj2);
   });
 
   test('should throw a request error when request error at calling `send` function', async () => {
@@ -376,7 +372,7 @@ describe('use useRequest hook to send GET with vue', function () {
     try {
       const data = await send(3);
       expect(data.path).toBe('/unit-test');
-      expect(data.params.index).toEqual('3');
+      expect(data.params.index).toStrictEqual('3');
       expect(mockFn).toHaveBeenCalledTimes(2);
     } catch (err: any) {
       expect(err.message).toMatch(/404/);
@@ -417,7 +413,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(rawData.params.a).toBe('~');
     expect(data.value.params.b).toBe('~~');
     const cacheData = getResponseCache(alova.id, key(getGetterObj));
-    expect(cacheData.params).toEqual({ a: '~', b: '~~' });
+    expect(cacheData.params).toStrictEqual({ a: '~', b: '~~' });
   });
 
   test('should update states when call update returns in useFetcher', async () => {

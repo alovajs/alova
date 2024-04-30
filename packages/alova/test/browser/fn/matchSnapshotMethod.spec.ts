@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { globalConfig } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
 import { key } from '@alova/shared/function';
 

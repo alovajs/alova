@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
+import VueHook from '@/statesHook/vue';
+import { delay, Result, untilCbCalled } from 'root/testUtils';
 
 describe('useRequet middleware', function () {
   test('middleware function can set with a common function', async () => {

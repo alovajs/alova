@@ -1,5 +1,3 @@
-import Method from '@/Method';
-import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { clearResponseCache, getResponseCache, removeResponseCache, setResponseCache } from '@/storage/responseCache';
 import {
   clearPersistentResponse,
@@ -8,8 +6,8 @@ import {
   removePersistentResponse
 } from '@/storage/responseStorage';
 import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn } from '@alova/shared/function';
-import { falseValue, forEach, trueValue, undefinedValue } from '@alova/shared/vars';
-import { MethodMatcher } from '~/typings';
+import { forEach, isArray, undefinedValue } from '@alova/shared/vars';
+import { Method } from '~/typings';
 
 /*
  * 以下三个函数中的matcher为Method实例匹配器，它分为3种情况：
@@ -23,16 +21,13 @@ import { MethodMatcher } from '~/typings';
  * @param matcher Method实例匹配器
  * @returns 缓存数据，未查到时返回undefined
  */
-export const queryCache = <R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
-  matcher: MethodMatcher<S, E, R, T, RC, RE, RH>
-) => {
-  const methodInstance = filterSnapshotMethods(matcher, falseValue);
-  if (methodInstance) {
-    const { id, storage } = getContext(methodInstance),
-      methodKey = getMethodInternalKey(methodInstance);
+export const queryCache = <R, S, E, T, RC, RE, RH>(matcher: Method<S, E, R, T, RC, RE, RH>) => {
+  if (matcher && matcher.__key__) {
+    const { id, storage } = getContext(matcher),
+      methodKey = getMethodInternalKey(matcher);
     return (
       getResponseCache(id, methodKey) ||
-      getPersistentResponse(id, methodKey, storage, getLocalCacheConfigParam(methodInstance).t)
+      getPersistentResponse(id, methodKey, storage, getLocalCacheConfigParam(matcher).t)
     );
   }
 };
@@ -42,11 +37,11 @@ export const queryCache = <R = any, S = any, E = any, T = any, RC = any, RE = an
  * @param matcher Method实例匹配器
  * @param data 缓存数据
  */
-export const setCache = <R = any, S = any, E = any, T = any, RC = any, RE = any, RH = any>(
-  matcher: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
+export const setCache = <R, S, E, T, RC, RE, RH>(
+  matcher: Method<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
   dataOrUpdater: R | ((oldCache?: R) => R | undefined | void)
 ) => {
-  const methodInstances = filterSnapshotMethods(matcher, trueValue);
+  const methodInstances = isArray(matcher) ? matcher : [matcher];
   forEach(methodInstances, methodInstance => {
     const { id, storage } = getContext(methodInstance),
       methodKey = getMethodInternalKey(methodInstance),
@@ -69,14 +64,14 @@ export const setCache = <R = any, S = any, E = any, T = any, RC = any, RE = any,
  * @param matcher Method实例匹配器
  */
 export const invalidateCache = <S, E, R, T, RC, RE, RH>(
-  matcher?: MethodMatcher<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
+  matcher?: Method<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
 ) => {
   if (!matcher) {
     clearResponseCache();
     clearPersistentResponse();
     return;
   }
-  const methodInstances = filterSnapshotMethods(matcher, trueValue);
+  const methodInstances = isArray(matcher) ? matcher : [matcher];
   forEach(methodInstances, methodInstance => {
     const { id, storage } = getContext(methodInstance),
       methodKey = getMethodInternalKey(methodInstance);

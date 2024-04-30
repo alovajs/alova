@@ -60,7 +60,7 @@ export const getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, R
     downloading: frontStates.downloading,
     uploading: frontStates.uploading
   }),
-  promiseStatesHook = (functionName = '') => {
-    myAssert(!!boundStatesHook, `can not call ${functionName} until set the \`statesHook\` at alova instance`);
+  promiseStatesHook = () => {
+    myAssert(!!boundStatesHook, `\`statesHook\` is not set in alova instance`);
     return boundStatesHook as NonNullable<typeof boundStatesHook>;
   };

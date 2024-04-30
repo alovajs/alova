@@ -7,11 +7,10 @@
   "types": "typings/index.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "echo \"\"no tests.\"",
+    "test": "echo \"no tests.\"",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build": "npm run clean && tsc",
-    "release": "semantic-release",
+    "build": "tsc",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "commit": "git add . && git-cz && git push"
   },

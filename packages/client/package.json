@@ -1,0 +1,54 @@
+{
+  "name": "alova-client",
+  "version": "2.0.0",
+  "description": "client request strategy for alova.js",
+  "homepage": "https://alova.js.org",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "hooks",
+    "vuejs",
+    "typescript",
+    "vue",
+    "request",
+    "vue3",
+    "superagent",
+    "alova",
+    "react",
+    "svelte",
+    "axios"
+  ],
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "test": "jest",
+    "lint": "eslint --ext .ts,.js src/**",
+    "lint:fix": "eslint --ext .ts,.js src/** --fix",
+    "build": "npm run clean && alova-scripts build",
+    "commit": "git-cz && git push"
+  },
+  "author": "Scott hu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alovajs/alova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alovajs/alova/issues"
+  },
+  "peerDependencies": {
+    "alova": "^3.0.0"
+  },
+  "dependencies": {
+    "@alova/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

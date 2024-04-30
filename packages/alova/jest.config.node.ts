@@ -9,7 +9,8 @@ import baseConfig from '../../jest.config.base';
 const config: Config = {
   ...baseConfig,
   displayName: 'alova',
-  testEnvironment: 'node'
+  testEnvironment: 'node',
+  testMatch: ['**/test/server/**/*.[jt]s?(x)']
 };
 
 export default config;

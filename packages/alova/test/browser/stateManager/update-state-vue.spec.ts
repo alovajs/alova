@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { queryCache, updateState, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { removeStateCache } from '@/storage/stateCache';
 import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';

@@ -25,12 +25,9 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "test": "jest",
-    "test:coverage": "jest --coverage",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build",
-    "release": "semantic-release",
-    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "commit": "git-cz && git push"
   },
   "publishConfig": {
@@ -40,10 +37,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/alovajs/adapter-xhr.git"
+    "url": "git://github.com/alovajs/alova.git"
   },
   "bugs": {
-    "url": "https://github.com/alovajs/adapter-xhr/issues"
+    "url": "https://github.com/alovajs/alova/issues"
   },
   "files": [
     "dist",

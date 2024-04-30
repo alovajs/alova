@@ -3,13 +3,11 @@ import Method from '@/Method';
 import myAssert from '@/utils/myAssert';
 import { objAssign } from '@alova/shared/function';
 import { len } from '@alova/shared/vars';
-import { Writable } from 'svelte/store';
-import { WatchSource } from 'vue';
-import { AlovaMethodHandler, EnumHookType, SvelteWritable, VueRef, WatcherHookConfig } from '~/typings';
+import { AlovaMethodHandler, EnumHookType, WatcherHookConfig } from '~/typings';
 
 export default function useWatcher<S, E, R, T, RC, RE, RH>(
   handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  watchingStates: S extends VueRef ? (WatchSource<any> | object)[] : S extends SvelteWritable ? Writable<any>[] : any[],
+  watchingStates: E[],
   config: WatcherHookConfig<S, E, R, T, RC, RE, RH> = {}
 ) {
   myAssert(watchingStates && len(watchingStates) > 0, 'must specify at least one watching state');

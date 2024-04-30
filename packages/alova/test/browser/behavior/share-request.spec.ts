@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { createAlova, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('Request shared', function () {
@@ -195,7 +195,7 @@ describe('Request shared', function () {
 
     const Get = alova.Get('/unit-test-count', {
       params: {
-        countKey: 'ccbb'
+        countKey: 'cc'
       },
       transformData: ({ data }: Result) => data
     });
@@ -209,7 +209,7 @@ describe('Request shared', function () {
       path: '/unit-test-count',
       method: 'GET',
       params: {
-        countKey: 'ccbb',
+        countKey: 'cc',
         count: 1
       }
     });

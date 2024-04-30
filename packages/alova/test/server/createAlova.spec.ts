@@ -1,5 +1,5 @@
+import defaultCacheLogger from '@/defaults/defaultCacheLogger';
 import { createAlova, updateState, useRequest } from '@/index';
-import defaultCacheLogger from '@/predefine/defaultCacheLogger';
 import GlobalFetch from '@/predefine/GlobalFetch';
 
 const baseURL = process.env.NODE_BASE_URL as string;

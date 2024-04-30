@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "2.19.2",
+  "version": "3.0.0",
   "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
   "main": "dist/alova.esm.js",
   "module": "dist/alova.esm.js",
@@ -69,40 +69,40 @@
       "require": "./dist/alova.common.cjs",
       "default": "./dist/alova.esm.js"
     },
-    "./vue": {
-      "types": "./typings/vuehook.d.ts",
-      "require": "./dist/hooks/vuehook.common.cjs",
-      "default": "./dist/hooks/vuehook.esm.js"
+    "./statesHook": {
+      "types": "./typings/stateshook.d.ts",
+      "require": "./dist/stateshook/index.common.cjs",
+      "default": "./dist/stateshook/index.esm.js"
     },
-    "./react": {
-      "types": "./typings/reacthook.d.ts",
-      "require": "./dist/hooks/reacthook.common.cjs",
-      "default": "./dist/hooks/reacthook.esm.js"
+    "./client": {
+      "types": "./typings/clienthook.d.ts",
+      "require": "./dist/clienthook/index.common.cjs",
+      "default": "./dist/clienthook/index.esm.js"
     },
-    "./svelte": {
-      "types": "./typings/sveltehook.d.ts",
-      "require": "./dist/hooks/sveltehook.common.cjs",
-      "default": "./dist/hooks/sveltehook.esm.js"
+    "./server": {
+      "types": "./typings/serverhook.d.ts",
+      "require": "./dist/serverhook/index.common.cjs",
+      "default": "./dist/serverhook/index.esm.js"
     },
-    "./GlobalFetch": {
-      "types": "./typings/globalfetch.d.ts",
-      "require": "./dist/adapter/globalfetch.common.cjs",
-      "default": "./dist/adapter/globalfetch.esm.js"
+    "./fetch": {
+      "types": "./typings/fetch.d.ts",
+      "require": "./dist/adapter/fetch.common.cjs",
+      "default": "./dist/adapter/fetch.esm.js"
     }
   },
   "typesVersions": {
     "*": {
-      "vue": [
-        "typings/vuehook.d.ts"
+      "statesHook": [
+        "typings/stateshook.d.ts"
       ],
-      "react": [
-        "typings/reacthook.d.ts"
+      "client": [
+        "typings/clienthook.d.ts"
       ],
-      "svelte": [
-        "typings/sveltehook.d.ts"
+      "server": [
+        "typings/serverhook.d.ts"
       ],
-      "GlobalFetch": [
-        "typings/globalfetch.d.ts"
+      "fetch": [
+        "typings/fetch.d.ts"
       ]
     }
   },
@@ -110,7 +110,8 @@
     "@alova/shared": "workspace:*"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:*"
+    "@alova/scripts": "workspace:*",
+    "vue-demi": "^0.14.7"
   },
   "config": {
     "commitizen": {

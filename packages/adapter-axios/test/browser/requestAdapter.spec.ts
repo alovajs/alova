@@ -103,6 +103,7 @@ describe('request adapter', () => {
       baseURL: baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
+      errorLogger: false,
       responsed({ data }) {
         return data;
       }
@@ -129,6 +130,7 @@ describe('request adapter', () => {
       baseURL: baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
+      errorLogger: false,
       responsed({ data }) {
         return data;
       }
@@ -154,6 +156,7 @@ describe('request adapter', () => {
       baseURL: baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
+      errorLogger: false,
       responsed({ data }) {
         return data;
       }
@@ -186,7 +189,7 @@ describe('request adapter', () => {
     const formData = new FormData();
     formData.append('f1', 'f1');
     formData.append('f2', 'f2');
-    const imageFile = new File([readFileSync(path.resolve(__dirname, '../../../assets/img-test.jpg'))], 'file', {
+    const imageFile = new File([readFileSync(path.resolve(__dirname, '../../../../assets/img-test.jpg'))], 'file', {
       type: 'image/jpeg'
     });
     formData.append('file', imageFile);

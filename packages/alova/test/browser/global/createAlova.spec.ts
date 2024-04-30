@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
-import { Method, createAlova, queryCache, useRequest } from '@/index';
+import { createAlova, Method, queryCache, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { Result, untilCbCalled } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -9,6 +9,7 @@ describe('createAlova', function () {
   test('baseURL can not be set and use complete url set in method to send request', async () => {
     const alova = createAlova({
       statesHook: VueHook,
+      cacheLogger: null,
       requestAdapter: GlobalFetch()
     });
     const response = await alova.Get<Response>('http://localhost:3000/unit-test').send();
@@ -28,6 +29,7 @@ describe('createAlova', function () {
     const alova = createAlova({
       baseURL: 'http://localhost:3000/unit-test?ctrl=api/',
       statesHook: VueHook,
+      cacheLogger: null,
       requestAdapter: GlobalFetch()
     });
     const response = await alova
@@ -98,6 +100,7 @@ describe('createAlova', function () {
   test('`beforeRequest` hook support async function', async () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
+      cacheLogger: null,
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       beforeRequest: async method => {
@@ -127,6 +130,7 @@ describe('createAlova', function () {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
       statesHook: VueHook,
+      cacheLogger: null,
       requestAdapter: GlobalFetch(),
       beforeRequest: method => {
         if (method.config.params.async) {
@@ -186,6 +190,7 @@ describe('createAlova', function () {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
       statesHook: VueHook,
+      cacheLogger: null,
       requestAdapter: GlobalFetch(),
       beforeRequest: method => {
         expect(method).toBeInstanceOf(Method);
@@ -332,6 +337,7 @@ describe('createAlova', function () {
     const alova1 = createAlova({
       baseURL,
       statesHook: VueHook,
+      cacheLogger: null,
       requestAdapter: GlobalFetch(),
       responded: r => r.json()
     });
@@ -392,6 +398,7 @@ describe('createAlova', function () {
       baseURL: 'http://localhost:3000',
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
+      cacheLogger: null,
       beforeRequest: method => {
         if (method.config.params.async) {
           return Promise.reject(new Error('reject in beforeRequest'));
@@ -425,6 +432,7 @@ describe('createAlova', function () {
       baseURL,
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
+      cacheLogger: null,
       responded: {
         onComplete: method => {
           expect(method).toBeInstanceOf(Method);
@@ -464,6 +472,7 @@ describe('createAlova', function () {
       baseURL,
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
+      cacheLogger: null,
       responded: r => r.json(),
       errorLogger: false
     });
@@ -501,6 +510,7 @@ describe('createAlova', function () {
       baseURL,
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
+      cacheLogger: null,
       responded: r => r.json(),
       errorLogger(error, methodInstance) {
         customLoggerMockFn();
@@ -539,7 +549,7 @@ describe('createAlova', function () {
 
   const groupCollapsed = console.groupCollapsed;
   const groupEnd = console.groupEnd;
-  test('should print cache hit message default when hit response cache', async () => {
+  test('should print cache hit message defaultly when hit response cache', async () => {
     const logConsoleMockFn = jest.fn();
     console.log = logConsoleMockFn; // 重写以便监听
     const alova1 = createAlova({

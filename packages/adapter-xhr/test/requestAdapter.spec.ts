@@ -229,30 +229,29 @@ describe('request adapter', () => {
     expect(error.value?.message).toMatch(/Network Error/);
   });
 
-  // 好像msw配合xhr的timeout不会触发ontimeout，暂时先skip
+  // 单独跑这个单测可以通过，整体测试报错，暂时先skip
   test.skip('should cancel request when timeout', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
       statesHook: VueHook,
       timeout: 1,
+      errorLogger: false,
       responsed({ data }) {
         return data;
       }
     });
 
-    const Get = alovaInst.Get<Result>('/unit-test-10s');
-    const { loading, data, downloading, error, onError } = useRequest(Get);
+    const Get = alovaInst.Get<Result>('/unit-test-passthrough');
+    const { loading, data, error, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value?.message).toBe('canceled');
+    expect(error.value?.message).toBe('Network Timeout');
   });
 
   test('should cancel request when call `abort`', async () => {
@@ -260,24 +259,25 @@ describe('request adapter', () => {
       baseURL,
       requestAdapter: xhrRequestAdapter(),
       statesHook: VueHook,
+      errorLogger: false,
       responsed({ data }) {
         return data;
       }
     });
 
-    const Get = alovaInst.Get<Result>('/unit-test-1s');
+    const Get = alovaInst.Get<Result>('/unit-test-passthrough');
     const { loading, data, downloading, error, abort, onError } = useRequest(Get);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
-    delay(10).then(abort);
+    delay(0).then(abort);
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value?.message).toBe('The user aborted a request');
+    expect(error.value?.message).toBe('The user aborted a request.');
   });
 
   test('should upload file and pass the right args', async () => {

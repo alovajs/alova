@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { setCache, useWatcher } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@alova/shared/function';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
@@ -19,7 +19,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const { loading, data, downloading, error, onSuccess } = useWatcher(
+    const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
@@ -38,7 +38,6 @@ describe('use useWatcher hook to send GET with vue', function () {
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
@@ -52,12 +51,11 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 缓存有值
     let cacheData = getResponseCache(alova.id, key(method));
     expect(cacheData.path).toBe('/unit-test');
-    expect(cacheData.params).toEqual({ num: '1', str: 'b' });
+    expect(cacheData.params).toStrictEqual({ num: '1', str: 'b' });
     expect(mockCallback.mock.calls.length).toBe(1);
     mutateNum.value = 2;
     mutateStr.value = 'c';
@@ -66,7 +64,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
     cacheData = getResponseCache(alova.id, key(method2));
-    expect(cacheData.params).toEqual({ num: '2', str: 'c' });
+    expect(cacheData.params).toStrictEqual({ num: '2', str: 'c' });
     expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
@@ -214,7 +212,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     const mutateNum = ref(0);
     const mutateStr = ref('a');
     const sendableFn = jest.fn();
-    const { loading, data, downloading, error, onSuccess } = useWatcher(
+    const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
@@ -239,7 +237,6 @@ describe('use useWatcher hook to send GET with vue', function () {
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(sendableFn).not.toHaveBeenCalled();
 
@@ -254,7 +251,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledTimes(1);
@@ -300,7 +296,7 @@ describe('use useWatcher hook to send GET with vue', function () {
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(sendableFn).not.toHaveBeenCalled();
 
@@ -312,7 +308,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     await delay(50);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(1);
     expect(mockCallback).not.toHaveBeenCalled();
@@ -322,7 +318,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     await delay(50);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(2);
     expect(mockCallback).not.toHaveBeenCalled();
@@ -367,7 +363,7 @@ describe('use useWatcher hook to send GET with vue', function () {
       transformData: (result: Result) => result.data,
       localCache: 0
     });
-    const { data, downloading, error, onSuccess } = useWatcher(currentGet, [mutateNum, mutateStr], {
+    const { data, error, onSuccess } = useWatcher(currentGet, [mutateNum, mutateStr], {
       immediate: true
     });
     const successMockFn = jest.fn();
@@ -377,7 +373,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('0');
     expect(data.value.params.str).toBe('a');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(successMockFn).toHaveBeenCalledTimes(1);
 
@@ -388,7 +383,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('0');
     expect(data.value.params.str).toBe('a');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(successMockFn).toHaveBeenCalledTimes(2);
   });
@@ -403,7 +397,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     const mutateObjReactive = reactive({
       str: ''
     });
-    const { loading, data, downloading, error, onSuccess } = useWatcher(
+    const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
           params: { num: mutateObj.value.num, str: mutateObjReactive.str },
@@ -419,7 +413,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 改变数据触发请求
@@ -429,7 +422,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 再次改变数据，触发请求
@@ -446,7 +438,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     });
     const mutateNum = ref(0);
     const computedStr = computed(() => (mutateNum.value === 0 ? 'str1' : 'str2'));
-    const { loading, data, downloading, error, onSuccess } = useWatcher(
+    const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
           params: { str: computedStr.value },
@@ -462,7 +454,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 改变数据触发请求
@@ -471,7 +462,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.str).toBe('str2');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 再次改变数据，触发请求
@@ -486,7 +476,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const { loading, data, downloading, error, onSuccess } = useWatcher(
+    const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
@@ -507,7 +497,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     const checkInitData = () => {
       expect(loading.value).toBeFalsy();
       expect(data.value).toBeUndefined();
-      expect(downloading.value).toEqual({ total: 0, loaded: 0 });
       expect(error.value).toBeUndefined();
       expect(mockCallback).not.toHaveBeenCalled();
     };
@@ -527,14 +516,13 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     expect(Date.now() - startTs).toBeLessThanOrEqual(200); // 实际异步时间会较长
 
     // 缓存有值
     const cacheData = getResponseCache(alova.id, key(method));
     expect(cacheData.path).toBe('/unit-test');
-    expect(cacheData.params).toEqual({ num: '2', str: 'c' });
+    expect(cacheData.params).toStrictEqual({ num: '2', str: 'c' });
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -562,7 +550,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 暂没发送请求
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await delay(10);
@@ -786,7 +774,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     );
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
@@ -796,7 +784,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('0');
     expect(data.value.params.str).toBe('a');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 96, loaded: 96 });
     expect(error.value).toBeUndefined();
     // 缓存没有值
     let cacheData = getResponseCache(alova.id, key(method));
@@ -819,7 +807,7 @@ describe('use useWatcher hook to send GET with vue', function () {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const { loading, data, downloading, error, onSuccess } = useWatcher(
+    const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
@@ -837,7 +825,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 监听时立即出发一次请求，因此loading的值为true
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
@@ -847,7 +834,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('0');
     expect(data.value.params.str).toBe('a');
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 缓存有值
     let cacheData = getResponseCache(alova.id, key(method));
@@ -904,6 +890,6 @@ describe('use useWatcher hook to send GET with vue', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.val).toBe('1');
     const cacheData = getResponseCache(alova.id, key(getGetterObj));
-    expect(cacheData.params).toEqual({ val: '1' });
+    expect(cacheData.params).toStrictEqual({ val: '1' });
   });
 });

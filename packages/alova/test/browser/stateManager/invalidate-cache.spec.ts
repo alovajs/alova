@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
-import Method from '@/Method';
 import { getMethodKey, invalidateCache, queryCache, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import Method from '@/Method';
+import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { key } from '@alova/shared/function';

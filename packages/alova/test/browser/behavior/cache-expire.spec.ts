@@ -1,12 +1,12 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
 import { key } from '@alova/shared/function';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('cache data', function () {
-  test('change the global default localCache setting', async () => {
+  test("change the default localCache's setting Globally", async () => {
     const alova = getAlovaInstance(VueHook, {
       localCache: {
         POST: 300000

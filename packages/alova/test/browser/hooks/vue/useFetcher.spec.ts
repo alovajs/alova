@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@alova/shared/function';
 import { Result, untilCbCalled } from 'root/testUtils';
@@ -75,13 +75,11 @@ describe('use useFetcher hook to fetch data', function () {
     const { data, onSuccess } = useRequest(Get1);
     const {
       fetching,
-      downloading,
       error,
       fetch,
       onSuccess: onFetchSuccess
     } = useFetcher<FetcherType<typeof alova>>({ force: true }); // 忽略缓存强制请求
     expect(fetching.value).toBeFalsy();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
@@ -93,13 +91,11 @@ describe('use useFetcher hook to fetch data', function () {
     fetch(Get1);
     // 因强制请求，请求会被发出并且缓存重新被更新
     expect(fetching.value).toBeTruthy();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onFetchSuccess);
     expect(data.value.params.count).toBe(1);
     expect(fetching.value).toBeFalsy();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     cacheData = getResponseCache(alova.id, key(Get1));
     expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'b', count: 1 });

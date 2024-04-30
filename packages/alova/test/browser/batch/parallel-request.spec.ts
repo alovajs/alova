@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { Result } from 'root/testUtils';
 import { AlovaSuccessEvent } from '~/typings';
 

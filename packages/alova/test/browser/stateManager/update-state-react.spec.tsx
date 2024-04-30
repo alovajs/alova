@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { updateState, useRequest, useWatcher } from '@/index';
-import ReactHook from '@/predefine/ReactHook';
+import ReactHook from '@/statesHook/react';
 import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache } from '@/storage/stateCache';

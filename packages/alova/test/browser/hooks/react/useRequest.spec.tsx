@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { createAlova, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
-import ReactHook from '@/predefine/ReactHook';
+import ReactHook from '@/statesHook/react';
 import { getStateCache } from '@/storage/stateCache';
 import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';

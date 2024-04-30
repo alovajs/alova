@@ -16,7 +16,10 @@ describe('request adapter in SSR', () => {
       params: { a: 'a', b: 'str' }
     });
     const { loading, data, downloading, error } = useRequest(Get, {
-      initialData: {}
+      // initialData: e => {
+      //   console.log(e);
+      // }
+      initialData: []
     });
     expect(loading.value).toBeTruthy();
     expect(data.value).toStrictEqual({});

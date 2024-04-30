@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest, useWatcher } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { ref } from 'vue';
 

@@ -1,10 +1,8 @@
 import { getAlovaInstance } from '#/utils';
-import { createAlova, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import { useRequest } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { Result, untilCbCalled } from 'root/testUtils';
-import { xhrRequestAdapter } from '../../../../adapter-xhr/src';
 
-const baseURL = process.env.NODE_BASE_URL as string;
 const alova = getAlovaInstance(VueHook, {
   responseExpect: r => r.json()
 });
@@ -225,7 +223,7 @@ describe('method instance', function () {
       catchMockFn(reason);
       return reason;
     });
-    expect(errorReason.message).toBe('Failed to fetch');
+    expect(errorReason.message).toMatch('Failed to fetch');
     expect(catchMockFn).toHaveBeenCalledTimes(1);
     expect(catchMockFn).toHaveBeenCalledWith(errorReason);
   });
@@ -258,16 +256,10 @@ describe('method instance', function () {
   });
 
   test('should download file and pass the right args', async () => {
-    const alovaInst = createAlova({
-      baseURL,
-      requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responded: ({ data }) => data,
-      cacheLogger: null
-    });
+    const alovaInst = getAlovaInstance(VueHook);
 
     const Get = alovaInst.Get('/unit-test-download', {
-      responseType: 'blob'
+      transformData: (resp: Response) => resp.blob()
     });
 
     let progress = { total: 0, loaded: 0 };

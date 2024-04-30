@@ -50,37 +50,37 @@ export default function requestAdapter() {
         }
 
         // 监听下载事件
-        xhr.onprogress = event => {
+        xhr.addEventListener('progress', event => {
           downloadHandler(event.loaded, event.total);
-        };
+        });
 
         // 监听上传事件
-        xhr.upload.onprogress = event => {
+        xhr.upload.addEventListener('progress', event => {
           uploadHandler(event.loaded, event.total);
-        };
+        });
 
         // 请求成功事件
-        xhr.onload = () => {
+        xhr.addEventListener('load', () => {
           resolve({
             status: xhr.status,
             statusText: xhr.statusText,
             data: xhr.response,
             headers: parseResponseHeaders(xhr.getAllResponseHeaders())
           });
-        };
+        });
 
         // 请求错误事件
-        xhr.onerror = () => {
+        xhr.addEventListener('error', () => {
           reject(err('Network Error'));
-        };
+        });
         // 请求超时事件
-        xhr.ontimeout = () => {
+        xhr.addEventListener('timeout', () => {
           reject(err('Network Timeout'));
-        };
+        });
         // 中断事件
-        xhr.onabort = () => {
-          reject(err('The user aborted a request'));
-        };
+        xhr.addEventListener('abort', () => {
+          reject(err('The user aborted a request.'));
+        });
 
         // 如果请求头中的Content-Type是application/x-www-form-urlencoded时，将body数据转换为queryString
         let dataSend: any = data;

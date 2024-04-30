@@ -9,35 +9,49 @@
       "@alova/shared/assert": null
     }
   },
-  "vuehook": {
-    "packageName": "VueHook",
-    "input": "src/predefine/VueHook.ts",
+  "stateshook": {
+    "packageName": "alovaStatesHook",
+    "input": "src/statesHook/index.ts",
     "external": {
-      "vue": "Vue"
-    },
-    "output": "./dist/hooks/vuehook.{suffix}.{ext}"
-  },
-  "reacthook": {
-    "packageName": "ReactHook",
-    "input": "src/predefine/ReactHook.ts",
-    "external": {
-      "react": "React"
-    },
-    "output": "./dist/hooks/reacthook.{suffix}.{ext}"
-  },
-  "sveltehook": {
-    "external": {
+      "vue": "Vue",
+      "react": "React",
       "svelte": null,
-      "svelte/store": null
+      "svelte/store": null,
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
     },
-    "packageName": "SvelteHook",
-    "input": "src/predefine/SvelteHook.ts",
-    "output": "./dist/hooks/sveltehook.{suffix}.{ext}",
+    "output": "./dist/stateshook/index.{suffix}.{ext}"
+  },
+  "client": {
+    "packageName": "alovaClient",
+    "input": "src/client.ts",
+    "external": {
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "output": "./dist/clienthook/index.{suffix}.{ext}"
+  },
+  "server": {
+    "packageName": "alovaServer",
+    "input": "src/server.ts",
+    "external": {
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "output": "./dist/serverhook/index.{suffix}.{ext}",
     "formats": ["esm", "cjs"]
   },
-  "globalfetch": {
-    "packageName": "GlobalFetch",
-    "input": "src/predefine/GlobalFetch.ts",
-    "output": "./dist/adapter/globalfetch.{suffix}.{ext}"
+  "fetch": {
+    "packageName": "alovaFetch",
+    "input": "src/predefine/fetch.ts",
+    "external": {
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "output": "./dist/adapter/fetch.{suffix}.{ext}"
   }
 }

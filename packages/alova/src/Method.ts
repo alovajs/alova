@@ -36,19 +36,6 @@ const offEventCallback = (offHandler: any, handlers: any[]) => () => {
   index >= 0 && handlers.splice(index, 1);
 };
 
-export const typeGet = 'GET';
-export const typeHead = 'HEAD';
-export const typePost = 'POST';
-export const typePut = 'PUT';
-export const typePatch = 'PATCH';
-export const typeDelete = 'DELETE';
-export const typeOptions = 'OPTIONS';
-
-const abortRequest: AbortFunction = () => {
-  abortRequest.a();
-};
-abortRequest.a = noop;
-
 export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
   public type: MethodType;
   public baseURL: string;
@@ -65,7 +52,7 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   /**
    * 请求中断函数，每次请求都会更新这个函数
    */
-  public abort = abortRequest;
+  public abort: AbortFunction;
   public fromCache: boolean | undefined = undefinedValue;
   constructor(
     type: MethodType,
@@ -74,8 +61,14 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     config?: AlovaMethodConfig<R, T, RC, RH>,
     data?: RequestBody
   ) {
+    const abortRequest: AbortFunction = () => {
+      abortRequest.a();
+    };
+    abortRequest.a = noop;
+
     const instance = this,
       contextOptions = getContextOptions(context);
+    instance.abort = abortRequest;
     instance.baseURL = contextOptions.baseURL || '';
     instance.url = url;
     instance.type = type;
@@ -151,8 +144,8 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     const instance = this,
       { response, onDownload, onUpload, abort, fromCache } = sendRequest(instance, forceRequest);
     len(instance.dhs) > 0 &&
-      onDownload((total, loaded) => forEach(instance.dhs, handler => handler({ total, loaded })));
-    len(instance.uhs) > 0 && onUpload((total, loaded) => forEach(instance.uhs, handler => handler({ total, loaded })));
+      onDownload((loaded, total) => forEach(instance.dhs, handler => handler({ loaded, total })));
+    len(instance.uhs) > 0 && onUpload((loaded, total) => forEach(instance.uhs, handler => handler({ loaded, total })));
 
     // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
     instance.abort.a = abort;

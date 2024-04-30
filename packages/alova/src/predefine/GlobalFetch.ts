@@ -6,7 +6,8 @@ import {
   falseValue,
   promiseReject,
   setTimeoutFn,
-  trueValue
+  trueValue,
+  undefinedValue
 } from '@alova/shared/vars';
 import { Method, RequestElements } from '~/typings';
 
@@ -65,31 +66,30 @@ export default function GlobalFetch() {
       /* c8 ignore start */
       onDownload: async (cb: (total: number, loaded: number) => void) => {
         let isAborted = falseValue;
-        const response = await fetchPromise.catch(err => {
-          console.log(err);
+        const response = await fetchPromise.catch(() => {
           isAborted = trueValue;
         });
         if (!response) return;
 
         const { headers, body } = response.clone(),
-          reader = body?.getReader?.(),
+          reader = body ? body.getReader() : undefinedValue,
           total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
         if (total <= 0) {
           return;
         }
         let loaded = 0;
         if (reader) {
-          const progressTimer = setInterval(() => {
+          const pump = (): Promise<void> =>
             reader.read().then(({ done, value = new Uint8Array() }) => {
               if (done || isAborted) {
                 isAborted && cb(total, 0);
-                clearInterval(progressTimer);
               } else {
                 loaded += value.byteLength;
                 cb(total, loaded);
+                return pump();
               }
             });
-          }, 0);
+          pump();
         }
       },
       /* c8 ignore stop */

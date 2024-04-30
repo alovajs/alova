@@ -1,12 +1,10 @@
 import { getAlovaInstance } from '#/utils';
-import { Method, createAlova, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
+import { Method, useRequest } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@alova/shared/function';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
-import { xhrRequestAdapter } from '../../../../../adapter-xhr/src';
 
-const baseURL = process.env.NODE_BASE_URL as string;
 // 其他请求方式测试
 describe('Test other methods without GET', function () {
   test('send POST', async () => {
@@ -113,10 +111,9 @@ describe('Test other methods without GET', function () {
         localCache: 100 * 1000
       }
     );
-    const { loading, data, downloading, error, onSuccess } = useRequest(Delete);
+    const { loading, data, error, onSuccess } = useRequest(Delete);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
@@ -124,7 +121,6 @@ describe('Test other methods without GET', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
     expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 缓存有值
@@ -173,10 +169,9 @@ describe('Test other methods without GET', function () {
         localCache: 100 * 1000
       }
     );
-    const { loading, data, downloading, error, onSuccess } = useRequest(Put);
+    const { loading, data, error, onSuccess } = useRequest(Put);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
@@ -184,7 +179,6 @@ describe('Test other methods without GET', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params).toStrictEqual({ a: 'a', b: 'str', c: '3' });
     expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     // 缓存有值
@@ -210,17 +204,15 @@ describe('Test other methods without GET', function () {
         return resp;
       }
     });
-    const { loading, data, downloading, error, onSuccess } = useRequest(Head);
+    const { loading, data, error, onSuccess } = useRequest(Head);
 
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({});
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, key(Head));
@@ -245,16 +237,14 @@ describe('Test other methods without GET', function () {
         return resp;
       }
     });
-    const { loading, data, downloading, error, onSuccess } = useRequest(Options);
+    const { loading, data, error, onSuccess } = useRequest(Options);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({});
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, key(Options));
@@ -283,10 +273,9 @@ describe('Test other methods without GET', function () {
         }
       }
     );
-    const { loading, data, downloading, error, onSuccess } = useRequest(Patch);
+    const { loading, data, error, onSuccess } = useRequest(Patch);
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
@@ -294,7 +283,6 @@ describe('Test other methods without GET', function () {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
     expect(data.value.data).toStrictEqual({ patch1: 'p' });
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 没有缓存值
     const cacheData = getResponseCache(alova.id, key(Patch));
@@ -302,18 +290,10 @@ describe('Test other methods without GET', function () {
   });
 
   test('should download file and pass the right args', async () => {
-    const alovaInst = createAlova({
-      baseURL,
-      requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responded({ data }) {
-        return data;
-      },
-      cacheLogger: null
-    });
-
+    const alovaInst = getAlovaInstance(VueHook);
     const Get = alovaInst.Get('/unit-test-download', {
-      responseType: 'blob'
+      transformData: (resp: Response) => resp.blob(),
+      localCache: 100000
     });
 
     const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Get);
@@ -332,5 +312,17 @@ describe('Test other methods without GET', function () {
     const { downloading: downloading2, onSuccess: onSuccess2 } = useRequest(Get);
     await untilCbCalled(onSuccess2);
     expect(downloading2.value).toStrictEqual({ total: 0, loaded: 0 });
+  });
+
+  test('should abort the file downloading when abort request', async () => {
+    const alovaInst = getAlovaInstance(VueHook);
+    const Get = alovaInst.Get('/unit-test-download', {
+      transformData: (resp: Response) => resp.blob()
+    });
+
+    const { error, abort, onError } = useRequest(Get);
+    delay(3).then(abort);
+    const e = await untilCbCalled(onError);
+    expect(error.value).toStrictEqual(e.error);
   });
 });

@@ -2,14 +2,13 @@ import Method from '@/Method';
 import { createHook } from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { debounce, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
-import { _self, getContext, getMethodInternalKey, isNumber, noop, sloughConfig } from '@alova/shared/function';
+import { _self, getContext, getMethodInternalKey, isFn, isNumber, sloughConfig } from '@alova/shared/function';
 import {
   deleteAttr,
   falseValue,
   forEach,
   isArray,
   isSSR,
-  promiseCatch,
   pushItem,
   trueValue,
   undefinedValue
@@ -48,14 +47,14 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   hookType: EnumHookType,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   useHookConfig: UC,
-  initialData?: any,
+  initialData?: FrontRequestHookConfig<S, E, R, T, RC, RE, RH>['initialData'],
   immediate = falseValue,
   watchingStates?: E[],
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
   // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
   useHookConfig = { ...useHookConfig };
-  const statesHook = promiseStatesHook('useHooks'),
+  const statesHook = promiseStatesHook(),
     {
       create,
       export: stateExport,
@@ -93,7 +92,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>,
     frontStates = {
       ...managedStates,
-      data: create(initialData, hookInstance),
+      data: create(isFn(initialData) ? initialData() : initialData, hookInstance),
       loading: create(initialLoading, hookInstance),
       error: create(undefinedValue as Error | undefined, hookInstance),
       downloading: create({ ...progress }, hookInstance),
@@ -105,12 +104,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     handleRequest = (
       handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
       sendCallingArgs?: any[]
-    ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs),
-    // 以捕获异常的方式调用handleRequest
-    // 捕获异常避免异常继续向外抛出
-    wrapEffectRequest = () => {
-      promiseCatch(handleRequest(), noop);
-    };
+    ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs);
 
   /**
    * ## react ##每次执行函数都需要重置以下项
@@ -127,10 +121,10 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         handler:
           // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
           hasWatchingStates
-            ? debounce(wrapEffectRequest, (changedIndex?: number) =>
+            ? debounce(handleRequest, (changedIndex?: number) =>
                 isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
               )
-            : wrapEffectRequest,
+            : handleRequest,
         removeStates: () => forEach(hookInstance.rf, fn => fn()),
         saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),
         frontStates: frontStates,
@@ -152,7 +146,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       return stateExport(frontStates.downloading, hookInstance) as unknown as ExportedType<Progress, S>;
     },
     get uploading() {
-      hookInstance.ed = trueValue;
+      hookInstance.eu = trueValue;
       return stateExport(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>;
     },
     onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
@@ -186,7 +180,9 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       handleRequest(methodInstance, sendCallingArgs)
     ),
 
-    /** 为兼容options框架，如vue2、原生小程序等，将config对象原样导出 */
-    _$c: useHookConfig
+    /**
+     * hook instance with key data of this usehook.
+     */
+    hook: hookInstance
   };
 }

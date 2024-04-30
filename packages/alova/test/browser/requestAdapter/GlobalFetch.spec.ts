@@ -1,5 +1,5 @@
 import { getAlovaInstance } from '#/utils';
-import VueHook from '@/predefine/VueHook';
+import VueHook from '@/statesHook/vue';
 import { Result } from 'root/testUtils';
 
 describe('request adapter GlobalFetch', function () {
@@ -10,19 +10,19 @@ describe('request adapter GlobalFetch', function () {
     const Get = alova.Get('/unit-test', {
       localCache: 100 * 1000,
       transformData: ({ data }: Result, headers) => {
-        return { data, headers };
+        expect(data).toStrictEqual({
+          path: '/unit-test',
+          method: 'GET',
+          params: {}
+        });
+        expect(headers.get('content-type')).toBe('application/json');
+        return data;
       }
     });
-    const { data, headers } = await Get.send();
-    expect(data).toStrictEqual({
-      path: '/unit-test',
-      method: 'GET',
-      params: {}
-    });
-    expect(headers.get('content-type')).toBe('application/json');
+    await Get.send();
   });
 
-  test('The Content-Type should be set to `application/json` default', async () => {
+  test('The Content-Type should be set to `application/json` defaultly', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });

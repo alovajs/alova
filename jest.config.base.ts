@@ -22,7 +22,7 @@ const config: Config = {
   // Indicates whether the coverage information should be collected while executing the test
   // collectCoverage: false,
   testEnvironmentOptions: {
-    customExportConditions: ['']
+    customExportConditions: ['', 'node', 'node-addons']
   },
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
@@ -84,7 +84,8 @@ const config: Config = {
     'tsx',
     'json',
     'node',
-    'svelte'
+    'svelte',
+    'vue'
   ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
@@ -92,7 +93,8 @@ const config: Config = {
     '@/(.*)': '<rootDir>/src/$1',
     '~/(.*)': '<rootDir>/$1',
     '#/(.*)': '<rootDir>/test/$1',
-    '^root/(.*)': resolve(__dirname, 'internal/$1')
+    '^root/(.*)': resolve(__dirname, 'internal/$1'),
+    '^vue$': 'vue/dist/vue.cjs.js'
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -171,7 +173,8 @@ const config: Config = {
   // A map from regular expressions to paths to transformers
   transform: {
     '\\.(j|t)sx?$': 'ts-jest',
-    '^.+\\.svelte$': 'svelte-jester'
+    '^.+\\.svelte$': 'svelte-jester',
+    '^.+\\.vue$': '@vue/vue3-jest'
   }
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

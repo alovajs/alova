@@ -1,4 +1,4 @@
-import { DefaultBodyType, delay, http, HttpResponse, StrictRequest } from 'msw';
+import { DefaultBodyType, delay, http, HttpResponse, passthrough, StrictRequest } from 'msw';
 import { setupServer } from 'msw/node';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -24,6 +24,8 @@ const mockServer = setupServer(
     });
   }),
   http.get(baseURL + '/unit-test-error', () => HttpResponse.error()),
+  http.options(baseURL + '/unit-test-passthrough', () => passthrough()),
+  http.get(baseURL + '/unit-test-passthrough', () => passthrough()),
   http.post(baseURL + '/unit-test', ({ request }) => result(200, request, true)),
   http.delete(baseURL + '/unit-test', ({ request }) => result(200, request, true)),
   http.put(baseURL + '/unit-test', ({ request }) => result(200, request, true)),
