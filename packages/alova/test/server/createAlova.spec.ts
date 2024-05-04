@@ -3,7 +3,7 @@ import { createAlova, updateState, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 
 const baseURL = process.env.NODE_BASE_URL as string;
-describe('createAlova', function () {
+describe('createAlova', () => {
   test('should throw error in useHooks when statesHook is not specific', async () => {
     const alova = createAlova({
       requestAdapter: GlobalFetch()
@@ -33,6 +33,7 @@ describe('createAlova', function () {
 
   test('cache logger in server', async () => {
     const logConsoleMockFn = jest.fn();
+    // eslint-disable-next-line
     console.log = logConsoleMockFn; // 重写以便监听
     const alova = createAlova({
       baseURL,

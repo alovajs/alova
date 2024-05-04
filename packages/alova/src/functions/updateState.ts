@@ -1,11 +1,11 @@
+import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn, noop } from '@alova/shared/function';
+import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { setResponseCache } from '@/storage/responseCache';
 import { persistResponse } from '@/storage/responseStorage';
 import { getStateCache } from '@/storage/stateCache';
 import { promiseStatesHook } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
-import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn, noop } from '@alova/shared/function';
-import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
 import { MethodMatcher, UpdateOptions, UpdateStateCollection } from '~/typings';
 
 /**
@@ -19,18 +19,20 @@ export default function updateState<R = any, S = any, E = any, T = any, RC = any
   handleUpdate: ((data: R) => any) | UpdateStateCollection<R>,
   options: UpdateOptions = {}
 ) {
-  const { onMatch = noop } = options,
-    methodInstance = filterSnapshotMethods(matcher, falseValue);
+  const { onMatch = noop } = options;
+  const methodInstance = filterSnapshotMethods(matcher, falseValue);
   let updated = falseValue;
 
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
   if (methodInstance) {
     onMatch(methodInstance); // 触发onMatch事件
-    const { dehydrate, update } = promiseStatesHook(),
-      methodKey = getMethodInternalKey(methodInstance),
-      { id, storage } = getContext(methodInstance),
-      { s: frontStates, h: hookInstance } = getStateCache(id, methodKey),
-      updateStateCollection = isFn(handleUpdate) ? ({ data: handleUpdate } as UpdateStateCollection<R>) : handleUpdate;
+    const { dehydrate, update } = promiseStatesHook();
+    const methodKey = getMethodInternalKey(methodInstance);
+    const { id, storage } = getContext(methodInstance);
+    const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
+    const updateStateCollection = isFn(handleUpdate)
+      ? ({ data: handleUpdate } as UpdateStateCollection<R>)
+      : handleUpdate;
 
     let updatedDataColumnData = undefinedValue as any;
     if (frontStates) {

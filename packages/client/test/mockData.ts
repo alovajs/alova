@@ -12,7 +12,7 @@ export const setMockListWithSearchData = (cb?: (data: any) => typeof mockListWit
     typeof cb === 'function'
       ? cb(mockListWithSearchData)
       : Array.from({ length: total }).map((_, i) => {
-          let n = i % 3;
+          const n = i % 3;
           return {
             id: i,
             word: ['aaa', 'bbb', 'ccc'][n]
@@ -68,33 +68,27 @@ const mocks = defineMock({
     };
   },
 
-  '/info-list': () => {
-    return [
-      {
-        id: 10,
-        text: 'a'
-      },
-      {
-        id: 20,
-        text: 'b'
-      },
-      {
-        id: 30,
-        text: 'c'
-      }
-    ];
-  },
-  '[POST]/detail': () => {
-    return {
-      id: 1
-    };
-  },
-  '[DELETE]/detail/{id}': ({ params, data }) => {
-    return {
-      params,
-      data
-    };
-  },
+  '/info-list': () => [
+    {
+      id: 10,
+      text: 'a'
+    },
+    {
+      id: 20,
+      text: 'b'
+    },
+    {
+      id: 30,
+      text: 'c'
+    }
+  ],
+  '[POST]/detail': () => ({
+    id: 1
+  }),
+  '[DELETE]/detail/{id}': ({ params, data }) => ({
+    params,
+    data
+  }),
   '[POST]/detail-error': ({ data = {} }) => {
     const { id, failTimes = 3 } = data;
     // 根据id判断是否需要重置detailErrorTimes
@@ -109,25 +103,20 @@ const mocks = defineMock({
         status: 403,
         statusText: 'no permission'
       };
-    } else {
-      detailErrorTimes = 0;
-      return {
-        id: 1
-      };
     }
-  },
-  '[GET]/list-error': () => {
+    detailErrorTimes = 0;
     return {
-      status: 500,
-      statusText: 'server error'
+      id: 1
     };
   },
-  '[POST]/detail2': ({ data = {} }) => {
-    return {
-      id: 10,
-      ...data
-    };
-  },
+  '[GET]/list-error': () => ({
+    status: 500,
+    statusText: 'server error'
+  }),
+  '[POST]/detail2': ({ data = {} }) => ({
+    id: 10,
+    ...data
+  }),
   '[POST]/captcha': ({ data = {} }) => {
     if (data.error) {
       return {
@@ -153,7 +142,7 @@ const mocks = defineMock({
     if (headers.Authorization !== '123') {
       return {
         status: 401,
-        statusText: 'unauthorized' + (query.notError ? '-notError' : '')
+        statusText: `unauthorized${query.notError ? '-notError' : ''}`
       };
     }
     return [0, 1, 2, 3, 4, 5];
@@ -169,11 +158,9 @@ const mocks = defineMock({
       token: '123'
     };
   },
-  '/return-query': ({ query }) => {
-    return {
-      query
-    };
-  }
+  '/return-query': ({ query }) => ({
+    query
+  })
 });
 
 // 模拟数据请求适配器

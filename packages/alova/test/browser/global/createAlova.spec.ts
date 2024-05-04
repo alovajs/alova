@@ -1,11 +1,11 @@
 import { getAlovaInstance } from '#/utils';
-import { createAlova, Method, queryCache, useRequest } from '@/index';
+import { Method, createAlova, queryCache, useRequest } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
 import VueHook from '@/statesHook/vue';
 import { Result, untilCbCalled } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
-describe('createAlova', function () {
+describe('createAlova', () => {
   test('baseURL can not be set and use complete url set in method to send request', async () => {
     const alova = createAlova({
       statesHook: VueHook,
@@ -75,7 +75,7 @@ describe('createAlova', function () {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
-        const config = method.config;
+        const { config } = method;
         expect(method.url).toBe('/unit-test');
         expect(config.params).toEqual({ a: 'a', b: 'str' });
         expect(config.headers).toEqual({
@@ -255,9 +255,7 @@ describe('createAlova', function () {
       localCache: {
         GET: 500000
       },
-      resErrorExpect: () => {
-        return [1, 2, 3];
-      }
+      resErrorExpect: () => [1, 2, 3]
     });
     const Get = alova.Get('/unit-test-error', {
       transformData: (arr: number[]) => arr.map(item => item * 2)
@@ -292,9 +290,7 @@ describe('createAlova', function () {
   test("shouldn't emit global error cb when responded cb return rejected Promise", async () => {
     const mockFn = jest.fn();
     const alova = getAlovaInstance(VueHook, {
-      responseExpect: () => {
-        return Promise.reject(new Error('test error from responded'));
-      },
+      responseExpect: () => Promise.reject(new Error('test error from responded')),
       resErrorExpect: () => {
         mockFn();
       }
@@ -333,6 +329,7 @@ describe('createAlova', function () {
 
   test('should print error message by `console.error` by default when get a error in useHooks', async () => {
     const errorConsoleMockFn = jest.fn();
+    // eslint-disable-next-line
     console.error = errorConsoleMockFn; // 重写以便监听
     const alova1 = createAlova({
       baseURL,
@@ -453,9 +450,7 @@ describe('createAlova', function () {
   test('should throws an async error in `responded-onComplete` hook', async () => {
     const mockFn = jest.fn();
     const alova = getAlovaInstance(VueHook, {
-      resErrorExpect: () => {
-        return 'error response';
-      },
+      resErrorExpect: () => 'error response',
       resCompleteExpect: () => {
         mockFn();
       }
@@ -467,6 +462,7 @@ describe('createAlova', function () {
 
   test("shouldn't print error message when set errorLogger to false", async () => {
     const errorConsoleMockFn = jest.fn();
+    // eslint-disable-next-line
     console.error = errorConsoleMockFn;
     const alova = createAlova({
       baseURL,
@@ -504,6 +500,7 @@ describe('createAlova', function () {
 
   test('should emit custom errorLogger function  when set errorLogger to a custom function', async () => {
     const errorConsoleMockFn = jest.fn();
+    // eslint-disable-next-line
     console.error = errorConsoleMockFn;
     const customLoggerMockFn = jest.fn();
     const alova = createAlova({
@@ -547,10 +544,11 @@ describe('createAlova', function () {
     expect(customLoggerMockFn).toHaveBeenCalledTimes(3);
   });
 
-  const groupCollapsed = console.groupCollapsed;
-  const groupEnd = console.groupEnd;
+  const { groupCollapsed } = console;
+  const { groupEnd } = console;
   test('should print cache hit message defaultly when hit response cache', async () => {
     const logConsoleMockFn = jest.fn();
+    // eslint-disable-next-line
     console.log = logConsoleMockFn; // 重写以便监听
     const alova1 = createAlova({
       baseURL,
@@ -635,12 +633,15 @@ describe('createAlova', function () {
     expect(calls3[4][0]).toBe('%c[Method]');
     expect(calls3[4][2]).toBeInstanceOf(Method);
     expect(calls3[5][1]).toBe(Array(startSep.length + 1).join('^'));
+    // eslint-disable-next-line
     console.groupCollapsed = groupCollapsed;
+    // eslint-disable-next-line
     console.groupEnd = groupEnd;
   });
 
   test("shouldn't print cache hit message when set cacheLogger to false or null", async () => {
     const logConsoleMockFn = jest.fn();
+    // eslint-disable-next-line
     console.log = logConsoleMockFn; // 重写以便监听
     const alova1 = createAlova({
       baseURL,

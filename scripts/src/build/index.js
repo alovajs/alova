@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const { rollup } = require('rollup');
-const createConfig = require('./rollup.config.js');
 const ora = require('ora');
+const createConfig = require('./rollup.config.js');
 
 module.exports = async function (bundleKey, version) {
   let bundle;

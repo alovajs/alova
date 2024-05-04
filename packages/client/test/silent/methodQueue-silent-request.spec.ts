@@ -390,7 +390,7 @@ describe('silent method request in queue with silent behavior', () => {
         [
           event => {
             retryMockFn();
-            expect(event.retryDelay).toBe(50 * Math.pow(2, event.retryTimes - 1));
+            expect(event.retryDelay).toBe(50 * 2 ** (event.retryTimes - 1));
           }
         ]
       );

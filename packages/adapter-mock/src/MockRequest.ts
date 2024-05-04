@@ -23,8 +23,8 @@ export default function MockRequest<RC, RE, RH>(
     mock = (enable && mock) || {};
 
     const { url, data, type, headers: requestHeaders } = elements;
-    let pathname = method.url,
-      query = method.config.params || {};
+    let pathname = method.url;
+    let query = method.config.params || {};
     if (matchMode === 'pathname') {
       const parsedUrl = parseUrl(url);
       pathname = parsedUrl.pathname;
@@ -39,14 +39,14 @@ export default function MockRequest<RC, RE, RH>(
       }
 
       // 匹配请求方法
-      let method = 'GET';
+      let methodType = 'GET';
       key = key.replace(/^\[(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE|CONNECT)\]/i, (_, $1) => {
-        method = $1.toUpperCase();
+        methodType = $1.toUpperCase();
         return '';
       });
 
       // 请求方法不匹配，返回false
-      if (method !== type.toUpperCase()) {
+      if (methodType !== type.toUpperCase()) {
         return falseValue;
       }
 
@@ -91,9 +91,8 @@ export default function MockRequest<RC, RE, RH>(
             responseHeaders: {}
           });
         return httpAdapter(elements, method);
-      } else {
-        throw new Error(`could not find the httpAdapter which send request.\n[url]${url}`);
       }
+      throw new Error(`could not find the httpAdapter which send request.\n[url]${url}`);
     }
 
     let timer: NodeJS.Timeout;
@@ -131,10 +130,10 @@ export default function MockRequest<RC, RE, RH>(
       }, delay);
     })
       .then(response => {
-        let status = 200,
-          statusText = 'ok',
-          responseHeaders = {},
-          body = undefinedValue;
+        let status = 200;
+        let statusText = 'ok';
+        let responseHeaders = {};
+        let body = undefinedValue;
 
         // 如果没有返回值则认为404
         if (response === undefinedValue) {

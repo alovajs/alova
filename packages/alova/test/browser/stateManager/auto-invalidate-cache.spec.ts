@@ -1,9 +1,9 @@
+import { key } from '@alova/shared/function';
+import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 
 describe('auto invalitate cached response data', () => {
   test("shouldn't invalidate cache when source method not hit target method", async () => {

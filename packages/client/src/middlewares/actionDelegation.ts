@@ -1,7 +1,7 @@
+import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext } from 'alova';
 import { TuseFlag$ } from '@/framework/type';
 import { createAssert, filterItem, forEach, instanceOf, isNumber, isString, objectKeys, pushItem } from '@/helper';
 import { falseValue, trueValue } from '@/helper/variables';
-import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext } from 'alova';
 import { Actions } from '~/typings/general';
 
 type AnyAlovaFrontMiddlewareContext = AlovaFrontMiddlewareContext<any, any, any, any, any, any, any>;

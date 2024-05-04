@@ -152,7 +152,7 @@ describe('silent method request in queue with silent behavior', () => {
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const delayRequestTs = [] as number[];
 
-    let startTs = Date.now();
+    const startTs = Date.now();
     const silentMethodInstance = new SilentMethod(
       methodInstance,
       'silent',

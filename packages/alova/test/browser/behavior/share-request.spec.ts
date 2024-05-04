@@ -3,7 +3,7 @@ import { createAlova, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
-describe('Request shared', function () {
+describe('Request shared', () => {
   test('should share request when use usehooks', async () => {
     const requestMockFn = jest.fn();
     const beforeRequestMockFn = jest.fn();
@@ -117,7 +117,7 @@ describe('Request shared', function () {
       requestAdapter() {
         const promise = new Promise((resolve, reject) => {
           if (index === 0) {
-            index++;
+            index += 1;
             reject(new Error('request error'));
           } else {
             resolve({
@@ -149,7 +149,7 @@ describe('Request shared', function () {
       },
       responseExpect(response) {
         if (i === 0) {
-          i++;
+          i += 1;
           throw new Error('custom error');
         }
         return response.json();
@@ -186,7 +186,7 @@ describe('Request shared', function () {
       },
       async responseExpect(response) {
         if (i === 0) {
-          i++;
+          i += 1;
           throw new Error('custom error');
         }
         return response.json();

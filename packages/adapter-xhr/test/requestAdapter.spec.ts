@@ -1,9 +1,9 @@
-import { xhrRequestAdapter } from '@/index';
 import { createAlova, useRequest } from 'alova';
 import VueHook from 'alova/vue';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
+import { xhrRequestAdapter } from '@/index';
 import { AlovaXHRResponse } from '~/typings';
 
 const baseURL = process.env.NODE_BASE_URL as string;

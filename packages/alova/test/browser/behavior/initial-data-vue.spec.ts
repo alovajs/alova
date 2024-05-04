@@ -1,10 +1,10 @@
+import { Result, untilCbCalled } from 'root/testUtils';
+import { ref } from 'vue';
 import { getAlovaInstance } from '#/utils';
 import { useRequest, useWatcher } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { Result, untilCbCalled } from 'root/testUtils';
-import { ref } from 'vue';
 
-describe('Initial data before request', function () {
+describe('Initial data before request', () => {
   test('[useRequest]should assign the initial data to state `data`', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

@@ -1,7 +1,7 @@
+import { AlovaMethodHandler, Method, UseHookReturnType, useRequest } from 'alova';
 import { TonMounted$, TonUnmounted$ } from '@/framework/type';
 import { noop } from '@/helper';
 import { falseValue, isSSR, trueValue } from '@/helper/variables';
-import { AlovaMethodHandler, Method, UseHookReturnType, useRequest } from 'alova';
 import { AutoRequestHookConfig, NotifyHandler, UnbindHandler } from '~/typings/general';
 
 interface AutoRequestHook<S, E, R, T, RC, RE, RH> {
@@ -30,27 +30,27 @@ const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any> = (
 ) => {
   let notifiable = trueValue;
   const {
-      enableFocus = trueValue,
-      enableVisibility = trueValue,
-      enableNetwork = trueValue,
-      pollingTime = 0,
-      throttle = 1000
-    } = config,
-    states = useRequest(handler, config),
-    notify = () => {
-      if (notifiable) {
-        states.send();
-        if (throttle > 0) {
-          notifiable = falseValue;
-          setTimeout(() => (notifiable = trueValue), throttle);
-        }
+    enableFocus = trueValue,
+    enableVisibility = trueValue,
+    enableNetwork = trueValue,
+    pollingTime = 0,
+    throttle = 1000
+  } = config;
+  const states = useRequest(handler, config);
+  const notify = () => {
+    if (notifiable) {
+      states.send();
+      if (throttle > 0) {
+        notifiable = falseValue;
+        setTimeout(() => (notifiable = trueValue), throttle);
       }
-    };
+    }
+  };
 
-  let offNetwork = noop,
-    offFocus = noop,
-    offVisiblity = noop,
-    offPolling = noop;
+  let offNetwork = noop;
+  let offFocus = noop;
+  let offVisiblity = noop;
+  let offPolling = noop;
   onMounted$(() => {
     if (!isSSR) {
       offNetwork = enableNetwork ? useAutoRequest.onNetwork(notify, config) : offNetwork;

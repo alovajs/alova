@@ -32,8 +32,8 @@ export default {
     onDestroy(removeStates);
     onMount(() => immediate && handler());
 
-    let timer: any,
-      needEmit = falseValue;
+    let timer: any;
+    let needEmit = falseValue;
     forEach(watchingStates || [], (state, i) => {
       state.subscribe(() => {
         timer && clearTimeoutTimer(timer);

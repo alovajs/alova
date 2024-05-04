@@ -1,9 +1,9 @@
+import { noop } from '@alova/shared/function';
+import { falseValue } from '@alova/shared/vars';
 import createRequestState from '@/functions/createRequestState';
 import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { exportFetchStates } from '@/utils/helper';
 import { assertMethodMatcher } from '@/utils/myAssert';
-import { noop } from '@alova/shared/function';
-import { falseValue } from '@alova/shared/vars';
 import { EnumHookType, FetcherHookConfig, FetcherType, MethodMatcher } from '~/typings';
 
 /**

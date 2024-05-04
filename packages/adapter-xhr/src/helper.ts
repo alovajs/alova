@@ -34,9 +34,10 @@ export const data2QueryString = (data: Record<string, any>) => {
         // 否则index++来记录当前使用的次数
         if (index >= refValueAttrCount - 1) {
           paths = [];
-          index = refValueAttrCount = 0;
+          index = 0;
+          refValueAttrCount = 0;
         } else {
-          index++;
+          index += 1;
         }
       }
     }

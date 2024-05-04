@@ -3,7 +3,7 @@ import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
 
-describe('useRequet middleware', function () {
+describe('useRequet middleware', () => {
   test('middleware function can set with a common function', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -73,7 +73,7 @@ describe('useRequet middleware', function () {
     const mockFn2 = jest.fn();
     try {
       await send();
-    } catch (error) {
+    } catch (err) {
       mockFn2();
     }
     expect(mockFn2).toHaveBeenCalledTimes(1);
@@ -143,7 +143,7 @@ describe('useRequet middleware', function () {
         const resp = await next({
           force: true,
           method: alova.Get('/unit-test', {
-            transformData: ({ data }: Result<true>) => data,
+            transformData: ({ data: responseData }: Result<true>) => responseData,
             params: {
               a: 'a',
               b: 'b'
@@ -258,7 +258,7 @@ describe('useRequet middleware', function () {
     const mockFn = jest.fn();
     try {
       await send();
-    } catch (error) {
+    } catch (err) {
       mockFn();
     }
     expect(mockFn).toHaveBeenCalledTimes(0);
@@ -273,9 +273,7 @@ describe('useRequet middleware', function () {
     });
     const middlewareResp = {};
     const { loading, error, onSuccess, data } = useRequest(getGetterObj, {
-      middleware: async () => {
-        return middlewareResp;
-      }
+      middleware: async () => middlewareResp
     });
 
     // 只有在中间件中未返回数据或返回undefined时才继续获取真实的响应数据，否则使用返回数据并不再等待响应promise
@@ -344,13 +342,12 @@ describe('useRequet middleware', function () {
 
     // 成功示例
     const { loading, onSuccess, data } = useRequest(getGetterObj, {
-      middleware: () => {
-        return new Promise(resolve => {
+      middleware: () =>
+        new Promise(resolve => {
           setTimeout(() => {
             resolve({ anotherData: '123' });
           }, 20);
-        });
-      }
+        })
     });
     expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
     const { data: dataRaw } = await untilCbCalled(onSuccess);
@@ -434,7 +431,7 @@ describe('useRequet middleware', function () {
       });
 
     // 调用了controlLoading后将自定义控制loading状态
-    let sendInMiddleware: any = undefined;
+    let sendInMiddleware: any;
     const { loading, data, onSuccess } = useRequest(getGetter, {
       middleware: ({ send }, next) => {
         sendInMiddleware = send;
@@ -456,9 +453,7 @@ describe('useRequet middleware', function () {
 
   test('should abort request like abort function in returns when call abort in middleware', async () => {
     const alova = getAlovaInstance(VueHook, {
-      resErrorExpect: error => {
-        return Promise.reject(error);
-      }
+      resErrorExpect: error => Promise.reject(error)
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-1s');
     const { loading, data, error, onError } = useRequest(Get, {
@@ -486,9 +481,7 @@ describe('useRequet middleware', function () {
 
   test('should abort request like abort function in returns when call abort in middleware(non-immediate)', async () => {
     const alova = getAlovaInstance(VueHook, {
-      resErrorExpect: error => {
-        return Promise.reject(error);
-      }
+      resErrorExpect: error => Promise.reject(error)
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-1s');
     const { loading, data, error, onError } = useRequest(Get, {

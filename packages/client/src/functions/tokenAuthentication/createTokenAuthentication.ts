@@ -1,6 +1,6 @@
+import { AlovaRequestAdapter, StatesHook } from 'alova';
 import { noop, __self } from '@/helper';
 import { falseValue } from '@/helper/variables';
-import { AlovaRequestAdapter, StatesHook } from 'alova';
 import {
   ClientTokenAuthenticationOptions,
   ServerTokenAuthenticationOptions,
@@ -32,13 +32,13 @@ export const createClientTokenAuthentication = ({
   refreshToken,
   assignToken = noop
 }: ClientTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any, any, any>>) => {
-  let tokenRefreshing = falseValue,
-    waitingList: WaitingRequestList = [];
+  let tokenRefreshing = falseValue;
+  const waitingList: WaitingRequestList = [];
   return {
     waitingList,
     onAuthRequired: onBeforeRequest => async method => {
-      const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta),
-        isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
+      const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
+      const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
       // 被忽略的、登录、刷新token的请求不进行token认证
       if (
         !isVisitorRole &&
@@ -91,13 +91,13 @@ export const createServerTokenAuthentication = ({
   refreshTokenOnError,
   assignToken = noop
 }: ServerTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any, any, any>>) => {
-  let tokenRefreshing = falseValue,
-    waitingList: WaitingRequestList = [];
+  let tokenRefreshing = falseValue;
+  const waitingList: WaitingRequestList = [];
   return {
     waitingList,
     onAuthRequired: onBeforeRequest => async method => {
-      const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta),
-        isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
+      const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
+      const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
       // 被忽略的、登录、刷新token的请求不进行token认证
       if (
         !isVisitorRole &&

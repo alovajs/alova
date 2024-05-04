@@ -1,10 +1,10 @@
+import { delay, Result } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import SvelteHook from '@/statesHook/svelte';
-import { delay, Result } from 'root/testUtils';
 
 // use hook在服务端不再发送请求
-describe('[svelte]use hooks in SSR', function () {
+describe('[svelte]use hooks in SSR', () => {
   test("shouldn't request but loading is true", async () => {
     const alova = getAlovaInstance(SvelteHook, {
       responseExpect: r => r.json(),

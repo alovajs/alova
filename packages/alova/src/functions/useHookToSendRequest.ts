@@ -1,12 +1,3 @@
-import Method from '@/Method';
-import defaultMiddleware from '@/defaults/defaultMiddleware';
-import { filterSnapshotMethods } from '@/storage/methodSnapShots';
-import { getResponseCache } from '@/storage/responseCache';
-import { getPersistentResponse } from '@/storage/responseStorage';
-import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
-import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
-import { exportFetchStates, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
-import { assertMethodMatcher } from '@/utils/myAssert';
 import {
   getContext,
   getLocalCacheConfigParam,
@@ -20,13 +11,21 @@ import {
   MEMORY,
   STORAGE_RESTORE,
   falseValue,
-  len,
   promiseResolve,
   promiseThen,
   pushItem,
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
+import Method from '@/Method';
+import defaultMiddleware from '@/defaults/defaultMiddleware';
+import { filterSnapshotMethods } from '@/storage/methodSnapShots';
+import { getResponseCache } from '@/storage/responseCache';
+import { getPersistentResponse } from '@/storage/responseStorage';
+import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
+import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
+import { exportFetchStates, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
+import { assertMethodMatcher } from '@/utils/myAssert';
 import {
   AlovaCompleteEvent,
   AlovaErrorEvent,
@@ -61,38 +60,38 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
 ) {
   let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
   const {
-      fs: frontStates,
-      sh: successHandlers,
-      eh: errorHandlers,
-      ch: completeHandlers,
-      ht,
-      c: useHookConfig
-    } = hookInstance,
-    isFetcher = ht === EnumHookType.USE_FETCHER,
-    { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-      | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
-      | FetcherHookConfig,
-    alovaInstance = getContext(methodInstance),
-    { id, storage } = alovaInstance,
-    { update } = promiseStatesHook(),
-    // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
-    methodKey = getMethodInternalKey(methodInstance),
-    { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
-    { abortLast = trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
+    fs: frontStates,
+    sh: successHandlers,
+    eh: errorHandlers,
+    ch: completeHandlers,
+    ht,
+    c: useHookConfig
+  } = hookInstance;
+  const isFetcher = ht === EnumHookType.USE_FETCHER;
+  const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
+    | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
+    | FetcherHookConfig;
+  const alovaInstance = getContext(methodInstance);
+  const { id, storage } = alovaInstance;
+  const { update } = promiseStatesHook();
+  // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
+  const methodKey = getMethodInternalKey(methodInstance);
+  const { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
+  const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
   hookInstance.m = methodInstance;
 
   return (async () => {
     // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
-    let removeStates = noop,
-      saveStates = noop as Hook['sf'][number],
-      cachedResponse: R | undefined = getResponseCache(id, methodKey),
-      isNextCalled = falseValue,
-      responseHandlePromise = promiseResolve<any>(undefinedValue),
-      offDownloadEvent = noop,
-      offUploadEvent = noop,
-      fromCache = () => !!cachedResponse,
-      // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
-      controlledLoading = falseValue;
+    let removeStates = noop;
+    let saveStates = noop as Hook['sf'][number];
+    let cachedResponse: R | undefined = getResponseCache(id, methodKey);
+    let isNextCalled = falseValue;
+    let responseHandlePromise = promiseResolve<any>(undefinedValue);
+    let offDownloadEvent = noop;
+    let offUploadEvent = noop;
+    let fromCache = () => !!cachedResponse;
+    // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
+    let controlledLoading = falseValue;
     if (!isFetcher) {
       // 当缓存模式为memory时不获取缓存，减少缓存获取
       const persistentResponse =
@@ -114,24 +113,24 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
     const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
       isNextCalled = trueValue;
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
-          guardNextConfig || {},
-        forceRequestFinally = sloughConfig(
-          guardNextForceRequest,
-          createAlovaEvent(AlovaEventType.AlovaEvent, methodInstance, sendCallingArgs)
-        ),
-        progressUpdater =
-          (stage: 'downloading' | 'uploading') =>
-          ({ loaded, total }: Progress) =>
-            update(
-              {
-                [stage]: {
-                  loaded,
-                  total
-                }
-              },
-              frontStates,
-              hookInstance
-            );
+        guardNextConfig || {};
+      const forceRequestFinally = sloughConfig(
+        guardNextForceRequest,
+        createAlovaEvent(AlovaEventType.AlovaEvent, methodInstance, sendCallingArgs)
+      );
+      const progressUpdater =
+        (stage: 'downloading' | 'uploading') =>
+        ({ loaded, total }: Progress) =>
+          update(
+            {
+              [stage]: {
+                loaded,
+                total
+              }
+            },
+            frontStates,
+            hookInstance
+          );
 
       methodInstance = guardNextReplacingMethod;
       // 每次发送请求都需要保存最新的控制器
@@ -152,80 +151,80 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
 
     // 调用中间件函数
     let successHandlerDecorator:
-        | ((
-            handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
-            event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
-            index: number,
-            length: number
-          ) => void)
-        | undefined,
-      errorHandlerDecorator:
-        | ((
-            handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
-            event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
-            index: number,
-            length: number
-          ) => void)
-        | undefined,
-      completeHandlerDecorator:
-        | ((
-            handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
-            event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
-            index: number,
-            length: number
-          ) => void)
-        | undefined = undefinedValue;
+      | ((
+          handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
+          event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
+          index: number,
+          length: number
+        ) => void)
+      | undefined;
+    let errorHandlerDecorator:
+      | ((
+          handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
+          event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
+          index: number,
+          length: number
+        ) => void)
+      | undefined;
+    let completeHandlerDecorator:
+      | ((
+          handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
+          event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
+          index: number,
+          length: number
+        ) => void)
+      | undefined = undefinedValue;
 
     const commonContext = {
-        method: methodInstance,
-        cachedResponse,
-        config: useHookConfig,
-        abort: () => methodInstance.abort(),
-        decorateSuccess(decorator: NonNullable<typeof successHandlerDecorator>) {
-          isFn(decorator) && (successHandlerDecorator = decorator);
-        },
-        decorateError(decorator: NonNullable<typeof errorHandlerDecorator>) {
-          isFn(decorator) && (errorHandlerDecorator = decorator);
-        },
-        decorateComplete(decorator: NonNullable<typeof completeHandlerDecorator>) {
-          isFn(decorator) && (completeHandlerDecorator = decorator);
-        }
+      method: methodInstance,
+      cachedResponse,
+      config: useHookConfig,
+      abort: () => methodInstance.abort(),
+      decorateSuccess(decorator: NonNullable<typeof successHandlerDecorator>) {
+        isFn(decorator) && (successHandlerDecorator = decorator);
       },
-      // 是否需要更新响应数据，以及调用响应回调
-      toUpdateResponse = () => ht !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance,
-      fetchStates = exportFetchStates(frontStates),
-      // 调用中间件函数
-      middlewareCompletePromise = isFetcher
-        ? (middleware as AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH>)(
-            {
-              ...commonContext,
-              fetchArgs: sendCallingArgs,
-              fetch: (matcher, ...args) => {
-                const methodInstance = filterSnapshotMethods(matcher, falseValue);
-                assertMethodMatcher(methodInstance);
-                return useHookToSendRequest(hookInstance, methodInstance as Method, args);
-              },
-              fetchStates,
-              update: newFetchStates => update(newFetchStates, fetchStates, hookInstance),
-              controlFetching(control = trueValue) {
-                controlledLoading = control;
-              }
+      decorateError(decorator: NonNullable<typeof errorHandlerDecorator>) {
+        isFn(decorator) && (errorHandlerDecorator = decorator);
+      },
+      decorateComplete(decorator: NonNullable<typeof completeHandlerDecorator>) {
+        isFn(decorator) && (completeHandlerDecorator = decorator);
+      }
+    };
+    // 是否需要更新响应数据，以及调用响应回调
+    const toUpdateResponse = () => ht !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
+    const fetchStates = exportFetchStates(frontStates);
+    // 调用中间件函数
+    const middlewareCompletePromise = isFetcher
+      ? (middleware as AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH>)(
+          {
+            ...commonContext,
+            fetchArgs: sendCallingArgs,
+            fetch: (matcher, ...args) => {
+              const methodInstance = filterSnapshotMethods(matcher, falseValue);
+              assertMethodMatcher(methodInstance);
+              return useHookToSendRequest(hookInstance, methodInstance as Method, args);
             },
-            guardNext
-          )
-        : (middleware as AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>)(
-            {
-              ...commonContext,
-              sendArgs: sendCallingArgs,
-              send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args),
-              frontStates,
-              update: newFrontStates => update(newFrontStates, frontStates, hookInstance),
-              controlLoading(control = trueValue) {
-                controlledLoading = control;
-              }
-            },
-            guardNext
-          );
+            fetchStates,
+            update: newFetchStates => update(newFetchStates, fetchStates, hookInstance),
+            controlFetching(control = trueValue) {
+              controlledLoading = control;
+            }
+          },
+          guardNext
+        )
+      : (middleware as AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>)(
+          {
+            ...commonContext,
+            sendArgs: sendCallingArgs,
+            send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args),
+            frontStates,
+            update: newFrontStates => update(newFrontStates, frontStates, hookInstance),
+            controlLoading(control = trueValue) {
+              controlledLoading = control;
+            }
+          },
+          guardNext
+        );
 
     let finallyResponse: any = undefinedValue;
     try {
@@ -318,11 +317,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
         );
       }
 
-      // the existence of error handlers indicates that the error is catched.
-      // in this case, we should not throw the error.
-      if (len(errorHandlers) > 0) {
-        throw error;
-      }
+      throw error;
     }
     // 响应后解绑下载和上传事件
     offDownloadEvent();

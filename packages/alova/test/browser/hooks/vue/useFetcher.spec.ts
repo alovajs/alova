@@ -1,12 +1,12 @@
+import { key } from '@alova/shared/function';
+import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 import { FetcherType } from '~/typings';
 
-describe('use useFetcher hook to fetch data', function () {
+describe('use useFetcher hook to fetch data', () => {
   test('should hit cached response when fetch data with default config', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

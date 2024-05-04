@@ -1,6 +1,6 @@
+import { Method } from 'alova';
 import { forEach, includes, newInstance, objectKeys } from '@/helper';
 import { trueValue } from '@/helper/variables';
-import { Method } from 'alova';
 import { dependentAlovaInstance } from '../globalVariables';
 import { SerializedSilentMethod, SilentMethod } from '../SilentMethod';
 

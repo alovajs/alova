@@ -1,12 +1,12 @@
-import { clearResponseCache, getResponseCache, removeResponseCache, setResponseCache } from '@/storage/responseCache';
-import {
-  clearPersistentResponse,
-  getPersistentResponse,
-  persistResponse,
-  removePersistentResponse
-} from '@/storage/responseStorage';
 import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn } from '@alova/shared/function';
-import { forEach, isArray, undefinedValue } from '@alova/shared/vars';
+import { PromiseCls, isArray, undefinedValue } from '@alova/shared/vars';
+import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
+import {
+  clearWithCacheAdapter,
+  getWithCacheAdapter,
+  removeWithCacheAdapter,
+  setWithCacheAdapter
+} from '@/storage/cacheWrapper';
 import { Method } from '~/typings';
 
 /*
@@ -21,14 +21,13 @@ import { Method } from '~/typings';
  * @param matcher Method实例匹配器
  * @returns 缓存数据，未查到时返回undefined
  */
-export const queryCache = <R, S, E, T, RC, RE, RH>(matcher: Method<S, E, R, T, RC, RE, RH>) => {
+export const queryCache = async <Responded>(matcher: Method<any, any, any, any, Responded>) => {
   if (matcher && matcher.__key__) {
-    const { id, storage } = getContext(matcher),
-      methodKey = getMethodInternalKey(matcher);
-    return (
-      getResponseCache(id, methodKey) ||
-      getPersistentResponse(id, methodKey, storage, getLocalCacheConfigParam(matcher).t)
-    );
+    const { id, l1Cache, l2Cache } = getContext(matcher);
+    const methodKey = getMethodInternalKey(matcher);
+    let cachedData = await getWithCacheAdapter(id, methodKey, l1Cache);
+    cachedData = cachedData || (await getWithCacheAdapter(id, methodKey, l2Cache, getLocalCacheConfigParam(matcher).t));
+    return cachedData;
   }
 };
 
@@ -37,45 +36,49 @@ export const queryCache = <R, S, E, T, RC, RE, RH>(matcher: Method<S, E, R, T, R
  * @param matcher Method实例匹配器
  * @param data 缓存数据
  */
-export const setCache = <R, S, E, T, RC, RE, RH>(
-  matcher: Method<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[],
-  dataOrUpdater: R | ((oldCache?: R) => R | undefined | void)
+export const setCache = async <Responded>(
+  matcher: Method<any, any, any, any, Responded> | Method<any, any, any, any, Responded>[],
+  dataOrUpdater: Responded | ((oldCache?: Responded) => Responded | undefined | void)
 ) => {
   const methodInstances = isArray(matcher) ? matcher : [matcher];
-  forEach(methodInstances, methodInstance => {
-    const { id, storage } = getContext(methodInstance),
-      methodKey = getMethodInternalKey(methodInstance),
-      { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
+  const batchPromises = methodInstances.map(async methodInstance => {
+    const { id, l1Cache, l2Cache } = getContext(methodInstance);
+    const methodKey = getMethodInternalKey(methodInstance);
+    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
-      const cachedData = getResponseCache(id, methodKey) || getPersistentResponse(id, methodKey, storage, tag);
+      let cachedData = await getWithCacheAdapter(id, methodKey, l1Cache);
+      cachedData = cachedData || (await getWithCacheAdapter(id, methodKey, l2Cache, tag));
       data = dataOrUpdater(cachedData);
       if (data === undefinedValue) {
         return;
       }
     }
-    setResponseCache(id, methodKey, data, expireMilliseconds);
-    toStorage && persistResponse(id, methodKey, data, expireMilliseconds, storage, tag);
+    await PromiseCls.all([
+      setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l1Cache),
+      toStorage && setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l2Cache, tag)
+    ]);
   });
+  await PromiseCls.all(batchPromises);
 };
 
 /**
  * 失效缓存
  * @param matcher Method实例匹配器
  */
-export const invalidateCache = <S, E, R, T, RC, RE, RH>(
-  matcher?: Method<S, E, R, T, RC, RE, RH> | Method<S, E, R, T, RC, RE, RH>[]
-) => {
+export const invalidateCache = async (matcher?: Method | Method[]) => {
   if (!matcher) {
-    clearResponseCache();
-    clearPersistentResponse();
+    await PromiseCls.all([clearWithCacheAdapter(usingL1CacheAdapters), clearWithCacheAdapter(usingL2CacheAdapters)]);
     return;
   }
   const methodInstances = isArray(matcher) ? matcher : [matcher];
-  forEach(methodInstances, methodInstance => {
-    const { id, storage } = getContext(methodInstance),
-      methodKey = getMethodInternalKey(methodInstance);
-    removeResponseCache(id, methodKey);
-    removePersistentResponse(id, methodKey, storage);
+  const batchPromises = methodInstances.map(methodInstance => {
+    const { id, l1Cache, l2Cache } = getContext(methodInstance);
+    const methodKey = getMethodInternalKey(methodInstance);
+    return PromiseCls.all([
+      removeWithCacheAdapter(id, methodKey, l1Cache),
+      removeWithCacheAdapter(id, methodKey, l2Cache)
+    ]);
   });
+  await PromiseCls.all(batchPromises);
 };

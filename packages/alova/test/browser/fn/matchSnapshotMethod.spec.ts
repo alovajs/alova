@@ -1,10 +1,10 @@
+import { key } from '@alova/shared/function';
 import { getAlovaInstance } from '#/utils';
 import { globalConfig } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
-import { key } from '@alova/shared/function';
 
-describe('matchSnapshotMethod', function () {
+describe('matchSnapshotMethod', () => {
   test('should change snapshot limitation when set `limitSnapshots` in globalConfig', () => {
     globalConfig({
       limitSnapshots: 0
@@ -73,9 +73,7 @@ describe('matchSnapshotMethod', function () {
     // 匹配到两个，并筛选出最后一个
     matchedMethods = matchSnapshotMethod({
       name: 'get-method',
-      filter: (_, index, methods) => {
-        return index === methods.length - 1;
-      }
+      filter: (_, index, methods) => index === methods.length - 1
     });
     expect(matchedMethods).toHaveLength(1);
     expect(matchedMethods[0]).toBe(Get2);
@@ -92,9 +90,7 @@ describe('matchSnapshotMethod', function () {
     matchedMethod = matchSnapshotMethod(
       {
         name: 'get-method',
-        filter: (_, index, methods) => {
-          return index === methods.length - 1;
-        }
+        filter: (_, index, methods) => index === methods.length - 1
       },
       false
     );
@@ -158,9 +154,7 @@ describe('matchSnapshotMethod', function () {
     matchedMethods = matchSnapshotMethod({
       name: /get-method1/,
       alova,
-      filter: (_, index, methods) => {
-        return index === methods.length - 1;
-      }
+      filter: (_, index, methods) => index === methods.length - 1
     });
     expect(matchedMethods).toHaveLength(1);
     expect(matchedMethods[0]).toBe(Get2);
@@ -184,9 +178,7 @@ describe('matchSnapshotMethod', function () {
       {
         name: /get-method1/,
         alova,
-        filter: (_, index, methods) => {
-          return index === methods.length - 1;
-        }
+        filter: (_, index, methods) => index === methods.length - 1
       },
       false
     );

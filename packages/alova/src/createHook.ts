@@ -1,8 +1,8 @@
-import Method from '@/Method';
 import { falseValue, undefinedValue } from '@alova/shared/vars';
+import Method from '@/Method';
 import { FrontRequestState, Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
 
-export const createHook = (ht: TEnumHookType, c: UseHookConfig) =>
+export default (ht: TEnumHookType, c: UseHookConfig) =>
   ({
     /** 最后一次请求的method实例 */
     m: undefinedValue as unknown as Method,

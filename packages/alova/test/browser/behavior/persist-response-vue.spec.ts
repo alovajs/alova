@@ -1,13 +1,13 @@
+import { key } from '@alova/shared/function';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { getResponseCache, removeResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
-import { key } from '@alova/shared/function';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { DetailLocalCacheConfig } from '~/typings';
 
-describe('persist data', function () {
+describe('persist data', () => {
   test('should persist responded data but it still send request when request again', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

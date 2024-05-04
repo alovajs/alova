@@ -36,29 +36,51 @@ const offEventCallback = (offHandler: any, handlers: any[]) => () => {
   index >= 0 && handlers.splice(index, 1);
 };
 
-export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
+export default class Method<
+  State = any,
+  Computed = any,
+  Watched = any,
+  Export = any,
+  Responded = any,
+  Transformed = any,
+  RequestConfig = any,
+  Response = any,
+  ResponseHeader = any
+> {
   public type: MethodType;
+
   public baseURL: string;
+
   public url: string;
-  public config: MethodRequestConfig & AlovaMethodConfig<R, T, RC, RH>;
+
+  public config: MethodRequestConfig & AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
+
   public data?: RequestBody;
+
   public hitSource?: (string | RegExp)[];
-  public context: Alova<S, E, RC, RE, RH>;
+
+  public context: Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
+
   public dhs: ProgressHandler[] = [];
+
   public uhs: ProgressHandler[] = [];
+
   public meta?: any;
+
   public __key__: string;
 
   /**
    * 请求中断函数，每次请求都会更新这个函数
    */
   public abort: AbortFunction;
+
   public fromCache: boolean | undefined = undefinedValue;
+
   constructor(
     type: MethodType,
-    context: Alova<S, E, RC, RE, RH>,
+    context: Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>,
     url: string,
-    config?: AlovaMethodConfig<R, T, RC, RH>,
+    config?: AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>,
     data?: RequestBody
   ) {
     const abortRequest: AbortFunction = () => {
@@ -66,8 +88,8 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     };
     abortRequest.a = noop;
 
-    const instance = this,
-      contextOptions = getContextOptions(context);
+    const instance = this;
+    const contextOptions = getContextOptions(context);
     instance.abort = abortRequest;
     instance.baseURL = contextOptions.baseURL || '';
     instance.url = url;
@@ -75,12 +97,12 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
     instance.context = context;
 
     // 将请求相关的全局配置合并到Method对象中
-    const contextConcatConfig: any = {},
-      mergedLocalCacheKey = 'localCache',
-      globalLocalCache = isPlainObject(contextOptions[mergedLocalCacheKey])
-        ? contextOptions[mergedLocalCacheKey][type]
-        : undefinedValue,
-      hitSource = config && config.hitSource;
+    const contextConcatConfig: any = {};
+    const mergedLocalCacheKey = 'cache';
+    const globalLocalCache = isPlainObject(contextOptions[mergedLocalCacheKey])
+      ? contextOptions[mergedLocalCacheKey][type]
+      : undefinedValue;
+    const hitSource = config && config.hitSource;
 
     // 合并参数
     forEach(['timeout', 'shareRequest'], mergedKey => {
@@ -140,9 +162,9 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
   /**
    * 通过method实例发送请求，返回promise对象
    */
-  public send(forceRequest = falseValue): Promise<R> {
-    const instance = this,
-      { response, onDownload, onUpload, abort, fromCache } = sendRequest(instance, forceRequest);
+  public send(forceRequest = falseValue): Promise<Responded> {
+    const instance = this;
+    const { response, onDownload, onUpload, abort, fromCache } = sendRequest(instance, forceRequest);
     len(instance.dhs) > 0 &&
       onDownload((loaded, total) => forEach(instance.dhs, handler => handler({ loaded, total })));
     len(instance.uhs) > 0 && onUpload((loaded, total) => forEach(instance.uhs, handler => handler({ loaded, total })));
@@ -170,8 +192,8 @@ export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = a
    * @param onrejected 当Promise被reject时要执行的回调
    * @returns 返回一个Promise，用于执行任何回调
    */
-  public then<TResult1 = R, TResult2 = never>(
-    onfulfilled?: (value: R) => TResult1 | PromiseLike<TResult1>,
+  public then<TResult1 = Responded, TResult2 = never>(
+    onfulfilled?: (value: Responded) => TResult1 | PromiseLike<TResult1>,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
   ) {
     return promiseThen(this.send(), onfulfilled, onrejected);

@@ -1,6 +1,6 @@
 import type { Config } from 'jest';
 import { resolve } from 'node:path';
-import baseConfig from '../../jest.config.base';
+import baseConfig from 'alova-root/jest.config.base';
 
 /*
  * For a detailed explanation regarding each configuration property and type check, visit:

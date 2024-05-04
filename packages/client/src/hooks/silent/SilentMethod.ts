@@ -1,6 +1,6 @@
+import { matchSnapshotMethod, Method, MethodFilter, MethodMatcher } from 'alova';
 import { instanceOf, isArray, splice, uuid } from '@/helper';
 import { falseValue, undefinedValue } from '@/helper/variables';
-import { matchSnapshotMethod, Method, MethodFilter, MethodMatcher } from 'alova';
 import {
   BackoffPolicy,
   FallbackHandler,
@@ -43,16 +43,22 @@ const getBelongQueuePosition = (silentMethodInstance: SilentMethod) => {
  */
 export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
   public id: string;
+
   /** 是否为持久化实例 */
   public cache: boolean;
+
   /** 实例的行为，queue或silent */
   public behavior: SQHookBehavior;
+
   /** method实例 */
   public entity: Method<S, E, R, T, RC, RE, RH>;
+
   /** 重试错误规则 */
   public retryError?: RetryError;
+
   /** 重试次数 */
   public maxRetryTimes?: MaxRetryTimes;
+
   /** 避让策略 */
   public backoff?: BackoffPolicy;
 
@@ -95,6 +101,7 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
 
   /** 是否强制 */
   public force: boolean;
+
   constructor(
     entity: Method<S, E, R, T, RC, RE, RH>,
     behavior: SQHookBehavior,

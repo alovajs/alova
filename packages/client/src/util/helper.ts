@@ -57,7 +57,7 @@ export const valueObject = <T>(value: T, writable = falseValue) => ({
 export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => {
   let { startQuiver, endQuiver } = backoff;
   const { delay, multiplier = 1 } = backoff;
-  let retryDelayFinally = (delay || 0) * Math.pow(multiplier, retryTimes - 1);
+  let retryDelayFinally = (delay || 0) * multiplier ** (retryTimes - 1);
   // 如果startQuiver或endQuiver有值，则需要增加指定范围的随机抖动值
   if (startQuiver || endQuiver) {
     startQuiver = startQuiver || 0;

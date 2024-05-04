@@ -1,6 +1,6 @@
+import { isArray } from '@vue/shared';
 import { instanceOf, isPlainOrCustomObject, walkObject } from '@/helper';
 import { BooleanCls, nullValue, NumberCls, StringCls, trueValue, undefinedValue } from '@/helper/variables';
-import { isArray } from '@vue/shared';
 import { vDataCollectUnified } from './helper';
 import Null from './Null';
 import Undefined from './Undefined';

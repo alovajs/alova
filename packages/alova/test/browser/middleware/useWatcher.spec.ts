@@ -4,7 +4,7 @@ import VueHook from '@/statesHook/vue';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
 import { ref } from 'vue';
 
-describe('useWatcher middleware', function () {
+describe('useWatcher middleware', () => {
   test('should send request synchronously when set a sync middleware function', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -20,7 +20,7 @@ describe('useWatcher middleware', function () {
       }
     });
 
-    stateA.value++;
+    stateA.value += 1;
     let { data: rawData } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value.path).toBe('/unit-test');
@@ -54,7 +54,7 @@ describe('useWatcher middleware', function () {
     expect(!!rawData).toBeTruthy();
     expect(endTs - startTs).toBeGreaterThanOrEqual(500);
 
-    stateA.value++;
+    stateA.value += 1;
     startTs = Date.now();
     await untilCbCalled(onSuccess);
     endTs = Date.now();
@@ -84,7 +84,7 @@ describe('useWatcher middleware', function () {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
 
-    stateA.value++;
+    stateA.value += 1;
     await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
 

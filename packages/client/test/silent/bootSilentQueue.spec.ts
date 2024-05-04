@@ -293,7 +293,7 @@ describe('boot silent queue', () => {
       });
       silentMethodInstance.virtualResponse = virtualResponse;
       const vid = virtualResponse.id;
-      const other = virtualResponse.other;
+      const { other } = virtualResponse;
 
       const methodInstance2 = new Method('DELETE', alovaInst, `/detail/${vid}`, undefined, {
         id: vid,

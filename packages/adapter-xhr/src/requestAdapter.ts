@@ -1,7 +1,7 @@
-import { data2QueryString, parseResponseHeaders } from '@/helper';
 import { isPlainObject, isSpecialRequestBody, isString, newInstance, noop } from '@alova/shared/function';
 import { falseValue, nullValue, trueValue } from '@alova/shared/vars';
 import type { ProgressUpdater } from 'alova';
+import { data2QueryString, parseResponseHeaders } from '@/helper';
 import { AlovaXHRAdapter, AlovaXHRResponse } from '~/typings';
 
 const err = (msg: string) => newInstance(Error, msg);

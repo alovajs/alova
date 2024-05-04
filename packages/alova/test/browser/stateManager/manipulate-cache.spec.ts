@@ -1,14 +1,14 @@
+import { key } from '@alova/shared/function';
+import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { queryCache, setCache, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { getPersistentResponse, persistResponse } from '@/storage/responseStorage';
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 
 const alova = getAlovaInstance(VueHook, {
   responseExpect: r => r.json()
 });
-describe('manipulate cache', function () {
+describe('manipulate cache', () => {
   test('the cache response data should be saved', () => {
     const Get = alova.Get('/unit-test', {
       localCache: 100 * 1000,

@@ -10,7 +10,7 @@ const { resolve } = require('node:path');
 const basePath = process.cwd();
 const pkgPath = resolve(basePath, './package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, { encoding: 'utf-8' }).toString());
-const author = pkg.author;
+const { author } = pkg;
 const repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
 
 /**

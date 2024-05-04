@@ -16,7 +16,7 @@ export const saveMethodSnapshot = (namespace: string, key: string, methodInstanc
   if (snapshotCount < globalConfigMap.limitSnapshots) {
     const namespacedSnapshots = (methodSnapshots[namespace] = methodSnapshots[namespace] || {});
     namespacedSnapshots[key] = methodInstance;
-    snapshotCount++;
+    snapshotCount += 1;
   }
 };
 
@@ -27,15 +27,15 @@ export const saveMethodSnapshot = (namespace: string, key: string, methodInstanc
  */
 export const matchSnapshotMethod = <M extends boolean = true>(matcher: MethodFilter, matchAll: M = trueValue as M) => {
   // 将filter参数统一解构为nameMatcher和matchHandler
-  let namespace = '',
-    nameMatcher: string | RegExp | undefined = undefinedValue,
-    matchHandler: MethodFilterHandler | undefined;
+  let namespace = '';
+  let nameMatcher: string | RegExp | undefined = undefinedValue;
+  let matchHandler: MethodFilterHandler | undefined;
   if (isString(matcher) || instanceOf(matcher, RegExp)) {
     nameMatcher = matcher;
   } else if (isPlainObject(matcher)) {
     nameMatcher = matcher.name;
     matchHandler = matcher.filter;
-    const alova = matcher.alova;
+    const { alova } = matcher;
     namespace = alova ? alova.id : namespace;
   }
 
@@ -48,8 +48,8 @@ export const matchSnapshotMethod = <M extends boolean = true>(matcher: MethodFil
       const namespacedSnapshots = methodSnapshots[keyedNamespace];
       forEach(objectKeys(namespacedSnapshots), methodKey => {
         // 为做到和缓存表现统一，如果过期了则不匹配出来，并删除其缓存
-        const hitMethodInstance = namespacedSnapshots[methodKey],
-          name = getConfig(hitMethodInstance).name || '';
+        const hitMethodInstance = namespacedSnapshots[methodKey];
+        const name = getConfig(hitMethodInstance).name || '';
         // 当nameMatcher为undefined时，表示命中所有method实例
         if (
           nameMatcher === undefinedValue ||

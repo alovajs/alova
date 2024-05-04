@@ -15,7 +15,7 @@ describe('equals', () => {
     const num1 = createVirtualResponse(1);
     const num2 = createVirtualResponse(1);
     expect(equals(num1, num1)).toBeTruthy();
-    expect(equals(num1, num1 + '')).toBeTruthy();
+    expect(equals(num1, `${num1}`)).toBeTruthy();
     expect(equals(num1, 1)).toBeFalsy();
     expect(equals(num1, num2)).toBeFalsy();
   });

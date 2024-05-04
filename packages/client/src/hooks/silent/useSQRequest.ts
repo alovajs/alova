@@ -1,6 +1,6 @@
+import { AlovaMethodHandler, useRequest } from 'alova';
 import { noop, promiseResolve } from '@/helper';
 import { undefinedValue } from '@/helper/variables';
-import { AlovaMethodHandler, useRequest } from 'alova';
 import { SQRequestHookConfig } from '~/typings/general';
 import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';
 

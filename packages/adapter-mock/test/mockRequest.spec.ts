@@ -1,8 +1,8 @@
-import createAlovaMockAdapter from '@/createAlovaMockAdapter';
-import defineMock from '@/defineMock';
 import { createAlova, useRequest } from 'alova';
 import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
+import defineMock from '@/defineMock';
+import createAlovaMockAdapter from '@/createAlovaMockAdapter';
 
 declare const isSSR: boolean;
 describe('mock request', () => {
@@ -74,23 +74,19 @@ describe('mock request', () => {
 
   test('should receive all request data', async () => {
     const mocks = defineMock({
-      '[POST]/detail': () => {
-        return {
-          id: 1
-        };
-      }
+      '[POST]/detail': () => ({
+        id: 1
+      })
     });
 
     const mockFn = jest.fn();
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
-      onMockResponse: responseData => {
-        return {
-          response: responseData.body,
-          headers: {}
-        };
-      },
+      onMockResponse: responseData => ({
+        response: responseData.body,
+        headers: {}
+      }),
       mockRequestLogger: ({ isMock, url, method, headers, query, data, responseHeaders, response }) => {
         mockFn();
         expect(isMock).toBeTruthy();
@@ -133,15 +129,13 @@ describe('mock request', () => {
 
   test('response with status and statusText', async () => {
     const mocks = defineMock({
-      '[POST]/detail': () => {
-        return {
-          status: 403,
-          statusText: 'customer error',
-          responseHeaders: {
-            rh1: 'rh1'
-          }
-        };
-      }
+      '[POST]/detail': () => ({
+        status: 403,
+        statusText: 'customer error',
+        responseHeaders: {
+          rh1: 'rh1'
+        }
+      })
     });
 
     // 模拟数据请求适配器
@@ -196,7 +190,7 @@ describe('mock request', () => {
           headers: {}
         };
       },
-      onMockError: error => new Error('new error:' + error.message)
+      onMockError: error => new Error(`new error:${error.message}`)
     });
 
     const alovaInst = createAlova({
@@ -210,22 +204,18 @@ describe('mock request', () => {
 
   test('should work when mock function is async', async () => {
     const mocks = defineMock({
-      '[POST]/detail': async () => {
-        return {
-          id: 1
-        };
-      }
+      '[POST]/detail': async () => ({
+        id: 1
+      })
     });
 
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
-      onMockResponse: ({ body }) => {
-        return {
-          response: body,
-          headers: {}
-        };
-      },
+      onMockResponse: ({ body }) => ({
+        response: body,
+        headers: {}
+      }),
       mockRequestLogger: false
     });
 
@@ -260,7 +250,7 @@ describe('mock request', () => {
           headers: {}
         };
       },
-      onMockError: error => new Error('new error:' + error.message)
+      onMockError: error => new Error(`new error:${error.message}`)
     });
 
     const alovaInst = createAlova({
@@ -274,18 +264,14 @@ describe('mock request', () => {
 
   (isSSR ? xtest : test)("shouldn't throw error when has no being request", async () => {
     const mocks = defineMock({
-      '[POST]/detail': async () => {
-        return [];
-      }
+      '[POST]/detail': async () => []
     });
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-      onMockResponse: ({ body }) => {
-        return {
-          response: body,
-          headers: {}
-        };
-      }
+      onMockResponse: ({ body }) => ({
+        response: body,
+        headers: {}
+      })
     });
 
     const alovaInst = createAlova({
@@ -305,9 +291,7 @@ describe('mock request', () => {
 
   (isSSR ? xtest : test)('should abort request when call abort manually', async () => {
     const mocks = defineMock({
-      '[POST]/detail': async () => {
-        return [];
-      }
+      '[POST]/detail': async () => []
     });
 
     // 模拟数据请求适配器
@@ -360,9 +344,7 @@ describe('mock request', () => {
 
   (isSSR ? xtest : test)('should timeout when timeout', async () => {
     const mocks = defineMock({
-      '[POST]/detail': async () => {
-        return [];
-      }
+      '[POST]/detail': async () => []
     });
 
     // 模拟数据请求适配器

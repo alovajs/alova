@@ -1,17 +1,17 @@
+import { key } from '@alova/shared/function';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { Method, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@alova/shared/function';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 // 其他请求方式测试
-describe('Test other methods without GET', function () {
+describe('Test other methods without GET', () => {
   test('send POST', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
-        const config = method.config;
+        const { config } = method;
         expect(method.url).toBe('/unit-test');
         expect(config.params).toStrictEqual({ a: 'a', b: 'str' });
         expect(method.data).toStrictEqual({ post1: 'a' });
@@ -73,7 +73,7 @@ describe('Test other methods without GET', function () {
   test('send DELETE', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
-        const config = method.config;
+        const { config } = method;
         expect(method.url).toBe('/unit-test');
         expect(config.params).toStrictEqual({ a: 'a', b: 'str' });
         expect(method.data).toStrictEqual({ post1: 'a' });
@@ -131,7 +131,7 @@ describe('Test other methods without GET', function () {
   test('send PUT', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
-        const config = method.config;
+        const { config } = method;
         expect(method.url).toBe('/unit-test?c=3');
         expect(config.params).toStrictEqual({ a: 'a', b: 'str' });
         expect(method.data).toStrictEqual({ post1: 'a' });

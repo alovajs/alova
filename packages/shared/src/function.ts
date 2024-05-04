@@ -1,4 +1,4 @@
-import type { Alova, AlovaEvent, CacheExpire, CacheMode, Hook, Method, StatesHook } from '../../alova/typings';
+import type { Alova, AlovaEvent, CacheExpire, CacheMode, Hook, Method, StatesHook } from 'alova/typings/typings';
 import { FrameworkState, GeneralFn } from './types';
 import {
   JSONStringify,
@@ -71,38 +71,35 @@ export const getTime = (date?: Date) => (date ? date.getTime() : Date.now());
  * 通过method实例获取alova实例
  * @returns alova实例
  */
-export const getContext = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
-  methodInstance.context;
+export const getContext = (methodInstance: Method) => methodInstance.context;
 /**
  * 获取method实例配置数据
  * @returns 配置对象
  */
-export const getConfig = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
-  methodInstance.config;
+export const getConfig = (methodInstance: Method) => methodInstance.config;
 /**
  * 获取alova配置数据
  * @returns alova配置对象
  */
-export const getContextOptions = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) => alovaInstance.options;
+export const getContextOptions = (alovaInstance: Alova<any, any, any, any, any, any, any>) => alovaInstance.options;
 /**
  * 通过method实例获取alova配置数据
  * @returns alova配置对象
  */
-export const getOptions = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) =>
-  getContextOptions(getContext(methodInstance));
+export const getOptions = (methodInstance: Method) => getContextOptions(getContext(methodInstance));
 
 /**
  * 获取请求方式的key值
- * @returns {string} 此请求方式的key值
+ * @returns 此请求方式的key值
  */
-export const key = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
+export const key = (methodInstance: Method) => {
   const { params, headers } = getConfig(methodInstance);
   return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
 };
 /**
  * 获取method实例的key值
  * @param methodInstance method实例
- * @returns {string} 此method实例的key值
+ * @returns 此method实例的key值
  */
 export const getMethodInternalKey = (methodInstance: Method) => methodInstance.__key__;
 /**
@@ -116,9 +113,8 @@ export const isSpecialRequestBody = (data: any) => {
     /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) || instanceOf(data, ArrayBuffer)
   );
 };
-export const objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
-  return ObjectCls.assign(target, ...sources);
-};
+export const objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T =>
+  ObjectCls.assign(target, ...sources);
 
 /**
  * 获取缓存的配置参数，固定返回{ e: number, m: number, s: boolean, t: string }格式的对象
@@ -129,14 +125,14 @@ export const objAssign = <T extends Record<string, any>>(target: T, ...sources: 
  * @param localCache 本地缓存参数
  * @returns 统一的缓存参数对象
  */
-export const getLocalCacheConfigParam = <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-  const _localCache = getConfig(methodInstance).localCache,
-    getCacheExpireTs = (_localCache: CacheExpire) =>
-      isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache || undefinedValue);
-  let cacheMode: CacheMode = MEMORY,
-    expire = 0,
-    storage = falseValue,
-    tag: undefined | string = undefinedValue;
+export const getLocalCacheConfigParam = (methodInstance: Method) => {
+  const _localCache = getConfig(methodInstance).localCache;
+  const getCacheExpireTs = (_localCache: CacheExpire) =>
+    isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache || undefinedValue);
+  let cacheMode: CacheMode = MEMORY;
+  let expire = 0;
+  let storage = falseValue;
+  let tag: undefined | string = undefinedValue;
   if (!isFn(_localCache)) {
     if (isNumber(_localCache) || instanceOf(_localCache, Date)) {
       expire = getCacheExpireTs(_localCache);
@@ -197,17 +193,9 @@ export const createSyncOnceRunner = (delay = 0) => {
  * @param event event instance
  * @param decorator event decorator defined on usehook middleware
  */
-export const runEventHandlers = <
-  State,
-  Export,
-  ResponseTransformed,
-  MethodTransformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export const runEventHandlers = (
   handlers: GeneralFn[],
-  event?: AlovaEvent<State, Export, ResponseTransformed, MethodTransformed, RequestConfig, Response, ResponseHeader>,
+  event?: AlovaEvent<any, any, any, any, any, any, any, any, any>,
   decorator?: ((...args: any[]) => void) | undefined
 ) => {
   forEach(handlers, (handler, index) =>

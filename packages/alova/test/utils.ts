@@ -25,7 +25,7 @@ export const getAlovaInstance = <S, E>(
   const alovaInst = createAlova({
     baseURL: process.env.NODE_BASE_URL + (endWithSlash ? '/' : ''),
     timeout: 3000,
-    statesHook: statesHook,
+    statesHook,
     requestAdapter: GlobalFetch(),
     beforeRequest(config) {
       beforeRequestExpect && beforeRequestExpect(config);

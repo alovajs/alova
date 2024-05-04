@@ -14,13 +14,13 @@ import { Method, RequestElements } from '~/typings';
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
 export default function GlobalFetch() {
-  return function (elements: RequestElements, method: Method<any, any, any, any, FetchRequestInit, Response, Headers>) {
-    const adapterConfig = method.config,
-      timeout = adapterConfig.timeout || 0,
-      ctrl = new AbortController(),
-      { data, headers } = elements,
-      isContentTypeSet = /content-type/i.test(ObjectCls.keys(headers).join()),
-      isDataFormData = data && data.toString() === '[object FormData]';
+  return (elements: RequestElements, method: Method<any, any, any, any, FetchRequestInit, Response, Headers>) => {
+    const adapterConfig = method.config;
+    const timeout = adapterConfig.timeout || 0;
+    const ctrl = new AbortController();
+    const { data, headers } = elements;
+    const isContentTypeSet = /content-type/i.test(ObjectCls.keys(headers).join());
+    const isDataFormData = data && data.toString() === '[object FormData]';
 
     // 未设置Content-Type并且data不是FormData对象时，默认设置Content-Type为application/json
     if (!isContentTypeSet && !isDataFormData) {
@@ -34,8 +34,8 @@ export default function GlobalFetch() {
     });
 
     // 设置了中断时间，则在指定时间后中断请求
-    let abortTimer: NodeJS.Timeout | number,
-      isTimeout = falseValue;
+    let abortTimer: NodeJS.Timeout | number;
+    let isTimeout = falseValue;
     if (timeout > 0) {
       abortTimer = setTimeoutFn(() => {
         isTimeout = trueValue;
@@ -59,7 +59,7 @@ export default function GlobalFetch() {
       // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
       headers: () =>
         fetchPromise.then(
-          ({ headers }) => headers,
+          ({ headers: responseHeaders }) => responseHeaders,
           () => ({}) as Headers
         ),
       // 因nodeFetch库限制，这块代码无法进行单元测试，但已在浏览器中通过测试
@@ -71,9 +71,9 @@ export default function GlobalFetch() {
         });
         if (!response) return;
 
-        const { headers, body } = response.clone(),
-          reader = body ? body.getReader() : undefinedValue,
-          total = Number(headers.get('Content-Length') || headers.get('content-length') || 0);
+        const { headers: responseHeaders, body } = response.clone();
+        const reader = body ? body.getReader() : undefinedValue;
+        const total = Number(responseHeaders.get('Content-Length') || responseHeaders.get('content-length') || 0);
         if (total <= 0) {
           return;
         }

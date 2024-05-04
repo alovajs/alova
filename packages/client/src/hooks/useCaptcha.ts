@@ -1,7 +1,7 @@
+import { AlovaMethodHandler, Method, useRequest } from 'alova';
 import { T$, Tupd$, TuseFlag$, TuseMemorizedCallback$, T_$, T_exp$ } from '@/framework/type';
 import { buildErrorMsg, createAssert, newInstance } from '@/helper';
 import { falseValue, PromiseCls, trueValue, undefinedValue } from '@/helper/variables';
-import { AlovaMethodHandler, Method, useRequest } from 'alova';
 import { CaptchaHookConfig } from '~/typings/general';
 
 const hookPrefix = 'useCaptcha';

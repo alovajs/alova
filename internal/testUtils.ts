@@ -12,7 +12,7 @@ type PostData = {
 export type Result<T = string> = {
   code: number;
   msg: string;
-  data: T extends string ? GetData : PostData;
+  responseData: T extends string ? GetData : PostData;
 };
 
 // 辅助函数
@@ -26,4 +26,7 @@ export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[])
     );
   });
 
-export const delay = (ts = 0) => new Promise<void>(resolve => setTimeout(resolve, ts));
+export const delay = (ts = 0) =>
+  new Promise<void>(resolve => {
+    setTimeout(resolve, ts);
+  });

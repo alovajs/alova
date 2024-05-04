@@ -1,6 +1,6 @@
+import { getMethodKey, Method } from 'alova';
 import { instanceOf } from '@/helper';
 import { falseValue } from '@/helper/variables';
-import { getMethodKey, Method } from 'alova';
 
 interface SnapshotValue {
   entity: Method;

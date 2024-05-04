@@ -1,11 +1,11 @@
+import { key } from '@alova/shared/function';
+import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { queryCache, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 
 // 其他请求方式测试
-describe('Request by other data', function () {
+describe('Request by other data', () => {
   test('send POST with FormData', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {

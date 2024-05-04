@@ -4,7 +4,7 @@ import VueHook from '@/statesHook/vue';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
 import { FetcherType } from '~/typings';
 
-describe('useFetcher middleware', function () {
+describe('useFetcher middleware', () => {
   test('should send request when call next immediately in middleware function', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -79,8 +79,8 @@ describe('useFetcher middleware', function () {
 
     let fetchInMiddleware: any;
     const { fetching, fetch, onSuccess } = useFetcher<FetcherType<typeof alova>>({
-      middleware: ({ fetch }, next) => {
-        fetchInMiddleware = fetch;
+      middleware: ({ fetch: fetchFn }, next) => {
+        fetchInMiddleware = fetchFn;
         return next();
       }
     });

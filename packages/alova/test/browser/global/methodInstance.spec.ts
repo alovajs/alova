@@ -1,12 +1,12 @@
+import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { Result, untilCbCalled } from 'root/testUtils';
 
 const alova = getAlovaInstance(VueHook, {
   responseExpect: r => r.json()
 });
-describe('method instance', function () {
+describe('method instance', () => {
   test('should send request when call `method.send` and return promise', async () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },

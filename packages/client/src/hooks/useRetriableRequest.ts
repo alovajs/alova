@@ -1,3 +1,4 @@
+import { AlovaMethodHandler, Method, useRequest } from 'alova';
 import { TuseFlag$, TuseMemorizedCallback$ } from '@/framework/type';
 import {
   buildErrorMsg,
@@ -16,7 +17,6 @@ import {
 } from '@/helper';
 import createHookEvent from '@/helper/createHookEvent';
 import { falseValue, trueValue, undefinedValue } from '@/helper/variables';
-import { AlovaMethodHandler, Method, useRequest } from 'alova';
 import { RetriableFailEvent, RetriableHookConfig, RetriableRetryEvent } from '~/typings/general';
 
 type RetryHandler<S, E, R, T, RC, RE, RH> = (event: RetriableRetryEvent<S, E, R, T, RC, RE, RH>) => void;

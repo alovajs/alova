@@ -6,7 +6,7 @@ import { key } from '@alova/shared/function';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { computed, reactive, ref } from 'vue';
 
-describe('use useWatcher hook to send GET with vue', function () {
+describe('use useWatcher hook to send GET with vue', () => {
   test('should specify at least one watching state', () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -95,13 +95,13 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     await untilCbCalled(setTimeout);
     // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
-    ++i;
+    i += 1;
     mutateNum.value = 1;
     mutateStr.value = 'b';
 
     await untilCbCalled(setTimeout);
 
-    ++i;
+    i += 1;
     mutateNum.value = 2;
     mutateStr.value = 'c';
     await untilCbCalled(onSuccess);
@@ -121,11 +121,11 @@ describe('use useWatcher hook to send GET with vue', function () {
       () =>
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
-          transformData: ({ data }: Result) => {
-            if (data.path === '/unit-test-1s') {
+          transformData: ({ data: responseData }: Result) => {
+            if (responseData.path === '/unit-test-1s') {
               throw new Error('error');
             }
-            return data;
+            return responseData;
           },
           localCache: null
         }),
@@ -144,13 +144,13 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     await untilCbCalled(setTimeout);
     // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
-    ++i;
+    i += 1;
     mutateNum.value = 1;
     mutateStr.value = 'b';
 
     await untilCbCalled(setTimeout);
 
-    ++i;
+    i += 1;
     mutateNum.value = 2;
     mutateStr.value = 'c';
     await untilCbCalled(onSuccess);
@@ -172,8 +172,8 @@ describe('use useWatcher hook to send GET with vue', function () {
       () =>
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
-          transformData: ({ data }: Result) => data,
-          localCache: null
+          transformData: ({ data: responseData }: Result) => responseData,
+          cache: null
         }),
       [mutateNum, mutateStr],
       {
@@ -191,12 +191,12 @@ describe('use useWatcher hook to send GET with vue', function () {
     // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
     await untilCbCalled(setTimeout);
     // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
-    ++i;
+    i += 1;
     mutateNum.value = 1;
     mutateStr.value = 'b';
     await delay(10);
 
-    ++i;
+    i += 1;
     mutateNum.value = 2;
     mutateStr.value = 'c';
     await delay(1100);

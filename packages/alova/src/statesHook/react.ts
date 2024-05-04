@@ -4,9 +4,11 @@ import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, use
 import { StatesHook } from '~/typings';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
-const stateToData = <D>([state]: ReactState<D>) => state,
-  refCurrent = <T>(ref: MutableRefObject<T>) => ref.current,
-  setRef = <T>(ref: MutableRefObject<T>, newVal: T) => (ref.current = newVal);
+const stateToData = <D>([state]: ReactState<D>) => state;
+const refCurrent = <T>(ref: MutableRefObject<T>) => ref.current;
+const setRef = <T>(ref: MutableRefObject<T>, newVal: T) => {
+  ref.current = newVal;
+};
 
 // React的预定义hooks
 export default {

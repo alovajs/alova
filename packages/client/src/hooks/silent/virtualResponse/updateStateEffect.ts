@@ -1,7 +1,7 @@
-import { isFn, objectKeys } from '@/helper';
-import { undefinedValue } from '@/helper/variables';
 import { updateState } from 'alova';
 import { noop } from 'svelte/internal';
+import { isFn, objectKeys } from '@/helper';
+import { undefinedValue } from '@/helper/variables';
 import { currentSilentMethod } from '../createSilentQueueMiddlewares';
 
 /**
@@ -11,7 +11,7 @@ import { currentSilentMethod } from '../createSilentQueueMiddlewares';
  * @param handleUpdate 更新回调
  */
 const updateStateEffect: typeof updateState = (matcher, handleUpdate, options = {}) => {
-  const onMatch = options.onMatch;
+  const { onMatch } = options;
   options.onMatch = method => {
     // 将目标method实例保存到当前的silentMethod实例
     if (currentSilentMethod) {

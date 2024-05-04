@@ -1,34 +1,26 @@
-import { xhrMockResponse, xhrRequestAdapter } from '@/index';
 import { createAlovaMockAdapter, defineMock } from '@alova/mock';
 import { createAlova, invalidateCache } from 'alova';
 import vueHook from 'alova/vue';
 import { readFileSync } from 'fs';
 import path from 'path';
+import { xhrMockResponse, xhrRequestAdapter } from '@/index';
 import { AlovaXHRResponse } from '~/typings';
 
 const mocks = defineMock({
-  '/unit-test': () => {
-    return {
-      id: 1
-    };
-  },
-  '/unit-test-error': () => {
-    return {
-      status: 500,
-      statusText: 'server error'
-    };
-  },
+  '/unit-test': () => ({
+    id: 1
+  }),
+  '/unit-test-error': () => ({
+    status: 500,
+    statusText: 'server error'
+  }),
   '/unit-test-fail': () => {
     throw new Error('network error');
   },
-  '[POST]/unit-test-upload': () => {
-    return {
-      uploadPath: 'http://upload-xxxxx'
-    };
-  },
-  '/unit-test-download': () => {
-    return 'http://download-xxxxx';
-  }
+  '[POST]/unit-test-upload': () => ({
+    uploadPath: 'http://upload-xxxxx'
+  }),
+  '/unit-test-download': () => 'http://download-xxxxx'
 });
 
 // 模拟数据请求适配器

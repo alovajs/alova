@@ -32,7 +32,7 @@ describe('virtual response', () => {
 
     const vBool = createVirtualResponse(true);
     expect(vBool.toString()).toBe('true');
-    expect(vBool + 'aa').toMatch(/^\[vd:.+\]aa$/);
+    expect(`${vBool}aa`).toMatch(/^\[vd:.+\]aa$/);
   });
 
   test('create virtual response with object', () => {
@@ -41,10 +41,10 @@ describe('virtual response', () => {
       b: 'bb',
       c: [1, 2, 3]
     });
-    const a = vObject.a;
-    const b = vObject.b;
-    const b1 = vObject.b.b1;
-    const c = vObject.c;
+    const { a } = vObject;
+    const { b } = vObject;
+    const { b1 } = vObject.b;
+    const { c } = vObject;
     const c0 = vObject.c[0];
     expect(vObject[symbolVDataId]).not.toBeUndefined();
     expect(a).toBeInstanceOf(Number);
@@ -61,6 +61,7 @@ describe('virtual response', () => {
   test('create virtual response with array contained non plain object', () => {
     class A {
       aa = 1;
+
       bb = 'bb';
     }
     const vArray = createVirtualResponse([111, /123/, new Date(), new A()]);

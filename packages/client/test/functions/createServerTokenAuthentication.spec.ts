@@ -389,7 +389,7 @@ describe('createServerTokenAuthentication', () => {
       })
     });
     const method = (a: string) =>
-      alovaInst.Get('/list-auth?a=' + a, {
+      alovaInst.Get(`/list-auth?a=${a}`, {
         transformData: (data: number[]) => data.map(i => i + 5)
       });
     const list = await method('1');
@@ -408,9 +408,7 @@ describe('createServerTokenAuthentication', () => {
       typeof mockRequestAdapter
     >({
       refreshTokenOnError: {
-        isExpired: error => {
-          return error.name === '401';
-        },
+        isExpired: error => error.name === '401',
         handler: async () => {
           const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
           refreshMethod.meta = {
@@ -437,7 +435,7 @@ describe('createServerTokenAuthentication', () => {
       })
     });
     const method = (a: string) =>
-      alovaInst.Get('/list-auth?a=' + a, {
+      alovaInst.Get(`/list-auth?a=${a}`, {
         transformData: (data: number[]) => data.map(i => i + 5)
       });
 
@@ -457,9 +455,7 @@ describe('createServerTokenAuthentication', () => {
       typeof mockRequestAdapter
     >({
       refreshTokenOnError: {
-        isExpired: error => {
-          return error.name === '401';
-        },
+        isExpired: error => error.name === '401',
         handler: async () => {
           const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token?error=1');
           refreshMethod.meta = {

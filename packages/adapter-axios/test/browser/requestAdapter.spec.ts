@@ -1,16 +1,16 @@
-import { axiosRequestAdapter } from '@/index';
 import { createAlova, useRequest } from 'alova';
 import VueHook from 'alova/vue';
 import axios, { AxiosError } from 'axios';
 import { readFileSync } from 'node:fs';
 import path from 'path';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
+import { axiosRequestAdapter } from '@/index';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('request adapter', () => {
   test('should call axios and pass the right args', async () => {
     const alovaInst = createAlova({
-      baseURL: baseURL,
+      baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
       timeout: 100000,
@@ -63,7 +63,7 @@ describe('request adapter', () => {
 
   test('should call axios with post', async () => {
     const alovaInst = createAlova({
-      baseURL: baseURL,
+      baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
       responsed({ data }) {
@@ -100,7 +100,7 @@ describe('request adapter', () => {
 
   test('api not found when request', async () => {
     const alovaInst = createAlova({
-      baseURL: baseURL,
+      baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
       errorLogger: false,
@@ -127,7 +127,7 @@ describe('request adapter', () => {
 
   test('request fail with axios', async () => {
     const alovaInst = createAlova({
-      baseURL: baseURL,
+      baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
       errorLogger: false,
@@ -153,7 +153,7 @@ describe('request adapter', () => {
 
   test('should cancel request when call `controller.abort`', async () => {
     const alovaInst = createAlova({
-      baseURL: baseURL,
+      baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
       errorLogger: false,
@@ -177,7 +177,7 @@ describe('request adapter', () => {
 
   test('should upload file and pass the right args', async () => {
     const alovaInst = createAlova({
-      baseURL: baseURL,
+      baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
       responsed({ data }) {
@@ -211,7 +211,7 @@ describe('request adapter', () => {
 
   test('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
-      baseURL: baseURL,
+      baseURL,
       requestAdapter: axiosRequestAdapter(),
       statesHook: VueHook,
       responsed({ data }) {
@@ -235,7 +235,7 @@ describe('request adapter', () => {
 
   test('should request with custom axios instance', async () => {
     const newAxiosInst = axios.create({
-      baseURL: baseURL,
+      baseURL,
       timeout: 5000
     });
 

@@ -10,7 +10,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React, { ReactElement, useState } from 'react';
 import { Result, delay } from 'root/testUtils';
 
-describe('update cached response data by user in react', function () {
+describe('update cached response data by user in react', () => {
   test('the cached response data should be changed and the screen should be update', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

@@ -1,4 +1,5 @@
 import http from 'http';
+
 let replyList: http.ServerResponse[] = [];
 
 function wrapData(event: string, data: string) {
@@ -9,12 +10,12 @@ export const TriggerEventName = 'trigger';
 export const IntervalEventName = 'interval';
 export const IntervalMessage = 'interval-message';
 
-export const server = http.createServer(function (req, res) {
+export const server = http.createServer((req, res) => {
   req.on('close', () => {
     replyList = replyList.filter(e => e !== res);
   });
 
-  let path = '.' + req.url;
+  const path = `.${req.url}`;
 
   if (path === './get') {
     res.write('OK');
@@ -54,7 +55,7 @@ export const server = http.createServer(function (req, res) {
 
     res.write('\n\n');
 
-    const interval = setInterval(function () {
+    const interval = setInterval(() => {
       res.write(wrapData('interval', IntervalMessage));
     }, 200);
 
@@ -63,5 +64,5 @@ export const server = http.createServer(function (req, res) {
 });
 
 export async function send(data: string) {
-  return await Promise.all(replyList.map(e => e.write(wrapData('message', data))));
+  return Promise.all(replyList.map(e => e.write(wrapData('message', data))));
 }

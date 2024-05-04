@@ -1,4 +1,3 @@
-import createSerializerPerformer from '@/util/serializer';
 import { createAssert } from '@alova/shared/assert';
 import {
   getContext,
@@ -12,6 +11,7 @@ import {
 } from '@alova/shared/function';
 import { falseValue, isArray, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import { Method, UseHookReturnType, getMethodKey, promiseStatesHook, useRequest } from 'alova';
+import createSerializerPerformer from '@/util/serializer';
 import { FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/general';
 
 const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodKey(methodInstance)}`;
@@ -29,35 +29,17 @@ const assert = createAssert('useForm');
 export default <
   State,
   Export,
-  ResponseTransformed,
-  MethodTransformed,
+  Responded,
+  Transformed,
   RequestConfig,
   Response,
   ResponseHeader,
   FormData extends Record<string | symbol, any>
 >(
   handler:
-    | FormHookHandler<
-        State,
-        Export,
-        ResponseTransformed,
-        MethodTransformed,
-        RequestConfig,
-        Response,
-        ResponseHeader,
-        FormData
-      >
+    | FormHookHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData>
     | ID,
-  config: FormHookConfig<
-    State,
-    Export,
-    ResponseTransformed,
-    MethodTransformed,
-    RequestConfig,
-    Response,
-    ResponseHeader,
-    FormData
-  >
+  config: FormHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData>
 ) => {
   // 如果第一个参数传入的是id，则获取它的初始化数据并返回
   if (isNumber(handler) || isString(handler)) {
@@ -67,64 +49,64 @@ export default <
     return sharedState.hookReturns;
   }
 
-  const { id, initialForm, store, resetAfterSubmiting, immediate = falseValue, middleware } = config,
-    isStoreObject = isPlainObject(store),
-    enableStore = isStoreObject ? (store as StoreDetailConfig).enable : store,
-    // 如果config中的id也有对应的共享状态，则也会返回它
-    // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
-    sharedState = id ? sharedStates[id] : undefinedValue,
-    originalHookReturns = useRequest((...args: any[]) => methodHandler(_$(form) as any, ...args), {
-      ...config,
+  const { id, initialForm, store, resetAfterSubmiting, immediate = falseValue, middleware } = config;
+  const isStoreObject = isPlainObject(store);
+  const enableStore = isStoreObject ? (store as StoreDetailConfig).enable : store;
+  // 如果config中的id也有对应的共享状态，则也会返回它
+  // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
+  const sharedState = id ? sharedStates[id] : undefinedValue;
+  const originalHookReturns = useRequest((...args: any[]) => methodHandler(_$(form) as any, ...args), {
+    ...config,
 
-      // 中间件函数，也支持subscriberMiddleware
-      middleware: middleware
-        ? (ctx, next) =>
-            middleware(
-              {
-                ...ctx,
-                delegatingActions: { updateForm, reset }
-              } as any,
-              next
-            )
-        : undefinedValue,
+    // 中间件函数，也支持subscriberMiddleware
+    middleware: middleware
+      ? (ctx, next) =>
+          middleware(
+            {
+              ...ctx,
+              delegatingActions: { updateForm, reset }
+            } as any,
+            next
+          )
+      : undefinedValue,
 
-      // 1. 当需要持久化时，将在数据恢复后触发
-      // 2. 当已有共享状态时，表示之前已有初始化（无论有无立即发起请求），后面的不再自动发起请求，这是为了兼容多表单立即发起请求时，重复发出请求的问题
-      immediate: enableStore || sharedState ? falseValue : immediate
-    }),
-    {
-      create: $,
-      computed: $$,
-      dehydrate: _$,
-      ref: useFlag$,
-      update: upd$,
-      export: _exp$,
-      onMounted: onMounted$,
-      watch: watch$,
-      memorize: useMemorizedCallback$
-    } = statesHookHelper(promiseStatesHook(), originalHookReturns.hook),
-    form = $(cloneFormData(initialForm), trueValue),
-    methodHandler = handler as FormHookHandler<
-      State,
-      Export,
-      ResponseTransformed,
-      MethodTransformed,
-      RequestConfig,
-      Response,
-      ResponseHeader,
-      FormData
-    >,
-    restoreHandlers: RestoreHandler[] = [],
-    // 使用计算属性，避免每次执行此use hook都调用一遍methodHandler
-    initialMethodInstance = $$(() => sloughConfig(methodHandler, [_$(form)]), []),
-    storageContext = getContext(_$(initialMethodInstance)).storage,
-    storagedKey = useFlag$(getStoragedKey(_$(initialMethodInstance), id)),
-    reseting = useFlag$(falseValue),
-    serializerPerformer = useFlag$(
-      createSerializerPerformer(isStoreObject ? (store as StoreDetailConfig).serializers : undefinedValue)
-    ),
-    // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
-    isCreateShardState = useFlag$(false);
+    // 1. 当需要持久化时，将在数据恢复后触发
+    // 2. 当已有共享状态时，表示之前已有初始化（无论有无立即发起请求），后面的不再自动发起请求，这是为了兼容多表单立即发起请求时，重复发出请求的问题
+    immediate: enableStore || sharedState ? falseValue : immediate
+  });
+  const {
+    create: $,
+    computed: $$,
+    dehydrate: _$,
+    ref: useFlag$,
+    update: upd$,
+    export: _exp$,
+    onMounted: onMounted$,
+    watch: watch$,
+    memorize: useMemorizedCallback$
+  } = statesHookHelper(promiseStatesHook(), originalHookReturns.hook);
+  const form = $(cloneFormData(initialForm), trueValue);
+  const methodHandler = handler as FormHookHandler<
+    State,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader,
+    FormData
+  >;
+  const restoreHandlers: RestoreHandler[] = [];
+  // 使用计算属性，避免每次执行此use hook都调用一遍methodHandler
+  const initialMethodInstance = $$(() => sloughConfig(methodHandler, [_$(form)]), []);
+  const storageContext = getContext(_$(initialMethodInstance)).storage;
+  const storagedKey = useFlag$(getStoragedKey(_$(initialMethodInstance), id));
+  const reseting = useFlag$(falseValue);
+  const serializerPerformer = useFlag$(
+    createSerializerPerformer(isStoreObject ? (store as StoreDetailConfig).serializers : undefinedValue)
+  );
+  // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
+  const isCreateShardState = useFlag$(false);
 
   /**
    * 重置form数据

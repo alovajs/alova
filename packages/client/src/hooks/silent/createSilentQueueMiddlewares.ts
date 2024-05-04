@@ -1,3 +1,4 @@
+import { AlovaFrontMiddleware, AlovaMethodHandler, Method } from 'alova';
 import {
   getConfig,
   isFn,
@@ -22,7 +23,6 @@ import {
   trueValue,
   undefinedValue
 } from '@/helper/variables';
-import { AlovaFrontMiddleware, AlovaMethodHandler, Method } from 'alova';
 import {
   BeforePushQueueHandler,
   FallbackHandler,

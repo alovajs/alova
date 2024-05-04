@@ -1,7 +1,7 @@
-export const undefinedValue = undefined,
-  nullValue = null,
-  trueValue = true,
-  falseValue = false;
+export const undefinedValue = undefined;
+export const nullValue = null;
+export const trueValue = true;
+export const falseValue = false;
 
 /**
  * 空函数，做兼容处理
@@ -23,7 +23,7 @@ export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is 
  * @param arg 任意参数
  * @returns 该参数是否为数字
  */
-export const isNumber = (arg: any): arg is number => typeof arg === 'number' && !isNaN(arg);
+export const isNumber = (arg: any): arg is number => typeof arg === 'number' && !Number.isNaN(arg);
 
 /**
  * 判断参数是否为字符串
@@ -45,12 +45,12 @@ export const len = (data: any[] | Uint8Array | string) => data.length;
  * @returns 解析后的信息对象
  */
 export const parseUrl = (url: string) => {
-  url = /^[^/]*\/\//.test(url) ? url : '//' + url;
+  url = /^[^/]*\/\//.test(url) ? url : `//${url}`;
   const splitedFullPath = url.split('/').slice(3);
   const query = {} as Record<string, string>;
-  let pathContainedParams = splitedFullPath.pop(),
-    pathname = '',
-    hash = '';
+  let pathContainedParams = splitedFullPath.pop();
+  let pathname = '';
+  let hash = '';
   if (pathContainedParams) {
     pathContainedParams = pathContainedParams.replace(/\?[^?#]+/, mat => {
       // 解析url参数
@@ -68,7 +68,7 @@ export const parseUrl = (url: string) => {
       return '';
     });
     splitedFullPath.push(pathContainedParams);
-    pathname = '/' + splitedFullPath.join('/');
+    pathname = `/${splitedFullPath.join('/')}`;
   }
   return {
     pathname,

@@ -5,7 +5,7 @@ import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@alova/shared/function';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
-describe('use useRequest hook to send GET with vue', function () {
+describe('use useRequest hook to send GET with vue', () => {
   test('init and send get request', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json(),
@@ -160,9 +160,7 @@ describe('use useRequest hook to send GET with vue', function () {
     expect(error.value?.message).toBe('responseCallback error');
 
     const alova2 = getAlovaInstance(VueHook, {
-      responseExpect: () => {
-        return Promise.reject(new Error('responseCallback error2'));
-      }
+      responseExpect: () => Promise.reject(new Error('responseCallback error2'))
     });
     const Get2 = alova2.Get<string, Result<string>>('/unit-test');
     const secondState = useRequest(Get2);
@@ -302,7 +300,7 @@ describe('use useRequest hook to send GET with vue', function () {
         }
       });
 
-    const { data, send, onSuccess, onComplete } = useRequest(data => getGetter(data), {
+    const { data, send, onSuccess, onComplete } = useRequest(params => getGetter(params), {
       immediate: false
     });
     onSuccess(({ data, sendArgs }) => {

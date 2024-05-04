@@ -1,6 +1,6 @@
+import { AlovaFrontMiddleware, AlovaMethodHandler, Method } from 'alova';
 import { createAssert, isArray, len, promiseResolve, promiseThen, pushItem, shift } from '@/helper';
 import { falseValue, trueValue, undefinedValue } from '@/helper/variables';
-import { AlovaFrontMiddleware, AlovaMethodHandler, Method } from 'alova';
 
 /**
  * 断言serialHandlers

@@ -1,3 +1,4 @@
+import { Method, setCache, updateState, UpdateStateCollection } from 'alova';
 import {
   delayWithBackoff,
   forEach,
@@ -26,7 +27,6 @@ import {
   trueValue,
   undefinedValue
 } from '@/helper/variables';
-import { Method, setCache, updateState, UpdateStateCollection } from 'alova';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {
   beforeHandlers,
@@ -80,7 +80,8 @@ export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>
     // 不在本次vDataResponse中的虚拟数据将不变，它可能是下一次请求的虚拟数据Map
     if (vData in vDataResponse) {
       return vDataResponse[vData];
-    } else if (isString(value)) {
+    }
+    if (isString(value)) {
       return value.replace(newInstance(RegExpCls, regVDataId.source, 'g'), mat =>
         mat in vDataResponse ? vDataResponse[mat] : mat
       );
@@ -283,7 +284,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           // 在silent行为模式下，判断是否需要重试
           // 重试只有在响应错误符合retryError正则匹配时有效
           const { name: errorName = '', message: errorMsg = '' } = reason || {};
-          let regRetryErrorName: RegExp | void, regRetryErrorMsg: RegExp | void;
+          let regRetryErrorName: RegExp | void;
+          let regRetryErrorMsg: RegExp | void;
           if (instanceOf(retryError, RegExp)) {
             regRetryErrorMsg = retryError;
           } else if (isObject(retryError)) {

@@ -1,6 +1,6 @@
+import { Alova } from 'alova';
 import { createAssert, isArray } from '@/helper';
 import { DEFAUT_QUEUE_NAME } from '@/helper/variables';
-import { Alova } from 'alova';
 import {
   BeforeSilentSubmitHandler,
   DataSerializer,

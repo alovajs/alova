@@ -1,7 +1,7 @@
-import { axiosRequestAdapter } from '@/index';
 import { createAlova, useRequest } from 'alova';
 import VueHook from 'alova/vue';
 import { Result, untilCbCalled } from 'root/testUtils';
+import { axiosRequestAdapter } from '@/index';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('request adapter in SSR', () => {

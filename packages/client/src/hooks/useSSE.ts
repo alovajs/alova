@@ -1,4 +1,14 @@
 import {
+  AlovaMethodHandler,
+  Method,
+  ResponseCompleteHandler,
+  ResponseErrorHandler,
+  ResponsedHandler,
+  ResponsedHandlerRecord,
+  invalidateCache,
+  matchSnapshotMethod
+} from 'alova';
+import {
   T$,
   T$$,
   T_$,
@@ -30,16 +40,6 @@ import {
 } from '@/helper';
 import createHookEvent, { AlovaHookEventType } from '@/helper/createHookEvent';
 import { falseValue, trueValue, undefinedValue } from '@/helper/variables';
-import {
-  AlovaMethodHandler,
-  Method,
-  ResponseCompleteHandler,
-  ResponseErrorHandler,
-  ResponsedHandler,
-  ResponsedHandlerRecord,
-  invalidateCache,
-  matchSnapshotMethod
-} from 'alova';
 import {
   AlovaSSEErrorEvent,
   AlovaSSEEvent,
@@ -88,8 +88,8 @@ export default <Data, S, E, R, T, RC, RE, RH>(
   // ! 暂时不支持指定 abortLast
   const abortLast = trueValue;
 
-  let eventSource = useFlag$<EventSource | undefined>(undefinedValue);
-  let sendPromiseObject = useFlag$<UsePromiseReturnType<void> | undefined>(undefinedValue);
+  const eventSource = useFlag$<EventSource | undefined>(undefinedValue);
+  const sendPromiseObject = useFlag$<UsePromiseReturnType<void> | undefined>(undefinedValue);
 
   const data = $<Data>(initialData, trueValue);
   const readyState = $<SSEHookReadyState>(SSEHookReadyState.CLOSED, trueValue);
@@ -104,9 +104,9 @@ export default <Data, S, E, R, T, RC, RE, RH>(
   const [onMessage, triggerOnMessage, offMessage] = useCallback<SSEOnMessageTrigger<Data, S, E, R, T, RC, RE, RH>>();
   const [onError, triggerOnError, offError] = useCallback<SSEOnErrorTrigger<S, E, R, T, RC, RE, RH>>();
 
-  let responseSuccessHandler: ResponsedHandler<any, any, RC, RE, RH> = __self,
-    responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> = __throw,
-    responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = noop;
+  let responseSuccessHandler: ResponsedHandler<any, any, RC, RE, RH> = __self;
+  let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> = __throw;
+  let responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = noop;
 
   /**
    * 设置响应拦截器，在每次 send 之后都需要调用
@@ -220,14 +220,11 @@ export default <Data, S, E, R, T, RC, RE, RH>(
    * 根据事件选择需要的触发函数。如果事件无错误则触发传传入的回调函数
    * @param callback 无错误时触发的回调函数
    */
-  const sendSSEEvent = (callback: (event: AnySSEEventType) => any) => {
-    return (event: AnySSEEventType) => {
-      if (event.error === undefinedValue) {
-        return callback(event);
-      } else {
-        return triggerOnError(event);
-      }
-    };
+  const sendSSEEvent = (callback: (event: AnySSEEventType) => any) => (event: AnySSEEventType) => {
+    if (event.error === undefinedValue) {
+      return callback(event);
+    }
+    return triggerOnError(event);
   };
 
   // * MARK: EventSource 的事件处理

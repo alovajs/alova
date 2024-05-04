@@ -6,7 +6,7 @@ import { renderToString } from 'react-dom/server';
 import { delay, Result } from 'root/testUtils';
 
 // use hook在服务端不再发送请求
-describe('[react]use hooks in SSR', function () {
+describe('[react]use hooks in SSR', () => {
   test("shouldn't request but loading is true", async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json(),

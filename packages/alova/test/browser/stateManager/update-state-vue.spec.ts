@@ -7,7 +7,7 @@ import '@testing-library/jest-dom';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { Ref, ref } from 'vue';
 
-describe('update cached response data by user in vue', function () {
+describe('update cached response data by user in vue', () => {
   test('test update function', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -18,9 +18,9 @@ describe('update cached response data by user in vue', function () {
     });
     const { data, onSuccess } = useRequest(Get);
     await untilCbCalled(onSuccess);
-    const updated = updateState(Get, data => {
-      data.path = '/unit-test-updated';
-      return data;
+    const updated = updateState(Get, responseData => {
+      responseData.path = '/unit-test-updated';
+      return responseData;
     });
     expect(data.value.path).toBe('/unit-test-updated');
     expect(updated).toBeTruthy();
