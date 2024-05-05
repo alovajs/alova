@@ -1,4 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
-  "include": ["internal", "packages/**/*", "*.ts", ".eslintrc.cjs"]
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
+  "include": ["internal", "scripts", "packages/**/*", "*.ts", ".eslintrc.cjs"]
 }

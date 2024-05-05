@@ -203,8 +203,8 @@ export default function sendRequest<
      * @returns 处理后的response
      */
     const handleResponseTask = async (handlerReturns: any, responseHeaders: any, callInSuccess = trueValue) => {
-      const data = await handlerReturns;
-      const transformedData = await transformData(data, responseHeaders || {});
+      const responseData = await handlerReturns;
+      const transformedData = await transformData(responseData, responseHeaders || {});
 
       saveMethodSnapshot(id, methodKey, methodInstance);
       // 当requestBody为特殊数据时不保存缓存
@@ -235,10 +235,10 @@ export default function sendRequest<
     return promiseFinally(
       promiseThen(
         PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()]),
-        ([rawResponse, headers]) => {
+        ([rawResponse, rawHeaders]) => {
           // 无论请求成功、失败，都需要首先移除共享的请求
           deleteAttr(namespacedAdapterReturnMap, methodKey);
-          return handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), headers);
+          return handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), rawHeaders);
         },
         (error: any) => {
           // 无论请求成功、失败，都需要首先移除共享的请求

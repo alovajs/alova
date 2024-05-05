@@ -1,8 +1,8 @@
+import { delay, Result, untilCbCalled } from 'root/testUtils';
+import { ref } from 'vue';
 import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { delay, Result, untilCbCalled } from 'root/testUtils';
-import { ref } from 'vue';
 
 describe('useWatcher middleware', () => {
   test('should send request synchronously when set a sync middleware function', async () => {

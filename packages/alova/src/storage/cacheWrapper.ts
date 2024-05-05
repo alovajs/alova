@@ -55,6 +55,7 @@ export const getRawWithCacheAdapter = async (
 ) => {
   const storagedData = await cacheAdapter.get(buildNamespacedCacheKey(namespace, key));
   if (storagedData) {
+    // eslint-disable-next-line
     const [_, expireTimestamp, storedTag = nullValue] = storagedData;
     // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
     if (storedTag === tag && (!expireTimestamp || expireTimestamp > getTime())) {

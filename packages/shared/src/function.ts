@@ -37,7 +37,7 @@ export const isFn = (arg: any): arg is GeneralFn => typeOf(arg) === 'function';
  * @param arg 任意参数
  * @returns 该参数是否为数字
  */
-export const isNumber = (arg: any): arg is number => typeOf(arg) === 'number' && !isNaN(arg);
+export const isNumber = (arg: any): arg is number => typeOf(arg) === 'number' && !Number.isNaN(arg);
 /**
  * 判断参数是否为字符串
  * @param arg 任意参数
@@ -126,18 +126,18 @@ export const objAssign = <T extends Record<string, any>>(target: T, ...sources: 
  * @returns 统一的缓存参数对象
  */
 export const getLocalCacheConfigParam = (methodInstance: Method) => {
-  const _localCache = getConfig(methodInstance).localCache;
-  const getCacheExpireTs = (_localCache: CacheExpire) =>
-    isNumber(_localCache) ? getTime() + _localCache : getTime(_localCache || undefinedValue);
+  const { localCache } = getConfig(methodInstance);
+  const getCacheExpireTs = (cacheExpire: CacheExpire) =>
+    isNumber(cacheExpire) ? getTime() + cacheExpire : getTime(cacheExpire || undefinedValue);
   let cacheMode: CacheMode = MEMORY;
   let expire = 0;
   let storage = falseValue;
   let tag: undefined | string = undefinedValue;
-  if (!isFn(_localCache)) {
-    if (isNumber(_localCache) || instanceOf(_localCache, Date)) {
-      expire = getCacheExpireTs(_localCache);
+  if (!isFn(localCache)) {
+    if (isNumber(localCache) || instanceOf(localCache, Date)) {
+      expire = getCacheExpireTs(localCache);
     } else {
-      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = _localCache || {};
+      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = localCache || {};
       cacheMode = mode;
       expire = getCacheExpireTs(configExpire);
       storage = [STORAGE_RESTORE].includes(mode);
@@ -154,14 +154,14 @@ export const getLocalCacheConfigParam = (methodInstance: Method) => {
 
 /**
  * 创建类实例
- * @param cls 构造函数
+ * @param Cls 构造函数
  * @param args 构造函数参数
  * @returns 类实例
  */
 export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(
-  cls: T,
+  Cls: T,
   ...args: ConstructorParameters<T>
-) => new cls(...args);
+) => new Cls(...args);
 /**
  * 统一配置
  * @param 数据

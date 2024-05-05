@@ -1,7 +1,7 @@
+import { delay, Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useFetcher } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { delay, Result, untilCbCalled } from 'root/testUtils';
 import { FetcherType } from '~/typings';
 
 describe('useFetcher middleware', () => {

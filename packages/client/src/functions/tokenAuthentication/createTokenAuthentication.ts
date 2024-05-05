@@ -1,12 +1,14 @@
-import { AlovaRequestAdapter, StatesHook } from 'alova';
-import { noop, __self } from '@/helper';
+import { __self, noop } from '@/helper';
 import { falseValue } from '@/helper/variables';
+import { AlovaRequestAdapter, StatesHook } from 'alova';
 import {
   ClientTokenAuthenticationOptions,
   ServerTokenAuthenticationOptions,
   TokenAuthenticationResult
 } from '~/typings/general';
 import {
+  PosibbleAuthMap,
+  WaitingRequestList,
   callHandlerIfMatchesMeta,
   checkMethodRole,
   defaultLoginMeta,
@@ -14,10 +16,8 @@ import {
   defaultRefreshTokenMeta,
   defaultVisitorMeta,
   onResponded2Record,
-  PosibbleAuthMap,
   refreshTokenIfExpired,
-  waitForTokenRefreshed,
-  WaitingRequestList
+  waitForTokenRefreshed
 } from './helper';
 
 /**
@@ -52,7 +52,9 @@ export const createClientTokenAuthentication = ({
         await refreshTokenIfExpired(
           method,
           waitingList,
-          refreshing => (tokenRefreshing = refreshing),
+          refreshing => {
+            tokenRefreshing = refreshing;
+          },
           [method],
           refreshToken
         );

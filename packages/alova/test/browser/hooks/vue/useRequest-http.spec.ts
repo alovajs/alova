@@ -1,9 +1,9 @@
+import { key } from '@alova/shared/function';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { setCache, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@alova/shared/function';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('use useRequest hook to send GET with vue', () => {
   test('init and send get request', async () => {

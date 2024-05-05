@@ -6,8 +6,8 @@ describe('uuid', () => {
     const total = 10000;
     const perTimes = 100;
     const uuidMap = {} as Record<string, any>;
-    for (let i = 0; i < total / perTimes; i++) {
-      for (let j = 0; j < perTimes; j++) {
+    for (let i = 0; i < total / perTimes; i += 1) {
+      for (let j = 0; j < perTimes; j += 1) {
         uuidMap[uuid()] = 1;
       }
       await untilCbCalled(setTimeout, 10);
@@ -19,8 +19,8 @@ describe('uuid', () => {
     const total = 10000;
     const perTimes = 1000;
     const uuidMap = {} as Record<string, any>;
-    for (let i = 0; i < total / perTimes; i++) {
-      for (let j = 0; j < perTimes; j++) {
+    for (let i = 0; i < total / perTimes; i += 1) {
+      for (let j = 0; j < perTimes; j += 1) {
         uuidMap[uuid()] = 1;
       }
       await untilCbCalled(setTimeout, 50);

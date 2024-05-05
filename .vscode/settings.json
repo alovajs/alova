@@ -1,8 +1,8 @@
 {
-  "editor.formatOnSave": true, // 保存是格式化
-  "editor.tabSize": 2, // Tab 的大小2个空格
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.suggestSelection": "recentlyUsedByPrefix", // 自动补全
+  "editor.suggestSelection": "recentlyUsedByPrefix",
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit",
     "source.fixAll.eslint": "explicit"

@@ -98,7 +98,7 @@ const mocks = defineMock({
     }
 
     if (detailErrorTimes < Number(failTimes)) {
-      detailErrorTimes++;
+      detailErrorTimes += 1;
       return {
         status: 403,
         statusText: 'no permission'

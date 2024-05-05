@@ -1,10 +1,10 @@
+import { key } from '@alova/shared/function';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
+import { computed, reactive, ref } from 'vue';
 import { getAlovaInstance } from '#/utils';
 import { setCache, useWatcher } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@alova/shared/function';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
-import { computed, reactive, ref } from 'vue';
 
 describe('use useWatcher hook to send GET with vue', () => {
   test('should specify at least one watching state', () => {

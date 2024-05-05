@@ -18,7 +18,9 @@ export default {
   dehydrate: state => {
     let raw;
     // 订阅时会立即执行一次函数，获取到值后立即调用解除订阅函数
-    state.subscribe(value => (raw = value))();
+    state.subscribe(value => {
+      raw = value;
+    })();
     return raw;
   },
   update: (newVal, states) => {

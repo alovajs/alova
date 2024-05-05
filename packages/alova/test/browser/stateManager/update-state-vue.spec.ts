@@ -13,7 +13,7 @@ describe('update cached response data by user in vue', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      localCache: 100000,
+      cache: 100000,
       transformData: ({ data }: Result) => data
     });
     const { data, onSuccess } = useRequest(Get);

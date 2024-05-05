@@ -29,6 +29,7 @@ module.exports = {
     'linebreak-style': ['error', 'unix'],
     '@typescript-eslint/no-explicit-any': 'off',
     'no-unused-vars': 'off',
+    'import/order': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { destructuredArrayIgnorePattern: '^_' }],
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
@@ -36,6 +37,7 @@ module.exports = {
     '@typescript-eslint/no-this-alias': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-implied-eval': 'off',
+    '@typescript-eslint/no-shadow': 'off',
     'no-empty': 'off'
   }
 };
