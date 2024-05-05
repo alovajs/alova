@@ -30,6 +30,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'no-unused-vars': 'off',
     'import/order': 'off',
+    'import/no-relative-packages': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { destructuredArrayIgnorePattern: '^_' }],
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',

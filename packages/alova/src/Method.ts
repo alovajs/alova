@@ -22,13 +22,13 @@ import {
 } from '@alova/shared/vars';
 import {
   AbortFunction,
+  Alova,
   AlovaMethodConfig,
   MethodRequestConfig,
   MethodType,
   ProgressHandler,
   RequestBody
 } from '~/typings';
-import { Alova } from './alova';
 import sendRequest from './functions/sendRequest';
 
 const offEventCallback = (offHandler: any, handlers: any[]) => () => {

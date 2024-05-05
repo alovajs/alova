@@ -1,4 +1,12 @@
-import type { Alova, AlovaEvent, CacheExpire, CacheMode, Hook, Method, StatesHook } from 'alova/typings/typings';
+import type {
+  Alova,
+  AlovaEvent,
+  CacheExpire,
+  CacheMode,
+  Method,
+  ReferingObject,
+  StatesHook
+} from '../../alova/typings';
 import { FrameworkState, GeneralFn } from './types';
 import {
   JSONStringify,
@@ -242,21 +250,24 @@ export const walkObject = (
 };
 
 type UnknownFrameworkState = FrameworkState<unknown>;
-export function statesHookHelper(statesHook: StatesHook<UnknownFrameworkState, UnknownFrameworkState>, hook: Hook) {
+export function statesHookHelper(statesHook: StatesHook<UnknownFrameworkState, UnknownFrameworkState>) {
+  const referingObject: ReferingObject = {};
   return {
-    create: <D>(initialValue: D, isRef = falseValue) =>
-      statesHook.create(initialValue, hook, isRef) as FrameworkState<D>,
+    create: <D>(initialValue: D, key: string, isRef = falseValue) => {
+      const state = statesHook.create(initialValue, referingObject, isRef) as FrameworkState<D>;
+      return [state, (newValue: D) => statesHook.update({ [key]: newValue }, { [key]: state }, referingObject)];
+    },
     computed: <D>(getter: () => D, depList: UnknownFrameworkState[], isRef = falseValue) =>
-      statesHook.computed(getter, depList, hook, isRef) as FrameworkState<D>,
-    export: (state: UnknownFrameworkState) => (statesHook.export ? statesHook.export(state, hook) : _self),
-    dehydrate: <D>(state: FrameworkState<D>) => statesHook.dehydrate(state, hook) as D,
-    update: (newVal: Record<string, any>, state: Record<string, UnknownFrameworkState>) =>
-      statesHook.update(newVal, state, hook),
+      statesHook.computed(getter, depList, referingObject, isRef) as FrameworkState<D>,
+    export: (state: UnknownFrameworkState) => (statesHook.export ? statesHook.export(state, referingObject) : _self),
+    dehydrate: <D>(state: FrameworkState<D>) => statesHook.dehydrate(state, referingObject) as D,
     memorize: <Callback extends (...args: any[]) => any>(fn: Callback) =>
       statesHook.memorize ? statesHook.memorize(fn) : fn,
     ref: <D>(initialValue: D) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue }),
-    watch: (source: UnknownFrameworkState[], callback: () => void) => statesHook.watch(source, callback, hook),
-    onMounted: (callback: () => void) => statesHook.onMounted(callback, hook),
-    onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, hook)
+    watch: (source: UnknownFrameworkState[], callback: () => void) =>
+      statesHook.watch(source, callback, referingObject),
+    onMounted: (callback: () => void) => statesHook.onMounted(callback, referingObject),
+    onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, referingObject),
+    __referingObj: referingObject
   };
 }

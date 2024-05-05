@@ -231,38 +231,40 @@ export interface EffectRequestParams<E> {
   immediate: boolean;
 }
 
+export type ReferingObject = Record<any, any>;
 export interface StatesHook<State, Computed, Watched = State | Computed, Export = State> {
   /**
    * 创建状态
    * @param initialValue 初始数据
    * @returns 状态值
    */
-  create: (initialValue: any, hook: Hook, isRef?: boolean) => State;
+  create: (initialValue: any, referingObject: ReferingObject, isRef?: boolean) => State;
 
   /**
    * create computed state
    * @param initialValue initial data
-   * @param hook: Hook
+   * @param referingObject refering object
    */
-  computed: (getter: () => any, deps: Export[], hook: Hook, isRef?: boolean) => Computed;
+  computed: (getter: () => any, deps: Export[], referingObject: ReferingObject, isRef?: boolean) => Computed;
 
   /**
    * 导出给开发者使用的值
    * @param state 状态值
+   * @param referingObject refering object
    * @returns 导出的值
    */
-  export?: (state: State, hook: Hook) => Export;
+  export?: (state: State, referingObject: ReferingObject) => Export;
 
   /** 将状态转换为普通数据 */
-  dehydrate: (state: State, hook: Hook) => any;
+  dehydrate: (state: State, referingObject: ReferingObject) => any;
 
   /**
    * 更新状态值
    * @param newVal 新的数据集合
    * @param state 原状态值
-   * @param hook use hook实例，每次use hook调用时都将生成一个hook实例
+   * @param @param referingObject refering object
    */
-  update: (newVal: Record<string, any>, state: Record<string, State>, hook: Hook) => void;
+  update: (newVal: Record<string, any>, state: Record<string, State>, referingObject: ReferingObject) => void;
 
   /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
@@ -273,7 +275,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * 在vue中直接执行即可，而在react中需要在useEffect中执行
    * removeStates函数为清除当前状态的函数，应该在组件卸载时调用
    */
-  effectRequest: (effectParams: EffectRequestParams<any>, hook: Hook) => void;
+  effectRequest: (effectParams: EffectRequestParams<any>, referingObject: ReferingObject) => void;
 
   /**
    * 包装send、abort等use hooks操作函数
@@ -294,22 +296,23 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * watch states
    * @param source watching source
    * @param callback callback when states changes
+   * @param referingObject refering object
    */
-  watch: (source: Watched[], callback: () => void, hook: Hook) => void;
+  watch: (source: Watched[], callback: () => void, referingObject: ReferingObject) => void;
 
   /**
    * bind mounted callback.
    * @param callback callback on component mounted
-   * @param hook hook instance
+   * @param referingObject refering object
    */
-  onMounted: (callback: () => void, hook: Hook) => void;
+  onMounted: (callback: () => void, referingObject: ReferingObject) => void;
 
   /**
    * bind unmounted callback.
    * @param callback callback on component unmounted
-   * @param hook  hook instance
+   * @param referingObject refering object
    */
-  onUnmounted: (callback: () => void, hook: Hook) => void;
+  onUnmounted: (callback: () => void, referingObject: ReferingObject) => void;
 }
 
 export type GlobalCacheConfig = Partial<Record<MethodType, CacheConfig>> | null;
@@ -452,7 +455,10 @@ export interface Method<
    * method配置
    */
   config: MethodRequestConfig & AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
-
+  /**
+   * 请求体
+   */
+  data?: RequestBody;
   /**
    * 缓存打击源
    */
@@ -1172,6 +1178,11 @@ export interface UseHookConfig<
           ResponseHeader
         >
       ) => boolean);
+
+  /**
+   * refering object that sharing some value with this object.
+   */
+  __referingObj: ReferingObject;
 
   /**
    * other attributes

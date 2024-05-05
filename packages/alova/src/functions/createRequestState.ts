@@ -1,3 +1,7 @@
+import Method from '@/Method';
+import createHook from '@/createHook';
+import { getResponseCache } from '@/storage/responseCache';
+import { debounce, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
 import { _self, getContext, getMethodInternalKey, isFn, isNumber, sloughConfig } from '@alova/shared/function';
 import {
   deleteAttr,
@@ -11,10 +15,6 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import Method from '@/Method';
-import createHook from '@/createHook';
-import { getResponseCache } from '@/storage/responseCache';
-import { debounce, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
 import {
   AlovaMethodHandler,
   CompleteHandler,
@@ -55,17 +55,57 @@ export default function createRequestState<
   RequestConfig,
   Response,
   ResponseHeader,
-  GUseHookConfig extends UseHookConfig
+  Config extends UseHookConfig<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 >(
   hookType: EnumHookType,
   methodHandler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  useHookConfig: UC,
-  initialData?: FrontRequestHookConfig<S, E, R, T, RC, RE, RH>['initialData'],
+    | AlovaMethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >,
+  useHookConfig: Config,
+  initialData?: FrontRequestHookConfig<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >['initialData'],
   immediate = falseValue,
-  watchingStates?: E[],
-  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
+  watchingStates?: Export[],
+  debounceDelay: WatcherHookConfig<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >['debounce'] = 0
 ) {
   // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
   useHookConfig = { ...useHookConfig };
@@ -78,7 +118,7 @@ export default function createRequestState<
     memorize = _self,
     ref = val => ({ current: val })
   } = statesHook;
-  const { middleware } = useHookConfig;
+  const { middleware, __referingObj: referingObject = {} } = useHookConfig;
   let initialLoading = middleware ? falseValue : !!immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
@@ -90,7 +130,10 @@ export default function createRequestState<
     try {
       const methodInstance = getHandlerMethod(methodHandler);
       const alovaInstance = getContext(methodInstance);
-      const cachedResponse: R | undefined = getResponseCache(alovaInstance.id, getMethodInternalKey(methodInstance));
+      const cachedResponse: Responded | undefined = getResponseCache(
+        alovaInstance.id,
+        getMethodInternalKey(methodInstance)
+      );
       const forceRequestFinally = sloughConfig(
         (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
       );
@@ -107,11 +150,11 @@ export default function createRequestState<
   const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
   const frontStates = {
     ...managedStates,
-    data: create(isFn(initialData) ? initialData() : initialData, hookInstance),
-    loading: create(initialLoading, hookInstance),
-    error: create(undefinedValue as Error | undefined, hookInstance),
-    downloading: create({ ...progress }, hookInstance),
-    uploading: create({ ...progress }, hookInstance)
+    data: create(isFn(initialData) ? initialData() : initialData, referingObject),
+    loading: create(initialLoading, referingObject),
+    error: create(undefinedValue as Error | undefined, referingObject),
+    downloading: create({ ...progress }, referingObject),
+    uploading: create({ ...progress }, referingObject)
   };
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
@@ -207,8 +250,8 @@ export default function createRequestState<
     ),
 
     /**
-     * hook instance with key data of this usehook.
+     * refering object that sharing some value with this object.
      */
-    hook: hookInstance
+    __referingObj: referingObject
   };
 }

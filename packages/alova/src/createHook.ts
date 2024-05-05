@@ -1,5 +1,5 @@
-import { falseValue, undefinedValue } from '@alova/shared/vars';
 import Method from '@/Method';
+import { falseValue, undefinedValue } from '@alova/shared/vars';
 import { FrontRequestState, Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
 
 export default (ht: TEnumHookType, c: UseHookConfig) =>
