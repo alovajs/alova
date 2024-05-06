@@ -1,11 +1,12 @@
-import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext } from 'alova';
-import { TuseFlag$ } from '@/framework/type';
-import { createAssert, filterItem, forEach, instanceOf, isNumber, isString, objectKeys, pushItem } from '@/helper';
-import { falseValue, trueValue } from '@/helper/variables';
+import { createAssert } from '@alova/shared/assert';
+import { instanceOf, statesHookHelper } from '@alova/shared/function';
+import { falseValue, trueValue, pushItem, filterItem, objectKeys } from '@alova/shared/vars';
+import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext, promiseStatesHook } from 'alova';
+import { isString, isNumber, forEach } from 'lodash-es';
 import { Actions } from '~/typings/general';
 
-type AnyAlovaFrontMiddlewareContext = AlovaFrontMiddlewareContext<any, any, any, any, any, any, any>;
-type AnyAlovaFetcherMiddlewareContext = AlovaFetcherMiddlewareContext<any, any, any, any, any, any, any>;
+type AnyAlovaFrontMiddlewareContext = AlovaFrontMiddlewareContext<any, any, any, any, any, any, any, any, any>;
+type AnyAlovaFetcherMiddlewareContext = AlovaFetcherMiddlewareContext<any, any, any, any, any, any, any, any, any>;
 
 const actionsMap: Record<string | number | symbol, Actions[]> = {};
 const isFrontMiddlewareContext = (
@@ -22,11 +23,13 @@ const assert = createAssert('subscriber');
  * @param id 委托者id
  * @returns alova中间件函数
  */
-export const actionDelegationMiddleware = (id: string | number | symbol, useFlag$: TuseFlag$) => {
-  const delegated = useFlag$(falseValue);
+export const actionDelegationMiddleware = (id: string | number | symbol) => {
+  const { ref } = statesHookHelper(promiseStatesHook());
+
+  const delegated = ref(falseValue);
   return (
     context: (AnyAlovaFrontMiddlewareContext | AnyAlovaFetcherMiddlewareContext) & { delegatingActions?: Actions },
-    next: AlovaGuardNext<any, any, any, any, any, any, any>
+    next: AlovaGuardNext<any, any, any, any, any, any, any, any, any>
   ) => {
     // 中间件会重复调用，已经订阅过了就无需再订阅了
     if (!delegated.current) {
@@ -43,7 +46,7 @@ export const actionDelegationMiddleware = (id: string | number | symbol, useFlag
             }
           : {
               ...delegatingActions,
-              fetch: context.fetch,
+              fetch: context.fetchFn,
               abort,
               update
             }

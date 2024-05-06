@@ -12,7 +12,7 @@ import {
 } from '@alova/shared/function';
 import { falseValue, isArray, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import { Method, UseHookReturnType, getMethodKey, promiseStatesHook, useRequest } from 'alova';
-import { FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/general';
+import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
 
 const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodKey(methodInstance)}`;
 type ID = NonNullable<FormHookConfig<any, any, any, any, any, any, any, any>['id']>;
@@ -20,7 +20,8 @@ type ID = NonNullable<FormHookConfig<any, any, any, any, any, any, any, any>['id
 const sharedStates = {} as Record<
   ID,
   {
-    hookReturns: UseHookReturnType<any, any, any, any, any, any, any>;
+    // hookReturns: UseHookReturnType<any, any, any, any, any, any, any>;
+    hookReturns: FormReturnType<any, any, any, any, any, any, any, any>;
     config: FormHookConfig<any, any, any, any, any, any, any, any>;
   }
 >;
@@ -44,7 +45,7 @@ export default <
   handler:
     | FormHookHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData>
     | ID,
-  config: FormHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData>
+  config: FormHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData> = {}
 ) => {
   // 如果第一个参数传入的是id，则获取它的初始化数据并返回
   if (isNumber(handler) || isString(handler)) {

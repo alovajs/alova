@@ -1,8 +1,8 @@
-import { isArray, isObject, len, objectKeys, walkObject } from '@/helper';
-import { falseValue, ObjectCls, undefinedValue } from '@/helper/variables';
 import { DataSerializer } from '~/typings/general';
 import dateSerializer from './date';
 import regexpSerializer from './regexp';
+import { isObject, walkObject } from '@alova/shared/function';
+import { undefinedValue, objectKeys, ObjectCls, len, falseValue, isArray } from '@alova/shared/vars';
 
 const createSerializerPerformer = (customSerializers: Record<string | number, DataSerializer> = {}) => {
   /**

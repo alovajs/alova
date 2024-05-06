@@ -1,6 +1,6 @@
+import { instanceOf } from '@alova/shared/function';
+import { falseValue } from '@alova/shared/vars';
 import { getMethodKey, Method } from 'alova';
-import { instanceOf } from '@/helper';
-import { falseValue } from '@/helper/variables';
 
 interface SnapshotValue {
   entity: Method;

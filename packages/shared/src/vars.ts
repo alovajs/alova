@@ -30,12 +30,15 @@ export const JSONParse = (value: string) => JSON.parse(value);
 export const setTimeoutFn = (fn: GeneralFn, delay = 0) => setTimeout(fn, delay);
 export const clearTimeoutTimer = (timer: NodeJS.Timeout | string | number) => clearTimeout(timer);
 export const objectKeys = (obj: object) => ObjectCls.keys(obj);
+export const objectValues = (obj: object) => ObjectCls.values(obj);
 export const forEach = <T>(ary: T[], fn: (item: T, index: number, ary: T[]) => void) => ary.forEach(fn);
 export const pushItem = <T>(ary: T[], ...item: T[]) => ary.push(...item);
 export const mapItem = <T, R>(ary: T[], callbackfn: (value: T, index: number, array: T[]) => R) => ary.map(callbackfn);
 export const filterItem = <T>(ary: T[], predicate: (value: T, index: number, array: T[]) => unknown) =>
   ary.filter(predicate);
 export const slice = <T>(ary: T[], start?: number, end?: number) => ary.slice(start, end);
+export const splice = <T>(ary: T[], start: number, deleteCount = 0, ...items: T[]) =>
+  ary.splice(start, deleteCount, ...items);
 export const len = (data: any[] | Uint8Array | string) => data.length;
 export const isArray = (arg: any): arg is any[] => Array.isArray(arg);
 export const deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) => delete arg[attr];

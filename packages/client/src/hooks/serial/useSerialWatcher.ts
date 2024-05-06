@@ -1,6 +1,4 @@
-import { AlovaMethodHandler, Method, RequestHookConfig, SvelteWritable, useWatcher, VueRef } from 'alova';
-import { Writable } from 'svelte/store';
-import { WatchSource } from 'vue';
+import { AlovaMethodHandler, Method, RequestHookConfig, useWatcher } from 'alova';
 import { assertSerialHandlers, serialMiddleware } from './general';
 
 /**
@@ -10,13 +8,46 @@ import { assertSerialHandlers, serialMiddleware } from './general';
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-export default <S, E, R, T, RC, RE, RH>(
+export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    ...AlovaMethodHandler<S, E, R, T, RC, RE, RH>[]
+    (
+      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      | AlovaMethodHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >
+    ),
+    ...AlovaMethodHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >[]
   ],
-  watchingStates: S extends VueRef ? (WatchSource<any> | object)[] : S extends SvelteWritable ? Writable<any>[] : any[],
-  config: RequestHookConfig<S, E, R, T, RC, RE, RH> = {}
+  watchingStates: Watched,
+  config: RequestHookConfig<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  > = {} as any
 ) => {
   assertSerialHandlers('useSerialWatcher', serialHandlers);
   return useWatcher(serialHandlers[0], watchingStates, {

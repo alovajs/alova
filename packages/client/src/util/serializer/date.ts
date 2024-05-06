@@ -1,5 +1,5 @@
-import { instanceOf, newInstance } from '@/helper';
-import { undefinedValue } from '@/helper/variables';
+import { instanceOf, newInstance } from '@alova/shared/function';
+import { undefinedValue } from '@alova/shared/vars';
 import { DataSerializer } from '~/typings/general';
 
 export default {

@@ -1,6 +1,5 @@
+import { filterItem, mapItem, objectKeys, undefinedValue } from '@alova/shared/vars';
 import { Arg } from 'alova';
-import { filterItem, map, objectKeys } from '@/helper';
-import { undefinedValue } from '@/helper/variables';
 
 /**
  * 构建完整的url
@@ -19,7 +18,7 @@ export const buildCompletedURL = (baseURL: string, url: string, params: Arg) => 
 
   // 将params对象转换为get字符串
   // 过滤掉值为undefined的
-  const paramsStr = map(
+  const paramsStr = mapItem(
     filterItem(objectKeys(params), key => params[key] !== undefinedValue),
     key => `${key}=${params[key]}`
   ).join('&');
@@ -30,3 +29,5 @@ export const buildCompletedURL = (baseURL: string, url: string, params: Arg) => 
       : `${completeURL}?${paramsStr}`
     : completeURL;
 };
+
+export default buildCompletedURL;

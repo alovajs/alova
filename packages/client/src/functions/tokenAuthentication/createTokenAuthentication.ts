@@ -1,6 +1,6 @@
-import { __self, noop } from '@/helper';
-import { falseValue } from '@/helper/variables';
-import { AlovaRequestAdapter, StatesHook } from 'alova';
+import { AlovaRequestAdapter, RespondedHandlerRecord, StatesHook } from 'alova';
+import { _self, noop } from '@alova/shared/function';
+import { falseValue } from '@alova/shared/vars';
 import {
   ClientTokenAuthenticationOptions,
   ServerTokenAuthenticationOptions,
@@ -31,7 +31,7 @@ export const createClientTokenAuthentication = ({
   logout,
   refreshToken,
   assignToken = noop
-}: ClientTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any, any, any>>) => {
+}: ClientTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any>>) => {
   let tokenRefreshing = falseValue;
   const waitingList: WaitingRequestList = [];
   return {
@@ -73,11 +73,11 @@ export const createClientTokenAuthentication = ({
         onSuccess: async (response, method) => {
           await callHandlerIfMatchesMeta(method, login, defaultLoginMeta, response);
           await callHandlerIfMatchesMeta(method, logout, defaultLogoutMeta, response);
-          return (respondedRecord.onSuccess || __self)(response, method);
+          return (respondedRecord.onSuccess || _self)(response, method);
         }
-      };
+      } as RespondedHandlerRecord<any, any, any, any, any, any>;
     }
-  } as TokenAuthenticationResult<StatesHook<any, any>, AlovaRequestAdapter<any, any, any, any, any>>;
+  } as TokenAuthenticationResult<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>;
 };
 
 /**
@@ -92,7 +92,7 @@ export const createServerTokenAuthentication = ({
   refreshTokenOnSuccess,
   refreshTokenOnError,
   assignToken = noop
-}: ServerTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any, any, any>>) => {
+}: ServerTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any>>) => {
   let tokenRefreshing = falseValue;
   const waitingList: WaitingRequestList = [];
   return {
@@ -130,7 +130,9 @@ export const createServerTokenAuthentication = ({
             const dataResent = await refreshTokenIfExpired(
               method,
               waitingList,
-              refreshing => (tokenRefreshing = refreshing),
+              refreshing => {
+                tokenRefreshing = refreshing;
+              },
               [response, method],
               refreshTokenOnSuccess,
               tokenRefreshing
@@ -142,7 +144,7 @@ export const createServerTokenAuthentication = ({
 
           await callHandlerIfMatchesMeta(method, login, defaultLoginMeta, response);
           await callHandlerIfMatchesMeta(method, logout, defaultLogoutMeta, response);
-          return (respondedRecord.onSuccess || __self)(response, method);
+          return (respondedRecord.onSuccess || _self)(response, method);
         },
         onError: async (error, method) => {
           if (
@@ -153,7 +155,9 @@ export const createServerTokenAuthentication = ({
             const dataResent = await refreshTokenIfExpired(
               method,
               waitingList,
-              refreshing => (tokenRefreshing = refreshing),
+              refreshing => {
+                tokenRefreshing = refreshing;
+              },
               [error, method],
               refreshTokenOnError,
               tokenRefreshing
@@ -164,7 +168,7 @@ export const createServerTokenAuthentication = ({
           }
           return (respondedRecord.onError || noop)(error, method);
         }
-      };
+      } as RespondedHandlerRecord<any, any, any, any, any, any>;
     }
-  } as TokenAuthenticationResult<StatesHook<any, any>, AlovaRequestAdapter<any, any, any, any, any>>;
+  } as TokenAuthenticationResult<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>;
 };

@@ -1,6 +1,11 @@
-import { noop } from '@alova/shared/function';
-import { falseValue, filterItem, forEach } from '@alova/shared/vars';
+import { createAssert } from '@alova/shared/assert';
+import { instanceOf, isFn, noop } from '@alova/shared/function';
+import { GeneralFn } from '@alova/shared/types';
+import { falseValue, filterItem, forEach, undefinedValue } from '@alova/shared/vars';
+import { Method, AlovaMethodHandler } from 'alova';
 import { AnyFn, BackoffPolicy, UsePromiseReturnType } from '~/typings/general';
+
+const myAssert = createAssert();
 
 /**
  * 创建uuid简易版
@@ -39,7 +44,8 @@ export const getUniqueReferenceId = (reference: any) => {
  * 兼容函数，抛出参数
  * @param error 错误
  */
-export const __throw = <T>(error: T) => {
+export const throwFn = <T>(error: T) => {
+  // eslint-disable-next-line @typescript-eslint/no-throw-literal
   throw error;
 };
 
@@ -99,14 +105,68 @@ export function useCallback<Fn extends AnyFn = AnyFn>(onCallbackChange: (callbac
 }
 
 export function usePromise<T = any>(): UsePromiseReturnType<T> {
-  let _resolve: UsePromiseReturnType<T>['resolve'];
-  let _reject: UsePromiseReturnType<T>['reject'];
+  let retResolve: UsePromiseReturnType<T>['resolve'];
+  let retReject: UsePromiseReturnType<T>['reject'];
 
   const promise = new Promise<T>((resolve, reject) => {
-    _resolve = resolve;
-    _reject = reject;
+    retResolve = resolve;
+    retReject = reject;
   });
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return { promise, resolve: _resolve!, reject: _reject! };
+  return { promise, resolve: retResolve!, reject: retReject! };
 }
+
+/**
+ * 批量执行事件回调函数，并将args作为参数传入
+ * @param handlers 事件回调数组
+ * @param args 函数参数
+ */
+export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
+  let ret: any = undefinedValue;
+  forEach(handlers, handler => {
+    const retInner = handler(...args);
+    ret = retInner !== undefinedValue ? retInner : ret;
+  });
+  return ret;
+};
+
+/**
+ * 获取请求方法对象
+ * @param methodHandler 请求方法句柄
+ * @param args 方法调用参数
+ * @returns 请求方法对象
+ */
+export const getHandlerMethod = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  methodHandler:
+    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    | AlovaMethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >,
+  args: any[] = []
+) => {
+  const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
+  myAssert(
+    instanceOf(methodInstance, Method),
+    'hook handler must be a method instance or a function that returns method instance'
+  );
+  return methodInstance;
+};

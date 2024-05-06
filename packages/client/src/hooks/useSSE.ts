@@ -1,45 +1,29 @@
+import { createAssert } from '@alova/shared/assert';
 import {
-  AlovaMethodHandler,
-  Method,
-  ResponseCompleteHandler,
-  ResponseErrorHandler,
-  ResponsedHandler,
-  ResponsedHandlerRecord,
-  invalidateCache,
-  matchSnapshotMethod
-} from 'alova';
-import {
-  T$,
-  T$$,
-  T_$,
-  T_exp$,
-  TonMounted$,
-  TonUnmounted$,
-  Tupd$,
-  TuseFlag$,
-  TuseMemorizedCallback$,
-  Twatch$
-} from '@/framework/type';
-import { buildCompletedURL } from '@/functions/sendRequest';
-import {
-  __self,
-  __throw,
-  createAssert,
+  _self,
   getConfig,
-  getHandlerMethod,
   getMethodInternalKey,
   getOptions,
   instanceOf,
   isFn,
-  isPlainOrCustomObject,
+  isPlainObject,
   noop,
-  promiseFinally,
-  promiseThen,
-  useCallback,
-  usePromise
-} from '@/helper';
-import createHookEvent, { AlovaHookEventType } from '@/helper/createHookEvent';
-import { falseValue, trueValue, undefinedValue } from '@/helper/variables';
+  statesHookHelper
+} from '@alova/shared/function';
+import { falseValue, promiseFinally, promiseThen, trueValue, undefinedValue } from '@alova/shared/vars';
+import {
+  AlovaMethodHandler,
+  Method,
+  RespondedHandler,
+  RespondedHandlerRecord,
+  ResponseCompleteHandler,
+  ResponseErrorHandler,
+  invalidateCache,
+  promiseStatesHook
+} from 'alova';
+import { getHandlerMethod, throwFn, useCallback, usePromise } from '@/util/helper';
+import { buildCompletedURL } from '@/functions/sendRequest';
+import createHookEvent, { AlovaHookEventType } from '@/util/createHookEvent';
 import {
   AlovaSSEErrorEvent,
   AlovaSSEEvent,
@@ -64,19 +48,32 @@ const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSour
   Message: 'message'
 } as const;
 
-export default <Data, S, E, R, T, RC, RE, RH>(
-  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config: SSEHookConfig = {},
-  $: T$,
-  $$: T$$,
-  _$: T_$,
-  _exp$: T_exp$,
-  upd$: Tupd$,
-  watch$: Twatch$,
-  onMounted$: TonMounted$,
-  onUnmounted$: TonUnmounted$,
-  useFlag$: TuseFlag$,
-  useMemorizedCallback$: TuseMemorizedCallback$
+export default <
+  Data,
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  handler:
+    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    | AlovaMethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >,
+  config: SSEHookConfig = {}
 ) => {
   const {
     initialData,
@@ -88,36 +85,64 @@ export default <Data, S, E, R, T, RC, RE, RH>(
   // ! 暂时不支持指定 abortLast
   const abortLast = trueValue;
 
-  const eventSource = useFlag$<EventSource | undefined>(undefinedValue);
-  const sendPromiseObject = useFlag$<UsePromiseReturnType<void> | undefined>(undefinedValue);
+  const {
+    create,
+    ref,
+    onMounted,
+    onUnmounted,
+    memorize,
+    exportObject,
+    __referingObj: referingObject
+  } = statesHookHelper(promiseStatesHook());
 
-  const data = $<Data>(initialData, trueValue);
-  const readyState = $<SSEHookReadyState>(SSEHookReadyState.CLOSED, trueValue);
+  const eventSource = ref<EventSource | undefined>(undefinedValue);
+  const sendPromiseObject = ref<UsePromiseReturnType<void> | undefined>(undefinedValue);
+
+  const [data, setData] = create<Data>(initialData, 'data', trueValue);
+  const [readyState, setReadyState] = create<SSEHookReadyState>(SSEHookReadyState.CLOSED, 'readyState', trueValue);
 
   let methodInstance = getHandlerMethod(handler);
 
-  let responseUnified: ResponsedHandler<S, E, RC, RE, RH> | ResponsedHandlerRecord<S, E, RC, RE, RH> | undefined;
+  let responseUnified:
+    | RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader>
+    | RespondedHandlerRecord<State, Computed, Export, RequestConfig, Response, ResponseHeader>
+    | undefined;
 
   // 储存自定义事件的 useCallback 对象，其中 key 为 eventName
   const customEventMap: Map<string, ReturnType<typeof useCallback>> = new Map();
-  const [onOpen, triggerOnOpen, offOpen] = useCallback<SSEOnOpenTrigger<S, E, R, T, RC, RE, RH>>();
-  const [onMessage, triggerOnMessage, offMessage] = useCallback<SSEOnMessageTrigger<Data, S, E, R, T, RC, RE, RH>>();
-  const [onError, triggerOnError, offError] = useCallback<SSEOnErrorTrigger<S, E, R, T, RC, RE, RH>>();
+  const [onOpen, triggerOnOpen, offOpen] =
+    useCallback<SSEOnOpenTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
+  const [onMessage, triggerOnMessage, offMessage] =
+    useCallback<
+      SSEOnMessageTrigger<Data, State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    >();
+  const [onError, triggerOnError, offError] =
+    useCallback<SSEOnErrorTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
 
-  let responseSuccessHandler: ResponsedHandler<any, any, RC, RE, RH> = __self;
-  let responseErrorHandler: ResponseErrorHandler<any, any, RC, RE, RH> = __throw;
-  let responseCompleteHandler: ResponseCompleteHandler<any, any, RC, RE, RH> = noop;
+  let responseSuccessHandler: RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> =
+    _self;
+  let responseErrorHandler: ResponseErrorHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> =
+    throwFn;
+  let responseCompleteHandler: ResponseCompleteHandler<
+    State,
+    Computed,
+    Export,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  > = noop;
 
   /**
    * 设置响应拦截器，在每次 send 之后都需要调用
    */
-  const setResponseHandler = (methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
-    const { responsed, responded } = getOptions(methodInstance);
-    responseUnified = responded || responsed;
+  const setResponseHandler = (instance: Method) => {
+    // responsed 从 3.0 开始移除
+    const { responded } = getOptions(instance);
+    responseUnified = responded;
 
     if (isFn(responseUnified)) {
       responseSuccessHandler = responseUnified;
-    } else if (responseUnified && isPlainOrCustomObject(responseUnified)) {
+    } else if (responseUnified && isPlainObject(responseUnified)) {
       const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responseUnified;
       responseSuccessHandler = isFn(successHandler) ? successHandler : responseSuccessHandler;
       responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
@@ -131,13 +156,13 @@ export default <Data, S, E, R, T, RC, RE, RH>(
    * @returns 处理后的response
    */
   const handleResponseTask = async (handlerReturns: any) => {
-    const { headers, name: methodInstanceName, transformData: transformDataFn = __self } = getConfig(methodInstance);
+    const { headers, name: methodInstanceName, transformData: transformDataFn = _self } = getConfig(methodInstance);
     const methodKey = getMethodInternalKey(methodInstance);
 
     const returnsData = await handlerReturns;
-    const transformedData = await transformDataFn(returnsData, (headers || {}) as RH);
+    const transformedData = await transformDataFn(returnsData, (headers || {}) as ResponseHeader);
 
-    upd$(data, transformedData);
+    setData(transformedData as any);
 
     // 查找hitTarget
     const hitMethods = matchSnapshotMethod({
@@ -179,7 +204,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
         data,
         undefinedValue,
         error
-      ) as AlovaSSEEvent<S, E, R, T, RC, RE, RH>;
+      ) as AlovaSSEEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
       event.eventSource = es;
 
@@ -190,14 +215,14 @@ export default <Data, S, E, R, T, RC, RE, RH>(
       return Promise.resolve(ev(AlovaHookEventType.SSEOpenEvent));
     }
 
-    const globalSuccess = interceptByGlobalResponded ? responseSuccessHandler : __self;
-    const globalError = interceptByGlobalResponded ? responseErrorHandler : __throw;
+    const globalSuccess = interceptByGlobalResponded ? responseSuccessHandler : _self;
+    const globalError = interceptByGlobalResponded ? responseErrorHandler : throwFn;
     const globalFinally = interceptByGlobalResponded ? responseCompleteHandler : noop;
 
     const p = promiseFinally(
       promiseThen(
         dataOrError,
-        data => handleResponseTask(globalSuccess(data, methodInstance)),
+        res => handleResponseTask(globalSuccess(res, methodInstance)),
         error => handleResponseTask(globalError(error, methodInstance))
       ),
       // finally
@@ -210,7 +235,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
     return promiseThen(
       p,
       // 得到处理好的数据（transform 之后的数据）
-      data => ev(AlovaHookEventType.SSEMessageEvent, data),
+      res => ev(AlovaHookEventType.SSEMessageEvent, res),
       // 有错误
       error => ev(AlovaHookEventType.SSEErrorEvent, undefinedValue, error)
     );
@@ -229,27 +254,31 @@ export default <Data, S, E, R, T, RC, RE, RH>(
 
   // * MARK: EventSource 的事件处理
 
-  const onCustomEvent: SSEOn<S, E, R, T, RC, RE, RH> = useMemorizedCallback$((eventName, handler) => {
-    if (!customEventMap.has(eventName)) {
-      const useCallbackObject = useCallback<(event: AlovaSSEEvent<S, E, R, T, RC, RE, RH>) => void>(callbacks => {
-        if (callbacks.length === 0) {
-          eventSource.current?.removeEventListener(eventName, useCallbackObject[1] as any);
-          customEventMap.delete(eventName);
-        }
-      });
+  const onCustomEvent: SSEOn<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = memorize(
+    (eventName, callbackHandler) => {
+      if (!customEventMap.has(eventName)) {
+        const useCallbackObject = useCallback<
+          (event: AlovaSSEEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => void
+        >(callbacks => {
+          if (callbacks.length === 0) {
+            eventSource.current?.removeEventListener(eventName, useCallbackObject[1] as any);
+            customEventMap.delete(eventName);
+          }
+        });
 
-      const trigger = useCallbackObject[1];
-      customEventMap.set(eventName, useCallbackObject);
-      eventSource.current?.addEventListener(eventName, event => {
-        promiseThen(createSSEEvent(eventName as any, Promise.resolve(event.data)), sendSSEEvent(trigger) as any);
-      });
+        const trigger = useCallbackObject[1];
+        customEventMap.set(eventName, useCallbackObject);
+        eventSource.current?.addEventListener(eventName, event => {
+          promiseThen(createSSEEvent(eventName as any, Promise.resolve(event.data)), sendSSEEvent(trigger) as any);
+        });
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const [onEvent] = customEventMap.get(eventName)!;
+
+      return onEvent(callbackHandler);
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const [onEvent] = customEventMap.get(eventName)!;
-
-    return onEvent(handler);
-  });
+  );
 
   /**
    * 取消自定义事件在 useCallback 中的注册
@@ -262,14 +291,14 @@ export default <Data, S, E, R, T, RC, RE, RH>(
 
   const esOpen = () => {
     // resolve 使用 send() 时返回的 promise
-    upd$(readyState, SSEHookReadyState.OPEN);
+    setReadyState(SSEHookReadyState.OPEN);
     promiseThen(createSSEEvent(MessageType.Open, Promise.resolve()), triggerOnOpen as any);
     // ! 一定要在调用 onOpen 之后 resolve
     sendPromiseObject.current?.resolve();
   };
 
   const esError = (event: Event) => {
-    upd$(readyState, SSEHookReadyState.CLOSED);
+    setReadyState(SSEHookReadyState.CLOSED);
     promiseThen(
       createSSEEvent(MessageType.Error, Promise.reject((event as any)?.message ?? 'SSE Error')),
       sendSSEEvent(triggerOnMessage) as any
@@ -286,7 +315,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
   /**
    * 关闭当前 eventSource 的注册
    */
-  const close = useMemorizedCallback$(() => {
+  const close = memorize(() => {
     const es = eventSource.current;
     if (!es) {
       return;
@@ -302,8 +331,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
     es.removeEventListener(MessageType.Open, esOpen);
     es.removeEventListener(MessageType.Error, esError);
     es.removeEventListener(MessageType.Message, esMessage);
-    upd$(readyState, SSEHookReadyState.CLOSED);
-
+    setReadyState(SSEHookReadyState.CLOSED);
     // eventSource 关闭后，取消注册所有自定义事件
     // 否则可能造成内存泄露
     customEventMap.forEach(([_, eventTrigger], eventName) => {
@@ -314,7 +342,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
   /**
    * 发送请求并初始化 eventSource
    */
-  const connect = useMemorizedCallback$((...sendArgs: any[]) => {
+  const connect = memorize((...sendArgs: any[]) => {
     let es = eventSource.current;
     let promiseObj = sendPromiseObject.current;
     if (es && abortLast) {
@@ -342,7 +370,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
     // 建立连接
     es = new EventSource(fullURL, { withCredentials });
     eventSource.current = es;
-    upd$(readyState, SSEHookReadyState.CONNECTING);
+    setReadyState(SSEHookReadyState.CONNECTING);
 
     // * MARK: 注册处理事件
 
@@ -362,7 +390,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
     return promiseObj!.promise;
   });
 
-  onUnmounted$(() => {
+  onUnmounted(() => {
     close();
 
     // 上面使用 eventSource.removeEventListener 只是断开了 eventSource 和 trigger 的联系
@@ -374,21 +402,24 @@ export default <Data, S, E, R, T, RC, RE, RH>(
   });
 
   // * MARK: 初始化动作
-  onMounted$(() => {
+  onMounted(() => {
     if (immediate) {
       connect();
     }
   });
 
   return {
-    readyState: _exp$(readyState),
-    data: _exp$(data),
-    eventSource: _exp$(eventSource),
     send: connect,
     close,
     onMessage,
     onError,
     onOpen,
-    on: onCustomEvent
+    on: onCustomEvent,
+    ...exportObject({
+      readyState,
+      data,
+      eventSource
+    }),
+    __referingObj: referingObject
   };
 };
