@@ -273,6 +273,7 @@ export function statesHookHelper(
     computed: <D>(getter: () => D, depList: GeneralFrameworkState[], isRef = falseValue) =>
       statesHook.computed(getter, depList, referingObject, isRef) as FrameworkState<D>,
     export: exportState,
+    batchExport: (...states: GeneralFrameworkState[]) => states.map(state => exportState(state)),
     dehydrate: <D>(state: FrameworkState<D>) => statesHook.dehydrate(state, referingObject) as D,
     effectRequest: (effectRequestParams: EffectRequestParams<any>) =>
       statesHook.effectRequest(effectRequestParams, referingObject),
