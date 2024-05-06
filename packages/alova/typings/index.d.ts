@@ -201,6 +201,11 @@ export interface Hook {
   /** frontStates */
   fs: FrontRequestState;
 
+  /**
+   * update states.
+   */
+  upd: (newStates: Record<string, any>) => void;
+
   /** successHandlers */
   sh: SuccessHandler<any, any, any, any, any, any, any, any, any>[];
 
@@ -1371,7 +1376,7 @@ export type UseHookReturnType<
       ResponseHeader
     >
   ) => void;
-  hook: Hook;
+  __referingObj: ReferingObject;
 };
 export type UseFetchHookReturnType<State> = FetchRequestState<
   ExportedType<boolean, State>,

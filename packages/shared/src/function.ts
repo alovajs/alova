@@ -3,6 +3,7 @@ import type {
   AlovaEvent,
   CacheExpire,
   CacheMode,
+  EffectRequestParams,
   Method,
   ReferingObject,
   StatesHook
@@ -17,6 +18,7 @@ import {
   forEach,
   len,
   nullValue,
+  objectKeys,
   setTimeoutFn,
   trueValue,
   typeOf,
@@ -249,25 +251,76 @@ export const walkObject = (
   return target;
 };
 
-type UnknownFrameworkState = FrameworkState<unknown>;
-export function statesHookHelper(statesHook: StatesHook<UnknownFrameworkState, UnknownFrameworkState>) {
-  const referingObject: ReferingObject = {};
+type GeneralFrameworkState = FrameworkState<unknown>;
+export function statesHookHelper(
+  statesHook: StatesHook<GeneralFrameworkState, GeneralFrameworkState>,
+  referingObject: ReferingObject = {}
+) {
+  const ref = <D>(initialValue: D) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
+  referingObject = ref(referingObject).current;
+  const exportState = (state: GeneralFrameworkState) => (statesHook.export || _self)(state, referingObject);
+  const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) =>
+    statesHook.memorize ? statesHook.memorize(fn) : fn;
+  const update = (newValue: any, state: GeneralFrameworkState, key: string) =>
+    statesHook.update({ [key]: newValue }, { [key]: state }, referingObject);
+  const statesList = [] as string[];
   return {
     create: <D>(initialValue: D, key: string, isRef = falseValue) => {
       const state = statesHook.create(initialValue, referingObject, isRef) as FrameworkState<D>;
-      return [state, (newValue: D) => statesHook.update({ [key]: newValue }, { [key]: state }, referingObject)];
+      statesList.push(key); // record the keys of created states.
+      return [state, (newValue: D) => update(newValue, state, key)] as const;
     },
-    computed: <D>(getter: () => D, depList: UnknownFrameworkState[], isRef = falseValue) =>
+    computed: <D>(getter: () => D, depList: GeneralFrameworkState[], isRef = falseValue) =>
       statesHook.computed(getter, depList, referingObject, isRef) as FrameworkState<D>,
-    export: (state: UnknownFrameworkState) => (statesHook.export ? statesHook.export(state, referingObject) : _self),
+    export: exportState,
     dehydrate: <D>(state: FrameworkState<D>) => statesHook.dehydrate(state, referingObject) as D,
-    memorize: <Callback extends (...args: any[]) => any>(fn: Callback) =>
-      statesHook.memorize ? statesHook.memorize(fn) : fn,
-    ref: <D>(initialValue: D) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue }),
-    watch: (source: UnknownFrameworkState[], callback: () => void) =>
+    effectRequest: (effectRequestParams: EffectRequestParams<any>) =>
+      statesHook.effectRequest(effectRequestParams, referingObject),
+    memorize,
+    ref,
+    watch: (source: GeneralFrameworkState[], callback: () => void) =>
       statesHook.watch(source, callback, referingObject),
     onMounted: (callback: () => void) => statesHook.onMounted(callback, referingObject),
     onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, referingObject),
-    __referingObj: referingObject
+
+    /**
+     * refering object that sharing some value with this object.
+     */
+    __referingObj: referingObject,
+
+    /**
+     * batch export states and provide a update function that update states simply.
+     * @param states new States
+     * @param coreHookStates the returns of useRequest/useWatcher/useFetcher that contains update function
+     * @returns exported states and update function
+     */
+    exportObject: <S extends Record<string, GeneralFrameworkState>>(
+      states: S,
+      coreHookStates: Record<string, any> = {}
+    ) => {
+      const exportedStates = objectKeys(states).reduce(
+        (result, key) => {
+          result[key] = exportState(states[key]);
+          return result;
+        },
+        {} as Record<string, GeneralFrameworkState>
+      );
+
+      return {
+        ...(exportedStates as Record<keyof S, GeneralFrameworkState>),
+        __referingObj: referingObject,
+        update: memorize((newStates: Record<string, any>) => {
+          objectKeys(newStates).forEach(key => {
+            if (statesList.includes(key)) {
+              update(newStates[key], states[key], key);
+            } else if (coreHookStates[key] && isFn(coreHookStates.update)) {
+              coreHookStates.update({
+                [key]: newStates[key]
+              });
+            }
+          });
+        })
+      };
+    }
   };
 }

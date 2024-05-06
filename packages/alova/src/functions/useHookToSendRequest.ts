@@ -5,7 +5,7 @@ import { getResponseCache } from '@/storage/responseCache';
 import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
 import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
-import { exportFetchStates, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
+import { exportFetchStates, getHandlerMethod } from '@/utils/helper';
 import { assertMethodMatcher } from '@/utils/myAssert';
 import {
   getContext,
@@ -53,9 +53,9 @@ import {
  * @param sendCallingArgs send函数参数
  * @returns 请求状态
  */
-export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
+export default function useHookToSendRequest(
   hookInstance: Hook,
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  methodHandler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any>,
   sendCallingArgs: any[] = []
 ) {
   let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
@@ -69,15 +69,15 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
   } = hookInstance;
   const isFetcher = ht === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-    | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
+    | FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>
     | FetcherHookConfig;
   const alovaInstance = getContext(methodInstance);
-  const { id, storage } = alovaInstance;
-  const { update } = promiseStatesHook();
+  const { id } = alovaInstance;
+  const { upd: update } = hookInstance;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const methodKey = getMethodInternalKey(methodInstance);
   const { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
-  const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
+  const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<any, any, any, any, any, any, any, any, any>;
   hookInstance.m = methodInstance;
 
   return (async () => {
@@ -121,16 +121,12 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       const progressUpdater =
         (stage: 'downloading' | 'uploading') =>
         ({ loaded, total }: Progress) =>
-          update(
-            {
-              [stage]: {
-                loaded,
-                total
-              }
-            },
-            frontStates,
-            hookInstance
-          );
+          update({
+            [stage]: {
+              loaded,
+              total
+            }
+          });
 
       methodInstance = guardNextReplacingMethod;
       // 每次发送请求都需要保存最新的控制器
@@ -139,7 +135,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
 
       // loading状态受控时将不更改loading
       // 未命中缓存，或强制请求时需要设置loading为true
-      !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse }, frontStates, hookInstance);
+      !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse });
 
       const { ed: enableDownload, eu: enableUpload } = hookInstance;
       offDownloadEvent = enableDownload ? methodInstance.onDownload(progressUpdater('downloading')) : offDownloadEvent;
@@ -205,7 +201,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
               return useHookToSendRequest(hookInstance, methodInstance as Method, args);
             },
             fetchStates,
-            update: newFetchStates => update(newFetchStates, fetchStates, hookInstance),
+            update,
             controlFetching(control = trueValue) {
               controlledLoading = control;
             }
@@ -218,7 +214,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
             sendArgs: sendCallingArgs,
             send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args),
             frontStates,
-            update: newFrontStates => update(newFrontStates, frontStates, hookInstance),
+            update,
             controlLoading(control = trueValue) {
               controlledLoading = control;
             }
@@ -233,11 +229,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       const afterSuccess = (data: any) => {
         // 更新缓存响应数据
         if (!isFetcher) {
-          toUpdateResponse() && update({ data }, frontStates, hookInstance);
+          toUpdateResponse() && update({ data });
         } else if (hookInstance.c.updateState !== falseValue) {
           // 更新缓存内的状态，一般为useFetcher中进入
           const cachedState = getStateCache(id, methodKey).s;
-          cachedState && update({ data }, cachedState, hookInstance);
+          cachedState && update({ data }, cachedState);
         }
 
         // 如果需要更新响应数据，则在请求后触发对应回调函数
@@ -245,7 +241,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
           const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
           // loading状态受控时将不再更改为false
           !controlledLoading && (newStates.loading = falseValue);
-          update(newStates, frontStates, hookInstance);
+          update(newStates);
           runEventHandlers(
             successHandlers,
             createAlovaEvent(AlovaEventType.AlovaSuccessEvent, methodInstance, sendCallingArgs, fromCache(), data),
@@ -282,14 +278,14 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
               undefinedValue;
 
       // 未调用next函数时，更新loading为false
-      !isNextCalled && !controlledLoading && update({ loading: falseValue }, frontStates, hookInstance);
+      !isNextCalled && !controlledLoading && update({ loading: falseValue });
     } catch (error: any) {
       if (toUpdateResponse()) {
         // 控制在输出错误消息
         const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
         // loading状态受控时将不再更改为false
         !controlledLoading && (newStates.loading = falseValue);
-        update(newStates, frontStates, hookInstance);
+        update(newStates);
         runEventHandlers(
           errorHandlers,
           createAlovaEvent(

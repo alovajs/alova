@@ -1,10 +1,16 @@
 import Method from '@/Method';
 import createHook from '@/createHook';
-import { getResponseCache } from '@/storage/responseCache';
+import { getWithCacheAdapter } from '@/storage/cacheWrapper';
 import { debounce, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
-import { _self, getContext, getMethodInternalKey, isFn, isNumber, sloughConfig } from '@alova/shared/function';
 import {
-  deleteAttr,
+  getContext,
+  getMethodInternalKey,
+  isFn,
+  isNumber,
+  sloughConfig,
+  statesHookHelper
+} from '@alova/shared/function';
+import {
   falseValue,
   forEach,
   isArray,
@@ -21,7 +27,6 @@ import {
   EnumHookType,
   ErrorHandler,
   ExportedType,
-  FetchRequestState,
   FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
@@ -33,6 +38,11 @@ import {
 import useHookToSendRequest from './useHookToSendRequest';
 
 const refCurrent = <T>(ref: { current: T }) => ref.current;
+const keyData = 'data';
+const keyLoading = 'loading';
+const keyError = 'error';
+const keyDownloading = 'downloading';
+const keyUploading = 'uploading';
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useFetcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -82,42 +92,13 @@ export default function createRequestState<
         ResponseHeader
       >,
   useHookConfig: Config,
-  initialData?: FrontRequestHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >['initialData'],
+  initialData?: FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>['initialData'],
   immediate = falseValue,
   watchingStates?: Export[],
-  debounceDelay: WatcherHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >['debounce'] = 0
+  debounceDelay: WatcherHookConfig<any, any, any, any, any, any, any, any, any>['debounce'] = 0
 ) {
   // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
   useHookConfig = { ...useHookConfig };
-  const statesHook = promiseStatesHook();
-  const {
-    create,
-    export: exportState,
-    effectRequest,
-    update,
-    memorize = _self,
-    ref = val => ({ current: val })
-  } = statesHook;
   const { middleware, __referingObj: referingObject = {} } = useHookConfig;
   let initialLoading = middleware ? falseValue : !!immediate;
 
@@ -130,9 +111,10 @@ export default function createRequestState<
     try {
       const methodInstance = getHandlerMethod(methodHandler);
       const alovaInstance = getContext(methodInstance);
-      const cachedResponse: Responded | undefined = getResponseCache(
+      const cachedResponse = getWithCacheAdapter(
         alovaInstance.id,
-        getMethodInternalKey(methodInstance)
+        getMethodInternalKey(methodInstance),
+        alovaInstance.l1Cache
       );
       const forceRequestFinally = sloughConfig(
         (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
@@ -141,26 +123,44 @@ export default function createRequestState<
     } catch (error) {}
   }
 
-  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig)));
+  const {
+    create,
+    export: exportState,
+    effectRequest,
+    memorize,
+    ref,
+    exportObject
+  } = statesHookHelper(promiseStatesHook(), referingObject);
   const progress: Progress = {
     total: 0,
     loaded: 0
   };
   // 将外部传入的受监管的状态一同放到frontStates集合中
-  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
+  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>;
+  const [data] = create(isFn(initialData) ? initialData() : initialData, keyData);
+  const [loading] = create(initialLoading, keyLoading);
+  const [error] = create(undefinedValue as Error | undefined, keyError);
+  const [downloading] = create({ ...progress }, keyDownloading);
+  const [uploading] = create({ ...progress }, keyUploading);
   const frontStates = {
     ...managedStates,
-    data: create(isFn(initialData) ? initialData() : initialData, referingObject),
-    loading: create(initialLoading, referingObject),
-    error: create(undefinedValue as Error | undefined, referingObject),
-    downloading: create({ ...progress }, referingObject),
-    uploading: create({ ...progress }, referingObject)
+    [keyData]: data,
+    [keyLoading]: loading,
+    [keyError]: error,
+    [keyDownloading]: downloading,
+    [keyUploading]: uploading
   };
+  const exportings = exportObject({
+    [keyData]: data,
+    [keyLoading]: loading,
+    [keyError]: error
+  });
+  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, exportings.update)));
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
   const handleRequest = (
-    handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
+    handler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any> = methodHandler,
     sendCallingArgs?: any[]
   ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs);
   // 以捕获异常的方式调用handleRequest
@@ -185,57 +185,41 @@ export default function createRequestState<
   hookInstance.c = useHookConfig;
   // 在服务端渲染时不发送请求
   if (!isSSR) {
-    effectRequest(
-      {
-        handler:
-          // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
-          hasWatchingStates
-            ? debounce(wrapEffectRequest, (changedIndex?: number) =>
-                isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
-              )
-            : wrapEffectRequest,
-        removeStates: () => forEach(hookInstance.rf, fn => fn()),
-        saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),
-        frontStates,
-        watchingStates,
-        immediate: immediate ?? trueValue
-      },
-      hookInstance
-    );
+    effectRequest({
+      handler:
+        // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
+        hasWatchingStates
+          ? debounce(wrapEffectRequest, (changedIndex?: number) =>
+              isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
+            )
+          : wrapEffectRequest,
+      removeStates: () => forEach(hookInstance.rf, fn => fn()),
+      saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),
+      frontStates,
+      watchingStates,
+      immediate: immediate ?? trueValue
+    });
   }
 
-  type PartialFrontRequestState = Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>;
-  type PartialFetchRequestState = Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>;
   return {
-    loading: exportState(frontStates.loading, hookInstance) as unknown as ExportedType<boolean, S>,
-    data: exportState(frontStates.data, hookInstance) as unknown as ExportedType<R, S>,
-    error: exportState(frontStates.error, hookInstance) as unknown as ExportedType<Error | null, S>,
-    get downloading() {
+    ...exportings,
+    get [keyDownloading]() {
       hookInstance.ed = trueValue;
-      return exportState(frontStates.downloading, hookInstance) as unknown as ExportedType<Progress, S>;
+      return exportState(downloading) as unknown as ExportedType<Progress, State>;
     },
-    get uploading() {
+    get [keyUploading]() {
       hookInstance.eu = trueValue;
-      return exportState(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>;
+      return exportState(uploading) as unknown as ExportedType<Progress, State>;
     },
-    onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
+    onSuccess(handler: SuccessHandler<any, any, any, any, any, any, any, any, any>) {
       pushItem(hookInstance.sh, handler);
     },
-    onError(handler: ErrorHandler<S, E, R, T, RC, RE, RH>) {
+    onError(handler: ErrorHandler<any, any, any, any, any, any, any, any, any>) {
       pushItem(hookInstance.eh, handler);
     },
-    onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
+    onComplete(handler: CompleteHandler<any, any, any, any, any, any, any, any, any>) {
       pushItem(hookInstance.ch, handler);
     },
-    update: memorize((newStates: PartialFrontRequestState | PartialFetchRequestState) => {
-      // 当useFetcher调用时，其fetching使用的是loading，更新时需要转换过来
-      const { fetching } = newStates as PartialFetchRequestState;
-      if (fetching) {
-        (newStates as PartialFrontRequestState).loading = fetching;
-        deleteAttr(newStates as PartialFetchRequestState, 'fetching');
-      }
-      update(newStates, frontStates, hookInstance);
-    }),
     abort: memorize(() => hookInstance.m && hookInstance.m.abort()),
 
     /**
@@ -245,13 +229,6 @@ export default function createRequestState<
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>) =>
-      handleRequest(methodInstance, sendCallingArgs)
-    ),
-
-    /**
-     * refering object that sharing some value with this object.
-     */
-    __referingObj: referingObject
+    send: memorize((sendCallingArgs?: any[], methodInstance?: Method) => handleRequest(methodInstance, sendCallingArgs))
   };
 }
