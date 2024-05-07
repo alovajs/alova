@@ -1,3 +1,8 @@
+import Method from '@/Method';
+import defaultCacheLogger from '@/defaults/cacheLogger';
+import { getRawWithCacheAdapter, getWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
+import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
+import cloneMethod from '@/utils/cloneMethod';
 import {
   _self,
   getConfig,
@@ -28,12 +33,6 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import Method from '@/Method';
-import defaultCacheLogger from '@/defaults/cacheLogger';
-import { getRawWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
-import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
-import { getResponseCache, setResponseCache } from '@/storage/responseCache';
-import cloneMethod from '@/utils/cloneMethod';
 import {
   AlovaRequestAdapter,
   Arg,
@@ -123,21 +122,21 @@ export default function sendRequest<
     const { localCache } = getConfig(methodInstance);
 
     // 如果当前method设置了受控缓存，则看是否有自定义的数据
-    let cachedResponse = isFn(localCache)
-      ? await localCache()
+    let cachedResponse = await (isFn(localCache)
+      ? localCache()
       : // 如果是强制请求的，则跳过从缓存中获取的步骤
         // 否则判断是否使用缓存数据
         forceRequest
         ? undefinedValue
-        : getResponseCache(id, methodKey);
+        : getWithCacheAdapter(id, methodKey, l1Cache));
 
     // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中，过期时间要使用缓存的
     if (cacheMode === STORAGE_RESTORE && !cachedResponse) {
-      const rawPersistentData = await getRawWithCacheAdapter(id, methodKey, l2Cache, tag);
-      if (rawPersistentData) {
-        const [persistentResponse, persistentExpireMilliseconds] = rawPersistentData;
-        setResponseCache(id, methodKey, persistentResponse, persistentExpireMilliseconds);
-        cachedResponse = persistentResponse;
+      const rawL2CacheData = await getRawWithCacheAdapter(id, methodKey, l2Cache, tag);
+      if (rawL2CacheData) {
+        const [l2Response, l2ExpireMilliseconds] = rawL2CacheData;
+        await setWithCacheAdapter(id, methodKey, l2Response, l2ExpireMilliseconds, l1Cache);
+        cachedResponse = l2Response;
       }
     }
 

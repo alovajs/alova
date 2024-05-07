@@ -1,6 +1,7 @@
 import type {
   Alova,
   AlovaEvent,
+  AlovaMethodHandler,
   CacheExpire,
   CacheMode,
   EffectRequestParams,
@@ -118,6 +119,44 @@ export const key = (methodInstance: Method) => {
  * @returns 此method实例的key值
  */
 export const getMethodInternalKey = (methodInstance: Method) => methodInstance.__key__;
+
+/**
+ * 获取请求方法对象
+ * @param methodHandler 请求方法句柄
+ * @param args 方法调用参数
+ * @returns 请求方法对象
+ */
+export const getHandlerMethod = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  methodHandler:
+    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    | AlovaMethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >,
+  assert: (expression: boolean, msg: string) => void,
+  args: any[] = []
+) => {
+  const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
+  assert(!!methodInstance.__key__, 'hook handler must be a method instance or a function that returns method instance');
+  return methodInstance;
+};
 /**
  * 是否为特殊数据
  * @param data 提交数据
@@ -132,6 +171,25 @@ export const isSpecialRequestBody = (data: any) => {
 export const objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T =>
   ObjectCls.assign(target, ...sources);
 
+// 编写一个omit的函数类型
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+/**
+ * 排除一个数据集合中指定的属性，并返回新的数据集合
+ * @param obj 数据集合
+ * @param keys 排除的key
+ * @returns 新的数据集合
+ */
+export const omit = <T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]) => {
+  const result = {} as Pick<T, Exclude<keyof T, K>>;
+  for (const key in obj) {
+    if (!keys.includes(key as any)) {
+      (result as any)[key] = obj[key];
+    }
+  }
+  return result;
+};
+
 /**
  * 获取缓存的配置参数，固定返回{ e: number, m: number, s: boolean, t: string }格式的对象
  * e为expire缩写，表示缓存失效时间点（时间戳），单位为毫秒
@@ -142,28 +200,28 @@ export const objAssign = <T extends Record<string, any>>(target: T, ...sources: 
  * @returns 统一的缓存参数对象
  */
 export const getLocalCacheConfigParam = (methodInstance: Method) => {
-  const { localCache } = getConfig(methodInstance);
+  const { cache } = getConfig(methodInstance);
   const getCacheExpireTs = (cacheExpire: CacheExpire) =>
     isNumber(cacheExpire) ? getTime() + cacheExpire : getTime(cacheExpire || undefinedValue);
   let cacheMode: CacheMode = MEMORY;
   let expire = 0;
-  let storage = falseValue;
+  let store = falseValue;
   let tag: undefined | string = undefinedValue;
-  if (!isFn(localCache)) {
-    if (isNumber(localCache) || instanceOf(localCache, Date)) {
-      expire = getCacheExpireTs(localCache);
+  if (!isFn(cache)) {
+    if (isNumber(cache) || instanceOf(cache, Date)) {
+      expire = getCacheExpireTs(cache);
     } else {
-      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = localCache || {};
+      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = cache || {};
       cacheMode = mode;
       expire = getCacheExpireTs(configExpire);
-      storage = [STORAGE_RESTORE].includes(mode);
+      store = mode === STORAGE_RESTORE;
       tag = configTag ? configTag.toString() : undefinedValue;
     }
   }
   return {
     e: expire,
     m: cacheMode,
-    s: storage,
+    s: store,
     t: tag
   };
 };
@@ -316,10 +374,11 @@ export function statesHookHelper(
       return {
         ...(exportedStates as Record<keyof S, GeneralFrameworkState>),
         __referingObj: referingObject,
-        update: memorize((newStates: Record<string, any>) => {
+        update: memorize((newStates: Record<string, any>, targetStates?: Record<string, GeneralFrameworkState>) => {
+          targetStates = targetStates || states;
           objectKeys(newStates).forEach(key => {
             if (statesList.includes(key)) {
-              update(newStates[key], states[key], key);
+              update(newStates[key], targetStates[key], key);
             } else if (coreHookStates[key] && isFn(coreHookStates.update)) {
               coreHookStates.update({
                 [key]: newStates[key]
@@ -331,3 +390,9 @@ export function statesHookHelper(
     }
   };
 }
+
+const cacheKeyPrefix = '$a.';
+/**
+ * build common cache key.
+ */
+export const buildNamespacedCacheKey = (namespace: string, key: string) => cacheKeyPrefix + namespace + key;

@@ -1,31 +1,19 @@
 import Method from '@/Method';
-import defaultMiddleware from '@/defaults/defaultMiddleware';
-import { filterSnapshotMethods } from '@/storage/methodSnapShots';
-import { getResponseCache } from '@/storage/responseCache';
-import { getPersistentResponse } from '@/storage/responseStorage';
+import defaultMiddleware from '@/defaults/middleware';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
 import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
-import { exportFetchStates, getHandlerMethod } from '@/utils/helper';
-import { assertMethodMatcher } from '@/utils/myAssert';
+import myAssert, { assertMethod } from '@/utils/myAssert';
 import {
   getContext,
-  getLocalCacheConfigParam,
+  getHandlerMethod,
   getMethodInternalKey,
   isFn,
   noop,
+  omit,
   runEventHandlers,
   sloughConfig
 } from '@alova/shared/function';
-import {
-  MEMORY,
-  STORAGE_RESTORE,
-  falseValue,
-  promiseResolve,
-  promiseThen,
-  pushItem,
-  trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
+import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
   AlovaCompleteEvent,
   AlovaErrorEvent,
@@ -45,6 +33,7 @@ import {
   SuccessHandler,
   WatcherHookConfig
 } from '~/typings';
+import { queryCache } from './manipulateCache';
 
 /**
  * 统一处理useRequest/useWatcher/useFetcher等请求钩子函数的请求逻辑
@@ -58,25 +47,24 @@ export default function useHookToSendRequest(
   methodHandler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any>,
   sendCallingArgs: any[] = []
 ) {
-  let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
+  let methodInstance = getHandlerMethod(methodHandler, myAssert, sendCallingArgs);
   const {
     fs: frontStates,
     sh: successHandlers,
     eh: errorHandlers,
     ch: completeHandlers,
-    ht,
-    c: useHookConfig
+    ht: hookType,
+    c: useHookConfig,
+    upd: update
   } = hookInstance;
-  const isFetcher = ht === EnumHookType.USE_FETCHER;
+  const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
     | FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>
     | FetcherHookConfig;
   const alovaInstance = getContext(methodInstance);
   const { id } = alovaInstance;
-  const { upd: update } = hookInstance;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const methodKey = getMethodInternalKey(methodInstance);
-  const { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance);
   const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<any, any, any, any, any, any, any, any, any>;
   hookInstance.m = methodInstance;
 
@@ -84,23 +72,15 @@ export default function useHookToSendRequest(
     // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
     let removeStates = noop;
     let saveStates = noop as Hook['sf'][number];
-    let cachedResponse: R | undefined = getResponseCache(id, methodKey);
     let isNextCalled = falseValue;
     let responseHandlePromise = promiseResolve<any>(undefinedValue);
     let offDownloadEvent = noop;
     let offUploadEvent = noop;
+    const cachedResponse = await queryCache(methodInstance);
     let fromCache = () => !!cachedResponse;
     // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
     let controlledLoading = falseValue;
     if (!isFetcher) {
-      // 当缓存模式为memory时不获取缓存，减少缓存获取
-      const persistentResponse =
-        cacheMode !== MEMORY ? getPersistentResponse(id, methodKey, storage, tag) : undefinedValue;
-
-      // 如果有持久化数据，则需要判断是否需要恢复它到缓存中
-      cachedResponse =
-        cacheMode === STORAGE_RESTORE && !cachedResponse && persistentResponse ? persistentResponse : cachedResponse;
-
       // 将初始状态存入缓存以便后续更新
       saveStates = (frontStates: FrontRequestState) => setStateCache(id, methodKey, frontStates, hookInstance);
       saveStates(frontStates);
@@ -110,7 +90,7 @@ export default function useHookToSendRequest(
     }
 
     // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
-    const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
+    const guardNext: AlovaGuardNext<any, any, any, any, any, any, any, any, any> = guardNextConfig => {
       isNextCalled = trueValue;
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
         guardNextConfig || {};
@@ -148,24 +128,24 @@ export default function useHookToSendRequest(
     // 调用中间件函数
     let successHandlerDecorator:
       | ((
-          handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
-          event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
+          handler: SuccessHandler<any, any, any, any, any, any, any, any, any>,
+          event: AlovaSuccessEvent<any, any, any, any, any, any, any, any, any>,
           index: number,
           length: number
         ) => void)
       | undefined;
     let errorHandlerDecorator:
       | ((
-          handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
-          event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
+          handler: ErrorHandler<any, any, any, any, any, any, any, any, any>,
+          event: AlovaErrorEvent<any, any, any, any, any, any, any, any, any>,
           index: number,
           length: number
         ) => void)
       | undefined;
     let completeHandlerDecorator:
       | ((
-          handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
-          event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
+          handler: CompleteHandler<any, any, any, any, any, any, any, any, any>,
+          event: AlovaCompleteEvent<any, any, any, any, any, any, any, any, any>,
           index: number,
           length: number
         ) => void)
@@ -187,20 +167,19 @@ export default function useHookToSendRequest(
       }
     };
     // 是否需要更新响应数据，以及调用响应回调
-    const toUpdateResponse = () => ht !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
-    const fetchStates = exportFetchStates(frontStates);
+    const toUpdateResponse = () =>
+      hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
     // 调用中间件函数
     const middlewareCompletePromise = isFetcher
-      ? (middleware as AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH>)(
+      ? (middleware as AlovaFetcherMiddleware<any, any, any, any, any, any, any, any, any>)(
           {
             ...commonContext,
             fetchArgs: sendCallingArgs,
-            fetch: (matcher, ...args) => {
-              const methodInstance = filterSnapshotMethods(matcher, falseValue);
-              assertMethodMatcher(methodInstance);
+            fetch: (methodInstance, ...args) => {
+              assertMethod(methodInstance);
               return useHookToSendRequest(hookInstance, methodInstance as Method, args);
             },
-            fetchStates,
+            fetchStates: omit(frontStates, 'data'),
             update,
             controlFetching(control = trueValue) {
               controlledLoading = control;
@@ -208,7 +187,7 @@ export default function useHookToSendRequest(
           },
           guardNext
         )
-      : (middleware as AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>)(
+      : (middleware as AlovaFrontMiddleware<any, any, any, any, any, any, any, any, any>)(
           {
             ...commonContext,
             sendArgs: sendCallingArgs,

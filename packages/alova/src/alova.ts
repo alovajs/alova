@@ -179,7 +179,7 @@ export const createAlova = <State, Computed, Watched, Export, RequestConfig, Res
   );
   const newStatesHook = getStatesHook(alovaInstance);
   if (boundStatesHook) {
-    myAssert(boundStatesHook === newStatesHook, 'must use the same `statesHook` in single project');
+    myAssert(boundStatesHook === newStatesHook, 'expected to use the same `statesHook`');
   }
   boundStatesHook = newStatesHook;
   const { l1Cache, l2Cache } = alovaInstance;
