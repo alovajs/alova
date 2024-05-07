@@ -116,9 +116,9 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
   timeout?: number;
 
   /**
-   * 响应数据在缓存时间内则不再次请求。get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+   * 响应数据在缓存时间内则不再次请求。get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    */
-  cache?: CacheConfig | CacheController<Responded>;
+  cacheFor?: CacheConfig | CacheController<Responded>;
 
   /**
    * 打击源方法实例，当源方法实例请求成功时，当前方法实例的缓存将被失效
@@ -257,7 +257,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
   export?: (state: State, referingObject: ReferingObject) => Export;
 
   /** 将状态转换为普通数据 */
-  dehydrate: (state: State, referingObject: ReferingObject) => any;
+  dehydrate: (state: State, key: string, referingObject: ReferingObject) => any;
 
   /**
    * 更新状态值
@@ -362,7 +362,7 @@ export interface AlovaOptions<State, Computed, Watched, Export, RequestConfig, R
    * get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    * @default { GET: 300000 }
    */
-  cache?: GlobalCacheConfig;
+  cacheFor?: GlobalCacheConfig;
 
   /**
    * memory mode cache adapter. it will be used when caching data with memory mode.
@@ -569,11 +569,12 @@ export interface MethodConstructor {
   ): Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   readonly prototype: Method;
 }
+// eslint-disable-next-line
 export declare const Method: MethodConstructor;
 
 export interface Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
-  options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
   id: string;
+  options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
   l1Cache: AlovaGlobalCacheAdapter;
   l2Cache: AlovaGlobalCacheAdapter;
   Get<Responded, Transformed = unknown>(
@@ -616,10 +617,10 @@ export interface Alova<State, Computed, Watched, Export, RequestConfig, Response
    * @param {boolean} matchAll is match all, default is true
    * @returns {Method[] | Method} method list when `matchAll` is true, otherwise return method instance or undefined
    */
-  matchSnapshot<M extends boolean = true>(
-    matcher: MethodFilter,
-    matchAll?: M
-  ): M extends true ? Method[] : Method | undefined;
+  // matchSnapshot<M extends boolean = true>(
+  //   matcher: MethodFilter,
+  //   matchAll?: M
+  // ): M extends true ? Method[] : Method | undefined;
 }
 
 /**
@@ -1398,10 +1399,10 @@ export type MethodDetaiedFilter = {
 };
 export type MethodFilter = string | RegExp | MethodDetaiedFilter;
 
-export type UpdateStateCollection<R> = {
+export type UpdateStateCollection<Responded> = {
   [key: string | number | symbol]: (data: any) => any;
 } & {
-  data?: (data: R) => any;
+  data?: (data: Responded) => any;
 };
 
 export type AlovaMethodHandler<
@@ -1585,14 +1586,12 @@ export interface UpdateOptions {
  * ```
  * @param matcher method instance
  * @param handleUpdate new data or update function that returns new data
- * @param options options
  * @returns is updated
  */
 export declare function updateState<Responded>(
   matcher: Method<any, any, any, any, Responded>,
-  handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>,
-  options?: UpdateOptions
-): boolean;
+  handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>
+): Promise<boolean>;
 
 export interface CacheSetOptions {
   /**

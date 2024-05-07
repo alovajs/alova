@@ -1,13 +1,6 @@
 import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import {
-  AlovaGlobalCacheAdapter,
-  AlovaMethodCreateConfig,
-  AlovaOptions,
-  MethodFilter,
-  RequestBody,
-  StatesHook
-} from '~/typings';
+import { AlovaGlobalCacheAdapter, AlovaMethodCreateConfig, AlovaOptions, RequestBody, StatesHook } from '~/typings';
 import Method from './Method';
 import { defaultL1CacheAdapter, defaultL2CacheAdapter } from './defaults/cacheAdapter';
 import { getStatesHook } from './utils/helper';
@@ -35,7 +28,10 @@ const defaultAlovaOptions = {
   shareRequest: trueValue
 };
 
+let idCount = 0;
 export class Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
+  public id: string;
+
   public options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
 
   public l1Cache: AlovaGlobalCacheAdapter;
@@ -43,6 +39,8 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
   public l2Cache: AlovaGlobalCacheAdapter;
 
   constructor(options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>) {
+    this.id = idCount.toString();
+    idCount += 1;
     // 如果storage未指定，则默认使用localStorage
     this.l1Cache = options.l1Cache || defaultL1CacheAdapter;
     this.l2Cache = options.l2Cache || defaultL2CacheAdapter;
@@ -153,12 +151,12 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
     );
   }
 
-  matchSnapshot<M extends boolean = true>(
-    matcher: MethodFilter,
-    matchAll?: M
-  ): M extends true ? Method[] : Method | undefined {
-    return matchAll ? ([] as Method[]) : undefined;
-  }
+  // matchSnapshot<M extends boolean = true>(
+  //   matcher: MethodFilter,
+  //   matchAll?: M
+  // ): M extends true ? Method[] : Method | undefined {
+  //   return matchAll ? ([] as Method[]) : undefined;
+  // }
 }
 
 export let boundStatesHook: StatesHook<any, any> | undefined = undefinedValue;

@@ -1,7 +1,19 @@
-import { getContext, newInstance, objAssign } from '@alova/shared/function';
 import Method from '@/Method';
+import { getContext, newInstance, objAssign } from '@alova/shared/function';
 
-export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, RE, RH>) => {
+export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+  methodInstance: Method<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
+) => {
   const { data, config } = methodInstance;
   const newConfig = { ...config };
   const { headers = {}, params = {} } = newConfig;
@@ -9,7 +21,7 @@ export default <S, E, R, T, RC, RE, RH>(methodInstance: Method<S, E, R, T, RC, R
   newConfig.headers = { ...headers };
   newConfig.params = { ...params };
   const newMethod = newInstance(
-    Method<S, E, R, T, RC, RE, RH>,
+    Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
     methodInstance.type,
     ctx,
     methodInstance.url,

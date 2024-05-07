@@ -1,5 +1,6 @@
 import { GeneralFn } from './types';
 
+declare const Deno: any;
 const undefStr = 'undefined';
 // 以下为减少编译代码量而添加的统一处理函数或变量
 export const PromiseCls = Promise as typeof Promise<any>;
@@ -40,8 +41,9 @@ export const len = (data: any[] | Uint8Array | string) => data.length;
 export const isArray = (arg: any): arg is any[] => Array.isArray(arg);
 export const deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) => delete arg[attr];
 export const typeOf = (arg: any) => typeof arg;
-export const noBrowserWin = typeof window === undefStr || !window.location; // 是否为服务端运行，为了兼容浏览器以及非web客户端环境（如小程序），需要再判断一下process
-export const isSSR = noBrowserWin && typeof process !== undefStr;
+
+// 是否为服务端运行，node和bun通过process判断，deno通过Deno判断，但是支付宝小程序有process需要再判断下process.browser
+export const isSSR = typeof process !== undefStr ? !(process as any).browser : typeof Deno !== undefStr;
 
 /** cache mode */
 // only cache in memory, it's default option

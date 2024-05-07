@@ -1,7 +1,7 @@
-import { updateState } from 'alova';
-import { noop } from 'svelte/internal';
 import { isFn, objectKeys } from '@/helper';
 import { undefinedValue } from '@/helper/variables';
+import { updateState } from 'alova';
+import { noop } from 'svelte/internal';
 import { currentSilentMethod } from '../createSilentQueueMiddlewares';
 
 /**
@@ -12,6 +12,7 @@ import { currentSilentMethod } from '../createSilentQueueMiddlewares';
  */
 const updateStateEffect: typeof updateState = (matcher, handleUpdate, options = {}) => {
   const { onMatch } = options;
+  // TODO: 由于updateState中不再支持method匹配器用法，因此废弃onMatch回调，而matcher就是当前的method实例，直接使用matcher即可。
   options.onMatch = method => {
     // 将目标method实例保存到当前的silentMethod实例
     if (currentSilentMethod) {

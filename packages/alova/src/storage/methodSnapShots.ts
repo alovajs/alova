@@ -1,7 +1,7 @@
+import { globalConfigMap } from '@/globalConfig';
 import { getConfig, instanceOf, isPlainObject, isString } from '@alova/shared/function';
 import { forEach, isArray, objectKeys, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import { globalConfigMap } from '@/globalConfig';
-import { Method, MethodFilter, MethodFilterHandler, MethodMatcher } from '~/typings';
+import { Method, MethodFilter, MethodFilterHandler } from '~/typings';
 
 /** method实例快照集合，发送过请求的method实例将会被保存 */
 const methodSnapshots: Record<string, Record<string, Method>> = {};

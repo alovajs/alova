@@ -1,5 +1,5 @@
 import { buildNamespacedCacheKey, getTime } from '@alova/shared/function';
-import { PromiseCls, nullValue, undefinedValue } from '@alova/shared/vars';
+import { PromiseCls, filterItem, nullValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter } from '~/typings';
 
 /**
@@ -17,12 +17,15 @@ export const setWithCacheAdapter = async (
   data: any,
   expireTimestamp: number,
   cacheAdapter: AlovaGlobalCacheAdapter,
-  tag: string | number | null = nullValue
+  tag: string | number | undefined = undefinedValue
 ) => {
   // not to cache if expireTimestamp is less than 0
   if (expireTimestamp > 0 && data) {
     const methodCacheKey = buildNamespacedCacheKey(namespace, key);
-    cacheAdapter.set(methodCacheKey, [data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag]);
+    await cacheAdapter.set(
+      methodCacheKey,
+      filterItem([data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag], Boolean)
+    );
   }
 };
 
@@ -48,12 +51,12 @@ export const getRawWithCacheAdapter = async (
   namespace: string,
   key: string,
   cacheAdapter: AlovaGlobalCacheAdapter,
-  tag: string | null = null
+  tag: string | undefined = undefinedValue
 ) => {
   const storagedData = await cacheAdapter.get(buildNamespacedCacheKey(namespace, key));
   if (storagedData) {
     // eslint-disable-next-line
-    const [_, expireTimestamp, storedTag = nullValue] = storagedData;
+    const [_, expireTimestamp, storedTag] = storagedData;
     // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
     if (storedTag === tag && (!expireTimestamp || expireTimestamp > getTime())) {
       return storagedData;
@@ -74,7 +77,7 @@ export const getWithCacheAdapter = async (
   namespace: string,
   key: string,
   cacheAdapter: AlovaGlobalCacheAdapter,
-  tag: string | null = null
+  tag: string | undefined = undefinedValue
 ) => {
   const rawData = await getRawWithCacheAdapter(namespace, key, cacheAdapter, tag);
   return rawData ? rawData[0] : undefinedValue;
