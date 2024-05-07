@@ -1,5 +1,6 @@
 import { createAssert } from '@alova/shared/assert';
-import type { Method } from '~/typings';
+import { instanceOf } from '@alova/shared/function';
+import { Method } from '~/typings';
 
 // import { get } from '@alova/shared';
 
@@ -12,8 +13,8 @@ const myAssert = createAssert();
 export default myAssert;
 
 /**
- * 断言是否匹配到method实例
+ * 断言是否为method实例
  * @param methodInstance method实例
  */
-export const assertMethodMatcher = (methodInstance?: Method) =>
-  myAssert(!!methodInstance, "didn't match any method instance");
+export const assertMethod = (methodInstance?: Method) =>
+  myAssert(instanceOf(methodInstance, Method), 'expected a method instance.');

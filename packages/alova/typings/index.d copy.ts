@@ -31,18 +31,14 @@ export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader> = (
   abort: () => void;
 };
 
-export interface FrontRequestState<L = any, R = any, E = any, D = any, U = any> {
+export interface FetchRequestState<L = any, E = any, D = any, U = any> {
   loading: L;
-  data: R;
   error: E;
   downloading: D;
   uploading: U;
 }
-export interface FetchRequestState<F = any, E = any, D = any, U = any> {
-  fetching: F;
-  error: E;
-  downloading: D;
-  uploading: U;
+export interface FrontRequestState<L = any, R = any, E = any, D = any, U = any> extends FetchRequestState<L, E, D, U> {
+  data: R;
 }
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 
@@ -204,7 +200,7 @@ export interface Hook {
   /**
    * update states.
    */
-  upd: (newStates: Record<string, any>) => void;
+  upd: (newStates: Record<string, any>, targetStates?: Record<string, any>) => void;
 
   /** successHandlers */
   sh: SuccessHandler<any, any, any, any, any, any, any, any, any>[];
@@ -997,7 +993,7 @@ export interface AlovaFetcherMiddlewareContext<
     ResponseHeader
   > {
   /** 数据预加载函数 */
-  fetchFn<Transformed>(method: Method<any, any, any, any, Transformed>, ...args: any[]): Promise<Transformed>;
+  fetch<Transformed>(method: Method<any, any, any, any, Transformed>, ...args: any[]): Promise<Transformed>;
 
   /** fetchArgs 响应处理回调的参数，该参数由useFetcher的fetch传入 */
   fetchArgs: any[];
@@ -1187,7 +1183,7 @@ export interface UseHookConfig<
   /**
    * refering object that sharing some value with this object.
    */
-  __referingObj: ReferingObject;
+  __referingObj?: ReferingObject;
 
   /**
    * other attributes
@@ -1598,6 +1594,16 @@ export declare function updateState<Responded>(
   options?: UpdateOptions
 ): boolean;
 
+export interface CacheSetOptions {
+  /**
+   * cache policy.
+   * - l1: only set l1 cache.
+   * - l2: only set l2 cache.
+   * - all: set l1 cache and set l2 cache(method cache mode need to be 'restore').
+   * @default 'all'
+   */
+  policy?: 'l1' | 'l2' | 'all';
+}
 /**
  * set cache manually
  * @example
@@ -1623,9 +1629,20 @@ export declare function updateState<Responded>(
  */
 export declare function setCache<Responded>(
   matcher: Method<any, any, any, any, Responded> | Method<any, any, any, any, Responded>[],
-  dataOrUpdater: Responded | ((oldCache: Responded) => Responded | undefined | void)
+  dataOrUpdater: Responded | ((oldCache: Responded) => Responded | undefined | void),
+  options?: CacheSetOptions
 ): Promise<void>;
 
+export interface CacheQueryOptions {
+  /**
+   * cache policy.
+   * - l1: only query l1 cache.
+   * - l2: only query l2 cache.
+   * - all: query l1 cache first and query l2 cache if l1 cache not found(method cache mode need to be 'restore').
+   * @default 'all'
+   */
+  policy?: 'l1' | 'l2' | 'all';
+}
 /**
  * query cache data
  * @example
@@ -1636,7 +1653,8 @@ export declare function setCache<Responded>(
  * @returns cache data, return undefined if not found
  */
 export declare function queryCache<Responded>(
-  matcher: Method<any, any, any, any, Responded>
+  matcher: Method<any, any, any, any, Responded>,
+  options?: CacheQueryOptions
 ): Promise<Responded | undefined>;
 
 /**

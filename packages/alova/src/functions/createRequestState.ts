@@ -1,16 +1,21 @@
 import Method from '@/Method';
 import createHook from '@/createHook';
-import { getWithCacheAdapter } from '@/storage/cacheWrapper';
-import { debounce, getHandlerMethod, promiseStatesHook } from '@/utils/helper';
+import { debounce, promiseStatesHook } from '@/utils/helper';
+import myAssert from '@/utils/myAssert';
 import {
+  buildNamespacedCacheKey,
   getContext,
+  getHandlerMethod,
   getMethodInternalKey,
+  getTime,
+  instanceOf,
   isFn,
   isNumber,
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
 import {
+  PromiseCls,
   falseValue,
   forEach,
   isArray,
@@ -94,10 +99,10 @@ export default function createRequestState<
   useHookConfig: Config,
   initialData?: FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>['initialData'],
   immediate = falseValue,
-  watchingStates?: Export[],
+  watchingStates?: Watched[],
   debounceDelay: WatcherHookConfig<any, any, any, any, any, any, any, any, any>['debounce'] = 0
 ) {
-  // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
+  // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
   const { middleware, __referingObj: referingObject = {} } = useHookConfig;
   let initialLoading = middleware ? falseValue : !!immediate;
@@ -109,15 +114,24 @@ export default function createRequestState<
   if (immediate && !middleware) {
     // 调用getHandlerMethod时可能会报错，需要try/catch
     try {
-      const methodInstance = getHandlerMethod(methodHandler);
+      const methodInstance = getHandlerMethod(methodHandler, myAssert);
       const alovaInstance = getContext(methodInstance);
-      const cachedResponse = getWithCacheAdapter(
-        alovaInstance.id,
-        getMethodInternalKey(methodInstance),
-        alovaInstance.l1Cache
+      const l1CacheResult = alovaInstance.l1Cache.get(
+        buildNamespacedCacheKey(alovaInstance.id, getMethodInternalKey(methodInstance))
       );
+      let cachedResponse: any = undefinedValue;
+      // 只同步检查缓存，因此对异步的l1Cache适配器不生效
+      // 建议在客户端不设置异步的l1Cache适配器
+      if (l1CacheResult && !instanceOf(l1CacheResult, PromiseCls)) {
+        const [data, expireTimestamp] = l1CacheResult;
+        // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
+        if (!expireTimestamp || expireTimestamp > getTime()) {
+          cachedResponse = data;
+        }
+      }
       const forceRequestFinally = sloughConfig(
-        (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
+        (useHookConfig as FrontRequestHookConfig<any, any, any, any, any, any, any, any, any> | FetcherHookConfig)
+          .force ?? falseValue
       );
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}

@@ -1,5 +1,3 @@
-import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn } from '@alova/shared/function';
-import { PromiseCls, isArray, undefinedValue } from '@alova/shared/vars';
 import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
 import {
   clearWithCacheAdapter,
@@ -7,7 +5,9 @@ import {
   removeWithCacheAdapter,
   setWithCacheAdapter
 } from '@/storage/cacheWrapper';
-import { Method } from '~/typings';
+import { getContext, getLocalCacheConfigParam, getMethodInternalKey, getTime, isFn } from '@alova/shared/function';
+import { PromiseCls, isArray, undefinedValue } from '@alova/shared/vars';
+import { CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
 /*
  * 以下三个函数中的matcher为Method实例匹配器，它分为3种情况：
@@ -21,12 +21,23 @@ import { Method } from '~/typings';
  * @param matcher Method实例匹配器
  * @returns 缓存数据，未查到时返回undefined
  */
-export const queryCache = async <Responded>(matcher: Method<any, any, any, any, Responded>) => {
+export const queryCache = async <Responded>(
+  matcher: Method<any, any, any, any, Responded>,
+  { policy = 'all' }: CacheQueryOptions = {}
+) => {
+  // if __key__ exists, that means it's a method instance.
   if (matcher && matcher.__key__) {
     const { id, l1Cache, l2Cache } = getContext(matcher);
     const methodKey = getMethodInternalKey(matcher);
-    let cachedData = await getWithCacheAdapter(id, methodKey, l1Cache);
-    cachedData = cachedData || (await getWithCacheAdapter(id, methodKey, l2Cache, getLocalCacheConfigParam(matcher).t));
+    let cachedData = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
+    if (policy === 'l2') {
+      cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, getLocalCacheConfigParam(matcher).t);
+    } else if (policy === 'all' && !cachedData) {
+      const { s: store, e: expireMilliseconds, t: tag } = getLocalCacheConfigParam(matcher);
+      if (store && expireMilliseconds > getTime()) {
+        cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
+      }
+    }
     return cachedData;
   }
 };
@@ -38,28 +49,33 @@ export const queryCache = async <Responded>(matcher: Method<any, any, any, any, 
  */
 export const setCache = async <Responded>(
   matcher: Method<any, any, any, any, Responded> | Method<any, any, any, any, Responded>[],
-  dataOrUpdater: Responded | ((oldCache?: Responded) => Responded | undefined | void)
+  dataOrUpdater: Responded | ((oldCache?: Responded) => Responded | undefined | void),
+  { policy = 'all' }: CacheSetOptions = {}
 ) => {
   const methodInstances = isArray(matcher) ? matcher : [matcher];
   const batchPromises = methodInstances.map(async methodInstance => {
     const { id, l1Cache, l2Cache } = getContext(methodInstance);
     const methodKey = getMethodInternalKey(methodInstance);
-    const { e: expireMilliseconds, s: toStorage, t: tag } = getLocalCacheConfigParam(methodInstance);
+    const { e: expireMilliseconds, s: toStore, t: tag } = getLocalCacheConfigParam(methodInstance);
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
-      let cachedData = await getWithCacheAdapter(id, methodKey, l1Cache);
-      cachedData = cachedData || (await getWithCacheAdapter(id, methodKey, l2Cache, tag));
+      let cachedData = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
+      if (policy === 'l2' || (policy === 'all' && !cachedData && toStore && expireMilliseconds > getTime())) {
+        cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
+      }
       data = dataOrUpdater(cachedData);
       if (data === undefinedValue) {
         return;
       }
     }
-    await PromiseCls.all([
-      setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l1Cache),
-      toStorage && setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l2Cache, tag)
+    return PromiseCls.all([
+      policy !== 'l2' && setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l1Cache),
+      policy === 'l2' || (policy === 'all' && toStore)
+        ? setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l2Cache, tag)
+        : undefinedValue
     ]);
   });
-  await PromiseCls.all(batchPromises);
+  return PromiseCls.all(batchPromises);
 };
 
 /**

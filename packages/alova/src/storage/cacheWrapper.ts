@@ -1,9 +1,6 @@
-import { getTime } from '@alova/shared/function';
+import { buildNamespacedCacheKey, getTime } from '@alova/shared/function';
 import { PromiseCls, nullValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter } from '~/typings';
-
-const cacheKeyPrefix = '$a.';
-const buildNamespacedCacheKey = (namespace: string, key: string) => cacheKeyPrefix + namespace + key;
 
 /**
  * set or update cache

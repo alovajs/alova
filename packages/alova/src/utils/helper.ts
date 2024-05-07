@@ -1,17 +1,17 @@
-import { getContextOptions, instanceOf, isFn, isNumber } from '@alova/shared/function';
+import { boundStatesHook } from '@/alova';
+import { getContextOptions, isNumber } from '@alova/shared/function';
 import type { GeneralFn } from '@alova/shared/types';
 import { clearTimeoutTimer, nullValue, setTimeoutFn } from '@alova/shared/vars';
-import { boundStatesHook } from '@/alova';
-import { Alova, AlovaMethodHandler, FrontRequestState } from '~/typings';
-import Method from '../Method';
+import { Alova, FrontRequestState } from '~/typings';
 import myAssert from './myAssert';
 
 /**
  * 获取alova实例的statesHook
  * @returns statesHook对象
  */
-export const getStatesHook = <S, E, RC, RE, RH>(alovaInstance: Alova<S, E, RC, RE, RH>) =>
-  getContextOptions(alovaInstance).statesHook;
+export const getStatesHook = <States, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
+  alovaInstance: Alova<States, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>
+) => getContextOptions(alovaInstance).statesHook;
 /**
  * 创建防抖函数，当delay为0时立即触发函数
  * 场景：在调用useWatcher并设置了immediate为true时，首次调用需立即执行，否则会造成延迟调用
@@ -32,23 +32,7 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
     }
   };
 };
-/**
- * 获取请求方法对象
- * @param methodHandler 请求方法句柄
- * @param args 方法调用参数
- * @returns 请求方法对象
- */
-export const getHandlerMethod = <S, E, R, T, RC, RE, RH>(
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  args: any[] = []
-) => {
-  const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
-  myAssert(
-    instanceOf(methodInstance, Method),
-    'hook handler must be a method instance or a function that returns method instance'
-  );
-  return methodInstance;
-};
+
 /**
  * 导出fetchStates map
  * @param frontStates front states map
