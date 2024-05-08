@@ -61,7 +61,7 @@ export interface AlovaGlobalCacheAdapter {
    * get value by key
    * @param key key
    */
-  get(key: string): any;
+  get<T>(key: string): T | undefined | Promise<T | undefined>;
 
   /**
    * remove item
@@ -116,9 +116,9 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
   timeout?: number;
 
   /**
-   * 响应数据在缓存时间内则不再次请求。get、head请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+   * 响应数据在缓存时间内则不再次请求。get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    */
-  cache?: CacheConfig | CacheController<Responded>;
+  cacheFor?: CacheConfig | CacheController<Responded>;
 
   /**
    * 打击源方法实例，当源方法实例请求成功时，当前方法实例的缓存将被失效
@@ -217,6 +217,9 @@ export interface Hook {
   /** hook config */
   c: UseHookConfig<any, any, any, any, any, any, any, any, any>;
 
+  /** refering object */
+  ro: ReferingObject;
+
   /** enableDownload */
   ed: boolean;
 
@@ -257,7 +260,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
   export?: (state: State, referingObject: ReferingObject) => Export;
 
   /** 将状态转换为普通数据 */
-  dehydrate: (state: State, referingObject: ReferingObject) => any;
+  dehydrate: (state: State, key: string, referingObject: ReferingObject) => any;
 
   /**
    * 更新状态值
@@ -335,6 +338,14 @@ export type CacheLoggerHandler<State, Computed, Watched, Export, RequestConfig, 
  */
 export interface AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
   /**
+   * custom alova id
+   *
+   * **Recommend to custom it in multiple server scenarios**
+   * @default increme from 0 in creating order
+   */
+  id?: number | string;
+
+  /**
    * base url
    */
   baseURL?: string;
@@ -362,7 +373,7 @@ export interface AlovaOptions<State, Computed, Watched, Export, RequestConfig, R
    * get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    * @default { GET: 300000 }
    */
-  cache?: GlobalCacheConfig;
+  cacheFor?: GlobalCacheConfig;
 
   /**
    * memory mode cache adapter. it will be used when caching data with memory mode.
@@ -436,7 +447,7 @@ export interface Method<
   Export = any,
   Responded = any,
   Transformed = any,
-  RequestConfig = any,
+  RequestConfig = Record<any, any>,
   Response = any,
   ResponseHeader = any
 > {
@@ -569,11 +580,12 @@ export interface MethodConstructor {
   ): Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   readonly prototype: Method;
 }
+// eslint-disable-next-line
 export declare const Method: MethodConstructor;
 
 export interface Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
-  options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
   id: string;
+  options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
   l1Cache: AlovaGlobalCacheAdapter;
   l2Cache: AlovaGlobalCacheAdapter;
   Get<Responded, Transformed = unknown>(
@@ -1398,10 +1410,10 @@ export type MethodDetaiedFilter = {
 };
 export type MethodFilter = string | RegExp | MethodDetaiedFilter;
 
-export type UpdateStateCollection<R> = {
+export type UpdateStateCollection<Responded> = {
   [key: string | number | symbol]: (data: any) => any;
 } & {
-  data?: (data: R) => any;
+  data?: (data: Responded) => any;
 };
 
 export type AlovaMethodHandler<
@@ -1427,7 +1439,15 @@ export interface AlovaGlobalConfig {
    * it indicates not save snapshot when value is set to 0, and the method matcher will not work.
    * @default 1000
    */
-  limitSnapshots?: number;
+  methodSnapshots?: number;
+
+  /**
+   * switch of auto invalidate cache.
+   * here is three options:
+   * - close: disable auto cache invalidation and save.
+   * @default 'global'
+   */
+  autoInvalidateCache?: 'close' | 'self' | 'global';
 }
 
 // ************ exports of library ***************
@@ -1585,14 +1605,12 @@ export interface UpdateOptions {
  * ```
  * @param matcher method instance
  * @param handleUpdate new data or update function that returns new data
- * @param options options
  * @returns is updated
  */
 export declare function updateState<Responded>(
   matcher: Method<any, any, any, any, Responded>,
-  handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>,
-  options?: UpdateOptions
-): boolean;
+  handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>
+): Promise<boolean>;
 
 export interface CacheSetOptions {
   /**

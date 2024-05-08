@@ -1,7 +1,14 @@
 import Method from '@/Method';
+import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
 import defaultCacheLogger from '@/defaults/cacheLogger';
-import { getRawWithCacheAdapter, getWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
-import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
+import { globalConfigMap } from '@/globalConfig';
+import {
+  getRawWithCacheAdapter,
+  getWithCacheAdapter,
+  hitTargetCacheWithCacheAdapter,
+  setWithCacheAdapter
+} from '@/storage/cacheWrapper';
+import { saveMethodSnapshot } from '@/storage/methodSnapShots';
 import cloneMethod from '@/utils/cloneMethod';
 import {
   _self,
@@ -10,7 +17,6 @@ import {
   getLocalCacheConfigParam,
   getMethodInternalKey,
   getOptions,
-  instanceOf,
   isFn,
   isPlainObject,
   isSpecialRequestBody,
@@ -41,7 +47,6 @@ import {
   ResponseCompleteHandler,
   ResponseErrorHandler
 } from '~/typings';
-import { invalidateCache } from './manipulateCache';
 
 // 请求适配器返回信息暂存，用于实现请求共享
 type RequestAdapterReturnType = ReturnType<AlovaRequestAdapter<any, any, any>>;
@@ -119,11 +124,12 @@ export default function sendRequest<
     const { e: expireMilliseconds, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(methodInstance);
     const { id, l1Cache, l2Cache } = getContext(methodInstance);
     // 获取受控缓存或非受控缓存
-    const { localCache } = getConfig(methodInstance);
+    const { cacheFor } = getConfig(methodInstance);
+    const { baseURL, url: newUrl, type, data, hitSource: methodHitSource } = clonedMethod;
 
     // 如果当前method设置了受控缓存，则看是否有自定义的数据
-    let cachedResponse = await (isFn(localCache)
-      ? localCache()
+    let cachedResponse = await (isFn(cacheFor)
+      ? cacheFor()
       : // 如果是强制请求的，则跳过从缓存中获取的步骤
         // 否则判断是否使用缓存数据
         forceRequest
@@ -135,7 +141,7 @@ export default function sendRequest<
       const rawL2CacheData = await getRawWithCacheAdapter(id, methodKey, l2Cache, tag);
       if (rawL2CacheData) {
         const [l2Response, l2ExpireMilliseconds] = rawL2CacheData;
-        await setWithCacheAdapter(id, methodKey, l2Response, l2ExpireMilliseconds, l1Cache);
+        await setWithCacheAdapter(id, methodKey, l2Response, l2ExpireMilliseconds, l1Cache, methodHitSource);
         cachedResponse = l2Response;
       }
     }
@@ -143,7 +149,6 @@ export default function sendRequest<
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数
     await beforeRequest(clonedMethod);
-    const { baseURL, url: newUrl, type, data } = clonedMethod;
     const {
       params = {},
       headers = {},
@@ -205,7 +210,24 @@ export default function sendRequest<
       const responseData = await handlerReturns;
       const transformedData = await transformData(responseData, responseHeaders || {});
 
-      saveMethodSnapshot(id, methodKey, methodInstance);
+      saveMethodSnapshot(id, methodInstance);
+      // 查找hit target cache，让它的缓存失效
+      // 通过全局配置`autoInvalidateCache`来控制自动缓存失效范围
+      const { autoInvalidateCache } = globalConfigMap;
+      const cacheAdaptersInvolved =
+        autoInvalidateCache === 'global'
+          ? [...usingL1CacheAdapters, ...usingL2CacheAdapters]
+          : autoInvalidateCache === 'self'
+            ? [l1Cache, l2Cache]
+            : [];
+      if (len(cacheAdaptersInvolved)) {
+        await PromiseCls.all(
+          mapItem(cacheAdaptersInvolved, involvedCacheAdapter =>
+            hitTargetCacheWithCacheAdapter(methodKey, methodInstanceName, involvedCacheAdapter)
+          )
+        );
+      }
+
       // 当requestBody为特殊数据时不保存缓存
       // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
       // 原因2：特殊数据不便于生成缓存key
@@ -213,21 +235,11 @@ export default function sendRequest<
       const toCache = !requestBody || !isSpecialRequestBody(requestBody);
       if (toCache && callInSuccess) {
         await PromiseCls.all([
-          setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache),
-          toStorage && setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, tag)
+          setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache, methodHitSource),
+          toStorage &&
+            setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
         ]);
       }
-
-      // 查找hitTarget，让它的缓存失效
-      const hitMethods = matchSnapshotMethod({
-        filter: cachedMethod =>
-          (cachedMethod.hitSource || []).some(sourceMatcher =>
-            instanceOf(sourceMatcher, RegExp)
-              ? sourceMatcher.test(methodInstanceName as string)
-              : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-          )
-      });
-      len(hitMethods) > 0 && invalidateCache(hitMethods);
       return transformedData;
     };
 

@@ -2,10 +2,10 @@ import { deleteAttr } from '@alova/shared/vars';
 import { FrontRequestState, Hook } from '~/typings';
 
 // 状态数据缓存
-type CacheItem = {
+interface CacheItem {
   s: FrontRequestState;
   h: Hook;
-};
+}
 const stateCache: Record<string, Record<string, CacheItem>> = {};
 
 /**

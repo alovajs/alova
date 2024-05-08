@@ -10,6 +10,7 @@ import {
 } from '~/typings';
 import Method from './Method';
 import { defaultL1CacheAdapter, defaultL2CacheAdapter } from './defaults/cacheAdapter';
+import { matchSnapshotMethods } from './storage/methodSnapShots';
 import { getStatesHook } from './utils/helper';
 import myAssert from './utils/myAssert';
 
@@ -35,7 +36,10 @@ const defaultAlovaOptions = {
   shareRequest: trueValue
 };
 
+let idCount = 0;
 export class Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
+  public id: string;
+
   public options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
 
   public l1Cache: AlovaGlobalCacheAdapter;
@@ -43,6 +47,7 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
   public l2Cache: AlovaGlobalCacheAdapter;
 
   constructor(options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>) {
+    this.id = (options.id || (idCount += 1)).toString();
     // 如果storage未指定，则默认使用localStorage
     this.l1Cache = options.l1Cache || defaultL1CacheAdapter;
     this.l2Cache = options.l2Cache || defaultL2CacheAdapter;
@@ -153,11 +158,17 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
     );
   }
 
-  matchSnapshot<M extends boolean = true>(
-    matcher: MethodFilter,
-    matchAll?: M
-  ): M extends true ? Method[] : Method | undefined {
-    return matchAll ? ([] as Method[]) : undefined;
+  /**
+   * get method snapshots by matcher
+   * the method snapshots means the method instance that has been requested
+   * @version 3.0.0
+   * @param  matcher method matcher
+   * @param  matchAll is match all, default is true
+   * @returns method list when `matchAll` is true, otherwise return method instance or undefined
+   */
+  matchSnapshot<M extends boolean = true>(matcher: MethodFilter, matchAll: M = true as M) {
+    const methods = matchSnapshotMethods(this.id, matcher);
+    return (matchAll ? methods : methods[0]) as M extends true ? Method[] : Method | undefined;
   }
 }
 

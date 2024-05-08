@@ -22,13 +22,13 @@ import {
 } from '@alova/shared/vars';
 import {
   AbortFunction,
-  Alova,
   AlovaMethodConfig,
   MethodRequestConfig,
   MethodType,
   ProgressHandler,
   RequestBody
 } from '~/typings';
+import type { Alova } from './alova';
 import sendRequest from './functions/sendRequest';
 
 const offEventCallback = (offHandler: any, handlers: any[]) => () => {
@@ -43,7 +43,7 @@ export default class Method<
   Export = any,
   Responded = any,
   Transformed = any,
-  RequestConfig = any,
+  RequestConfig = Record<any, any>,
   Response = any,
   ResponseHeader = any
 > {
@@ -98,7 +98,7 @@ export default class Method<
 
     // 将请求相关的全局配置合并到Method对象中
     const contextConcatConfig: any = {};
-    const mergedLocalCacheKey = 'cache';
+    const mergedLocalCacheKey = 'cacheFor';
     const globalLocalCache = isPlainObject(contextOptions[mergedLocalCacheKey])
       ? contextOptions[mergedLocalCacheKey][type]
       : undefinedValue;
@@ -130,7 +130,7 @@ export default class Method<
       ...(config || {})
     };
     instance.data = data;
-    instance.meta = config && config.meta;
+    instance.meta = config ? config.meta : instance.meta;
 
     // 在外部需要使用原始的key，而不是实时生成key
     // 原因是，method的参数可能传入引用类型值，但引用类型值在外部改变时，实时生成的key也随之改变，因此使用最开始的key更准确

@@ -1,11 +1,11 @@
 import { getAlovaInstance } from '#/utils';
-import { createAlova, useRequest } from '@/index';
-import GlobalFetch from '@/predefine/GlobalFetch';
 import ReactHook from '@/statesHook/react';
 import { getStateCache } from '@/storage/stateCache';
 import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createAlova, useRequest } from 'alova';
+import GlobalFetch from 'alova/GlobalFetch';
 import React, { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
 
@@ -16,12 +16,9 @@ function getAlovaInstanceSyncResponded() {
     timeout: 3000,
     statesHook: ReactHook,
     requestAdapter: GlobalFetch(),
-    errorLogger: false,
-    responded: () => {
-      return {
-        mock: 'mockdata'
-      };
-    }
+    responded: () => ({
+      mock: 'mockdata'
+    })
   });
 }
 
@@ -33,7 +30,7 @@ describe('useRequet hook with react', () => {
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
     function Page() {
       const { loading, data = { path: '', method: '' } } = useRequest(Get);
@@ -61,7 +58,7 @@ describe('useRequet hook with react', () => {
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
     function Page() {
       const { loading, data = { path: '', method: '' }, send } = useRequest(Get, { immediate: false });
@@ -80,7 +77,11 @@ describe('useRequet hook with react', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise<void>(resolve =>
+      setTimeout(() => {
+        resolve();
+      }, 1000)
+    );
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('method')).toHaveTextContent('');
@@ -96,7 +97,7 @@ describe('useRequet hook with react', () => {
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
     function Page() {
       const { loading, data = { path: '', method: '' }, send } = useRequest(Get, { immediate: false });
@@ -240,7 +241,7 @@ describe('useRequet hook with react', () => {
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
 
     const renderMockFn = jest.fn();
@@ -269,7 +270,7 @@ describe('useRequet hook with react', () => {
     const Get = alova.Get('/unit-test-1s', {
       timeout: 10000,
       transformData: ({ data }: Result<true>) => data,
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
 
     let i = 0;
@@ -285,11 +286,12 @@ describe('useRequet hook with react', () => {
             onClick={() => {
               update({
                 data: {
-                  path: '/abc' + i++,
+                  path: `/abc${i}`,
                   method: 'GET'
                 },
                 error: undefined
               });
+              i += 1;
             }}>
             update
           </button>

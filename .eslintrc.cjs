@@ -16,6 +16,8 @@ module.exports = {
   plugins: ['@typescript-eslint', 'prettier'],
   rules: {
     'prettier/prettier': 'error',
+
+    // eslint-airbnb
     'import/extensions': 'off',
     'import/no-extraneous-dependencies': 'off',
     'no-param-reassign': 'off',
@@ -27,10 +29,17 @@ module.exports = {
     'consistent-return': 'off',
     'no-restricted-exports': 'off',
     'linebreak-style': ['error', 'unix'],
-    '@typescript-eslint/no-explicit-any': 'off',
     'no-unused-vars': 'off',
     'import/order': 'off',
     'import/no-relative-packages': 'off',
+    'guard-for-in': 'off',
+
+    // jsx-a11y
+    'jsx-a11y/aria-role': 'off',
+    'react/button-has-type': 'off',
+
+    // @typescript-eslint
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { destructuredArrayIgnorePattern: '^_' }],
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',

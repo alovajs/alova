@@ -1,8 +1,8 @@
 import Method from '@/Method';
 import { falseValue, undefinedValue } from '@alova/shared/vars';
-import { FrontRequestState, Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
+import { FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
 
-export default (ht: TEnumHookType, c: UseHookConfig, update: Hook['upd']) =>
+export default (ht: TEnumHookType, c: UseHookConfig, ro: ReferingObject, upd: Hook['upd']) =>
   ({
     /** 最后一次请求的method实例 */
     m: undefinedValue as unknown as Method,
@@ -37,5 +37,9 @@ export default (ht: TEnumHookType, c: UseHookConfig, update: Hook['upd']) =>
     /** enableUpload */
     eu: falseValue,
 
-    upd: update
+    /** update states */
+    upd,
+
+    /** referingObject */
+    ro
   }) as Hook;

@@ -14,14 +14,24 @@ export const enum AlovaEventType {
 /**
  * 创建统一的事件对象
  */
-export default <S, E, R, T, RC, RE, RH>(
+export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   eventType: AlovaEventType,
-  method: Method<S, E, R, T, RC, RE, RH>,
+  method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   sendArgs: any[],
   fromCache?: boolean,
-  data?: R,
+  data?: Responded,
   error?: any,
-  status?: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>['status']
+  status?: AlovaCompleteEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */
