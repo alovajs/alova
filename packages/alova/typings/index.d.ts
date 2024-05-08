@@ -607,6 +607,11 @@ export interface Alova<State, Computed, Watched, Export, RequestConfig, Response
     data?: RequestBody,
     config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
   ): Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  Put<Responded, Transformed = unknown>(
+    url: string,
+    data?: RequestBody,
+    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+  ): Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   Head<Responded, Transformed = unknown>(
     url: string,
     config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
@@ -628,10 +633,10 @@ export interface Alova<State, Computed, Watched, Export, RequestConfig, Response
    * @param {boolean} matchAll is match all, default is true
    * @returns {Method[] | Method} method list when `matchAll` is true, otherwise return method instance or undefined
    */
-  // matchSnapshot<M extends boolean = true>(
-  //   matcher: MethodFilter,
-  //   matchAll?: M
-  // ): M extends true ? Method[] : Method | undefined;
+  matchSnapshot<M extends boolean = true>(
+    matcher: MethodFilter,
+    matchAll?: M
+  ): M extends true ? Method[] : Method | undefined;
 }
 
 /**

@@ -66,7 +66,7 @@ export const globalToString = (arg: any) => ObjectCls.prototype.toString.call(ar
  * @param arg 任意参数
  * @returns 判断结果
  */
-export const isPlainObject = (arg: any): arg is Record<string, any> => globalToString(arg) === '[object Object]';
+export const isPlainObject = (arg: any): arg is Record<any, any> => globalToString(arg) === '[object Object]';
 /**
  * 判断是否为某个类的实例
  * @param arg 任意参数
@@ -331,10 +331,7 @@ export function statesHookHelper(
      * @param coreHookStates the returns of useRequest/useWatcher/useFetcher that contains update function
      * @returns exported states and update function
      */
-    exportObject: <S extends Record<string, GeneralFrameworkState>>(
-      states: S,
-      coreHookStates: Record<string, any> = {}
-    ) => {
+    exportObject: <S extends Record<string, any>>(states: S, coreHookStates: Record<string, any> = {}) => {
       const exportedStates = objectKeys(states).reduce(
         (result, key) => {
           result[key] = exportState(states[key]);
@@ -344,7 +341,7 @@ export function statesHookHelper(
       );
 
       return {
-        ...(exportedStates as Record<keyof S, GeneralFrameworkState>),
+        ...(exportedStates as S),
         __referingObj: referingObject,
         update: memorize((newStates: Record<string, any>, targetStates?: Record<string, GeneralFrameworkState>) => {
           targetStates = targetStates || states;

@@ -210,8 +210,7 @@ export default function sendRequest<
       const responseData = await handlerReturns;
       const transformedData = await transformData(responseData, responseHeaders || {});
 
-      saveMethodSnapshot(id, methodKey, methodInstance);
-
+      saveMethodSnapshot(id, methodInstance);
       // 查找hit target cache，让它的缓存失效
       // 通过全局配置`autoInvalidateCache`来控制自动缓存失效范围
       const { autoInvalidateCache } = globalConfigMap;

@@ -1,11 +1,10 @@
 import { setWithCacheAdapter } from '@/storage/cacheWrapper';
-import { filterSnapshotMethods } from '@/storage/methodSnapShots';
 import { getStateCache } from '@/storage/stateCache';
 import { promiseStatesHook } from '@/utils/helper';
 import myAssert from '@/utils/myAssert';
-import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn, noop } from '@alova/shared/function';
+import { getContext, getLocalCacheConfigParam, getMethodInternalKey, isFn } from '@alova/shared/function';
 import { PromiseCls, falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
-import { Method, UpdateOptions, UpdateStateCollection } from '~/typings';
+import { Method, UpdateStateCollection } from '~/typings';
 
 /**
  * 更新对应method的状态
@@ -25,19 +24,16 @@ export default async function updateState<
   ResponseHeader
 >(
   matcher: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  handleUpdate: ((data: Responded) => any) | UpdateStateCollection<Responded>,
-  options: UpdateOptions = {}
+  handleUpdate: ((data: Responded) => any) | UpdateStateCollection<Responded>
 ) {
-  const { onMatch = noop } = options;
-  const methodInstance = filterSnapshotMethods(matcher, falseValue);
   let updated = falseValue;
 
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
-  if (methodInstance) {
-    onMatch(methodInstance); // 触发onMatch事件
+  if (matcher) {
     const { dehydrate, update } = promiseStatesHook();
-    const methodKey = getMethodInternalKey(methodInstance);
-    const { id, l1Cache, l2Cache } = getContext(methodInstance);
+    const { hitSource } = matcher;
+    const methodKey = getMethodInternalKey(matcher);
+    const { id, l1Cache, l2Cache } = getContext(matcher);
     const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
     const updateStateCollection = isFn(handleUpdate)
       ? ({ data: handleUpdate } as UpdateStateCollection<Responded>)
@@ -70,10 +66,11 @@ export default async function updateState<
 
     // 如果更新了data，则需要同时更新缓存和持久化数据
     if (updatedDataColumnData !== undefinedValue) {
-      const { e: expireMilliseconds, s: toStore, t: tag } = getLocalCacheConfigParam(methodInstance);
+      const { e: expireMilliseconds, s: toStore, t: tag } = getLocalCacheConfigParam(matcher);
       await PromiseCls.all([
-        setWithCacheAdapter(id, methodKey, updatedDataColumnData, expireMilliseconds, l1Cache),
-        toStore && setWithCacheAdapter(id, methodKey, updatedDataColumnData, expireMilliseconds, l2Cache, tag)
+        setWithCacheAdapter(id, methodKey, updatedDataColumnData, expireMilliseconds, l1Cache, hitSource),
+        toStore &&
+          setWithCacheAdapter(id, methodKey, updatedDataColumnData, expireMilliseconds, l2Cache, hitSource, tag)
       ]);
     }
   }

@@ -43,7 +43,7 @@ export default class Method<
   Export = any,
   Responded = any,
   Transformed = any,
-  RequestConfig = any,
+  RequestConfig = Record<any, any>,
   Response = any,
   ResponseHeader = any
 > {

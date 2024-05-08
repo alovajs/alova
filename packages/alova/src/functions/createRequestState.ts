@@ -165,9 +165,9 @@ export default function createRequestState<
     [keyUploading]: uploading
   };
   const exportings = exportObject({
-    [keyData]: data,
-    [keyLoading]: loading,
-    [keyError]: error
+    [keyData]: data as unknown as ExportedType<Responded, State>,
+    [keyLoading]: loading as unknown as ExportedType<boolean, State>,
+    [keyError]: error as unknown as ExportedType<Error | undefined, State>
   });
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, referingObject, exportings.update)));
   const hasWatchingStates = watchingStates !== undefinedValue;
