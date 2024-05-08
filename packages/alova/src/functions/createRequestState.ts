@@ -116,7 +116,7 @@ export default function createRequestState<
     try {
       const methodInstance = getHandlerMethod(methodHandler, myAssert);
       const alovaInstance = getContext(methodInstance);
-      const l1CacheResult = alovaInstance.l1Cache.get(
+      const l1CacheResult = alovaInstance.l1Cache.get<[any, number]>(
         buildNamespacedCacheKey(alovaInstance.id, getMethodInternalKey(methodInstance))
       );
       let cachedResponse: any = undefinedValue;
@@ -169,14 +169,26 @@ export default function createRequestState<
     [keyLoading]: loading,
     [keyError]: error
   });
-  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, exportings.update)));
+  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, referingObject, exportings.update)));
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
   const handleRequest = (
-    handler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any> = methodHandler,
+    handler:
+      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      | AlovaMethodHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        > = methodHandler,
     sendCallingArgs?: any[]
-  ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs);
+  ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<Responded>;
   // 以捕获异常的方式调用handleRequest
   // 捕获异常避免异常继续向外抛出
   const wrapEffectRequest = () => {
@@ -197,6 +209,7 @@ export default function createRequestState<
   hookInstance.eh = [];
   hookInstance.ch = [];
   hookInstance.c = useHookConfig;
+  hookInstance.ro = referingObject;
   // 在服务端渲染时不发送请求
   if (!isSSR) {
     effectRequest({
@@ -225,13 +238,49 @@ export default function createRequestState<
       hookInstance.eu = trueValue;
       return exportState(uploading) as unknown as ExportedType<Progress, State>;
     },
-    onSuccess(handler: SuccessHandler<any, any, any, any, any, any, any, any, any>) {
+    onSuccess(
+      handler: SuccessHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >
+    ) {
       pushItem(hookInstance.sh, handler);
     },
-    onError(handler: ErrorHandler<any, any, any, any, any, any, any, any, any>) {
+    onError(
+      handler: ErrorHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >
+    ) {
       pushItem(hookInstance.eh, handler);
     },
-    onComplete(handler: CompleteHandler<any, any, any, any, any, any, any, any, any>) {
+    onComplete(
+      handler: CompleteHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >
+    ) {
       pushItem(hookInstance.ch, handler);
     },
     abort: memorize(() => hookInstance.m && hookInstance.m.abort()),
@@ -243,6 +292,21 @@ export default function createRequestState<
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: memorize((sendCallingArgs?: any[], methodInstance?: Method) => handleRequest(methodInstance, sendCallingArgs))
+    send: memorize(
+      (
+        sendCallingArgs?: any[],
+        methodInstance?: Method<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >
+      ) => handleRequest(methodInstance, sendCallingArgs)
+    )
   };
 }

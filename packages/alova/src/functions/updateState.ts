@@ -50,8 +50,7 @@ export default async function updateState<
         myAssert(stateName in frontStates, `state named \`${stateName}\` is not found`);
         myAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
         const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
-          // TODO: dehydrate的hookInstance参数待确认。
-          dehydrate((frontStates as Record<string, any>)[stateName], stateName, hookInstance)
+          dehydrate((frontStates as Record<string, any>)[stateName], stateName, hookInstance.ro)
         );
 
         // 记录data字段的更新值，用于更新缓存数据

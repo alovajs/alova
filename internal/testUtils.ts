@@ -12,7 +12,7 @@ type PostData = {
 export type Result<T = string> = {
   code: number;
   msg: string;
-  responseData: T extends string ? GetData : PostData;
+  data: T extends string ? GetData : PostData;
 };
 
 // 辅助函数

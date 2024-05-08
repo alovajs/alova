@@ -61,7 +61,7 @@ export interface AlovaGlobalCacheAdapter {
    * get value by key
    * @param key key
    */
-  get(key: string): any;
+  get<T>(key: string): T | undefined | Promise<T | undefined>;
 
   /**
    * remove item
@@ -217,6 +217,9 @@ export interface Hook {
   /** hook config */
   c: UseHookConfig<any, any, any, any, any, any, any, any, any>;
 
+  /** refering object */
+  ro: ReferingObject;
+
   /** enableDownload */
   ed: boolean;
 
@@ -335,6 +338,14 @@ export type CacheLoggerHandler<State, Computed, Watched, Export, RequestConfig, 
  */
 export interface AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
   /**
+   * custom alova id
+   *
+   * **Recommend to custom it in multiple server scenarios**
+   * @default increme from 0 in creating order
+   */
+  id?: number | string;
+
+  /**
    * base url
    */
   baseURL?: string;
@@ -436,7 +447,7 @@ export interface Method<
   Export = any,
   Responded = any,
   Transformed = any,
-  RequestConfig = any,
+  RequestConfig = Record<any, any>,
   Response = any,
   ResponseHeader = any
 > {
@@ -1428,7 +1439,15 @@ export interface AlovaGlobalConfig {
    * it indicates not save snapshot when value is set to 0, and the method matcher will not work.
    * @default 1000
    */
-  limitSnapshots?: number;
+  methodSnapshots?: number;
+
+  /**
+   * switch of auto invalidate cache.
+   * here is three options:
+   * - close: disable auto cache invalidation and save.
+   * @default 'global'
+   */
+  autoInvalidateCache?: 'close' | 'self' | 'global';
 }
 
 // ************ exports of library ***************

@@ -13,7 +13,7 @@ let snapshotCount = 0;
  * @param methodInstance method实例
  */
 export const saveMethodSnapshot = (namespace: string, key: string, methodInstance: Method) => {
-  if (snapshotCount < globalConfigMap.limitSnapshots) {
+  if (snapshotCount < globalConfigMap.methodSnapshots) {
     const namespacedSnapshots = (methodSnapshots[namespace] = methodSnapshots[namespace] || {});
     namespacedSnapshots[key] = methodInstance;
     snapshotCount += 1;

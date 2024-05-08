@@ -120,30 +120,8 @@ export const getMethodInternalKey = (methodInstance: Method) => methodInstance._
  * @param args 方法调用参数
  * @returns 请求方法对象
  */
-export const getHandlerMethod = <
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
-  methodHandler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+export const getHandlerMethod = (
+  methodHandler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any>,
   assert: (expression: boolean, msg: string) => void,
   args: any[] = []
 ) => {
@@ -194,18 +172,18 @@ export const omit = <T extends Record<string, any>, K extends keyof T>(obj: T, .
  * @returns 统一的缓存参数对象
  */
 export const getLocalCacheConfigParam = (methodInstance: Method) => {
-  const { cache } = getConfig(methodInstance);
+  const { cacheFor } = getConfig(methodInstance);
   const getCacheExpireTs = (cacheExpire: CacheExpire) =>
     isNumber(cacheExpire) ? getTime() + cacheExpire : getTime(cacheExpire || undefinedValue);
   let cacheMode: CacheMode = MEMORY;
   let expire = 0;
   let store = falseValue;
   let tag: undefined | string = undefinedValue;
-  if (!isFn(cache)) {
-    if (isNumber(cache) || instanceOf(cache, Date)) {
-      expire = getCacheExpireTs(cache);
+  if (!isFn(cacheFor)) {
+    if (isNumber(cacheFor) || instanceOf(cacheFor, Date)) {
+      expire = getCacheExpireTs(cacheFor);
     } else {
-      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = cache || {};
+      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = cacheFor || {};
       cacheMode = mode;
       expire = getCacheExpireTs(configExpire);
       store = mode === STORAGE_RESTORE;
@@ -332,7 +310,7 @@ export function statesHookHelper(
       statesHook.computed(getter, depList, referingObject, isRef) as FrameworkState<D>,
     export: exportState,
     batchExport: (...states: GeneralFrameworkState[]) => states.map(state => exportState(state)),
-    dehydrate: <D>(state: FrameworkState<D>) => statesHook.dehydrate(state, referingObject) as D,
+    dehydrate: <D>(state: FrameworkState<D>, key: string) => statesHook.dehydrate(state, key, referingObject) as D,
     effectRequest: (effectRequestParams: EffectRequestParams<any>) =>
       statesHook.effectRequest(effectRequestParams, referingObject),
     memorize,

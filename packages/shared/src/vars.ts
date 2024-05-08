@@ -7,6 +7,7 @@ export const PromiseCls = Promise as typeof Promise<any>;
 export const promiseResolve = <T>(value: T) => PromiseCls.resolve(value);
 export const promiseReject = <T>(value: T) => PromiseCls.reject(value);
 export const ObjectCls = Object;
+export const RegExpCls = RegExp;
 export const undefinedValue = undefined;
 export const nullValue = null;
 export const trueValue = true;

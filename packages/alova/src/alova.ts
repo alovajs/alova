@@ -39,8 +39,7 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
   public l2Cache: AlovaGlobalCacheAdapter;
 
   constructor(options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>) {
-    this.id = idCount.toString();
-    idCount += 1;
+    this.id = (options.id || (idCount += 1)).toString();
     // 如果storage未指定，则默认使用localStorage
     this.l1Cache = options.l1Cache || defaultL1CacheAdapter;
     this.l2Cache = options.l2Cache || defaultL2CacheAdapter;

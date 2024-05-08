@@ -1,7 +1,8 @@
 import { AlovaGlobalConfig } from '~/typings';
 
 export let globalConfigMap: Required<AlovaGlobalConfig> = {
-  limitSnapshots: 1000
+  methodSnapshots: 1000,
+  autoInvalidateCache: 'global'
 };
 
 /**

@@ -1,21 +1,21 @@
 import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/GlobalFetch';
-import { GlobalLocalCacheConfig, Method, StatesHook } from '~/typings';
+import { GlobalCacheConfig, Method, StatesHook } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
-type FetchMethod = Method<any, any, any, any, FetchRequestInit, Response, Headers>;
-export const getAlovaInstance = <S, E>(
-  statesHook: StatesHook<S, E>,
+type FetchMethod = Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>;
+export const getAlovaInstance = <S, C, W, E>(
+  statesHook: StatesHook<S, C, W, E>,
   {
     endWithSlash = false,
-    localCache,
+    cacheFor,
     beforeRequestExpect,
     responseExpect,
     resErrorExpect,
     resCompleteExpect
   }: {
     endWithSlash?: boolean;
-    localCache?: GlobalLocalCacheConfig;
+    cacheFor?: GlobalCacheConfig;
     beforeRequestExpect?: (methodInstance: FetchMethod) => void;
     responseExpect?: (response: Response, method: FetchMethod) => void;
     resErrorExpect?: (err: Error, method: FetchMethod) => void;
@@ -38,11 +38,12 @@ export const getAlovaInstance = <S, E>(
             onError: resErrorExpect,
             onComplete: resCompleteExpect
           },
-    errorLogger: false,
     cacheLogger: false
   });
-  if (localCache !== undefined) {
-    alovaInst.options.localCache = localCache;
+  if (cacheFor !== undefined) {
+    alovaInst.options.cacheFor = cacheFor;
   }
   return alovaInst;
 };
+
+export const alt = '';
