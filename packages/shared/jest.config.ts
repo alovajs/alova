@@ -7,7 +7,7 @@ import baseConfig from '../../jest.config.base';
  */
 const config: Config = {
   ...baseConfig,
-  displayName: '@alova/adapter-xhr',
+  displayName: '@alova/shared',
   testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)']
 };
 

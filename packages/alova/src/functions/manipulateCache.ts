@@ -46,6 +46,7 @@ export const setCache = async <Responded>(
 ) => {
   const methodInstances = isArray(matcher) ? matcher : [matcher];
   const batchPromises = methodInstances.map(async methodInstance => {
+    const { hitSource } = methodInstance;
     const { id, l1Cache, l2Cache } = getContext(methodInstance);
     const methodKey = getMethodInternalKey(methodInstance);
     const { e: expireMilliseconds, s: toStore, t: tag } = getLocalCacheConfigParam(methodInstance);
@@ -61,9 +62,9 @@ export const setCache = async <Responded>(
       }
     }
     return PromiseCls.all([
-      policy !== 'l2' && setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l1Cache),
+      policy !== 'l2' && setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l1Cache, hitSource),
       policy === 'l2' || (policy === 'all' && toStore)
-        ? setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l2Cache, tag)
+        ? setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l2Cache, hitSource, tag)
         : undefinedValue
     ]);
   });

@@ -1,6 +1,5 @@
 import { Blob, File } from 'node:buffer';
 import { TextDecoder, TextEncoder } from 'node:util';
-import { Headers, Request, Response, fetch } from 'undici';
 import { ReadableStream } from 'web-streams-polyfill';
 
 Object.defineProperties(globalThis, {
@@ -8,6 +7,10 @@ Object.defineProperties(globalThis, {
   TextEncoder: { value: TextEncoder },
   ReadableStream: { value: ReadableStream }
 });
+
+// undici must import after defining TextDecoder and TextEncoder, otherwise it will throw error
+// eslint-disable-next-line
+import { Headers, Request, Response, fetch } from 'undici';
 Object.defineProperties(global, {
   fetch: { value: fetch, writable: true },
   Response: { value: Response },

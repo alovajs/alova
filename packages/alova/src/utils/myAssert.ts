@@ -1,6 +1,6 @@
+import Method from '@/Method';
 import { createAssert } from '@alova/shared/assert';
 import { instanceOf } from '@alova/shared/function';
-import { Method } from '~/typings';
 
 // import { get } from '@alova/shared';
 

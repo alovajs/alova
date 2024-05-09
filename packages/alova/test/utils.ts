@@ -1,5 +1,5 @@
 import { createAlova } from '@/index';
-import GlobalFetch from '@/predefine/GlobalFetch';
+import GlobalFetch from '@/predefine/adapterFetch';
 import { GlobalCacheConfig, Method, StatesHook } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;

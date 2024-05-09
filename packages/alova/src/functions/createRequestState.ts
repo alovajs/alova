@@ -116,18 +116,18 @@ export default function createRequestState<
     } catch (error) {}
   }
 
-  const { create, export: exportState, effectRequest, memorize, ref, exportObject } = statesHookHelper(promiseStatesHook(), referingObject);
+  const { create, effectRequest, ref, exportObject, memorizeOperators } = statesHookHelper(promiseStatesHook(), referingObject);
   const progress: Progress = {
     total: 0,
     loaded: 0
   };
   // 将外部传入的受监管的状态一同放到frontStates集合中
   const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>;
-  const [data] = create(isFn(initialData) ? initialData() : initialData, keyData);
-  const [loading] = create(initialLoading, keyLoading);
-  const [error] = create(undefinedValue as Error | undefined, keyError);
-  const [downloading] = create({ ...progress }, keyDownloading);
-  const [uploading] = create({ ...progress }, keyUploading);
+  const { s: data } = create(isFn(initialData) ? initialData() : initialData, keyData);
+  const { s: loading } = create(initialLoading, keyLoading);
+  const { s: error } = create(undefinedValue as Error | undefined, keyError);
+  const { s: downloading, e: exportedDownloading } = create({ ...progress }, keyDownloading);
+  const { s: uploading, e: exportedUploading } = create({ ...progress }, keyUploading);
   const frontStates = {
     ...managedStates,
     [keyData]: data,
@@ -204,12 +204,26 @@ export default function createRequestState<
     ...exportings,
     get [keyDownloading]() {
       hookInstance.ed = trueValue;
-      return exportState(downloading) as unknown as ExportedType<Progress, State>;
+      return exportedDownloading as unknown as ExportedType<Progress, State>;
     },
     get [keyUploading]() {
       hookInstance.eu = trueValue;
-      return exportState(uploading) as unknown as ExportedType<Progress, State>;
+      return exportedUploading as unknown as ExportedType<Progress, State>;
     },
+    ...memorizeOperators({
+      abort: () => hookInstance.m && hookInstance.m.abort(),
+      /**
+       * 通过执行该方法来手动发起请求
+       * @param sendCallingArgs 调用send函数时传入的参数
+       * @param methodInstance 方法对象
+       * @param isFetcher 是否为isFetcher调用
+       * @returns 请求promise
+       */
+      send: (
+        sendCallingArgs?: any[],
+        methodInstance?: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      ) => handleRequest(methodInstance, sendCallingArgs)
+    }),
     onSuccess(handler: SuccessHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) {
       pushItem(hookInstance.sh, handler);
     },
@@ -220,21 +234,6 @@ export default function createRequestState<
       handler: CompleteHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
     ) {
       pushItem(hookInstance.ch, handler);
-    },
-    abort: memorize(() => hookInstance.m && hookInstance.m.abort()),
-
-    /**
-     * 通过执行该方法来手动发起请求
-     * @param sendCallingArgs 调用send函数时传入的参数
-     * @param methodInstance 方法对象
-     * @param isFetcher 是否为isFetcher调用
-     * @returns 请求promise
-     */
-    send: memorize(
-      (
-        sendCallingArgs?: any[],
-        methodInstance?: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      ) => handleRequest(methodInstance, sendCallingArgs)
-    )
+    }
   };
 }

@@ -99,7 +99,9 @@ export const getConfig = <State, Computed, Watched, Export, Responded, Transform
  * 获取alova配置数据
  * @returns alova配置对象
  */
-export const getContextOptions = (alovaInstance: Alova<any, any, any, any, any, any, any>) => alovaInstance.options;
+export const getContextOptions = <State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
+  alovaInstance: Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>
+) => alovaInstance.options;
 /**
  * 通过method实例获取alova配置数据
  * @returns alova配置对象
