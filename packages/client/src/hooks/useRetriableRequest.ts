@@ -30,7 +30,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
 
-  const { ref: useFlag$, memorize: useMemorizedCallback$, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const { ref: useFlag$, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
 
   const retryHandlers: RetryHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[] = [];
   const failHandlers: FailHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[] = [];
@@ -144,7 +144,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * 如果正在请求中，则触发中断请求，让请求错误来抛出错误，否则手动修改状态以及触发onFail
    * 停止后将立即触发onFail事件
    */
-  const stop = useMemorizedCallback$(() => {
+  const stop = () => {
     assert(currentLoadingState.current, 'there are no requests being retried');
     stopManuallyError.current = new Error(buildErrorMsg(hookPrefix, 'stop retry manually'));
     if (requesting.current) {
@@ -155,7 +155,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
       currentLoadingState.current = falseValue;
       clearTimeout(retryTimer.current); // 清除重试定时器
     }
-  });
+  };
 
   /**
    * 重试事件绑定
@@ -182,7 +182,9 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   return {
     ...requestReturns,
     __referingObj: referingObject,
-    stop,
+    ...memorizeOperators({
+      stop
+    }),
     onRetry,
     onFail
   };

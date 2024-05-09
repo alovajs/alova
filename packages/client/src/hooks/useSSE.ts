@@ -288,7 +288,7 @@ export default <
     es.removeEventListener(MessageType.Open, esOpen);
     es.removeEventListener(MessageType.Error, esError);
     es.removeEventListener(MessageType.Message, esMessage);
-    setReadyState(SSEHookReadyState.CLOSED);
+    readyState.v = SSEHookReadyState.CLOSED;
     // eventSource 关闭后，取消注册所有自定义事件
     // 否则可能造成内存泄露
     customEventMap.forEach(([_, eventTrigger], eventName) => {

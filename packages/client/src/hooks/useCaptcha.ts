@@ -9,29 +9,12 @@ const captchaAssert = createAssert(hookPrefix);
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   config: CaptchaHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
 ) => {
   const { initialCountdown, middleware } = config;
   captchaAssert(initialCountdown === undefinedValue || initialCountdown > 0, 'initialCountdown must be greater than 0');
-  const {
-    create,
-    dehydrate,
-    ref,
-    exportObject,
-    memorize,
-    __referingObj: referingObject
-  } = statesHookHelper(promiseStatesHook());
+  const { create, ref, exportObject, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
 
   const requestReturned = useRequest(handler, {
     ...config,
@@ -41,19 +24,19 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     middleware: middleware ? (ctx, next) => middleware({ ...ctx, send }, next) : undefinedValue
   });
 
-  const [countdown, setCountdown] = create(0, 'countdown', trueValue);
+  const countdown = create(0, 'countdown', trueValue);
 
   const timer = ref(undefinedValue as NodeJS.Timeout | undefined);
-  const send = memorize((...args: any[]) =>
+  const send = (...args: any[]) =>
     newInstance(PromiseCls, (resolve, reject) => {
-      if (dehydrate(countdown) <= 0) {
+      if (countdown.v <= 0) {
         requestReturned
           .send(...args)
           .then(result => {
-            setCountdown(config.initialCountdown || 60);
+            countdown.v = config.initialCountdown || 60;
             timer.current = setInterval(() => {
-              setCountdown(dehydrate(countdown) - 1);
-              if (dehydrate(countdown) <= 0) {
+              countdown.v -= 1;
+              if (countdown.v <= 0) {
                 clearInterval(timer.current);
               }
             }, 1000);
@@ -63,11 +46,12 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
       } else {
         reject(new Error(buildErrorMsg(hookPrefix, 'the countdown is not over yet')));
       }
-    })
-  );
+    });
   return {
     ...requestReturned,
-    send,
+    ...memorizeOperators({
+      send
+    }),
     ...exportObject(
       {
         countdown

@@ -26,7 +26,8 @@ type IsUnknown<T, P, N> = IsAny<T, P, N> extends P ? N : unknown extends T ? P :
 
 /** @description usePagination相关 */
 type ArgGetter<R, LD> = (data: R) => LD | undefined;
-interface PaginationHookConfig<S, E, R, T, RC, RE, RH, LD, WS> extends WatcherHookConfig<S, E, R, T, RC, RE, RH> {
+interface PaginationHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, LD, WS>
+  extends WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /**
    * 是否预加载上一页
    * @default true

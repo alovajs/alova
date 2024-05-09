@@ -53,17 +53,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   data?: Responded,
   vDataResponse?: Record<string, any>,
   error?: any,
-  status?: AlovaCompleteEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >['status']
+  status?: AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */
