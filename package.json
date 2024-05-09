@@ -90,6 +90,7 @@
     "@types/react-dom": "^17.0.20",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
+    "@vue/vue3-jest": "^29.2.6",
     "babel-jest": "^29.7.0",
     "commitizen": "^4.3.0",
     "conventional-changelog-cli": "^4.1.0",

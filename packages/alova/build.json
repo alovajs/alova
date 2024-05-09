@@ -46,7 +46,7 @@
   },
   "fetch": {
     "packageName": "alovaFetch",
-    "input": "src/predefine/fetch.ts",
+    "input": "src/predefine/adapterFetch.ts",
     "external": {
       "@alova/shared/function": null,
       "@alova/shared/vars": null,

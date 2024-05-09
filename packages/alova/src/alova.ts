@@ -19,7 +19,7 @@ const defaultAlovaOptions = {
   /**
    * GET请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    */
-  localCache: {
+  cacheFor: {
     [typeGet]: 300000
   },
 

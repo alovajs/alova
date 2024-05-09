@@ -5,7 +5,8 @@ const config: Config = {
     '<rootDir>/packages/alova',
     '<rootDir>/packages/adapter-axios',
     '<rootDir>/packages/adapter-mock',
-    '<rootDir>/packages/adapter-xhr'
+    '<rootDir>/packages/adapter-xhr',
+    '<rootDir>/packages/shared'
   ]
 };
 

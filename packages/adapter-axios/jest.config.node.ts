@@ -1,5 +1,5 @@
 import type { Config } from 'jest';
-import baseConfig from 'alova-root/jest.config.base';
+import baseConfig from '../../jest.config.base';
 
 /*
  * For a detailed explanation regarding each configuration property and type check, visit:
