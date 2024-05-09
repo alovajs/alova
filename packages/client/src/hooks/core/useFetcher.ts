@@ -1,7 +1,7 @@
-import createRequestState from '@/functions/createRequestState';
-import { assertMethod } from '@/utils/myAssert';
 import { noop, omit } from '@alova/shared/function';
-import { EnumHookType, FetcherHookConfig, FetcherType, Method } from '~/typings';
+import { EnumHookType, FetcherHookConfig, FetcherType, Method } from 'alova';
+import { assertMethod, fetcherHookAssert } from './implements/assert';
+import createRequestState from './implements/createRequestState';
 
 /**
  * Fetch request data and cache
@@ -22,7 +22,7 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
      * @param matcher Method object
      */
     fetch: <Responded>(matcher: Method<any, any, any, any, Responded>, ...args: any[]) => {
-      assertMethod(matcher);
+      assertMethod(fetcherHookAssert, matcher);
       return send(args, matcher);
     }
   };

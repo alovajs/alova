@@ -1,8 +1,3 @@
-import Method from '@/Method';
-import defaultMiddleware from '@/defaults/middleware';
-import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
-import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
-import myAssert, { assertMethod } from '@/utils/myAssert';
 import {
   getContext,
   getHandlerMethod,
@@ -29,11 +24,16 @@ import {
   FrontRequestHookConfig,
   FrontRequestState,
   Hook,
+  Method,
   Progress,
   SuccessHandler,
-  WatcherHookConfig
-} from '~/typings';
-import { queryCache } from './manipulateCache';
+  WatcherHookConfig,
+  queryCache
+} from 'alova';
+import defaultMiddleware from '../defaults/middleware';
+import { assertMethod, coreHookAssert } from './assert';
+import createAlovaEvent, { AlovaEventType } from './createAlovaEvent';
+import { getStateCache, removeStateCache, setStateCache } from './stateCache';
 
 /**
  * 统一处理useRequest/useWatcher/useFetcher等请求钩子函数的请求逻辑
@@ -47,7 +47,8 @@ export default function useHookToSendRequest(
   methodHandler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any>,
   sendCallingArgs: any[] = []
 ) {
-  let methodInstance = getHandlerMethod(methodHandler, myAssert, sendCallingArgs);
+  const currentHookAssert = coreHookAssert(hookInstance.ht);
+  let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);
   const {
     fs: frontStates,
     sh: successHandlers,
@@ -174,7 +175,7 @@ export default function useHookToSendRequest(
             ...commonContext,
             fetchArgs: sendCallingArgs,
             fetch: (methodInstance, ...args) => {
-              assertMethod(methodInstance);
+              assertMethod(currentHookAssert, methodInstance);
               return useHookToSendRequest(hookInstance, methodInstance as Method, args);
             },
             fetchStates: omit(frontStates, 'data'),

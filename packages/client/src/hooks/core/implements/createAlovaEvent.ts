@@ -1,5 +1,5 @@
 import { ObjectCls, forEach, objectKeys, undefinedValue } from '@alova/shared/vars';
-import type { AlovaCompleteEvent, Method } from '~/typings';
+import type { AlovaCompleteEvent, Method } from 'alova';
 
 /**
  * 事件类型枚举

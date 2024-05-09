@@ -1,9 +1,8 @@
-import Method from '@/Method';
-import createRequestState from '@/functions/createRequestState';
-import myAssert from '@/utils/myAssert';
 import { objAssign } from '@alova/shared/function';
 import { len } from '@alova/shared/vars';
-import { AlovaMethodHandler, EnumHookType, WatcherHookConfig } from '~/typings';
+import { AlovaMethodHandler, EnumHookType, Method, WatcherHookConfig } from 'alova';
+import { watcherHookAssert } from './implements/assert';
+import createRequestState from './implements/createRequestState';
 
 export default function useWatcher<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
@@ -12,7 +11,7 @@ export default function useWatcher<State, Computed, Watched, Export, Responded, 
   watchingStates: Watched[],
   config: WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
 ) {
-  myAssert(watchingStates && len(watchingStates) > 0, 'must specify at least one watching state');
+  watcherHookAssert(watchingStates && len(watchingStates) > 0, 'expected at least one watching state');
   const { immediate, debounce = 0, initialData } = config;
   const props = createRequestState(
     EnumHookType.USE_WATCHER,

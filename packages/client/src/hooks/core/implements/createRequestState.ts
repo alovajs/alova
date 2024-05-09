@@ -1,7 +1,4 @@
-import Method from '@/Method';
-import createHook from '@/createHook';
-import { debounce, promiseStatesHook } from '@/utils/helper';
-import myAssert from '@/utils/myAssert';
+import { debounce } from '@/util/helper';
 import {
   buildNamespacedCacheKey,
   getContext,
@@ -26,7 +23,7 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import {
+import type {
   AlovaMethodHandler,
   CompleteHandler,
   EnumHookType,
@@ -35,11 +32,15 @@ import {
   FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
+  Method,
   Progress,
   SuccessHandler,
   UseHookConfig,
   WatcherHookConfig
-} from '~/typings';
+} from 'alova';
+import { promiseStatesHook } from 'alova';
+import { coreHookAssert } from './assert';
+import createHook from './createHook';
 import useHookToSendRequest from './useHookToSendRequest';
 
 const refCurrent = <T>(ref: { current: T }) => ref.current;
@@ -94,7 +95,7 @@ export default function createRequestState<
   if (immediate && !middleware) {
     // 调用getHandlerMethod时可能会报错，需要try/catch
     try {
-      const methodInstance = getHandlerMethod(methodHandler, myAssert);
+      const methodInstance = getHandlerMethod(methodHandler, coreHookAssert(hookType));
       const alovaInstance = getContext(methodInstance);
       const l1CacheResult = alovaInstance.l1Cache.get<[any, number]>(
         buildNamespacedCacheKey(alovaInstance.id, getMethodInternalKey(methodInstance))

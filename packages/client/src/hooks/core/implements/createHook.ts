@@ -1,6 +1,6 @@
-import Method from '@/Method';
 import { falseValue, undefinedValue } from '@alova/shared/vars';
-import { FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
+import type { FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from 'alova';
+import { Method } from 'alova';
 
 export default (ht: TEnumHookType, c: UseHookConfig, ro: ReferingObject, upd: Hook['upd']) =>
   ({

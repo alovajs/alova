@@ -6,7 +6,8 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "root/*": ["../../internal/*"]
     }
   },
   "include": ["src/**/*.ts", "test/**/*.ts"],

@@ -1,5 +1,6 @@
-import { noop } from '@alova/shared/function';
-import { falseValue, filterItem, forEach } from '@alova/shared/vars';
+import { isNumber, noop } from '@alova/shared/function';
+import { GeneralFn } from '@alova/shared/types';
+import { clearTimeoutTimer, falseValue, filterItem, forEach, nullValue, setTimeoutFn } from '@alova/shared/vars';
 import { AnyFn, BackoffPolicy, UsePromiseReturnType } from '~/typings/general';
 
 /**
@@ -109,3 +110,24 @@ export function usePromise<T = any>(): UsePromiseReturnType<T> {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return { promise, resolve: _resolve!, reject: _reject! };
 }
+
+/**
+ * 创建防抖函数，当delay为0时立即触发函数
+ * 场景：在调用useWatcher并设置了immediate为true时，首次调用需立即执行，否则会造成延迟调用
+ * @param {GeneralFn} fn 回调函数
+ * @param {number|(...args: any[]) => number} delay 延迟描述，设置为函数时可实现动态的延迟
+ * @returns 延迟后的回调函数
+ */
+export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => number)) => {
+  let timer: any = nullValue;
+  return function debounceFn(this: any, ...args: any[]) {
+    const bindFn = fn.bind(this, ...args);
+    const delayMill = isNumber(delay) ? delay : delay(...args);
+    timer && clearTimeoutTimer(timer);
+    if (delayMill > 0) {
+      timer = setTimeoutFn(bindFn, delayMill);
+    } else {
+      bindFn();
+    }
+  };
+};

@@ -1,6 +1,4 @@
-import Method from '@/Method';
 import { createAssert } from '@alova/shared/assert';
-import { instanceOf } from '@alova/shared/function';
 
 // import { get } from '@alova/shared';
 
@@ -11,9 +9,3 @@ import { instanceOf } from '@alova/shared/function';
  */
 const myAssert = createAssert();
 export default myAssert;
-
-/**
- * 断言是否为method实例
- * @param methodInstance method实例
- */
-export const assertMethod = (methodInstance?: Method) => myAssert(instanceOf(methodInstance, Method), 'expected a method instance.');

@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createAssert should handle null/undefined prefix gracefully 1`] = `"[alova]Test with null prefix"`;
+
+exports[`createAssert should handle null/undefined prefix gracefully 2`] = `"[alova]Test with undefined prefix"`;
+
+exports[`createAssert should throw an error when expression is false with prefix 1`] = `"[alova/validation]Value is not valid"`;
+
+exports[`createAssert should throw an error with error code and include error details URL 1`] = `
+"[alova]Invalid configuration
+
+Detaild: https://alova.js.org/err#1001"
+`;
+
+exports[`createAssert should throw an error without error code 1`] = `"[alova]Something went wrong"`;

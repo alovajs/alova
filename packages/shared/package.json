@@ -7,7 +7,7 @@
   "types": "typings/index.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "echo \"no tests.\"",
+    "test": "jest",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "tsc",

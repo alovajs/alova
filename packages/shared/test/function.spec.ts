@@ -1,5 +1,6 @@
 import { createAssert } from '@/assert';
 import {
+  createSyncOnceRunner,
   getConfig,
   getContext,
   getContextOptions,
@@ -12,9 +13,11 @@ import {
   isSpecialRequestBody,
   isString,
   key,
-  omit
+  omit,
+  walkObject
 } from '@/function';
 import { MEMORY, STORAGE_RESTORE } from '@/vars';
+import { untilCbCalled } from 'root/testUtils';
 import { createAlova } from '../../alova';
 
 const simulatedRequestAdapter = () => ({
@@ -289,5 +292,131 @@ describe('shared functions', () => {
     expect(result4).toEqual({ e: 1600000030000, m: STORAGE_RESTORE, s: true, t: 'my-tag' });
 
     Date.now = nowFn;
+  });
+
+  test('function createSyncOnceRunner', async () => {
+    // 'should execute the function only once after multiple synchronous calls with delay'
+    // Arrange
+    const delay = 100; // Delay for demonstration purposes
+    const runner = createSyncOnceRunner(delay);
+
+    // This function will be executed by the runner
+    const testFn = jest.fn();
+
+    // Act
+    // Call the runner multiple times synchronously
+    runner(testFn);
+    runner(testFn); // This call should not execute the function again
+    runner(testFn); // Nor this one
+
+    await untilCbCalled(setTimeout, delay + 3);
+    expect(testFn).toHaveBeenCalledTimes(1);
+  });
+
+  test('function walkObject', () => {
+    // should perform a preorder traversal and call the callback
+    // Arrange
+    const target = {
+      a: 1,
+      b: {
+        c: 2,
+        d: 3
+      },
+      e: 4
+    };
+
+    // eslint-disable-next-line
+    const callbackSpy = jest.fn((value, _, __) => value);
+
+    // Act
+    walkObject(target, callbackSpy, true);
+
+    // Assert
+    expect(callbackSpy).toHaveBeenCalledTimes(5);
+    expect(callbackSpy.mock.calls[0][0]).toBe(1);
+    expect(callbackSpy.mock.calls[0][1]).toBe('a');
+    expect(callbackSpy.mock.calls[0][2]).toBe(target);
+
+    expect(callbackSpy.mock.calls[1][0]).toBe(target.b);
+    expect(callbackSpy.mock.calls[1][1]).toBe('b');
+    expect(callbackSpy.mock.calls[1][2]).toBe(target);
+
+    expect(callbackSpy.mock.calls[2][0]).toBe(2);
+    expect(callbackSpy.mock.calls[2][1]).toBe('c');
+    expect(callbackSpy.mock.calls[2][2]).toBe(target.b);
+
+    expect(callbackSpy.mock.calls[3][0]).toBe(3);
+    expect(callbackSpy.mock.calls[3][1]).toBe('d');
+    expect(callbackSpy.mock.calls[3][2]).toBe(target.b);
+
+    expect(callbackSpy.mock.calls[4][0]).toBe(4);
+    expect(callbackSpy.mock.calls[4][1]).toBe('e');
+    expect(callbackSpy.mock.calls[4][2]).toBe(target);
+
+    // should perform a postorder traversal and call the callback
+    // Arrange
+    const target2 = {
+      a: 1,
+      b: {
+        c: 2,
+        d: 3
+      },
+      e: 4
+    };
+    // eslint-disable-next-line
+    const callbackSpy2 = jest.fn((value, _, __) => value);
+
+    // Act
+    walkObject(target2, callbackSpy2, false);
+
+    // Assert
+    expect(callbackSpy2).toHaveBeenCalledTimes(5);
+    expect(callbackSpy2.mock.calls[0][0]).toBe(1);
+    expect(callbackSpy2.mock.calls[0][1]).toBe('a');
+    expect(callbackSpy2.mock.calls[0][2]).toBe(target2);
+
+    expect(callbackSpy2.mock.calls[1][0]).toBe(2);
+    expect(callbackSpy2.mock.calls[1][1]).toBe('c');
+    expect(callbackSpy2.mock.calls[1][2]).toBe(target2.b);
+
+    expect(callbackSpy2.mock.calls[2][0]).toBe(3);
+    expect(callbackSpy2.mock.calls[2][1]).toBe('d');
+    expect(callbackSpy2.mock.calls[2][2]).toBe(target2.b);
+
+    expect(callbackSpy2.mock.calls[3][0]).toBe(target2.b);
+    expect(callbackSpy2.mock.calls[3][1]).toBe('b');
+    expect(callbackSpy2.mock.calls[3][2]).toBe(target2);
+
+    expect(callbackSpy2.mock.calls[4][0]).toBe(4);
+    expect(callbackSpy2.mock.calls[4][1]).toBe('e');
+    expect(callbackSpy2.mock.calls[4][2]).toBe(target2);
+
+    // should handle when the callback changes the value
+    // Arrange
+    const target3 = {
+      a: 1,
+      b: {
+        c: 2
+      }
+    };
+    // eslint-disable-next-line
+    const callbackSpy3 = jest.fn((value, key, _) => {
+      if (key === 'c') {
+        return value * 2; // Double the value of 'c'
+      }
+      return value;
+    });
+
+    // Act
+    walkObject(target3, callbackSpy3, true);
+
+    // Assert
+    expect(target3.b.c).toBe(4); // The value of 'c' should be doubled
+
+    // Assert the callback was called with the correct values
+    expect(callbackSpy3).toHaveBeenCalledTimes(3);
+    expect(callbackSpy3.mock.calls[2][0]).toBe(2); // params is original value
+    expect(callbackSpy3.mock.calls[2][1]).toBe('c'); // The new value for 'c'
+    expect(callbackSpy3.mock.calls[2][2]).toBe(target3.b);
   });
 });

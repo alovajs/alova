@@ -1,5 +1,4 @@
 import { defineProperty, forEach, objectKeys } from '@/helper';
-import { trueValue } from '@/helper/variables';
 import usePagination_unified from '@/hooks/pagination/usePagination';
 import useSQRequest_unified from '@/hooks/silent/useSQRequest';
 import useAutoRequest_unified from '@/hooks/useAutoRequest';
@@ -8,17 +7,15 @@ import useForm_unified from '@/hooks/useForm';
 import useRetriableRequest_unified from '@/hooks/useRetriableRequest';
 import useSSE_unified from '@/hooks/useSSE';
 import { actionDelegationMiddleware as actionDelegationMiddleware_unified } from '@/middlewares/actionDelegation';
+import { trueValue } from '@alova/shared/vars';
 
-export const usePagination = (handler, config = {}) =>
-  usePagination_unified(handler, config, $, $$, upd$, _$, _exp$, _expBatch$, watch$, useFlag$, useRequestRefState$, useMemorizedCallback$);
-
-// 已通过 hooks/silent/useSQRequest 导入测试
-/* c8 ignore start */
-export const useSQRequest = (handler, config = {}) => useSQRequest_unified(handler, config);
 export {
   createClientTokenAuthentication,
   createServerTokenAuthentication
 } from '@/functions/tokenAuthentication/createTokenAuthentication';
+export { default as useFetcher } from '@/hooks/core/useFetcher';
+export { default as useRequest } from '@/hooks/core/useRequest';
+export { default as useWatcher } from '@/hooks/core/useWatcher';
 export { default as useSerialRequest } from '@/hooks/serial/useSerialRequest';
 export { default as useSerialWatcher } from '@/hooks/serial/useSerialWatcher';
 export {
@@ -37,6 +34,14 @@ export { default as isVData } from '@/hooks/silent/virtualResponse/isVData';
 export { default as stringifyVData } from '@/hooks/silent/virtualResponse/stringifyVData';
 export { default as updateStateEffect } from '@/hooks/silent/virtualResponse/updateStateEffect';
 export { accessAction } from '@/middlewares/actionDelegation';
+export { default as updateState } from '@/updateState';
+
+export const usePagination = (handler, config = {}) =>
+  usePagination_unified(handler, config, $, $$, upd$, _$, _exp$, _expBatch$, watch$, useFlag$, useRequestRefState$, useMemorizedCallback$);
+
+// 已通过 hooks/silent/useSQRequest 导入测试
+/* c8 ignore start */
+export const useSQRequest = (handler, config = {}) => useSQRequest_unified(handler, config);
 
 // 导出actionDelegation中间件
 export const actionDelegationMiddleware = id => actionDelegationMiddleware_unified(id, useFlag$);
