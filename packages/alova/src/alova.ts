@@ -1,13 +1,6 @@
 import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import {
-  AlovaGlobalCacheAdapter,
-  AlovaMethodCreateConfig,
-  AlovaOptions,
-  MethodFilter,
-  RequestBody,
-  StatesHook
-} from '~/typings';
+import { AlovaGlobalCacheAdapter, AlovaMethodCreateConfig, AlovaOptions, MethodFilter, RequestBody, StatesHook } from '~/typings';
 import Method from './Method';
 import { defaultL1CacheAdapter, defaultL2CacheAdapter } from './defaults/cacheAdapter';
 import { matchSnapshotMethods } from './storage/methodSnapShots';
@@ -184,10 +177,7 @@ export const usingL2CacheAdapters: AlovaGlobalCacheAdapter[] = [];
 export const createAlova = <State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
   options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>
 ) => {
-  const alovaInstance = newInstance(
-    Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>,
-    options
-  );
+  const alovaInstance = newInstance(Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>, options);
   const newStatesHook = getStatesHook(alovaInstance);
   if (boundStatesHook) {
     myAssert(boundStatesHook === newStatesHook, 'expected to use the same `statesHook`');

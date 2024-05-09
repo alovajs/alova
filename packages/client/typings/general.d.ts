@@ -361,10 +361,8 @@ interface SQHookConfig<S, E, R, T, RC, RE, RH> {
   vDataCaptured?: (method: Method<S, E, R, T, RC, RE, RH>) => R | undefined | void;
 }
 
-type SQRequestHookConfig<S, E, R, T, RC, RE, RH> = SQHookConfig<S, E, R, T, RC, RE, RH> &
-  RequestHookConfig<S, E, R, T, RC, RE, RH>;
-type SQWatcherHookConfig<S, E, R, T, RC, RE, RH> = SQHookConfig<S, E, R, T, RC, RE, RH> &
-  WatcherHookConfig<S, E, R, T, RC, RE, RH>;
+type SQRequestHookConfig<S, E, R, T, RC, RE, RH> = SQHookConfig<S, E, R, T, RC, RE, RH> & RequestHookConfig<S, E, R, T, RC, RE, RH>;
+type SQWatcherHookConfig<S, E, R, T, RC, RE, RH> = SQHookConfig<S, E, R, T, RC, RE, RH> & WatcherHookConfig<S, E, R, T, RC, RE, RH>;
 
 type FallbackHandler<S, E, R, T, RC, RE, RH> = (event: ScopedSQEvent<S, E, R, T, RC, RE, RH>) => void;
 type RetryHandler<S, E, R, T, RC, RE, RH> = (event: ScopedSQRetryEvent<S, E, R, T, RC, RE, RH>) => void;
@@ -517,11 +515,22 @@ interface StoreDetailConfig {
    */
   serializers?: Record<string | number, DataSerializer>;
 }
-type FormHookConfig<S, E, R, T, RC, RE, RH, F> = {
+type FormHookConfig<
+  State = any,
+  Computed = any,
+  Watched = any,
+  Export = any,
+  Responded = any,
+  Transformed = any,
+  RequestConfig = any,
+  Response = any,
+  ResponseHeader = any,
+  FormData = any
+> = {
   /**
    * 初始表单数据
    */
-  initialForm?: F;
+  initialForm?: FormData;
 
   /**
    * form id，相同id的data数据是同一份引用，可以用于在多页表单时共用同一份表单数据
@@ -540,7 +549,7 @@ type FormHookConfig<S, E, R, T, RC, RE, RH, F> = {
    * @default false
    */
   resetAfterSubmiting?: boolean;
-} & RequestHookConfig<S, E, R, T, RC, RE, RH>;
+} & RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
 type RestoreHandler = () => void;
 /**
@@ -651,10 +660,7 @@ interface Actions {
  * @returns alova中间件函数
  */
 type ActionDelegationMiddleware = (id: string | number | symbol) => <S, E, R, T, RC, RE, RH>(
-  context: (
-    | AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>
-    | AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>
-  ) & {
+  context: (AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH> | AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>) & {
     delegatingActions?: Actions;
   },
   next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
@@ -710,8 +716,7 @@ interface TokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, an
    */
   assignToken?: (method: Parameters<RA>[1]) => void | Promise<void>;
 }
-interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>>
-  extends TokenAuthenticationOptions<RA> {
+interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>> extends TokenAuthenticationOptions<RA> {
   /**
    * 在请求前的拦截器中判断token是否过期，并刷新token
    */
@@ -730,8 +735,7 @@ interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, a
     metaMatches?: MetaMatches;
   };
 }
-interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>>
-  extends TokenAuthenticationOptions<RA> {
+interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>> extends TokenAuthenticationOptions<RA> {
   /**
    * 在请求成功拦截器中判断token是否过期，并刷新token
    */
@@ -774,10 +778,7 @@ type AlovaBeforeRequest<SH extends StatesHook<any, any>, RA extends AlovaRequest
     ? Method<ReturnType<SH['create']>, ReturnType<SH['export']>, any, any, RC, RT, RH>
     : never
 ) => void | Promise<void>;
-type AlovaResponded<
-  SH extends StatesHook<any, any>,
-  RA extends AlovaRequestAdapter<any, any, any, any, any>
-> = NonNullable<
+type AlovaResponded<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any, any, any>> = NonNullable<
   AlovaOptions<
     ReturnType<SH['create']>,
     ReturnType<SH['export']>,
@@ -786,10 +787,7 @@ type AlovaResponded<
     Parameters<RA>[1] extends Method<any, any, any, any, any, any, infer RH> ? RH : never
   >['responded']
 >;
-interface TokenAuthenticationResult<
-  SH extends StatesHook<any, any>,
-  RA extends AlovaRequestAdapter<any, any, any, any, any>
-> {
+interface TokenAuthenticationResult<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any, any, any>> {
   onAuthRequired(originalBeforeRequest?: AlovaBeforeRequest<SH, RA>): AlovaBeforeRequest<SH, RA>;
   onResponseRefreshToken(originalResponded?: AlovaResponded<SH, RA>): AlovaResponded<SH, RA>;
   waitingList: {
@@ -855,9 +853,7 @@ interface AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH> extends AlovaSSEEve
   data: Data; // 每次响应的，经过拦截器转换后的数据
 }
 type SSEOnOpenTrigger<S, E, R, T, RC, RE, RH> = (event: AlovaSSEEvent<S, E, R, T, RC, RE, RH>) => void;
-type SSEOnMessageTrigger<Data, S, E, R, T, RC, RE, RH> = (
-  event: AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH>
-) => void;
+type SSEOnMessageTrigger<Data, S, E, R, T, RC, RE, RH> = (event: AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH>) => void;
 type SSEOnErrorTrigger<S, E, R, T, RC, RE, RH> = (event: AlovaSSEErrorEvent<S, E, R, T, RC, RE, RH>) => void;
 type SSEOn<S, E, R, T, RC, RE, RH> = (
   eventName: string,

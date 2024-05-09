@@ -147,10 +147,7 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
    */
   public replace(newSilentMethod: SilentMethod) {
     const targetSilentMethod = this;
-    silentAssert(
-      newSilentMethod.cache === targetSilentMethod.cache,
-      'the cache of new silentMethod must equal with this silentMethod'
-    );
+    silentAssert(newSilentMethod.cache === targetSilentMethod.cache, 'the cache of new silentMethod must equal with this silentMethod');
     const [queue, queueName, position] = getBelongQueuePosition(targetSilentMethod);
     if (queue) {
       splice(queue, position, 1, newSilentMethod);
@@ -177,13 +174,8 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
    * @param matcher method实例匹配器
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  public setUpdateState(
-    matcher: MethodMatcher<any, any, any, any, any, any, any>,
-    updateStateName: string | string[] = 'data'
-  ) {
-    const methodInstance = instanceOf(matcher, Method)
-      ? matcher
-      : matchSnapshotMethod(matcher as MethodFilter, falseValue);
+  public setUpdateState(matcher: MethodMatcher<any, any, any, any, any, any, any>, updateStateName: string | string[] = 'data') {
+    const methodInstance = instanceOf(matcher, Method) ? matcher : matchSnapshotMethod(matcher as MethodFilter, falseValue);
     if (methodInstance) {
       this.targetRefMethod = methodInstance;
       this.updateStates = isArray(updateStateName) ? (updateStateName as string[]) : [updateStateName as string];

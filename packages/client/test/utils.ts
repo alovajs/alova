@@ -2,10 +2,7 @@ import { act } from '@testing-library/react';
 import { GlobalLocalCacheConfig, Method, StatesHook, createAlova } from 'alova';
 import GlobalFetch, { FetchRequestInit } from 'alova/GlobalFetch';
 
-export const untilCbCalled = <T>(
-  setCb: (cb: (arg: T, ...args: any[]) => any, ...others: any[]) => any,
-  ...args: any[]
-) =>
+export const untilCbCalled = <T>(setCb: (cb: (arg: T, ...args: any[]) => any, ...others: any[]) => any, ...args: any[]) =>
   new Promise<T>(resolve => {
     setCb(
       d => {

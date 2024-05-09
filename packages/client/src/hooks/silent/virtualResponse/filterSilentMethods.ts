@@ -24,9 +24,7 @@ export const filterSilentMethods = (
         return trueValue;
       }
       const name = getConfig(silentMethodItem.entity).name || '';
-      const retain = instanceOf(methodNameMatcher, RegExp)
-        ? regexpTest(methodNameMatcher, name)
-        : name === methodNameMatcher;
+      const retain = instanceOf(methodNameMatcher, RegExp) ? regexpTest(methodNameMatcher, name) : name === methodNameMatcher;
       return retain && (filterActive ? silentMethodItem.active : trueValue);
     });
 

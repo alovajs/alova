@@ -5,10 +5,7 @@ import { setDependentAlova } from '../../src/hooks/silent/globalVariables';
 import { SilentMethod } from '../../src/hooks/silent/SilentMethod';
 import { clearSilentQueueMap, pushNewSilentMethod2Queue, silentQueueMap } from '../../src/hooks/silent/silentQueue';
 import loadSilentQueueMapFromStorage from '../../src/hooks/silent/storage/loadSilentQueueMapFromStorage';
-import {
-  silentMethodIdQueueMapStorageKey,
-  silentMethodStorageKeyPrefix
-} from '../../src/hooks/silent/storage/performers';
+import { silentMethodIdQueueMapStorageKey, silentMethodStorageKeyPrefix } from '../../src/hooks/silent/storage/performers';
 import { spliceStorageSilentMethod } from '../../src/hooks/silent/storage/silentMethodStorage';
 import { mockRequestAdapter } from '../mockData';
 

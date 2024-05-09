@@ -35,9 +35,7 @@ export default async function updateState<
     const methodKey = getMethodInternalKey(matcher);
     const { id, l1Cache, l2Cache } = getContext(matcher);
     const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
-    const updateStateCollection = isFn(handleUpdate)
-      ? ({ data: handleUpdate } as UpdateStateCollection<Responded>)
-      : handleUpdate;
+    const updateStateCollection = isFn(handleUpdate) ? ({ data: handleUpdate } as UpdateStateCollection<Responded>) : handleUpdate;
 
     let updatedDataColumnData = undefinedValue as any;
     if (frontStates) {
@@ -69,8 +67,7 @@ export default async function updateState<
       const { e: expireMilliseconds, s: toStore, t: tag } = getLocalCacheConfigParam(matcher);
       await PromiseCls.all([
         setWithCacheAdapter(id, methodKey, updatedDataColumnData, expireMilliseconds, l1Cache, hitSource),
-        toStore &&
-          setWithCacheAdapter(id, methodKey, updatedDataColumnData, expireMilliseconds, l2Cache, hitSource, tag)
+        toStore && setWithCacheAdapter(id, methodKey, updatedDataColumnData, expireMilliseconds, l2Cache, hitSource, tag)
       ]);
     }
   }

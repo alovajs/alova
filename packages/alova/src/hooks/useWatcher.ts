@@ -5,42 +5,12 @@ import { objAssign } from '@alova/shared/function';
 import { len } from '@alova/shared/vars';
 import { AlovaMethodHandler, EnumHookType, WatcherHookConfig } from '~/typings';
 
-export default function useWatcher<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export default function useWatcher<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   watchingStates: Watched[],
-  config: WatcherHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > = {}
+  config: WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
 ) {
   myAssert(watchingStates && len(watchingStates) > 0, 'must specify at least one watching state');
   const { immediate, debounce = 0, initialData } = config;

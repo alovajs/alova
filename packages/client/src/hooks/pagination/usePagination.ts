@@ -1,3 +1,22 @@
+import { createAssert } from '@alova/shared/assert';
+import { createSyncOnceRunner, getLocalCacheConfigParam, getTime, isNumber, noop, statesHookHelper } from '@alova/shared/function';
+import {
+  falseValue,
+  filterItem,
+  forEach,
+  isArray,
+  len,
+  objectKeys,
+  objectValues,
+  promiseCatch,
+  promiseResolve,
+  pushItem,
+  setTimeoutFn,
+  shift,
+  splice,
+  trueValue,
+  undefinedValue
+} from '@alova/shared/vars';
 import {
   AlovaMethodHandler,
   Method,
@@ -9,34 +28,9 @@ import {
   useFetcher,
   useWatcher
 } from 'alova';
-import { createAssert } from '@alova/shared/assert';
-import {
-  getLocalCacheConfigParam,
-  getTime,
-  createSyncOnceRunner,
-  noop,
-  isNumber,
-  statesHookHelper
-} from '@alova/shared/function';
-import {
-  len,
-  trueValue,
-  falseValue,
-  promiseResolve,
-  undefinedValue,
-  promiseCatch,
-  splice,
-  filterItem,
-  objectKeys,
-  setTimeoutFn,
-  pushItem,
-  forEach,
-  isArray,
-  objectValues
-} from '@alova/shared/vars';
-import { map, includes } from 'lodash-es';
-import createSnapshotMethodsManager from './createSnapshotMethodsManager';
+import { includes, map } from 'lodash-es';
 import { PaginationHookConfig } from '~/typings/general';
+import createSnapshotMethodsManager from './createSnapshotMethodsManager';
 
 const paginationAssert = createAssert('usePagination');
 const indexAssert = (index, rawData) =>
@@ -45,28 +39,8 @@ const indexAssert = (index, rawData) =>
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-  config: PaginationHookConfig<
-    State,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader,
-    any,
-    Watched
-  > = {}
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  config: PaginationHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, any, Watched> = {}
 ) => {
   const {
     create,
@@ -194,17 +168,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   const canPreload = async (
     rawData = dehydrate(requestDataRef),
     preloadPage: number,
-    fetchMethod: Method<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >,
+    fetchMethod: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
     isNextPage = falseValue,
     forceRequest: boolean
   ) => {
@@ -372,9 +336,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
       paginationAssert(isNumber(refreshPage), 'unable to calculate refresh page by item in pagination mode');
       // 页数相等，则刷新当前页，否则fetch数据
       promiseCatch(
-        refreshPage === dehydrate(page)
-          ? send(undefinedValue, trueValue)
-          : fetch(handler(refreshPage, dehydrate(pageSize)), trueValue),
+        refreshPage === dehydrate(page) ? send(undefinedValue, trueValue) : fetch(handler(refreshPage, dehydrate(pageSize)), trueValue),
         noop
       );
     }
@@ -391,10 +353,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     } else {
       // 筛选出上一页、当前页、下一页的数据
       const excludeSnapshotKeys = map(
-        filterItem(
-          [getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)],
-          Boolean
-        ),
+        filterItem([getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)], Boolean),
         ({ entity }) => getMethodKey(entity)
       );
       snapshots = map(
@@ -505,7 +464,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
         if (rawData) {
           const cachedListData = listDataGetter(rawData);
           // 从下一页列表的头部开始取补位数据
-          fillingItem = shiftItem(cachedListData || []);
+          fillingItem = shift(cachedListData || []);
           return rawData;
         }
       });
@@ -608,6 +567,3 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     reload
   };
 };
-function shiftItem(arg0: any): undefined {
-  throw new Error('Function not implemented.');
-}

@@ -7,16 +7,7 @@ import { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders 
  */
 type AlovaAxiosRequestConfig = Omit<
   AxiosRequestConfig,
-  | 'url'
-  | 'method'
-  | 'baseURL'
-  | 'params'
-  | 'data'
-  | 'timeout'
-  | 'cancelToken'
-  | 'signal'
-  | 'onUploadProgress'
-  | 'onDownloadProgress'
+  'url' | 'method' | 'baseURL' | 'params' | 'data' | 'timeout' | 'cancelToken' | 'signal' | 'onUploadProgress' | 'onDownloadProgress'
 >;
 
 /**

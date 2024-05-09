@@ -1,12 +1,7 @@
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
 import { setSilentFactoryStatus } from '../../src/hooks/silent/globalVariables';
-import {
-  bootSilentFactory,
-  onSilentSubmitError,
-  onSilentSubmitFail,
-  onSilentSubmitSuccess
-} from '../../src/hooks/silent/silentFactory';
+import { bootSilentFactory, onSilentSubmitError, onSilentSubmitFail, onSilentSubmitSuccess } from '../../src/hooks/silent/silentFactory';
 import { SilentMethod } from '../../src/hooks/silent/SilentMethod';
 import { pushNewSilentMethod2Queue } from '../../src/hooks/silent/silentQueue';
 import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
@@ -261,21 +256,12 @@ describe('silent method request in queue with silent behavior', () => {
       const virtualResponse = createVirtualResponse({
         id: ''
       });
-      const silentMethodInstance = new SilentMethod(
-        methodInstance,
-        'silent',
-        undefined,
-        undefined,
-        /api not found/,
-        4,
-        { delay: 50 },
-        [
-          () => {
-            fallbackMockFn();
-            resolve();
-          }
-        ]
-      );
+      const silentMethodInstance = new SilentMethod(methodInstance, 'silent', undefined, undefined, /api not found/, 4, { delay: 50 }, [
+        () => {
+          fallbackMockFn();
+          resolve();
+        }
+      ]);
       silentMethodInstance.virtualResponse = virtualResponse;
       pushNewSilentMethod2Queue(silentMethodInstance, false, 't3');
 

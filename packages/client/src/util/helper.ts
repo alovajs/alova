@@ -68,8 +68,7 @@ export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => 
   if (startQuiver || endQuiver) {
     startQuiver = startQuiver || 0;
     endQuiver = endQuiver || 1;
-    retryDelayFinally +=
-      retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
+    retryDelayFinally += retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
     retryDelayFinally = Math.floor(retryDelayFinally); // 取整数延迟
   }
   return retryDelayFinally;
@@ -137,36 +136,13 @@ export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
  * @param args 方法调用参数
  * @returns 请求方法对象
  */
-export const getHandlerMethod = <
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export const getHandlerMethod = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   methodHandler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   args: any[] = []
 ) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
-  myAssert(
-    instanceOf(methodInstance, Method),
-    'hook handler must be a method instance or a function that returns method instance'
-  );
+  myAssert(instanceOf(methodInstance, Method), 'hook handler must be a method instance or a function that returns method instance');
   return methodInstance;
 };

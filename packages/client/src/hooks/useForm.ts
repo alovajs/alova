@@ -2,6 +2,7 @@ import createSerializerPerformer from '@/util/serializer';
 import { createAssert } from '@alova/shared/assert';
 import {
   getContext,
+  getMethodInternalKey,
   isNumber,
   isPlainObject,
   isString,
@@ -11,11 +12,11 @@ import {
   walkObject
 } from '@alova/shared/function';
 import { falseValue, isArray, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import { Method, UseHookReturnType, getMethodKey, promiseStatesHook, useRequest } from 'alova';
+import { Method, promiseStatesHook, useRequest } from 'alova';
 import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
 
-const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodKey(methodInstance)}`;
-type ID = NonNullable<FormHookConfig<any, any, any, any, any, any, any, any>['id']>;
+const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
+type ID = NonNullable<FormHookConfig['id']>;
 
 const sharedStates = {} as Record<
   ID,
@@ -42,9 +43,7 @@ export default <
   ResponseHeader,
   FormData extends Record<string | symbol, any>
 >(
-  handler:
-    | FormHookHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData>
-    | ID,
+  handler: FormHookHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData> | ID,
   config: FormHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData> = {}
 ) => {
   // 如果第一个参数传入的是id，则获取它的初始化数据并返回
@@ -58,13 +57,11 @@ export default <
   const { id, initialForm, store, resetAfterSubmiting, immediate = falseValue, middleware } = config;
   const {
     create: $,
-    computed: $$,
-    dehydrate: dehydrate$,
     ref: useFlag$,
     onMounted: onMounted$,
     watch: watch$,
-    memorize: useMemorizedCallback$,
     exportObject,
+    memorizeOperators,
     __referingObj: referingObject
   } = statesHookHelper(promiseStatesHook());
   const isStoreObject = isPlainObject(store);
@@ -72,7 +69,7 @@ export default <
   // 如果config中的id也有对应的共享状态，则也会返回它
   // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
   const sharedState = id ? sharedStates[id] : undefinedValue;
-  const [form, setForm] = $(cloneFormData(initialForm), keyForm);
+  const form = $(cloneFormData(initialForm), keyForm);
   const methodHandler = handler as FormHookHandler<
     State,
     Export,
@@ -85,9 +82,9 @@ export default <
   >;
   const restoreHandlers: RestoreHandler[] = [];
   // 使用计算属性，避免每次执行此use hook都调用一遍methodHandler
-  const initialMethodInstance = $$(() => sloughConfig(methodHandler, [dehydrate$(form)]), []);
-  const storageContext = getContext(dehydrate$(initialMethodInstance)).l2Cache;
-  const storagedKey = useFlag$(getStoragedKey(dehydrate$(initialMethodInstance), id));
+  const initialMethodInstance = useFlag$(sloughConfig(methodHandler, [form.v]));
+  const storageContext = getContext(initialMethodInstance.current).l2Cache;
+  const storagedKey = getStoragedKey(initialMethodInstance.current, id);
   const reseting = useFlag$(falseValue);
   const serializerPerformer = useFlag$(
     createSerializerPerformer(isStoreObject ? (store as StoreDetailConfig).serializers : undefinedValue)
@@ -95,7 +92,7 @@ export default <
   // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
   const isCreateShardState = useFlag$(false);
 
-  const originalHookReturns = useRequest((...args: any[]) => methodHandler(dehydrate$(form) as any, ...args), {
+  const originalHookReturns = useRequest((...args: any[]) => methodHandler(form.v, ...args), {
     ...config,
     __referingObj: referingObject,
 
@@ -120,23 +117,23 @@ export default <
   /**
    * 重置form数据
    */
-  const reset = useMemorizedCallback$(() => {
+  const reset = () => {
     reseting.current = trueValue;
     const clonedFormData = cloneFormData(initialForm);
-    clonedFormData && setForm(clonedFormData);
-    enableStore && storageContext.remove(storagedKey.current);
-  });
+    clonedFormData && (form.v = clonedFormData);
+    enableStore && storageContext.remove(storagedKey);
+  };
 
   /**
    * 更新form数据
    * @param newForm 新表单数据
    */
-  const updateForm = useMemorizedCallback$((newForm: Partial<FormData> | ((oldForm: FormData) => FormData)) => {
-    setForm({
-      ...dehydrate$(form),
+  const updateForm = (newForm: Partial<FormData> | ((oldForm: FormData) => FormData)) => {
+    form.v = {
+      ...form.v,
       ...newForm
-    });
-  });
+    };
+  };
 
   const hookReturns = {
     // 第一个参数固定为form数据
@@ -147,13 +144,15 @@ export default <
       },
       originalHookReturns
     ),
+    ...memorizeOperators({
+      updateForm,
+      reset
+    }),
 
     // 持久化数据恢复事件绑定
     onRestore(handler: RestoreHandler) {
       pushItem(restoreHandlers, handler);
-    },
-    updateForm,
-    reset
+    }
   };
 
   // 有id时，才保存到sharedStates中
@@ -179,11 +178,11 @@ export default <
     if (enableStore && !sharedState) {
       // 获取存储并更新data
       // 需要在onMounted中调用，否则会导致在react中重复被调用
-      const storagedForm = serializerPerformer.current.deserialize(storageContext.get(storagedKey.current));
+      const storagedForm = serializerPerformer.current.deserialize(storageContext.get(storagedKey));
 
       // 有草稿数据时，异步恢复数据，否则无法正常绑定onRetore事件
       if (storagedForm) {
-        setForm(storagedForm);
+        form.v = storagedForm;
         // 触发持久化数据恢复事件
         runEventHandlers(restoreHandlers);
         enableStore && immediate && send();
@@ -197,7 +196,7 @@ export default <
       reseting.current = falseValue;
       return;
     }
-    storageContext.set(storagedKey.current, serializerPerformer.current.serialize(dehydrate$(form)));
+    storageContext.set(storagedKey, serializerPerformer.current.serialize(form.v));
   });
   // 如果在提交后需要清除数据，则调用reset
   onSuccess(() => {

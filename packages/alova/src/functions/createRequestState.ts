@@ -70,32 +70,12 @@ export default function createRequestState<
   RequestConfig,
   Response,
   ResponseHeader,
-  Config extends UseHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+  Config extends UseHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 >(
   hookType: EnumHookType,
   methodHandler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   useHookConfig: Config,
   initialData?: FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>['initialData'],
   immediate = falseValue,
@@ -130,21 +110,13 @@ export default function createRequestState<
         }
       }
       const forceRequestFinally = sloughConfig(
-        (useHookConfig as FrontRequestHookConfig<any, any, any, any, any, any, any, any, any> | FetcherHookConfig)
-          .force ?? falseValue
+        (useHookConfig as FrontRequestHookConfig<any, any, any, any, any, any, any, any, any> | FetcherHookConfig).force ?? falseValue
       );
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
   }
 
-  const {
-    create,
-    export: exportState,
-    effectRequest,
-    memorize,
-    ref,
-    exportObject
-  } = statesHookHelper(promiseStatesHook(), referingObject);
+  const { create, export: exportState, effectRequest, memorize, ref, exportObject } = statesHookHelper(promiseStatesHook(), referingObject);
   const progress: Progress = {
     total: 0,
     loaded: 0
@@ -238,48 +210,14 @@ export default function createRequestState<
       hookInstance.eu = trueValue;
       return exportState(uploading) as unknown as ExportedType<Progress, State>;
     },
-    onSuccess(
-      handler: SuccessHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >
-    ) {
+    onSuccess(handler: SuccessHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) {
       pushItem(hookInstance.sh, handler);
     },
-    onError(
-      handler: ErrorHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >
-    ) {
+    onError(handler: ErrorHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) {
       pushItem(hookInstance.eh, handler);
     },
     onComplete(
-      handler: CompleteHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >
+      handler: CompleteHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
     ) {
       pushItem(hookInstance.ch, handler);
     },
@@ -295,17 +233,7 @@ export default function createRequestState<
     send: memorize(
       (
         sendCallingArgs?: any[],
-        methodInstance?: Method<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        >
+        methodInstance?: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
       ) => handleRequest(methodInstance, sendCallingArgs)
     )
   };

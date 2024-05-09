@@ -21,17 +21,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   fromCache?: boolean,
   data?: Responded,
   error?: any,
-  status?: AlovaCompleteEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >['status']
+  status?: AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */

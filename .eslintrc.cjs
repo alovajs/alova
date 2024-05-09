@@ -33,6 +33,7 @@ module.exports = {
     'import/order': 'off',
     'import/no-relative-packages': 'off',
     'guard-for-in': 'off',
+    'max-classes-per-file': 'off',
 
     // jsx-a11y
     'jsx-a11y/aria-role': 'off',

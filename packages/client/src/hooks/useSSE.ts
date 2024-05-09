@@ -1,3 +1,6 @@
+import { buildCompletedURL } from '@/functions/sendRequest';
+import createHookEvent, { AlovaHookEventType } from '@/util/createHookEvent';
+import { getHandlerMethod, throwFn, useCallback, usePromise } from '@/util/helper';
 import { createAssert } from '@alova/shared/assert';
 import {
   _self,
@@ -21,9 +24,6 @@ import {
   invalidateCache,
   promiseStatesHook
 } from 'alova';
-import { getHandlerMethod, throwFn, useCallback, usePromise } from '@/util/helper';
-import { buildCompletedURL } from '@/functions/sendRequest';
-import createHookEvent, { AlovaHookEventType } from '@/util/createHookEvent';
 import {
   AlovaSSEErrorEvent,
   AlovaSSEEvent,
@@ -48,31 +48,10 @@ const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSour
   Message: 'message'
 } as const;
 
-export default <
-  Data,
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export default <Data, State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   config: SSEHookConfig = {}
 ) => {
   const {
@@ -113,24 +92,13 @@ export default <
   const [onOpen, triggerOnOpen, offOpen] =
     useCallback<SSEOnOpenTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
   const [onMessage, triggerOnMessage, offMessage] =
-    useCallback<
-      SSEOnMessageTrigger<Data, State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    >();
+    useCallback<SSEOnMessageTrigger<Data, State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
   const [onError, triggerOnError, offError] =
     useCallback<SSEOnErrorTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
 
-  let responseSuccessHandler: RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> =
-    _self;
-  let responseErrorHandler: ResponseErrorHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> =
-    throwFn;
-  let responseCompleteHandler: ResponseCompleteHandler<
-    State,
-    Computed,
-    Export,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > = noop;
+  let responseSuccessHandler: RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = _self;
+  let responseErrorHandler: ResponseErrorHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = throwFn;
+  let responseCompleteHandler: ResponseCompleteHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = noop;
 
   /**
    * 设置响应拦截器，在每次 send 之后都需要调用
@@ -306,10 +274,7 @@ export default <
   };
 
   const esMessage = (event: MessageEvent<any>) => {
-    promiseThen(
-      createSSEEvent(MessageType.Message, Promise.resolve(event.data)),
-      sendSSEEvent(triggerOnMessage) as any
-    );
+    promiseThen(createSSEEvent(MessageType.Message, Promise.resolve(event.data)), sendSSEEvent(triggerOnMessage) as any);
   };
 
   /**

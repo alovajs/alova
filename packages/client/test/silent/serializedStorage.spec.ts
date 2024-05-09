@@ -227,15 +227,9 @@ describe('serialized storage with virtual response', () => {
       multiplier: 1.5
     });
 
-    expect(deserizlizedSilentMethodInstance.handlerArgs?.[0][symbolVDataId]).toBe(
-      virtualResponse.extra.other2[symbolVDataId]
-    );
-    expect(deserizlizedSilentMethodInstance.virtualResponse?.matcher[symbolVDataId]).toBe(
-      virtualResponse.matcher[symbolVDataId]
-    );
-    expect(deserizlizedSilentMethodInstance.virtualResponse?.time[symbolVDataId]).toBe(
-      virtualResponse.time[symbolVDataId]
-    );
+    expect(deserizlizedSilentMethodInstance.handlerArgs?.[0][symbolVDataId]).toBe(virtualResponse.extra.other2[symbolVDataId]);
+    expect(deserizlizedSilentMethodInstance.virtualResponse?.matcher[symbolVDataId]).toBe(virtualResponse.matcher[symbolVDataId]);
+    expect(deserizlizedSilentMethodInstance.virtualResponse?.time[symbolVDataId]).toBe(virtualResponse.time[symbolVDataId]);
 
     expect(deserizlizedSilentMethodInstance.targetRefMethod?.url).toBe(methodInstance.url);
     expect(deserizlizedSilentMethodInstance?.targetRefMethod?.type).toBe(methodInstance.type);

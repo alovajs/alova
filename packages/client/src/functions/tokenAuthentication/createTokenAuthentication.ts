@@ -1,11 +1,7 @@
-import { AlovaRequestAdapter, RespondedHandlerRecord, StatesHook } from 'alova';
 import { _self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
-import {
-  ClientTokenAuthenticationOptions,
-  ServerTokenAuthenticationOptions,
-  TokenAuthenticationResult
-} from '~/typings/general';
+import { AlovaRequestAdapter, RespondedHandlerRecord, StatesHook } from 'alova';
+import { ClientTokenAuthenticationOptions, ServerTokenAuthenticationOptions, TokenAuthenticationResult } from '~/typings/general';
 import {
   PosibbleAuthMap,
   WaitingRequestList,
