@@ -9,20 +9,6 @@
       "@alova/shared/assert": null
     }
   },
-  "stateshook": {
-    "packageName": "alovaStatesHook",
-    "input": "src/statesHook/index.ts",
-    "external": {
-      "vue": "Vue",
-      "react": "React",
-      "svelte": null,
-      "svelte/store": null,
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
-    },
-    "output": "./dist/stateshook/index.{suffix}.{ext}"
-  },
   "client": {
     "packageName": "alovaClient",
     "input": "src/client.ts",

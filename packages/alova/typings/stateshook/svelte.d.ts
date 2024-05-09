@@ -1,5 +1,5 @@
 import { Writable } from 'svelte/store';
-import { EffectRequestParams } from '.';
+import { EffectRequestParams } from '..';
 
 type UnknownWritable = Writable<unknown>;
 interface SvelteHook {

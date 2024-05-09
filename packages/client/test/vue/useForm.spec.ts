@@ -1,11 +1,11 @@
-import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/vue';
-import { Method, createAlova, getMethodKey } from 'alova';
-import { vue as VueHook } from 'alova/statesHook';
+import { createAlova, getMethodKey, Method } from 'alova';
+import VueHook from 'alova/vue';
 import { mockRequestAdapter } from '~/test/mockData';
 import { untilCbCalled } from '~/test/utils';
 import { FormHookConfig } from '~/typings/general';
+import { accessAction, actionDelegationMiddleware, useForm } from '..';
 import CompPersistentDataReset from './components/persistent-data-reset.vue';
 import CompRestorePersistentData from './components/restore-persistent-data.vue';
 
@@ -103,7 +103,7 @@ describe('vue => useForm', () => {
 
     // storageKey会在useForm被调用时同步生成
     const methodStorageKey = getStoragedKey(poster(initialForm));
-    const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
+    const getStoragedForm = () => alovaInst.storage.get(methodStorageKey);
 
     // 更新表单数据，并验证持久化数据
     form.value.name = 'Ming';
@@ -137,7 +137,7 @@ describe('vue => useForm', () => {
     };
     // 预先存储数据，模拟刷新恢复持久化数据
     const methodStorageKey = getStoragedKey(poster(initialForm));
-    alovaInst.l2Cache.set(methodStorageKey, storagedForm);
+    alovaInst.storage.set(methodStorageKey, storagedForm);
 
     render(CompRestorePersistentData);
 
@@ -201,7 +201,7 @@ describe('vue => useForm', () => {
       reg: regObj
     });
     // 序列化自动转换date和regexp对象
-    expect(alovaInst.l2Cache.get(methodStorageKey)).toStrictEqual({
+    expect(alovaInst.storage.get(methodStorageKey)).toStrictEqual({
       date: ['date', dateTimestamp],
       reg: ['regexp', regObj.source]
     });
@@ -209,7 +209,7 @@ describe('vue => useForm', () => {
     reset();
     expect(form.value).toStrictEqual(initialForm);
     await untilCbCalled(setTimeout, 20);
-    expect(alovaInst.l2Cache.get(methodStorageKey)).toBeNull();
+    expect(alovaInst.storage.get(methodStorageKey)).toBeNull();
   });
 
   test('should remove storage form data when call function reset', async () => {
@@ -225,8 +225,8 @@ describe('vue => useForm', () => {
 
     // 预先存储数据，模拟刷新恢复持久化数据
     const methodStorageKey = getStoragedKey(poster(initialForm));
-    alovaInst.l2Cache.set(methodStorageKey, storagedForm);
-    const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
+    alovaInst.storage.set(methodStorageKey, storagedForm);
+    const getStoragedForm = () => alovaInst.storage.get(methodStorageKey);
     expect(getStoragedForm()).toStrictEqual(storagedForm);
 
     render(CompPersistentDataReset); // 渲染组件
