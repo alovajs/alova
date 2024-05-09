@@ -1,20 +1,31 @@
-import { AlovaMethodHandler, Method, UseHookReturnType, useRequest } from 'alova';
-import { TonMounted$, TonUnmounted$ } from '@/framework/type';
-import { noop } from '@/helper';
-import { falseValue, isSSR, trueValue } from '@/helper/variables';
+import { noop, statesHookHelper } from '@alova/shared/function';
+import { falseValue, isSSR, trueValue } from '@alova/shared/vars';
+import { AlovaMethodHandler, Method, UseHookReturnType, promiseStatesHook, useRequest } from 'alova';
 import { AutoRequestHookConfig, NotifyHandler, UnbindHandler } from '~/typings/general';
 
-interface AutoRequestHook<S, E, R, T, RC, RE, RH> {
+interface AutoRequestHook<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   (
-    handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    config: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>,
-    onMounted$: TonMounted$,
-    onUnmounted$: TonUnmounted$
-  ): UseHookReturnType<S, E, R, T, RC, RE, RH>;
-  onNetwork(notify: NotifyHandler, config: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>): UnbindHandler;
-  onPolling(notify: NotifyHandler, config: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>): UnbindHandler;
-  onVisibility(notify: NotifyHandler, config: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>): UnbindHandler;
-  onFocus(notify: NotifyHandler, config: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>): UnbindHandler;
+    handler:
+      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ): UseHookReturnType<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  onNetwork(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ): UnbindHandler;
+  onPolling(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ): UnbindHandler;
+  onVisibility(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ): UnbindHandler;
+  onFocus(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ): UnbindHandler;
 }
 
 export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, any> = {
@@ -22,16 +33,22 @@ export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, 
   enableNetwork: trueValue,
   throttle: 1000
 };
-const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any> = (handler, config, onMounted$, onUnmounted$) => {
+const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any, any, any> = (handler, config) => {
   let notifiable = trueValue;
   const { enableFocus = trueValue, enableVisibility = trueValue, enableNetwork = trueValue, pollingTime = 0, throttle = 1000 } = config;
-  const states = useRequest(handler, config);
+  const { onMounted, onUnmounted, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const states = useRequest(handler, {
+    ...config,
+    __referingObj: referingObject
+  });
   const notify = () => {
     if (notifiable) {
       states.send();
       if (throttle > 0) {
         notifiable = falseValue;
-        setTimeout(() => (notifiable = trueValue), throttle);
+        setTimeout(() => {
+          notifiable = trueValue;
+        }, throttle);
       }
     }
   };
@@ -40,7 +57,7 @@ const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any> = (hand
   let offFocus = noop;
   let offVisiblity = noop;
   let offPolling = noop;
-  onMounted$(() => {
+  onMounted(() => {
     if (!isSSR) {
       offNetwork = enableNetwork ? useAutoRequest.onNetwork(notify, config) : offNetwork;
       offFocus = enableFocus ? useAutoRequest.onFocus(notify, config) : offFocus;
@@ -48,13 +65,16 @@ const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any> = (hand
       offPolling = pollingTime > 0 ? useAutoRequest.onPolling(notify, config) : offPolling;
     }
   });
-  onUnmounted$(() => {
+  onUnmounted(() => {
     offNetwork();
     offFocus();
     offVisiblity();
     offPolling();
   });
-  return states;
+  return {
+    ...states,
+    __referingObj: referingObject
+  };
 };
 
 const on = (type: string, handler: NotifyHandler) => {

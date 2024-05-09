@@ -59,6 +59,12 @@ export const isNumber = (arg: any): arg is number => typeOf(arg) === 'number' &&
  */
 export const isString = (arg: any): arg is string => typeOf(arg) === 'string';
 /**
+ * 判断参数是否为对象
+ * @param arg 任意参数
+ * @returns 该参数是否为对象
+ */
+export const isObject = <T = any>(arg: any): arg is T => arg !== nullValue && typeOf(arg) === 'object';
+/**
  * 全局的toString
  * @param arg 任意参数
  * @returns 字符串化的参数

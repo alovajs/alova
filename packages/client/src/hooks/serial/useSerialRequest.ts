@@ -8,12 +8,15 @@ import { assertSerialHandlers, serialMiddleware } from './general';
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-export default <S, E, R, T, RC, RE, RH>(
+export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    ...AlovaMethodHandler<S, E, R, T, RC, RE, RH>[]
+    (
+      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    ),
+    ...AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
   ],
-  config: RequestHookConfig<S, E, R, T, RC, RE, RH> = {}
+  config: RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {} as any
 ) => {
   assertSerialHandlers('useSerialRequest', serialHandlers);
   return useRequest(serialHandlers[0], {

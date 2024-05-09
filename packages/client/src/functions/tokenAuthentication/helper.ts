@@ -1,6 +1,6 @@
-import { AlovaRequestAdapter, Method, ResponseCompleteHandler, ResponsedHandler, ResponseErrorHandler, StatesHook } from 'alova';
-import { forEach, instanceOf, isFn, isPlainOrCustomObject, len, newInstance, noop, pushItem, splice } from '@/helper';
-import { falseValue, PromiseCls, trueValue, undefinedValue } from '@/helper/variables';
+import { instanceOf, isFn, isPlainObject, newInstance, noop } from '@alova/shared/function';
+import { PromiseCls, falseValue, forEach, len, pushItem, splice, trueValue, undefinedValue } from '@alova/shared/vars';
+import { AlovaRequestAdapter, Method, RespondedHandler, ResponseCompleteHandler, ResponseErrorHandler, StatesHook } from 'alova';
 import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/general';
 
 export type PosibbleAuthMap =
@@ -27,11 +27,13 @@ export const defaultRefreshTokenMeta = {
   authRole: 'refreshToken'
 };
 export const checkMethodRole = ({ meta }: Method, metaMatches: MetaMatches) => {
-  if (isPlainOrCustomObject<Record<string, any>>(meta)) {
+  if (isPlainObject(meta)) {
     for (const key in meta) {
-      const matchedMetaItem = metaMatches[key];
-      if (instanceOf(matchedMetaItem, RegExp) ? matchedMetaItem.test(meta[key]) : meta[key] === matchedMetaItem) {
-        return trueValue;
+      if (meta.hasOwn(key)) {
+        const matchedMetaItem = metaMatches[key];
+        if (instanceOf(matchedMetaItem, RegExp) ? matchedMetaItem.test(meta[key]) : meta[key] === matchedMetaItem) {
+          return trueValue;
+        }
       }
     }
   }
@@ -46,15 +48,14 @@ export const waitForTokenRefreshed = (method: Method, waitingList: WaitingReques
   });
 export const callHandlerIfMatchesMeta = (
   method: Method,
-  authorizationInterceptor: ResponseAuthorizationInterceptor<AlovaRequestAdapter<any, any, any, any, any>> | undefined,
+  authorizationInterceptor: ResponseAuthorizationInterceptor<AlovaRequestAdapter<any, any, any>> | undefined,
   defaultMeta: MetaMatches,
   response: any
 ) => {
   if (checkMethodRole(method, (authorizationInterceptor as PosibbleAuthMap)?.metaMatches || defaultMeta)) {
     const handler = isFn(authorizationInterceptor)
       ? authorizationInterceptor
-      : isPlainOrCustomObject<NonNullable<typeof authorizationInterceptor>>(authorizationInterceptor) &&
-          isFn(authorizationInterceptor.handler)
+      : isPlainObject(authorizationInterceptor) && isFn(authorizationInterceptor.handler)
         ? authorizationInterceptor.handler
         : noop;
     return handler(response, method);
@@ -111,15 +112,13 @@ export const refreshTokenIfExpired = async (
     }
   }
 };
-export const onResponded2Record = (
-  onRespondedHandlers?: AlovaResponded<StatesHook<any, any>, AlovaRequestAdapter<any, any, any, any, any>>
-) => {
-  let successHandler: ResponsedHandler<any, any, any, any, any> | undefined = undefinedValue;
-  let errorHandler: ResponseErrorHandler<any, any, any, any, any> | undefined = undefinedValue;
-  let onCompleteHandler: ResponseCompleteHandler<any, any, any, any, any> | undefined = undefinedValue;
+export const onResponded2Record = (onRespondedHandlers?: AlovaResponded<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>) => {
+  let successHandler: RespondedHandler<any, any, any, any, any, any> | undefined = undefinedValue;
+  let errorHandler: ResponseErrorHandler<any, any, any, any, any, any> | undefined = undefinedValue;
+  let onCompleteHandler: ResponseCompleteHandler<any, any, any, any, any, any> | undefined = undefinedValue;
   if (isFn(onRespondedHandlers)) {
     successHandler = onRespondedHandlers;
-  } else if (isPlainOrCustomObject<NonNullable<typeof onRespondedHandlers>>(onRespondedHandlers)) {
+  } else if (isPlainObject(onRespondedHandlers)) {
     const { onSuccess, onError, onComplete } = onRespondedHandlers;
     successHandler = isFn(onSuccess) ? onSuccess : successHandler;
     errorHandler = isFn(onError) ? onError : errorHandler;

@@ -26,7 +26,8 @@
     "./assert": "./dist/assert.js",
     "./function": "./dist/function.js",
     "./vars": "./dist/vars.js",
-    "./types": "./dist/types.js"
+    "./types": "./dist/types.js",
+    "./event": "./dist/event.js"
   },
   "typesVersions": {
     "*": {
@@ -41,6 +42,9 @@
       ],
       "types": [
         "./dist/types.d.ts"
+      ],
+      "event": [
+        "./dist/event.d.ts"
       ]
     }
   },

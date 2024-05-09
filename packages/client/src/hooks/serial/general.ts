@@ -1,6 +1,6 @@
+import { createAssert } from '@alova/shared/assert';
+import { len, promiseResolve, undefinedValue, trueValue, promiseThen, pushItem, falseValue, isArray } from '@alova/shared/vars';
 import { AlovaFrontMiddleware, AlovaMethodHandler, Method } from 'alova';
-import { createAssert, isArray, len, promiseResolve, promiseThen, pushItem, shift } from '@/helper';
-import { falseValue, trueValue, undefinedValue } from '@/helper/variables';
 
 /**
  * 断言serialHandlers
@@ -10,9 +10,12 @@ import { falseValue, trueValue, undefinedValue } from '@/helper/variables';
 export const assertSerialHandlers = (hookName: string, serialHandlers: any) =>
   createAssert(hookName)(isArray(serialHandlers) && len(serialHandlers) > 0, 'please use an array to represent serial requests');
 
-export type SerialHandlers<S, E, R, T, RC, RE, RH> = [
-  Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  ...AlovaMethodHandler<S, E, R, T, RC, RE, RH>[]
+export type SerialHandlers<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = [
+  (
+    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ),
+  ...AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
 ];
 
 /**
@@ -21,12 +24,12 @@ export type SerialHandlers<S, E, R, T, RC, RE, RH> = [
  * @param hookMiddleware use hook的中间件
  * @returns 串行请求中间件
  */
-export const serialMiddleware = <S, E, R, T, RC, RE, RH>(
-  serialHandlers: SerialHandlers<S, E, R, T, RC, RE, RH>,
-  hookMiddleware?: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>
+export const serialMiddleware = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+  serialHandlers: SerialHandlers<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  hookMiddleware?: AlovaFrontMiddleware<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ) => {
   // 第一个handler在外部传递给了use hook，不需要再次请求
-  shift(serialHandlers);
+  serialHandlers.shift();
   return ((ctx, next) => {
     hookMiddleware?.(ctx, () => promiseResolve(undefinedValue as any));
 
@@ -34,9 +37,11 @@ export const serialMiddleware = <S, E, R, T, RC, RE, RH>(
     ctx.update({ loading: trueValue });
     const methods: Method[] = [];
     let serialPromise = next();
-    for (const i in serialHandlers) {
+    for (const handler of serialHandlers) {
       serialPromise = promiseThen(serialPromise, value => {
-        const methodItem = (serialHandlers as AlovaMethodHandler<S, E, R, T, RC, RE, RH>[])[i](value, ...ctx.sendArgs);
+        const methodItem = (
+          handler as AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+        )(value, ...ctx.sendArgs);
         pushItem(methods, methodItem);
         return methodItem.send();
       });
@@ -50,5 +55,5 @@ export const serialMiddleware = <S, E, R, T, RC, RE, RH>(
     return serialPromise.finally(() => {
       ctx.update({ loading: falseValue });
     });
-  }) as AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>;
+  }) as AlovaFrontMiddleware<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 };

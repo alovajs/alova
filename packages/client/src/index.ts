@@ -1,14 +1,3 @@
-import { defineProperty, forEach, objectKeys } from '@/helper';
-import usePagination_unified from '@/hooks/pagination/usePagination';
-import useSQRequest_unified from '@/hooks/silent/useSQRequest';
-import useAutoRequest_unified from '@/hooks/useAutoRequest';
-import useCaptcha_unified from '@/hooks/useCaptcha';
-import useForm_unified from '@/hooks/useForm';
-import useRetriableRequest_unified from '@/hooks/useRetriableRequest';
-import useSSE_unified from '@/hooks/useSSE';
-import { actionDelegationMiddleware as actionDelegationMiddleware_unified } from '@/middlewares/actionDelegation';
-import { trueValue } from '@alova/shared/vars';
-
 export {
   createClientTokenAuthentication,
   createServerTokenAuthentication
@@ -43,34 +32,24 @@ export const usePagination = (handler, config = {}) =>
 /* c8 ignore start */
 export const useSQRequest = (handler, config = {}) => useSQRequest_unified(handler, config);
 
-// 导出actionDelegation中间件
-export const actionDelegationMiddleware = id => actionDelegationMiddleware_unified(id, useFlag$);
+export { actionDelegationMiddleware } from '@/middlewares/actionDelegation';
 
-// 导出useCaptcha
-export const useCaptcha = (handler, config = {}) =>
-  useCaptcha_unified(handler, config, $, upd$, _$, _exp$, useFlag$, useMemorizedCallback$);
+export { default as usePagination } from '@/hooks/pagination/usePagination';
+export { default as useSQRequest } from '@/hooks/silent/useSQRequest';
+export { default as useAutoRequest } from '@/hooks/useAutoRequest';
+export { default as useCaptcha } from '@/hooks/useCaptcha';
+export { default as useForm } from '@/hooks/useForm';
+export { default as useRetriableRequest } from '@/hooks/useRetriableRequest';
+export { default as useSSE } from '@/hooks/useSSE';
 
-// 导出useForm
-export const useForm = (handler, config = {}) =>
-  useForm_unified(handler, config, $, $$, _$, _exp$, upd$, watch$, onMounted$, useFlag$, useMemorizedCallback$);
-
-// 导出useRetriableRequest
-export const useRetriableRequest = (handler, config = {}) => useRetriableRequest_unified(handler, config, useFlag$, useMemorizedCallback$);
-
-// 导出useAutoRequest
-export const useAutoRequest = (handler, config = {}) => useAutoRequest_unified(handler, config, onMounted$, onUnmounted$);
-forEach(objectKeys(useAutoRequest_unified), key => {
-  defineProperty(
-    useAutoRequest,
-    key,
-    {
-      get: () => useAutoRequest_unified[key],
-      set: value => (useAutoRequest_unified[key] = value)
-    },
-    trueValue
-  );
-});
-
-// 导出useSSE
-export const useSSE = (handler, config = {}) =>
-  useSSE_unified(handler, config, $, $$, _$, _exp$, upd$, watch$, onMounted$, onUnmounted$, useFlag$, useMemorizedCallback$);
+// forEach(objectKeys(useAutoRequest_unified), key => {
+//   defineProperty(
+//     useAutoRequest,
+//     key,
+//     {
+//       get: () => useAutoRequest_unified[key],
+//       set: value => (useAutoRequest_unified[key] = value)
+//     },
+//     trueValue
+//   );
+// });

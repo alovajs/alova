@@ -41,19 +41,19 @@ export const enum AlovaHookEventType {
   SSEErrorEvent = 13
 }
 
-export default <S, E, R, T, RC, RE, RH>(
+export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   eventType: AlovaHookEventType,
-  method: Method<S, E, R, T, RC, RE, RH>,
+  method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   behavior?: SQHookBehavior,
-  silentMethod?: SilentMethod<S, E, R, T, RC, RE, RH>,
+  silentMethod?: SilentMethod<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   queueName?: string,
   retryTimes?: number,
   retryDelay?: number,
   sendArgs?: any[],
-  data?: R,
+  data?: Responded,
   vDataResponse?: Record<string, any>,
   error?: any,
-  status?: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>['status']
+  status?: AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */

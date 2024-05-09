@@ -40,7 +40,8 @@ export const getUniqueReferenceId = (reference: any) => {
  * 兼容函数，抛出参数
  * @param error 错误
  */
-export const __throw = <T>(error: T) => {
+export const throwFn = <T>(error: T) => {
+  // eslint-disable-next-line @typescript-eslint/no-throw-literal
   throw error;
 };
 
@@ -99,16 +100,16 @@ export function useCallback<Fn extends AnyFn = AnyFn>(onCallbackChange: (callbac
 }
 
 export function usePromise<T = any>(): UsePromiseReturnType<T> {
-  let _resolve: UsePromiseReturnType<T>['resolve'];
-  let _reject: UsePromiseReturnType<T>['reject'];
+  let retResolve: UsePromiseReturnType<T>['resolve'];
+  let retReject: UsePromiseReturnType<T>['reject'];
 
   const promise = new Promise<T>((resolve, reject) => {
-    _resolve = resolve;
-    _reject = reject;
+    retResolve = resolve;
+    retReject = reject;
   });
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return { promise, resolve: _resolve!, reject: _reject! };
+  return { promise, resolve: retResolve!, reject: retReject! };
 }
 
 /**
