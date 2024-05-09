@@ -40,7 +40,11 @@ export const len = (data: any[] | Uint8Array | string) => data.length;
 export const isArray = (arg: any): arg is any[] => Array.isArray(arg);
 export const deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) => delete arg[attr];
 export const typeOf = (arg: any) => typeof arg;
-
+export const regexpTest = (reg: RegExp, str: string) => reg.test(str);
+export const includes = <T>(ary: T[], target: T) => ary.includes(target);
+export const valueObject = <T>(value: T, writable = falseValue) => ({ value, writable });
+export const defineProperty = (o: object, key: string | symbol, value: any, isDescriptor = falseValue) =>
+  ObjectCls.defineProperty(o, key, isDescriptor ? value : valueObject(value, falseValue));
 // 是否为服务端运行，node和bun通过process判断，deno通过Deno判断，但是支付宝小程序有process需要再判断下process.browser
 export const isSSR = typeof process !== undefStr ? !(process as any).browser : typeof Deno !== undefStr;
 

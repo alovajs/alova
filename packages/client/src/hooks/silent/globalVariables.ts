@@ -1,6 +1,6 @@
+import { createAssert } from '@alova/shared/assert';
+import { isArray } from '@alova/shared/vars';
 import { Alova } from 'alova';
-import { createAssert, isArray } from '@/helper';
-import { DEFAUT_QUEUE_NAME } from '@/helper/variables';
 import {
   BeforeSilentSubmitHandler,
   DataSerializer,
@@ -11,6 +11,12 @@ import {
   SilentSubmitSuccessHandler
 } from '~/typings/general';
 
+export const STR_VALUE_OF = 'valueOf';
+export const STR_TO_STRING = 'toString';
+export const DEFAUT_QUEUE_NAME = 'default';
+export const BEHAVIOR_SILENT = 'silent';
+export const BEHAVIOR_QUEUE = 'queue';
+export const BEHAVIOR_STATIC = 'static';
 /**
  * 全局的虚拟数据收集数组
  * 它只会在method创建时为数组，其他时间为undefined
@@ -38,13 +44,15 @@ import {
  *    等作为计算参数参与的形式
  */
 export let vDataIdCollectBasket: Record<string, undefined> | undefined;
-export const setVDataIdCollectBasket = (value: typeof vDataIdCollectBasket) => (vDataIdCollectBasket = value);
+export const setVDataIdCollectBasket = (value: typeof vDataIdCollectBasket) => {
+  vDataIdCollectBasket = value;
+};
 
 /**
  * 依赖的alova实例，它的存储适配器、请求适配器等将用于存取SilentMethod实例，以及发送静默提交
  */
-export let dependentAlovaInstance: Alova<any, any, any, any, any>;
-export const setDependentAlova = (alovaInst: Alova<any, any, any, any, any>) => {
+export let dependentAlovaInstance: Alova<any, any, any, any, any, any, any>;
+export const setDependentAlova = (alovaInst: Alova<any, any, any, any, any, any, any>) => {
   dependentAlovaInstance = alovaInst;
 };
 
@@ -63,7 +71,9 @@ export const setCustomSerializers = (serializers: typeof customSerializers = {})
  * 2表示请求失败，即按重试规则请求达到最大次数时，或不匹配重试规则时变更
  */
 export let silentFactoryStatus = 0;
-export const setSilentFactoryStatus = (status: 0 | 1 | 2) => (silentFactoryStatus = status);
+export const setSilentFactoryStatus = (status: 0 | 1 | 2) => {
+  silentFactoryStatus = status;
+};
 
 /**
  * silentQueue内的请求等待时间，单位为毫秒（ms）

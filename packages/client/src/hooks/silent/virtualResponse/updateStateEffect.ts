@@ -1,8 +1,8 @@
-import { isFn, objectKeys } from '@/helper';
-import { undefinedValue } from '@/helper/variables';
 import { updateState } from 'alova';
 import { noop } from 'svelte/internal';
 import { currentSilentMethod } from '../createSilentQueueMiddlewares';
+import { isFn } from '@alova/shared/function';
+import { undefinedValue, objectKeys } from '@alova/shared/vars';
 
 /**
  * 更新对应method的状态

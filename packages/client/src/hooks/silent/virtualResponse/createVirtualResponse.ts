@@ -1,9 +1,11 @@
-import { defineProperty, isArray, isPlainOrCustomObject, newInstance, uuid, walkObject } from '@/helper';
-import { nullValue, ObjectCls, STR_VALUE_OF, undefinedValue } from '@/helper/variables';
+import { uuid } from '@/util/helper';
+import { isObject, newInstance, walkObject } from '@alova/shared/function';
+import { nullValue, undefinedValue, ObjectCls, isArray, defineProperty } from '@alova/shared/vars';
 import Null from './Null';
 import { stringifyWithThis } from './stringifyVData';
 import Undefined from './Undefined';
 import { symbolOriginal, symbolVDataId } from './variables';
+import { STR_VALUE_OF } from '../globalVariables';
 
 /**
  * 创建虚拟响应数据
@@ -26,7 +28,7 @@ export default (structure: any, vDataId = uuid()) => {
   };
 
   const virtualResponse = transform2VData(structure, vDataId);
-  if (isPlainOrCustomObject(virtualResponse) || isArray(virtualResponse)) {
+  if (isObject(virtualResponse) || isArray(virtualResponse)) {
     walkObject(virtualResponse, value => transform2VData(value));
   }
   return virtualResponse;

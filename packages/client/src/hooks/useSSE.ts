@@ -106,7 +106,7 @@ export default <
   const [onError, triggerOnError, offError] =
     useCallback<SSEOnErrorTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
 
-  let responseSuccessHandler: RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = _self;
+  let responseSuccessHandler: RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = $self;
   let responseErrorHandler: ResponseErrorHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = throwFn;
   let responseCompleteHandler: ResponseCompleteHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = noop;
 
@@ -140,10 +140,10 @@ export default <
     const returnsData = await handlerReturns;
     const transformedData = await transformDataFn(returnsData, (headers || {}) as ResponseHeader);
 
-    data.v = transformedData;
+    data.v = transformedData as any;
 
     // 查找hitTarget
-    const hitMethods = matchSnapshotMethod({
+    const hitMethods = matchSnapshot({
       filter: cachedMethod =>
         (cachedMethod.hitSource || []).some(sourceMatcher =>
           instanceOf(sourceMatcher, RegExp)

@@ -1,6 +1,6 @@
-import { forEach, includes, instanceOf, isArray, isObject, len, objectKeys, walkObject } from '@/helper';
-import createSerializerPerformer from '@/helper/serializer';
-import { ObjectCls, StringCls, falseValue, undefinedValue } from '@/helper/variables';
+import createSerializerPerformer from '@/util/serializer';
+import { walkObject, instanceOf, isObject } from '@alova/shared/function';
+import { undefinedValue, falseValue, ObjectCls, len, objectKeys, isArray, forEach, includes } from '@alova/shared/vars';
 import { customSerializers, dependentAlovaInstance, silentAssert } from '../globalVariables';
 import createVirtualResponse from '../virtualResponse/createVirtualResponse';
 import { dehydrateVDataUnified } from '../virtualResponse/dehydrateVData';
@@ -12,7 +12,7 @@ const vDataValueKey = '__$v';
 const getAlovaStorage = () => {
   // 未启动silentFactory时提供提示
   silentAssert(!!dependentAlovaInstance, 'alova instance is not found, Do you forget to set `alova` or call `bootSilentFactory`?');
-  return dependentAlovaInstance.storage;
+  return dependentAlovaInstance.l2Cache;
 };
 
 let serializerPerformer: ReturnType<typeof createSerializerPerformer> | undefined = undefinedValue;
@@ -58,8 +58,8 @@ export const storageSetItem = (key: string, payload: any) => {
           ...value
         };
         // 如果是String类型，将会有像数组一样的如0、1、2为下标，值为字符的项，需将他们过滤掉
-        if (instanceOf(value, StringCls)) {
-          for (let i = 0; i < len(value as string); i++) {
+        if (instanceOf(value, String)) {
+          for (let i = 0; i < len(value as string); i += 1) {
             delete valueWithVData?.[i];
           }
         }

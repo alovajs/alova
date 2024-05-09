@@ -1,4 +1,4 @@
-import { undefinedValue } from '@/helper/variables';
+import { undefinedValue } from '@alova/shared/vars';
 import { vDataIdCollectBasket } from '../globalVariables';
 import { symbolVDataId } from './variables';
 
@@ -17,5 +17,7 @@ export const vDataCollectUnified = (target: any) => {
   const vDataId = target?.[symbolVDataId];
   vDataId && vDataIdCollectBasket && (vDataIdCollectBasket[vDataId] = undefinedValue);
 };
+
+export default vDataCollectUnified;
 
 // export const vDataGetter = (key: string) => vDataCollectGetter((thisObj: any) => thisObj.__proto__[key].call(thisObj));

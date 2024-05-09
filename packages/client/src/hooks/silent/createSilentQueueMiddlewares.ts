@@ -1,48 +1,87 @@
 import { AlovaFrontMiddleware, AlovaMethodHandler, Method } from 'alova';
-import {
-  getConfig,
-  isFn,
-  len,
-  newInstance,
-  objectKeys,
-  promiseResolve,
-  promiseThen,
-  pushItem,
-  regexpTest,
-  runArgsHandler,
-  sloughConfig,
-  walkObject
-} from '@/helper';
-import createHookEvent from '@/helper/createHookEvent';
-import { BEHAVIOR_QUEUE, BEHAVIOR_SILENT, BEHAVIOR_STATIC, falseValue, PromiseCls, trueValue, undefinedValue } from '@/helper/variables';
 import { BeforePushQueueHandler, FallbackHandler, PushedQueueHandler, RetryHandler, SQHookConfig } from '~/typings/general';
-import { setVDataIdCollectBasket, silentAssert, vDataIdCollectBasket } from './globalVariables';
+import {
+  BEHAVIOR_QUEUE,
+  BEHAVIOR_SILENT,
+  BEHAVIOR_STATIC,
+  setVDataIdCollectBasket,
+  silentAssert,
+  vDataIdCollectBasket
+} from './globalVariables';
 import { MethodHandler, SilentMethod } from './SilentMethod';
 import { pushNewSilentMethod2Queue } from './silentQueue';
 import createVirtualResponse from './virtualResponse/createVirtualResponse';
 import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
+import createHookEvent from '@/util/createHookEvent';
+import { runArgsHandler } from '@/util/helper';
+import { isFn, sloughConfig, walkObject, newInstance, getConfig } from '@alova/shared/function';
+import {
+  undefinedValue,
+  falseValue,
+  len,
+  objectKeys,
+  trueValue,
+  promiseResolve,
+  PromiseCls,
+  promiseThen,
+  pushItem,
+  regexpTest
+} from '@alova/shared/vars';
 
 /**
  * 全局的silentMethod实例，它将在第一个成功事件触发前到最后一个成功事件触发后有值（同步时段）
  * 通过此方式让onSuccess中的updateStateEffect内获得当前的silentMethod实例
  */
-export let currentSilentMethod: SilentMethod | undefined = undefinedValue;
+export let currentSilentMethod: SilentMethod<any, any, any, any, any, any, any, any, any> | undefined = undefinedValue;
 
 /**
  * 创建SilentQueue中间件函数
  * @param config 配置对象
  * @returns 中间件函数
  */
-export default <S, E, R, T, RC, RE, RH>(
-  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: SQHookConfig<S, E, R, T, RC, RE, RH>
+export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+  handler:
+    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  config?: SQHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ) => {
   const { behavior = 'queue', queue, retryError, maxRetryTimes, backoff } = config || {};
-  const fallbackHandlers: FallbackHandler<S, E, R, T, RC, RE, RH>[] = [];
-  const beforePushQueueHandlers: BeforePushQueueHandler<S, E, R, T, RC, RE, RH>[] = [];
-  const pushedQueueHandlers: PushedQueueHandler<S, E, R, T, RC, RE, RH>[] = [];
-  const retryHandlers: RetryHandler<S, E, R, T, RC, RE, RH>[] = [];
+  const fallbackHandlers: FallbackHandler<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >[] = [];
+  const beforePushQueueHandlers: BeforePushQueueHandler<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >[] = [];
+  const pushedQueueHandlers: PushedQueueHandler<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >[] = [];
+  const retryHandlers: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[] =
+    [];
   let handlerArgs: any[] | undefined;
 
   /**
@@ -54,7 +93,9 @@ export default <S, E, R, T, RC, RE, RH>(
     silentAssert(isFn(handler), 'method handler must be a function. eg. useSQRequest(() => method)');
     setVDataIdCollectBasket({});
     handlerArgs = args;
-    return (handler as MethodHandler<S, E, R, T, RC, RE, RH>)(...args);
+    return (handler as MethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>)(
+      ...args
+    );
   };
 
   /**
@@ -63,10 +104,17 @@ export default <S, E, R, T, RC, RE, RH>(
    * @param next 继续执行函数
    * @returns {Promise}
    */
-  const middleware: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH> = (
-    { method, sendArgs, cachedResponse, update, decorateSuccess, decorateError, decorateComplete, config },
-    next
-  ) => {
+  const middleware: AlovaFrontMiddleware<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  > = ({ method, sendArgs, cachedResponse, update, decorateSuccess, decorateError, decorateComplete, config }, next) => {
     const { silentDefaultResponse, vDataCaptured, force = falseValue } = config;
 
     // 因为behavior返回值可能会变化，因此每次请求都应该调用它重新获取返回值
@@ -189,7 +237,7 @@ export default <S, E, R, T, RC, RE, RH>(
         });
 
         // onBeforePush和onPushed事件是同步绑定的，因此需要异步执行入队列才能正常触发事件
-        promiseThen(promiseResolve(), () => {
+        promiseThen(promiseResolve(undefinedValue), () => {
           const createPushEvent = () =>
             createHookEvent(4, method, behaviorFinally, silentMethodInstance, undefinedValue, undefinedValue, undefinedValue, sendArgs);
 
@@ -255,7 +303,9 @@ export default <S, E, R, T, RC, RE, RH>(
        * 绑定回退事件
        * @param handler 回退事件回调
        */
-      onFallback: (handler: FallbackHandler<S, E, R, T, RC, RE, RH>) => {
+      onFallback: (
+        handler: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      ) => {
         pushItem(fallbackHandlers, handler);
       },
 
@@ -263,7 +313,9 @@ export default <S, E, R, T, RC, RE, RH>(
        * 绑定入队列前事件
        * @param handler 入队列前的事件回调
        */
-      onBeforePushQueue: (handler: BeforePushQueueHandler<S, E, R, T, RC, RE, RH>) => {
+      onBeforePushQueue: (
+        handler: BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      ) => {
         pushItem(beforePushQueueHandlers, handler);
       },
 
@@ -271,7 +323,9 @@ export default <S, E, R, T, RC, RE, RH>(
        * 绑定入队列后事件
        * @param handler 入队列后的事件回调
        */
-      onPushedQueue: (handler: PushedQueueHandler<S, E, R, T, RC, RE, RH>) => {
+      onPushedQueue: (
+        handler: PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      ) => {
         pushItem(pushedQueueHandlers, handler);
       },
 
@@ -279,7 +333,9 @@ export default <S, E, R, T, RC, RE, RH>(
        * 重试事件
        * @param handler 重试事件回调
        */
-      onRetry: (handler: RetryHandler<S, E, R, T, RC, RE, RH>) => {
+      onRetry: (
+        handler: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      ) => {
         pushItem(retryHandlers, handler);
       }
     }
