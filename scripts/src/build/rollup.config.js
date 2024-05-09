@@ -66,11 +66,7 @@ module.exports = function (bundleKey, version) {
 
   return groupedFormats.map(formatGroup => {
     // 计算环境变量
-    const env = formatGroup.includes('umd.min')
-      ? 'production'
-      : formatGroup.includes('umd')
-        ? 'development'
-        : undefined;
+    const env = formatGroup.includes('umd.min') ? 'production' : formatGroup.includes('umd') ? 'development' : undefined;
     // 计算external、globals，当external的属性值设为null或undefined时，在umd中不会作为外部依赖。
     const external = [];
     const globals = bundleItem.external;

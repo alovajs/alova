@@ -46,12 +46,33 @@ export const setWithCacheAdapter = async (
   // not to cache if expireTimestamp is less than 0
   if (expireTimestamp > 0 && data) {
     const methodCacheKey = buildNamespacedCacheKey(namespace, key);
-    await cacheAdapter.set(
-      methodCacheKey,
-      filterItem([data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag], Boolean)
-    );
+    await cacheAdapter.set(methodCacheKey, filterItem([data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag], Boolean));
 
     // save the relationship between this method and its hitSources.
+    // cache structure is like this:
+    /*
+      {
+        "$a.[namespace][methodKey]": [cache data],
+        ...
+        "hss.[sourceMethodKey]": "{
+          [targtMethodKey1]: 0,
+          [targtMethodKey2]: 0,
+          ...
+        }",
+        "hss.[sourceMethodName]": "{
+          [targtMethodKey3]: 0,
+          [targtMethodKey4]: 0,
+          ...
+        }",
+        "hsr.[sourceMethodNameRegxpSource]": "{
+          [targtMethodKey5]: 0,
+          [targtMethodKey6]: 0,
+          ...
+        }",
+        "hsr.regexp1": ["hss.key1", "hss.key2"],
+        "hsr.regexp2": ["hss.key1", "hss.key2"]
+      }
+    */
     if (hitSource) {
       // filter repeat items and categorize the regexp, to prevent unnecessary cost of IO
       const hitSourceKeys = {} as UniqueKeyPromised;
@@ -116,9 +137,7 @@ export const getRawWithCacheAdapter = async (
   cacheAdapter: AlovaGlobalCacheAdapter,
   tag?: DetailCacheConfig['tag']
 ) => {
-  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig['tag']]>(
-    buildNamespacedCacheKey(namespace, key)
-  );
+  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig['tag']]>(buildNamespacedCacheKey(namespace, key));
   if (storagedData) {
     // eslint-disable-next-line
     const [_, expireTimestamp, storedTag] = storagedData;

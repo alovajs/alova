@@ -24,9 +24,5 @@ export const buildCompletedURL = (baseURL: string, url: string, params: Arg) => 
     key => `${key}=${params[key]}`
   ).join('&');
   // 将get参数拼接到url后面，注意url可能已存在参数
-  return paramsStr
-    ? +completeURL.includes('?')
-      ? `${completeURL}&${paramsStr}`
-      : `${completeURL}?${paramsStr}`
-    : completeURL;
+  return paramsStr ? (+completeURL.includes('?') ? `${completeURL}&${paramsStr}` : `${completeURL}?${paramsStr}`) : completeURL;
 };

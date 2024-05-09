@@ -92,8 +92,7 @@ export default function useHookToSendRequest(
     // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
     const guardNext: AlovaGuardNext<any, any, any, any, any, any, any, any, any> = guardNextConfig => {
       isNextCalled = trueValue;
-      const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
-        guardNextConfig || {};
+      const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } = guardNextConfig || {};
       const forceRequestFinally = sloughConfig(
         guardNextForceRequest,
         createAlovaEvent(AlovaEventType.AlovaEvent, methodInstance, sendCallingArgs)
@@ -167,8 +166,7 @@ export default function useHookToSendRequest(
       }
     };
     // 是否需要更新响应数据，以及调用响应回调
-    const toUpdateResponse = () =>
-      hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
+    const toUpdateResponse = () => hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
     // 调用中间件函数
     const middlewareCompletePromise = isFetcher
       ? (middleware as AlovaFetcherMiddleware<any, any, any, any, any, any, any, any, any>)(
@@ -267,27 +265,12 @@ export default function useHookToSendRequest(
         update(newStates);
         runEventHandlers(
           errorHandlers,
-          createAlovaEvent(
-            AlovaEventType.AlovaErrorEvent,
-            methodInstance,
-            sendCallingArgs,
-            fromCache(),
-            undefinedValue,
-            error
-          ),
+          createAlovaEvent(AlovaEventType.AlovaErrorEvent, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error),
           errorHandlerDecorator
         );
         runEventHandlers(
           completeHandlers,
-          createAlovaEvent(
-            AlovaEventType.AlovaCompleteEvent,
-            methodInstance,
-            sendCallingArgs,
-            fromCache(),
-            undefinedValue,
-            error,
-            'error'
-          ),
+          createAlovaEvent(AlovaEventType.AlovaCompleteEvent, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error, 'error'),
           completeHandlerDecorator
         );
       }

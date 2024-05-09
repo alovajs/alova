@@ -19,14 +19,7 @@ import {
   walkObject
 } from '@/helper';
 import createHookEvent from '@/helper/createHookEvent';
-import {
-  BEHAVIOR_SILENT,
-  DEFAUT_QUEUE_NAME,
-  falseValue,
-  RegExpCls,
-  trueValue,
-  undefinedValue
-} from '@/helper/variables';
+import { BEHAVIOR_SILENT, DEFAUT_QUEUE_NAME, falseValue, RegExpCls, trueValue, undefinedValue } from '@/helper/variables';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {
   beforeHandlers,
@@ -38,11 +31,7 @@ import {
   successHandlers
 } from './globalVariables';
 import { SilentMethod } from './SilentMethod';
-import {
-  persistSilentMethod,
-  push2PersistentSilentQueue,
-  spliceStorageSilentMethod
-} from './storage/silentMethodStorage';
+import { persistSilentMethod, push2PersistentSilentQueue, spliceStorageSilentMethod } from './storage/silentMethodStorage';
 import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
 
@@ -82,9 +71,7 @@ export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>
       return vDataResponse[vData];
     }
     if (isString(value)) {
-      return value.replace(newInstance(RegExpCls, regVDataId.source, 'g'), mat =>
-        mat in vDataResponse ? vDataResponse[mat] : mat
-      );
+      return value.replace(newInstance(RegExpCls, regVDataId.source, 'g'), mat => (mat in vDataResponse ? vDataResponse[mat] : mat));
     }
     return value;
   };
@@ -294,8 +281,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           }
 
           const matchRetryError =
-            (regRetryErrorName && regexpTest(regRetryErrorName, errorName)) ||
-            (regRetryErrorMsg && regexpTest(regRetryErrorMsg, errorMsg));
+            (regRetryErrorName && regexpTest(regRetryErrorName, errorName)) || (regRetryErrorMsg && regexpTest(regRetryErrorMsg, errorMsg));
           // 如果还有重试次数则进行重试
           if (retryTimes < maxRetryTimes && matchRetryError) {
             // 需要使用下次的retryTimes来计算延迟时间，因此这边需+1
@@ -306,16 +292,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
                 silentMethodRequest(silentMethodInstance, ++retryTimes);
                 runArgsHandler(
                   retryHandlers,
-                  createHookEvent(
-                    8,
-                    entity,
-                    behavior,
-                    silentMethodInstance,
-                    undefinedValue,
-                    retryTimes,
-                    retryDelay,
-                    handlerArgs
-                  )
+                  createHookEvent(8, entity, behavior, silentMethodInstance, undefinedValue, retryTimes, retryDelay, handlerArgs)
                 );
               },
               // 还有重试次数时使用timeout作为下次请求时间

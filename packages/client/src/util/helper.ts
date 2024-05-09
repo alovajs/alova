@@ -62,8 +62,7 @@ export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => 
   if (startQuiver || endQuiver) {
     startQuiver = startQuiver || 0;
     endQuiver = endQuiver || 1;
-    retryDelayFinally +=
-      retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
+    retryDelayFinally += retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
     retryDelayFinally = Math.floor(retryDelayFinally); // 取整数延迟
   }
   return retryDelayFinally;

@@ -3,7 +3,7 @@ export type GeneralFn = (...args: any[]) => any;
 /**
  * common UI framework state type
  */
-export interface FrameworkState<T> {
+export interface GeneralState<T = unknown> {
   [x: string]: T;
 }
 

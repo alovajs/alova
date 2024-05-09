@@ -20,8 +20,7 @@ export const saveMethodSnapshot = (namespace: string, methodInstance: Method) =>
   if (name && snapshotCount < globalConfigMap.methodSnapshots) {
     // 以method的name为key，将method实例保存到快照中
     const namespacedMethodName = buildNamespacedSnapshotKey(namespace, name);
-    const targetSnapshots = (methodSnapshotRecords[namespacedMethodName] =
-      methodSnapshotRecords[namespacedMethodName] || []);
+    const targetSnapshots = (methodSnapshotRecords[namespacedMethodName] = methodSnapshotRecords[namespacedMethodName] || []);
     pushItem(targetSnapshots, methodInstance);
 
     // 保存这个name到当前namespace下，便于使用正则表达式查找
@@ -63,14 +62,11 @@ export const matchSnapshotMethods = (namespace: string, matcher: MethodFilter) =
   if (nameString) {
     matches = (methodSnapshotRecords[buildNamespacedSnapshotKey(namespace, nameString)] as Method[]) || matches;
   } else if (nameReg) {
-    filterItem(methodSnapshotRecords[buildNamespaceKey(namespace)] || [], methodName =>
-      nameReg.test(methodName as string)
-    ).forEach(methodName => {
-      matches = [
-        ...matches,
-        ...((methodSnapshotRecords[buildNamespacedSnapshotKey(namespace, methodName as string)] || []) as Method[])
-      ];
-    });
+    filterItem(methodSnapshotRecords[buildNamespaceKey(namespace)] || [], methodName => nameReg.test(methodName as string)).forEach(
+      methodName => {
+        matches = [...matches, ...((methodSnapshotRecords[buildNamespacedSnapshotKey(namespace, methodName as string)] || []) as Method[])];
+      }
+    );
   }
   return filterItem(matches, matchHandler || noop);
 };

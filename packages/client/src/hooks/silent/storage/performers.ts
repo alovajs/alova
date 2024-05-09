@@ -11,10 +11,7 @@ const vDataKey = '__$k';
 const vDataValueKey = '__$v';
 const getAlovaStorage = () => {
   // 未启动silentFactory时提供提示
-  silentAssert(
-    !!dependentAlovaInstance,
-    'alova instance is not found, Do you forget to set `alova` or call `bootSilentFactory`?'
-  );
+  silentAssert(!!dependentAlovaInstance, 'alova instance is not found, Do you forget to set `alova` or call `bootSilentFactory`?');
   return dependentAlovaInstance.storage;
 };
 

@@ -22,20 +22,9 @@ export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, 
   enableNetwork: trueValue,
   throttle: 1000
 };
-const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any> = (
-  handler,
-  config,
-  onMounted$,
-  onUnmounted$
-) => {
+const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any> = (handler, config, onMounted$, onUnmounted$) => {
   let notifiable = trueValue;
-  const {
-    enableFocus = trueValue,
-    enableVisibility = trueValue,
-    enableNetwork = trueValue,
-    pollingTime = 0,
-    throttle = 1000
-  } = config;
+  const { enableFocus = trueValue, enableVisibility = trueValue, enableNetwork = trueValue, pollingTime = 0, throttle = 1000 } = config;
   const states = useRequest(handler, config);
   const notify = () => {
     if (notifiable) {

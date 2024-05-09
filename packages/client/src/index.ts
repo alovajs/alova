@@ -10,20 +10,7 @@ import useSSE_unified from '@/hooks/useSSE';
 import { actionDelegationMiddleware as actionDelegationMiddleware_unified } from '@/middlewares/actionDelegation';
 
 export const usePagination = (handler, config = {}) =>
-  usePagination_unified(
-    handler,
-    config,
-    $,
-    $$,
-    upd$,
-    _$,
-    _exp$,
-    _expBatch$,
-    watch$,
-    useFlag$,
-    useRequestRefState$,
-    useMemorizedCallback$
-  );
+  usePagination_unified(handler, config, $, $$, upd$, _$, _exp$, _expBatch$, watch$, useFlag$, useRequestRefState$, useMemorizedCallback$);
 
 // 已通过 hooks/silent/useSQRequest 导入测试
 /* c8 ignore start */
@@ -63,12 +50,10 @@ export const useForm = (handler, config = {}) =>
   useForm_unified(handler, config, $, $$, _$, _exp$, upd$, watch$, onMounted$, useFlag$, useMemorizedCallback$);
 
 // 导出useRetriableRequest
-export const useRetriableRequest = (handler, config = {}) =>
-  useRetriableRequest_unified(handler, config, useFlag$, useMemorizedCallback$);
+export const useRetriableRequest = (handler, config = {}) => useRetriableRequest_unified(handler, config, useFlag$, useMemorizedCallback$);
 
 // 导出useAutoRequest
-export const useAutoRequest = (handler, config = {}) =>
-  useAutoRequest_unified(handler, config, onMounted$, onUnmounted$);
+export const useAutoRequest = (handler, config = {}) => useAutoRequest_unified(handler, config, onMounted$, onUnmounted$);
 forEach(objectKeys(useAutoRequest_unified), key => {
   defineProperty(
     useAutoRequest,
@@ -83,17 +68,4 @@ forEach(objectKeys(useAutoRequest_unified), key => {
 
 // 导出useSSE
 export const useSSE = (handler, config = {}) =>
-  useSSE_unified(
-    handler,
-    config,
-    $,
-    $$,
-    _$,
-    _exp$,
-    upd$,
-    watch$,
-    onMounted$,
-    onUnmounted$,
-    useFlag$,
-    useMemorizedCallback$
-  );
+  useSSE_unified(handler, config, $, $$, _$, _exp$, upd$, watch$, onMounted$, onUnmounted$, useFlag$, useMemorizedCallback$);

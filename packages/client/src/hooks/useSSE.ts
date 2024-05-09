@@ -8,18 +8,7 @@ import {
   invalidateCache,
   matchSnapshotMethod
 } from 'alova';
-import {
-  T$,
-  T$$,
-  T_$,
-  T_exp$,
-  TonMounted$,
-  TonUnmounted$,
-  Tupd$,
-  TuseFlag$,
-  TuseMemorizedCallback$,
-  Twatch$
-} from '@/framework/type';
+import { T$, T$$, T_$, T_exp$, TonMounted$, TonUnmounted$, Tupd$, TuseFlag$, TuseMemorizedCallback$, Twatch$ } from '@/framework/type';
 import { buildCompletedURL } from '@/functions/sendRequest';
 import {
   __self,
@@ -277,10 +266,7 @@ export default <Data, S, E, R, T, RC, RE, RH>(
   };
 
   const esMessage = (event: MessageEvent<any>) => {
-    promiseThen(
-      createSSEEvent(MessageType.Message, Promise.resolve(event.data)),
-      sendSSEEvent(triggerOnMessage) as any
-    );
+    promiseThen(createSSEEvent(MessageType.Message, Promise.resolve(event.data)), sendSSEEvent(triggerOnMessage) as any);
   };
 
   /**

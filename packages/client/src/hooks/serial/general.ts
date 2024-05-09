@@ -8,10 +8,7 @@ import { falseValue, trueValue, undefinedValue } from '@/helper/variables';
  * @param serialHandlers 串行请求method获取函数
  */
 export const assertSerialHandlers = (hookName: string, serialHandlers: any) =>
-  createAssert(hookName)(
-    isArray(serialHandlers) && len(serialHandlers) > 0,
-    'please use an array to represent serial requests'
-  );
+  createAssert(hookName)(isArray(serialHandlers) && len(serialHandlers) > 0, 'please use an array to represent serial requests');
 
 export type SerialHandlers<S, E, R, T, RC, RE, RH> = [
   Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,

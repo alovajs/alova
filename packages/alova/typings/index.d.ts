@@ -145,8 +145,8 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
    */
   meta?: AlovaCustomTypes['meta'];
 } & RequestConfig;
-export type AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader> =
-  Partial<MethodRequestConfig> & AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
+export type AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader> = Partial<MethodRequestConfig> &
+  AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
 
 export type RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = (
   response: Response,
@@ -424,10 +424,7 @@ export interface AlovaOptions<State, Computed, Watched, Export, RequestConfig, R
    * @version 2.8.0
    * @default true
    */
-  cacheLogger?:
-    | boolean
-    | null
-    | CacheLoggerHandler<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
+  cacheLogger?: boolean | null | CacheLoggerHandler<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
 }
 
 export type ProgressHandler = (progress: Progress) => void;
@@ -447,7 +444,7 @@ export interface Method<
   Export = any,
   Responded = any,
   Transformed = any,
-  RequestConfig = Record<any, any>,
+  RequestConfig = any,
   Response = any,
   ResponseHeader = any
 > {
@@ -543,9 +540,7 @@ export interface Method<
    * @param onrejected 当Promise被reject时要执行的回调
    * @returns 返回一个完成回调的Promise
    */
-  catch<TResult = never>(
-    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
-  ): Promise<Responded | TResult>;
+  catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<Responded | TResult>;
 
   /**
    * 绑定一个回调，该回调在Promise结算（resolve或reject）时调用
@@ -633,26 +628,13 @@ export interface Alova<State, Computed, Watched, Export, RequestConfig, Response
    * @param {boolean} matchAll is match all, default is true
    * @returns {Method[] | Method} method list when `matchAll` is true, otherwise return method instance or undefined
    */
-  matchSnapshot<M extends boolean = true>(
-    matcher: MethodFilter,
-    matchAll?: M
-  ): M extends true ? Method[] : Method | undefined;
+  matchSnapshot<M extends boolean = true>(matcher: MethodFilter, matchAll?: M): M extends true ? Method[] : Method | undefined;
 }
 
 /**
  * alova base event
  */
-export interface AlovaEvent<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> {
+export interface AlovaEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /**
    * params from send function
    */
@@ -665,77 +647,20 @@ export interface AlovaEvent<
 /**
  * success event object
  */
-export interface AlovaSuccessEvent<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends AlovaEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > {
+export interface AlovaSuccessEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  extends AlovaEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /** data数据是否来自缓存 */
   fromCache: boolean;
   data: Responded;
 }
 /** 错误事件对象 */
-export interface AlovaErrorEvent<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends AlovaEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > {
+export interface AlovaErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  extends AlovaEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   error: any;
 }
 /** 完成事件对象 */
-export interface AlovaCompleteEvent<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends AlovaEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > {
+export interface AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  extends AlovaEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /** 响应状态 */
   status: 'success' | 'error';
   /** data数据是否来自缓存，当status为error时，fromCache始终为false */
@@ -744,93 +669,21 @@ export interface AlovaCompleteEvent<
   error?: any;
 }
 
-export type SuccessHandler<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> = (
-  event: AlovaSuccessEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+export type SuccessHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: AlovaSuccessEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ) => void;
-export type ErrorHandler<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> = (
-  event: AlovaErrorEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+export type ErrorHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: AlovaErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ) => void;
-export type CompleteHandler<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> = (
-  event: AlovaCompleteEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+export type CompleteHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ) => void;
 
 export type FrontExportedUpdate<R> = (
   newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
 ) => void;
-export type FetcherExportedUpdate = (
-  newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
-) => void;
-export interface AlovaMiddlewareContext<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> {
+export type FetcherExportedUpdate = (newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>) => void;
+export interface AlovaMiddlewareContext<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /** 当前的method对象 */
   method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
@@ -846,28 +699,8 @@ export interface AlovaMiddlewareContext<
   /** 成功回调装饰 */
   decorateSuccess: (
     decorator: (
-      handler: SuccessHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-      event: AlovaSuccessEvent<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+      handler: SuccessHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+      event: AlovaSuccessEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
       index: number,
       length: number
     ) => void
@@ -876,28 +709,8 @@ export interface AlovaMiddlewareContext<
   /** 失败回调装饰 */
   decorateError: (
     decorator: (
-      handler: ErrorHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-      event: AlovaErrorEvent<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+      handler: ErrorHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+      event: AlovaErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
       index: number,
       length: number
     ) => void
@@ -906,28 +719,8 @@ export interface AlovaMiddlewareContext<
   /** 完成回调装饰 */
   decorateComplete: (
     decorator: (
-      handler: CompleteHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-      event: AlovaCompleteEvent<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+      handler: CompleteHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+      event: AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
       index: number,
       length: number
     ) => void
@@ -947,17 +740,7 @@ export interface AlovaFrontMiddlewareContext<
   RequestConfig,
   Response,
   ResponseHeader
-> extends AlovaMiddlewareContext<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > {
+> extends AlovaMiddlewareContext<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /** 发送请求函数 */
   send: SendHandler<Responded>;
 
@@ -998,17 +781,7 @@ export interface AlovaFetcherMiddlewareContext<
   RequestConfig,
   Response,
   ResponseHeader
-> extends AlovaMiddlewareContext<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > {
+> extends AlovaMiddlewareContext<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /** 数据预加载函数 */
   fetch<Transformed>(method: Method<any, any, any, any, Transformed>, ...args: any[]): Promise<Transformed>;
 
@@ -1047,30 +820,10 @@ export interface MiddlewareNextGuardConfig<
   Response,
   ResponseHeader
 > {
-  force?: UseHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >['force'];
+  force?: UseHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>['force'];
   method?: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 }
-export interface AlovaGuardNext<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> {
+export interface AlovaGuardNext<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   (
     guardNextConfig?: MiddlewareNextGuardConfig<
       State,
@@ -1089,56 +842,16 @@ export interface AlovaGuardNext<
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFrontMiddleware<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> {
+export interface AlovaFrontMiddleware<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   (
-    context: AlovaFrontMiddlewareContext<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >,
-    next: AlovaGuardNext<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
+    context: AlovaFrontMiddlewareContext<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+    next: AlovaGuardNext<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): any;
 }
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFetcherMiddleware<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> {
+export interface AlovaFetcherMiddleware<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   (
     context: AlovaFetcherMiddlewareContext<
       State,
@@ -1151,17 +864,7 @@ export interface AlovaFetcherMiddleware<
       Response,
       ResponseHeader
     >,
-    next: AlovaGuardNext<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
+    next: AlovaGuardNext<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): any;
 }
 
@@ -1183,19 +886,7 @@ export interface UseHookConfig<
    */
   force?:
     | boolean
-    | ((
-        event: AlovaEvent<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        >
-      ) => boolean);
+    | ((event: AlovaEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => boolean);
 
   /**
    * refering object that sharing some value with this object.
@@ -1210,27 +901,8 @@ export interface UseHookConfig<
 
 /** useRequest和useWatcher都有的类型 */
 type InitialDataType = number | string | boolean | object;
-export interface FrontRequestHookConfig<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends UseHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > {
+export interface FrontRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  extends UseHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /** 是否立即发起一次请求 */
   immediate?: boolean;
 
@@ -1241,64 +913,16 @@ export interface FrontRequestHookConfig<
   managedStates?: Record<string | symbol, State>;
 
   /** 中间件 */
-  middleware?: AlovaFrontMiddleware<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >;
+  middleware?: AlovaFrontMiddleware<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 }
 
 /** useRequest config export type */
-export type RequestHookConfig<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> = FrontRequestHookConfig<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->;
+export type RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> =
+  FrontRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
 /** useWatcher config export type */
-export interface WatcherHookConfig<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends FrontRequestHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > {
+export interface WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  extends FrontRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
   debounce?: number | number[];
   abortLast?: boolean;
@@ -1351,43 +975,13 @@ export type UseHookReturnType<
   update: FrontExportedUpdate<Responded>;
   send: SendHandler<Responded>;
   onSuccess: (
-    handler: SuccessHandler<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
+    handler: SuccessHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ) => void;
   onError: (
-    handler: ErrorHandler<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
+    handler: ErrorHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ) => void;
   onComplete: (
-    handler: CompleteHandler<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
+    handler: CompleteHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ) => void;
   __referingObj: ReferingObject;
 };
@@ -1421,17 +1015,7 @@ export type UpdateStateCollection<Responded> = {
   data?: (data: Responded) => any;
 };
 
-export type AlovaMethodHandler<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> = (
+export type AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
   ...args: any[]
 ) => Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
@@ -1475,41 +1059,11 @@ export declare function createAlova<State, Computed, Watched, Export, RequestCon
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useRequest<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export declare function useRequest<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   methodHandler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-  config?: RequestHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  config?: RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ): UseHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
 /**
@@ -1523,42 +1077,12 @@ export declare function useRequest<
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useWatcher<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export declare function useWatcher<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   methodHandler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   watchingStates: Watched,
-  config?: WatcherHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+  config?: WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ): UseHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
 /**
@@ -1573,9 +1097,7 @@ export declare function useWatcher<
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useFetcher<SE extends FetcherType<any>>(
-  config?: FetcherHookConfig
-): UseFetchHookReturnType<SE['state']>;
+export declare function useFetcher<SE extends FetcherType<any>>(config?: FetcherHookConfig): UseFetchHookReturnType<SE['state']>;
 
 /**
  * invalidate cache

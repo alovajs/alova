@@ -1,11 +1,7 @@
 import { __self, noop } from '@/helper';
 import { falseValue } from '@/helper/variables';
 import { AlovaRequestAdapter, StatesHook } from 'alova';
-import {
-  ClientTokenAuthenticationOptions,
-  ServerTokenAuthenticationOptions,
-  TokenAuthenticationResult
-} from '~/typings/general';
+import { ClientTokenAuthenticationOptions, ServerTokenAuthenticationOptions, TokenAuthenticationResult } from '~/typings/general';
 import {
   PosibbleAuthMap,
   WaitingRequestList,

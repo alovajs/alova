@@ -1,11 +1,4 @@
-import {
-  AlovaRequestAdapter,
-  Method,
-  ResponseCompleteHandler,
-  ResponsedHandler,
-  ResponseErrorHandler,
-  StatesHook
-} from 'alova';
+import { AlovaRequestAdapter, Method, ResponseCompleteHandler, ResponsedHandler, ResponseErrorHandler, StatesHook } from 'alova';
 import { forEach, instanceOf, isFn, isPlainOrCustomObject, len, newInstance, noop, pushItem, splice } from '@/helper';
 import { falseValue, PromiseCls, trueValue, undefinedValue } from '@/helper/variables';
 import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/general';

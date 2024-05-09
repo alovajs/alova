@@ -7,19 +7,7 @@
   "module": "dist/alova-adapter-axios.esm.js",
   "types": "typings/index.d.ts",
   "type": "module",
-  "keywords": [
-    "hooks",
-    "vuejs",
-    "typescript",
-    "vue",
-    "request",
-    "vue3",
-    "superagent",
-    "alova",
-    "react",
-    "svelte",
-    "axios"
-  ],
+  "keywords": ["hooks", "vuejs", "typescript", "vue", "request", "vue3", "superagent", "alova", "react", "svelte", "axios"],
   "jsdelivr": "dist/alova-adapter-axios.umd.min.js",
   "unpkg": "dist/alova-adapter-axios.umd.min.js",
   "scripts": {

@@ -16,5 +16,4 @@ export default myAssert;
  * 断言是否为method实例
  * @param methodInstance method实例
  */
-export const assertMethod = (methodInstance?: Method) =>
-  myAssert(instanceOf(methodInstance, Method), 'expected a method instance.');
+export const assertMethod = (methodInstance?: Method) => myAssert(instanceOf(methodInstance, Method), 'expected a method instance.');

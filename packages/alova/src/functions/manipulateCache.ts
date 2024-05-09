@@ -1,10 +1,5 @@
 import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
-import {
-  clearWithCacheAdapter,
-  getWithCacheAdapter,
-  removeWithCacheAdapter,
-  setWithCacheAdapter
-} from '@/storage/cacheWrapper';
+import { clearWithCacheAdapter, getWithCacheAdapter, removeWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
 import { getContext, getLocalCacheConfigParam, getMethodInternalKey, getTime, isFn } from '@alova/shared/function';
 import { PromiseCls, isArray, undefinedValue } from '@alova/shared/vars';
 import { CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
@@ -21,10 +16,7 @@ import { CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
  * @param matcher Method实例匹配器
  * @returns 缓存数据，未查到时返回undefined
  */
-export const queryCache = async <Responded>(
-  matcher: Method<any, any, any, any, Responded>,
-  { policy = 'all' }: CacheQueryOptions = {}
-) => {
+export const queryCache = async <Responded>(matcher: Method<any, any, any, any, Responded>, { policy = 'all' }: CacheQueryOptions = {}) => {
   // if __key__ exists, that means it's a method instance.
   if (matcher && matcher.__key__) {
     const { id, l1Cache, l2Cache } = getContext(matcher);
@@ -91,10 +83,7 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
   const batchPromises = methodInstances.map(methodInstance => {
     const { id, l1Cache, l2Cache } = getContext(methodInstance);
     const methodKey = getMethodInternalKey(methodInstance);
-    return PromiseCls.all([
-      removeWithCacheAdapter(id, methodKey, l1Cache),
-      removeWithCacheAdapter(id, methodKey, l2Cache)
-    ]);
+    return PromiseCls.all([removeWithCacheAdapter(id, methodKey, l1Cache), removeWithCacheAdapter(id, methodKey, l2Cache)]);
   });
   await PromiseCls.all(batchPromises);
 };

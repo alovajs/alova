@@ -151,13 +151,7 @@ export default function (
   const requestDataRef = useRequestRefState$(states.data);
 
   // 判断是否可预加载数据
-  const canPreload = (
-    rawData = _$(requestDataRef),
-    preloadPage,
-    fetchMethod,
-    isNextPage = falseValue,
-    forceRequest
-  ) => {
+  const canPreload = (rawData = _$(requestDataRef), preloadPage, fetchMethod, isNextPage = falseValue, forceRequest) => {
     const { e: expireMilliseconds } = getLocalCacheConfigParam(fetchMethod);
     // 如果缓存时间小于等于当前时间，表示没有设置缓存，此时不再预拉取数据
     // 或者已经有缓存了也不预拉取
@@ -319,12 +313,7 @@ export default function (
     } else {
       paginationAssert(isNumber(refreshPage), 'unable to calculate refresh page by item in pagination mode');
       // 页数相等，则刷新当前页，否则fetch数据
-      promiseCatch(
-        refreshPage === _$(page)
-          ? send(undefinedValue, trueValue)
-          : fetch(handler(refreshPage, _$(pageSize)), trueValue),
-        noop
-      );
+      promiseCatch(refreshPage === _$(page) ? send(undefinedValue, trueValue) : fetch(handler(refreshPage, _$(pageSize)), trueValue), noop);
     }
   });
 
@@ -339,10 +328,7 @@ export default function (
     } else {
       // 筛选出上一页、当前页、下一页的数据
       const excludeSnapshotKeys = map(
-        filterItem(
-          [getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)],
-          Boolean
-        ),
+        filterItem([getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)], Boolean),
         ({ entity }) => getMethodKey(entity)
       );
       snapshots = map(

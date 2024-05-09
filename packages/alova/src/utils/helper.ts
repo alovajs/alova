@@ -38,9 +38,7 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
  * @param frontStates front states map
  * @returns fetchStates map
  */
-export const exportFetchStates = <L = any, R = any, E = any, D = any, U = any>(
-  frontStates: FrontRequestState<L, R, E, D, U>
-) => ({
+export const exportFetchStates = <L = any, R = any, E = any, D = any, U = any>(frontStates: FrontRequestState<L, R, E, D, U>) => ({
   fetching: frontStates.loading,
   error: frontStates.error,
   downloading: frontStates.downloading,

@@ -169,16 +169,12 @@ describe('useWatcher hook with react', () => {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
 
-      const { loading, error, data, onSuccess, onError } = useWatcher(
-        () => getter(stateId1, stateId2),
-        [stateId1, stateId2],
-        {
-          initialData: {
-            path: '',
-            params: { id1: '', id2: '' }
-          }
+      const { loading, error, data, onSuccess, onError } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
         }
-      );
+      });
       onSuccess(mockfn);
       onError(mockErrorfn);
       return (

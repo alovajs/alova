@@ -2,16 +2,11 @@ import Method from '@/Method';
 import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
 import defaultCacheLogger from '@/defaults/cacheLogger';
 import { globalConfigMap } from '@/globalConfig';
-import {
-  getRawWithCacheAdapter,
-  getWithCacheAdapter,
-  hitTargetCacheWithCacheAdapter,
-  setWithCacheAdapter
-} from '@/storage/cacheWrapper';
+import { getRawWithCacheAdapter, getWithCacheAdapter, hitTargetCacheWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
 import { saveMethodSnapshot } from '@/storage/methodSnapShots';
 import cloneMethod from '@/utils/cloneMethod';
 import {
-  _self,
+  $self,
   getConfig,
   getContext,
   getLocalCacheConfigParam,
@@ -39,14 +34,7 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import {
-  AlovaRequestAdapter,
-  Arg,
-  ProgressUpdater,
-  RespondedHandler,
-  ResponseCompleteHandler,
-  ResponseErrorHandler
-} from '~/typings';
+import { AlovaRequestAdapter, Arg, ProgressUpdater, RespondedHandler, ResponseCompleteHandler, ResponseErrorHandler } from '~/typings';
 
 // 请求适配器返回信息暂存，用于实现请求共享
 type RequestAdapterReturnType = ReturnType<AlovaRequestAdapter<any, any, any>>;
@@ -74,11 +62,7 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
     key => `${key}=${params[key]}`
   ).join('&');
   // 将get参数拼接到url后面，注意url可能已存在参数
-  return paramsStr
-    ? +completeURL.includes('?')
-      ? `${completeURL}&${paramsStr}`
-      : `${completeURL}?${paramsStr}`
-    : completeURL;
+  return paramsStr ? (+completeURL.includes('?') ? `${completeURL}&${paramsStr}` : `${completeURL}?${paramsStr}`) : completeURL;
 };
 
 /**
@@ -87,28 +71,8 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
  * @param forceRequest 忽略缓存
  * @returns 响应数据
  */
-export default function sendRequest<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
-  methodInstance: Method<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >,
+export default function sendRequest<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   forceRequest: boolean
 ) {
   let fromCache = trueValue;
@@ -149,18 +113,11 @@ export default function sendRequest<
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数
     await beforeRequest(clonedMethod);
-    const {
-      params = {},
-      headers = {},
-      transformData = _self,
-      name: methodInstanceName = '',
-      shareRequest
-    } = getConfig(clonedMethod);
+    const { params = {}, headers = {}, transformData = $self, name: methodInstanceName = '', shareRequest } = getConfig(clonedMethod);
     const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
     let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
-    let responseSuccessHandler: RespondedHandler<any, any, any, RequestConfig, Response, ResponseHeader> = _self;
-    let responseErrorHandler: ResponseErrorHandler<any, any, any, RequestConfig, Response, ResponseHeader> | undefined =
-      undefinedValue;
+    let responseSuccessHandler: RespondedHandler<any, any, any, RequestConfig, Response, ResponseHeader> = $self;
+    let responseErrorHandler: ResponseErrorHandler<any, any, any, RequestConfig, Response, ResponseHeader> | undefined = undefinedValue;
     let responseCompleteHandler: ResponseCompleteHandler<any, any, any, RequestConfig, Response, ResponseHeader> = noop;
 
     // uniform handler of onSuccess, onError, onComplete
@@ -236,8 +193,7 @@ export default function sendRequest<
       if (toCache && callInSuccess) {
         await PromiseCls.all([
           setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache, methodHitSource),
-          toStorage &&
-            setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
+          toStorage && setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
         ]);
       }
       return transformedData;
@@ -269,23 +225,18 @@ export default function sendRequest<
   return {
     // 请求中断函数
     abort: () => {
-      promiseThen(
-        requestAdapterCtrlsPromise,
-        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
-      );
+      promiseThen(requestAdapterCtrlsPromise, requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort());
     },
     onDownload: (handler: ProgressUpdater) => {
       promiseThen(
         requestAdapterCtrlsPromise,
-        requestAdapterCtrls =>
-          requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler)
+        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler)
       );
     },
     onUpload: (handler: ProgressUpdater) => {
       promiseThen(
         requestAdapterCtrlsPromise,
-        requestAdapterCtrls =>
-          requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler)
+        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler)
       );
     },
     response,

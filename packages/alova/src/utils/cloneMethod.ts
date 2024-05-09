@@ -2,17 +2,7 @@ import Method from '@/Method';
 import { getContext, newInstance, objAssign } from '@alova/shared/function';
 
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
 ) => {
   const { data, config } = methodInstance;
   const newConfig = { ...config };

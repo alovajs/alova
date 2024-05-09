@@ -119,10 +119,7 @@ export default <S, E, R, T, RC, RE, RH>(
         // 请求失败时触发重试机制
         error => {
           // 没有手动触发停止，以及重试次数未到达最大时触发重试
-          if (
-            !stopManuallyError.current &&
-            (isNumber(retry) ? retryTimes.current < retry : retry(error, ...sendArgs))
-          ) {
+          if (!stopManuallyError.current && (isNumber(retry) ? retryTimes.current < retry : retry(error, ...sendArgs))) {
             // 计算重试延迟时间
             const retryDelay = delayWithBackoff(backoff, ++retryTimes.current);
             // 延迟对应时间重试
@@ -132,16 +129,7 @@ export default <S, E, R, T, RC, RE, RH>(
               // 触发重试事件
               runArgsHandler(
                 retryHandlers,
-                createHookEvent(
-                  9,
-                  method,
-                  undefinedValue,
-                  undefinedValue,
-                  undefinedValue,
-                  retryTimes.current,
-                  retryDelay,
-                  sendArgs
-                )
+                createHookEvent(9, method, undefinedValue, undefinedValue, undefinedValue, retryTimes.current, retryDelay, sendArgs)
               );
             }, retryDelay);
           } else {

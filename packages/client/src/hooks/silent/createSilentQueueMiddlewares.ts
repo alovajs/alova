@@ -14,22 +14,8 @@ import {
   walkObject
 } from '@/helper';
 import createHookEvent from '@/helper/createHookEvent';
-import {
-  BEHAVIOR_QUEUE,
-  BEHAVIOR_SILENT,
-  BEHAVIOR_STATIC,
-  falseValue,
-  PromiseCls,
-  trueValue,
-  undefinedValue
-} from '@/helper/variables';
-import {
-  BeforePushQueueHandler,
-  FallbackHandler,
-  PushedQueueHandler,
-  RetryHandler,
-  SQHookConfig
-} from '~/typings/general';
+import { BEHAVIOR_QUEUE, BEHAVIOR_SILENT, BEHAVIOR_STATIC, falseValue, PromiseCls, trueValue, undefinedValue } from '@/helper/variables';
+import { BeforePushQueueHandler, FallbackHandler, PushedQueueHandler, RetryHandler, SQHookConfig } from '~/typings/general';
 import { setVDataIdCollectBasket, silentAssert, vDataIdCollectBasket } from './globalVariables';
 import { MethodHandler, SilentMethod } from './SilentMethod';
 import { pushNewSilentMethod2Queue } from './silentQueue';
@@ -205,16 +191,7 @@ export default <S, E, R, T, RC, RE, RH>(
         // onBeforePush和onPushed事件是同步绑定的，因此需要异步执行入队列才能正常触发事件
         promiseThen(promiseResolve(), () => {
           const createPushEvent = () =>
-            createHookEvent(
-              4,
-              method,
-              behaviorFinally,
-              silentMethodInstance,
-              undefinedValue,
-              undefinedValue,
-              undefinedValue,
-              sendArgs
-            );
+            createHookEvent(4, method, behaviorFinally, silentMethodInstance, undefinedValue, undefinedValue, undefinedValue, sendArgs);
 
           // 将silentMethod放入队列并持久化
           const isPushed = pushNewSilentMethod2Queue(
