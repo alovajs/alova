@@ -1,7 +1,7 @@
 import { isNumber, noop } from '@alova/shared/function';
 import { falseValue, forEach, mapItem, objectKeys, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+import { StatesHook } from 'alova';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StatesHook } from '~/typings';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 const stateToData = <D>([state]: ReactState<D>) => state;

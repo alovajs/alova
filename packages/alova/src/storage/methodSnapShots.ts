@@ -1,5 +1,5 @@
 import { globalConfigMap } from '@/globalConfig';
-import { getConfig, instanceOf, isPlainObject, isString, noop } from '@alova/shared/function';
+import { getConfig, instanceOf, isFn, isPlainObject, isString } from '@alova/shared/function';
 import { RegExpCls, filterItem, pushItem } from '@alova/shared/vars';
 import { Method, MethodDetaiedFilter, MethodFilter, MethodFilterHandler } from '~/typings';
 
@@ -26,7 +26,7 @@ export const saveMethodSnapshot = (namespace: string, methodInstance: Method) =>
     // 保存这个name到当前namespace下，便于使用正则表达式查找
     const namespaceKey = buildNamespaceKey(namespace);
     const targetNamespaces = (methodSnapshotRecords[namespaceKey] = methodSnapshotRecords[namespaceKey] || []);
-    pushItem(targetNamespaces, methodInstance);
+    pushItem(targetNamespaces, name);
 
     // 统计数量
     snapshotCount += 1;
@@ -43,7 +43,7 @@ export const matchSnapshotMethods = (namespace: string, matcher: MethodFilter) =
   let nameString: string | undefined;
   let nameReg: RegExp | undefined;
   let matchHandler: MethodFilterHandler | undefined;
-  let nameMatcher: string | RegExp | undefined;
+  let nameMatcher: any = matcher;
   if (isPlainObject(matcher)) {
     nameMatcher = (matcher as MethodDetaiedFilter).name;
     matchHandler = (matcher as MethodDetaiedFilter).filter;
@@ -68,5 +68,5 @@ export const matchSnapshotMethods = (namespace: string, matcher: MethodFilter) =
       }
     );
   }
-  return filterItem(matches, matchHandler || noop);
+  return isFn(matchHandler) ? filterItem(matches, matchHandler) : matches;
 };

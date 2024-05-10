@@ -160,8 +160,9 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
    * @returns method list when `matchAll` is true, otherwise return method instance or undefined
    */
   matchSnapshot<M extends boolean = true>(matcher: MethodFilter, matchAll: M = true as M) {
+    type TypedMethod = Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>;
     const methods = matchSnapshotMethods(this.id, matcher);
-    return (matchAll ? methods : methods[0]) as M extends true ? Method[] : Method | undefined;
+    return (matchAll ? methods : methods[0]) as M extends true ? TypedMethod[] : TypedMethod | undefined;
   }
 }
 

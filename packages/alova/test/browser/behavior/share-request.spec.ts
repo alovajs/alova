@@ -1,7 +1,6 @@
-import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
-import { createAlova, useRequest } from '@/index';
-import VueHook from '@/statesHook/vue';
+import { createAlova } from '@/index';
+import { Result, delay } from 'root/testUtils';
 
 describe('Request shared', () => {
   test('should share request when use usehooks', async () => {
@@ -10,10 +9,9 @@ describe('Request shared', () => {
     const responseMockFn = jest.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
-      localCache: {
+      cacheFor: {
         GET: 0
       },
-      statesHook: VueHook,
       beforeRequest() {
         beforeRequestMockFn();
       },
@@ -38,82 +36,30 @@ describe('Request shared', () => {
     });
 
     const Get = () => alova.Get<{ status: number; data: { id: number } }>('/unit-test');
-    const state1 = useRequest(Get);
-    const state2 = useRequest(Get);
-    expect(state1.loading.value).toBeTruthy();
-    expect(state1.data.value).toBeUndefined();
-    expect(state1.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(state1.error.value).toBeUndefined();
-    expect(state2.loading.value).toBeTruthy();
-    expect(state2.data.value).toBeUndefined();
-    expect(state2.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(state2.error.value).toBeUndefined();
+    const p1 = Get().send();
+    const p2 = Get().send();
 
-    const [{ data: rawData }] = await Promise.all([untilCbCalled(state1.onSuccess), untilCbCalled(state2.onSuccess)]);
-    expect(state1.loading.value).toBeFalsy();
-    expect(state1.data.value.status).toBe(200);
-    expect(state1.data.value.data).toStrictEqual({ id: 1 });
-    expect(rawData.status).toBe(200);
-    expect(rawData.data).toStrictEqual({ id: 1 });
-    expect(state1.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(state2.loading.value).toBeFalsy();
-    expect(state2.data.value.status).toBe(200);
-    expect(state2.data.value.data).toStrictEqual({ id: 1 });
-    expect(state2.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
+    const [data1, data2] = await Promise.all([p1, p2]);
+    expect(data1.status).toBe(200);
+    expect(data1.data).toStrictEqual({ id: 1 });
+    expect(data2.status).toBe(200);
+    expect(data2.data).toStrictEqual({ id: 1 });
 
-    // 因为请求共享了，因此只执行一次
+    // Because the request is shared, it is only executed once
     expect(requestMockFn).toHaveBeenCalledTimes(1);
 
-    // 全局请求钩子调用次数不变
+    // The number of global request hook calls remains unchanged
     expect(beforeRequestMockFn).toHaveBeenCalledTimes(2);
     expect(responseMockFn).toHaveBeenCalledTimes(2);
-  });
-
-  test('should also share request when send request directly', async () => {
-    const requestMockFn = jest.fn();
-    const alova = createAlova({
-      baseURL: 'http://xxx',
-      localCache: {
-        GET: 0
-      },
-      statesHook: VueHook,
-      requestAdapter() {
-        requestMockFn();
-        return {
-          response: async () => ({
-            status: 200,
-            data: { id: 1 }
-          }),
-          headers: async () => ({}),
-          abort() {}
-        };
-      }
-    });
-
-    const Get = (plusStatus: boolean) =>
-      alova.Get('/unit-test', {
-        transformData: plusStatus
-          ? (data: { status: number; data: { id: number } }) => data.status + 100
-          : (data: { status: number; data: { id: number } }) => data.status
-      });
-
-    const [rawData1, rawData2] = await Promise.all([Get(false).send(), Get(true).send()]);
-    expect(rawData1).toBe(200);
-    expect(rawData2).toBe(300);
-
-    // 因为请求共享了，因此只执行一次
-    expect(requestMockFn).toHaveBeenCalledTimes(1);
   });
 
   test('request shared promise will also remove when request error', async () => {
     let index = 0;
     const alova = createAlova({
       baseURL: 'http://xxx',
-      localCache: {
+      cacheFor: {
         GET: 0
       },
-      errorLogger: false,
-      statesHook: VueHook,
       requestAdapter() {
         const promise = new Promise((resolve, reject) => {
           if (index === 0) {
@@ -121,7 +67,7 @@ describe('Request shared', () => {
             reject(new Error('request error'));
           } else {
             resolve({
-              id: 1
+              ID: 1
             });
           }
         });
@@ -135,7 +81,7 @@ describe('Request shared', () => {
 
     const Get = alova.Get('/unit-test');
 
-    // 第一次请求会抛出错误，第二次开始不会
+    // An error will be thrown for the first request, but not for the second time.
     await expect(Get.send()).rejects.toThrow('request error');
     const res = await Get.send();
     expect(res).toStrictEqual({ id: 1 });
@@ -143,8 +89,8 @@ describe('Request shared', () => {
 
   test('request shared promise will also remove when throw in response handler', async () => {
     let i = 0;
-    const alova = getAlovaInstance(VueHook, {
-      localCache: {
+    const alova = getAlovaInstance({
+      cacheFor: {
         GET: 0
       },
       responseExpect(response) {
@@ -163,11 +109,11 @@ describe('Request shared', () => {
       transformData: ({ data }: Result) => data
     });
 
-    // 第一次请求会抛出错误，第二次开始不会
+    // An error will be thrown for the first request, but not for the second time.
     await expect(Get.send()).rejects.toThrow('custom error');
-    const res = await Get.send();
+    const res = await Get;
 
-    // count=1表示重新请求到了服务
+    // count=1 indicates that the service has been requested again
     expect(res).toStrictEqual({
       path: '/unit-test-count',
       method: 'GET',
@@ -180,8 +126,8 @@ describe('Request shared', () => {
 
   test('request shared promise will also remove when throw in async response handler', async () => {
     let i = 0;
-    const alova = getAlovaInstance(VueHook, {
-      localCache: {
+    const alova = getAlovaInstance({
+      cacheFor: {
         GET: 0
       },
       async responseExpect(response) {
@@ -200,11 +146,11 @@ describe('Request shared', () => {
       transformData: ({ data }: Result) => data
     });
 
-    // 第一次请求会抛出错误，第二次开始不会
+    // An error will be thrown for the first request, but not for the second time.
     await expect(Get.send()).rejects.toThrow('custom error');
     const res = await Get.send();
 
-    // count=1表示重新请求到了服务
+    // count=1 indicates that the service has been requested again
     expect(res).toStrictEqual({
       path: '/unit-test-count',
       method: 'GET',
@@ -216,36 +162,34 @@ describe('Request shared', () => {
   });
 
   test('request shared promise will be removed when abort request manually', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      localCache: {
+    const alova = getAlovaInstance({
+      cacheFor: {
         GET: 0
       }
     });
     const Get = alova.Get('/unit-test');
-    const { abort, onError, error, onSuccess, send, data } = useRequest(Get);
+    const prom = Get.send();
 
-    // 手动中断请求，将抛出错误
+    // Manually interrupt the request and an error will be thrown
     await delay(0);
-    abort();
-    await untilCbCalled(onError);
-    expect(error.value?.message).toBe('The operation was aborted.');
-    expect(!!data.value).toBeFalsy();
+    Get.abort();
 
-    // 再次发送请求，此时应该成功
-    send();
-    await untilCbCalled(onSuccess);
-    expect(error.value).toBeUndefined();
-    expect(!!data.value).toBeTruthy();
+    const error = await new Promise<any>(resolve => {
+      prom.catch(resolve);
+    });
+    expect(error.message).toBe('The operation was aborted.');
+
+    // Send the request again, it should be successful now
+    expect(await Get).not.toBeUndefined();
   });
 
   test("shouldn't share request when close in global config", async () => {
     const requestMockFn = jest.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
-      localCache: {
+      cacheFor: {
         GET: 0
       },
-      statesHook: VueHook,
       shareRequest: false,
       requestAdapter() {
         requestMockFn();
@@ -269,7 +213,7 @@ describe('Request shared', () => {
     expect(rawData1).toBe(200);
     expect(rawData2).toBe(200);
 
-    // 请求共享关闭了，执行了两次
+    // Request sharing is closed and executed twice
     expect(requestMockFn).toHaveBeenCalledTimes(2);
   });
 
@@ -277,10 +221,9 @@ describe('Request shared', () => {
     const requestMockFn = jest.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
-      localCache: {
+      cacheFor: {
         GET: 0
       },
-      statesHook: VueHook,
       requestAdapter() {
         requestMockFn();
         return {
@@ -304,7 +247,7 @@ describe('Request shared', () => {
     expect(rawData1).toBe(200);
     expect(rawData2).toBe(200);
 
-    // 共享请求在method配置中关闭了，执行了两次
+    // The sharing request is closed in the method configuration and executed twice
     expect(requestMockFn).toHaveBeenCalledTimes(2);
   });
 });

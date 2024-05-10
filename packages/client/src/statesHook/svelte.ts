@@ -1,8 +1,8 @@
 import { createSyncOnceRunner } from '@alova/shared/function';
 import { clearTimeoutTimer, falseValue, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { StatesHook } from 'alova';
 import { onDestroy, onMount } from 'svelte';
 import { Readable, Writable, derived, writable } from 'svelte/store';
-import { StatesHook } from '~/typings';
 
 type UnknownWritable = Writable<unknown>;
 export default {

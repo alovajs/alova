@@ -1,16 +1,14 @@
-import { key } from '@alova/shared/function';
 import { getAlovaInstance } from '#/utils';
 import { globalConfig } from '@/index';
-import VueHook from '@/statesHook/vue';
-import { matchSnapshotMethod, saveMethodSnapshot } from '@/storage/methodSnapShots';
+import { saveMethodSnapshot } from '@/storage/methodSnapShots';
 
 describe('matchSnapshotMethod', () => {
-  test('should change snapshot limitation when set `limitSnapshots` in globalConfig', () => {
+  test('should change snapshot limitation when set `methodSnapshots` in globalConfig', () => {
     globalConfig({
-      limitSnapshots: 0
+      methodSnapshots: 0
     });
 
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const Get1 = alova.Get('/unit-test', {
@@ -21,30 +19,30 @@ describe('matchSnapshotMethod', () => {
       params: { a: 2 },
       name: 'limitation-method-test'
     });
-    saveMethodSnapshot(alova.id, key(Get1), Get1);
-    saveMethodSnapshot(alova.id, key(Get2), Get2);
+    saveMethodSnapshot(alova.id, Get1);
+    saveMethodSnapshot(alova.id, Get2);
 
     // 由于限制为了0个，不能匹配到
-    let matchedMethods = matchSnapshotMethod('limitation-method-test');
+    let matchedMethods = alova.matchSnapshot('limitation-method-test');
     expect(matchedMethods).toHaveLength(0);
 
     globalConfig({
-      limitSnapshots: 1
+      methodSnapshots: 1
     });
-    saveMethodSnapshot(alova.id, key(Get1), Get1);
-    saveMethodSnapshot(alova.id, key(Get2), Get2);
-    matchedMethods = matchSnapshotMethod('limitation-method-test');
+    saveMethodSnapshot(alova.id, Get1);
+    saveMethodSnapshot(alova.id, Get2);
+    matchedMethods = alova.matchSnapshot('limitation-method-test');
     // 由于限制为了1个，只能匹配到1个
     expect(matchedMethods).toHaveLength(1);
 
     // 恢复限制
     globalConfig({
-      limitSnapshots: 1000
+      methodSnapshots: 1000
     });
   });
 
   test('match with name string', () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const Get1 = alova.Get('/unit-test', {
@@ -60,18 +58,18 @@ describe('matchSnapshotMethod', () => {
       name: 'get-method2'
     });
 
-    saveMethodSnapshot(alova.id, key(Get1), Get1);
-    saveMethodSnapshot(alova.id, key(Get2), Get2);
-    saveMethodSnapshot(alova.id, key(Get3), Get3);
+    saveMethodSnapshot(alova.id, Get1);
+    saveMethodSnapshot(alova.id, Get2);
+    saveMethodSnapshot(alova.id, Get3);
 
     // 匹配到前两个
-    let matchedMethods = matchSnapshotMethod('get-method');
+    let matchedMethods = alova.matchSnapshot('get-method');
     expect(matchedMethods).toHaveLength(2);
     expect(matchedMethods[0]).toBe(Get1);
     expect(matchedMethods[1]).toBe(Get2);
 
     // 匹配到两个，并筛选出最后一个
-    matchedMethods = matchSnapshotMethod({
+    matchedMethods = alova.matchSnapshot({
       name: 'get-method',
       filter: (_, index, methods) => index === methods.length - 1
     });
@@ -79,15 +77,15 @@ describe('matchSnapshotMethod', () => {
     expect(matchedMethods[0]).toBe(Get2);
 
     // 匹配不到
-    matchedMethods = matchSnapshotMethod('get-method555');
+    matchedMethods = alova.matchSnapshot('get-method555');
     expect(matchedMethods).toHaveLength(0);
 
     // 匹配到两个，但默认取第一个
-    let matchedMethod = matchSnapshotMethod('get-method', false);
+    let matchedMethod = alova.matchSnapshot('get-method', false);
     expect(matchedMethod).toBe(Get1);
 
     // 匹配到两个，并筛选出最后一个
-    matchedMethod = matchSnapshotMethod(
+    matchedMethod = alova.matchSnapshot(
       {
         name: 'get-method',
         filter: (_, index, methods) => index === methods.length - 1
@@ -97,11 +95,11 @@ describe('matchSnapshotMethod', () => {
     expect(matchedMethod).toBe(Get2);
 
     // 匹配不到
-    matchedMethod = matchSnapshotMethod('get-method555', false);
+    matchedMethod = alova.matchSnapshot('get-method555', false);
     expect(matchedMethod).toBeUndefined();
     // 匹配不到，filter不会被调用
     const mockFn = jest.fn();
-    matchedMethod = matchSnapshotMethod(
+    matchedMethod = alova.matchSnapshot(
       {
         name: 'get-method555',
         filter: () => {
@@ -116,7 +114,7 @@ describe('matchSnapshotMethod', () => {
   });
 
   test('match with name regexp', () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const Get1 = alova.Get('/unit-test', {
@@ -132,52 +130,39 @@ describe('matchSnapshotMethod', () => {
       name: 'get-method2'
     });
 
-    saveMethodSnapshot(alova.id, key(Get1), Get1);
-    saveMethodSnapshot(alova.id, key(Get2), Get2);
-    saveMethodSnapshot(alova.id, key(Get3), Get3);
+    saveMethodSnapshot(alova.id, Get1);
+    saveMethodSnapshot(alova.id, Get2);
+    saveMethodSnapshot(alova.id, Get3);
 
-    // 匹配到包括上个用例，全部6个
-    let matchedMethods = matchSnapshotMethod(/^get-method/);
-    expect(matchedMethods).toHaveLength(6);
-
-    // 限制只查询当前alova实例的
-    matchedMethods = matchSnapshotMethod({
-      name: /^get-method/,
-      alova
-    });
+    // 匹配到当前alova的3个
+    let matchedMethods = alova.matchSnapshot(/^get-method/);
     expect(matchedMethods).toHaveLength(3);
-    expect(matchedMethods[0]).toBe(Get1);
-    expect(matchedMethods[1]).toBe(Get2);
-    expect(matchedMethods[2]).toBe(Get3);
 
     // 匹配到两个，并筛选出最后一个
-    matchedMethods = matchSnapshotMethod({
+    matchedMethods = alova.matchSnapshot({
       name: /get-method1/,
-      alova,
       filter: (_, index, methods) => index === methods.length - 1
     });
     expect(matchedMethods).toHaveLength(1);
     expect(matchedMethods[0]).toBe(Get2);
 
     // 匹配不到
-    matchedMethods = matchSnapshotMethod(/get-method555/);
+    matchedMethods = alova.matchSnapshot(/get-method555/);
     expect(matchedMethods).toHaveLength(0);
 
     // 匹配到三个，但默认取第一个
-    let matchedMethod = matchSnapshotMethod(
+    let matchedMethod = alova.matchSnapshot(
       {
-        name: /get-method/,
-        alova
+        name: /get-method/
       },
       false
     );
     expect(matchedMethod).toBe(Get1);
 
     // 匹配到两个，并筛选出最后一个
-    matchedMethod = matchSnapshotMethod(
+    matchedMethod = alova.matchSnapshot(
       {
         name: /get-method1/,
-        alova,
         filter: (_, index, methods) => index === methods.length - 1
       },
       false
@@ -185,11 +170,11 @@ describe('matchSnapshotMethod', () => {
     expect(matchedMethod).toBe(Get2);
 
     // 匹配不到
-    matchedMethod = matchSnapshotMethod(/get-method555/, false);
+    matchedMethod = alova.matchSnapshot(/get-method555/, false);
     expect(matchedMethod).toBeUndefined();
     // 匹配不到，filter不会被调用
     const mockFn = jest.fn();
-    matchedMethod = matchSnapshotMethod(
+    matchedMethod = alova.matchSnapshot(
       {
         name: /get-method555/,
         filter: () => {
@@ -202,4 +187,6 @@ describe('matchSnapshotMethod', () => {
     expect(matchedMethod).toBeUndefined();
     expect(mockFn).not.toHaveBeenCalled();
   });
+
+  test("shouldn't match the snapshots of alova2 when call `matchSnapshots` of alova1", () => {});
 });

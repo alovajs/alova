@@ -46,9 +46,9 @@ const mockServer = setupServer(
   http.get(`${baseURL}/unit-test-count`, ({ request }) => {
     const urlObj = new URL(request.url);
     const key = (urlObj.searchParams.get('countKey') || '') as string;
-    countMap[key] = countMap[key] || 0;
+    const count = (countMap[key] = countMap[key] || 0);
     countMap[key] += 1;
-    return result(200, request, false, { count: countMap[key] });
+    return result(200, request, false, { count });
   }),
   http.get(
     `${baseURL}/unit-test-404`,
