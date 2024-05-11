@@ -90,9 +90,9 @@ export default class Method<
     const hitSource = config && config.hitSource;
 
     // 合并参数
-    forEach(['timeout', 'shareRequest'], mergedKey => {
-      if (contextOptions[mergedKey as keyof typeof contextOptions] !== undefinedValue) {
-        contextConcatConfig[mergedKey] = contextOptions[mergedKey as keyof typeof contextOptions];
+    forEach(['timeout', 'shareRequest'] as const, mergedKey => {
+      if (contextOptions[mergedKey] !== undefinedValue) {
+        contextConcatConfig[mergedKey] = contextOptions[mergedKey];
       }
     });
 

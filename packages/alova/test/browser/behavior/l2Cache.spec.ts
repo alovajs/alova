@@ -19,7 +19,7 @@ describe('l2cache cache data', () => {
     });
     await Get;
     // Clear the cache first to simulate the scenario after the browser is refreshed. At this time, the persistent data will be assigned to the data state first and a request will be initiated.
-    removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
+    await removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
 
     // After setting to restore, even if the local cache fails, the persistent data will be automatically restored to the cache, so the cache will be hit.
     await Get;
@@ -41,7 +41,7 @@ describe('l2cache cache data', () => {
 
     await Get;
     // After clearing the cache, request it to be restored to the memory cache after 400 milliseconds. If the cache time is consistent, the memory cache will expire after 100 milliseconds.
-    removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
+    await removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
     await delay(400);
     Get.send();
     await delay(150);

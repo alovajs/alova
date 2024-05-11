@@ -3,7 +3,6 @@ import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
 import defaultCacheLogger from '@/defaults/cacheLogger';
 import { globalConfigMap } from '@/globalConfig';
 import { getRawWithCacheAdapter, getWithCacheAdapter, hitTargetCacheWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
-import { saveMethodSnapshot } from '@/storage/methodSnapShots';
 import cloneMethod from '@/utils/cloneMethod';
 import {
   $self,
@@ -86,7 +85,7 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
     const clonedMethod = cloneMethod(methodInstance);
     const methodKey = getMethodInternalKey(clonedMethod);
     const { e: expireMilliseconds, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(methodInstance);
-    const { id, l1Cache, l2Cache } = getContext(methodInstance);
+    const { id, l1Cache, l2Cache, snapshots } = getContext(methodInstance);
     // 获取受控缓存或非受控缓存
     const { cacheFor } = getConfig(methodInstance);
     const { baseURL, url: newUrl, type, data, hitSource: methodHitSource } = clonedMethod;
@@ -166,8 +165,7 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
     const handleResponseTask = async (handlerReturns: any, responseHeaders: any, callInSuccess = trueValue) => {
       const responseData = await handlerReturns;
       const transformedData = await transformData(responseData, responseHeaders || {});
-
-      saveMethodSnapshot(id, methodInstance);
+      snapshots.save(methodInstance);
       // 查找hit target cache，让它的缓存失效
       // 通过全局配置`autoInvalidateCache`来控制自动缓存失效范围
       const { autoInvalidateCache } = globalConfigMap;

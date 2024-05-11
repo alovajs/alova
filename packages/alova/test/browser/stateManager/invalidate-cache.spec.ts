@@ -1,106 +1,95 @@
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
-import Method from '@/Method';
-import { getMethodKey, invalidateCache, queryCache, useRequest } from '@/index';
-import VueHook from '@/statesHook/vue';
-import { getResponseCache } from '@/storage/responseCache';
-import { getPersistentResponse } from '@/storage/responseStorage';
+import { invalidateCache, queryCache } from '@/index';
+import { Result } from 'root/testUtils';
 
 describe('invalitate cached response data', () => {
-  test('It will use the default cache time when not set the cache time with `GET`', async () => {
-    const alova = getAlovaInstance(VueHook, {
+  test('it will use the default cache time when not set the cache time with `GET`', async () => {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });
-    const firstState = useRequest(Get);
-    await untilCbCalled(firstState.onSuccess);
-    const cachedData = getResponseCache(alova.id, key(Get));
-    expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
+    await Get;
+    const cachedData = await queryCache(Get, {
+      policy: 'l1'
+    });
+    expect(cachedData).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
   });
 
   test('the cached response data should be removed', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
-    const firstState = useRequest(Get);
-    await untilCbCalled(firstState.onSuccess);
-    let cachedData = getResponseCache(alova.id, key(Get));
-    expect(cachedData).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    invalidateCache(Get);
-    cachedData = getResponseCache(alova.id, key(Get));
+    await Get;
+    let cachedData = await queryCache(Get, {
+      policy: 'l1'
+    });
+    expect(cachedData).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
+    await invalidateCache(Get);
+    cachedData = await queryCache(Get, {
+      policy: 'l1'
+    });
     expect(cachedData).toBeUndefined();
   });
 
   test('cache will be cleard when invalidateCache is called without params', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const Get1 = alova.Get('/unit-test', {
-      localCache: Infinity,
+      cacheFor: Infinity,
       transformData: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test-count', {
       params: { countKey: 'c' },
-      localCache: Infinity,
+      cacheFor: Infinity,
       transformData: ({ data }: Result) => data
     });
 
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    const [ev1, ev2] = await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+    await Promise.all([Get1, Get2]);
     // 此时响应数据来自网络请求
-    expect(ev1.fromCache).toBeFalsy();
-    expect(ev2.fromCache).toBeFalsy();
+    expect(Get1.fromCache).toBeFalsy();
+    expect(Get2.fromCache).toBeFalsy();
 
     // 检查缓存情况
-    const firstState2 = useRequest(Get1);
-    expect(firstState2.loading.value).toBeFalsy();
-    const secondState2 = useRequest(Get2);
-    expect(secondState2.loading.value).toBeFalsy();
-    const [ev3, ev4] = await Promise.all([untilCbCalled(firstState2.onSuccess), untilCbCalled(secondState2.onSuccess)]);
+    const [data1, data2] = await Promise.all([Get1, Get2]);
     // 此时响应数据来自缓存
-    expect(ev3.fromCache).toBeTruthy();
-    expect(ev4.fromCache).toBeTruthy();
+    expect(Get1.fromCache).toBeTruthy();
+    expect(Get2.fromCache).toBeTruthy();
 
-    expect(firstState2.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState2.data.value).toEqual({
+    expect(data1).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
+    expect(data2).toStrictEqual({
       path: '/unit-test-count',
       method: 'GET',
       params: { count: 0, countKey: 'c' }
     });
 
-    invalidateCache(); // 清空缓存
+    await invalidateCache(); // 清空缓存
 
     // 缓存清空，会重新请求
-    const firstState3 = useRequest(Get1);
-    expect(firstState3.loading.value).toBeTruthy();
-    const secondState3 = useRequest(Get2);
-    expect(secondState3.loading.value).toBeTruthy();
-    const [ev5, ev6] = await Promise.all([untilCbCalled(firstState3.onSuccess), untilCbCalled(secondState3.onSuccess)]);
+    const [data11, data22] = await Promise.all([Get1, Get2]);
     // 缓存清除，此时响应数据再次来自网络请求
-    expect(ev5.fromCache).toBeFalsy();
-    expect(ev6.fromCache).toBeFalsy();
-    expect(firstState3.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState3.data.value).toEqual({
+    expect(Get1.fromCache).toBeFalsy();
+    expect(Get2.fromCache).toBeFalsy();
+    expect(data11).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
+    expect(data22).toStrictEqual({
       path: '/unit-test-count',
       method: 'GET',
       params: { count: 1, countKey: 'c' }
     });
   });
 
-  test('persistent cache should also be cleard when invalidateCache is called without params', async () => {
-    const alova = getAlovaInstance(VueHook, {
+  test('l2cache should also be cleard when invalidateCache is called without params', async () => {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const Get1 = alova.Get('/unit-test', {
-      localCache: {
+      cacheFor: {
         mode: 'restore',
         expire: Infinity
       },
@@ -108,16 +97,17 @@ describe('invalitate cached response data', () => {
     });
     const Get2 = alova.Get('/unit-test-count', {
       params: { countKey: 'ccc' },
-      localCache: {
+      cacheFor: {
         mode: 'restore',
         expire: Infinity
       },
       transformData: ({ data }: Result) => data
     });
 
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+    await Promise.all([Get1, Get2]);
+    // 此时响应数据来自网络请求
+    expect(Get1.fromCache).toBeFalsy();
+    expect(Get2.fromCache).toBeFalsy();
 
     // 检查缓存情况
     const cacheGet1 = { path: '/unit-test', method: 'GET', params: {} };
@@ -126,296 +116,44 @@ describe('invalitate cached response data', () => {
       method: 'GET',
       params: { count: 0, countKey: 'ccc' }
     };
-    expect(queryCache(Get1)).toStrictEqual(cacheGet1);
-    expect(queryCache(Get2)).toStrictEqual(cacheGet2);
-    expect(getPersistentResponse(alova.id, getMethodKey(Get1), alova.storage)).toStrictEqual(cacheGet1);
-    expect(getPersistentResponse(alova.id, getMethodKey(Get2), alova.storage)).toStrictEqual(cacheGet2);
+    expect(await queryCache(Get1)).toStrictEqual(cacheGet1);
+    expect(await queryCache(Get2)).toStrictEqual(cacheGet2);
+    const persistentData1 = await queryCache(Get1, {
+      policy: 'l2'
+    });
+    expect(persistentData1).toStrictEqual(cacheGet1);
+    const persistentData2 = await queryCache(Get2, {
+      policy: 'l2'
+    });
+    expect(persistentData2).toStrictEqual(cacheGet2);
 
-    invalidateCache(); // 清空缓存
+    await invalidateCache(); // 清空缓存
 
     // 缓存清空
-    expect(queryCache(Get1)).toBeUndefined();
-    expect(queryCache(Get2)).toBeUndefined();
-    expect(getPersistentResponse(alova.id, getMethodKey(Get1), alova.storage)).toBeUndefined();
-    expect(getPersistentResponse(alova.id, getMethodKey(Get2), alova.storage)).toBeUndefined();
+    expect(
+      await queryCache(Get1, {
+        policy: 'l1'
+      })
+    ).toBeUndefined();
+    expect(
+      await queryCache(Get2, {
+        policy: 'l1'
+      })
+    ).toBeUndefined();
+    expect(
+      await queryCache(Get1, {
+        policy: 'l2'
+      })
+    ).toBeUndefined();
+    expect(
+      await queryCache(Get2, {
+        policy: 'l2'
+      })
+    ).toBeUndefined();
   });
 
-  test('cache in method array will be removed', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const Get1 = alova.Get('/unit-test', {
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test', {
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-
-    // 检查缓存情况
-    expect(getResponseCache(alova.id, key(Get1))).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(getResponseCache(alova.id, key(Get2))).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-
-    invalidateCache([Get1, Get2]); // 删除缓存
-
-    // 缓存清空，会重新请求
-    const firstState3 = useRequest(Get1);
-    expect(firstState3.loading.value).toBeTruthy();
-    const secondState3 = useRequest(Get2);
-    expect(secondState3.loading.value).toBeTruthy();
-  });
-
-  test('cache will be removed when invalidateCache is called with specific string', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const Get1 = alova.Get('/unit-test', {
-      name: 'test-get1',
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test-count', {
-      name: 'test-get2',
-      params: { countKey: 'd' },
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    expect(firstState.loading.value).toBeTruthy();
-    expect(secondState.loading.value).toBeTruthy();
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-
-    // 检查缓存情况
-    const firstState2 = useRequest(Get1);
-    expect(firstState2.loading.value).toBeFalsy();
-    const secondState2 = useRequest(Get2);
-    expect(secondState2.loading.value).toBeFalsy();
-    await Promise.all([untilCbCalled(firstState2.onSuccess), untilCbCalled(secondState2.onSuccess)]);
-    expect(firstState2.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState2.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 0, countKey: 'd' }
-    });
-
-    invalidateCache('test-get1'); // 删除test-get1缓存
-
-    // 缓存清空，会重新请求
-    const firstState3 = useRequest(Get1);
-    expect(firstState3.loading.value).toBeTruthy();
-    const secondState3 = useRequest(Get2);
-    expect(secondState3.loading.value).toBeFalsy(); // 还有缓存，不会发起请求
-    await Promise.all([untilCbCalled(firstState3.onSuccess), untilCbCalled(secondState3.onSuccess)]);
-    expect(secondState3.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 0, countKey: 'd' }
-    });
-  });
-
-  test('cache still will be removed when pass object in vue', async () => {
-    // 使用引用类型作为参数，期望仍能失效对应的缓存
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-
-    const params = {
-      a: 'a111'
-    };
-    const Get1 = alova.Get('/unit-test', {
-      name: 'test-get111',
-      localCache: Infinity,
-      params,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test', {
-      name: 'test-get222',
-      params,
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-
-    await Get1.send();
-    params.a = 'a222';
-    await Get2.send();
-
-    invalidateCache(/test-get/); // 删除test-get前缀的缓存
-
-    let cache = queryCache(Get2);
-    expect(cache).toBeUndefined();
-    params.a = 'a111';
-    cache = queryCache(Get1);
-    expect(cache).toBeUndefined();
-  });
-
-  test("cache will be removed that invalidateCache's regexp matches", async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const Get1 = alova.Get('/unit-test', {
-      name: 'test-get1',
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test-count', {
-      name: 'test-get2',
-      params: { countKey: 'e' },
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-
-    // 检查缓存情况
-    const firstState2 = useRequest(Get1);
-    expect(firstState2.loading.value).toBeFalsy();
-    const secondState2 = useRequest(Get2);
-    expect(secondState2.loading.value).toBeFalsy();
-    await Promise.all([untilCbCalled(firstState2.onSuccess), untilCbCalled(secondState2.onSuccess)]);
-    expect(firstState2.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState2.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 0, countKey: 'e' }
-    });
-
-    invalidateCache(/^test-get/); // 删除匹配名称的缓存
-
-    // 缓存清空，会重新请求
-    const firstState3 = useRequest(Get1);
-    expect(firstState3.loading.value).toBeTruthy();
-    const secondState3 = useRequest(Get2);
-    expect(secondState3.loading.value).toBeTruthy();
-    await Promise.all([untilCbCalled(firstState3.onSuccess), untilCbCalled(secondState3.onSuccess)]);
-    expect(firstState3.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState3.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 1, countKey: 'e' }
-    });
-  });
-
-  test("cache will be removed that invalidateCache's regexp matches and filter one", async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const Get1 = alova.Get('/unit-test', {
-      name: 'test1-get',
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test-count', {
-      name: 'test2-get',
-      params: { countKey: 'f' },
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-
-    // 检查缓存情况
-    const firstState2 = useRequest(Get1);
-    expect(firstState2.loading.value).toBeFalsy();
-    const secondState2 = useRequest(Get2);
-    expect(secondState2.loading.value).toBeFalsy();
-    await Promise.all([untilCbCalled(firstState2.onSuccess), untilCbCalled(secondState2.onSuccess)]);
-    expect(firstState2.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState2.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 0, countKey: 'f' }
-    });
-
-    const mockfn = jest.fn(() => {});
-    invalidateCache({
-      name: /^test(.)-get/,
-      filter: (method, index, ary) => {
-        mockfn();
-        expect(method instanceof Method).toBeTruthy();
-        expect(ary.length).toBe(2);
-        return index === 1;
-      }
-    }); // 删除匹配名称的缓存
-
-    expect(mockfn.mock.calls.length).toBe(2);
-
-    // Get2的缓存会被清空，会重新请求
-    const firstState3 = useRequest(Get1);
-    expect(firstState3.loading.value).toBeFalsy();
-    const secondState3 = useRequest(Get2);
-    expect(secondState3.loading.value).toBeTruthy();
-    await Promise.all([untilCbCalled(firstState3.onSuccess), untilCbCalled(secondState3.onSuccess)]);
-    expect(firstState3.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState3.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 1, countKey: 'f' }
-    });
-  });
-
-  test("shouldn't throw error when not match any one", async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const Get1 = alova.Get('/unit-test', {
-      name: 'test-get1',
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test-count', {
-      name: 'test-get2',
-      params: { countKey: 'g' },
-      localCache: Infinity,
-      transformData: ({ data }: Result) => data
-    });
-
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    expect(firstState.loading.value).toBeTruthy();
-    expect(secondState.loading.value).toBeTruthy();
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-
-    // 检查缓存情况
-    const firstState2 = useRequest(Get1);
-    expect(firstState2.loading.value).toBeFalsy();
-    const secondState2 = useRequest(Get2);
-    expect(secondState2.loading.value).toBeFalsy();
-    await Promise.all([untilCbCalled(firstState2.onSuccess), untilCbCalled(secondState2.onSuccess)]);
-    expect(firstState2.data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} });
-    expect(secondState2.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 0, countKey: 'g' }
-    });
-
-    invalidateCache('test'); // 不会匹配任何缓存，因此不会失效缓存
-
-    // 没有失效任何缓存，不会重新请求
-    const firstState3 = useRequest(Get1);
-    expect(firstState3.loading.value).toBeFalsy();
-    const secondState3 = useRequest(Get2);
-    expect(secondState3.loading.value).toBeFalsy();
-    await Promise.all([untilCbCalled(firstState3.onSuccess), untilCbCalled(secondState3.onSuccess)]);
-    expect(secondState3.data.value).toEqual({
-      path: '/unit-test-count',
-      method: 'GET',
-      params: { count: 0, countKey: 'g' }
-    });
-  });
-
-  test('should match method even if change method in beforeRequest', async () => {
-    const alova = getAlovaInstance(VueHook, {
+  test('should match method even if changed method in beforeRequest', async () => {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json(),
       beforeRequestExpect(methodInstance) {
         methodInstance.config.headers = methodInstance.config.headers || {};
@@ -425,36 +163,61 @@ describe('invalitate cached response data', () => {
     const Get1 = () =>
       alova.Get('/unit-test', {
         name: 'test10-get',
-        localCache: Infinity,
+        cacheFor: Infinity,
         transformData: ({ data }: Result) => data
       });
     const Get2 = () =>
       alova.Get('/unit-test', {
         name: 'test20-get',
         params: { key: 'f' },
-        localCache: Infinity,
+        cacheFor: Infinity,
         transformData: ({ data }: Result) => data
       });
 
-    const firstState = useRequest(Get1());
-    const secondState = useRequest(Get2());
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-
-    expect(queryCache(Get1())).toStrictEqual({
+    await Promise.all([Get1(), Get2()]);
+    expect(await queryCache(Get1())).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {}
     });
-    expect(queryCache(Get2())).toStrictEqual({
+    expect(await queryCache(Get2())).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: { key: 'f' }
     });
+  });
 
-    invalidateCache('test10-get');
-    expect(queryCache(Get1())).toBeUndefined();
+  // invalidateCache 可以批量失效不同alova实例的缓存
+  test('should batch invalidate the caches created by different alova instance.', async () => {
+    const alova1 = getAlovaInstance();
+    const alova2 = getAlovaInstance();
 
-    invalidateCache(Get2());
-    expect(queryCache(Get2())).toBeUndefined();
+    const Get11 = alova1.Get('/unit-test');
+    const Get12 = alova1.Get('/unit-test');
+    const Get21 = alova2.Get('/unit-test');
+    const Get22 = alova2.Get('/unit-test');
+
+    await Promise.all([Get11, Get12, Get21, Get22]);
+    expect(await queryCache(Get11)).not.toBeUndefined();
+    expect(await queryCache(Get12)).not.toBeUndefined();
+    expect(await queryCache(Get21)).not.toBeUndefined();
+    expect(await queryCache(Get22)).not.toBeUndefined();
+
+    await invalidateCache([Get11, Get12, Get21, Get22]);
+    expect(await queryCache(Get11)).toBeUndefined();
+    expect(await queryCache(Get12)).toBeUndefined();
+    expect(await queryCache(Get21)).toBeUndefined();
+    expect(await queryCache(Get22)).toBeUndefined();
+
+    await Promise.all([Get11, Get12, Get21, Get22]);
+    expect(await queryCache(Get11)).not.toBeUndefined();
+    expect(await queryCache(Get12)).not.toBeUndefined();
+    expect(await queryCache(Get21)).not.toBeUndefined();
+    expect(await queryCache(Get22)).not.toBeUndefined();
+    await invalidateCache();
+    expect(await queryCache(Get11)).toBeUndefined();
+    expect(await queryCache(Get12)).toBeUndefined();
+    expect(await queryCache(Get21)).toBeUndefined();
+    expect(await queryCache(Get22)).toBeUndefined();
   });
 });

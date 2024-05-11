@@ -1,14 +1,12 @@
-import { getAlovaInstance } from '#/utils';
-import { Method, createAlova, queryCache, useRequest } from '@/index';
+import { getAlovaInstance, untilReject } from '#/utils';
+import { Method, createAlova, queryCache } from '@/index';
 import GlobalFetch from '@/predefine/adapterFetch';
-import VueHook from '@/statesHook/vue';
-import { Result, untilCbCalled } from 'root/testUtils';
+import { Result } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', () => {
   test('baseURL can not be set and use complete url set in method to send request', async () => {
     const alova = createAlova({
-      statesHook: VueHook,
       cacheLogger: null,
       requestAdapter: GlobalFetch()
     });
@@ -28,7 +26,6 @@ describe('createAlova', () => {
   test('baseURL can be set a url that contains params', async () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000/unit-test?ctrl=api/',
-      statesHook: VueHook,
       cacheLogger: null,
       requestAdapter: GlobalFetch()
     });
@@ -54,25 +51,24 @@ describe('createAlova', () => {
     });
   });
 
-  test('localCache can be set with null to disable all cache', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      localCache: null
+  test('`cacheFor` can be set with null to disable all cache', async () => {
+    const alova = getAlovaInstance({
+      cacheFor: null
     });
     const Get = alova.Get<Response>('/unit-test');
-    expect(Get.config.localCache).toBeUndefined();
+    expect(Get.config.cacheFor).toBeUndefined();
+    await Get;
+    expect(Get.fromCache).toBeFalsy();
 
-    const { onSuccess } = useRequest(Get);
-    const ev1 = await untilCbCalled(onSuccess);
-    expect(ev1.fromCache).toBeFalsy();
-
-    const { onSuccess: onSuccess2 } = useRequest(Get);
-    const ev2 = await untilCbCalled(onSuccess2);
-    expect(ev2.fromCache).toBeFalsy();
+    const Post = alova.Post<Response>('/unit-test');
+    expect(Post.config.cacheFor).toBeUndefined();
+    await Post;
+    expect(Post.fromCache).toBeFalsy();
   });
 
   test('`beforeRequest` hook will receive the request params', async () => {
     const mockFn = jest.fn();
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
         const { config } = method;
@@ -91,9 +87,9 @@ describe('createAlova', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
-    await Get.send();
+    await Get;
     expect(mockFn).toHaveBeenCalled();
   });
 
@@ -101,7 +97,6 @@ describe('createAlova', () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
       cacheLogger: null,
-      statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       beforeRequest: async method => {
         await new Promise(resolve => {
@@ -115,7 +110,7 @@ describe('createAlova', () => {
       responded: r => r.json()
     });
     const Get = alova.Get<Result>('/unit-test');
-    const { data } = await Get.send();
+    const { data } = await Get;
     expect(data).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
@@ -126,10 +121,9 @@ describe('createAlova', () => {
     });
   });
 
-  test('should emit onError when `beforeRequest` hook throws a error', async () => {
+  test('should promise reject when `beforeRequest` hook throws an error', async () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
-      statesHook: VueHook,
       cacheLogger: null,
       requestAdapter: GlobalFetch(),
       beforeRequest: method => {
@@ -138,7 +132,6 @@ describe('createAlova', () => {
         }
         throw new Error('error in beforeRequest');
       },
-      errorLogger: false,
       responded: r => r.json()
     });
     const Get = (async = true) =>
@@ -146,21 +139,16 @@ describe('createAlova', () => {
         params: { async }
       });
 
-    // beforeRequest异步函数测试
-    const { onError } = useRequest(Get);
-    let errEvent = await untilCbCalled(onError);
-    expect(errEvent.error.message).toBe('reject in beforeRequest');
-    await expect(Get().send()).rejects.toThrow('reject in beforeRequest');
+    // beforeRequest asynchronous function test
+    await expect(Get()).rejects.toThrow('reject in beforeRequest');
 
-    // beforeRequest同步函数测试
-    const { onError: onError2 } = useRequest(Get(false));
-    errEvent = await untilCbCalled(onError2);
-    expect(errEvent.error.message).toBe('error in beforeRequest');
-    await expect(Get(false).send()).rejects.toThrow('error in beforeRequest');
+    // beforeRequest synchronization function test
+    await expect(Get(false)).rejects.toThrow('error in beforeRequest');
   });
 
-  test('`responded-onSuccess` hook will receive the method param', async () => {
-    const alova = getAlovaInstance(VueHook, {
+  test('`responded-onSuccess` hook will receive the requesting method instance', async () => {
+    const mockFn = jest.fn();
+    const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
         method.meta = {
@@ -169,10 +157,8 @@ describe('createAlova', () => {
         };
       },
       responseExpect: async (r, method) => {
-        const result = await r.json();
-        expect(result.data.path).toBe('/unit-test');
-        expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.meta).toEqual({ a: 1, b: 2 });
+        mockFn(method);
+        return r.json();
       }
     });
     const Get = alova.Get('/unit-test', {
@@ -181,15 +167,19 @@ describe('createAlova', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
-    await Get.send();
+    await Get;
+    expect(mockFn).toHaveBeenCalledTimes(1);
+    const respondedMethod = mockFn.mock.calls[0][0];
+    expect(respondedMethod).toBeInstanceOf(Method);
+    expect(respondedMethod.meta).toStrictEqual({ a: 1, b: 2 });
   });
 
-  test('You can also use `responded` to handle global response event', async () => {
+  test('You can also use `responded` to handle global response success event', async () => {
+    const mockFn = jest.fn();
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
-      statesHook: VueHook,
       cacheLogger: null,
       requestAdapter: GlobalFetch(),
       beforeRequest: method => {
@@ -200,10 +190,8 @@ describe('createAlova', () => {
         };
       },
       responded: async (r, method) => {
-        const result = await r.json();
-        expect(result.data.path).toBe('/unit-test');
-        expect(result.data.params).toEqual({ a: 'a', b: 'str' });
-        expect(method.meta).toEqual({ a: 1, b: 2 });
+        mockFn(method);
+        return r.json();
       }
     });
     const Get = alova.Get('/unit-test', {
@@ -212,14 +200,18 @@ describe('createAlova', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
-    await Get.send();
+    await Get;
+    expect(mockFn).toHaveBeenCalledTimes(1);
+    const respondedMethod = mockFn.mock.calls[0][0];
+    expect(respondedMethod).toBeInstanceOf(Method);
+    expect(respondedMethod.meta).toStrictEqual({ a: 1, b: 2 });
   });
 
-  test('`responded-onError` hook will receive the method param', async () => {
+  test('`responded-onError` hook will receive the requesting method instance', async () => {
     const mockFn = jest.fn();
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         method.meta = {
           a: 1,
@@ -227,18 +219,19 @@ describe('createAlova', () => {
         };
       },
       resErrorExpect: (error, method) => {
-        expect(error).not.toBeUndefined();
-        expect(method.meta).toEqual({ a: 1, b: 2 });
-        mockFn();
+        mockFn(error, method);
       }
     });
-    const Get = alova.Get('/unit-test-error');
-    await Get.send();
-    expect(mockFn).toHaveBeenCalled();
+    await alova.Get('/unit-test-error');
+    expect(mockFn).toHaveBeenCalledTimes(1);
+    const [error, errorMethod] = mockFn.mock.calls[0];
+    expect(error).toBeInstanceOf(Error);
+    expect(errorMethod).toBeInstanceOf(Method);
+    expect(errorMethod.meta).toEqual({ a: 1, b: 2 });
   });
 
   test('should throws an async error in `responded-onError` hook', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       resErrorExpect: async () => {
         await new Promise(resolve => {
           setTimeout(resolve, 200);
@@ -247,12 +240,23 @@ describe('createAlova', () => {
       }
     });
     const Get = alova.Get('/unit-test-error');
-    await expect(Get.send()).rejects.toThrow('async error');
+    await expect(Get).rejects.toThrow('async error');
+  });
+
+  test('should abort request when time is exceeded the `timeout`', async () => {
+    const alova = createAlova({
+      baseURL,
+      timeout: 10,
+      requestAdapter: GlobalFetch()
+    });
+    const Get = alova.Get('/unit-test-1s');
+    const error = await untilReject(Get);
+    expect(error.message).toBe('fetchError: network timeout');
   });
 
   test('should transformData but not cache data when return data in `responded-onError` interceptor', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      localCache: {
+    const alova = getAlovaInstance({
+      cacheFor: {
         GET: 500000
       },
       resErrorExpect: () => [1, 2, 3]
@@ -260,14 +264,14 @@ describe('createAlova', () => {
     const Get = alova.Get('/unit-test-error', {
       transformData: (arr: number[]) => arr.map(item => item * 2)
     });
-    const arr = await Get.send();
+    const arr = await Get;
     expect(arr).toStrictEqual([2, 4, 6]);
-    expect(queryCache(Get)).toBeUndefined();
+    expect(await queryCache(Get)).toBeUndefined();
   });
 
   test("shouldn't call global error callback when responded callback throws an error", async () => {
     const mockFn = jest.fn();
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: () => {
         throw new Error('test error from responded');
       },
@@ -276,20 +280,15 @@ describe('createAlova', () => {
       }
     });
 
-    const Get = alova.Get('/unit-test', {
-      transformData(result: Result) {
-        return result.data;
-      }
-    });
-    const { onError, error } = useRequest(Get);
-    await untilCbCalled(onError);
+    const Get = alova.Get('/unit-test');
+    const error = await untilReject(Get);
+    expect(error.message).toBe('test error from responded');
     expect(mockFn).not.toHaveBeenCalled();
-    expect(error.value?.message).toBe('test error from responded');
   });
 
-  test("shouldn't emit global error cb when responded cb return rejected Promise", async () => {
+  test("shouldn't emit global error callback when responded callback return rejected Promise", async () => {
     const mockFn = jest.fn();
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: () => Promise.reject(new Error('test error from responded')),
       resErrorExpect: () => {
         mockFn();
@@ -301,15 +300,14 @@ describe('createAlova', () => {
         return result.data;
       }
     });
-    const { onError, error } = useRequest(Get);
-    await untilCbCalled(onError);
-    expect(error.value?.message).toBe('test error from responded');
+    const error = await untilReject(Get);
+    expect(error.message).toBe('test error from responded');
     expect(mockFn).not.toHaveBeenCalled();
   });
 
-  test("shouldn't emit responded instead of onError when request error", async () => {
+  test('should emit global onError when request error', async () => {
     const mockFn = jest.fn();
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: () => {
         mockFn();
       },
@@ -319,54 +317,17 @@ describe('createAlova', () => {
       }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-error', {
-      localCache: {
+      cacheFor: {
         expire: 100 * 1000
       }
     });
-    await expect(Get.send()).rejects.toThrow('onError called');
+    await expect(Get).rejects.toThrow('onError called');
     expect(mockFn).not.toHaveBeenCalled();
   });
 
-  test('should print error message by `console.error` by default when get a error in useHooks', async () => {
-    const errorConsoleMockFn = jest.fn();
-    // eslint-disable-next-line
-    console.error = errorConsoleMockFn; // 重写以便监听
-    const alova1 = createAlova({
-      baseURL,
-      statesHook: VueHook,
-      cacheLogger: null,
-      requestAdapter: GlobalFetch(),
-      responded: r => r.json()
-    });
-
-    const state1 = useRequest(alova1.Get<string, Result<string>>('/unit-test-error'));
-    await untilCbCalled(state1.onError);
-    expect(errorConsoleMockFn).toHaveBeenCalledTimes(1);
-
-    const state2 = useRequest(
-      alova1.Get<string, Result<string>>('/unit-test', {
-        transformData: () => {
-          throw new Error('error in transform data');
-        }
-      })
-    );
-    await untilCbCalled(state2.onError);
-    expect(errorConsoleMockFn).toHaveBeenCalledTimes(2);
-
-    const state3 = useRequest(
-      alova1.Get<string, Result<string>>('/unit-test', {
-        localCache() {
-          throw new Error('error in custom localCache');
-        }
-      })
-    );
-    await untilCbCalled(state3.onError);
-    expect(errorConsoleMockFn).toHaveBeenCalledTimes(3);
-  });
-
-  test('`responded-onComplete` hook will receive the method param', async () => {
+  test('`responded-onComplete` hook will receive the requesting method instance', async () => {
     const mockFn = jest.fn();
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         method.meta = {
           a: 1,
@@ -374,60 +335,27 @@ describe('createAlova', () => {
         };
       },
       resCompleteExpect: method => {
-        expect(method.meta).toEqual({ a: 1, b: 2 });
-        mockFn();
+        mockFn(method);
       }
     });
     const Get = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
-      timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
       },
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
-    await Get.send();
+    await Get;
     expect(mockFn).toHaveBeenCalled();
-  });
-
-  test('should emit onComplete when `beforeRequest` hook throws a error', async () => {
-    const alova = createAlova({
-      baseURL: 'http://localhost:3000',
-      statesHook: VueHook,
-      requestAdapter: GlobalFetch(),
-      cacheLogger: null,
-      beforeRequest: method => {
-        if (method.config.params.async) {
-          return Promise.reject(new Error('reject in beforeRequest'));
-        }
-        throw new Error('error in beforeRequest');
-      },
-      errorLogger: false,
-      responded: r => r.json()
-    });
-    const Get = (async = true) =>
-      alova.Get<Result>('/unit-test', {
-        params: { async }
-      });
-
-    // beforeRequest异步函数测试
-    const { onComplete } = useRequest(Get);
-    let completeEvent = await untilCbCalled(onComplete);
-    expect(completeEvent.error.message).toBe('reject in beforeRequest');
-    await expect(Get().send()).rejects.toThrow('reject in beforeRequest');
-
-    // beforeRequest同步函数测试
-    const { onComplete: onComplete2 } = useRequest(Get(false));
-    completeEvent = await untilCbCalled(onComplete2);
-    expect(completeEvent.error.message).toBe('error in beforeRequest');
-    await expect(Get(false).send()).rejects.toThrow('error in beforeRequest');
+    const completeMethod = mockFn.mock.calls[0][0];
+    expect(completeMethod).toBeInstanceOf(Method);
+    expect(completeMethod.meta).toStrictEqual({ a: 1, b: 2 });
   });
 
   test('should emit onComplete when hit response cache', async () => {
     const MockFn = jest.fn();
     const alova = createAlova({
       baseURL,
-      statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       cacheLogger: null,
       responded: {
@@ -438,18 +366,18 @@ describe('createAlova', () => {
       }
     });
     const Get = alova.Get('/unit-test', {
-      localCache: 1000 * 100
+      cacheFor: 1000 * 100
     });
 
-    await Get.send();
-    await Get.send();
-    await Get.send();
+    await Get;
+    await Get;
+    await Get;
     expect(MockFn).toHaveBeenCalledTimes(3);
   });
 
   test('should throws an async error in `responded-onComplete` hook', async () => {
     const mockFn = jest.fn();
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       resErrorExpect: () => 'error response',
       resCompleteExpect: () => {
         mockFn();
@@ -460,99 +388,14 @@ describe('createAlova', () => {
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  test("shouldn't print error message when set errorLogger to false", async () => {
-    const errorConsoleMockFn = jest.fn();
-    // eslint-disable-next-line
-    console.error = errorConsoleMockFn;
-    const alova = createAlova({
-      baseURL,
-      statesHook: VueHook,
-      requestAdapter: GlobalFetch(),
-      cacheLogger: null,
-      responded: r => r.json(),
-      errorLogger: false
-    });
-
-    const state1 = useRequest(alova.Get<string, Result<string>>('/unit-test-error'));
-    await untilCbCalled(state1.onError);
-    expect(errorConsoleMockFn).not.toHaveBeenCalled();
-
-    const state2 = useRequest(
-      alova.Get<string, Result<string>>('/unit-test', {
-        transformData: () => {
-          throw new Error('error in transform data');
-        }
-      })
-    );
-    await untilCbCalled(state2.onError);
-    expect(errorConsoleMockFn).not.toHaveBeenCalled();
-
-    const state3 = useRequest(
-      alova.Get<string, Result<string>>('/unit-test', {
-        localCache() {
-          throw new Error('error in custom localCache');
-        }
-      })
-    );
-    await untilCbCalled(state3.onError);
-    expect(errorConsoleMockFn).not.toHaveBeenCalled();
-  });
-
-  test('should emit custom errorLogger function  when set errorLogger to a custom function', async () => {
-    const errorConsoleMockFn = jest.fn();
-    // eslint-disable-next-line
-    console.error = errorConsoleMockFn;
-    const customLoggerMockFn = jest.fn();
-    const alova = createAlova({
-      baseURL,
-      statesHook: VueHook,
-      requestAdapter: GlobalFetch(),
-      cacheLogger: null,
-      responded: r => r.json(),
-      errorLogger(error, methodInstance) {
-        customLoggerMockFn();
-        expect(error).toBeInstanceOf(Error);
-        expect(methodInstance).toBeInstanceOf(Method);
-      }
-    });
-
-    const state1 = useRequest(alova.Get<string, Result<string>>('/unit-test-error'));
-    await untilCbCalled(state1.onError);
-    expect(errorConsoleMockFn).not.toHaveBeenCalled();
-    expect(customLoggerMockFn).toHaveBeenCalledTimes(1);
-
-    const state2 = useRequest(
-      alova.Get<string, Result<string>>('/unit-test', {
-        transformData: () => {
-          throw new Error('error in transform data');
-        }
-      })
-    );
-    await untilCbCalled(state2.onError);
-    expect(errorConsoleMockFn).not.toHaveBeenCalled();
-    expect(customLoggerMockFn).toHaveBeenCalledTimes(2);
-
-    const state3 = useRequest(
-      alova.Get<string, Result<string>>('/unit-test', {
-        localCache() {
-          throw new Error('error in custom localCache');
-        }
-      })
-    );
-    await untilCbCalled(state3.onError);
-    expect(errorConsoleMockFn).not.toHaveBeenCalled();
-    expect(customLoggerMockFn).toHaveBeenCalledTimes(3);
-  });
-
   const { groupCollapsed } = console;
   const { groupEnd } = console;
-  test('should print cache hit message defaultly when hit response cache', async () => {
+  test('should print cache hit message default when hit response cache', async () => {
     const logConsoleMockFn = jest.fn();
     // eslint-disable-next-line
-    console.log = logConsoleMockFn; // 重写以便监听
+    console.log = logConsoleMockFn; // Rewrite for monitoring
     const alova1 = createAlova({
       baseURL,
-      statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       responded: r => r.json()
     });
@@ -560,13 +403,10 @@ describe('createAlova', () => {
     const getter1 = alova1.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });
-    // 请求一次缓存数据
-    const state1 = useRequest(getter1);
-    await untilCbCalled(state1.onSuccess);
-
-    const state2 = useRequest(getter1);
-    await untilCbCalled(state2.onSuccess);
-    expect(logConsoleMockFn).toHaveBeenCalledTimes(3); // 每次缓存会调用3次console.log
+    // Request twice to hit the cache once
+    await getter1;
+    await getter1;
+    expect(logConsoleMockFn).toHaveBeenCalledTimes(3); // Each cache will call console.log 3 times
     const calls1 = logConsoleMockFn.mock.calls.slice(0);
     expect(calls1[0][0]).toBe('%c[Cache]');
     expect(calls1[0][2]).toStrictEqual({
@@ -581,19 +421,17 @@ describe('createAlova', () => {
 
     const getter2 = alova1.Get('/unit-test', {
       params: { restore: '1' },
-      localCache: {
+      cacheFor: {
         mode: 'restore',
         expire: 200000,
         tag: 'v1'
       },
       transformData: ({ data }: Result) => data
     });
-    // 请求一次缓存数据
-    const state3 = useRequest(getter2);
-    await untilCbCalled(state3.onSuccess);
-    const state4 = useRequest(getter2);
-    await untilCbCalled(state4.onSuccess);
-    expect(logConsoleMockFn).toHaveBeenCalledTimes(7); // restore缓存还会打印tag
+    // Request cached data once
+    await getter2;
+    await getter2;
+    expect(logConsoleMockFn).toHaveBeenCalledTimes(7); // Restore cache will also print tag
     const calls2 = logConsoleMockFn.mock.calls.slice(3);
     expect(calls2[0][0]).toBe('%c[Cache]');
     expect(calls2[0][2]).toStrictEqual({
@@ -610,10 +448,9 @@ describe('createAlova', () => {
     expect(calls2[3][0]).toBe('%c[Method]');
     expect(calls2[3][2]).toBeInstanceOf(Method);
 
-    // 当console.groupCollapsed为空时将以另一种形式打印
+    // Will be printed in another form when console.groupCollapsed is empty
     (console as any).groupCollapsed = (console as any).groupEnd = undefined;
-    const state5 = useRequest(getter2);
-    await untilCbCalled(state5.onSuccess);
+    await getter2;
     expect(logConsoleMockFn).toHaveBeenCalledTimes(13);
     const calls3 = logConsoleMockFn.mock.calls.slice(7);
     const startSep = ` [HitCache]${getter2.url} `;
@@ -642,10 +479,9 @@ describe('createAlova', () => {
   test("shouldn't print cache hit message when set cacheLogger to false or null", async () => {
     const logConsoleMockFn = jest.fn();
     // eslint-disable-next-line
-    console.log = logConsoleMockFn; // 重写以便监听
+    console.log = logConsoleMockFn; // Rewrite for monitoring
     const alova1 = createAlova({
       baseURL,
-      statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       responded: r => r.json(),
       cacheLogger: false
@@ -654,34 +490,29 @@ describe('createAlova', () => {
     const getter1 = alova1.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });
-    // 请求一次缓存数据
-    const state1 = useRequest(getter1);
-    await untilCbCalled(state1.onSuccess);
-    const state2 = useRequest(getter1);
-    await untilCbCalled(state2.onSuccess);
+    // Request cache data twice to hit the cache once
+    await getter1;
+    await getter1;
     expect(logConsoleMockFn).toHaveBeenCalledTimes(0);
 
     const alova2 = createAlova({
       baseURL,
-      statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       responded: r => r.json(),
       cacheLogger: null
     });
     const getter2 = alova2.Get('/unit-test', {
       params: { restore: '1' },
-      localCache: {
+      cacheFor: {
         mode: 'restore',
         expire: 200000,
         tag: 'v1'
       },
       transformData: ({ data }: Result) => data
     });
-    // 请求一次缓存数据
-    const state3 = useRequest(getter2);
-    await untilCbCalled(state3.onSuccess);
-    const state4 = useRequest(getter2);
-    await untilCbCalled(state4.onSuccess);
+    // Request cache data twice to hit the cache once
+    await getter2;
+    await getter2;
     expect(logConsoleMockFn).toHaveBeenCalledTimes(0);
   });
 
@@ -689,7 +520,6 @@ describe('createAlova', () => {
     const loggerMockFn = jest.fn();
     const alova1 = createAlova({
       baseURL,
-      statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       responded: r => r.json(),
       cacheLogger(response, methodInstance, mode, tag) {
@@ -700,11 +530,9 @@ describe('createAlova', () => {
     const getter1 = alova1.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });
-    // 请求一次缓存数据
-    const state1 = useRequest(getter1);
-    await untilCbCalled(state1.onSuccess);
-    const state2 = useRequest(getter1);
-    await untilCbCalled(state2.onSuccess);
+    // Request cache data twice to hit the cache once
+    await getter1;
+    await getter1;
     expect(loggerMockFn).toHaveBeenCalledTimes(1);
     const calls1 = loggerMockFn.mock.calls[0];
     expect(calls1[3]).toBeUndefined();
@@ -718,18 +546,17 @@ describe('createAlova', () => {
 
     const getter2 = alova1.Get('/unit-test', {
       params: { restore: '1' },
-      localCache: {
+      cacheFor: {
         mode: 'restore',
         expire: 200000,
         tag: 'v1'
       },
       transformData: ({ data }: Result) => data
     });
-    // 请求一次缓存数据
-    const state3 = useRequest(getter2);
-    await untilCbCalled(state3.onSuccess);
-    const state4 = useRequest(getter2);
-    await untilCbCalled(state4.onSuccess);
+    // Request cached data once
+    // Request cache data twice to hit the cache once
+    await getter2;
+    await getter2;
     expect(loggerMockFn).toHaveBeenCalledTimes(2);
     const calls2 = loggerMockFn.mock.calls[1];
     expect(calls2[3]).toBe('v1');

@@ -10,7 +10,8 @@ export const getAlovaInstance = ({
   beforeRequestExpect,
   responseExpect,
   resErrorExpect,
-  resCompleteExpect
+  resCompleteExpect,
+  limitSnapshots
 }: {
   endWithSlash?: boolean;
   cacheFor?: GlobalCacheConfig;
@@ -18,11 +19,13 @@ export const getAlovaInstance = ({
   responseExpect?: (response: Response, method: FetchMethod) => void;
   resErrorExpect?: (err: Error, method: FetchMethod) => void;
   resCompleteExpect?: (method: FetchMethod) => void;
+  limitSnapshots?: number;
 } = {}) => {
   const alovaInst = createAlova({
     baseURL: process.env.NODE_BASE_URL + (endWithSlash ? '/' : ''),
     timeout: 3000,
     requestAdapter: GlobalFetch(),
+    snapshots: limitSnapshots,
     beforeRequest(config) {
       beforeRequestExpect && beforeRequestExpect(config);
     },
@@ -42,4 +45,10 @@ export const getAlovaInstance = ({
   return alovaInst;
 };
 
-export const alt = '';
+/**
+ * resolve returned promise when param promise is rejected
+ */
+export const untilReject = (promise: Promise<any> | Method) =>
+  new Promise<Error>(resolve => {
+    promise.catch(resolve);
+  });

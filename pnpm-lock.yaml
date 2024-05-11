@@ -162,8 +162,8 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
       undici:
-        specifier: ^6.13.0
-        version: 6.14.0
+        specifier: ^6.16.1
+        version: 6.16.1
       vue:
         specifier: ^3.4.21
         version: 3.4.24(typescript@5.4.5)
@@ -4745,8 +4745,8 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  undici@6.14.0:
-    resolution: {integrity: sha512-esJ/x2QU5boTG6thdA0o4qP3cv/oPx9mcQGcp8TAHI+ZBTa0EvM9Jiyp0ILdPGLGxs5HATTKrJqAK+YhrSFicg==}
+  undici@6.16.1:
+    resolution: {integrity: sha512-NeNiTT7ixpeiL1qOIU/xTVpHpVP0svmI6PwoCKaMGaI5AsHOaRdwqU/f7Fi9eyU4u03nd5U/BC8wmRMnS9nqoA==}
     engines: {node: '>=18.17'}
 
   unicode-canonical-property-names-ecmascript@2.0.0:
@@ -10388,7 +10388,7 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  undici@6.14.0: {}
+  undici@6.16.1: {}
 
   unicode-canonical-property-names-ecmascript@2.0.0: {}
 

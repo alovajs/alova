@@ -1,4 +1,4 @@
-import { getAlovaInstance } from '#/utils';
+import { getAlovaInstance, untilReject } from '#/utils';
 import { createAlova } from '@/index';
 import { Result, delay } from 'root/testUtils';
 
@@ -174,9 +174,7 @@ describe('Request shared', () => {
     await delay(0);
     Get.abort();
 
-    const error = await new Promise<any>(resolve => {
-      prom.catch(resolve);
-    });
+    const error = await untilReject(prom);
     expect(error.message).toBe('The operation was aborted.');
 
     // Send the request again, it should be successful now

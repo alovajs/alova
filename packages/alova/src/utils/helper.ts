@@ -1,15 +1,6 @@
 import { boundStatesHook } from '@/alova';
-import { getContextOptions } from '@alova/shared/function';
-import { Alova, FrontRequestState } from '~/typings';
+import { FrontRequestState } from '~/typings';
 import myAssert from './myAssert';
-
-/**
- * 获取alova实例的statesHook
- * @returns statesHook对象
- */
-export const getStatesHook = <States, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
-  alovaInstance: Alova<States, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>
-) => getContextOptions(alovaInstance).statesHook;
 
 /**
  * 导出fetchStates map

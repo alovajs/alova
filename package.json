@@ -117,7 +117,7 @@
     "tslib": "^2.6.2",
     "turbo": "^1.13.2",
     "typescript": "^5.4.5",
-    "undici": "^6.13.0",
+    "undici": "^6.16.1",
     "vue": "^3.4.21",
     "web-streams-polyfill": "^4.0.0"
   },

@@ -384,6 +384,13 @@ export interface AlovaOptions<State, Computed, Watched, Export, RequestConfig, R
   l1Cache?: AlovaGlobalCacheAdapter;
 
   /**
+   * limitation of method snapshots.
+   * it indicates not save snapshot when value is set to 0, and the method matcher will not work.
+   * @default 1000
+   */
+  snapshots?: number;
+
+  /**
    * restore mode cache adapter. it will be used when persist data.
    * default behavior:
    * - browser/deno: localStorage.
@@ -578,11 +585,34 @@ export interface MethodConstructor {
 // eslint-disable-next-line
 export declare const Method: MethodConstructor;
 
+export interface MethodSnapshotContainer<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
+  records: Record<string, Set<Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>>;
+  capacity: number;
+  occupy: number;
+  save(methodInstance: Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>): void;
+
+  /**
+   * get method snapshots by matcher
+   * the method snapshots means the method instance that has been requested
+   * @version 3.0.0
+   * @param {MethodFilter} matcher method matcher
+   * @param {boolean} matchAll is match all, default is true
+   * @returns {Method[] | Method} method list when `matchAll` is true, otherwise return method instance or undefined
+   */
+  match<M extends boolean = true>(
+    matcher: MethodFilter,
+    matchAll?: M
+  ): M extends true
+    ? Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>[]
+    : Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader> | undefined;
+}
+
 export interface Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
   id: string;
   options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
   l1Cache: AlovaGlobalCacheAdapter;
   l2Cache: AlovaGlobalCacheAdapter;
+  snapshots: MethodSnapshotContainer<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
   Get<Responded, Transformed = unknown>(
     url: string,
     config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
@@ -619,21 +649,6 @@ export interface Alova<State, Computed, Watched, Export, RequestConfig, Response
     url: string,
     config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
   ): Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-
-  /**
-   * get method snapshots by matcher
-   * the method snapshots means the method instance that has been requested
-   * @version 3.0.0
-   * @param {MethodFilter} matcher method matcher
-   * @param {boolean} matchAll is match all, default is true
-   * @returns {Method[] | Method} method list when `matchAll` is true, otherwise return method instance or undefined
-   */
-  matchSnapshot<M extends boolean = true>(
-    matcher: MethodFilter,
-    matchAll?: M
-  ): M extends true
-    ? Method<State, Computed, Watched, Export, any, any, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
-    : Method<State, Computed, Watched, Export, any, any, Responded, Transformed, RequestConfig, Response, ResponseHeader> | undefined;
 }
 
 /**
@@ -1029,13 +1044,6 @@ export type AlovaMethodHandler<State, Computed, Watched, Export, Responded, Tran
  */
 export interface AlovaGlobalConfig {
   /**
-   * limitation of method snapshots.
-   * it indicates not save snapshot when value is set to 0, and the method matcher will not work.
-   * @default 1000
-   */
-  methodSnapshots?: number;
-
-  /**
    * switch of auto invalidate cache.
    * here is three options:
    * - close: disable auto cache invalidation and save.
@@ -1215,8 +1223,8 @@ export declare function queryCache<Responded>(
 export declare function getMethodKey(method: Method): string;
 
 /**
- * 全局设置
- * @param config 配置项
+ * Set global configuration
+ * @param config configuration
  */
 export declare function globalConfig(config: AlovaGlobalConfig): void;
 
