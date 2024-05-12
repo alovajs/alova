@@ -1,7 +1,7 @@
 import { AlovaGlobalConfig } from '~/typings';
 
 export let globalConfigMap: Required<AlovaGlobalConfig> = {
-  autoInvalidateCache: 'global'
+  autoHitCache: 'global'
 };
 
 /**

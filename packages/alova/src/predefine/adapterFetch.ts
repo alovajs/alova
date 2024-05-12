@@ -13,7 +13,7 @@ import { Method, RequestElements } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
-export default function GlobalFetch() {
+export default function adapterFetch() {
   return (elements: RequestElements, method: Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>) => {
     const adapterConfig = method.config;
     const timeout = adapterConfig.timeout || 0;

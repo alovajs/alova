@@ -82,26 +82,27 @@ export const setWithCacheAdapter = async (
         const targetHitSourceKey = isRegexp
           ? sourceItem.source + (sourceItem.flags ? regexpSourceFlagSeparator + sourceItem.flags : '')
           : sourceItem;
-        if (isRegexp && !hitSourceKeys[targetHitSourceKey]) {
-          pushItem(hitSourceRegexpSources, targetHitSourceKey);
+
+        if (targetHitSourceKey) {
+          if (isRegexp && !hitSourceKeys[targetHitSourceKey]) {
+            pushItem(hitSourceRegexpSources, targetHitSourceKey);
+          }
+          addItem(hitSourceKeys, isRegexp ? hitSourceRegexpCacheKey(targetHitSourceKey) : hitSourceStringCacheKey(targetHitSourceKey));
         }
-        addItem(hitSourceKeys, targetHitSourceKey);
       });
 
       // save the relationship. Minimize IO as much as possible
       const promises = mapItem(objectKeys(hitSourceKeys), async hitSourceKey => {
         // filter the empty strings.
-        if (hitSourceKey) {
-          hitSourceKey = hitSourceStringCacheKey(hitSourceKey);
-          const targetMethodKeys: UniqueKeyPromised = (await cacheAdapter.get(hitSourceKey)) || {};
-          addItem(targetMethodKeys, methodCacheKey);
-          await cacheAdapter.set(hitSourceKey, targetMethodKeys);
-        }
+        const targetMethodKeys: UniqueKeyPromised = (await cacheAdapter.get(hitSourceKey)) || {};
+        addItem(targetMethodKeys, methodCacheKey);
+        await cacheAdapter.set(hitSourceKey, targetMethodKeys);
       });
       const saveRegexp = async () => {
         // save the regexp source if regexp exists.
         if (len(hitSourceRegexpSources)) {
           const regexpList: string[] = (await cacheAdapter.get(unifiedHitSourceRegexpCacheKey)) || [];
+          // TODO: hitSourceRegexpSources 需要去重
           pushItem(regexpList, ...hitSourceRegexpSources);
           await cacheAdapter.set(unifiedHitSourceRegexpCacheKey, regexpList);
         }

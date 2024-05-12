@@ -167,14 +167,10 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
       const transformedData = await transformData(responseData, responseHeaders || {});
       snapshots.save(methodInstance);
       // 查找hit target cache，让它的缓存失效
-      // 通过全局配置`autoInvalidateCache`来控制自动缓存失效范围
-      const { autoInvalidateCache } = globalConfigMap;
+      // 通过全局配置`autoHitCache`来控制自动缓存失效范围
+      const { autoHitCache } = globalConfigMap;
       const cacheAdaptersInvolved =
-        autoInvalidateCache === 'global'
-          ? [...usingL1CacheAdapters, ...usingL2CacheAdapters]
-          : autoInvalidateCache === 'self'
-            ? [l1Cache, l2Cache]
-            : [];
+        autoHitCache === 'global' ? [...usingL1CacheAdapters, ...usingL2CacheAdapters] : autoHitCache === 'self' ? [l1Cache, l2Cache] : [];
       if (len(cacheAdaptersInvolved)) {
         await PromiseCls.all(
           mapItem(cacheAdaptersInvolved, involvedCacheAdapter =>

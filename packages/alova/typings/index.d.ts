@@ -1044,12 +1044,14 @@ export type AlovaMethodHandler<State, Computed, Watched, Export, Responded, Tran
  */
 export interface AlovaGlobalConfig {
   /**
-   * switch of auto invalidate cache.
+   * switch of auto hit cache.
    * here is three options:
-   * - close: disable auto cache invalidation and save.
+   * - global: invalidate cache cross alova instances.
+   * - self: only invalidate cache from the same alova instance.
+   * - close: don't auto invalidate cache any more.
    * @default 'global'
    */
-  autoInvalidateCache?: 'close' | 'self' | 'global';
+  autoHitCache?: 'global' | 'self' | 'close';
 }
 
 // ************ exports of library ***************
