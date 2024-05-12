@@ -1,11 +1,13 @@
 import { createAssert } from '@alova/shared/assert';
-import { createSyncOnceRunner, getLocalCacheConfigParam, getTime, isNumber, noop, statesHookHelper } from '@alova/shared/function';
+import { createSyncOnceRunner, getLocalCacheConfigParam, getTime, isFn, isNumber, noop, statesHookHelper } from '@alova/shared/function';
 import {
   falseValue,
   filterItem,
   forEach,
+  includes,
   isArray,
   len,
+  mapItem,
   objectKeys,
   objectValues,
   promiseCatch,
@@ -17,29 +19,21 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import {
-  AlovaMethodHandler,
-  Method,
-  getMethodKey,
-  invalidateCache,
-  promiseStatesHook,
-  queryCache,
-  setCache,
-  useFetcher,
-  useWatcher
-} from 'alova';
-import { PaginationHookConfig } from '~/typings/general';
+import { Method, getMethodKey, invalidateCache, promiseStatesHook, queryCache, setCache, useFetcher, useWatcher } from 'alova';
+import { AnyFn, PaginationHookConfig } from '~/typings/general';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';
-import { FrameworkState } from '../../../../shared/dist/model/FrameworkState';
+import { FrameworkReadableState, FrameworkState } from '../../../../shared/dist/model/FrameworkState';
+import { GeneralState } from '@alova/shared/types';
 
 const paginationAssert = createAssert('usePagination');
 const indexAssert = (index: number, rawData: any[]) =>
   paginationAssert(isNumber(index) && index < len(rawData), 'index must be a number that less than list length');
 
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  handler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  handler: (
+    page: number,
+    pageSize: number
+  ) => Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   config: PaginationHookConfig<
     State,
     Computed,
@@ -50,11 +44,19 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     RequestConfig,
     Response,
     ResponseHeader,
-    any,
-    Watched
+    unknown[],
+    (GeneralState | FrameworkReadableState<any>)[]
   > = {}
 ) => {
-  const { create, computed, ref, watch, exportObject, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const {
+    create,
+    computed,
+    ref,
+    watch,
+    exportObject,
+    memorizeOperators,
+    __referingObj: referingObject
+  } = statesHookHelper(promiseStatesHook());
 
   const {
     preloadPreviousPage = trueValue,
@@ -87,14 +89,14 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     save: saveSnapshot,
     remove: removeSnapshot
   } = ref(createSnapshotMethodsManager(page => handlerRef.current(page, pageSize.v))).current;
-  const listDataGetter = (rawData: any) => dataGetter(rawData) || rawData;
+  const listDataGetter = (rawData: any[]) => dataGetter(rawData) || rawData;
   // 初始化fetcher
   const fetchStates = useFetcher({
     __referingObj: referingObject,
-    force: forceFetch => forceFetch
+    force: ({ sendArgs }) => sendArgs[0]
   });
-  const { fetching, fetch, abort: abortFetch, onSuccess: onFetchSuccess } = fetchStates;
-  const fetchingRef = useRequestRefState$(fetching);
+  const { loading, fetch, abort: abortFetch, onSuccess: onFetchSuccess } = fetchStates;
+  const fetchingRef = ref(loading);
 
   const getHandlerMethod = (refreshPage = page.v) => {
     const pageSizeVal = pageSize.v;
@@ -113,17 +115,27 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
 
   // 兼容react，将需要代理的函数存放在此
   // 这样可以在代理函数中调用到最新的操作函数，避免react闭包陷阱
-  const delegationActions = ref({});
+  const delegationActions = ref<Record<string, AnyFn>>({});
+  // 计算data、total、isLastPage参数
+  const pageCount = computed(
+    () => {
+      const totalVal = total.v;
+      return totalVal !== undefinedValue ? Math.ceil(totalVal / pageSize.v) : undefinedValue;
+    },
+    [pageSize.e, total.e],
+    'pageCount',
+    trueValue
+  );
   const createDelegationAction =
-    actionName =>
-    (...args) =>
+    (actionName: string) =>
+    (...args: any[]) =>
       delegationActions.current[actionName](...args);
-  const states = useWatcher(getHandlerMethod, [...watchingStates, page.e, pageSize.e], {
+  const states = useWatcher(getHandlerMethod, [...watchingStates, page.e, pageSize.e] as any, {
     __referingObj: referingObject,
     immediate,
     initialData,
     middleware(ctx, next) {
-      middleware(
+      (middleware as any)(
         {
           ...ctx,
           delegatingActions: {
@@ -139,6 +151,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
                 data,
                 pageCount,
                 total,
+                // eslint-disable-next-line @typescript-eslint/no-use-before-define
                 isLastPage
               } as Record<string, any>;
               return states[stateKey].v;
@@ -158,33 +171,30 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
       }
       return requestPromise;
     },
-    force: (...args) => args[1] || force(...args),
+    force: event => {
+      if (isFn(force)) {
+        return force(event as any);
+      }
+
+      return force === undefinedValue ? event.sendArgs[1] : force;
+    },
     abortLast: false,
     ...others
   });
   const { send } = states;
-  // 计算data、total、isLastPage参数
-  const pageCount = computed(
-    () => {
-      const totalVal = total.v;
-      return totalVal !== undefinedValue ? Math.ceil(totalVal / pageSize.v) : undefinedValue;
-    },
-    [pageSize.e, total.e],
-    'pageCount',
-    trueValue
-  );
-  const requestDataRef = useRequestRefState$(states.data);
+
+  const requestDataRef = ref(states.data);
 
   // 判断是否可预加载数据
-  const canPreload = async (
-    rawData: any,
-    preloadPage: number,
-    fetchMethod: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-    isNextPage = falseValue,
-    forceRequest: boolean
-  ) => {
-    rawData ??= requestDataRef.v;
-    isNextPage ??= falseValue;
+  const canPreload = async (payload: {
+    rawData?: any;
+    preloadPage: number;
+    fetchMethod: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+    isNextPage?: boolean;
+    forceRequest?: boolean;
+  }) => {
+    const { rawData = requestDataRef.current, preloadPage, fetchMethod, forceRequest = falseValue, isNextPage = falseValue } = payload;
+
     const { e: expireMilliseconds } = getLocalCacheConfigParam(fetchMethod);
     // 如果缓存时间小于等于当前时间，表示没有设置缓存，此时不再预拉取数据
     // 或者已经有缓存了也不预拉取
@@ -208,35 +218,51 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   };
 
   // 预加载下一页数据
-  const fetchNextPage = async (rawData: any, force = falseValue) => {
+  const fetchNextPage = async (rawData?: any[], force = falseValue) => {
     const nextPage = page.v + 1;
     const fetchMethod = getHandlerMethod(nextPage);
-    if (preloadNextPage && (await canPreload(rawData, nextPage, fetchMethod, trueValue, force))) {
+    if (
+      preloadNextPage &&
+      (await canPreload({
+        rawData,
+        preloadPage: nextPage,
+        fetchMethod,
+        isNextPage: trueValue,
+        forceRequest: force
+      }))
+    ) {
       promiseCatch(fetch(fetchMethod, force), noop);
     }
   };
   // 预加载上一页数据
-  const fetchPreviousPage = rawData => {
+  const fetchPreviousPage = async (rawData: any[]) => {
     const prevPage = page.v - 1;
     const fetchMethod = getHandlerMethod(prevPage);
-    if (preloadPreviousPage && canPreload(rawData, prevPage, fetchMethod)) {
+    if (
+      preloadPreviousPage &&
+      (await canPreload({
+        rawData,
+        preloadPage: prevPage,
+        fetchMethod
+      }))
+    ) {
       promiseCatch(fetch(fetchMethod), noop);
     }
   };
   // 如果返回的数据小于pageSize了，则认定为最后一页了
   const isLastPage = computed(
     () => {
-      const dataRaw = requestDataRef.v;
+      const dataRaw = requestDataRef.current;
       if (!dataRaw) {
         return trueValue;
       }
-      const statesDataVal = listDataGetter(dataRaw);
+      const statesDataVal = listDataGetter(dataRaw as any[]);
       const pageVal = page.v;
       const pageCountVal = pageCount.v;
       const dataLen = isArray(statesDataVal) ? len(statesDataVal) : 0;
       return pageCountVal ? pageVal >= pageCountVal : dataLen < pageSize.v;
     },
-    [page.e, pageCount.e, states.data.e, pageSize.e],
+    [page.e, pageCount.e, states.data, pageSize.e],
     'isLastPage',
     trueValue
   );
@@ -245,7 +271,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   const updateCurrentPageCache = () => {
     const snapshotItem = getSnapshotMethods(page.v);
     snapshotItem &&
-      setCache(snapshotItem.entity, rawData => {
+      setCache(snapshotItem.entity, (rawData: any[]) => {
         // 当关闭缓存时，rawData为undefined
         if (rawData) {
           const cachedListData = listDataGetter(rawData) || [];
@@ -282,14 +308,15 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   });
   states.onSuccess(({ data: rawData, sendArgs: [refreshPage, isRefresh], method }) => {
     const { total: cachedTotal } = getSnapshotMethods(method) || {};
-    total.v = cachedTotal !== undefinedValue ? cachedTotal : totalGetter(rawData);
+    const typedRawData = rawData as any[];
+    total.v = cachedTotal !== undefinedValue ? cachedTotal : totalGetter(typedRawData);
     if (!isRefresh) {
-      fetchPreviousPage(rawData);
-      fetchNextPage(rawData);
+      fetchPreviousPage(typedRawData);
+      fetchNextPage(typedRawData);
     }
 
     const pageSizeVal = pageSize.v;
-    const listData = listDataGetter(rawData); // 获取数组
+    const listData = listDataGetter(typedRawData); // 获取数组
     paginationAssert(isArray(listData), 'Got wrong array, did you return the correct array of list in `data` function');
 
     // 如果追加数据，才更新data
@@ -318,7 +345,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   });
 
   // 获取列表项所在位置
-  const getItemIndex = item => {
+  const getItemIndex = (item: any) => {
     const index = data.v.indexOf(item);
     paginationAssert(index >= 0, 'item is not found in list');
     return index;
@@ -357,11 +384,11 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
       removeSnapshot();
     } else {
       // 筛选出上一页、当前页、下一页的数据
-      const excludeSnapshotKeys = map(
+      const excludeSnapshotKeys = mapItem(
         filterItem([getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)], Boolean),
         ({ entity }) => getMethodKey(entity)
       );
-      snapshots = map(
+      snapshots = mapItem(
         filterItem(objectKeys(snapshotObj), key => !includes(excludeSnapshotKeys, key)),
         key => {
           const item = snapshotObj[key];
@@ -370,7 +397,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
         }
       );
     }
-    invalidateCache(map(snapshots, ({ entity }) => entity));
+    invalidateCache(mapItem(snapshots, ({ entity }) => entity));
   };
 
   // 单独拿出来的原因是
@@ -378,15 +405,15 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   const resetSyncRunner = ref(createSyncOnceRunner()).current;
   const resetCache = () =>
     resetSyncRunner(() => {
-      fetchingRef.v && abortFetch();
+      fetchingRef.current && abortFetch();
       // 缓存失效
       invalidatePaginationCache();
 
       // 当下一页的数据量不超过pageSize时，强制请求下一页，因为有请求共享，需要在中断请求后异步执行拉取操作
-      setTimeoutFn(() => {
+      setTimeoutFn(async () => {
         const snapshotItem = getSnapshotMethods(page.v + 1);
         if (snapshotItem) {
-          const cachedListData = listDataGetter(queryCache(snapshotItem.entity) || {}) || [];
+          const cachedListData = listDataGetter((await queryCache(snapshotItem.entity)) || {}) || [];
           fetchNextPage(undefinedValue, len(cachedListData) < pageSize.v);
         }
       });
@@ -415,7 +442,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * @param item 插入项
    * @param position 插入位置（索引）或列表项
    */
-  const insert = (item, position = 0) => {
+  const insert = (item: any, position = 0) => {
     const index = isNumber(position) ? position : getItemIndex(position) + 1;
     let popItem = undefinedValue;
     const rawData = data.v;
@@ -437,7 +464,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     if (popItem) {
       const snapshotItem = getSnapshotMethods(page.v + 1);
       snapshotItem &&
-        setCache(snapshotItem.entity, rawData => {
+        setCache(snapshotItem.entity, (rawData: any[]) => {
           if (rawData) {
             const cachedListData = listDataGetter(rawData) || [];
             cachedListData.unshift(popItem);
@@ -456,8 +483,8 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
    * @param position 移除的索引或列表项
    */
-  let tempData; // 临时保存的数据，以便当需要重新加载时用于数据恢复
-  const remove = position => {
+  let tempData: any[] | undefined; // 临时保存的数据，以便当需要重新加载时用于数据恢复
+  const remove = (position: number) => {
     const index = isNumber(position) ? position : getItemIndex(position);
     indexAssert(index, data.v);
     const pageVal = page.v;
@@ -465,7 +492,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     const snapshotItem = getSnapshotMethods(nextPage);
     let fillingItem = undefinedValue; // 补位数据项
     snapshotItem &&
-      setCache(snapshotItem.entity, rawData => {
+      setCache(snapshotItem.entity, (rawData: any[]) => {
         if (rawData) {
           const cachedListData = listDataGetter(rawData);
           // 从下一页列表的头部开始取补位数据
@@ -517,7 +544,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * @param item 替换项
    * @param position 替换位置（索引）或列表项
    */
-  const replace = (item, position) => {
+  const replace = (item: any, position: number) => {
     paginationAssert(position !== undefinedValue, 'must specify replace position');
     const index = isNumber(position) ? position : getItemIndex(position);
     indexAssert(index, data.v);
@@ -549,11 +576,11 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   return {
     ...states,
 
-    fetching: fetchStates.fetching,
+    fetching: fetchStates.loading,
     onFetchSuccess: fetchStates.onSuccess,
     onFetchError: fetchStates.onError,
     onFetchComplete: fetchStates.onComplete,
-    ...Operators({
+    ...memorizeOperators({
       refresh,
       insert,
       remove,

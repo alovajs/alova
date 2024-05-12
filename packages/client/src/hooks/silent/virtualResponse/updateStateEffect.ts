@@ -10,10 +10,9 @@ import { undefinedValue, objectKeys } from '@alova/shared/vars';
  * @param method 请求方法对象
  * @param handleUpdate 更新回调
  */
-const updateStateEffect: typeof updateState = (matcher, handleUpdate, options = {}) => {
-  const { onMatch } = options;
+const updateStateEffect: typeof updateState = (matcher, handleUpdate) => {
   // TODO: 由于updateState中不再支持method匹配器用法，因此废弃onMatch回调，而matcher就是当前的method实例，直接使用matcher即可。
-  options.onMatch = method => {
+  const onMatch = (method: typeof matcher) => {
     // 将目标method实例保存到当前的silentMethod实例
     if (currentSilentMethod) {
       currentSilentMethod.setUpdateState(method, isFn(updateState) ? undefinedValue : objectKeys(updateState));
@@ -21,7 +20,9 @@ const updateStateEffect: typeof updateState = (matcher, handleUpdate, options = 
     }
     (onMatch || noop)(method);
   };
-  return updateState(matcher, handleUpdate, options);
+
+  onMatch(matcher);
+  return updateState(matcher, handleUpdate);
 };
 
 export default updateStateEffect;

@@ -12,7 +12,7 @@ import { silentAssert } from './globalVariables';
 import { silentQueueMap } from './silentQueue';
 import { persistSilentMethod, spliceStorageSilentMethod } from './storage/silentMethodStorage';
 import { uuid } from '@/util/helper';
-import { instanceOf } from '@alova/shared/function';
+import { getContext, instanceOf } from '@alova/shared/function';
 import { undefinedValue, splice, falseValue, isArray } from '@alova/shared/vars';
 
 export type PromiseExecuteParameter = Parameters<ConstructorParameters<typeof Promise<any>>['0']>;
@@ -192,8 +192,8 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
    * @param matcher method实例匹配器
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  public setUpdateState(matcher: MethodMatcher<any, any, any, any, any, any, any>, updateStateName: string | string[] = 'data') {
-    const methodInstance = instanceOf(matcher, Method) ? matcher : matchSnapshotMethod(matcher as MethodFilter, falseValue);
+  public setUpdateState(matcher: Method | MethodFilter, updateStateName: string | string[] = 'data') {
+    const methodInstance = instanceOf(matcher, Method) ? matcher : getContext(this.entity).snapshots.match(matcher, falseValue);
     if (methodInstance) {
       this.targetRefMethod = methodInstance;
       this.updateStates = isArray(updateStateName) ? (updateStateName as string[]) : [updateStateName as string];

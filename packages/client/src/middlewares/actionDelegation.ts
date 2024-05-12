@@ -46,7 +46,7 @@ export const actionDelegationMiddleware = (id: string | number | symbol) => {
             }
           : {
               ...delegatingActions,
-              fetch: context.fetchFn,
+              fetch: context.fetch,
               abort,
               update
             }

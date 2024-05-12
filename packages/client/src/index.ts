@@ -25,13 +25,6 @@ export { default as updateStateEffect } from '@/hooks/silent/virtualResponse/upd
 export { accessAction } from '@/middlewares/actionDelegation';
 export { default as updateState } from '@/updateState';
 
-export const usePagination = (handler, config = {}) =>
-  usePagination_unified(handler, config, $, $$, upd$, _$, _exp$, _expBatch$, watch$, useFlag$, useRequestRefState$, useMemorizedCallback$);
-
-// 已通过 hooks/silent/useSQRequest 导入测试
-/* c8 ignore start */
-export const useSQRequest = (handler, config = {}) => useSQRequest_unified(handler, config);
-
 export { actionDelegationMiddleware } from '@/middlewares/actionDelegation';
 
 export { default as usePagination } from '@/hooks/pagination/usePagination';

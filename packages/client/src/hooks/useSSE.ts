@@ -4,6 +4,7 @@ import { createAssert } from '@alova/shared/assert';
 import {
   $self,
   getConfig,
+  getContext,
   getMethodInternalKey,
   getOptions,
   instanceOf,
@@ -143,14 +144,17 @@ export default <
     data.v = transformedData as any;
 
     // 查找hitTarget
-    const hitMethods = matchSnapshot({
-      filter: cachedMethod =>
-        (cachedMethod.hitSource || []).some(sourceMatcher =>
-          instanceOf(sourceMatcher, RegExp)
-            ? sourceMatcher.test(methodInstanceName as string)
-            : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-        )
-    });
+    const hitMethods = getContext(methodInstance).snapshots.match(
+      {
+        filter: cachedMethod =>
+          (cachedMethod.hitSource || []).some(sourceMatcher =>
+            instanceOf(sourceMatcher, RegExp)
+              ? sourceMatcher.test(methodInstanceName as string)
+              : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
+          )
+      },
+      trueValue
+    );
 
     // 令符合条件(hitTarget定义)的method的缓存失效
     if (hitMethods.length > 0) {
