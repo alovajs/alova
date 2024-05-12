@@ -31,11 +31,7 @@ const formatMap = {
 };
 
 const defaultFormat = Object.keys(formatMap);
-module.exports = function (bundleKey, version) {
-  if (/^[0-9]+\.[0-9]+\.[0-9]+$/.test(bundleKey) && !version) {
-    version = bundleKey;
-    bundleKey = undefined;
-  }
+module.exports = function rollupConfig(bundleConfig, version) {
   version = version || pkg.version;
   const banner = `/**
   * ${pkg.name} ${version} (${pkg.homepage})
@@ -44,13 +40,12 @@ module.exports = function (bundleKey, version) {
   * Licensed under MIT (${repository}/blob/main/LICENSE)
   */
 `;
-  const bundles = require(resolve(basePath, './build.json'));
-  const bundleItem = bundleKey ? bundles[bundleKey] : bundles; // 如果没有bundleKey则表示只有一个bundle模块
-  if (!bundleItem) {
-    throw new Error(`Can not find compile config for module: ${bundleKey}`);
+
+  if (!bundleConfig) {
+    throw new Error(`bundle config is undefined`);
   }
 
-  const formats = bundleItem.formats || defaultFormat;
+  const formats = bundleConfig.formats || defaultFormat;
   const moduleGroup = ['cjs', 'esm'];
   const groupTemp = [];
   // 将moduleGroup分到同一个数组里
@@ -69,9 +64,9 @@ module.exports = function (bundleKey, version) {
     const env = formatGroup.includes('umd.min') ? 'production' : formatGroup.includes('umd') ? 'development' : undefined;
     // 计算external、globals，当external的属性值设为null或undefined时，在umd中不会作为外部依赖。
     const external = [];
-    const globals = bundleItem.external;
-    for (const key in bundleItem.external || {}) {
-      const globalVal = bundleItem.external[key];
+    const globals = bundleConfig.external;
+    for (const key in bundleConfig.external || {}) {
+      const globalVal = bundleConfig.external[key];
       globals[key] = globalVal;
       if (![undefined, null].includes(globalVal) || !env) {
         external.push(key);
@@ -80,7 +75,7 @@ module.exports = function (bundleKey, version) {
 
     return {
       inputOptions: {
-        input: bundleItem.input,
+        input: bundleConfig.input,
         external,
         plugins: [
           nodeResolve({
@@ -100,8 +95,8 @@ module.exports = function (bundleKey, version) {
       outputOptionsList: formatGroup.map(fmt => {
         const { format = fmt, suffix = fmt, ext = 'js' } = formatMap[fmt];
         return {
-          name: bundleItem.packageName,
-          file: bundleItem.output.replace('{suffix}', suffix).replace('{ext}', ext),
+          name: bundleConfig.packageName,
+          file: bundleConfig.output.replace('{suffix}', suffix).replace('{ext}', ext),
           format,
           // When export and export default are not used at the same time, set legacy to true.
           // legacy: true,

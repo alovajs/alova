@@ -1,32 +1,31 @@
 import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/adapterFetch';
-import { GlobalCacheConfig, Method, StatesHook } from '~/typings';
+import { GlobalCacheConfig, Method } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 type FetchMethod = Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>;
-export const getAlovaInstance = <S, C, W, E>(
-  statesHook: StatesHook<S, C, W, E>,
-  {
-    endWithSlash = false,
-    cacheFor,
-    beforeRequestExpect,
-    responseExpect,
-    resErrorExpect,
-    resCompleteExpect
-  }: {
-    endWithSlash?: boolean;
-    cacheFor?: GlobalCacheConfig;
-    beforeRequestExpect?: (methodInstance: FetchMethod) => void;
-    responseExpect?: (response: Response, method: FetchMethod) => void;
-    resErrorExpect?: (err: Error, method: FetchMethod) => void;
-    resCompleteExpect?: (method: FetchMethod) => void;
-  } = {}
-) => {
+export const getAlovaInstance = ({
+  endWithSlash = false,
+  cacheFor,
+  beforeRequestExpect,
+  responseExpect,
+  resErrorExpect,
+  resCompleteExpect,
+  limitSnapshots
+}: {
+  endWithSlash?: boolean;
+  cacheFor?: GlobalCacheConfig;
+  beforeRequestExpect?: (methodInstance: FetchMethod) => void;
+  responseExpect?: (response: Response, method: FetchMethod) => void;
+  resErrorExpect?: (err: Error, method: FetchMethod) => void;
+  resCompleteExpect?: (method: FetchMethod) => void;
+  limitSnapshots?: number;
+} = {}) => {
   const alovaInst = createAlova({
     baseURL: process.env.NODE_BASE_URL + (endWithSlash ? '/' : ''),
     timeout: 3000,
-    statesHook,
     requestAdapter: GlobalFetch(),
+    snapshots: limitSnapshots,
     beforeRequest(config) {
       beforeRequestExpect && beforeRequestExpect(config);
     },
@@ -46,4 +45,10 @@ export const getAlovaInstance = <S, C, W, E>(
   return alovaInst;
 };
 
-export const alt = '';
+/**
+ * resolve returned promise when param promise is rejected
+ */
+export const untilReject = (promise: Promise<any> | Method) =>
+  new Promise<Error>(resolve => {
+    promise.catch(resolve);
+  });

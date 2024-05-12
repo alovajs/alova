@@ -34,6 +34,7 @@ module.exports = {
     'import/no-relative-packages': 'off',
     'guard-for-in': 'off',
     'max-classes-per-file': 'off',
+    'no-await-in-loop': 'off',
 
     // jsx-a11y
     'jsx-a11y/aria-role': 'off',

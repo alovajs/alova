@@ -10,7 +10,7 @@
     "test": "jest",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "commit": "git add . && git-cz && git push"
   },

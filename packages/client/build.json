@@ -1,11 +1,48 @@
 {
-  "input": "src/index.ts",
-  "output": "../alova/dist/clienthook/index.{suffix}.{ext}",
-  "packageName": "AlovaClientHook",
-  "external": {
-    "alova": "alova",
-    "@alova/shared/function": null,
-    "@alova/shared/vars": null,
-    "@alova/shared/assert": null
+  "core": {
+    "input": "src/index.ts",
+    "output": "../alova/dist/clienthook/index.{suffix}.{ext}",
+    "packageName": "AlovaClientHook",
+    "external": {
+      "alova": "alova",
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    }
+  },
+  "vue": {
+    "packageName": "vueHook",
+    "input": "src/statesHook/vue.ts",
+    "external": {
+      "vue": "Vue",
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "output": "../alova/dist/stateshook/vue.{suffix}.{ext}"
+  },
+  "react": {
+    "packageName": "reactHook",
+    "input": "src/statesHook/react.ts",
+    "external": {
+      "react": "React",
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "output": "../alova/dist/stateshook/react.{suffix}.{ext}"
+  },
+  "svelte": {
+    "packageName": "svelteHook",
+    "input": "src/statesHook/svelte.ts",
+    "external": {
+      "svelte": null,
+      "svelte/store": null,
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "formats": ["cjs", "esm"],
+    "output": "../alova/dist/stateshook/svelte.{suffix}.{ext}"
   }
 }

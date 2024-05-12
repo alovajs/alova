@@ -41,7 +41,7 @@
     "build:stateshook": "alova-scripts build stateshook",
     "build:client": "alova-scripts build client",
     "build:server": "alova-scripts build server",
-    "build": "npm run clean && npm run build:core && npm run build:stateshook && npm run build:fetch",
+    "build": "npm run clean && npm run build:core && npm run build:fetch",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
     "commit": "git-cz && git push",
@@ -69,11 +69,6 @@
       "require": "./dist/alova.common.cjs",
       "default": "./dist/alova.esm.js"
     },
-    "./statesHook": {
-      "types": "./typings/stateshook.d.ts",
-      "require": "./dist/stateshook/index.common.cjs",
-      "default": "./dist/stateshook/index.esm.js"
-    },
     "./client": {
       "types": "./typings/clienthook.d.ts",
       "require": "./dist/clienthook/index.common.cjs",
@@ -88,6 +83,18 @@
       "types": "./typings/fetch.d.ts",
       "require": "./dist/adapter/fetch.common.cjs",
       "default": "./dist/adapter/fetch.esm.js"
+    },
+    "./vue": {
+      "types": "./typings/stateshook/vue.d.ts",
+      "default": "./dist/stateshook/vue.esm.js"
+    },
+    "./react": {
+      "types": "./typings/stateshook/react.d.ts",
+      "default": "./dist/stateshook/react.esm.js"
+    },
+    "./svelte": {
+      "types": "./typings/stateshook/svelte.d.ts",
+      "default": "./dist/stateshook/svelte.esm.js"
     }
   },
   "typesVersions": {

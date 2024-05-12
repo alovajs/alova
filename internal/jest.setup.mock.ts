@@ -5,8 +5,15 @@ import { ReadableStream } from 'web-streams-polyfill';
 Object.defineProperties(globalThis, {
   TextDecoder: { value: TextDecoder },
   TextEncoder: { value: TextEncoder },
-  ReadableStream: { value: ReadableStream }
+  ReadableStream: { value: ReadableStream },
+  setImmediate: { value: setTimeout },
+  clearImmediate: { value: clearTimeout }
 });
+
+// if the environment is jsdom, set process.browser to true
+if (typeof window !== 'undefined') {
+  (process as any).browser = true;
+}
 
 // undici must import after defining TextDecoder and TextEncoder, otherwise it will throw error
 // eslint-disable-next-line

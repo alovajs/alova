@@ -1,8 +1,8 @@
-import { JSONParse, JSONStringify, deleteAttr } from '@alova/shared/vars';
 import myAssert from '@/utils/myAssert';
+import { JSONParse, JSONStringify, deleteAttr } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter } from '~/typings';
 
-const l1Cache = {} as Record<string, any>;
+let l1Cache = {} as Record<string, any>;
 export const defaultL1CacheAdapter = {
   set(key, value) {
     l1Cache[key] = value;
@@ -10,6 +10,9 @@ export const defaultL1CacheAdapter = {
   get: key => l1Cache[key],
   remove(key) {
     deleteAttr(l1Cache, key);
+  },
+  clear: () => {
+    l1Cache = {};
   }
 } as AlovaGlobalCacheAdapter;
 
@@ -24,5 +27,6 @@ export const defaultL2CacheAdapter = {
     const data = storage().getItem(key);
     return data ? JSONParse(data) : data;
   },
-  remove: key => storage().removeItem(key)
+  remove: key => storage().removeItem(key),
+  clear: () => storage().clear()
 } as AlovaGlobalCacheAdapter;

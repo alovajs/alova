@@ -1,21 +1,17 @@
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
-import { useRequest } from '@/index';
-import VueHook from '@/statesHook/vue';
-import { getResponseCache } from '@/storage/responseCache';
+import { queryCache } from '@/index';
+import { Result } from 'root/testUtils';
 
 describe('auto invalitate cached response data', () => {
   test("shouldn't invalidate cache when source method not hit target method", async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: ['a1', /^a2/, alova.Post('/unit-test', { a: 1 })]
     });
-    const firstState = useRequest(targetGet);
-    await untilCbCalled(firstState.onSuccess);
+    await targetGet;
 
     const sourcePost = alova.Post(
       '/unit-test',
@@ -26,38 +22,33 @@ describe('auto invalitate cached response data', () => {
     );
 
     await sourcePost.send();
-    const cachedData = getResponseCache(alova.id, key(targetGet));
-    expect(!!cachedData).toBeTruthy();
+    expect(await queryCache(targetGet)).not.toBeUndefined();
   });
 
   test('should invalidate cache when hit with the key of source method', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: alova.Post('/unit-test', { a: 1 })
     });
-    const firstState = useRequest(targetGet);
-    await untilCbCalled(firstState.onSuccess);
+    await targetGet;
 
     const sourcePost = alova.Post('/unit-test', { a: 1 });
-
-    await sourcePost.send();
-    const cachedData = getResponseCache(alova.id, key(targetGet));
-    expect(!!cachedData).toBeFalsy();
+    await sourcePost;
+    expect(await queryCache(targetGet)).toBeUndefined();
   });
 
   test('should invalidate cache when equal with source name', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: 'a1'
     });
-    const firstState = useRequest(targetGet);
-    await untilCbCalled(firstState.onSuccess);
+    await targetGet;
 
     const sourcePost = alova.Post(
       '/unit-test',
@@ -67,21 +58,19 @@ describe('auto invalitate cached response data', () => {
       }
     );
 
-    await sourcePost.send();
-    const cachedData = getResponseCache(alova.id, key(targetGet));
-    expect(!!cachedData).toBeFalsy();
+    await sourcePost;
+    expect(await queryCache(targetGet)).toBeUndefined();
   });
 
   test('should invalidate cache when the regexp match with source name', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data,
       hitSource: /^a2/
     });
-    const firstState = useRequest(targetGet);
-    await untilCbCalled(firstState.onSuccess);
+    await targetGet;
 
     const sourcePost = alova.Post(
       '/unit-test',
@@ -90,14 +79,12 @@ describe('auto invalitate cached response data', () => {
         name: 'a2fegea5'
       }
     );
-
-    await sourcePost.send();
-    const cachedData = getResponseCache(alova.id, key(targetGet));
-    expect(!!cachedData).toBeFalsy();
+    await sourcePost;
+    expect(await queryCache(targetGet)).toBeUndefined();
   });
 
   test('should invalidate cache when hit one of source flags', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
@@ -106,7 +93,7 @@ describe('auto invalitate cached response data', () => {
     });
 
     // 发送请求并保存快照和缓存
-    await targetGet.send();
+    await targetGet;
     let sourcePost = alova.Post(
       '/unit-test',
       {},
@@ -114,12 +101,11 @@ describe('auto invalitate cached response data', () => {
         name: 'a1'
       }
     );
-    await sourcePost.send();
-    let cachedData = getResponseCache(alova.id, key(targetGet));
-    expect(!!cachedData).toBeFalsy();
+    await sourcePost;
+    expect(await queryCache(targetGet)).toBeUndefined();
 
     // 再次请求并生成缓存
-    await targetGet.send();
+    await targetGet;
     sourcePost = alova.Post(
       '/unit-test',
       {},
@@ -127,15 +113,13 @@ describe('auto invalitate cached response data', () => {
         name: 'a2sdyfisdkafj'
       }
     );
-    await sourcePost.send();
-    cachedData = getResponseCache(alova.id, key(targetGet));
-    expect(!!cachedData).toBeFalsy();
+    await sourcePost;
+    expect(await queryCache(targetGet)).toBeUndefined();
 
     // 再次请求并生成缓存
-    await targetGet.send();
+    await targetGet;
     sourcePost = alova.Post('/unit-test', { a: 1 });
-    await sourcePost.send();
-    cachedData = getResponseCache(alova.id, key(targetGet));
-    expect(!!cachedData).toBeFalsy();
+    await sourcePost;
+    expect(await queryCache(targetGet)).toBeUndefined();
   });
 });

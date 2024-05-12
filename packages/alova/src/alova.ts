@@ -1,10 +1,9 @@
 import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGlobalCacheAdapter, AlovaMethodCreateConfig, AlovaOptions, MethodFilter, RequestBody, StatesHook } from '~/typings';
+import { AlovaGlobalCacheAdapter, AlovaMethodCreateConfig, AlovaOptions, RequestBody, StatesHook } from '~/typings';
 import Method from './Method';
 import { defaultL1CacheAdapter, defaultL2CacheAdapter } from './defaults/cacheAdapter';
-import { matchSnapshotMethods } from './storage/methodSnapShots';
-import { getStatesHook } from './utils/helper';
+import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
 
 const typeGet = 'GET';
@@ -15,7 +14,7 @@ const typePatch = 'PATCH';
 const typeDelete = 'DELETE';
 const typeOptions = 'OPTIONS';
 
-const defaultAlovaOptions = {
+const defaultAlovaOptions: Partial<AlovaOptions<any, any, any, any, any, any, any>> = {
   /**
    * GET请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    */
@@ -26,7 +25,12 @@ const defaultAlovaOptions = {
   /**
    * 共享请求默认为true
    */
-  shareRequest: trueValue
+  shareRequest: trueValue,
+
+  /**
+   * method快照数量，默认为1000
+   */
+  snapshots: 1000
 };
 
 let idCount = 0;
@@ -39,17 +43,24 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
 
   public l2Cache: AlovaGlobalCacheAdapter;
 
+  public snapshots: MethodSnapshotContainer<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
+
   constructor(options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>) {
-    this.id = (options.id || (idCount += 1)).toString();
+    const instance = this;
+    instance.id = (options.id || (idCount += 1)).toString();
     // 如果storage未指定，则默认使用localStorage
-    this.l1Cache = options.l1Cache || defaultL1CacheAdapter;
-    this.l2Cache = options.l2Cache || defaultL2CacheAdapter;
+    instance.l1Cache = options.l1Cache || defaultL1CacheAdapter;
+    instance.l2Cache = options.l2Cache || defaultL2CacheAdapter;
 
     // 合并默认options
-    this.options = {
+    instance.options = {
       ...defaultAlovaOptions,
       ...options
     };
+    instance.snapshots = newInstance(
+      MethodSnapshotContainer<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>,
+      options.snapshots ?? defaultAlovaOptions.snapshots ?? 0
+    );
   }
 
   Get<Responded, Transformed = unknown>(
@@ -150,19 +161,6 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
       config
     );
   }
-
-  /**
-   * get method snapshots by matcher
-   * the method snapshots means the method instance that has been requested
-   * @version 3.0.0
-   * @param  matcher method matcher
-   * @param  matchAll is match all, default is true
-   * @returns method list when `matchAll` is true, otherwise return method instance or undefined
-   */
-  matchSnapshot<M extends boolean = true>(matcher: MethodFilter, matchAll: M = true as M) {
-    const methods = matchSnapshotMethods(this.id, matcher);
-    return (matchAll ? methods : methods[0]) as M extends true ? Method[] : Method | undefined;
-  }
 }
 
 export let boundStatesHook: StatesHook<any, any> | undefined = undefinedValue;
@@ -178,7 +176,7 @@ export const createAlova = <State, Computed, Watched, Export, RequestConfig, Res
   options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>
 ) => {
   const alovaInstance = newInstance(Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>, options);
-  const newStatesHook = getStatesHook(alovaInstance);
+  const newStatesHook = alovaInstance.options.statesHook;
   if (boundStatesHook) {
     myAssert(boundStatesHook === newStatesHook, 'expected to use the same `statesHook`');
   }
