@@ -318,7 +318,7 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
 
 // 静默队列hooks相关
 type SQHookBehavior = 'static' | 'queue' | 'silent';
-interface SQHookConfig<S, E, R, T, RC, RE, RH> {
+interface SQHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   /**
    * hook行为，可选值为silent、queue、static，默认为queue
    * 可以设置为可选值，或一个带返回可选值的回调函数
@@ -359,18 +359,50 @@ interface SQHookConfig<S, E, R, T, RC, RE, RH> {
    * @param {Method} method method实例
    * @returns {R} 与响应数据相同格式的数据
    */
-  vDataCaptured?: (method: Method<S, E, R, T, RC, RE, RH>) => R | undefined | void;
+  vDataCaptured?: (
+    method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => R | undefined | void;
 }
 
-type SQRequestHookConfig<S, E, R, T, RC, RE, RH> = SQHookConfig<S, E, R, T, RC, RE, RH> & RequestHookConfig<S, E, R, T, RC, RE, RH>;
-type SQWatcherHookConfig<S, E, R, T, RC, RE, RH> = SQHookConfig<S, E, R, T, RC, RE, RH> & WatcherHookConfig<S, E, R, T, RC, RE, RH>;
+type SQRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = SQHookConfig<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> &
+  RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+type SQWatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = SQHookConfig<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> &
+  WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
-type FallbackHandler<S, E, R, T, RC, RE, RH> = (event: ScopedSQEvent<S, E, R, T, RC, RE, RH>) => void;
-type RetryHandler<S, E, R, T, RC, RE, RH> = (event: ScopedSQRetryEvent<S, E, R, T, RC, RE, RH>) => void;
-type BeforePushQueueHandler<S, E, R, T, RC, RE, RH> = (event: ScopedSQEvent<S, E, R, T, RC, RE, RH>) => void;
-type PushedQueueHandler<S, E, R, T, RC, RE, RH> = (event: ScopedSQEvent<S, E, R, T, RC, RE, RH>) => void;
-type SQHookReturnType<S, E, R, T, RC, RE, RH> = Pick<
-  UseHookReturnType<S, E, R, T, RC, RE, RH>,
+type FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+) => void;
+type RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: ScopedSQRetryEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+) => void;
+type BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+) => void;
+type PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+) => void;
+type SQHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = Pick<
+  UseHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   'loading' | 'data' | 'error' | 'downloading' | 'uploading' | 'abort' | 'update' | 'send'
 > & {
   /**
@@ -385,25 +417,45 @@ type SQHookReturnType<S, E, R, T, RC, RE, RH> = Pick<
    * 1. 只在重试次数达到后仍然失败时触发
    * 2. 在onComplete之前触发
    */
-  onFallback: (handler: FallbackHandler<S, E, R, T, RC, RE, RH>) => void;
+  onFallback: (
+    handler: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => void;
 
   /** 在入队列前调用，在此可以过滤队列中重复的SilentMethod，在static行为下无效 */
-  onBeforePushQueue: (handler: BeforePushQueueHandler<S, E, R, T, RC, RE, RH>) => boolean | void;
+  onBeforePushQueue: (
+    handler: BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => boolean | void;
 
   /** 在入队列后调用，在static行为下无效 */
-  onPushedQueue: (handler: PushedQueueHandler<S, E, R, T, RC, RE, RH>) => void;
+  onPushedQueue: (
+    handler: PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => void;
 
   /** 重试事件绑定 */
-  onRetry: (handler: RetryHandler<S, E, R, T, RC, RE, RH>) => void;
+  onRetry: (
+    handler: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => void;
 
   /** @override 重写alova的onSuccess事件 */
-  onSuccess: (handler: (event: ScopedSQSuccessEvent<S, E, R, T, RC, RE, RH>) => void) => void;
+  onSuccess: (
+    handler: (
+      event: ScopedSQSuccessEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    ) => void
+  ) => void;
 
   /** @override 重写alova的onError事件 */
-  onError: (handler: (event: ScopedSQErrorEvent<S, E, R, T, RC, RE, RH>) => void) => void;
+  onError: (
+    handler: (
+      event: ScopedSQErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    ) => void
+  ) => void;
 
   /** @override 重写alova的onComplete事件 */
-  onComplete: (handler: (event: ScopedSQCompleteEvent<S, E, R, T, RC, RE, RH>) => void) => void;
+  onComplete: (
+    handler: (
+      event: ScopedSQCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    ) => void
+  ) => void;
 };
 
 interface DataSerializer {

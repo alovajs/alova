@@ -1,12 +1,12 @@
 import { AlovaMethodHandler, useRequest } from 'alova';
-import { noop, promiseResolve } from '@/helper';
-import { undefinedValue } from '@/helper/variables';
 import { SQRequestHookConfig } from '~/typings/general';
 import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';
+import { promiseResolve, undefinedValue } from '@alova/shared/vars';
+import { noop } from '@alova/shared/function';
 
-export default function <S, E, R, T, RC, RE, RH>(
-  handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config: SQRequestHookConfig<S, E, R, T, RC, RE, RH> = {}
+export default function <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+  handler: AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  config: SQRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
 ) {
   const { middleware = noop } = config;
   const { c: methodCreateHandler, m: silentMiddleware, b: binders } = createSilentQueueMiddlewares(handler, config);

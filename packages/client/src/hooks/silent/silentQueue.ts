@@ -1,28 +1,9 @@
 import { Method, setCache, updateState, UpdateStateCollection } from 'alova';
-import {
-  delayWithBackoff,
-  forEach,
-  instanceOf,
-  isObject,
-  isString,
-  len,
-  newInstance,
-  noop,
-  objectKeys,
-  promiseThen,
-  pushItem,
-  regexpTest,
-  runArgsHandler,
-  setTimeoutFn,
-  shift,
-  sloughConfig,
-  walkObject
-} from '@/helper';
-import createHookEvent from '@/helper/createHookEvent';
-import { BEHAVIOR_SILENT, DEFAUT_QUEUE_NAME, falseValue, RegExpCls, trueValue, undefinedValue } from '@/helper/variables';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {
   beforeHandlers,
+  BEHAVIOR_SILENT,
+  DEFAUT_QUEUE_NAME,
   errorHandlers,
   failHandlers,
   queueRequestWaitSetting,
@@ -30,10 +11,28 @@ import {
   silentFactoryStatus,
   successHandlers
 } from './globalVariables';
+// eslint-disable-next-line import/no-cycle
 import { SilentMethod } from './SilentMethod';
 import { persistSilentMethod, push2PersistentSilentQueue, spliceStorageSilentMethod } from './storage/silentMethodStorage';
 import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
+import createHookEvent from '@/util/createHookEvent';
+import { runArgsHandler, delayWithBackoff } from '@/util/helper';
+import { newInstance, walkObject, instanceOf, sloughConfig, isString, isObject, noop } from '@alova/shared/function';
+import {
+  objectKeys,
+  pushItem,
+  RegExpCls,
+  falseValue,
+  regexpTest,
+  setTimeoutFn,
+  trueValue,
+  promiseThen,
+  shift,
+  len,
+  undefinedValue,
+  forEach
+} from '@alova/shared/vars';
 
 /** 静默方法队列集合 */
 export let silentQueueMap = {} as SilentQueueMap;
@@ -52,7 +51,9 @@ export const merge2SilentQueueMap = (queueMap: SilentQueueMap) => {
 /**
  * 清除silentQueue内所有项（测试使用）
  */
-export const clearSilentQueueMap = () => (silentQueueMap = {});
+export const clearSilentQueueMap = () => {
+  silentQueueMap = {};
+};
 
 /**
  * 深层遍历目标数据，并将虚拟数据替换为实际数据
@@ -128,7 +129,10 @@ const replaceVirtualResponseWithResponse = (virtualResponse: any, response: any)
  *
  * @param queue SilentMethod队列
  */
-const setSilentMethodActive = (silentMethodInstance: SilentMethod, active: boolean) => {
+const setSilentMethodActive = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  active: boolean
+) => {
   if (active) {
     silentMethodInstance.active = active;
   } else {
@@ -149,6 +153,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
       const targetSetting = queueRequestWaitSetting.find(({ queue }) =>
         instanceOf(queue, RegExpCls) ? regexpTest(queue, queueName) : queue === queueName
       );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       const callback = () => queue[0] && silentMethodRequest(queue[0]);
       const delay = targetSetting?.wait ? sloughConfig(targetSetting.wait, [nextSilentMethod, queueName]) : 0;
       delay && delay > 0 ? setTimeoutFn(callback, delay) : callback();
@@ -160,7 +165,10 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
    * @param silentMethodInstance silentMethod实例
    * @param retryTimes 重试的次数
    */
-  const silentMethodRequest = (silentMethodInstance: SilentMethod, retryTimes = 0) => {
+  const silentMethodRequest = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+    silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+    retryTimes = 0
+  ) => {
     // 将当前silentMethod实例设置活跃状态
     setSilentMethodActive(silentMethodInstance, trueValue);
     const {
@@ -271,8 +279,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           // 在silent行为模式下，判断是否需要重试
           // 重试只有在响应错误符合retryError正则匹配时有效
           const { name: errorName = '', message: errorMsg = '' } = reason || {};
-          let regRetryErrorName: RegExp | void;
-          let regRetryErrorMsg: RegExp | void;
+          let regRetryErrorName: RegExp | undefined;
+          let regRetryErrorMsg: RegExp | undefined;
           if (instanceOf(retryError, RegExp)) {
             regRetryErrorMsg = retryError;
           } else if (isObject(retryError)) {
@@ -289,7 +297,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
             runGlobalErrorEvent(retryDelay);
             setTimeoutFn(
               () => {
-                silentMethodRequest(silentMethodInstance, ++retryTimes);
+                retryTimes += 1;
+                silentMethodRequest(silentMethodInstance, retryTimes);
                 runArgsHandler(
                   retryHandlers,
                   createHookEvent(8, entity, behavior, silentMethodInstance, undefinedValue, retryTimes, retryDelay, handlerArgs)
@@ -351,8 +360,18 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
  * @param targetQueueName 目标队列名
  * @param onBeforePush silentMethod实例push前的事件
  */
-export const pushNewSilentMethod2Queue = <S, E, R, T, RC, RE, RH>(
-  silentMethodInstance: SilentMethod<S, E, R, T, RC, RE, RH>,
+export const pushNewSilentMethod2Queue = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   cache: boolean,
   targetQueueName = DEFAUT_QUEUE_NAME,
   onBeforePush = noop

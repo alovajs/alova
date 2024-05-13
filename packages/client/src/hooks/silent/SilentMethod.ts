@@ -1,7 +1,6 @@
-import { matchSnapshotMethod, Method, MethodFilter, MethodMatcher } from 'alova';
-import { instanceOf, isArray, splice, uuid } from '@/helper';
-import { falseValue, undefinedValue } from '@/helper/variables';
-import {
+/* eslint-disable import/no-cycle */
+import { Method, MethodFilter } from 'alova';
+import type {
   BackoffPolicy,
   FallbackHandler,
   RetryHandler,
@@ -12,9 +11,14 @@ import {
 import { silentAssert } from './globalVariables';
 import { silentQueueMap } from './silentQueue';
 import { persistSilentMethod, spliceStorageSilentMethod } from './storage/silentMethodStorage';
+import { uuid } from '@/util/helper';
+import { getContext, instanceOf } from '@alova/shared/function';
+import { undefinedValue, splice, falseValue, isArray } from '@alova/shared/vars';
 
 export type PromiseExecuteParameter = Parameters<ConstructorParameters<typeof Promise<any>>['0']>;
-export type MethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
+export type MethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  ...args: any[]
+) => Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 export type MaxRetryTimes = NonNullable<SilentMethodInterface['maxRetryTimes']>;
 export type RetryError = NonNullable<SilentMethodInterface['retryError']>;
 
@@ -22,7 +26,9 @@ export type RetryError = NonNullable<SilentMethodInterface['retryError']>;
  * 定位silentMethod实例所在的位置
  * @param silentMethodInstance silentMethod实例
  */
-const getBelongQueuePosition = (silentMethodInstance: SilentMethod) => {
+const getBelongQueuePosition = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+) => {
   let queue: SilentQueueMap[string] | undefined = undefinedValue;
   let queueName = '';
   let position = 0;
@@ -41,7 +47,7 @@ const getBelongQueuePosition = (silentMethodInstance: SilentMethod) => {
  * silentMethod实例
  * 需要进入silentQueue的请求都将被包装成silentMethod实例，它将带有请求策略的各项参数
  */
-export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
+export class SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
   public id: string;
 
   /** 是否为持久化实例 */
@@ -51,7 +57,7 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
   public behavior: SQHookBehavior;
 
   /** method实例 */
-  public entity: Method<S, E, R, T, RC, RE, RH>;
+  public entity: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
   /** 重试错误规则 */
   public retryError?: RetryError;
@@ -63,7 +69,17 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
   public backoff?: BackoffPolicy;
 
   /** 回退事件回调，当重试次数达到上限但仍然失败时，此回调将被调用 */
-  public fallbackHandlers?: FallbackHandler<S, E, R, T, RC, RE, RH>[];
+  public fallbackHandlers?: FallbackHandler<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >[];
 
   /** Promise的resolve函数，调用将通过对应的promise对象 */
   public resolveHandler?: PromiseExecuteParameter['0'];
@@ -94,7 +110,7 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
   public updateStates?: string[];
 
   /** 重试回调函数 */
-  public retryHandlers?: RetryHandler<S, E, R, T, RC, RE, RH>[];
+  public retryHandlers?: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[];
 
   /** 当前是否正在请求中 */
   public active?: boolean;
@@ -103,19 +119,19 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
   public force: boolean;
 
   constructor(
-    entity: Method<S, E, R, T, RC, RE, RH>,
+    entity: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
     behavior: SQHookBehavior,
     id = uuid(),
     force?: boolean,
     retryError?: RetryError,
     maxRetryTimes?: MaxRetryTimes,
     backoff?: BackoffPolicy,
-    fallbackHandlers?: FallbackHandler<S, E, R, T, RC, RE, RH>[],
+    fallbackHandlers?: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[],
     resolveHandler?: PromiseExecuteParameter['0'],
     rejectHandler?: PromiseExecuteParameter['1'],
     handlerArgs?: any[],
     vDatas?: string[],
-    retryHandlers?: RetryHandler<S, E, R, T, RC, RE, RH>[]
+    retryHandlers?: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
   ) {
     const thisObj = this;
     thisObj.entity = entity;
@@ -145,7 +161,9 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
    * 如果有持久化缓存也将会更新缓存
    * @param newSilentMethod 新的silentMethod实例
    */
-  public replace(newSilentMethod: SilentMethod) {
+  public replace(
+    newSilentMethod: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) {
     const targetSilentMethod = this;
     silentAssert(newSilentMethod.cache === targetSilentMethod.cache, 'the cache of new silentMethod must equal with this silentMethod');
     const [queue, queueName, position] = getBelongQueuePosition(targetSilentMethod);
@@ -174,8 +192,8 @@ export class SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any
    * @param matcher method实例匹配器
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  public setUpdateState(matcher: MethodMatcher<any, any, any, any, any, any, any>, updateStateName: string | string[] = 'data') {
-    const methodInstance = instanceOf(matcher, Method) ? matcher : matchSnapshotMethod(matcher as MethodFilter, falseValue);
+  public setUpdateState(matcher: Method | MethodFilter, updateStateName: string | string[] = 'data') {
+    const methodInstance = instanceOf(matcher, Method) ? matcher : getContext(this.entity).snapshots.match(matcher, falseValue);
     if (methodInstance) {
       this.targetRefMethod = methodInstance;
       this.updateStates = isArray(updateStateName) ? (updateStateName as string[]) : [updateStateName as string];

@@ -1,5 +1,5 @@
-import { valueObject } from '@/helper';
-import { nullValue, ObjectCls, STR_VALUE_OF } from '@/helper/variables';
+import { ObjectCls, nullValue, valueObject } from '@alova/shared/vars';
+import { STR_VALUE_OF } from '../globalVariables';
 import { stringifyWithThis } from './stringifyVData';
 
 interface UndefinedConstructor {

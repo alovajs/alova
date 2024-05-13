@@ -1,8 +1,8 @@
 import { Method } from 'alova';
-import { forEach, includes, newInstance, objectKeys } from '@/helper';
-import { trueValue } from '@/helper/variables';
 import { dependentAlovaInstance } from '../globalVariables';
 import { SerializedSilentMethod, SilentMethod } from '../SilentMethod';
+import { newInstance } from '@alova/shared/function';
+import { trueValue, objectKeys, forEach, includes } from '@alova/shared/vars';
 
 /**
  * 反序列化silentMethod实例，根据序列化器的名称进行反序列化

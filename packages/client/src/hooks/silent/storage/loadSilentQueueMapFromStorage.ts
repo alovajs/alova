@@ -1,4 +1,3 @@
-import { forEach, objectKeys, pushItem } from '@/helper';
 import { SilentQueueMap } from '~/typings/general';
 import convertPayload2SilentMethod from './convertPayload2SilentMethod';
 import {
@@ -7,6 +6,7 @@ import {
   silentMethodStorageKeyPrefix,
   storageGetItem
 } from './performers';
+import { forEach, objectKeys, pushItem } from '@alova/shared/vars';
 
 /**
  * 从storage中载入静默队列数据

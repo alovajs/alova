@@ -45,7 +45,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   eventType: AlovaHookEventType,
   method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   behavior?: SQHookBehavior,
-  silentMethod?: SilentMethod<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  silentMethod?: SilentMethod,
   queueName?: string,
   retryTimes?: number,
   retryDelay?: number,

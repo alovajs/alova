@@ -1,4 +1,4 @@
-import { trueValue, undefinedValue } from '@/helper/variables';
+import { trueValue, undefinedValue } from '@alova/shared/vars';
 import { vDataCollectUnified } from './helper';
 import { symbolVDataId } from './variables';
 

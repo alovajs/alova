@@ -1,6 +1,8 @@
-import { isNumber, noop } from '@alova/shared/function';
+import { createAssert } from '@alova/shared/assert';
+import { instanceOf, isFn, isNumber, noop } from '@alova/shared/function';
 import { GeneralFn } from '@alova/shared/types';
-import { clearTimeoutTimer, falseValue, filterItem, forEach, nullValue, setTimeoutFn } from '@alova/shared/vars';
+import { clearTimeoutTimer, falseValue, filterItem, forEach, nullValue, setTimeoutFn, undefinedValue } from '@alova/shared/vars';
+import { Method, AlovaMethodHandler } from 'alova';
 import { AnyFn, BackoffPolicy, UsePromiseReturnType } from '~/typings/general';
 
 /**
@@ -131,4 +133,36 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
       bindFn();
     }
   };
+};
+
+/**
+ * 批量执行事件回调函数，并将args作为参数传入
+ * @param handlers 事件回调数组
+ * @param args 函数参数
+ */
+export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
+  let ret: any = undefinedValue;
+  forEach(handlers, handler => {
+    const retInner = handler(...args);
+    ret = retInner !== undefinedValue ? retInner : ret;
+  });
+  return ret;
+};
+
+/**
+ * 获取请求方法对象
+ * @param methodHandler 请求方法句柄
+ * @param args 方法调用参数
+ * @returns 请求方法对象
+ */
+export const getHandlerMethod = (
+  methodHandler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any>,
+  args: any[] = []
+) => {
+  const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
+  createAssert('scene')(
+    instanceOf(methodInstance, Method),
+    'hook handler must be a method instance or a function that returns method instance'
+  );
+  return methodInstance;
 };

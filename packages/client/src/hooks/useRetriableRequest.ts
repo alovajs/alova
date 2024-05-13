@@ -80,6 +80,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
         {
           ...ctx,
           delegatingActions: {
+            // eslint-disable-next-line @typescript-eslint/no-use-before-define
             stop
           }
         } as any,

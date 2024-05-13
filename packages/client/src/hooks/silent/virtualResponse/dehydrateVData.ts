@@ -1,6 +1,5 @@
-import { isArray } from '@vue/shared';
-import { instanceOf, isPlainOrCustomObject, walkObject } from '@/helper';
-import { BooleanCls, nullValue, NumberCls, StringCls, trueValue, undefinedValue } from '@/helper/variables';
+import { instanceOf, isObject, walkObject } from '@alova/shared/function';
+import { trueValue, undefinedValue, nullValue, isArray } from '@alova/shared/vars';
 import { vDataCollectUnified } from './helper';
 import Null from './Null';
 import Undefined from './Undefined';
@@ -21,7 +20,7 @@ export const dehydrateVDataUnified = <T>(target: T, deepDehydrate = trueValue): 
         value = undefinedValue;
       } else if (instanceOf(value, Null)) {
         value = nullValue;
-      } else if (instanceOf(value, NumberCls) || instanceOf(value, StringCls) || instanceOf(value, BooleanCls)) {
+      } else if (instanceOf(value, Number) || instanceOf(value, String) || instanceOf(value, Boolean)) {
         value = (value as any)[symbolOriginal];
       }
     }
@@ -30,7 +29,7 @@ export const dehydrateVDataUnified = <T>(target: T, deepDehydrate = trueValue): 
 
   const newTarget = dehydrateItem(target);
   // 如果是对象或数组，需要深度遍历获取虚拟数据值
-  if (deepDehydrate && (isPlainOrCustomObject(newTarget) || isArray(newTarget))) {
+  if (deepDehydrate && (isObject(newTarget) || isArray(newTarget))) {
     walkObject(newTarget, value => dehydrateItem(value));
   }
   return newTarget;

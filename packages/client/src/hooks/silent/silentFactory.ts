@@ -1,4 +1,3 @@
-import { forEach, objectKeys, pushItem, runArgsHandler, setTimeoutFn, splice } from '@/helper';
 import {
   BeforeSilentSubmitHandler,
   SilentFactoryBootOptions,
@@ -21,6 +20,8 @@ import {
 } from './globalVariables';
 import { bootSilentQueue, merge2SilentQueueMap, silentQueueMap } from './silentQueue';
 import loadSilentQueueMapFromStorage from './storage/loadSilentQueueMapFromStorage';
+import { runArgsHandler } from '@/util/helper';
+import { splice, pushItem, setTimeoutFn, objectKeys, forEach } from '@alova/shared/vars';
 
 const offEventCallback = (offHandler: any, handlers: any[]) => () => {
   const index = handlers.indexOf(offHandler);
