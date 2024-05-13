@@ -61,7 +61,7 @@
     "typings/*.d.ts"
   ],
   "engines": {
-    "node": ">= 16.0.0"
+    "node": ">= 18.0.0"
   },
   "exports": {
     ".": {
@@ -99,9 +99,6 @@
   },
   "typesVersions": {
     "*": {
-      "statesHook": [
-        "typings/stateshook.d.ts"
-      ],
       "client": [
         "typings/clienthook.d.ts"
       ],
@@ -110,6 +107,15 @@
       ],
       "fetch": [
         "typings/fetch.d.ts"
+      ],
+      "vue": [
+        "typings/stateshook/vue.d.ts"
+      ],
+      "react": [
+        "typings/stateshook/react.d.ts"
+      ],
+      "svelte": [
+        "typings/stateshook/svelte.d.ts"
       ]
     }
   },

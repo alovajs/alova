@@ -1,27 +1,26 @@
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
-import { queryCache, setCache, useRequest } from '@/index';
-import VueHook from '@/statesHook/vue';
-import { getPersistentResponse, persistResponse } from '@/storage/responseStorage';
+import { createAlova, invalidateCache, queryCache, setCache } from '@/index';
+import adapterFetch from '@/predefine/adapterFetch';
+import { setWithCacheAdapter } from '@/storage/cacheWrapper';
+import { Result } from 'root/testUtils';
 
-const alova = getAlovaInstance(VueHook, {
+const alova = getAlovaInstance({
   responseExpect: r => r.json()
 });
 describe('manipulate cache', () => {
-  test('the cache response data should be saved', () => {
+  test('the cache response data should be saved', async () => {
     const Get = alova.Get('/unit-test', {
-      localCache: 100 * 1000,
+      cacheFor: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
 
     // 没有缓存时为undefined
-    setCache(Get, data => {
+    await setCache(Get, data => {
       expect(data).toBeUndefined();
       return undefined; // 返回undefined或不返回时，取消缓存修改
     });
 
-    setCache(Get, {
+    await setCache(Get, {
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -29,7 +28,7 @@ describe('manipulate cache', () => {
       }
     });
 
-    expect(queryCache(Get)).toEqual({
+    expect(await queryCache(Get)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -40,27 +39,25 @@ describe('manipulate cache', () => {
 
   test('batch set response data', async () => {
     const Get1 = alova.Get('/unit-test', {
-      name: 'test-get1',
       params: { a: 1 },
-      localCache: 100 * 1000,
+      cacheFor: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test', {
-      name: 'test-get1',
       params: { a: 2 },
-      localCache: 100 * 1000,
+      cacheFor: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
-    await Promise.all([Get1.send(), Get2.send()]);
+    await Promise.all([Get1, Get2]);
 
-    expect(queryCache(Get1)).toEqual({
+    expect(await queryCache(Get1)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
         a: '1'
       }
     });
-    expect(queryCache(Get2)).toEqual({
+    expect(await queryCache(Get2)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -69,75 +66,50 @@ describe('manipulate cache', () => {
     });
 
     // 通过传入数组设置
-    setCache([Get1, Get2], {
+    await setCache([Get1, Get2], {
       path: '/unit-test',
       method: 'GET',
       params: {
         manual: '123'
       }
     });
-    expect(queryCache(Get1)).toEqual({
+    expect(await queryCache(Get1)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
         manual: '123'
       }
     });
-    expect(queryCache(Get2)).toEqual({
+    expect(await queryCache(Get2)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
         manual: '123'
-      }
-    });
-
-    // 通过通配符名称设置
-    setCache('test-get1', {
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        manual: '456'
-      }
-    });
-    expect(queryCache(Get1)).toEqual({
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        manual: '456'
-      }
-    });
-    expect(queryCache(Get2)).toEqual({
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        manual: '456'
       }
     });
   });
 
   test('batch update response data', async () => {
     const Get1 = alova.Get('/unit-test', {
-      name: 'test-get2',
       params: { a: 55 },
-      localCache: 100 * 1000,
+      cacheFor: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test', {
-      name: 'test-get2',
       params: { a: 100 },
-      localCache: 100 * 1000,
+      cacheFor: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
-    await Promise.all([Get1.send(), Get2.send()]);
+    await Promise.all([Get1, Get2]);
 
-    expect(queryCache(Get1)).toEqual({
+    expect(await queryCache(Get1)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
         a: '55'
       }
     });
-    expect(queryCache(Get2)).toEqual({
+    expect(await queryCache(Get2)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -147,7 +119,7 @@ describe('manipulate cache', () => {
 
     // 更新以上两个请求的缓存
     const mockfn = jest.fn();
-    setCache<Result['data']>('test-get2', cache => {
+    await setCache([Get1, Get2], cache => {
       if (!cache) {
         return;
       }
@@ -155,44 +127,32 @@ describe('manipulate cache', () => {
       mockfn();
       return cache;
     });
-    expect(queryCache(Get1)).toEqual({
+    expect(await queryCache(Get1)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
         a: 'update'
       }
     });
-    expect(queryCache(Get2)).toEqual({
+    expect(await queryCache(Get2)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
         a: 'update'
       }
     });
-    expect(mockfn).toHaveBeenCalledTimes(2); // 只有两个被匹配
-
-    const mockfn2 = jest.fn();
-    await Get2.send();
-    setCache<Result['data']>('test-get2', cache => {
-      if (!cache) {
-        return;
-      }
-      cache.params.a = 'update2';
-      mockfn2();
-      return cache;
-    });
-    expect(mockfn).toHaveBeenCalledTimes(2); // 相同的Method请求不会被多次匹配
+    expect(mockfn).toHaveBeenCalledTimes(2); // 会被调用两次
   });
 
   test('update will be canceled when callback return undefined', async () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 200 },
-      localCache: 100 * 1000,
+      cacheFor: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
-    await Get1.send();
+    await Get1;
 
-    expect(queryCache(Get1)).toEqual({
+    expect(await queryCache(Get1)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -205,7 +165,7 @@ describe('manipulate cache', () => {
     setCache(Get1, () => {
       mockfn();
     });
-    expect(queryCache(Get1)).toEqual({
+    expect(await queryCache(Get1)).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: {
@@ -215,65 +175,48 @@ describe('manipulate cache', () => {
     expect(mockfn).toHaveBeenCalledTimes(1); // 执行了一次
   });
 
-  test('should also replace storaged data when using method instance with `placeholder`', async () => {
-    const Get1 = alova.Get('/unit-test', {
-      params: { a: 200 },
-      localCache: {
-        mode: 'placeholder',
-        expire: 100 * 1000
-      },
-      transformData: ({ data }: Result) => data
-    });
-    await Get1.send();
-
-    setCache(Get1, rawData => {
-      if (rawData) {
-        rawData.path = 'changed';
-        return rawData;
-      }
-    });
-    expect(queryCache(Get1)).toEqual({
-      path: 'changed',
-      method: 'GET',
-      params: {
-        a: '200'
-      }
-    });
-    expect(getPersistentResponse(alova.id, key(Get1), alova.storage)).toEqual({
-      path: 'changed',
-      method: 'GET',
-      params: {
-        a: '200'
-      }
-    });
-  });
-
   test('should also replace storaged data when using method instance with `restore`', async () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 200 },
-      localCache: {
+      cacheFor: {
         mode: 'restore',
         expire: 100 * 1000
       },
       transformData: ({ data }: Result) => data
     });
-    await Get1.send();
+    await Get1;
 
-    setCache(Get1, rawData => {
+    await setCache(Get1, rawData => {
       if (rawData) {
         rawData.path = 'changed';
         return rawData;
       }
       return undefined;
     });
-    expect(queryCache(Get1)).toEqual({
+
+    expect(await queryCache(Get1)).toStrictEqual({
       path: 'changed',
       method: 'GET',
       params: {
         a: '200'
       }
     });
-    expect(getPersistentResponse(alova.id, key(Get1), alova.storage)).toEqual({
+    expect(
+      await queryCache(Get1, {
+        policy: 'l1'
+      })
+    ).toStrictEqual({
+      path: 'changed',
+      method: 'GET',
+      params: {
+        a: '200'
+      }
+    });
+    expect(
+      await queryCache(Get1, {
+        policy: 'l2'
+      })
+    ).toStrictEqual({
       path: 'changed',
       method: 'GET',
       params: {
@@ -282,58 +225,45 @@ describe('manipulate cache', () => {
     });
   });
 
-  test('should get persistent cache', () => {
+  test('should get cache from l2cache', async () => {
     const Get = alova.Get('/unit-test', {
       params: {
         ccc: '555'
       },
-      localCache: 100 * 1000,
+      cacheFor: 100 * 1000,
       transformData: ({ data }: Result) => data
     });
 
     // 持久化自定义缓存
-    persistResponse(
-      alova.id,
-      key(Get),
+    await setCache(
+      Get,
       {
         data: 'persisted'
-      },
-      Infinity,
-      alova.storage
+      } as any,
+      {
+        policy: 'l2'
+      }
     );
-    expect(queryCache(Get)).toEqual({
+
+    // 未指定policy参数时，将根据method实例的`cacheFor`判断是否获取l2Cache
+    expect(await queryCache(Get)).toBeUndefined();
+    // 指定policy参数时，将获取对应的cache
+    expect(
+      await queryCache(Get, {
+        policy: 'l1'
+      })
+    ).toBeUndefined();
+    expect(
+      await queryCache(Get, {
+        policy: 'l2'
+      })
+    ).toStrictEqual({
       data: 'persisted'
     });
   });
 
-  test('queryCache can only get the first cache', async () => {
-    const Get1 = alova.Get('/unit-test', {
-      name: 'test-get3',
-      params: { a: 1000 },
-      localCache: 100 * 1000,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test', {
-      name: 'test-get3',
-      params: { a: 2000 },
-      localCache: 100 * 1000,
-      transformData: ({ data }: Result) => data
-    });
-    await Promise.all([Get1.send(), Get2.send()]);
-
-    expect(queryCache('test-get3')).toEqual({
-      path: '/unit-test',
-      method: 'GET',
-      params: {
-        a: '1000'
-      }
-    });
-    // 未匹配到时返回undefined
-    expect(queryCache('test-get222')).toBeUndefined();
-  });
-
-  // 通过设置localCache为函数，将缓存变为受控状态，可以自定义返回需要使用的缓存数据
-  test('should hit the controlled cache when localCache is sync function', async () => {
+  // 通过设置cacheFor为函数，将缓存变为受控状态，可以自定义返回需要使用的缓存数据
+  test('should hit the controlled cache when cacheFor is sync function', async () => {
     const mockControlledCache = {
       path: 'local-controlled',
       params: {},
@@ -341,21 +271,16 @@ describe('manipulate cache', () => {
     };
     const Get1 = alova.Get('/unit-test', {
       params: { a: 1000 },
-      localCache() {
+      cacheFor() {
         return mockControlledCache;
       },
       transformData: ({ data }: Result) => data
     });
-    const { onSuccess, data } = useRequest(Get1);
-    const event = await untilCbCalled(onSuccess);
-    expect(event.fromCache).toBeTruthy();
-    expect(event.data).toStrictEqual(mockControlledCache);
-    expect(data.value).toStrictEqual(mockControlledCache);
-
-    const rawData = await Get1.send();
-    expect(rawData).toStrictEqual(mockControlledCache);
+    const data = await Get1;
+    expect(Get1.fromCache).toBeTruthy();
+    expect(data).toStrictEqual(mockControlledCache);
   });
-  test('localCache can also be a async function', async () => {
+  test('cacheFor can also be a async function', async () => {
     const mockControlledCache = {
       path: 'local-controlled',
       params: {},
@@ -363,7 +288,7 @@ describe('manipulate cache', () => {
     };
     const Get1 = alova.Get('/unit-test', {
       params: { a: 1000 },
-      async localCache() {
+      async cacheFor() {
         await new Promise(resolve => {
           setTimeout(resolve, 200);
         });
@@ -371,54 +296,143 @@ describe('manipulate cache', () => {
       },
       transformData: ({ data }: Result) => data
     });
-    const { onSuccess, data } = useRequest(Get1);
-    const event = await untilCbCalled(onSuccess);
-    expect(event.fromCache).toBeTruthy();
-    expect(event.data).toStrictEqual(mockControlledCache);
-    expect(data.value).toStrictEqual(mockControlledCache);
-
-    const rawData = await Get1.send();
-    expect(rawData).toStrictEqual(mockControlledCache);
+    const data = await Get1;
+    expect(Get1.fromCache).toBeTruthy();
+    expect(data).toStrictEqual(mockControlledCache);
   });
 
-  test('should continue send request when localCache function is return undefined', async () => {
+  test('should continue send request when cacheFor function is return undefined', async () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 1000 },
-      async localCache() {
+      async cacheFor() {
         return undefined;
       },
       transformData: ({ data }: Result) => data
     });
-    const { onSuccess } = useRequest(Get1);
-    const event = await untilCbCalled(onSuccess);
-    expect(event.fromCache).toBeFalsy();
-    expect(event.data).toStrictEqual({
+    const data = await Get1;
+    expect(Get1.fromCache).toBeFalsy();
+    expect(data).toStrictEqual({
       path: '/unit-test',
       params: { a: '1000' },
       method: 'GET'
     });
   });
 
-  test('should emit onError when localCache throws a error', async () => {
+  test('should reject request when cacheFor throws an error', async () => {
     const Get1 = (async = true) =>
       alova.Get('/unit-test', {
         params: { a: 1000 },
-        localCache() {
+        cacheFor() {
           if (async) {
-            return Promise.reject(new Error('reject in localCache'));
+            return Promise.reject(new Error('reject in cacheFor'));
           }
-          throw new Error('error in localCache');
+          throw new Error('error in cacheFor');
         },
         transformData: ({ data }: Result) => data
       });
-    const { onError } = useRequest(Get1);
-    let event = await untilCbCalled(onError);
-    expect(event.error.message).toBe('reject in localCache');
-    await expect(Get1().send()).rejects.toThrow('reject in localCache');
+    await expect(Get1()).rejects.toThrow('reject in cacheFor');
+    await expect(Get1(false)).rejects.toThrow('error in cacheFor');
+  });
 
-    const { onError: onError2 } = useRequest(Get1(false));
-    event = await untilCbCalled(onError2);
-    expect(event.error.message).toBe('error in localCache');
-    await expect(Get1(false).send()).rejects.toThrow('error in localCache');
+  test('should receive data from function `cacheFor` when `cacheFor` is a function', async () => {
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 5555 },
+      async cacheFor() {
+        return {
+          path: 'local-controlled',
+          params: {},
+          method: 'GET'
+        };
+      },
+      transformData: ({ data }: Result) => data
+    });
+
+    expect(await queryCache(Get1)).toStrictEqual({
+      path: 'local-controlled',
+      params: {},
+      method: 'GET'
+    });
+  });
+  test("shouldn't set cache with method that has a functional `cacheFor` param", async () => {
+    let l1Cache = {} as Record<string, any>;
+    const alova = createAlova({
+      requestAdapter: adapterFetch(),
+      responded: r => r.json(),
+      l1Cache: {
+        set(key, value) {
+          l1Cache[key] = value;
+        },
+        get: key => l1Cache[key],
+        remove(key) {
+          delete l1Cache[key];
+        },
+        clear: () => {
+          l1Cache = {};
+        }
+      }
+    });
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 5555 },
+      async cacheFor() {
+        return {
+          path: 'local-controlled',
+          params: {},
+          method: 'GET'
+        };
+      },
+      transformData: ({ data }: Result) => data
+    });
+    await setCache(Get1, {
+      path: 'custom-path',
+      params: {},
+      method: 'GET'
+    });
+    expect(Object.keys(l1Cache)).toHaveLength(0);
+  });
+  test("shouldn't invalidate cache with method that has a functional `cacheFor` param", async () => {
+    let l1Cache = {} as Record<string, any>;
+    const alova = createAlova({
+      requestAdapter: adapterFetch(),
+      responded: r => r.json(),
+      l1Cache: {
+        set(key, value) {
+          l1Cache[key] = value;
+        },
+        get: key => l1Cache[key],
+        remove(key) {
+          delete l1Cache[key];
+        },
+        clear: () => {
+          l1Cache = {};
+        }
+      }
+    });
+    const Get1 = alova.Get('/unit-test', {
+      params: { a: 5555 },
+      async cacheFor() {
+        return {
+          path: 'local-controlled',
+          params: {},
+          method: 'GET'
+        };
+      },
+      transformData: ({ data }: Result) => data
+    });
+    await setWithCacheAdapter(
+      alova.id,
+      Get1.__key__,
+      {
+        path: 'custom-path',
+        params: {},
+        method: 'GET'
+      },
+      Date.now() + 10000,
+      alova.l1Cache,
+      undefined
+    );
+    expect(Object.keys(l1Cache)).toHaveLength(1);
+
+    await invalidateCache(Get1);
+    expect(Object.keys(l1Cache)).toHaveLength(1);
   });
 });

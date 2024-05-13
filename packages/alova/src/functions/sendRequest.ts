@@ -170,19 +170,21 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
       try {
         // 自动失效缓存
         await hitCacheBySource(clonedMethod);
+      } catch (error) {}
 
-        // 当requestBody为特殊数据时不保存缓存
-        // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
-        // 原因2：特殊数据不便于生成缓存key
-        const requestBody = clonedMethod.data;
-        const toCache = !requestBody || !isSpecialRequestBody(requestBody);
-        if (toCache && callInSuccess) {
+      // 当requestBody为特殊数据时不保存缓存
+      // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
+      // 原因2：特殊数据不便于生成缓存key
+      const requestBody = clonedMethod.data;
+      const toCache = !requestBody || !isSpecialRequestBody(requestBody);
+      if (toCache && callInSuccess) {
+        try {
           await PromiseCls.all([
             setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache, methodHitSource),
             toStorage && setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
           ]);
-        }
-      } catch (error) {}
+        } catch (error) {}
+      }
       return transformedData;
     };
 
