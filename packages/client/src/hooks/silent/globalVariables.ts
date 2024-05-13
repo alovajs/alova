@@ -1,9 +1,14 @@
 import { createAssert } from '@alova/shared/assert';
+import createEventManager from '@alova/shared/createEventManager';
 import { isArray } from '@alova/shared/vars';
 import { Alova } from 'alova';
 import {
   BeforeSilentSubmitHandler,
   DataSerializer,
+  GlobalSQErrorEvent,
+  GlobalSQEvent,
+  GlobalSQFailEvent,
+  GlobalSQSuccessEvent,
   QueueRequestWaitSetting,
   SilentSubmitBootHandler,
   SilentSubmitErrorHandler,
@@ -105,12 +110,28 @@ export const setQueueRequestWaitSetting = (requestWaitSetting: QueueRequestWaitS
       ];
 };
 
+export const BootEventKey = Symbol('GSQBoot');
+export const BeforeEventKey = Symbol('GSQBefore');
+export const SuccessEventKey = Symbol('GSQSuccess');
+export const ErrorEventKey = Symbol('GSQError');
+export const FailEventKey = Symbol('GSQFail');
+
 /** 全局的silent事件回调函数 */
 export const bootHandlers = [] as SilentSubmitBootHandler[];
 export const beforeHandlers = [] as BeforeSilentSubmitHandler[];
 export const successHandlers = [] as SilentSubmitSuccessHandler[];
 export const errorHandlers = [] as SilentSubmitErrorHandler[];
 export const failHandlers = [] as SilentSubmitFailHandler[];
+
+export type GlobalSQEvents = {
+  [BootEventKey]: void;
+  [BeforeEventKey]: GlobalSQEvent;
+  [SuccessEventKey]: GlobalSQSuccessEvent;
+  [ErrorEventKey]: GlobalSQErrorEvent;
+  [FailEventKey]: GlobalSQFailEvent;
+};
+
+export const globalSQEventManager = createEventManager<GlobalSQEvents>();
 
 /** silentAssert */
 export const silentAssert = createAssert('useSQHook');

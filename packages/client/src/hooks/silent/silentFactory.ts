@@ -1,3 +1,4 @@
+import { forEach, objectKeys, setTimeoutFn, undefinedValue } from '@alova/shared/vars';
 import {
   BeforeSilentSubmitHandler,
   SilentFactoryBootOptions,
@@ -7,46 +8,35 @@ import {
   SilentSubmitSuccessHandler
 } from '~/typings/general';
 import {
-  beforeHandlers,
-  bootHandlers,
-  errorHandlers,
-  failHandlers,
+  BeforeEventKey,
+  BootEventKey,
+  ErrorEventKey,
+  FailEventKey,
+  SuccessEventKey,
+  globalSQEventManager,
   setCustomSerializers,
   setDependentAlova,
   setQueueRequestWaitSetting,
   setSilentFactoryStatus,
-  silentFactoryStatus,
-  successHandlers
+  silentFactoryStatus
 } from './globalVariables';
 import { bootSilentQueue, merge2SilentQueueMap, silentQueueMap } from './silentQueue';
 import loadSilentQueueMapFromStorage from './storage/loadSilentQueueMapFromStorage';
-import { runArgsHandler } from '@/util/helper';
-import { splice, pushItem, setTimeoutFn, objectKeys, forEach } from '@alova/shared/vars';
-
-const offEventCallback = (offHandler: any, handlers: any[]) => () => {
-  const index = handlers.indexOf(offHandler);
-  index >= 0 && splice(handlers, index, 1);
-};
 
 /**
  * 绑定silentSubmit启动事件
  * @param {SilentSubmitBootHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) => {
-  pushItem(bootHandlers, handler);
-  return offEventCallback(handler, bootHandlers);
-};
+export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) => globalSQEventManager.on(BootEventKey, () => handler());
 
 /**
  * 绑定silentSubmit成功事件
  * @param {SilentSubmitSuccessHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) => {
-  pushItem(successHandlers, handler);
-  return offEventCallback(handler, successHandlers);
-};
+export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) =>
+  globalSQEventManager.on(SuccessEventKey, event => handler(event));
 
 /**
  * 绑定silentSubmit错误事件
@@ -54,10 +44,7 @@ export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) => {
  * @param {SilentSubmitErrorHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) => {
-  pushItem(errorHandlers, handler);
-  return offEventCallback(handler, errorHandlers);
-};
+export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) => globalSQEventManager.on(ErrorEventKey, event => handler(event));
 
 /**
  * 绑定silentSubmit失败事件
@@ -65,20 +52,15 @@ export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) => {
  * @param {SilentSubmitFailHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) => {
-  pushItem(failHandlers, handler);
-  return offEventCallback(handler, failHandlers);
-};
+export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) => globalSQEventManager.on(FailEventKey, event => handler(event));
 
 /**
  * 绑定silentSubmit发起请求前事件
  * @param {BeforeSilentSubmitHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onBeforeSilentSubmit = (handler: BeforeSilentSubmitHandler) => {
-  pushItem(beforeHandlers, handler);
-  return offEventCallback(handler, beforeHandlers);
-};
+export const onBeforeSilentSubmit = (handler: BeforeSilentSubmitHandler) =>
+  globalSQEventManager.on(BeforeEventKey, event => handler(event));
 
 /**
  * 启动静默提交，它将载入缓存中的静默方法，并开始静默提交
@@ -100,7 +82,7 @@ export const bootSilentFactory = (options: SilentFactoryBootOptions) => {
         bootSilentQueue(silentQueueMap[queueName], queueName);
       });
       setSilentFactoryStatus(1); // 设置状态为已启动
-      runArgsHandler(bootHandlers);
+      globalSQEventManager.emit(BootEventKey, undefinedValue);
     }, options.delay ?? 500);
   }
 };

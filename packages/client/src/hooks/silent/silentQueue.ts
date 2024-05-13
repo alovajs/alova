@@ -1,38 +1,39 @@
 import { Method, setCache, updateState, UpdateStateCollection } from 'alova';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {
-  beforeHandlers,
+  BeforeEventKey,
   BEHAVIOR_SILENT,
   DEFAUT_QUEUE_NAME,
-  errorHandlers,
-  failHandlers,
+  ErrorEventKey,
+  FailEventKey,
+  globalSQEventManager,
   queueRequestWaitSetting,
   setSilentFactoryStatus,
   silentFactoryStatus,
-  successHandlers
+  SuccessEventKey
 } from './globalVariables';
 // eslint-disable-next-line import/no-cycle
+import createHookEvent from '@/util/createHookEvent';
+import { delayWithBackoff, runArgsHandler } from '@/util/helper';
+import { instanceOf, isObject, isString, newInstance, noop, sloughConfig, walkObject } from '@alova/shared/function';
+import {
+  falseValue,
+  forEach,
+  len,
+  objectKeys,
+  promiseThen,
+  pushItem,
+  RegExpCls,
+  regexpTest,
+  setTimeoutFn,
+  shift,
+  trueValue,
+  undefinedValue
+} from '@alova/shared/vars';
 import { SilentMethod } from './SilentMethod';
 import { persistSilentMethod, push2PersistentSilentQueue, spliceStorageSilentMethod } from './storage/silentMethodStorage';
 import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
-import createHookEvent from '@/util/createHookEvent';
-import { runArgsHandler, delayWithBackoff } from '@/util/helper';
-import { newInstance, walkObject, instanceOf, sloughConfig, isString, isObject, noop } from '@alova/shared/function';
-import {
-  objectKeys,
-  pushItem,
-  RegExpCls,
-  falseValue,
-  regexpTest,
-  setTimeoutFn,
-  trueValue,
-  promiseThen,
-  shift,
-  len,
-  undefinedValue,
-  forEach
-} from '@alova/shared/vars';
 
 /** 静默方法队列集合 */
 export let silentQueueMap = {} as SilentQueueMap;
@@ -189,7 +190,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
     } = silentMethodInstance;
 
     // 触发请求前事件
-    runArgsHandler(beforeHandlers, createHookEvent(0, entity, behavior, silentMethodInstance, queueName, retryTimes));
+    globalSQEventManager.emit(BeforeEventKey, createHookEvent(0, entity, behavior, silentMethodInstance, queueName, retryTimes) as any);
     promiseThen(
       entity.send(force),
       data => {
@@ -227,8 +228,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           updateQueueMethodEntities(vDataResponse, queue);
 
           // 触发全局的成功事件
-          runArgsHandler(
-            successHandlers,
+          globalSQEventManager.emit(
+            SuccessEventKey,
             createHookEvent(
               1,
               entity,
@@ -240,7 +241,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
               undefinedValue,
               data,
               vDataResponse
-            )
+            ) as any
           );
         }
 
@@ -259,8 +260,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
         } else {
           // 每次请求错误都将触发错误回调
           const runGlobalErrorEvent = (retryDelay?: number) =>
-            runArgsHandler(
-              errorHandlers,
+            globalSQEventManager.emit(
+              ErrorEventKey,
               createHookEvent(
                 2,
                 entity,
@@ -273,7 +274,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
                 undefinedValue,
                 undefinedValue,
                 reason
-              )
+              ) as any
             );
 
           // 在silent行为模式下，判断是否需要重试
@@ -327,8 +328,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
                 reason
               )
             );
-            runArgsHandler(
-              failHandlers,
+            globalSQEventManager.emit(
+              FailEventKey,
               createHookEvent(
                 3,
                 entity,
@@ -341,7 +342,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
                 undefinedValue,
                 undefinedValue,
                 reason
-              )
+              ) as any
             );
           }
         }

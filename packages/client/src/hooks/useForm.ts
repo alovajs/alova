@@ -1,20 +1,21 @@
 import createSerializerPerformer from '@/util/serializer';
 import { createAssert } from '@alova/shared/assert';
+import createEventManager from '@alova/shared/createEventManager';
 import {
   getContext,
   getMethodInternalKey,
   isNumber,
   isPlainObject,
   isString,
-  runEventHandlers,
   sloughConfig,
   statesHookHelper,
   walkObject
 } from '@alova/shared/function';
-import { falseValue, isArray, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
 import { Method, promiseStatesHook, useRequest } from 'alova';
 import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
 
+const RestoreEventKey = Symbol('FormRestore');
 const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
 type ID = NonNullable<FormHookConfig['id']>;
 
@@ -80,7 +81,9 @@ export default <
     ResponseHeader,
     FormData
   >;
-  const restoreHandlers: RestoreHandler[] = [];
+  const eventManager = createEventManager<{
+    [RestoreEventKey]: void;
+  }>();
   // 使用计算属性，避免每次执行此use hook都调用一遍methodHandler
   const initialMethodInstance = useFlag$(sloughConfig(methodHandler, [form.v]));
   const storageContext = getContext(initialMethodInstance.current).l2Cache;
@@ -151,7 +154,7 @@ export default <
 
     // 持久化数据恢复事件绑定
     onRestore(handler: RestoreHandler) {
-      pushItem(restoreHandlers, handler);
+      eventManager.on(RestoreEventKey, handler);
     }
   };
 
@@ -184,7 +187,7 @@ export default <
       if (storagedForm) {
         form.v = storagedForm;
         // 触发持久化数据恢复事件
-        runEventHandlers(restoreHandlers);
+        eventManager.emit(RestoreEventKey, undefinedValue);
         enableStore && immediate && send();
       }
     }

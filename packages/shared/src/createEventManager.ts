@@ -3,6 +3,7 @@ import { filterItem, forEach, len, pushItem } from './vars';
 
 export interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
+  off<K extends keyof E>(type: K, handler?: (event: E[K]) => void): () => void;
   emit<K extends keyof E>(type: K, event: E[K]): void;
   setDecorator<K extends keyof E>(
     type: K,
@@ -28,6 +29,18 @@ const createEventManager = <E extends object>() => {
       return () => {
         eventMap[type] = filterItem(eventTypeItem, item => item !== handler);
       };
+    },
+    off(type, handler) {
+      const handlers = eventMap[type];
+      if (!handlers) {
+        return;
+      }
+      if (handler) {
+        const index = handlers.indexOf(handler);
+        index > -1 && handlers.splice(index, 1);
+      } else {
+        delete eventMap[type];
+      }
     },
     emit(type, event) {
       const decorator = decoratorMap[type];

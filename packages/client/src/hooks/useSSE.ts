@@ -2,6 +2,7 @@ import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event
 import { buildCompletedURL } from '@/functions/sendRequest';
 import { getHandlerMethod, throwFn, useCallback, usePromise } from '@/util/helper';
 import { createAssert } from '@alova/shared/assert';
+import createEventManager from '@alova/shared/createEventManager';
 import { AlovaEventBase } from '@alova/shared/event';
 import { $self, getConfig, getOptions, isFn, isPlainObject, noop, statesHookHelper } from '@alova/shared/function';
 import { falseValue, promiseFinally, promiseThen, trueValue, undefinedValue } from '@alova/shared/vars';
@@ -24,6 +25,27 @@ import {
   SSEOnOpenTrigger,
   UsePromiseReturnType
 } from '~/typings/general';
+
+const SSEOpenEventKey = Symbol('SSEOpen');
+const SSEMessageEventKey = Symbol('SSEMessage');
+const SSEErrorEventKey = Symbol('SSEError');
+
+export type SSEEvents<Data, State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
+  [SSEOpenEventKey]: AlovaSSEEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  [SSEMessageEventKey]: AlovaSSEMessageEvent<
+    Data,
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >;
+  [SSEErrorEventKey]: AlovaSSEErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+};
 
 type AnySSEEventType = AlovaSSEMessageEvent<any, any, any, any, any, any, any, any, any, any> &
   AlovaSSEErrorEvent<any, any, any, any, any, any, any, any, any> &
@@ -87,14 +109,23 @@ export default <
     | RespondedHandlerRecord<State, Computed, Export, RequestConfig, Response, ResponseHeader>
     | undefined;
 
+  const eventManager =
+    createEventManager<
+      SSEEvents<Data, State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    >();
   // 储存自定义事件的 useCallback 对象，其中 key 为 eventName
   const customEventMap: Map<string, ReturnType<typeof useCallback>> = new Map();
-  const [onOpen, triggerOnOpen, offOpen] =
-    useCallback<SSEOnOpenTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
-  const [onMessage, triggerOnMessage, offMessage] =
-    useCallback<SSEOnMessageTrigger<Data, State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
-  const [onError, triggerOnError, offError] =
-    useCallback<SSEOnErrorTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
+  const onOpen = (handler: SSEOnOpenTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => {
+    eventManager.on(SSEOpenEventKey, handler);
+  };
+  const onMessage = (
+    handler: SSEOnMessageTrigger<Data, State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => {
+    eventManager.on(SSEMessageEventKey, handler);
+  };
+  const onError = (handler: SSEOnErrorTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => {
+    eventManager.on(SSEErrorEventKey, handler);
+  };
 
   let responseSuccessHandler: RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = $self;
   let responseErrorHandler: ResponseErrorHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> = throwFn;
@@ -186,7 +217,7 @@ export default <
     if (event.error === undefinedValue) {
       return callback(event);
     }
-    return triggerOnError(event);
+    return eventManager.emit(SSEErrorEventKey, event);
   };
 
   // * MARK: EventSource 的事件处理
@@ -229,7 +260,7 @@ export default <
   const esOpen = () => {
     // resolve 使用 send() 时返回的 promise
     readyState.v = SSEHookReadyState.OPEN;
-    promiseThen(createSSEEvent(MessageType.Open, Promise.resolve()), triggerOnOpen as any);
+    promiseThen(createSSEEvent(MessageType.Open, Promise.resolve()), event => eventManager.emit(SSEOpenEventKey, event));
     // ! 一定要在调用 onOpen 之后 resolve
     sendPromiseObject.current?.resolve();
   };
@@ -238,12 +269,15 @@ export default <
     readyState.v = SSEHookReadyState.CLOSED;
     promiseThen(
       createSSEEvent(MessageType.Error, Promise.reject((event as any)?.message ?? 'SSE Error')),
-      sendSSEEvent(triggerOnMessage) as any
+      sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
     );
   };
 
   const esMessage = (event: MessageEvent<any>) => {
-    promiseThen(createSSEEvent(MessageType.Message, Promise.resolve(event.data)), sendSSEEvent(triggerOnMessage) as any);
+    promiseThen(
+      createSSEEvent(MessageType.Message, Promise.resolve(event.data)),
+      sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
+    );
   };
 
   /**
@@ -329,9 +363,9 @@ export default <
 
     // 上面使用 eventSource.removeEventListener 只是断开了 eventSource 和 trigger 的联系
     // 这里是取消 useCallback 对象中的事件注册
-    offOpen();
-    offMessage();
-    offError();
+    eventManager.off(SSEOpenEventKey);
+    eventManager.off(SSEMessageEventKey);
+    eventManager.off(SSEErrorEventKey);
     offCustomEvent();
   });
 

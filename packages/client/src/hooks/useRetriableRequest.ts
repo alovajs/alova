@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import createHookEvent from '@/util/createHookEvent';
-import { delayWithBackoff, runArgsHandler } from '@/util/helper';
+import { delayWithBackoff } from '@/util/helper';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
+import createEventManager from '@alova/shared/createEventManager';
 import { statesHookHelper } from '@alova/shared/function';
 import {
   falseValue,
@@ -9,7 +10,6 @@ import {
   promiseReject,
   promiseResolve,
   promiseThen,
-  pushItem,
   setTimeoutFn,
   trueValue,
   undefinedValue
@@ -17,6 +17,14 @@ import {
 import { AlovaMethodHandler, Method, promiseStatesHook, useRequest } from 'alova';
 import { isNumber, noop } from 'lodash-es';
 import { RetriableFailEvent, RetriableHookConfig, RetriableRetryEvent } from '~/typings/general';
+
+const RetryEventKey = Symbol('RetriableRetry');
+const FailEventKey = Symbol('RetriableFail');
+
+export type RetriableEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
+  [RetryEventKey]: RetriableRetryEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  [FailEventKey]: RetriableFailEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+};
 
 type RetryHandler<S, E, R, T, RC, RE, RH> = (event: RetriableRetryEvent<S, E, R, T, RC, RE, RH>) => void;
 type FailHandler<S, E, R, T, RC, RE, RH> = (event: RetriableFailEvent<S, E, R, T, RC, RE, RH>) => void;
@@ -32,8 +40,8 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
 
   const { ref: useFlag$, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
 
-  const retryHandlers: RetryHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[] = [];
-  const failHandlers: FailHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[] = [];
+  const eventManager =
+    createEventManager<RetriableEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
   const retryTimes = useFlag$(0);
   const stopManuallyError = useFlag$(undefinedValue as Error | undefined); // 停止错误对象，在手动触发停止时有值
   const methodInstanceLastest = useFlag$(
@@ -51,8 +59,8 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   ) => {
     // 需要异步触发onFail，让onError和onComplete先触发
     setTimeoutFn(() => {
-      runArgsHandler(
-        failHandlers,
+      eventManager.emit(
+        FailEventKey,
         createHookEvent(
           10,
           method,
@@ -65,7 +73,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
           undefinedValue,
           undefinedValue,
           error
-        )
+        ) as any
       );
       stopManuallyError.current = undefinedValue;
       retryTimes.current = 0; // 重置已重试次数
@@ -121,9 +129,9 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
               // 如果手动停止了则不再触发重试
               promiseCatch(send(...sendArgs), noop); // 捕获错误不再往外抛，否则重试时也会抛出错误
               // 触发重试事件
-              runArgsHandler(
-                retryHandlers,
-                createHookEvent(9, method, undefinedValue, undefinedValue, undefinedValue, retryTimes.current, retryDelay, sendArgs)
+              eventManager.emit(
+                RetryEventKey,
+                createHookEvent(9, method, undefinedValue, undefinedValue, undefinedValue, retryTimes.current, retryDelay, sendArgs) as any
               );
             }, retryDelay);
           } else {
@@ -164,7 +172,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * @param handler 重试事件回调
    */
   const onRetry = (handler: RetryHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => {
-    pushItem(retryHandlers, handler);
+    eventManager.on(RetryEventKey, event => handler(event));
   };
 
   /**
@@ -177,7 +185,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * @param handler 失败事件回调
    */
   const onFail = (handler: FailHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => {
-    pushItem(failHandlers, handler);
+    eventManager.on(FailEventKey, event => handler(event));
   };
 
   return {
