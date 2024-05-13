@@ -1,19 +1,19 @@
 /* eslint-disable import/no-cycle */
-import { Method, MethodFilter } from 'alova';
+import { uuid } from '@/util/helper';
+import { getContext, instanceOf } from '@alova/shared/function';
+import { falseValue, isArray, splice, undefinedValue } from '@alova/shared/vars';
+import { Method } from 'alova';
 import type {
   BackoffPolicy,
   FallbackHandler,
   RetryHandler,
+  SQHookBehavior,
   SilentMethod as SilentMethodInterface,
-  SilentQueueMap,
-  SQHookBehavior
+  SilentQueueMap
 } from '~/typings/general';
 import { silentAssert } from './globalVariables';
 import { silentQueueMap } from './silentQueue';
 import { persistSilentMethod, spliceStorageSilentMethod } from './storage/silentMethodStorage';
-import { uuid } from '@/util/helper';
-import { getContext, instanceOf } from '@alova/shared/function';
-import { undefinedValue, splice, falseValue, isArray } from '@alova/shared/vars';
 
 export type PromiseExecuteParameter = Parameters<ConstructorParameters<typeof Promise<any>>['0']>;
 export type MethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
@@ -192,7 +192,7 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
    * @param matcher method实例匹配器
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  public setUpdateState(matcher: Method | MethodFilter, updateStateName: string | string[] = 'data') {
+  public setUpdateState(matcher: Method, updateStateName: string | string[] = 'data') {
     const methodInstance = instanceOf(matcher, Method) ? matcher : getContext(this.entity).snapshots.match(matcher, falseValue);
     if (methodInstance) {
       this.targetRefMethod = methodInstance;

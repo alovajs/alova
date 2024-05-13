@@ -1,18 +1,9 @@
+import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
 import { buildCompletedURL } from '@/functions/sendRequest';
 import { getHandlerMethod, throwFn, useCallback, usePromise } from '@/util/helper';
 import { createAssert } from '@alova/shared/assert';
-import {
-  $self,
-  getConfig,
-  getContext,
-  getMethodInternalKey,
-  getOptions,
-  instanceOf,
-  isFn,
-  isPlainObject,
-  noop,
-  statesHookHelper
-} from '@alova/shared/function';
+import { AlovaEventBase } from '@alova/shared/event';
+import { $self, getConfig, getOptions, isFn, isPlainObject, noop, statesHookHelper } from '@alova/shared/function';
 import { falseValue, promiseFinally, promiseThen, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
   AlovaMethodHandler,
@@ -21,7 +12,7 @@ import {
   RespondedHandlerRecord,
   ResponseCompleteHandler,
   ResponseErrorHandler,
-  invalidateCache,
+  hitCacheBySource,
   promiseStatesHook
 } from 'alova';
 import {
@@ -33,8 +24,6 @@ import {
   SSEOnOpenTrigger,
   UsePromiseReturnType
 } from '~/typings/general';
-import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
-import { AlovaEventBase } from '@alova/shared/event';
 
 type AnySSEEventType = AlovaSSEMessageEvent<any, any, any, any, any, any, any, any, any, any> &
   AlovaSSEErrorEvent<any, any, any, any, any, any, any, any, any> &
@@ -135,31 +124,15 @@ export default <
    * @returns 处理后的response
    */
   const handleResponseTask = async (handlerReturns: any) => {
-    const { headers, name: methodInstanceName, transformData: transformDataFn = $self } = getConfig(methodInstance);
-    const methodKey = getMethodInternalKey(methodInstance);
+    const { headers, transformData: transformDataFn = $self } = getConfig(methodInstance);
 
     const returnsData = await handlerReturns;
     const transformedData = await transformDataFn(returnsData, (headers || {}) as ResponseHeader);
 
     data.v = transformedData as any;
 
-    // 查找hitTarget
-    const hitMethods = getContext(methodInstance).snapshots.match(
-      {
-        filter: cachedMethod =>
-          (cachedMethod.hitSource || []).some(sourceMatcher =>
-            instanceOf(sourceMatcher, RegExp)
-              ? sourceMatcher.test(methodInstanceName as string)
-              : sourceMatcher === methodInstanceName || sourceMatcher === methodKey
-          )
-      },
-      trueValue
-    );
-
-    // 令符合条件(hitTarget定义)的method的缓存失效
-    if (hitMethods.length > 0) {
-      invalidateCache(hitMethods);
-    }
+    // invalidate cache
+    hitCacheBySource(methodInstance);
 
     return transformedData;
   };

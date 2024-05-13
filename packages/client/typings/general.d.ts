@@ -11,7 +11,6 @@ import {
   AlovaRequestAdapter,
   ExportedType,
   Method,
-  MethodMatcher,
   RequestHookConfig,
   StatesHook,
   UseHookReturnType,
@@ -313,7 +312,7 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
    * @param matcher method实例匹配器
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  setUpdateState(matcher: MethodMatcher<any, any, any, any, any, any, any>, updateStateName?: string | string[]): void;
+  setUpdateState(matcher: Method, updateStateName?: string | string[]): void;
 }
 
 // 静默队列hooks相关
