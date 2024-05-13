@@ -165,8 +165,12 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
       const transformedData = await transformData(responseData, responseHeaders || {});
       snapshots.save(methodInstance);
 
-      // 自动失效缓存
-      await hitCacheBySource(clonedMethod);
+      // 即使缓存操作失败，也正常返回响应结构，避免因缓存操作问题导致请求错误
+      // 缓存操作结果，可通过`cacheAdapter.emitter.on('success' | 'fail', event => {})`监听获取
+      try {
+        // 自动失效缓存
+        await hitCacheBySource(clonedMethod);
+      } catch (error) {}
 
       // 当requestBody为特殊数据时不保存缓存
       // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
@@ -174,10 +178,12 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
       const requestBody = clonedMethod.data;
       const toCache = !requestBody || !isSpecialRequestBody(requestBody);
       if (toCache && callInSuccess) {
-        await PromiseCls.all([
-          setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache, methodHitSource),
-          toStorage && setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
-        ]);
+        try {
+          await PromiseCls.all([
+            setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache, methodHitSource),
+            toStorage && setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
+          ]);
+        } catch (error) {}
       }
       return transformedData;
     };

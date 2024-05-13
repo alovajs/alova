@@ -67,7 +67,7 @@ describe('Request shared', () => {
             reject(new Error('request error'));
           } else {
             resolve({
-              ID: 1
+              id: 1
             });
           }
         });

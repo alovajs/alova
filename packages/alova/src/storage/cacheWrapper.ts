@@ -1,4 +1,4 @@
-import { buildNamespacedCacheKey, getTime, instanceOf, newInstance, noop } from '@alova/shared/function';
+import { buildNamespacedCacheKey, getTime, instanceOf, newInstance } from '@alova/shared/function';
 import {
   PromiseCls,
   RegExpCls,
@@ -9,7 +9,6 @@ import {
   mapItem,
   nullValue,
   objectKeys,
-  promiseResolve,
   pushItem,
   undefinedValue
 } from '@alova/shared/vars';
@@ -43,8 +42,8 @@ export const setWithCacheAdapter = async (
   hitSource: Method['hitSource'],
   tag?: DetailCacheConfig['tag']
 ) => {
-  // not to cache if expireTimestamp is less than 0
-  if (expireTimestamp > 0 && data) {
+  // not to cache if expireTimestamp is less than current timestamp
+  if (expireTimestamp > getTime() && data) {
     const methodCacheKey = buildNamespacedCacheKey(namespace, key);
     await cacheAdapter.set(methodCacheKey, filterItem([data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag], Boolean));
 
@@ -94,14 +93,14 @@ export const setWithCacheAdapter = async (
       // save the relationship. Minimize IO as much as possible
       const promises = mapItem(objectKeys(hitSourceKeys), async hitSourceKey => {
         // filter the empty strings.
-        const targetMethodKeys: UniqueKeyPromised = (await cacheAdapter.get(hitSourceKey)) || {};
+        const targetMethodKeys = (await cacheAdapter.get<UniqueKeyPromised>(hitSourceKey)) || {};
         addItem(targetMethodKeys, methodCacheKey);
         await cacheAdapter.set(hitSourceKey, targetMethodKeys);
       });
       const saveRegexp = async () => {
         // save the regexp source if regexp exists.
         if (len(hitSourceRegexpSources)) {
-          const regexpList: string[] = (await cacheAdapter.get(unifiedHitSourceRegexpCacheKey)) || [];
+          const regexpList = (await cacheAdapter.get<string[]>(unifiedHitSourceRegexpCacheKey)) || [];
           // TODO: hitSourceRegexpSources 需要去重
           pushItem(regexpList, ...hitSourceRegexpSources);
           await cacheAdapter.set(unifiedHitSourceRegexpCacheKey, regexpList);
@@ -219,6 +218,21 @@ export const hitTargetCacheWithCacheAdapter = async (
     }
   }
 
+  const removeWithTargetKey = async (targetKey: string) => {
+    try {
+      await cacheAdapter.remove(targetKey);
+      // loop sourceTargetKeyMap and remove this key to prevent unnecessary cost of IO.
+      for (const sourceKey in sourceTargetKeyMap) {
+        const targetKeys = sourceTargetKeyMap[sourceKey];
+        if (targetKeys) {
+          deleteAttr(targetKeys, targetKey);
+        }
+      }
+    } catch (error) {
+      // the try-catch is used to prevent throwing error, cause throwing error in `Promise.all` below.
+    }
+  };
+
   // now let's start to delete target caches.
   // and filter the finished keys.
   const accessedKeys: UniqueKeyPromised = {};
@@ -230,18 +244,7 @@ export const hitTargetCacheWithCacheAdapter = async (
         for (const key in targetKeys) {
           if (!accessedKeys[key]) {
             addItem(accessedKeys, key);
-            pushItem(
-              removingPromises,
-              promiseResolve(cacheAdapter.remove(key)).then(() => {
-                // loop sourceTargetKeyMap and remove this key to prevent unnecessary cost of IO.
-                for (const sourceKey in sourceTargetKeyMap) {
-                  const targetKeys = sourceTargetKeyMap[sourceKey];
-                  if (targetKeys) {
-                    deleteAttr(targetKeys, key);
-                  }
-                }
-              }, noop) // the noop is used to prevent throwing error, cause throwing error in `Promise.all` below.
-            );
+            pushItem(removingPromises, removeWithTargetKey(key));
           }
         }
         await PromiseCls.all(removingPromises);

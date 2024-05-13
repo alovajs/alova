@@ -9,7 +9,7 @@ import {
 } from '@/storage/cacheWrapper';
 import { getConfig, getContext, getLocalCacheConfigParam, getMethodInternalKey, getTime, isFn } from '@alova/shared/function';
 import { PromiseCls, isArray, len, mapItem, undefinedValue } from '@alova/shared/vars';
-import { CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
+import { CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
 /*
  * 以下三个函数中的matcher为Method实例匹配器，它分为3种情况：
@@ -28,11 +28,16 @@ export const queryCache = async <Responded>(matcher: Method<any, any, any, any, 
   if (matcher && matcher.__key__) {
     const { id, l1Cache, l2Cache } = getContext(matcher);
     const methodKey = getMethodInternalKey(matcher);
-    let cachedData = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
+    const { f: cacheFor, c: controlled, s: store, e: expireMilliseconds, t: tag } = getLocalCacheConfigParam(matcher);
+    // if it's controlled cache, it will return the result of cacheFor function.
+    if (controlled) {
+      return (cacheFor as CacheController<Responded>)();
+    }
+
+    let cachedData: Responded | undefined = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
     if (policy === 'l2') {
-      cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, getLocalCacheConfigParam(matcher).t);
+      cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
     } else if (policy === 'all' && !cachedData) {
-      const { s: store, e: expireMilliseconds, t: tag } = getLocalCacheConfigParam(matcher);
       if (store && expireMilliseconds > getTime()) {
         cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
       }
@@ -56,7 +61,11 @@ export const setCache = async <Responded>(
     const { hitSource } = methodInstance;
     const { id, l1Cache, l2Cache } = getContext(methodInstance);
     const methodKey = getMethodInternalKey(methodInstance);
-    const { e: expireMilliseconds, s: toStore, t: tag } = getLocalCacheConfigParam(methodInstance);
+    const { e: expireMilliseconds, s: toStore, t: tag, c: controlled } = getLocalCacheConfigParam(methodInstance);
+    // don't set cache when it's controlled cache.
+    if (controlled) {
+      return;
+    }
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
       let cachedData = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
@@ -90,6 +99,11 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
   const methodInstances = isArray(matcher) ? matcher : [matcher];
   const batchPromises = methodInstances.map(methodInstance => {
     const { id, l1Cache, l2Cache } = getContext(methodInstance);
+    const { c: controlled } = getLocalCacheConfigParam(methodInstance);
+    // don't invalidate cache when it's controlled cache.
+    if (controlled) {
+      return;
+    }
     const methodKey = getMethodInternalKey(methodInstance);
     return PromiseCls.all([removeWithCacheAdapter(id, methodKey, l1Cache), removeWithCacheAdapter(id, methodKey, l2Cache)]);
   });
@@ -118,7 +132,4 @@ export const hitCacheBySource = async (sourceMethod: Method) => {
       mapItem(cacheAdaptersInvolved, involvedCacheAdapter => hitTargetCacheWithCacheAdapter(sourceKey, sourceName, involvedCacheAdapter))
     );
   }
-
-  const batchPromises = usingL1CacheAdapters.map(cacheAdapter => hitTargetCacheWithCacheAdapter(sourceKey, sourceName, cacheAdapter));
-  await PromiseCls.all(batchPromises);
 };

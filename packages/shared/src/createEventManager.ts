@@ -1,24 +1,24 @@
-import { isFn } from '@/function';
-import { filterItem, forEach, len, pushItem } from '@/vars';
+import { isFn } from './function';
+import { filterItem, forEach, len, pushItem } from './vars';
 
-export interface EventManager<EventType extends string> {
-  on(type: EventType, handler: (event: any) => void): () => void;
-  emit(type: EventType, event: Event): void;
-  setDecorator(
-    type: EventType,
-    decorator: (handler: Parameters<EventManager<EventType>['on']>[1], event: any, index: number, length: number) => void
+export interface EventManager<E extends object> {
+  on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
+  emit<K extends keyof E>(type: K, event: E[K]): void;
+  setDecorator<K extends keyof E>(
+    type: K,
+    decorator: (handler: (event: any) => void, event: any, index: number, length: number) => void
   ): void;
-  eventMap: EventMap<EventType>;
+  eventMap: EventMap<E>;
 }
-type EventMap<EventType extends string> = {
-  [eventType in EventType]?: ((event: any) => void)[];
+type EventMap<E extends object> = {
+  [K in keyof E]?: ((event: E[K]) => void)[];
 };
-type DecoratorMap<EventType extends string> = {
-  [eventType in EventType]?: Parameters<EventManager<EventType>['setDecorator']>[1];
+type DecoratorMap<E extends object> = {
+  [K in keyof E]?: (handler: (event: E[K]) => void, event: any, index: number, length: number) => void;
 };
-const createEventManager = <EventType extends string>() => {
-  const eventMap: EventMap<EventType> = {};
-  const decoratorMap: DecoratorMap<EventType> = {};
+const createEventManager = <E extends object>() => {
+  const eventMap: EventMap<E> = {};
+  const decoratorMap: DecoratorMap<E> = {};
   return {
     eventMap,
     on(type, handler) {
@@ -37,7 +37,7 @@ const createEventManager = <EventType extends string>() => {
     setDecorator(type, decorator) {
       decoratorMap[type] = decorator;
     }
-  } as EventManager<EventType>;
+  } as EventManager<E>;
 };
 
 export default createEventManager;

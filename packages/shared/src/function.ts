@@ -1,6 +1,5 @@
 import type {
   Alova,
-  AlovaEvent,
   AlovaMethodHandler,
   CacheExpire,
   CacheMode,
@@ -17,8 +16,6 @@ import {
   ObjectCls,
   STORAGE_RESTORE,
   falseValue,
-  forEach,
-  len,
   mapItem,
   nullValue,
   objectKeys,
@@ -202,7 +199,8 @@ export const getLocalCacheConfigParam = <State, Computed, Watched, Export, Respo
   let expire = 0;
   let store = falseValue;
   let tag: undefined | string = undefinedValue;
-  if (!isFn(cacheFor)) {
+  const controlled = isFn(cacheFor);
+  if (!controlled) {
     if (isNumber(cacheFor) || instanceOf(cacheFor, Date)) {
       expire = getCacheExpireTs(cacheFor);
     } else {
@@ -214,6 +212,8 @@ export const getLocalCacheConfigParam = <State, Computed, Watched, Export, Respo
     }
   }
   return {
+    f: cacheFor,
+    c: controlled,
     e: expire,
     m: cacheMode,
     s: store,
@@ -251,20 +251,6 @@ export const createSyncOnceRunner = (delay = 0) => {
     }
     timer = setTimeoutFn(fn, delay);
   };
-};
-
-/**
- * run event handlers with event.
- * @param handlers event handlers
- * @param event event instance
- * @param decorator event decorator defined on usehook middleware
- */
-export const runEventHandlers = (
-  handlers: GeneralFn[],
-  event?: AlovaEvent<any, any, any, any, any, any, any, any, any>,
-  decorator?: ((...args: any[]) => void) | undefined
-) => {
-  forEach(handlers, (handler, index) => (isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)));
 };
 
 /**

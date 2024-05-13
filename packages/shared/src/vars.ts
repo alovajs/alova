@@ -3,7 +3,7 @@ import { GeneralFn } from './types';
 declare const Deno: any;
 const undefStr = 'undefined';
 // 以下为减少编译代码量而添加的统一处理函数或变量
-export const PromiseCls = Promise as typeof Promise<any>;
+export const PromiseCls = Promise;
 export const promiseResolve = <T>(value: T) => PromiseCls.resolve(value);
 export const promiseReject = <T>(value: T) => PromiseCls.reject(value);
 export const ObjectCls = Object;

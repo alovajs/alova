@@ -14,7 +14,10 @@ import {
 } from '@alova/shared/function';
 import { PromiseCls, falseValue, forEach, isArray, isSSR, len, promiseCatch, trueValue, undefinedValue } from '@alova/shared/vars';
 import type {
+  AlovaCompleteEvent,
+  AlovaErrorEvent,
   AlovaMethodHandler,
+  AlovaSuccessEvent,
   CompleteHandler,
   EnumHookType,
   ErrorHandler,
@@ -133,7 +136,11 @@ export default function createRequestState<
     [keyLoading]: loading as unknown as ExportedType<boolean, State>,
     [keyError]: error as unknown as ExportedType<Error | undefined, State>
   });
-  const eventManager = createEventManager<'success' | 'error' | 'complete'>();
+  const eventManager = createEventManager<{
+    success: AlovaSuccessEvent<any, any, any, any, any, any, any, any, any>;
+    error: AlovaErrorEvent<any, any, any, any, any, any, any, any, any>;
+    complete: AlovaCompleteEvent<any, any, any, any, any, any, any, any, any>;
+  }>();
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject, exportings.update)));
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件

@@ -1,34 +1,28 @@
 import defaultCacheLogger from '@/defaults/cacheLogger';
-import { createAlova, updateState, useRequest } from '@/index';
+import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/adapterFetch';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', () => {
-  test('should throw error in useHooks when statesHook is not specific', async () => {
+  test('should be an error prompt indicating the setting of l2cache when accessing l2cache on the server', () => {
     const alova = createAlova({
+      baseURL,
       requestAdapter: GlobalFetch()
     });
-    const methodInst = alova.Get('http://localhost:3000/unit-test', {
-      transformData: (response: Response) => response.json()
-    });
-    const result = await methodInst;
-    expect(result).toStrictEqual({
-      code: 200,
-      msg: '',
-      data: {
-        path: '/unit-test',
-        method: 'GET',
-        params: {}
-      }
-    });
 
+    const errorTips = '[alova]l2Cache is not defined.';
     expect(() => {
-      useRequest(methodInst);
-    }).toThrow('[alova]can not call useHooks until set the `statesHook` at alova instance');
-
+      alova.l2Cache.get('1');
+    }).toThrow(errorTips);
     expect(() => {
-      updateState(methodInst, {});
-    }).toThrow('[alova]can not call updateState until set the `statesHook` at alova instance');
+      alova.l2Cache.set('1', '112');
+    }).toThrow(errorTips);
+    expect(() => {
+      alova.l2Cache.remove('1');
+    }).toThrow(errorTips);
+    expect(() => {
+      alova.l2Cache.clear();
+    }).toThrow(errorTips);
   });
 
   test('cache logger in server', async () => {

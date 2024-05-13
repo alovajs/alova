@@ -50,6 +50,12 @@ export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' 
  */
 interface AlovaCustomTypes {}
 
+export interface DefaultCacheEvent {
+  type: 'set' | 'get' | 'remove' | 'clear';
+  key: string;
+  value?: any;
+  container: Record<string, any>;
+}
 export interface AlovaGlobalCacheAdapter {
   /**
    * save or update cache
@@ -76,11 +82,9 @@ export interface AlovaGlobalCacheAdapter {
   clear(): void | Promise<void>;
 
   /**
-   * listen the events related to cache operating.
-   * @param eventType event type
-   * @param handler event handler
+   * the events related to cache operating emitter.
    */
-  on?: (eventType: 'success' | 'fail', handler: (event: any) => void) => void;
+  readonly emitter?: EventManager<{ success: DefaultCacheEvent; fail: Omit<DefaultCacheEvent, 'value'> }>;
 }
 
 /**
@@ -211,7 +215,11 @@ export interface Hook {
   upd: (newStates: Record<string, any>, targetStates?: Record<string, any>) => void;
 
   /** event manager */
-  em: EventManager<'success' | 'error' | 'complete'>;
+  em: EventManager<{
+    success: AlovaSuccessEvent<any, any, any, any, any, any, any, any, any>;
+    error: AlovaErrorEvent<any, any, any, any, any, any, any, any, any>;
+    complete: AlovaCompleteEvent<any, any, any, any, any, any, any, any, any>;
+  }>;
 
   /** hookType, useRequest=1, useWatcher=2, useFetcher=3 */
   ht: EnumHookType;
