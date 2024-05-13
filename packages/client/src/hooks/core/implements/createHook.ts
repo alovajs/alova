@@ -1,15 +1,8 @@
-import { EventManager } from '@alova/shared/createEventManager';
 import { falseValue, undefinedValue } from '@alova/shared/vars';
-import type { AlovaEvent, FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from 'alova';
+import type { FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from 'alova';
 import { Method } from 'alova';
 
-export default (
-  ht: TEnumHookType,
-  c: UseHookConfig,
-  eventManager: EventManager<'success' | 'error' | 'complete', AlovaEvent<any, any, any, any, any, any, any, any, any>>,
-  ro: ReferingObject,
-  upd: Hook['upd']
-) =>
+export default (ht: TEnumHookType, c: UseHookConfig, eventManager: Hook['em'], ro: ReferingObject, upd: Hook['upd']) =>
   ({
     /** 最后一次请求的method实例 */
     m: undefinedValue as unknown as Method,

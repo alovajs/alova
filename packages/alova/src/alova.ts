@@ -2,7 +2,7 @@ import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter, AlovaMethodCreateConfig, AlovaOptions, RequestBody, StatesHook } from '~/typings';
 import Method from './Method';
-import { defaultL1CacheAdapter, defaultL2CacheAdapter } from './defaults/cacheAdapter';
+import { createDefaultL1CacheAdapter, createDefaultL2CacheAdapter } from './defaults/cacheAdapter';
 import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
 
@@ -49,8 +49,8 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
     const instance = this;
     instance.id = (options.id || (idCount += 1)).toString();
     // 如果storage未指定，则默认使用localStorage
-    instance.l1Cache = options.l1Cache || defaultL1CacheAdapter;
-    instance.l2Cache = options.l2Cache || defaultL2CacheAdapter;
+    instance.l1Cache = options.l1Cache || createDefaultL1CacheAdapter();
+    instance.l2Cache = options.l2Cache || createDefaultL2CacheAdapter();
 
     // 合并默认options
     instance.options = {

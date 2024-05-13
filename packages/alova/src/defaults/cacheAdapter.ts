@@ -1,32 +1,65 @@
 import myAssert from '@/utils/myAssert';
+import createEventManager from '@alova/shared/createEventManager';
 import { JSONParse, JSONStringify, deleteAttr } from '@alova/shared/vars';
-import { AlovaGlobalCacheAdapter } from '~/typings';
+import { AlovaGlobalCacheAdapter, DefaultCacheEvent } from '~/typings';
 
-let l1Cache = {} as Record<string, any>;
-export const defaultL1CacheAdapter = {
-  set(key, value) {
-    l1Cache[key] = value;
-  },
-  get: key => l1Cache[key],
-  remove(key) {
-    deleteAttr(l1Cache, key);
-  },
-  clear: () => {
-    l1Cache = {};
-  }
-} as AlovaGlobalCacheAdapter;
+// local storage will not fail the operation.
+const EVENT_SUCCESS_KEY = 'success';
+type CacheEventRecord = {
+  success: DefaultCacheEvent;
+  fail: Omit<DefaultCacheEvent, 'value'>;
+};
+export const createDefaultL1CacheAdapter = () => {
+  let l1Cache = {} as Record<string, any>;
+  const l1CacheEmitter = createEventManager<CacheEventRecord>();
+  return {
+    set(key, value) {
+      l1Cache[key] = value;
+      l1CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'set', key, value, container: l1Cache });
+    },
+    get: key => {
+      const value = l1Cache[key];
+      l1CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'get', key, value, container: l1Cache });
+      return value;
+    },
+    remove(key) {
+      deleteAttr(l1Cache, key);
+      l1CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'remove', key, container: l1Cache });
+    },
+    clear: () => {
+      l1Cache = {};
+      l1CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'clear', key: '', container: l1Cache });
+    },
+    emitter: l1CacheEmitter
+  } as AlovaGlobalCacheAdapter;
+};
 
 const // delay get localStorage by function, and avoid erroring at initialization
   storage = () => {
     myAssert(typeof localStorage !== 'undefined', 'l2Cache is not defined.');
     return localStorage;
   };
-export const defaultL2CacheAdapter = {
-  set: (key, value) => storage().setItem(key, JSONStringify(value)),
-  get: key => {
-    const data = storage().getItem(key);
-    return data ? JSONParse(data) : data;
-  },
-  remove: key => storage().removeItem(key),
-  clear: () => storage().clear()
-} as AlovaGlobalCacheAdapter;
+export const createDefaultL2CacheAdapter = () => {
+  const l2CacheEmitter = createEventManager<CacheEventRecord>();
+  return {
+    set: (key, value) => {
+      storage().setItem(key, JSONStringify(value));
+      l2CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'set', key, value, container: storage() });
+    },
+    get: key => {
+      const data = storage().getItem(key);
+      const value = data ? JSONParse(data) : data;
+      l2CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'get', key, value, container: storage() });
+      return value;
+    },
+    remove: key => {
+      storage().removeItem(key);
+      l2CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'remove', key, container: storage() });
+    },
+    clear: () => {
+      storage().clear();
+      l2CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'clear', key: '', container: storage() });
+    },
+    emitter: l2CacheEmitter
+  } as AlovaGlobalCacheAdapter;
+};

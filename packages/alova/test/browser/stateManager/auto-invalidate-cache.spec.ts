@@ -168,7 +168,7 @@ describe('auto invalitate cached response data', () => {
         get: key => l1Cache[key],
         remove(key) {
           if (i === 0) {
-            return;
+            throw new Error('remove failed');
           }
           delete l1Cache[key];
         },
@@ -196,7 +196,6 @@ describe('auto invalitate cached response data', () => {
     await targetGet2;
     expect(await queryCache(targetGet1)).not.toBeUndefined();
     expect(await queryCache(targetGet2)).not.toBeUndefined();
-    console.log(l1Cache);
 
     await sourcePost;
     expect(await queryCache(targetGet1)).not.toBeUndefined();

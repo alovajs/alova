@@ -118,7 +118,4 @@ export const hitCacheBySource = async (sourceMethod: Method) => {
       mapItem(cacheAdaptersInvolved, involvedCacheAdapter => hitTargetCacheWithCacheAdapter(sourceKey, sourceName, involvedCacheAdapter))
     );
   }
-
-  const batchPromises = usingL1CacheAdapters.map(cacheAdapter => hitTargetCacheWithCacheAdapter(sourceKey, sourceName, cacheAdapter));
-  await PromiseCls.all(batchPromises);
 };

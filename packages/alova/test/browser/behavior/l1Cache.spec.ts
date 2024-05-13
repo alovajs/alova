@@ -3,6 +3,23 @@ import { invalidateCache, queryCache } from '@/index';
 import { Result, delay } from 'root/testUtils';
 
 describe('l1cache cache data', () => {
+  test('should default has 300000ms for GET request', async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+
+    // GET requests no longer have default cache settings
+    const Get = alova.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    await Get;
+    expect(await queryCache(Get)).not.toBeUndefined();
+
+    // POST not cache default
+    const Post = alova.Post('/unit-test');
+    await Post;
+    expect(await queryCache(Post)).toBeUndefined();
+  });
   test("change the default cache's setting globally", async () => {
     const alova = getAlovaInstance({
       cacheFor: {
