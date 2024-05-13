@@ -1,4 +1,5 @@
 import { debounce } from '@/util/helper';
+import createEventManager from '@alova/shared/createEventManager';
 import {
   buildNamespacedCacheKey,
   getContext,
@@ -11,18 +12,7 @@ import {
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
-import {
-  PromiseCls,
-  falseValue,
-  forEach,
-  isArray,
-  isSSR,
-  len,
-  promiseCatch,
-  pushItem,
-  trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
+import { PromiseCls, falseValue, forEach, isArray, isSSR, len, promiseCatch, trueValue, undefinedValue } from '@alova/shared/vars';
 import type {
   AlovaMethodHandler,
   CompleteHandler,
@@ -40,6 +30,7 @@ import type {
 } from 'alova';
 import { promiseStatesHook } from 'alova';
 import { coreHookAssert } from './assert';
+import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './createAlovaEvent';
 import createHook from './createHook';
 import useHookToSendRequest from './useHookToSendRequest';
 
@@ -142,7 +133,8 @@ export default function createRequestState<
     [keyLoading]: loading as unknown as ExportedType<boolean, State>,
     [keyError]: error as unknown as ExportedType<Error | undefined, State>
   });
-  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, referingObject, exportings.update)));
+  const eventManager = createEventManager<'success' | 'error' | 'complete'>();
+  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject, exportings.update)));
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
@@ -168,7 +160,7 @@ export default function createRequestState<
     promiseCatch(handleRequest(), error => {
       // the existence of error handlers indicates that the error is catched.
       // in this case, we should not throw error.
-      if (len(hookInstance.eh) <= 0) {
+      if (len(eventManager.eventMap[KEY_ERROR] || []) <= 0) {
         throw error;
       }
     });
@@ -178,9 +170,7 @@ export default function createRequestState<
    * ## react ##每次执行函数都需要重置以下项
    * */
   hookInstance.fs = frontStates;
-  hookInstance.sh = [];
-  hookInstance.eh = [];
-  hookInstance.ch = [];
+  hookInstance.em = eventManager;
   hookInstance.c = useHookConfig;
   hookInstance.ro = referingObject;
   // 在服务端渲染时不发送请求
@@ -226,15 +216,17 @@ export default function createRequestState<
       ) => handleRequest(methodInstance, sendCallingArgs)
     }),
     onSuccess(handler: SuccessHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) {
-      pushItem(hookInstance.sh, handler);
+      eventManager.on(KEY_SUCCESS, event => {
+        handler(event);
+      });
     },
     onError(handler: ErrorHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) {
-      pushItem(hookInstance.eh, handler);
+      eventManager.on(KEY_ERROR, handler);
     },
     onComplete(
       handler: CompleteHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
     ) {
-      pushItem(hookInstance.ch, handler);
+      eventManager.on(KEY_COMPLETE, handler);
     }
   };
 }

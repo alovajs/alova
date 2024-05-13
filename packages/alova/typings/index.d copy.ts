@@ -73,6 +73,13 @@ export interface AlovaGlobalCacheAdapter {
    * clear all cache.
    */
   clear(): void | Promise<void>;
+
+  /**
+   * listen the events related to cache operating.
+   * @param eventType event type
+   * @param handler event handler
+   */
+  on?: (eventType: 'success' | 'fail', handler: (event: any) => void) => void;
 }
 
 /**
@@ -1044,12 +1051,14 @@ export type AlovaMethodHandler<State, Computed, Watched, Export, Responded, Tran
  */
 export interface AlovaGlobalConfig {
   /**
-   * switch of auto invalidate cache.
+   * switch of auto hit cache.
    * here is three options:
-   * - close: disable auto cache invalidation and save.
+   * - global: invalidate cache cross alova instances.
+   * - self: only invalidate cache from the same alova instance.
+   * - close: don't auto invalidate cache any more.
    * @default 'global'
    */
-  autoInvalidateCache?: 'close' | 'self' | 'global';
+  autoHitCache?: 'global' | 'self' | 'close';
 }
 
 // ************ exports of library ***************
@@ -1214,6 +1223,17 @@ export declare function queryCache<Responded>(
   matcher: Method<any, any, any, any, Responded>,
   options?: CacheQueryOptions
 ): Promise<Responded | undefined>;
+
+/**
+ * hit(invalidate) target caches by source method
+ * this is the implementation of auto invalidate cache
+ * @param sourceMethod source method instance
+ * @example
+ * ```js
+ * await hitCacheBySource(alova.Get('/api/profile'));
+ * ```
+ */
+export declare function hitCacheBySource(sourceMethod: Method): Promise<void>;
 
 /**
  * 获取请求方式的key值

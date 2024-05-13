@@ -1,38 +1,23 @@
-import {
-  getContext,
-  getHandlerMethod,
-  getMethodInternalKey,
-  isFn,
-  noop,
-  omit,
-  runEventHandlers,
-  sloughConfig
-} from '@alova/shared/function';
+import { getContext, getHandlerMethod, getMethodInternalKey, noop, omit, sloughConfig } from '@alova/shared/function';
 import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
-  AlovaCompleteEvent,
-  AlovaErrorEvent,
   AlovaFetcherMiddleware,
   AlovaFrontMiddleware,
   AlovaGuardNext,
   AlovaMethodHandler,
-  AlovaSuccessEvent,
-  CompleteHandler,
   EnumHookType,
-  ErrorHandler,
   FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
   Hook,
   Method,
   Progress,
-  SuccessHandler,
   WatcherHookConfig,
   queryCache
 } from 'alova';
 import defaultMiddleware from '../defaults/middleware';
 import { assertMethod, coreHookAssert } from './assert';
-import createAlovaEvent, { AlovaEventType } from './createAlovaEvent';
+import createAlovaEvent, { AlovaEventType, KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './createAlovaEvent';
 import { getStateCache, removeStateCache, setStateCache } from './stateCache';
 
 /**
@@ -49,15 +34,7 @@ export default function useHookToSendRequest(
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
   let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);
-  const {
-    fs: frontStates,
-    sh: successHandlers,
-    eh: errorHandlers,
-    ch: completeHandlers,
-    ht: hookType,
-    c: useHookConfig,
-    upd: update
-  } = hookInstance;
+  const { fs: frontStates, ht: hookType, c: useHookConfig, upd: update, em: eventManager } = hookInstance;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
     | FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>
@@ -126,44 +103,20 @@ export default function useHookToSendRequest(
     };
 
     // 调用中间件函数
-    let successHandlerDecorator:
-      | ((
-          handler: SuccessHandler<any, any, any, any, any, any, any, any, any>,
-          event: AlovaSuccessEvent<any, any, any, any, any, any, any, any, any>,
-          index: number,
-          length: number
-        ) => void)
-      | undefined;
-    let errorHandlerDecorator:
-      | ((
-          handler: ErrorHandler<any, any, any, any, any, any, any, any, any>,
-          event: AlovaErrorEvent<any, any, any, any, any, any, any, any, any>,
-          index: number,
-          length: number
-        ) => void)
-      | undefined;
-    let completeHandlerDecorator:
-      | ((
-          handler: CompleteHandler<any, any, any, any, any, any, any, any, any>,
-          event: AlovaCompleteEvent<any, any, any, any, any, any, any, any, any>,
-          index: number,
-          length: number
-        ) => void)
-      | undefined = undefinedValue;
-
+    type EventHandlerDecorator = Parameters<(typeof eventManager)['setDecorator']>[1];
     const commonContext = {
       method: methodInstance,
       cachedResponse,
       config: useHookConfig,
       abort: () => methodInstance.abort(),
-      decorateSuccess(decorator: NonNullable<typeof successHandlerDecorator>) {
-        isFn(decorator) && (successHandlerDecorator = decorator);
+      decorateSuccess(decorator: EventHandlerDecorator) {
+        eventManager.setDecorator(KEY_SUCCESS, decorator);
       },
-      decorateError(decorator: NonNullable<typeof errorHandlerDecorator>) {
-        isFn(decorator) && (errorHandlerDecorator = decorator);
+      decorateError(decorator: EventHandlerDecorator) {
+        eventManager.setDecorator(KEY_ERROR, decorator);
       },
-      decorateComplete(decorator: NonNullable<typeof completeHandlerDecorator>) {
-        isFn(decorator) && (completeHandlerDecorator = decorator);
+      decorateComplete(decorator: EventHandlerDecorator) {
+        eventManager.setDecorator(KEY_COMPLETE, decorator);
       }
     };
     // 是否需要更新响应数据，以及调用响应回调
@@ -220,13 +173,12 @@ export default function useHookToSendRequest(
           // loading状态受控时将不再更改为false
           !controlledLoading && (newStates.loading = falseValue);
           update(newStates);
-          runEventHandlers(
-            successHandlers,
-            createAlovaEvent(AlovaEventType.AlovaSuccessEvent, methodInstance, sendCallingArgs, fromCache(), data),
-            successHandlerDecorator
+          eventManager.emit(
+            KEY_SUCCESS,
+            createAlovaEvent(AlovaEventType.AlovaSuccessEvent, methodInstance, sendCallingArgs, fromCache(), data)
           );
-          runEventHandlers(
-            completeHandlers,
+          eventManager.emit(
+            KEY_COMPLETE,
             createAlovaEvent(
               AlovaEventType.AlovaCompleteEvent,
               methodInstance,
@@ -234,9 +186,8 @@ export default function useHookToSendRequest(
               fromCache(),
               data,
               undefinedValue,
-              'success'
-            ),
-            completeHandlerDecorator
+              KEY_SUCCESS
+            )
           );
         }
         return data;
@@ -264,15 +215,21 @@ export default function useHookToSendRequest(
         // loading状态受控时将不再更改为false
         !controlledLoading && (newStates.loading = falseValue);
         update(newStates);
-        runEventHandlers(
-          errorHandlers,
-          createAlovaEvent(AlovaEventType.AlovaErrorEvent, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error),
-          errorHandlerDecorator
+        eventManager.emit(
+          KEY_ERROR,
+          createAlovaEvent(AlovaEventType.AlovaErrorEvent, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error)
         );
-        runEventHandlers(
-          completeHandlers,
-          createAlovaEvent(AlovaEventType.AlovaCompleteEvent, methodInstance, sendCallingArgs, fromCache(), undefinedValue, error, 'error'),
-          completeHandlerDecorator
+        eventManager.emit(
+          KEY_COMPLETE,
+          createAlovaEvent(
+            AlovaEventType.AlovaCompleteEvent,
+            methodInstance,
+            sendCallingArgs,
+            fromCache(),
+            undefinedValue,
+            error,
+            KEY_ERROR
+          )
         );
       }
 

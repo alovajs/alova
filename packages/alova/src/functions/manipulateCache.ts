@@ -1,7 +1,14 @@
 import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
-import { clearWithCacheAdapter, getWithCacheAdapter, removeWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
-import { getContext, getLocalCacheConfigParam, getMethodInternalKey, getTime, isFn } from '@alova/shared/function';
-import { PromiseCls, isArray, undefinedValue } from '@alova/shared/vars';
+import { globalConfigMap } from '@/globalConfig';
+import {
+  clearWithCacheAdapter,
+  getWithCacheAdapter,
+  hitTargetCacheWithCacheAdapter,
+  removeWithCacheAdapter,
+  setWithCacheAdapter
+} from '@/storage/cacheWrapper';
+import { getConfig, getContext, getLocalCacheConfigParam, getMethodInternalKey, getTime, isFn } from '@alova/shared/function';
+import { PromiseCls, isArray, len, mapItem, undefinedValue } from '@alova/shared/vars';
 import { CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
 /*
@@ -86,5 +93,32 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
     const methodKey = getMethodInternalKey(methodInstance);
     return PromiseCls.all([removeWithCacheAdapter(id, methodKey, l1Cache), removeWithCacheAdapter(id, methodKey, l2Cache)]);
   });
+  await PromiseCls.all(batchPromises);
+};
+
+/**
+ * hit(invalidate) target caches by source method
+ * this is the implementation of auto invalidate cache
+ * @param sourceMethod source method instance
+ */
+export const hitCacheBySource = async (sourceMethod: Method) => {
+  // 查找hit target cache，让它的缓存失效
+  // 通过全局配置`autoHitCache`来控制自动缓存失效范围
+  const { autoHitCache } = globalConfigMap;
+  const { l1Cache, l2Cache } = getContext(sourceMethod);
+  const sourceKey = getMethodInternalKey(sourceMethod);
+  const { name: sourceName } = getConfig(sourceMethod);
+  const cacheAdaptersInvolved = {
+    global: [...usingL1CacheAdapters, ...usingL2CacheAdapters],
+    self: [l1Cache, l2Cache],
+    close: []
+  }[autoHitCache];
+  if (cacheAdaptersInvolved && len(cacheAdaptersInvolved)) {
+    await PromiseCls.all(
+      mapItem(cacheAdaptersInvolved, involvedCacheAdapter => hitTargetCacheWithCacheAdapter(sourceKey, sourceName, involvedCacheAdapter))
+    );
+  }
+
+  const batchPromises = usingL1CacheAdapters.map(cacheAdapter => hitTargetCacheWithCacheAdapter(sourceKey, sourceName, cacheAdapter));
   await PromiseCls.all(batchPromises);
 };

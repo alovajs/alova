@@ -1,6 +1,10 @@
 import { ObjectCls, forEach, objectKeys, undefinedValue } from '@alova/shared/vars';
 import type { AlovaCompleteEvent, Method } from 'alova';
 
+export const KEY_SUCCESS = 'success';
+export const KEY_ERROR = 'error';
+export const KEY_COMPLETE = 'complete';
+
 /**
  * 事件类型枚举
  */

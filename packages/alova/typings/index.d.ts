@@ -1,3 +1,4 @@
+import { EventManager } from '@alova/shared/createEventManager';
 import { Writable } from 'svelte/store';
 import { Ref } from 'vue';
 
@@ -73,6 +74,13 @@ export interface AlovaGlobalCacheAdapter {
    * clear all cache.
    */
   clear(): void | Promise<void>;
+
+  /**
+   * listen the events related to cache operating.
+   * @param eventType event type
+   * @param handler event handler
+   */
+  on?: (eventType: 'success' | 'fail', handler: (event: any) => void) => void;
 }
 
 /**
@@ -202,14 +210,8 @@ export interface Hook {
    */
   upd: (newStates: Record<string, any>, targetStates?: Record<string, any>) => void;
 
-  /** successHandlers */
-  sh: SuccessHandler<any, any, any, any, any, any, any, any, any>[];
-
-  /** errorHandlers */
-  eh: ErrorHandler<any, any, any, any, any, any, any, any, any>[];
-
-  /** completeHandlers */
-  ch: CompleteHandler<any, any, any, any, any, any, any, any, any>[];
+  /** event manager */
+  em: EventManager<'success' | 'error' | 'complete'>;
 
   /** hookType, useRequest=1, useWatcher=2, useFetcher=3 */
   ht: EnumHookType;
@@ -1216,6 +1218,17 @@ export declare function queryCache<Responded>(
   matcher: Method<any, any, any, any, Responded>,
   options?: CacheQueryOptions
 ): Promise<Responded | undefined>;
+
+/**
+ * hit(invalidate) target caches by source method
+ * this is the implementation of auto invalidate cache
+ * @param sourceMethod source method instance
+ * @example
+ * ```js
+ * await hitCacheBySource(alova.Get('/api/profile'));
+ * ```
+ */
+export declare function hitCacheBySource(sourceMethod: Method): Promise<void>;
 
 /**
  * 获取请求方式的key值

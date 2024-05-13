@@ -1,8 +1,6 @@
 import Method from '@/Method';
-import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
 import defaultCacheLogger from '@/defaults/cacheLogger';
-import { globalConfigMap } from '@/globalConfig';
-import { getRawWithCacheAdapter, getWithCacheAdapter, hitTargetCacheWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
+import { getRawWithCacheAdapter, getWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
 import cloneMethod from '@/utils/cloneMethod';
 import {
   $self,
@@ -24,7 +22,6 @@ import {
   deleteAttr,
   falseValue,
   filterItem,
-  len,
   mapItem,
   objectKeys,
   promiseFinally,
@@ -34,6 +31,7 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaRequestAdapter, Arg, ProgressUpdater, RespondedHandler, ResponseCompleteHandler, ResponseErrorHandler } from '~/typings';
+import { hitCacheBySource } from './manipulateCache';
 
 // 请求适配器返回信息暂存，用于实现请求共享
 type RequestAdapterReturnType = ReturnType<AlovaRequestAdapter<any, any, any>>;
@@ -112,7 +110,7 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数
     await beforeRequest(clonedMethod);
-    const { params = {}, headers = {}, transformData = $self, name: methodInstanceName = '', shareRequest } = getConfig(clonedMethod);
+    const { params = {}, headers = {}, transformData = $self, shareRequest } = getConfig(clonedMethod);
     const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
     let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
     let responseSuccessHandler: RespondedHandler<any, any, any, RequestConfig, Response, ResponseHeader> = $self;
@@ -166,18 +164,9 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
       const responseData = await handlerReturns;
       const transformedData = await transformData(responseData, responseHeaders || {});
       snapshots.save(methodInstance);
-      // 查找hit target cache，让它的缓存失效
-      // 通过全局配置`autoHitCache`来控制自动缓存失效范围
-      const { autoHitCache } = globalConfigMap;
-      const cacheAdaptersInvolved =
-        autoHitCache === 'global' ? [...usingL1CacheAdapters, ...usingL2CacheAdapters] : autoHitCache === 'self' ? [l1Cache, l2Cache] : [];
-      if (len(cacheAdaptersInvolved)) {
-        await PromiseCls.all(
-          mapItem(cacheAdaptersInvolved, involvedCacheAdapter =>
-            hitTargetCacheWithCacheAdapter(methodKey, methodInstanceName, involvedCacheAdapter)
-          )
-        );
-      }
+
+      // 自动失效缓存
+      await hitCacheBySource(clonedMethod);
 
       // 当requestBody为特殊数据时不保存缓存
       // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
