@@ -7,7 +7,7 @@ import {
   RequestBody,
   StatesHook
 } from '~/typings';
-import Method, { typeGet } from './Method';
+import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
 import globalLocalStorage from './predefine/globalLocalStorage';
 import { getStatesHook, newInstance } from './utils/helper';
 import myAssert from './utils/myAssert';
@@ -69,22 +69,22 @@ export class Alova<S, E, RC, RE, RH> {
     return this.instance({ url, type: typeGet, config });
   }
   Post<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeGet, config, data });
+    return this.instance({ url, type: typePost, config, data });
   }
   Delete<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeGet, config, data });
+    return this.instance({ url, type: typeDelete, config, data });
   }
   Put<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeGet, config, data });
+    return this.instance({ url, type: typePut, config, data });
   }
   Head<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeGet, config });
+    return this.instance({ url, type: typeHead, config });
   }
   Patch<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeGet, config, data });
+    return this.instance({ url, type: typePatch, config, data });
   }
   Options<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeGet, config });
+    return this.instance({ url, type: typeOptions, config });
   }
 }
 
