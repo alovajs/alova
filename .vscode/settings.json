@@ -11,5 +11,8 @@
   "jest.autoRun": "off",
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   }
 }

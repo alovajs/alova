@@ -3,10 +3,11 @@ import {
   AlovaMethodConfig,
   AlovaOptions,
   MethodRequestConfig,
+  MethodType,
   RequestBody,
   StatesHook
 } from '~/typings';
-import Method, { typeDelete, typeGet, typeHead, typeOptions, typePatch, typePost, typePut } from './Method';
+import Method, { typeGet } from './Method';
 import globalLocalStorage from './predefine/globalLocalStorage';
 import { getStatesHook, newInstance } from './utils/helper';
 import myAssert from './utils/myAssert';
@@ -42,26 +43,48 @@ export class Alova<S, E, RC, RE, RH> {
       ...options
     };
   }
+
+  /**
+   * 暴露instance 实例适用于动态更改MethodType
+   * 例
+   *  const create = (data: Arg) => alova.Post('api/todo', data)
+   *  const update = (data: Arg) => alova.Put('api/todo', data)
+   *  const createOrUpdate = (data: Arg) => !!data?.id ? update(data) : create(data)
+   *  以下等于👆👆👆
+   *  const store = (data: Arg) => alova.instance({
+   *    url: 'api/todo',
+   *    type: ['POST', 'PUT'][Number(!!data?.id)],
+   *    data
+   *  })
+   */
+  instance<R, T = unknown>(options: {
+    url: string,
+    type: MethodType,
+    data?: RequestBody,
+    config?: AlovaMethodCreateConfig<R, T, RC, RH>
+  }) {
+    return newInstance(Method<S, E, R, T, RC, RE, RH>, options.type, this, options.url, options?.config, options?.data);
+  }
   Get<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return newInstance(Method<S, E, R, T, RC, RE, RH>, typeGet, this, url, config);
+    return this.instance({ url, type: typeGet, config });
   }
   Post<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return newInstance(Method<S, E, R, T, RC, RE, RH>, typePost, this, url, config, data);
+    return this.instance({ url, type: typeGet, config, data });
   }
   Delete<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return newInstance(Method<S, E, R, T, RC, RE, RH>, typeDelete, this, url, config, data);
+    return this.instance({ url, type: typeGet, config, data });
   }
   Put<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return newInstance(Method<S, E, R, T, RC, RE, RH>, typePut, this, url, config, data);
+    return this.instance({ url, type: typeGet, config, data });
   }
   Head<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return newInstance(Method<S, E, R, T, RC, RE, RH>, typeHead, this, url, config);
+    return this.instance({ url, type: typeGet, config });
   }
   Patch<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return newInstance(Method<S, E, R, T, RC, RE, RH>, typePatch, this, url, config, data);
+    return this.instance({ url, type: typeGet, config, data });
   }
   Options<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return newInstance(Method<S, E, R, T, RC, RE, RH>, typeOptions, this, url, config);
+    return this.instance({ url, type: typeGet, config });
   }
 }
 
