@@ -657,6 +657,7 @@ export interface Alova<State, Computed, Watched, Export, RequestConfig, Response
   ): Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   Patch<Responded, Transformed = unknown>(
     url: string,
+    data?: RequestBody,
     config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
   ): Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 }
