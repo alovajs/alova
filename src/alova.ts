@@ -66,25 +66,25 @@ export class Alova<S, E, RC, RE, RH> {
     return newInstance(Method<S, E, R, T, RC, RE, RH>, options.type, this, options.url, options?.config, options?.data);
   }
   Get<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeGet, config });
+    return this.instance<R, T>({ url, type: typeGet, config });
   }
   Post<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typePost, config, data });
+    return this.instance<R, T>({ url, type: typePost, config, data });
   }
   Delete<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeDelete, config, data });
+    return this.instance<R, T>({ url, type: typeDelete, config, data });
   }
   Put<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typePut, config, data });
+    return this.instance<R, T>({ url, type: typePut, config, data });
   }
   Head<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeHead, config });
+    return this.instance<R, T>({ url, type: typeHead, config });
   }
   Patch<R, T = unknown>(url: string, data: RequestBody = {}, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typePatch, config, data });
+    return this.instance<R, T>({ url, type: typePatch, config, data });
   }
   Options<R, T = unknown>(url: string, config?: AlovaMethodCreateConfig<R, T, RC, RH>) {
-    return this.instance({ url, type: typeOptions, config });
+    return this.instance<R, T>({ url, type: typeOptions, config });
   }
 }
 
