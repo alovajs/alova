@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "2.20.3",
+  "version": "2.20.4",
   "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
   "main": "dist/alova.esm.js",
   "module": "dist/alova.esm.js",
@@ -41,20 +41,24 @@
     "build:umd": "cross-env rollup -c config/rollup.config.umd.cjs",
     "build:umd.min": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.cjs",
     "build:vuehook:esm": "cross-env MODULE=vue rollup -c config/rollup.config.esm.cjs",
+    "build:vuehook:cjs": "cross-env MODULE=vue rollup -c config/rollup.config.cjs",
     "build:vuehook:umd": "cross-env MODULE=vue rollup -c config/rollup.config.umd.cjs",
     "build:vuehook:umd.min": "cross-env NODE_ENV=production MODULE=vue rollup -c config/rollup.config.umd.cjs",
-    "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
+    "build:vuehook": "npm run build:vuehook:esm && npm run build:vuehook:cjs && npm run build:vuehook:umd && npm run build:vuehook:umd.min",
     "build:reacthook:esm": "cross-env MODULE=react rollup -c config/rollup.config.esm.cjs",
+    "build:reacthook:cjs": "cross-env MODULE=react rollup -c config/rollup.config.cjs",
     "build:reacthook:umd": "cross-env MODULE=react rollup -c config/rollup.config.umd.cjs",
     "build:reacthook:umd.min": "cross-env NODE_ENV=production MODULE=react rollup -c config/rollup.config.umd.cjs",
-    "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
+    "build:reacthook": "npm run build:reacthook:esm && npm run build:reacthook:cjs && npm run build:reacthook:umd && npm run build:reacthook:umd.min",
     "build:sveltehook:esm": "cross-env MODULE=svelte rollup -c config/rollup.config.esm.cjs",
+    "build:sveltehook:cjs": "cross-env MODULE=svelte rollup -c config/rollup.config.cjs",
+    "build:sveltehook": "npm run build:sveltehook:esm && npm run build:sveltehook:cjs",
     "build:globalfetch:esm": "cross-env MODULE=globalFetch rollup -c config/rollup.config.esm.cjs",
     "build:globalfetch:cjs": "cross-env MODULE=globalFetch rollup -c config/rollup.config.cjs",
     "build:globalfetch:umd": "cross-env MODULE=globalFetch rollup -c config/rollup.config.umd.cjs",
     "build:globalfetch:umd.min": "cross-env NODE_ENV=production MODULE=globalFetch rollup -c config/rollup.config.umd.cjs",
     "build:globalfetch": "npm run build:globalfetch:esm && npm run build:globalfetch:cjs && npm run build:globalfetch:umd && npm run build:globalfetch:umd.min",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook:esm && npm run build:globalfetch",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:umd.min && npm run build:vuehook && npm run build:reacthook && npm run build:sveltehook && npm run build:globalfetch",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
@@ -85,14 +89,17 @@
     },
     "./vue": {
       "types": "./typings/vuehook.d.ts",
+      "require": "./dist/vuehook.common.cjs",
       "default": "./dist/hooks/vuehook.esm.js"
     },
     "./react": {
       "types": "./typings/reacthook.d.ts",
+      "require": "./dist/reacthook.common.cjs",
       "default": "./dist/hooks/reacthook.esm.js"
     },
     "./svelte": {
       "types": "./typings/sveltehook.d.ts",
+      "require": "./dist/sveltehook.common.cjs",
       "default": "./dist/hooks/sveltehook.esm.js"
     },
     "./GlobalFetch": {
