@@ -1,8 +1,9 @@
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
-import { queryCache, useRequest } from '@/index';
+import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
+import { key } from '@alova/shared/function';
+import { queryCache } from 'alova';
+import { Result, untilCbCalled } from 'root/testUtils';
 
 // 其他请求方式测试
 describe('Request by other data', () => {
@@ -22,7 +23,7 @@ describe('Request by other data', () => {
     formData.append('post1', 'a');
     formData.append('post2', 'b');
     const Post = alova.Post('/unit-test', formData, {
-      localCache: 100000,
+      cacheFor: 100000,
       transformData({ data }: Result<true>) {
         return data;
       }
@@ -42,7 +43,7 @@ describe('Request by other data', () => {
     });
 
     // 提交特殊数据时不会缓存
-    expect(queryCache(Post)).toBeUndefined();
+    expect(await queryCache(Post)).toBeUndefined();
   });
 
   test('send POST with string', async () => {
@@ -54,7 +55,7 @@ describe('Request by other data', () => {
       headers: {
         'content-type': 'application/x-www-form-urlencoded'
       },
-      localCache: 100000,
+      cacheFor: 100000,
       transformData({ data }: Result<true>) {
         return data;
       }
@@ -74,7 +75,7 @@ describe('Request by other data', () => {
     });
 
     // 字符串不是特殊数据，会进行缓存
-    expect(queryCache(Post)).toStrictEqual(data);
+    expect(await queryCache(Post)).toStrictEqual(data);
   });
 
   test('send POST with Blob', async () => {
@@ -99,6 +100,6 @@ describe('Request by other data', () => {
     });
 
     // 提交特殊数据时不会缓存
-    expect(queryCache(Post)).toBeUndefined();
+    expect(await queryCache(Post)).toBeUndefined();
   });
 });

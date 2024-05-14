@@ -1,5 +1,5 @@
 import { noop, omit } from '@alova/shared/function';
-import { EnumHookType, FetcherHookConfig, FetcherType, Method } from 'alova';
+import { EnumHookType, FetcherHookConfig, FetcherType, Method, type UseFetchHookReturnType } from 'alova';
 import { assertMethod, fetcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 
@@ -25,5 +25,5 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
       assertMethod(fetcherHookAssert, matcher);
       return send(args, matcher);
     }
-  };
+  } as UseFetchHookReturnType<SE['state']>;
 }

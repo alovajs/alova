@@ -1,28 +1,17 @@
 import { getAlovaInstance } from '#/utils';
+import { getStateCache } from '@/hooks/core/implements/stateCache';
+import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
-import { getStateCache } from '@/storage/stateCache';
 import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createAlova, useRequest } from 'alova';
-import GlobalFetch from 'alova/GlobalFetch';
 import React, { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
+import { getAlovaInstanceSyncResponded } from './getAlovaInstanceSyncResponded';
 
 const StrictModeReact = StrictMode as any;
-function getAlovaInstanceSyncResponded() {
-  return createAlova({
-    baseURL: 'http://localhost:3000',
-    timeout: 3000,
-    statesHook: ReactHook,
-    requestAdapter: GlobalFetch(),
-    responded: () => ({
-      mock: 'mockdata'
-    })
-  });
-}
 
-describe('useRequet hook with react', () => {
+describe('useRequest hook with react', () => {
   test('send GET', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
@@ -69,7 +58,7 @@ describe('useRequet hook with react', () => {
           <span role="method">{data.method}</span>
           <button
             role="btn"
-            onClick={send}>
+            onClick={() => send()}>
             send request
           </button>
         </div>
@@ -77,11 +66,9 @@ describe('useRequet hook with react', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    await new Promise<void>(resolve =>
-      setTimeout(() => {
-        resolve();
-      }, 1000)
-    );
+    await new Promise<void>(resolve => {
+      setTimeout(() => resolve(), 1000);
+    });
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('method')).toHaveTextContent('');
@@ -108,7 +95,7 @@ describe('useRequet hook with react', () => {
           <span role="method">{data.method}</span>
           <button
             role="btn"
-            onClick={send}>
+            onClick={() => send()}>
             send request
           </button>
         </div>
@@ -269,7 +256,7 @@ describe('useRequet hook with react', () => {
     });
     const Get = alova.Get('/unit-test-1s', {
       timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
+      transformData: ({ data }: Result) => data,
       cacheFor: 100 * 1000
     });
 
@@ -287,7 +274,8 @@ describe('useRequet hook with react', () => {
               update({
                 data: {
                   path: `/abc${i}`,
-                  method: 'GET'
+                  method: 'GET',
+                  params: {}
                 },
                 error: undefined
               });

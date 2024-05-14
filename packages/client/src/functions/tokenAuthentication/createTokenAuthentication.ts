@@ -1,4 +1,4 @@
-import { _self, noop } from '@alova/shared/function';
+import { $self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
 import { AlovaRequestAdapter, RespondedHandlerRecord, StatesHook } from 'alova';
 import { ClientTokenAuthenticationOptions, ServerTokenAuthenticationOptions, TokenAuthenticationResult } from '~/typings/general';
@@ -69,7 +69,7 @@ export const createClientTokenAuthentication = ({
         onSuccess: async (response, method) => {
           await callHandlerIfMatchesMeta(method, login, defaultLoginMeta, response);
           await callHandlerIfMatchesMeta(method, logout, defaultLogoutMeta, response);
-          return (respondedRecord.onSuccess || _self)(response, method);
+          return (respondedRecord.onSuccess || $self)(response, method);
         }
       } as RespondedHandlerRecord<any, any, any, any, any, any>;
     }
@@ -140,7 +140,7 @@ export const createServerTokenAuthentication = ({
 
           await callHandlerIfMatchesMeta(method, login, defaultLoginMeta, response);
           await callHandlerIfMatchesMeta(method, logout, defaultLogoutMeta, response);
-          return (respondedRecord.onSuccess || _self)(response, method);
+          return (respondedRecord.onSuccess || $self)(response, method);
         },
         onError: async (error, method) => {
           if (

@@ -3,7 +3,7 @@ import createHookEvent from '@/util/createHookEvent';
 import { delayWithBackoff } from '@/util/helper';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
-import { statesHookHelper } from '@alova/shared/function';
+import { isNumber, noop, statesHookHelper } from '@alova/shared/function';
 import {
   falseValue,
   promiseCatch,
@@ -15,7 +15,6 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaMethodHandler, Method, promiseStatesHook, useRequest } from 'alova';
-import { isNumber, noop } from 'lodash-es';
 import { RetriableFailEvent, RetriableHookConfig, RetriableRetryEvent } from '~/typings/general';
 
 const RetryEventKey = Symbol('RetriableRetry');

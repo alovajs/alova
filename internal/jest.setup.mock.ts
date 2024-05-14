@@ -1,4 +1,5 @@
 import { Blob, File } from 'node:buffer';
+import { performance } from 'node:perf_hooks';
 import { TextDecoder, TextEncoder } from 'node:util';
 import { ReadableStream } from 'web-streams-polyfill';
 
@@ -7,7 +8,8 @@ Object.defineProperties(globalThis, {
   TextEncoder: { value: TextEncoder },
   ReadableStream: { value: ReadableStream },
   setImmediate: { value: setTimeout },
-  clearImmediate: { value: clearTimeout }
+  clearImmediate: { value: clearTimeout },
+  performance: { value: performance }
 });
 
 // if the environment is jsdom, set process.browser to true

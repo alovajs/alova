@@ -1,14 +1,13 @@
-import { delay, Result } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
+import { delay, Result } from 'root/testUtils';
 
 // use hook在服务端不再发送请求
 describe('[vue]use hooks in SSR', () => {
   test("shouldn't request but loading is true", async () => {
     const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json(),
-      endWithSlash: true
+      responseExpect: r => r.json()
     });
     const Get = alova.Get<Result>('/unit-test', {
       params: { a: 'a', b: 'str' }

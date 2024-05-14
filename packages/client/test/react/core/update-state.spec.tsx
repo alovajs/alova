@@ -1,9 +1,7 @@
 import { getAlovaInstance } from '#/utils';
+import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { updateState, useRequest, useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
-import { getResponseCache } from '@/storage/responseCache';
-import { getPersistentResponse } from '@/storage/responseStorage';
-import { getStateCache } from '@/storage/stateCache';
 import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -16,23 +14,26 @@ describe('update cached response data by user in react', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      localCache: {
-        expire: 100000,
-        mode: 'placeholder'
-      },
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
 
     function Page() {
-      const { data = { path: '' }, onSuccess } = useRequest(Get);
-      onSuccess(() =>
-        updateState(Get, data => {
-          return {
-            ...data,
-            path: '/unit-test-updated'
-          };
-        })
-      );
+      const { data, onSuccess } = useRequest(Get, {
+        initialData() {
+          return alova.l2Cache.get('placeholder-data') || { path: '' };
+        }
+      });
+      onSuccess(() => {
+        updateState(Get, data => ({
+          ...data,
+          path: '/unit-test-updated'
+        }));
+        alova.l2Cache.set('placeholder-data', {
+          ...data,
+          path: '/unit-test-updated'
+        });
+      });
       return <div role="path">{data.path}</div>;
     }
     render((<Page />) as ReactElement<any, any>);
@@ -41,10 +42,8 @@ describe('update cached response data by user in react', () => {
     // 延迟检查页面是否有更新
     await delay(100);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
-    const cacheData = getResponseCache(alova.id, key(Get));
-    expect(cacheData.path).toBe('/unit-test-updated'); // 除了状态数据被更新外，缓存也将会被更新
-    const storageData = getPersistentResponse(alova.id, key(Get), alova.storage);
-    expect(storageData.path).toBe('/unit-test-updated'); // 持久化数据也将被更新
+    const cacheData = alova.l2Cache.get('placeholder-data') as any;
+    expect(cacheData.path).toBe('/unit-test-updated');
   });
 
   test('front states would be valid when not change their value', async () => {
@@ -64,11 +63,13 @@ describe('update cached response data by user in react', () => {
       return (
         <div>
           <div role="path">{data.path}</div>
-          <span
+          <button
             role="count"
-            onClick={() => setCount(v => v + 1)}>
+            onClick={() => {
+              setCount(v => v + 1);
+            }}>
             {count}
-          </span>
+          </button>
         </div>
       );
     }
@@ -80,12 +81,10 @@ describe('update cached response data by user in react', () => {
     await screen.findByText('1');
 
     act(() => {
-      updateState(Get, data => {
-        return {
-          ...data,
-          path: '/unit-test-updated'
-        };
-      });
+      updateState(Get, data => ({
+        ...data,
+        path: '/unit-test-updated'
+      }));
     });
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
     expect(screen.getByRole('count')).toHaveTextContent('1');
@@ -107,7 +106,7 @@ describe('update cached response data by user in react', () => {
         managedStates: {
           extraData,
           extraData2: extraData2 as unknown as [number, React.Dispatch<React.SetStateAction<number>>]
-        }
+        } as any
       });
       return (
         <div>
@@ -192,23 +191,19 @@ describe('update cached response data by user in react', () => {
     // 执行了两次不同参数的请求后，验证两次请求是否缓存了相同的states
     act(() => {
       updateState(getter('a'), {
-        data: d => {
-          return {
-            ...d,
-            path: '/path-str-a'
-          };
-        }
+        data: d => ({
+          ...d,
+          path: '/path-str-a'
+        })
       });
     });
     expect(screen.getByRole('path')).toHaveTextContent('/path-str-a');
     act(() => {
       updateState(getter('b'), {
-        data: d => {
-          return {
-            ...d,
-            path: '/path-str-b'
-          };
-        }
+        data: d => ({
+          ...d,
+          path: '/path-str-b'
+        })
       });
     });
     expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');

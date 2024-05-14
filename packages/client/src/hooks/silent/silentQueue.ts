@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { Method, setCache, updateState, UpdateStateCollection } from 'alova';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {

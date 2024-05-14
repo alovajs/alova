@@ -19,7 +19,7 @@ describe('useWatcher hook with react', () => {
         },
         timeout: 10000,
         transformData: ({ data }: Result<true>) => data,
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
     const mockfn = jest.fn();
     function Page() {
@@ -84,7 +84,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         transformData: ({ data }: Result<true>) => data,
-        localCache: null
+        cacheFor: null
       });
     const mockfn = jest.fn();
     function Page() {
@@ -107,7 +107,7 @@ describe('useWatcher hook with react', () => {
           <button
             role="button1"
             onClick={() => {
-              i++;
+              i += 1;
               setStateId1(1);
               setStateId2(11);
             }}>
@@ -116,7 +116,7 @@ describe('useWatcher hook with react', () => {
           <button
             role="button2"
             onClick={() => {
-              i++;
+              i += 1;
               setStateId1(2);
               setStateId2(12);
             }}>
@@ -161,7 +161,7 @@ describe('useWatcher hook with react', () => {
           }
           return data;
         },
-        localCache: null
+        cacheFor: null
       });
     const mockfn = jest.fn();
     const mockErrorfn = jest.fn();
@@ -187,7 +187,7 @@ describe('useWatcher hook with react', () => {
           <button
             role="button1"
             onClick={() => {
-              i++;
+              i += 1;
               setStateId1(1);
               setStateId2(11);
             }}>
@@ -196,7 +196,7 @@ describe('useWatcher hook with react', () => {
           <button
             role="button2"
             onClick={() => {
-              i++;
+              i += 1;
               setStateId1(2);
               setStateId2(12);
             }}>
@@ -238,7 +238,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         transformData: ({ data }: Result<true>) => data,
-        localCache: null
+        cacheFor: null
       });
     const mockfn = jest.fn();
     function Page() {
@@ -262,7 +262,7 @@ describe('useWatcher hook with react', () => {
           <button
             role="button1"
             onClick={() => {
-              i++;
+              i += 1;
               setStateId1(3);
               setStateId2(13);
             }}>
@@ -271,7 +271,7 @@ describe('useWatcher hook with react', () => {
           <button
             role="button2"
             onClick={() => {
-              i++;
+              i += 1;
               setStateId1(4);
               setStateId2(14);
             }}>
@@ -504,7 +504,7 @@ describe('useWatcher hook with react', () => {
         },
         timeout: 10000,
         transformData: ({ data }: Result<true>) => data,
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
     const mockfn = jest.fn();
     function Page() {
@@ -536,7 +536,7 @@ describe('useWatcher hook with react', () => {
           </button>
           <button
             role="btn2"
-            onClick={send}>
+            onClick={() => send()}>
             btn2
           </button>
         </div>
@@ -583,7 +583,7 @@ describe('useWatcher hook with react', () => {
         },
         timeout: 10000,
         transformData: ({ data }: Result<true>) => data,
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
     function Page() {
       const [stateId1, setStateId1] = useState(0);
@@ -612,7 +612,7 @@ describe('useWatcher hook with react', () => {
           </button>
           <button
             role="btn2"
-            onClick={send}>
+            onClick={() => send()}>
             btn2
           </button>
         </div>
@@ -640,7 +640,7 @@ describe('useWatcher hook with react', () => {
         },
         timeout: 10000,
         transformData: ({ data }: Result<true>) => data,
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
 
     const successMockFn = jest.fn();
@@ -746,7 +746,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         transformData: ({ data }: Result<true>) => data,
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
 
     const successMockFn = jest.fn();

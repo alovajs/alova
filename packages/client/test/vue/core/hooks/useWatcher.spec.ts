@@ -1,10 +1,9 @@
-import { key } from '@alova/shared/function';
+import { getAlovaInstance } from '#/utils';
+import { useWatcher } from '@/index';
+import VueHook from '@/statesHook/vue';
+import { queryCache, setCache } from 'alova';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { computed, reactive, ref } from 'vue';
-import { getAlovaInstance } from '#/utils';
-import { setCache, useWatcher } from '@/index';
-import VueHook from '@/statesHook/vue';
-import { getResponseCache } from '@/storage/responseCache';
 
 describe('use useWatcher hook to send GET with vue', () => {
   test('should specify at least one watching state', () => {
@@ -28,7 +27,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr]
     );
@@ -53,9 +52,9 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.str).toBe('b');
     expect(error.value).toBeUndefined();
     // 缓存有值
-    let cacheData = getResponseCache(alova.id, key(method));
-    expect(cacheData.path).toBe('/unit-test');
-    expect(cacheData.params).toStrictEqual({ num: '1', str: 'b' });
+    let cacheData = await queryCache(method);
+    expect(cacheData?.path).toBe('/unit-test');
+    expect(cacheData?.params).toStrictEqual({ num: '1', str: 'b' });
     expect(mockCallback.mock.calls.length).toBe(1);
     mutateNum.value = 2;
     mutateStr.value = 'c';
@@ -63,8 +62,8 @@ describe('use useWatcher hook to send GET with vue', () => {
     const { method: method2 } = await untilCbCalled(onSuccess);
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    cacheData = getResponseCache(alova.id, key(method2));
-    expect(cacheData.params).toStrictEqual({ num: '2', str: 'c' });
+    cacheData = await queryCache(method2);
+    expect(cacheData?.params).toStrictEqual({ num: '2', str: 'c' });
     expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
@@ -80,7 +79,7 @@ describe('use useWatcher hook to send GET with vue', () => {
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
           transformData: (result: Result) => result.data,
-          localCache: null
+          cacheFor: null
         }),
       [mutateNum, mutateStr]
     );
@@ -127,7 +126,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             }
             return responseData;
           },
-          localCache: null
+          cacheFor: null
         }),
       [mutateNum, mutateStr]
     );
@@ -173,7 +172,7 @@ describe('use useWatcher hook to send GET with vue', () => {
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
           transformData: ({ data: responseData }: Result) => responseData,
-          cache: null
+          cacheFor: null
         }),
       [mutateNum, mutateStr],
       {
@@ -221,7 +220,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
       {
@@ -280,7 +279,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
       {
@@ -361,7 +360,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     const currentGet = alova.Get('/unit-test', {
       params: { num: mutateNum.value, str: mutateStr.value },
       transformData: (result: Result) => result.data,
-      localCache: 0
+      cacheFor: 0
     });
     const { data, error, onSuccess } = useWatcher(currentGet, [mutateNum, mutateStr], {
       immediate: true
@@ -406,7 +405,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateObj, mutateObjReactive]
     );
@@ -447,7 +446,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [computedStr]
     );
@@ -485,7 +484,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
       { debounce: 100 }
@@ -520,9 +519,9 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(Date.now() - startTs).toBeLessThanOrEqual(200); // 实际异步时间会较长
 
     // 缓存有值
-    const cacheData = getResponseCache(alova.id, key(method));
-    expect(cacheData.path).toBe('/unit-test');
-    expect(cacheData.params).toStrictEqual({ num: '2', str: 'c' });
+    const cacheData = await queryCache(method);
+    expect(cacheData?.path).toBe('/unit-test');
+    expect(cacheData?.params).toStrictEqual({ num: '2', str: 'c' });
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -541,7 +540,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
       { debounce: [200, 100] }
@@ -601,7 +600,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         });
         return get;
       },
@@ -661,7 +660,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateObj, mutateObjReactive],
       { debounce: 200 }
@@ -716,7 +715,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 100 * 1000
+          cacheFor: 100 * 1000
         }),
       [mutateObj, mutateObjReactive],
       { debounce: [200, 100] }
@@ -767,7 +766,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 0
+          cacheFor: 0
         }),
       [mutateNum, mutateStr],
       { immediate: true }
@@ -787,7 +786,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(downloading.value).toStrictEqual({ total: 96, loaded: 96 });
     expect(error.value).toBeUndefined();
     // 缓存没有值
-    let cacheData = getResponseCache(alova.id, key(method));
+    let cacheData = await queryCache(method);
     expect(cacheData).toBeUndefined();
     expect(mockCallback).toHaveBeenCalledTimes(1);
 
@@ -796,7 +795,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     const { method: method2 } = await untilCbCalled(onSuccess);
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    cacheData = getResponseCache(alova.id, key(method2));
+    cacheData = await queryCache(method2);
     expect(cacheData).toBeUndefined();
     expect(mockCallback).toHaveBeenCalledTimes(2);
   });
@@ -816,7 +815,7 @@ describe('use useWatcher hook to send GET with vue', () => {
             'Content-Type': 'application/json'
           },
           transformData: (result: Result) => result.data,
-          localCache: 0
+          cacheFor: 0
         }),
       [mutateNum, mutateStr],
       { immediate: true, debounce: 200 }
@@ -836,7 +835,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.str).toBe('a');
     expect(error.value).toBeUndefined();
     // 缓存有值
-    let cacheData = getResponseCache(alova.id, key(method));
+    let cacheData = await queryCache(method);
     expect(cacheData).toBeUndefined();
     expect(mockCallback).toHaveBeenCalledTimes(1);
 
@@ -851,7 +850,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     const { method: method2 } = await untilCbCalled(onSuccess);
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    cacheData = getResponseCache(alova.id, key(method2));
+    cacheData = await queryCache(method2);
     expect(cacheData).toBeUndefined();
     expect(mockCallback).toHaveBeenCalledTimes(2);
   });
@@ -870,7 +869,7 @@ describe('use useWatcher hook to send GET with vue', () => {
 
     const ctrlVal = ref(0);
     const { data, send, onSuccess } = useWatcher(() => getGetterObj, [ctrlVal], {
-      force: (isForce = false) => isForce
+      force: ({ sendArgs: [force] }) => force
     });
 
     setCache(getGetterObj, {
@@ -885,11 +884,11 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.val).toBe('-1');
 
-    send(true);
+    send([true]);
     await untilCbCalled(onSuccess);
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.val).toBe('1');
-    const cacheData = getResponseCache(alova.id, key(getGetterObj));
-    expect(cacheData.params).toStrictEqual({ val: '1' });
+    const cacheData = await queryCache(getGetterObj);
+    expect(cacheData?.params).toStrictEqual({ val: '1' });
   });
 });

@@ -1,10 +1,8 @@
-import { key } from '@alova/shared/function';
-import { Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { getResponseCache } from '@/storage/responseCache';
-import { FetcherType } from '~/typings';
+import { queryCache, type FetcherType } from 'alova';
+import { Result, untilCbCalled } from 'root/testUtils';
 
 describe('use useFetcher hook to fetch data', () => {
   test('should hit cached response when fetch data with default config', async () => {
@@ -21,37 +19,37 @@ describe('use useFetcher hook to fetch data', () => {
         transformData(result: Result) {
           return result.data;
         },
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
 
     const Get1 = createGet({ a: '1', b: '2', countKey: 'a' });
     const { data, onSuccess } = useRequest(Get1);
 
     // fetcher默认不强制请求，会命中缓存
-    const { fetching, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>();
-    expect(fetching.value).toBeFalsy();
+    const { loading, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>();
+    expect(loading.value).toBeFalsy();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(data.value.params.count).toBe(0);
     // 缓存有值
-    let cacheData = getResponseCache(alova.id, key(Get1));
-    expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'a', count: 0 });
+    let cacheData = await queryCache(Get1);
+    expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'a', count: 0 });
 
     fetch(Get1);
     // 缓存会被命中，不会发出请求
-    expect(fetching.value).toBeFalsy();
+    expect(loading.value).toBeFalsy();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onFetchSuccess);
     expect(data.value.params.count).toBe(0);
-    expect(fetching.value).toBeFalsy();
+    expect(loading.value).toBeFalsy();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    cacheData = getResponseCache(alova.id, key(Get1));
-    expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'a', count: 0 });
+    cacheData = await queryCache(Get1);
+    expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'a', count: 0 });
   });
 
   test('should replace cached response when force fetch data', async () => {
@@ -68,32 +66,32 @@ describe('use useFetcher hook to fetch data', () => {
         transformData(result: Result) {
           return result.data;
         },
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
 
     const Get1 = createGet({ a: '1', b: '2', countKey: 'b' });
     const { data, onSuccess } = useRequest(Get1);
-    const { fetching, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>({ force: true }); // 忽略缓存强制请求
-    expect(fetching.value).toBeFalsy();
+    const { loading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>({ force: true }); // 忽略缓存强制请求
+    expect(loading.value).toBeFalsy();
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(data.value.params.count).toBe(0);
     // 缓存有值
-    let cacheData = getResponseCache(alova.id, key(Get1));
-    expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'b', count: 0 });
+    let cacheData = await queryCache(Get1);
+    expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'b', count: 0 });
 
     fetch(Get1);
     // 因强制请求，请求会被发出并且缓存重新被更新
-    expect(fetching.value).toBeTruthy();
+    expect(loading.value).toBeTruthy();
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onFetchSuccess);
     expect(data.value.params.count).toBe(1);
-    expect(fetching.value).toBeFalsy();
+    expect(loading.value).toBeFalsy();
     expect(error.value).toBeUndefined();
-    cacheData = getResponseCache(alova.id, key(Get1));
-    expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'b', count: 1 });
+    cacheData = await queryCache(Get1);
+    expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'b', count: 1 });
   });
 
   test('args in fetch should pass to the force function', async () => {
@@ -110,7 +108,7 @@ describe('use useFetcher hook to fetch data', () => {
         transformData(result: Result) {
           return result.data;
         },
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       });
 
     const Get1 = createGet({ a: '1', b: '2', countKey: 'c' });
@@ -118,11 +116,11 @@ describe('use useFetcher hook to fetch data', () => {
 
     const mockFn = jest.fn();
     const {
-      fetching,
+      loading,
       fetch,
       onSuccess: onFetchSuccess
     } = useFetcher<FetcherType<typeof alova>>({
-      force(p1, p2) {
+      force({ sendArgs: [p1, p2] }) {
         mockFn();
         expect(p1).toBeTruthy();
         expect(p2).toBeFalsy();
@@ -130,17 +128,17 @@ describe('use useFetcher hook to fetch data', () => {
       }
     });
     // 缓存有值
-    let cacheData = getResponseCache(alova.id, key(Get1));
-    expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 0 });
+    let cacheData = await queryCache(Get1);
+    expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 0 });
 
     fetch(Get1, true, false);
     // 因强制请求，请求会被发出并且缓存重新被更新
-    expect(fetching.value).toBeTruthy();
+    expect(loading.value).toBeTruthy();
 
     await untilCbCalled(onFetchSuccess);
-    expect(fetching.value).toBeFalsy();
-    cacheData = getResponseCache(alova.id, key(Get1));
-    expect(cacheData.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 1 });
+    expect(loading.value).toBeFalsy();
+    cacheData = await queryCache(Get1);
+    expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 1 });
     expect(mockFn).toHaveBeenCalled();
   });
 
@@ -151,7 +149,7 @@ describe('use useFetcher hook to fetch data', () => {
     const createGet = (params: Record<string, string>) =>
       alova.Get('/unit-test-count', {
         params,
-        localCache: 0,
+        cacheFor: 0,
         transformData(result: Result) {
           return result.data;
         }
@@ -182,12 +180,12 @@ describe('use useFetcher hook to fetch data', () => {
       responseExpect: r => r.json()
     });
 
-    const { fetching, error, update } = useFetcher<FetcherType<typeof alova>>();
+    const { loading, error, update } = useFetcher<FetcherType<typeof alova>>();
     update({
-      fetching: true,
+      loading: true,
       error: new Error('custom fetch error')
     });
-    expect(fetching.value).toBeTruthy();
+    expect(loading.value).toBeTruthy();
     expect(error.value?.message).toBe('custom fetch error');
   });
 
@@ -198,7 +196,7 @@ describe('use useFetcher hook to fetch data', () => {
     const createGet = (params: Record<string, string>) =>
       alova.Get('/unit-test-count', {
         params,
-        localCache: 5 * 60 * 1000,
+        cacheFor: 5 * 60 * 1000,
         transformData(result: Result) {
           return result.data;
         }
@@ -206,10 +204,10 @@ describe('use useFetcher hook to fetch data', () => {
 
     const { data, onSuccess, send } = useRequest(params => createGet(params || { page: '1', countKey: 'pagination' }));
     await untilCbCalled(onSuccess);
-    const { fetch, fetching, error } = useFetcher<FetcherType<typeof alova>>({ updateState: false });
+    const { fetch, loading, error } = useFetcher<FetcherType<typeof alova>>({ updateState: false });
     let res = await fetch(createGet({ page: '2', countKey: 'pagination' }));
 
-    expect(fetching.value).toBeFalsy();
+    expect(loading.value).toBeFalsy();
     expect(error.value).toBeFalsy();
 
     expect(data.value).toStrictEqual({
@@ -230,7 +228,7 @@ describe('use useFetcher hook to fetch data', () => {
     await untilCbCalled(onSuccess);
     res = await fetch(createGet({ page: '2', countKey: 'pagination' }));
 
-    expect(fetching.value).toBeFalsy();
+    expect(loading.value).toBeFalsy();
     expect(error.value).toBeFalsy();
 
     expect(data.value).toStrictEqual({
@@ -247,7 +245,7 @@ describe('use useFetcher hook to fetch data', () => {
     const createGet = (params: Record<string, string>) =>
       alova.Get('/unit-test-count', {
         params,
-        localCache: 5 * 60 * 1000,
+        cacheFor: 5 * 60 * 1000,
         transformData(result: Result) {
           return result.data;
         }
@@ -255,10 +253,10 @@ describe('use useFetcher hook to fetch data', () => {
 
     const { data, onSuccess, send } = useRequest(params => createGet(params || { page: '1', countKey: 'pagination1' }));
     await untilCbCalled(onSuccess);
-    const { fetch, fetching, error } = useFetcher<FetcherType<typeof alova>>();
+    const { fetch, loading, error } = useFetcher<FetcherType<typeof alova>>();
     let res = await fetch(createGet({ page: '2', countKey: 'pagination1' }));
 
-    expect(fetching.value).toBeFalsy();
+    expect(loading.value).toBeFalsy();
     expect(error.value).toBeFalsy();
 
     expect(data.value).toStrictEqual({
@@ -279,7 +277,7 @@ describe('use useFetcher hook to fetch data', () => {
     await untilCbCalled(onSuccess);
     res = await fetch(createGet({ page: '2', countKey: 'pagination1' }));
 
-    expect(fetching.value).toBeFalsy();
+    expect(loading.value).toBeFalsy();
     expect(error.value).toBeFalsy();
 
     expect(res).toStrictEqual(data.value);

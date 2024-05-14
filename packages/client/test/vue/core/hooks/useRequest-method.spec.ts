@@ -1,9 +1,8 @@
-import { key } from '@alova/shared/function';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
-import { Method, useRequest } from '@/index';
+import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { getResponseCache } from '@/storage/responseCache';
+import { Method, queryCache } from 'alova';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 // 其他请求方式测试
 describe('Test other methods without GET', () => {
@@ -47,7 +46,7 @@ describe('Test other methods without GET', () => {
           expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
           return data;
         },
-        localCache: {
+        cacheFor: {
           expire: 100 * 1000,
           mode: 'memory'
         }
@@ -66,7 +65,7 @@ describe('Test other methods without GET', () => {
     expect(error.value).toBeUndefined();
 
     // 缓存有值
-    const cacheData = getResponseCache(alova.id, key(Post));
+    const cacheData = await queryCache(Post);
     expect(cacheData).toBeUndefined();
   });
 
@@ -108,7 +107,7 @@ describe('Test other methods without GET', () => {
           expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
           return data;
         },
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       }
     );
     const { loading, data, error, onSuccess } = useRequest(Delete);
@@ -124,7 +123,7 @@ describe('Test other methods without GET', () => {
     expect(error.value).toBeUndefined();
 
     // 缓存有值
-    const cacheData = getResponseCache(alova.id, key(Delete));
+    const cacheData = await queryCache(Delete);
     expect(cacheData).toBeUndefined();
   });
 
@@ -166,7 +165,7 @@ describe('Test other methods without GET', () => {
           expect(data.data).toStrictEqual({ post1: 'a', post2: 'b' });
           return data;
         },
-        localCache: 100 * 1000
+        cacheFor: 100 * 1000
       }
     );
     const { loading, data, error, onSuccess } = useRequest(Put);
@@ -182,7 +181,7 @@ describe('Test other methods without GET', () => {
     expect(error.value).toBeUndefined();
 
     // 缓存有值
-    const cacheData = getResponseCache(alova.id, key(Put));
+    const cacheData = await queryCache(Put);
     expect(cacheData).toBeUndefined();
   });
 
@@ -215,7 +214,7 @@ describe('Test other methods without GET', () => {
     expect(data.value).toStrictEqual({});
     expect(error.value).toBeUndefined();
     // 没有缓存值
-    const cacheData = getResponseCache(alova.id, key(Head));
+    const cacheData = await queryCache(Head);
     expect(cacheData).toBeUndefined();
   });
 
@@ -247,7 +246,7 @@ describe('Test other methods without GET', () => {
     expect(data.value).toStrictEqual({});
     expect(error.value).toBeUndefined();
     // 没有缓存值
-    const cacheData = getResponseCache(alova.id, key(Options));
+    const cacheData = await queryCache(Options);
     expect(cacheData).toBeUndefined();
   });
 
@@ -285,7 +284,7 @@ describe('Test other methods without GET', () => {
     expect(data.value.data).toStrictEqual({ patch1: 'p' });
     expect(error.value).toBeUndefined();
     // 没有缓存值
-    const cacheData = getResponseCache(alova.id, key(Patch));
+    const cacheData = await queryCache(Patch);
     expect(cacheData).toBeUndefined();
   });
 
@@ -293,7 +292,7 @@ describe('Test other methods without GET', () => {
     const alovaInst = getAlovaInstance(VueHook);
     const Get = alovaInst.Get('/unit-test-download', {
       transformData: (resp: Response) => resp.blob(),
-      localCache: 100000
+      cacheFor: 100000
     });
 
     const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Get);

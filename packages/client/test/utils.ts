@@ -1,6 +1,5 @@
-import { act } from '@testing-library/react';
-import { GlobalLocalCacheConfig, Method, StatesHook, createAlova } from 'alova';
-import GlobalFetch, { FetchRequestInit } from 'alova/GlobalFetch';
+import { AlovaGlobalCacheAdapter, Method, StatesHook, createAlova } from 'alova';
+import GlobalFetch from 'alova/fetch';
 
 export const untilCbCalled = <T>(setCb: (cb: (arg: T, ...args: any[]) => any, ...others: any[]) => any, ...args: any[]) =>
   new Promise<T>(resolve => {
@@ -21,34 +20,22 @@ export const generateContinuousNumbers = (
   return Array.from({ length: Math.abs(end - start + 1) }).map((_, i) => transformFn(start + i));
 };
 
-export async function waitForWithFakeTimers(cb: () => void) {
-  let waiting = true;
-  while (waiting) {
-    await act(() =>
-      Promise.resolve()
-        .then(() => jest.runAllTimers())
-        .then(() => new Promise(resolve => setTimeout(resolve, 0)))
-    );
-    try {
-      cb();
-      waiting = false;
-    } catch {}
-  }
-}
-
-type FetchMethod = Method<any, any, any, any, FetchRequestInit, Response, Headers>;
-export const getAlovaInstance = <S, E>(
-  statesHook: StatesHook<S, E>,
+type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
+type FetchMethod = Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>;
+export const getAlovaInstance = <State, Computed, Watched, Export>(
+  statesHook: StatesHook<State, Computed, Watched, Export>,
   {
-    baseURL,
-    localCache,
+    baseURL = 'http://localhost:3000',
+    l1Cache,
+    l2Cache,
     beforeRequestExpect,
     responseExpect,
     resErrorExpect,
     resCompleteExpect
   }: {
     baseURL?: string;
-    localCache?: GlobalLocalCacheConfig;
+    l1Cache?: AlovaGlobalCacheAdapter;
+    l2Cache?: AlovaGlobalCacheAdapter;
     beforeRequestExpect?: (methodInstance: FetchMethod) => void;
     responseExpect?: (response: Response, method: FetchMethod) => void;
     resErrorExpect?: (err: Error, method: FetchMethod) => void;
@@ -71,11 +58,13 @@ export const getAlovaInstance = <S, E>(
             onError: resErrorExpect,
             onComplete: resCompleteExpect
           },
-    errorLogger: false,
     cacheLogger: false
   });
-  if (localCache !== undefined) {
-    alovaInst.options.localCache = localCache;
+  if (l1Cache !== undefined) {
+    alovaInst.options.l1Cache = l1Cache;
+  }
+  if (l2Cache !== undefined) {
+    alovaInst.options.l2Cache = l2Cache;
   }
   return alovaInst;
 };

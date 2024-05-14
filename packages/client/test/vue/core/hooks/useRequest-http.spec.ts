@@ -1,15 +1,13 @@
-import { key } from '@alova/shared/function';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
-import { setCache, useRequest } from '@/index';
+import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { getResponseCache } from '@/storage/responseCache';
+import { queryCache, setCache } from 'alova';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('use useRequest hook to send GET with vue', () => {
   test('init and send get request', async () => {
     const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json(),
-      endWithSlash: true
+      responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
@@ -23,7 +21,7 @@ describe('use useRequest hook to send GET with vue', () => {
         expect(result.data.params).toStrictEqual({ a: 'a', b: 'str' });
         return result.data;
       },
-      localCache: 100 * 1000
+      cacheFor: 100 * 1000
     });
     const { loading, data, error, onSuccess } = useRequest(Get);
     expect(loading.value).toBeTruthy();
@@ -40,9 +38,9 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(fromCache).toBeFalsy();
 
     // 缓存有值
-    const cacheData = getResponseCache(alova.id, key(Get));
-    expect(cacheData.path).toBe('/unit-test');
-    expect(cacheData.params).toStrictEqual({ a: 'a', b: 'str' });
+    const cacheData = await queryCache(Get);
+    expect(cacheData?.path).toBe('/unit-test');
+    expect(cacheData?.params).toStrictEqual({ a: 'a', b: 'str' });
   });
 
   test("shouldn't emit onError of useRequest when global error cb don't throw Error at error request", async () => {
@@ -52,7 +50,7 @@ describe('use useRequest hook to send GET with vue', () => {
       }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-error', {
-      localCache: {
+      cacheFor: {
         expire: 100 * 1000
       }
     });
@@ -69,7 +67,7 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(error.value).toBeUndefined();
 
     // 请求错误无缓存
-    const cacheData = getResponseCache(alova.id, key(Get));
+    const cacheData = await queryCache(Get);
     expect(cacheData).toBeUndefined();
   });
 
@@ -84,7 +82,7 @@ describe('use useRequest hook to send GET with vue', () => {
       }
     });
     const Get = alova.Get<string, Result<string>>('/unit-test-404', {
-      localCache: {
+      cacheFor: {
         expire: 100 * 1000
       }
     });
@@ -112,7 +110,7 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(error.value?.message).toBe('api not found');
 
     // 请求错误无缓存
-    const cacheData = getResponseCache(alova.id, key(Get));
+    const cacheData = await queryCache(Get);
     expect(cacheData).toBeUndefined();
 
     const alova2 = getAlovaInstance(VueHook, {
@@ -121,7 +119,7 @@ describe('use useRequest hook to send GET with vue', () => {
       }
     });
     const Get2 = alova2.Get<string, Result<string>>('/unit-test-404', {
-      localCache: {
+      cacheFor: {
         expire: 100 * 1000
       }
     });
@@ -324,15 +322,15 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(rawData.path).toBe('/unit-test');
     expect(rawData.params.a).toBe('~');
     expect(data.value.params.b).toBe('~');
-    let cacheData: typeof data.value = getResponseCache(alova.id, key(getGetter(sendObj)));
-    expect(cacheData.params).toStrictEqual(sendObj);
+    let cacheData = await queryCache(getGetter(sendObj));
+    expect(cacheData?.params).toStrictEqual(sendObj);
 
     const sendObj2 = { a: '.', b: '.' };
     rawData = await send(sendObj2);
     expect(rawData.params.a).toBe('.');
     expect(data.value.params.b).toBe('.');
-    cacheData = getResponseCache(alova.id, key(getGetter(sendObj2)));
-    expect(cacheData.params).toStrictEqual(sendObj2);
+    cacheData = await queryCache(getGetter(sendObj2));
+    expect(cacheData?.params).toStrictEqual(sendObj2);
   });
 
   test('should throw a request error when request error at calling `send` function', async () => {
@@ -392,7 +390,7 @@ describe('use useRequest hook to send GET with vue', () => {
 
     const { data, send } = useRequest(getGetterObj, {
       immediate: false,
-      force: (isForce = false) => isForce
+      force: ({ sendArgs: [force] }) => force
     });
 
     setCache(getGetterObj, {
@@ -410,8 +408,8 @@ describe('use useRequest hook to send GET with vue', () => {
     rawData = await send(true);
     expect(rawData.params.a).toBe('~');
     expect(data.value.params.b).toBe('~~');
-    const cacheData = getResponseCache(alova.id, key(getGetterObj));
-    expect(cacheData.params).toStrictEqual({ a: '~', b: '~~' });
+    const cacheData = await queryCache(getGetterObj);
+    expect(cacheData?.params).toStrictEqual({ a: '~', b: '~~' });
   });
 
   test('should update states when call update returns in useFetcher', async () => {

@@ -1,8 +1,7 @@
 import { createAssert } from '@alova/shared/assert';
-import { instanceOf, statesHookHelper } from '@alova/shared/function';
-import { falseValue, trueValue, pushItem, filterItem, objectKeys } from '@alova/shared/vars';
+import { instanceOf, isNumber, isString, statesHookHelper } from '@alova/shared/function';
+import { falseValue, filterItem, forEach, objectKeys, pushItem, trueValue } from '@alova/shared/vars';
 import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext, promiseStatesHook } from 'alova';
-import { isString, isNumber, forEach } from 'lodash-es';
 import { Actions } from '~/typings/general';
 
 type AnyAlovaFrontMiddlewareContext = AlovaFrontMiddlewareContext<any, any, any, any, any, any, any, any, any>;
