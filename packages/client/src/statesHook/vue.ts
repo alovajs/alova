@@ -50,4 +50,4 @@ export default {
   onUnmounted: callback => {
     onUnmounted(callback);
   }
-} as StatesHook<UnknownRef, ComputedRef<unknown>, (WatchSource<any> | object)[]>;
+} as StatesHook<UnknownRef, ComputedRef<unknown>, WatchSource<any> | object>;

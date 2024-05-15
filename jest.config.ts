@@ -6,7 +6,8 @@ const config: Config = {
     '<rootDir>/packages/adapter-axios',
     '<rootDir>/packages/adapter-mock',
     '<rootDir>/packages/adapter-xhr',
-    '<rootDir>/packages/shared'
+    '<rootDir>/packages/shared',
+    '<rootDir>/packages/client'
   ]
 };
 

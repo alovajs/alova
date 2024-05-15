@@ -61,10 +61,10 @@ export const getAlovaInstance = <State, Computed, Watched, Export>(
     cacheLogger: false
   });
   if (l1Cache !== undefined) {
-    alovaInst.options.l1Cache = l1Cache;
+    alovaInst.l1Cache = l1Cache;
   }
   if (l2Cache !== undefined) {
-    alovaInst.options.l2Cache = l2Cache;
+    alovaInst.l2Cache = l2Cache;
   }
   return alovaInst;
 };
