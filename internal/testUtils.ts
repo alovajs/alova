@@ -30,3 +30,12 @@ export const delay = (ts = 0) =>
   new Promise<void>(resolve => {
     setTimeout(resolve, ts);
   });
+
+export const generateContinuousNumbers = (
+  end: number,
+  start = 0,
+  transform: ((i: number) => any) | Record<string | number, any> = i => i
+) => {
+  const transformFn = typeof transform === 'object' ? (i: number) => transform[i] || i : transform;
+  return Array.from({ length: Math.abs(end - start + 1) }).map((_, i) => transformFn(start + i));
+};

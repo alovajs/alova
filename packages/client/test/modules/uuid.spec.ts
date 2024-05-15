@@ -1,5 +1,5 @@
-import { uuid } from '../../src/helper';
-import { untilCbCalled } from '../utils';
+import { uuid } from '@/util/helper';
+import { untilCbCalled } from 'root/testUtils';
 
 describe('uuid', () => {
   test('generate 10000 uuids, 100 per times and interval 10 ms', async () => {

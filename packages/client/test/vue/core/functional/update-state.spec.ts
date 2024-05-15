@@ -1,9 +1,10 @@
 import { getAlovaInstance } from '#/utils';
-import { queryCache, updateState, useRequest } from '@/index';
+import { removeStateCache } from '@/hooks/core/implements/stateCache';
+import { updateState, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { removeStateCache } from '@/storage/stateCache';
 import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
+import { queryCache } from 'alova';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { Ref, ref } from 'vue';
 
@@ -13,7 +14,7 @@ describe('update cached response data by user in vue', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      cache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
     const { data, onSuccess } = useRequest(Get);
@@ -32,7 +33,7 @@ describe('update cached response data by user in vue', () => {
     });
     const Get = alova.Get('/unit-test', {
       params: { a: 1 },
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
 
@@ -52,31 +53,25 @@ describe('update cached response data by user in vue', () => {
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',
       params: { a: 1 },
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test', {
       name: 'get2',
       params: { b: 2 },
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
 
     const firstState = useRequest(Get1);
     const secondState = useRequest(Get2);
     await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-    updateState(
-      /^get/,
-      (data: any) => {
-        data.path = '/unit-test-updated';
-        return data;
-      },
-      {
-        onMatch: methodInstance => {
-          expect(methodInstance).toBe(Get1);
-        }
-      }
-    );
+    const updater = (data: any) => {
+      data.path = '/unit-test-updated';
+      return data;
+    };
+    updateState(Get1, updater);
+    updateState(Get2, updater);
 
     // 匹配到多个method实例，只会更新第一个
     expect(firstState.data.value.path).toBe('/unit-test-updated');
@@ -90,13 +85,13 @@ describe('update cached response data by user in vue', () => {
     const Get1 = alova.Get('/unit-test', {
       name: 'get1',
       params: { a: 1 },
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test', {
       name: 'get2',
       params: { b: 2 },
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
 
@@ -105,7 +100,7 @@ describe('update cached response data by user in vue', () => {
     await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
 
     // 不会匹配任何一个method实例
-    updateState('get', (data: any) => {
+    updateState(alova.Get(''), (data: any) => {
       data.path = '/unit-test-updated';
       return data;
     });
@@ -120,7 +115,7 @@ describe('update cached response data by user in vue', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
 
@@ -162,7 +157,7 @@ describe('update cached response data by user in vue', () => {
     expect(extraData.value).toBe(1);
 
     // 更新额外管理的状态时，不会涉及它的缓存
-    expect(queryCache(Get)).toStrictEqual(data.value);
+    expect(await queryCache(Get)).toStrictEqual(data.value);
   });
 
   test("shouldn't return false when matched method instance but has no cached states", async () => {
@@ -172,7 +167,7 @@ describe('update cached response data by user in vue', () => {
     const Get1 = alova.Get('/unit-test', {
       name: 'get10',
       params: { a: 1 },
-      localCache: 100000,
+      cacheFor: 100000,
       transformData: ({ data }: Result) => data
     });
 
@@ -180,24 +175,12 @@ describe('update cached response data by user in vue', () => {
     await untilCbCalled(onSuccess);
     removeStateCache(alova.id, key(Get1));
 
-    // onMatch将会被调用，但不会更新
-    const mockMatchFn = jest.fn();
     const mockUpdateFn = jest.fn();
-    const updated = updateState(
-      'get10',
-      (data: any) => {
-        mockUpdateFn();
-        return data;
-      },
-      {
-        onMatch(method) {
-          expect(method).toBe(Get1);
-          mockMatchFn();
-        }
-      }
-    );
+    const updated = updateState(Get1, (data: any) => {
+      mockUpdateFn();
+      return data;
+    });
 
-    expect(mockMatchFn).toHaveBeenCalled();
     expect(mockUpdateFn).not.toHaveBeenCalled();
     expect(updated).toBeFalsy();
   });

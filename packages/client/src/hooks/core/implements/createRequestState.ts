@@ -32,10 +32,16 @@ import type {
   WatcherHookConfig
 } from 'alova';
 import { promiseStatesHook } from 'alova';
+import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './alovaEvent';
 import { coreHookAssert } from './assert';
-import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './createAlovaEvent';
 import createHook from './createHook';
 import useHookToSendRequest from './useHookToSendRequest';
+
+export type AlovaEvents<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
+  [KEY_SUCCESS]: AlovaSuccessEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  [KEY_ERROR]: AlovaErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  [KEY_COMPLETE]: AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+};
 
 const refCurrent = <T>(ref: { current: T }) => ref.current;
 const keyData = 'data';
@@ -136,11 +142,8 @@ export default function createRequestState<
     [keyLoading]: loading as unknown as ExportedType<boolean, State>,
     [keyError]: error as unknown as ExportedType<Error | undefined, State>
   });
-  const eventManager = createEventManager<{
-    success: AlovaSuccessEvent<any, any, any, any, any, any, any, any, any>;
-    error: AlovaErrorEvent<any, any, any, any, any, any, any, any, any>;
-    complete: AlovaCompleteEvent<any, any, any, any, any, any, any, any, any>;
-  }>();
+  const eventManager =
+    createEventManager<AlovaEvents<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject, exportings.update)));
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件

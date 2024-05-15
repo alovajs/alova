@@ -1,24 +1,5 @@
-import { AlovaGlobalCacheAdapter, Method, StatesHook, createAlova } from 'alova';
+import { AlovaGlobalCacheAdapter, GlobalCacheConfig, Method, StatesHook, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-
-export const untilCbCalled = <T>(setCb: (cb: (arg: T, ...args: any[]) => any, ...others: any[]) => any, ...args: any[]) =>
-  new Promise<T>(resolve => {
-    setCb(
-      d => {
-        resolve(d);
-      },
-      ...args
-    );
-  });
-
-export const generateContinuousNumbers = (
-  end: number,
-  start = 0,
-  transform: ((i: number) => any) | Record<string | number, any> = i => i
-) => {
-  const transformFn = typeof transform === 'object' ? (i: number) => transform[i] || i : transform;
-  return Array.from({ length: Math.abs(end - start + 1) }).map((_, i) => transformFn(start + i));
-};
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 type FetchMethod = Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>;
@@ -26,6 +7,7 @@ export const getAlovaInstance = <State, Computed, Watched, Export>(
   statesHook: StatesHook<State, Computed, Watched, Export>,
   {
     baseURL = 'http://localhost:3000',
+    cacheFor,
     l1Cache,
     l2Cache,
     beforeRequestExpect,
@@ -34,6 +16,7 @@ export const getAlovaInstance = <State, Computed, Watched, Export>(
     resCompleteExpect
   }: {
     baseURL?: string;
+    cacheFor?: GlobalCacheConfig;
     l1Cache?: AlovaGlobalCacheAdapter;
     l2Cache?: AlovaGlobalCacheAdapter;
     beforeRequestExpect?: (methodInstance: FetchMethod) => void;
@@ -47,6 +30,7 @@ export const getAlovaInstance = <State, Computed, Watched, Export>(
     timeout: 3000,
     statesHook,
     requestAdapter: GlobalFetch(),
+    cacheFor,
     beforeRequest(config) {
       beforeRequestExpect && beforeRequestExpect(config);
     },
@@ -68,3 +52,5 @@ export const getAlovaInstance = <State, Computed, Watched, Export>(
   }
   return alovaInst;
 };
+
+export default getAlovaInstance;

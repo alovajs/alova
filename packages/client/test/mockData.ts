@@ -34,7 +34,8 @@ let detailErrorId = '';
 let detailErrorTimes = 0;
 const mocks = defineMock({
   '/list': ({ query }) => {
-    let { page = 1, pageSize = 10, min = 0, max = Infinity } = query;
+    let { page = 1, pageSize = 10 } = query;
+    const { min = 0, max = Infinity } = query;
     page = Number(page);
     pageSize = Number(pageSize);
     const start = (page - 1) * pageSize;
@@ -57,7 +58,8 @@ const mocks = defineMock({
   },
 
   '/list-with-search': ({ query }) => {
-    let { page = 1, pageSize = 10, keyword } = query;
+    let { page = 1, pageSize = 10 } = query;
+    const { keyword } = query;
     page = Number(page);
     pageSize = Number(pageSize);
     const start = (page - 1) * pageSize;

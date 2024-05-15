@@ -7,7 +7,6 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
-import { getAlovaInstanceSyncResponded } from './getAlovaInstanceSyncResponded';
 
 const StrictModeReact = StrictMode as any;
 
@@ -120,7 +119,11 @@ describe('useRequest hook with react', () => {
   });
 
   test('should return sync mock data from responded hook', async () => {
-    const alova = getAlovaInstanceSyncResponded();
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: () => ({
+        mock: 'mockdata'
+      })
+    });
     const Get = alova.Get<{ mock: string }>('/unit-test');
     function Page() {
       const { data, loading } = useRequest(Get);

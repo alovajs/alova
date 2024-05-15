@@ -1,8 +1,8 @@
 import { createAlova, Method, useRequest } from 'alova';
 import VueHook from 'alova/vue';
+import { generateContinuousNumbers, untilCbCalled } from 'root/testUtils';
 import { createClientTokenAuthentication } from '../../packages/scene-vue';
 import { mockRequestAdapter } from '../mockData';
-import { generateContinuousNumbers, untilCbCalled } from '../utils';
 
 interface ListResponse {
   total: number;
