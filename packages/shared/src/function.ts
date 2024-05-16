@@ -1,5 +1,6 @@
 import type {
   Alova,
+  AlovaGenerics,
   AlovaMethodHandler,
   CacheExpire,
   CacheMode,
@@ -88,38 +89,28 @@ export const getTime = (date?: Date) => (date ? date.getTime() : Date.now());
  * 通过method实例获取alova实例
  * @returns alova实例
  */
-export const getContext = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => methodInstance.context;
+export const getContext = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => methodInstance.context;
 /**
  * 获取method实例配置数据
  * @returns 配置对象
  */
-export const getConfig = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => methodInstance.config;
+export const getConfig = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => methodInstance.config;
 /**
  * 获取alova配置数据
  * @returns alova配置对象
  */
-export const getContextOptions = <State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
-  alovaInstance: Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>
-) => alovaInstance.options;
+export const getContextOptions = <AG extends AlovaGenerics>(alovaInstance: Alova<AG>) => alovaInstance.options;
 /**
  * 通过method实例获取alova配置数据
  * @returns alova配置对象
  */
-export const getOptions = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => getContextOptions(getContext(methodInstance));
+export const getOptions = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => getContextOptions(getContext(methodInstance));
 
 /**
  * 获取请求方式的key值
  * @returns 此请求方式的key值
  */
-export const key = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => {
+export const key = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => {
   const { params, headers } = getConfig(methodInstance);
   return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
 };
@@ -128,9 +119,7 @@ export const key = <State, Computed, Watched, Export, Responded, Transformed, Re
  * @param methodInstance method实例
  * @returns 此method实例的key值
  */
-export const getMethodInternalKey = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => methodInstance.__key__;
+export const getMethodInternalKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => methodInstance.__key__;
 
 /**
  * 获取请求方法对象
@@ -138,10 +127,8 @@ export const getMethodInternalKey = <State, Computed, Watched, Export, Responded
  * @param args 方法调用参数
  * @returns 请求方法对象
  */
-export const getHandlerMethod = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodHandler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+export const getHandlerMethod = <AG extends AlovaGenerics>(
+  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
   assert: (expression: boolean, msg: string) => void,
   args: any[] = []
 ) => {
@@ -189,9 +176,7 @@ export const omit = <T extends Record<string, any>, K extends keyof T>(obj: T, .
  * @param localCache 本地缓存参数
  * @returns 统一的缓存参数对象
  */
-export const getLocalCacheConfigParam = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => {
+export const getLocalCacheConfigParam = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => {
   const { cacheFor } = getConfig(methodInstance);
   const getCacheExpireTs = (cacheExpire: CacheExpire) =>
     isNumber(cacheExpire) ? getTime() + cacheExpire : getTime(cacheExpire || undefinedValue);

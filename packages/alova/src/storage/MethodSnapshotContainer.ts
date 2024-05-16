@@ -1,15 +1,15 @@
 import myAssert from '@/utils/myAssert';
 import { getConfig, instanceOf, isFn, isPlainObject, isString, newInstance } from '@alova/shared/function';
 import { RegExpCls, filterItem, forEach, objectKeys } from '@alova/shared/vars';
-import { Method, MethodDetaiedFilter, MethodFilter, MethodFilterHandler } from '~/typings';
+import { AlovaGenerics, Method, MethodDetaiedFilter, MethodFilter, MethodFilterHandler } from '~/typings';
 
 const SetCls = Set;
 
-export default class MethodSnapshotContainer<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
+export default class MethodSnapshotContainer<AG extends AlovaGenerics> {
   /**
    * method实例快照集合，发送过请求的method实例将会被保存
    */
-  records: Record<string, Set<Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>> = {};
+  records: Record<string, Set<Method<AG>>> = {};
 
   capacity: number;
 
@@ -24,7 +24,7 @@ export default class MethodSnapshotContainer<State, Computed, Watched, Export, R
    * 保存method实例快照
    * @param methodInstance method实例
    */
-  save(methodInstance: Method) {
+  save(methodInstance: Method<AG>) {
     const { name } = getConfig(methodInstance);
     const { records, occupy, capacity } = this;
     if (name && occupy < capacity) {
@@ -61,7 +61,7 @@ export default class MethodSnapshotContainer<State, Computed, Watched, Export, R
 
     const { records } = this;
     // 通过解构的nameMatcher和filterHandler，获取对应的Method实例快照
-    let matches = newInstance(SetCls<Method>);
+    let matches = newInstance(SetCls<Method<AG>>);
 
     // 如果有提供namespace参数则只在这个namespace中查找，否则在所有缓存数据中查找
     if (nameString) {
@@ -76,8 +76,6 @@ export default class MethodSnapshotContainer<State, Computed, Watched, Export, R
     }
 
     const fromMatchesArray = isFn(matchHandler) ? filterItem([...matches], matchHandler) : [...matches];
-    return (matchAll ? fromMatchesArray : fromMatchesArray[0]) as M extends true
-      ? Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>[]
-      : Method<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader> | undefined;
+    return (matchAll ? fromMatchesArray : fromMatchesArray[0]) as M extends true ? Method<AG>[] : Method<AG> | undefined;
   }
 }

@@ -1,15 +1,13 @@
 import { objAssign } from '@alova/shared/function';
 import { len } from '@alova/shared/vars';
-import { AlovaMethodHandler, EnumHookType, Method, WatcherHookConfig, type UseHookReturnType } from 'alova';
+import { AlovaGenerics, AlovaMethodHandler, EnumHookType, Method, WatcherHookConfig, type UseHookReturnType } from 'alova';
 import { watcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 
-export default function useWatcher<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  handler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  watchingStates: Watched[],
-  config: WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
+export default function useWatcher<AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  watchingStates: AG['Watched'][],
+  config: WatcherHookConfig<AG> = {}
 ) {
   watcherHookAssert(watchingStates && len(watchingStates) > 0, 'expected at least one watching state');
   const { immediate, debounce = 0, initialData } = config;
@@ -25,5 +23,5 @@ export default function useWatcher<State, Computed, Watched, Export, Responded, 
   const { send } = props;
   return objAssign(props, {
     send: (...args: any[]) => send(args)
-  }) as UseHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  }) as UseHookReturnType<AG>;
 }

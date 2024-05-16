@@ -1,4 +1,3 @@
-import Method from '@/Method';
 import defaultCacheLogger from '@/defaults/cacheLogger';
 import { getRawWithCacheAdapter, getWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
 import cloneMethod from '@/utils/cloneMethod';
@@ -30,7 +29,16 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import { AlovaRequestAdapter, Arg, ProgressUpdater, RespondedHandler, ResponseCompleteHandler, ResponseErrorHandler } from '~/typings';
+import {
+  AlovaGenerics,
+  AlovaRequestAdapter,
+  Arg,
+  Method,
+  ProgressUpdater,
+  RespondedHandler,
+  ResponseCompleteHandler,
+  ResponseErrorHandler
+} from '~/typings';
 import { hitCacheBySource } from './manipulateCache';
 
 // 请求适配器返回信息暂存，用于实现请求共享
@@ -68,10 +76,7 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
  * @param forceRequest 忽略缓存
  * @returns 响应数据
  */
-export default function sendRequest<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  methodInstance: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  forceRequest: boolean
-) {
+export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Method<AG>, forceRequest: boolean) {
   let fromCache = trueValue;
   let requestAdapterCtrlsPromiseResolveFn: (value?: RequestAdapterReturnType) => void;
   const requestAdapterCtrlsPromise = newInstance(PromiseCls, resolve => {
@@ -113,9 +118,9 @@ export default function sendRequest<State, Computed, Watched, Export, Responded,
     const { params = {}, headers = {}, transformData = $self, shareRequest } = getConfig(clonedMethod);
     const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
     let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
-    let responseSuccessHandler: RespondedHandler<any, any, any, RequestConfig, Response, ResponseHeader> = $self;
-    let responseErrorHandler: ResponseErrorHandler<any, any, any, RequestConfig, Response, ResponseHeader> | undefined = undefinedValue;
-    let responseCompleteHandler: ResponseCompleteHandler<any, any, any, RequestConfig, Response, ResponseHeader> = noop;
+    let responseSuccessHandler: RespondedHandler<AG> = $self;
+    let responseErrorHandler: ResponseErrorHandler<AG> | undefined = undefinedValue;
+    let responseCompleteHandler: ResponseCompleteHandler<AG> = noop;
 
     // uniform handler of onSuccess, onError, onComplete
     if (isFn(responded)) {

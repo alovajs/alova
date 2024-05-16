@@ -12,8 +12,16 @@ import {
   pushItem,
   undefinedValue
 } from '@alova/shared/vars';
-import { AbortFunction, AlovaMethodConfig, MethodRequestConfig, MethodType, ProgressHandler, RequestBody } from '~/typings';
-import type { Alova } from './alova';
+import {
+  AbortFunction,
+  Alova,
+  AlovaGenerics,
+  AlovaMethodConfig,
+  MethodRequestConfig,
+  MethodType,
+  ProgressHandler,
+  RequestBody
+} from '~/typings';
 import sendRequest from './functions/sendRequest';
 
 const offEventCallback = (offHandler: any, handlers: any[]) => () => {
@@ -21,30 +29,20 @@ const offEventCallback = (offHandler: any, handlers: any[]) => () => {
   index >= 0 && handlers.splice(index, 1);
 };
 
-export default class Method<
-  State = any,
-  Computed = any,
-  Watched = any,
-  Export = any,
-  Responded = any,
-  Transformed = any,
-  RequestConfig = any,
-  Response = any,
-  ResponseHeader = any
-> {
+export default class Method<AG extends AlovaGenerics = AlovaGenerics> {
   public type: MethodType;
 
   public baseURL: string;
 
   public url: string;
 
-  public config: MethodRequestConfig & AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
+  public config: MethodRequestConfig & AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>;
 
   public data?: RequestBody;
 
   public hitSource?: (string | RegExp)[];
 
-  public context: Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
+  public context: Alova<AG>;
 
   public dhs: ProgressHandler[] = [];
 
@@ -63,9 +61,9 @@ export default class Method<
 
   constructor(
     type: MethodType,
-    context: Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>,
+    context: Alova<AG>,
     url: string,
-    config?: AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>,
+    config?: AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>,
     data?: RequestBody
   ) {
     const abortRequest: AbortFunction = () => {
@@ -147,7 +145,7 @@ export default class Method<
   /**
    * 通过method实例发送请求，返回promise对象
    */
-  public send(forceRequest = falseValue): Promise<Responded> {
+  public send(forceRequest = falseValue): Promise<AG['Responded']> {
     const instance = this;
     const { response, onDownload, onUpload, abort, fromCache } = sendRequest(instance, forceRequest);
     len(instance.dhs) > 0 && onDownload((loaded, total) => forEach(instance.dhs, handler => handler({ loaded, total })));
@@ -176,8 +174,8 @@ export default class Method<
    * @param onrejected 当Promise被reject时要执行的回调
    * @returns 返回一个Promise，用于执行任何回调
    */
-  public then<TResult1 = Responded, TResult2 = never>(
-    onfulfilled?: (value: Responded) => TResult1 | PromiseLike<TResult1>,
+  public then<TResult1 = AG['Responded'], TResult2 = never>(
+    onfulfilled?: (value: AG['Responded']) => TResult1 | PromiseLike<TResult1>,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
   ) {
     return promiseThen(this.send(), onfulfilled, onrejected);

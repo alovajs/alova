@@ -1,8 +1,14 @@
 import { falseValue, undefinedValue } from '@alova/shared/vars';
-import type { FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from 'alova';
+import type { AlovaGenerics, FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from 'alova';
 import { Method } from 'alova';
 
-export default (ht: TEnumHookType, c: UseHookConfig, eventManager: Hook['em'], ro: ReferingObject, upd: Hook['upd']) =>
+export default <AG extends AlovaGenerics>(
+  ht: TEnumHookType,
+  c: UseHookConfig<AG>,
+  eventManager: Hook['em'],
+  ro: ReferingObject,
+  upd: Hook['upd']
+) =>
   ({
     /** 最后一次请求的method实例 */
     m: undefinedValue as unknown as Method,

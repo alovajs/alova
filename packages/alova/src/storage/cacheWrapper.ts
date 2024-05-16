@@ -181,7 +181,7 @@ export const clearWithCacheAdapter = async (cacheAdapters: AlovaGlobalCacheAdapt
  */
 export const hitTargetCacheWithCacheAdapter = async (
   sourceKey: string,
-  sourceName: NonNullable<AlovaMethodConfig<any, any, {}, any>['name']>,
+  sourceName: AlovaMethodConfig<any, any, {}, any>['name'],
   cacheAdapter: AlovaGlobalCacheAdapter
 ) => {
   const sourceNameStr = `${sourceName}`;

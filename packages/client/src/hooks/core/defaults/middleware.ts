@@ -1,4 +1,4 @@
-import type { AlovaGuardNext } from 'alova';
+import type { AlovaGenerics, AlovaGuardNext } from 'alova';
 
-const defaultMiddleware = (_: any, next: AlovaGuardNext<any, any, any, any, any, any, any, any, any>) => next();
+const defaultMiddleware = <AG extends AlovaGenerics>(_: any, next: AlovaGuardNext<AG>) => next();
 export default defaultMiddleware;

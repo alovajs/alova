@@ -3,6 +3,7 @@ import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefined
 import {
   AlovaFetcherMiddleware,
   AlovaFrontMiddleware,
+  AlovaGenerics,
   AlovaGuardNext,
   AlovaMethodHandler,
   EnumHookType,
@@ -27,9 +28,9 @@ import { getStateCache, removeStateCache, setStateCache } from './stateCache';
  * @param sendCallingArgs send函数参数
  * @returns 请求状态
  */
-export default function useHookToSendRequest(
+export default function useHookToSendRequest<AG extends AlovaGenerics>(
   hookInstance: Hook,
-  methodHandler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any>,
+  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
   sendCallingArgs: any[] = []
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
@@ -37,13 +38,13 @@ export default function useHookToSendRequest(
   const { fs: frontStates, ht: hookType, c: useHookConfig, upd: update, em: eventManager } = hookInstance;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-    | FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>
-    | FetcherHookConfig;
+    | FrontRequestHookConfig<AG>
+    | FetcherHookConfig<AG>;
   const alovaInstance = getContext(methodInstance);
   const { id } = alovaInstance;
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const methodKey = getMethodInternalKey(methodInstance);
-  const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<any, any, any, any, any, any, any, any, any>;
+  const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<AG>;
   hookInstance.m = methodInstance;
 
   return (async () => {
@@ -68,7 +69,7 @@ export default function useHookToSendRequest(
     }
 
     // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
-    const guardNext: AlovaGuardNext<any, any, any, any, any, any, any, any, any> = guardNextConfig => {
+    const guardNext: AlovaGuardNext<AG> = guardNextConfig => {
       isNextCalled = trueValue;
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } = guardNextConfig || {};
       const forceRequestFinally = sloughConfig(
@@ -123,13 +124,13 @@ export default function useHookToSendRequest(
     const toUpdateResponse = () => hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
     // 调用中间件函数
     const middlewareCompletePromise = isFetcher
-      ? (middleware as AlovaFetcherMiddleware<any, any, any, any, any, any, any, any, any>)(
+      ? (middleware as AlovaFetcherMiddleware<AG>)(
           {
             ...commonContext,
             fetchArgs: sendCallingArgs,
             fetch: (methodInstance, ...args) => {
               assertMethod(currentHookAssert, methodInstance);
-              return useHookToSendRequest(hookInstance, methodInstance as Method, args);
+              return useHookToSendRequest(hookInstance, methodInstance as Method<AG>, args);
             },
             fetchStates: omit(frontStates, 'data'),
             update,
@@ -139,7 +140,7 @@ export default function useHookToSendRequest(
           },
           guardNext
         )
-      : (middleware as AlovaFrontMiddleware<any, any, any, any, any, any, any, any, any>)(
+      : (middleware as AlovaFrontMiddleware<AG>)(
           {
             ...commonContext,
             sendArgs: sendCallingArgs,

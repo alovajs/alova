@@ -1,25 +1,12 @@
 /* eslint-disable max-classes-per-file */
-import { AlovaEvent, Method } from '../../alova/typings';
+import { AlovaEvent, AlovaGenerics, Method } from '../../alova/typings';
 
-type AnyMethod = Method<any, any, any, any, any, any, any, any, any>;
-
-export class AlovaEventBase<
-  State = any,
-  Computed = any,
-  Watched = any,
-  Export = any,
-  Responded = any,
-  Transformed = any,
-  RequestConfig = any,
-  Response = any,
-  ResponseHeader = any
-> implements AlovaEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-{
+export class AlovaEventBase<AG extends AlovaGenerics> implements AlovaEvent<AG> {
   readonly sendArgs: any[];
 
-  readonly method: AnyMethod;
+  readonly method: Method<AG>;
 
-  constructor(method: AnyMethod, sendArgs: any[]) {
+  constructor(method: Method<AG>, sendArgs: any[]) {
     this.method = method;
     this.sendArgs = sendArgs;
   }
@@ -28,74 +15,44 @@ export class AlovaEventBase<
     return { ...this };
   }
 
-  static spawn(method: AnyMethod, sendArgs: any[]) {
+  static spawn(method: Method, sendArgs: any[]) {
     return new AlovaEventBase(method, sendArgs);
   }
 }
 
-export class AlovaSuccessEvent<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends AlovaEventBase<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+export class AlovaSuccessEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
   readonly fromCache: boolean;
 
-  readonly data: Responded;
+  readonly data: AG['Responded'];
 
-  constructor(base: AlovaEventBase, data: Responded, fromCache: boolean) {
+  constructor(base: AlovaEventBase<AG>, data: AG['Responded'], fromCache: boolean) {
     super(base.method, base.sendArgs);
     this.data = data;
     this.fromCache = fromCache;
   }
 }
 
-export class AlovaErrorEvent<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends AlovaEventBase<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+export class AlovaErrorEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
   readonly error: any;
 
-  constructor(base: AlovaEventBase, error: any) {
+  constructor(base: AlovaEventBase<AG>, error: any) {
     super(base.method, base.sendArgs);
     this.error = error;
   }
 }
 
-export class AlovaCompleteEvent<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> extends AlovaEventBase<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+export class AlovaCompleteEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
   /** 响应状态 */
   status: 'success' | 'error';
 
   /** data数据是否来自缓存，当status为error时，fromCache始终为false */
   readonly fromCache: boolean;
 
-  readonly data: Responded;
+  readonly data: AG['Responded'];
 
   readonly error: any;
 
-  constructor(base: AlovaEventBase, status: 'success' | 'error', data: Responded, fromCache: boolean, error: any) {
+  constructor(base: AlovaEventBase<AG>, status: 'success' | 'error', data: AG['Responded'], fromCache: boolean, error: any) {
     super(base.method, base.sendArgs);
     this.status = status;
     this.data = data;

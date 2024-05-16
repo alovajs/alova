@@ -9,7 +9,7 @@ import {
 } from '@/storage/cacheWrapper';
 import { getConfig, getContext, getLocalCacheConfigParam, getMethodInternalKey, getTime, isFn } from '@alova/shared/function';
 import { PromiseCls, isArray, len, mapItem, undefinedValue } from '@alova/shared/vars';
-import { CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
+import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
 /*
  * 以下三个函数中的matcher为Method实例匹配器，它分为3种情况：
@@ -23,7 +23,10 @@ import { CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/t
  * @param matcher Method实例匹配器
  * @returns 缓存数据，未查到时返回undefined
  */
-export const queryCache = async <Responded>(matcher: Method<any, any, any, any, Responded>, { policy = 'all' }: CacheQueryOptions = {}) => {
+export const queryCache = async <Responded>(
+  matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
+  { policy = 'all' }: CacheQueryOptions = {}
+) => {
   // if __key__ exists, that means it's a method instance.
   if (matcher && matcher.__key__) {
     const { id, l1Cache, l2Cache } = getContext(matcher);
@@ -52,7 +55,7 @@ export const queryCache = async <Responded>(matcher: Method<any, any, any, any, 
  * @param data 缓存数据
  */
 export const setCache = async <Responded>(
-  matcher: Method<any, any, any, any, Responded> | Method<any, any, any, any, Responded>[],
+  matcher: Method<AlovaGenerics<any, any, any, any, Responded>> | Method<AlovaGenerics<any, any, any, any, Responded>>[],
   dataOrUpdater: Responded | ((oldCache?: Responded) => Responded | undefined | void),
   { policy = 'all' }: CacheSetOptions = {}
 ) => {

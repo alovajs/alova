@@ -1,6 +1,6 @@
 import { createAssert } from '@alova/shared/assert';
 import { instanceOf } from '@alova/shared/function';
-import { EnumHookType, Method } from 'alova';
+import { AlovaGenerics, EnumHookType, Method } from 'alova';
 
 export const coreAssert = createAssert('');
 export const requestHookAssert = createAssert('useRequest');
@@ -18,5 +18,5 @@ export const coreHookAssert = (hookType: EnumHookType) =>
  * 断言是否为method实例
  * @param methodInstance method实例
  */
-export const assertMethod = (assert: typeof requestHookAssert, methodInstance?: Method) =>
+export const assertMethod = <AG extends AlovaGenerics>(assert: typeof requestHookAssert, methodInstance?: Method<AG>) =>
   assert(instanceOf(methodInstance, Method), 'expected a method instance.');

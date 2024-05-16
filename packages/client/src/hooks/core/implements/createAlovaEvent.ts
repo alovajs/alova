@@ -1,5 +1,5 @@
 import { ObjectCls, forEach, objectKeys, undefinedValue } from '@alova/shared/vars';
-import type { AlovaCompleteEvent, Method } from 'alova';
+import type { AlovaCompleteEvent, AlovaGenerics, Method } from 'alova';
 
 export const KEY_SUCCESS = 'success';
 export const KEY_ERROR = 'error';
@@ -18,14 +18,14 @@ export const enum AlovaEventType {
 /**
  * 创建统一的事件对象
  */
-export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+export default <AG extends AlovaGenerics>(
   eventType: AlovaEventType,
-  method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  method: Method<AG>,
   sendArgs: any[],
   fromCache?: boolean,
-  data?: Responded,
+  data?: AG['Responded'],
   error?: any,
-  status?: AlovaCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>['status']
+  status?: AlovaCompleteEvent<AG>['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */

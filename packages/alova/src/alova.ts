@@ -1,10 +1,30 @@
 import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGlobalCacheAdapter, AlovaMethodCreateConfig, AlovaOptions, RequestBody, StatesHook } from '~/typings';
+import {
+  AlovaGenerics,
+  AlovaGlobalCacheAdapter,
+  AlovaMethodCreateConfig,
+  AlovaOptions,
+  RequestBody,
+  StatesHook,
+  Alova as TAlova
+} from '~/typings';
 import Method from './Method';
 import { createDefaultL1CacheAdapter, createDefaultL2CacheAdapter } from './defaults/cacheAdapter';
 import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
+
+interface RespondedAlovaGenerics<AG extends AlovaGenerics, Responded, Transformed> {
+  State: AG['State'];
+  Computed: AG['Computed'];
+  Watched: AG['Watched'];
+  Export: AG['Export'];
+  Responded: Responded;
+  Transformed: Transformed;
+  RequestConfig: AG['RequestConfig'];
+  Response: AG['Response'];
+  ResponseHeader: AG['ResponseHeader'];
+}
 
 const typeGet = 'GET';
 const typeHead = 'HEAD';
@@ -14,7 +34,7 @@ const typePatch = 'PATCH';
 const typeDelete = 'DELETE';
 const typeOptions = 'OPTIONS';
 
-const defaultAlovaOptions: Partial<AlovaOptions<any, any, any, any, any, any, any>> = {
+const defaultAlovaOptions: Partial<AlovaOptions<AlovaGenerics>> = {
   /**
    * GET请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    */
@@ -34,18 +54,18 @@ const defaultAlovaOptions: Partial<AlovaOptions<any, any, any, any, any, any, an
 };
 
 let idCount = 0;
-export class Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader> {
+export class Alova<AG extends AlovaGenerics> {
   public id: string;
 
-  public options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
+  public options: AlovaOptions<AG>;
 
   public l1Cache: AlovaGlobalCacheAdapter;
 
   public l2Cache: AlovaGlobalCacheAdapter;
 
-  public snapshots: MethodSnapshotContainer<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>;
+  public snapshots: MethodSnapshotContainer<AG>;
 
-  constructor(options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>) {
+  constructor(options: AlovaOptions<AG>) {
     const instance = this;
     instance.id = (options.id || (idCount += 1)).toString();
     // 如果storage未指定，则默认使用localStorage
@@ -54,112 +74,71 @@ export class Alova<State, Computed, Watched, Export, RequestConfig, Response, Re
 
     // 合并默认options
     instance.options = {
-      ...defaultAlovaOptions,
+      ...(defaultAlovaOptions as Partial<AlovaOptions<AG>>),
       ...options
     };
-    instance.snapshots = newInstance(
-      MethodSnapshotContainer<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>,
-      options.snapshots ?? defaultAlovaOptions.snapshots ?? 0
-    );
+    instance.snapshots = newInstance(MethodSnapshotContainer<AG>, options.snapshots ?? defaultAlovaOptions.snapshots ?? 0);
   }
 
-  Get<Responded, Transformed = unknown>(
+  Get<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
   ) {
-    return newInstance(
-      Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-      typeGet,
-      this,
-      url,
-      config
-    );
+    return newInstance(Method<AG>, typeGet, this, url, config) as unknown as Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   }
 
-  Post<Responded, Transformed = unknown>(
+  Post<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
   ) {
-    return newInstance(
-      Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-      typePost,
-      this,
-      url,
-      config,
-      data
-    );
+    return newInstance(Method<AG>, typePost, this, url, config, data) as unknown as Method<
+      RespondedAlovaGenerics<AG, Responded, Transformed>
+    >;
   }
 
-  Delete<Responded, Transformed = unknown>(
+  Delete<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
   ) {
-    return newInstance(
-      Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-      typeDelete,
-      this,
-      url,
-      config,
-      data
-    );
+    return newInstance(Method<AG>, typeDelete, this, url, config, data) as unknown as Method<
+      RespondedAlovaGenerics<AG, Responded, Transformed>
+    >;
   }
 
-  Put<Responded, Transformed = unknown>(
+  Put<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
   ) {
-    return newInstance(
-      Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-      typePut,
-      this,
-      url,
-      config,
-      data
-    );
+    return newInstance(Method<AG>, typePut, this, url, config, data) as unknown as Method<
+      RespondedAlovaGenerics<AG, Responded, Transformed>
+    >;
   }
 
-  Head<Responded, Transformed = unknown>(
+  Head<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
   ) {
-    return newInstance(
-      Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-      typeHead,
-      this,
-      url,
-      config
-    );
+    return newInstance(Method<AG>, typeHead, this, url, config) as unknown as Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   }
 
-  Patch<Responded, Transformed = unknown>(
+  Patch<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
   ) {
-    return newInstance(
-      Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-      typePatch,
-      this,
-      url,
-      config,
-      data
-    );
+    return newInstance(Method<AG>, typePatch, this, url, config, data) as unknown as Method<
+      RespondedAlovaGenerics<AG, Responded, Transformed>
+    >;
   }
 
-  Options<Responded, Transformed = unknown>(
+  Options<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader>
+    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
   ) {
-    return newInstance(
-      Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-      typeOptions,
-      this,
-      url,
-      config
-    );
+    return newInstance(Method<AG>, typeOptions, this, url, config) as unknown as Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   }
 }
 
@@ -173,9 +152,12 @@ export const usingL2CacheAdapters: AlovaGlobalCacheAdapter[] = [];
  * @returns alova instance.
  */
 export const createAlova = <State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
-  options: AlovaOptions<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>
+  options: AlovaOptions<AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>
 ) => {
-  const alovaInstance = newInstance(Alova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>, options);
+  const alovaInstance = newInstance(
+    Alova<AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>,
+    options
+  );
   const newStatesHook = alovaInstance.options.statesHook;
   if (boundStatesHook) {
     myAssert(boundStatesHook === newStatesHook, 'expected to use the same `statesHook`');
@@ -186,3 +168,6 @@ export const createAlova = <State, Computed, Watched, Export, RequestConfig, Res
   !usingL2CacheAdapters.includes(l2Cache) && pushItem(usingL2CacheAdapters, l2Cache);
   return alovaInstance;
 };
+
+const tt: Alova<AlovaGenerics> = null as unknown as TAlova<AlovaGenerics>;
+const cv = await tt.Get<{ a: 1 }>('');

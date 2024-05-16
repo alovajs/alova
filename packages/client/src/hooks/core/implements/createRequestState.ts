@@ -16,6 +16,7 @@ import { PromiseCls, falseValue, forEach, isArray, isSSR, len, promiseCatch, tru
 import type {
   AlovaCompleteEvent,
   AlovaErrorEvent,
+  AlovaGenerics,
   AlovaMethodHandler,
   AlovaSuccessEvent,
   CompleteHandler,
@@ -55,27 +56,14 @@ const keyUploading = 'uploading';
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader,
-  Config extends UseHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
->(
+export default function createRequestState<AG extends AlovaGenerics, Config extends UseHookConfig<AG>>(
   hookType: EnumHookType,
-  methodHandler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
   useHookConfig: Config,
-  initialData?: FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>['initialData'],
+  initialData?: FrontRequestHookConfig<AG>['initialData'],
   immediate = falseValue,
-  watchingStates?: Watched[],
-  debounceDelay: WatcherHookConfig<any, any, any, any, any, any, any, any, any>['debounce'] = 0
+  watchingStates?: AG['Watched'][],
+  debounceDelay: WatcherHookConfig<AG>['debounce'] = 0
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
@@ -104,9 +92,7 @@ export default function createRequestState<
           cachedResponse = data;
         }
       }
-      const forceRequestFinally = sloughConfig(
-        (useHookConfig as FrontRequestHookConfig<any, any, any, any, any, any, any, any, any> | FetcherHookConfig).force ?? falseValue
-      );
+      const forceRequestFinally = sloughConfig((useHookConfig as FrontRequestHookConfig<AG> | FetcherHookConfig).force ?? falseValue);
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
   }
@@ -117,7 +103,7 @@ export default function createRequestState<
     loaded: 0
   };
   // 将外部传入的受监管的状态一同放到frontStates集合中
-  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<any, any, any, any, any, any, any, any, any>;
+  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG>;
   const { s: data } = create(isFn(initialData) ? initialData() : initialData, keyData);
   const { s: loading } = create(initialLoading, keyLoading);
   const { s: error } = create(undefinedValue as Error | undefined, keyError);
@@ -132,35 +118,21 @@ export default function createRequestState<
     [keyUploading]: uploading
   };
   const exportings = exportObject({
-    [keyData]: data as unknown as ExportedType<Responded, State>,
-    [keyLoading]: loading as unknown as ExportedType<boolean, State>,
-    [keyError]: error as unknown as ExportedType<Error | undefined, State>
+    [keyData]: data as unknown as ExportedType<AG['Responded'], AG['State']>,
+    [keyLoading]: loading as unknown as ExportedType<boolean, AG['State']>,
+    [keyError]: error as unknown as ExportedType<Error | undefined, AG['State']>
   });
   const eventManager = createEventManager<{
-    success: AlovaSuccessEvent<any, any, any, any, any, any, any, any, any>;
-    error: AlovaErrorEvent<any, any, any, any, any, any, any, any, any>;
-    complete: AlovaCompleteEvent<any, any, any, any, any, any, any, any, any>;
+    success: AlovaSuccessEvent<AG>;
+    error: AlovaErrorEvent<AG>;
+    complete: AlovaCompleteEvent<AG>;
   }>();
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject, exportings.update)));
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
-  const handleRequest = (
-    handler:
-      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      | AlovaMethodHandler<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        > = methodHandler,
-    sendCallingArgs?: any[]
-  ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<Responded>;
+  const handleRequest = (handler: Method<AG> | AlovaMethodHandler<AG> = methodHandler, sendCallingArgs?: any[]) =>
+    useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
   // 以捕获异常的方式调用handleRequest
   // 捕获异常避免异常继续向外抛出
   const wrapEffectRequest = () => {
@@ -202,11 +174,11 @@ export default function createRequestState<
     ...exportings,
     get [keyDownloading]() {
       hookInstance.ed = trueValue;
-      return exportedDownloading as unknown as ExportedType<Progress, State>;
+      return exportedDownloading as unknown as ExportedType<Progress, AG['State']>;
     },
     get [keyUploading]() {
       hookInstance.eu = trueValue;
-      return exportedUploading as unknown as ExportedType<Progress, State>;
+      return exportedUploading as unknown as ExportedType<Progress, AG['State']>;
     },
     ...memorizeOperators({
       abort: () => hookInstance.m && hookInstance.m.abort(),
@@ -217,22 +189,17 @@ export default function createRequestState<
        * @param isFetcher 是否为isFetcher调用
        * @returns 请求promise
        */
-      send: (
-        sendCallingArgs?: any[],
-        methodInstance?: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      ) => handleRequest(methodInstance, sendCallingArgs)
+      send: (sendCallingArgs?: any[], methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs)
     }),
-    onSuccess(handler: SuccessHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) {
+    onSuccess(handler: SuccessHandler<AG>) {
       eventManager.on(KEY_SUCCESS, event => {
         handler(event);
       });
     },
-    onError(handler: ErrorHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) {
+    onError(handler: ErrorHandler<AG>) {
       eventManager.on(KEY_ERROR, handler);
     },
-    onComplete(
-      handler: CompleteHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    ) {
+    onComplete(handler: CompleteHandler<AG>) {
       eventManager.on(KEY_COMPLETE, handler);
     }
   };

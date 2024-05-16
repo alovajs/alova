@@ -9,12 +9,12 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import { Method, RequestElements } from '~/typings';
+import { AlovaRequestAdapter } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
-export default function adapterFetch() {
-  return (elements: RequestElements, method: Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>) => {
+export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Response, Headers> {
+  return (elements, method) => {
     const adapterConfig = method.config;
     const timeout = adapterConfig.timeout || 0;
     const ctrl = new AbortController();
