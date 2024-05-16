@@ -2,6 +2,7 @@ import { EventManager } from '@alova/shared/createEventManager';
 import { Writable } from 'svelte/store';
 import { Ref } from 'vue';
 
+type Replace<T1, T2> = Omit<T1, keyof T2> & T2;
 export interface AlovaGenerics<S = any, C = any, W = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
   State: S;
   Computed: C;
