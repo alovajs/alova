@@ -33,8 +33,8 @@ import type {
   WatcherHookConfig
 } from 'alova';
 import { promiseStatesHook } from 'alova';
+import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './alovaEvent';
 import { coreHookAssert } from './assert';
-import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './createAlovaEvent';
 import createHook from './createHook';
 import useHookToSendRequest from './useHookToSendRequest';
 

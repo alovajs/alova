@@ -1,4 +1,4 @@
-import createSerializerPerformer from '../../src/helper/serializer';
+import createSerializerPerformer from '@/util/serializer';
 
 const performer = createSerializerPerformer({
   custom: {

@@ -1,9 +1,9 @@
-import { delay, Result, untilCbCalled } from 'root/testUtils';
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
+import { delay, Result, untilCbCalled } from 'root/testUtils';
 
-describe('useRequet middleware', () => {
+describe('useRequest middleware', () => {
   test('middleware function can set with a common function', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -418,7 +418,7 @@ describe('useRequet middleware', () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json(),
       // 设置不缓存，重复发起请求时才可以观察loading状态
-      localCache: null
+      cacheFor: null
     });
     const getGetter = (d?: { a: string; b: string }) =>
       alova.Get('/unit-test', {

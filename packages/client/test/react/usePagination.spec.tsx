@@ -1,11 +1,11 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
+import { usePagination } from '@/index';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import ReactHook from 'alova/react';
 import React, { ReactElement, useState } from 'react';
-import { generateContinuousNumbers, untilCbCalled } from '~/test/utils';
-import { usePagination } from '..';
+import { generateContinuousNumbers, untilCbCalled } from 'root/testUtils';
 
 interface ListResponse {
   total: number;
@@ -89,8 +89,8 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 1,
-      pageSize = 10;
+    const page = 1;
+    const pageSize = 10;
     await waitFor(() => {
       expect(screen.getByRole('page')).toHaveTextContent('1');
       expect(screen.getByRole('pageSize')).toHaveTextContent('10');
@@ -306,7 +306,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(
           generateContinuousNumbers(9, 0, i => {
-            let n = i % 3;
+            const n = i % 3;
             return {
               id: i,
               word: ['aaa', 'bbb', 'ccc'][n]
@@ -322,7 +322,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(
           generateContinuousNumbers(19, 10, i => {
-            let n = i % 3;
+            const n = i % 3;
             return {
               id: i,
               word: ['aaa', 'bbb', 'ccc'][n]
@@ -496,9 +496,9 @@ describe('react => usePagination', () => {
     }
     render((<Page />) as ReactElement<any, any>);
 
-    let page = 2,
-      pageSize = 10,
-      total = 300;
+    const page = 2;
+    const pageSize = 10;
+    let total = 300;
     // 检查预加载缓存
     await waitFor(() => {
       let cache = queryCache(getter(page + 1, pageSize));
@@ -615,9 +615,9 @@ describe('react => usePagination', () => {
       );
     }
     render((<Page />) as ReactElement<any, any>);
-    let page = 2,
-      pageSize = 4,
-      total = 300;
+    const page = 2;
+    const pageSize = 4;
+    let total = 300;
 
     // 通过检查缓存数据表示预加载数据成功
     await waitFor(() => {
@@ -857,8 +857,8 @@ describe('react => usePagination', () => {
       );
     }
 
-    let currentList = generateContinuousNumbers(9, 0, i => {
-      let n = i % 3;
+    const currentList = generateContinuousNumbers(9, 0, i => {
+      const n = i % 3;
       return {
         id: i,
         word: ['aaa', 'bbb', 'ccc'][n]
@@ -943,8 +943,8 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 2,
-      pageSize = 10;
+    const page = 2;
+    const pageSize = 10;
     await screen.findByText(/loaded/);
 
     // 检查预加载缓存
@@ -1034,8 +1034,8 @@ describe('react => usePagination', () => {
       );
     }
 
-    let currentList = generateContinuousNumbers(9, 0, i => {
-      let n = i % 3;
+    const currentList = generateContinuousNumbers(9, 0, i => {
+      const n = i % 3;
       return {
         id: i,
         word: ['aaa', 'bbb', 'ccc'][n]
@@ -1142,9 +1142,9 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 2,
-      pageSize = 4,
-      total = 300;
+    const page = 2;
+    const pageSize = 4;
+    let total = 300;
     await waitFor(() => {
       // 检查预加载缓存
       let cache = queryCache(getter(page + 1, pageSize));
@@ -1302,7 +1302,7 @@ describe('react => usePagination', () => {
     }
 
     let currentList = generateContinuousNumbers(9, 0, i => {
-      let n = i % 3;
+      const n = i % 3;
       return {
         id: i,
         word: ['aaa', 'bbb', 'ccc'][n]
@@ -1321,7 +1321,7 @@ describe('react => usePagination', () => {
     fireEvent.click(screen.getByRole('removeByItem'));
 
     currentList = generateContinuousNumbers(10, 0, i => {
-      let n = i % 3;
+      const n = i % 3;
       return {
         id: i,
         word: ['aaa', 'bbb', 'ccc'][n]
@@ -1396,9 +1396,9 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 2,
-      pageSize = 4,
-      total = 300;
+    const page = 2;
+    const pageSize = 4;
+    let total = 300;
     await waitFor(() => {
       // 检查预加载缓存
       let cache = queryCache(getter(page + 1, pageSize));
@@ -1410,10 +1410,10 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('batchRemove1'));
     total -= 2;
-    setMockListData(data => {
+    setMockListData(data =>
       // 模拟数据中同步删除，这样fetch的数据校验才正常
-      return data.filter((i: number) => ![5, 6].includes(i));
-    });
+      data.filter((i: number) => ![5, 6].includes(i))
+    );
 
     // 正在重新fetch下一页数据，但还没响应（响应有50ms延迟），此时翻页到下一页
     await untilCbCalled(setTimeout, 10);
@@ -1529,10 +1529,10 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 2,
-      pageSize = 4,
-      total = 300,
-      min = 0;
+    const page = 2;
+    const pageSize = 4;
+    let total = 300;
+    const min = 0;
     // 等待预加载数据完成
     await waitFor(() => {
       let cache = queryCache(getter(page + 1, pageSize, min));
@@ -1545,10 +1545,10 @@ describe('react => usePagination', () => {
     // 删除两项，前后页的total也会同步更新
     fireEvent.click(screen.getByRole('batchRemove1'));
     total -= 2;
-    setMockListData(data => {
+    setMockListData(data =>
       // 模拟数据中同步删除，这样fetch的数据校验才正常
-      return data.filter((i: number) => ![5, 6].includes(i));
-    });
+      data.filter((i: number) => ![5, 6].includes(i))
+    );
     await waitFor(() => {
       // 有两项用于填补前一页数据了
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
@@ -1588,10 +1588,10 @@ describe('react => usePagination', () => {
     fireEvent.click(screen.getByRole('remove2'));
     total--;
     totalBackup--;
-    setMockListData(data => {
+    setMockListData(data =>
       // 模拟数据中同步删除，这样fetch的数据校验才正常
-      return data.filter((i: number) => ![105].includes(i));
-    });
+      data.filter((i: number) => ![105].includes(i))
+    );
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(7); // 预加载下一页+1
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([104, 106, 107, 108]));
@@ -1685,9 +1685,9 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 3,
-      pageSize = 4,
-      total = 10;
+    const page = 3;
+    const pageSize = 4;
+    let total = 10;
 
     // 等待请求成功
     await waitFor(() => {
@@ -1695,10 +1695,10 @@ describe('react => usePagination', () => {
     });
     fireEvent.click(screen.getByRole('remove1'));
     total -= 1;
-    setMockShortListData(data => {
+    setMockShortListData(data =>
       // 模拟数据中同步删除，这样fetch的数据校验才正常
-      return data.filter((i: number) => ![9].includes(i));
-    });
+      data.filter((i: number) => ![9].includes(i))
+    );
 
     await waitFor(() => {
       // 有两项用于填补前一页数据了
@@ -1712,9 +1712,7 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('remove2'));
     total--;
-    setMockShortListData(data => {
-      return data.filter((i: number) => ![8].includes(i));
-    });
+    setMockShortListData(data => data.filter((i: number) => ![8].includes(i)));
 
     // 当最后一页没数据后，会自动切换到上一页
     await waitFor(() => {
@@ -1812,9 +1810,9 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 2,
-      pageSize = 4,
-      total = 10;
+    const page = 2;
+    const pageSize = 4;
+    let total = 10;
 
     // 等待请求成功
     await waitFor(() => {
@@ -1824,10 +1822,10 @@ describe('react => usePagination', () => {
     // 删除数据
     fireEvent.click(screen.getByRole('remove1'));
     total -= 1;
-    setMockShortListData(data => {
+    setMockShortListData(data =>
       // 模拟数据中同步删除，这样fetch的数据校验才正常
-      return data.filter((i: number) => ![5].includes(i));
-    });
+      data.filter((i: number) => ![5].includes(i))
+    );
 
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
@@ -1933,8 +1931,8 @@ describe('react => usePagination', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let page = 1,
-      pageSize = 10;
+    let page = 1;
+    const pageSize = 10;
 
     // 等待请求成功
     await waitFor(() => {
@@ -2036,7 +2034,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(
           generateContinuousNumbers(9, 0, i => {
-            let n = i % 3;
+            const n = i % 3;
             return {
               id: i,
               word: ['aaa', 'bbb', 'ccc'][n]
@@ -2052,7 +2050,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(
           generateContinuousNumbers(19, 0, i => {
-            let n = i % 3;
+            const n = i % 3;
             return {
               id: i,
               word: ['aaa', 'bbb', 'ccc'][n]
@@ -2226,7 +2224,7 @@ describe('react => usePagination', () => {
 
     render((<Page />) as ReactElement<any, any>);
     let currentList = generateContinuousNumbers(9, 0, i => {
-      let n = i % 3;
+      const n = i % 3;
       return {
         id: i,
         word: ['aaa', 'bbb', 'ccc'][n]
@@ -2239,7 +2237,7 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('addPage'));
     currentList = generateContinuousNumbers(19, 0, i => {
-      let n = i % 3;
+      const n = i % 3;
       return {
         id: i,
         word: ['aaa', 'bbb', 'ccc'][n]
@@ -2613,8 +2611,8 @@ describe('react => usePagination', () => {
       );
     }
     render((<Page />) as ReactElement<any, any>);
-    let page = 2,
-      pageSize = 4;
+    let page = 2;
+    const pageSize = 4;
     // 等待fetch完成
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
@@ -2766,7 +2764,8 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="reload"
-            onClick={reload}></button>
+            onClick={reload}
+          />
         </div>
       );
     }
@@ -2816,17 +2815,19 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setKeyword-bbb"
-            onClick={() => setKeyword('bbb')}></button>
+            onClick={() => setKeyword('bbb')}
+          />
           <button
             role="resetKeyword"
-            onClick={() => setKeyword('')}></button>
+            onClick={() => setKeyword('')}
+          />
         </div>
       );
     }
 
     render((<Page />) as ReactElement<any, any>);
-    let currentList = generateContinuousNumbers(9, 0, i => {
-      let n = i % 3;
+    const currentList = generateContinuousNumbers(9, 0, i => {
+      const n = i % 3;
       return {
         id: i,
         word: ['aaa', 'bbb', 'ccc'][n]

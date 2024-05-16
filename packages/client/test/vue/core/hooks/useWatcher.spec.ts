@@ -10,7 +10,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
-    expect(() => useWatcher(() => alova.Get<Result>('/unit-test'), [])).toThrowError();
+    expect(() => useWatcher(() => alova.Get<Result>('/unit-test'), [])).toThrow();
   });
   test('should send request when change value', async () => {
     const alova = getAlovaInstance(VueHook, {
@@ -884,7 +884,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.val).toBe('-1');
 
-    send([true]);
+    send(true);
     await untilCbCalled(onSuccess);
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.val).toBe('1');
