@@ -1,9 +1,9 @@
 import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/adapterFetch';
-import { GlobalCacheConfig, Method } from '~/typings';
+import { AlovaGenerics, GlobalCacheConfig, Method } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
-type FetchMethod = Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>;
+type FetchMethod = Method<AlovaGenerics<any, any, any, any, any, any, FetchRequestInit, Response, Headers>>;
 export const getAlovaInstance = ({
   endWithSlash = false,
   cacheFor,

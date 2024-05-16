@@ -1,27 +1,15 @@
 import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import {
-  AlovaGenerics,
-  AlovaGlobalCacheAdapter,
-  AlovaMethodCreateConfig,
-  AlovaOptions,
-  Replace,
-  RequestBody,
-  StatesHook,
-  Alova as TAlova
-} from '~/typings';
+import { AlovaGenerics, AlovaGlobalCacheAdapter, AlovaMethodCreateConfig, AlovaOptions, RequestBody, StatesHook } from '~/typings';
 import Method from './Method';
 import { createDefaultL1CacheAdapter, createDefaultL2CacheAdapter } from './defaults/cacheAdapter';
 import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
 
-type RespondedAlovaGenerics<AG extends AlovaGenerics, Responded, Transformed> = Replace<
-  AG,
-  {
-    Responded: Responded;
-    Transformed: Transformed;
-  }
->;
+type RespondedAlovaGenerics<AG extends AlovaGenerics, Responded, Transformed> = Omit<AG, 'Responded' | 'Transformed'> & {
+  Responded: Responded;
+  Transformed: Transformed;
+};
 
 const typeGet = 'GET';
 const typeHead = 'HEAD';
@@ -157,6 +145,3 @@ export const createAlova = <State, Computed, Watched, Export, RequestConfig, Res
   !usingL2CacheAdapters.includes(l2Cache) && pushItem(usingL2CacheAdapters, l2Cache);
   return alovaInstance;
 };
-
-const tt: Alova<AlovaGenerics> = null as unknown as TAlova<AlovaGenerics>;
-const cv = await tt.Get<{ a: 1 }>('');

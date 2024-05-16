@@ -136,7 +136,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       requestAdapterCtrlsPromiseResolveFn(); // 遇到缓存将不传入ctrls
 
       // 打印缓存日志
-      sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod, cacheMode, tag);
+      sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod as any, cacheMode, tag);
       responseCompleteHandler(clonedMethod);
       return cachedResponse;
     }
@@ -151,7 +151,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
           data,
           headers
         },
-        clonedMethod
+        clonedMethod as any
       );
       requestAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
     }

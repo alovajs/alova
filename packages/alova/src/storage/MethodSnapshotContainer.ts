@@ -42,15 +42,15 @@ export default class MethodSnapshotContainer<AG extends AlovaGenerics> {
    * @param matcher 匹配的快照名称，可以是字符串或正则表达式、或带过滤函数的对象
    * @returns 匹配到的Method实例快照数组
    */
-  match<M extends boolean = true>(matcher: MethodFilter, matchAll: M = true as M) {
+  match<M extends boolean = true>(matcher: MethodFilter<AG>, matchAll: M = true as M) {
     // 将filter参数统一解构为nameMatcher和matchHandler
     let nameString: string | undefined;
     let nameReg: RegExp | undefined;
-    let matchHandler: MethodFilterHandler | undefined;
+    let matchHandler: MethodFilterHandler<AG> | undefined;
     let nameMatcher: any = matcher;
     if (isPlainObject(matcher)) {
-      nameMatcher = (matcher as MethodDetaiedFilter).name;
-      matchHandler = (matcher as MethodDetaiedFilter).filter;
+      nameMatcher = (matcher as MethodDetaiedFilter<AG>).name;
+      matchHandler = (matcher as MethodDetaiedFilter<AG>).filter;
     }
 
     if (instanceOf(nameMatcher, RegExpCls)) {

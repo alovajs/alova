@@ -118,7 +118,7 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
  * this is the implementation of auto invalidate cache
  * @param sourceMethod source method instance
  */
-export const hitCacheBySource = async (sourceMethod: Method) => {
+export const hitCacheBySource = async <AG extends AlovaGenerics>(sourceMethod: Method<AG>) => {
   // 查找hit target cache，让它的缓存失效
   // 通过全局配置`autoHitCache`来控制自动缓存失效范围
   const { autoHitCache } = globalConfigMap;

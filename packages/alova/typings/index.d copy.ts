@@ -601,7 +601,7 @@ export interface MethodSnapshotContainer<AG extends AlovaGenerics> {
    * @param {boolean} matchAll is match all, default is true
    * @returns {Method[] | Method} method list when `matchAll` is true, otherwise return method instance or undefined
    */
-  match<M extends boolean = true>(matcher: MethodFilter, matchAll?: M): M extends true ? Method<AG>[] : Method<AG> | undefined;
+  match<M extends boolean = true>(matcher: MethodFilter<AG>, matchAll?: M): M extends true ? Method<AG>[] : Method<AG> | undefined;
 }
 
 export interface Alova<AG extends AlovaGenerics> {
@@ -996,15 +996,15 @@ export type UseFetchHookReturnType<State> = FetchRequestState<
   onComplete: UseHookReturnType['onComplete'];
 };
 
-export interface MethodFilterHandler {
-  (method: Method, index: number, methods: Method[]): boolean;
+export interface MethodFilterHandler<AG extends AlovaGenerics> {
+  (method: Method<AG>, index: number, methods: Method<AG>[]): boolean;
 }
 
-export type MethodDetaiedFilter = {
+export type MethodDetaiedFilter<AG extends AlovaGenerics> = {
   name?: string | RegExp;
-  filter?: MethodFilterHandler;
+  filter?: MethodFilterHandler<AG>;
 };
-export type MethodFilter = string | RegExp | MethodDetaiedFilter;
+export type MethodFilter<AG extends AlovaGenerics> = string | RegExp | MethodDetaiedFilter<AG>;
 
 export type UpdateStateCollection<Responded> = {
   [key: string | number | symbol]: (data: any) => any;
@@ -1197,7 +1197,7 @@ export declare function queryCache<Responded>(
  * await hitCacheBySource(alova.Get('/api/profile'));
  * ```
  */
-export declare function hitCacheBySource(sourceMethod: Method): Promise<void>;
+export declare function hitCacheBySource<AG extends AlovaGenerics>(sourceMethod: Method<AG>): Promise<void>;
 
 /**
  * 获取请求方式的key值
