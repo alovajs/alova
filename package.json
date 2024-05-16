@@ -89,17 +89,17 @@
     },
     "./vue": {
       "types": "./typings/vuehook.d.ts",
-      "require": "./dist/vuehook.common.cjs",
+      "require": "./dist/hooks/vuehook.common.cjs",
       "default": "./dist/hooks/vuehook.esm.js"
     },
     "./react": {
       "types": "./typings/reacthook.d.ts",
-      "require": "./dist/reacthook.common.cjs",
+      "require": "./dist/hooks/reacthook.common.cjs",
       "default": "./dist/hooks/reacthook.esm.js"
     },
     "./svelte": {
       "types": "./typings/sveltehook.d.ts",
-      "require": "./dist/sveltehook.common.cjs",
+      "require": "./dist/hooks/sveltehook.common.cjs",
       "default": "./dist/hooks/sveltehook.esm.js"
     },
     "./GlobalFetch": {
