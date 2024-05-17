@@ -29,7 +29,7 @@ const offEventCallback = (offHandler: any, handlers: any[]) => () => {
   index >= 0 && handlers.splice(index, 1);
 };
 
-export default class Method<AG extends AlovaGenerics = AlovaGenerics> {
+export default class Method<AG extends AlovaGenerics = any> {
   public type: MethodType;
 
   public baseURL: string;
