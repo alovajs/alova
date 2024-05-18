@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import { AlovaEvent, AlovaGenerics, Method } from '../../alova/typings';
+import { AlovaGenerics, Method } from '../../alova/typings';
+import { AlovaEvent } from '../../client/typings';
 
 export class AlovaEventBase<AG extends AlovaGenerics> implements AlovaEvent<AG> {
   readonly sendArgs: any[];

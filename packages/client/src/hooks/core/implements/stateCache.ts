@@ -1,5 +1,6 @@
 import { deleteAttr } from '@alova/shared/vars';
-import type { FrontRequestState, Hook } from 'alova';
+import type { FrontRequestState } from 'alova';
+import { Hook } from '~/typings';
 
 // 状态数据缓存
 interface CacheItem {

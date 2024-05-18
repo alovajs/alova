@@ -1,22 +1,18 @@
 import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@alova/shared/event';
 import { getContext, getHandlerMethod, getMethodInternalKey, noop, omit, sloughConfig } from '@alova/shared/function';
 import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+import { AlovaGenerics, FrontRequestState, Method, Progress, queryCache } from 'alova';
 import {
   AlovaFetcherMiddleware,
   AlovaFrontMiddleware,
-  AlovaGenerics,
   AlovaGuardNext,
   AlovaMethodHandler,
   EnumHookType,
   FetcherHookConfig,
   FrontRequestHookConfig,
-  FrontRequestState,
   Hook,
-  Method,
-  Progress,
-  WatcherHookConfig,
-  queryCache
-} from 'alova';
+  WatcherHookConfig
+} from '~/typings';
 import defaultMiddleware from '../defaults/middleware';
 import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './alovaEvent';
 import { assertMethod, coreHookAssert } from './assert';
@@ -56,7 +52,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
     let responseHandlePromise = promiseResolve<any>(undefinedValue);
     let offDownloadEvent = noop;
     let offUploadEvent = noop;
-    const cachedResponse = await queryCache(methodInstance);
+    const cachedResponse = await queryCache(methodInstance as Method);
     let fromCache = () => !!cachedResponse;
     // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
     let controlledLoading = falseValue;

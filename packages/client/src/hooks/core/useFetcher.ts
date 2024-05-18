@@ -1,5 +1,6 @@
 import { noop, omit } from '@alova/shared/function';
-import { AlovaGenerics, EnumHookType, FetcherHookConfig, FetcherType, Method, type UseFetchHookReturnType } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
+import { EnumHookType, FetcherHookConfig, FetcherType, type UseFetchHookReturnType } from '~/typings';
 import { assertMethod, fetcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 

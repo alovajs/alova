@@ -12,8 +12,9 @@ import {
   walkObject
 } from '@alova/shared/function';
 import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
-import { Method, promiseStatesHook, useRequest } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
+import useRequest from './core/useRequest';
 
 const RestoreEventKey = Symbol('FormRestore');
 const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
@@ -34,18 +35,9 @@ const cloneFormData = <T>(form: T): T => {
 const assert = createAssert('useForm');
 const keyForm = 'form';
 
-export default <
-  State,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader,
-  FormData extends Record<string | symbol, any>
->(
-  handler: FormHookHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData> | ID,
-  config: FormHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, FormData> = {}
+export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
+  handler: FormHookHandler<AG, FormData> | ID,
+  config: FormHookConfig<AG, FormData> = {}
 ) => {
   // 如果第一个参数传入的是id，则获取它的初始化数据并返回
   if (isNumber(handler) || isString(handler)) {
@@ -58,29 +50,21 @@ export default <
   const { id, initialForm, store, resetAfterSubmiting, immediate = falseValue, middleware } = config;
   const {
     create: $,
+    computed,
     ref: useFlag$,
     onMounted: onMounted$,
     watch: watch$,
     exportObject,
     memorizeOperators,
     __referingObj: referingObject
-  } = statesHookHelper(promiseStatesHook());
+  } = statesHookHelper<AG>(promiseStatesHook());
   const isStoreObject = isPlainObject(store);
   const enableStore = isStoreObject ? (store as StoreDetailConfig).enable : store;
   // 如果config中的id也有对应的共享状态，则也会返回它
   // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
   const sharedState = id ? sharedStates[id] : undefinedValue;
   const form = $(cloneFormData(initialForm), keyForm);
-  const methodHandler = handler as FormHookHandler<
-    State,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader,
-    FormData
-  >;
+  const methodHandler = handler as FormHookHandler<AG, FormData>;
   const eventManager = createEventManager<{
     [RestoreEventKey]: void;
   }>();
@@ -94,7 +78,6 @@ export default <
   );
   // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
   const isCreateShardState = useFlag$(false);
-
   const originalHookReturns = useRequest((...args: any[]) => methodHandler(form.v, ...args), {
     ...config,
     __referingObj: referingObject,
@@ -137,6 +120,15 @@ export default <
       ...newForm
     };
   };
+
+  const vv = computed(() => 123, [], 'vv');
+  const tt = exportObject(
+    {
+      [keyForm]: form,
+      vv
+    },
+    originalHookReturns
+  );
 
   const hookReturns = {
     // 第一个参数固定为form数据

@@ -6,6 +6,7 @@ import {
   AlovaEvent,
   AlovaFetcherMiddlewareContext,
   AlovaFrontMiddlewareContext,
+  AlovaGenerics,
   AlovaGuardNext,
   AlovaOptions,
   AlovaRequestAdapter,
@@ -543,7 +544,7 @@ type CaptchaReturnType<S, E, R, T, RC, RE, RH> = UseHookReturnType<S, E, R, T, R
 /**
  * useForm的handler函数类型
  */
-type FormHookHandler<S, E, R, T, RC, RE, RH, F> = (form: F, ...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
+type FormHookHandler<AG extends AlovaGenerics, F> = (form: F, ...args: any[]) => Method<AG>;
 
 /**
  * useForm配置

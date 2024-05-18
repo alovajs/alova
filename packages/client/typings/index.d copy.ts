@@ -129,19 +129,9 @@ export interface Hook {
  * 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
  * 使用不同库的特征作为父类进行判断
  */
-// type TTT<State, CollapsedState, Otherwise> = IsAny<CollapsedState, unknown, CollapsedState> extends State ? CollapsedState : Otherwise;
-export type ExportedState<Responded, State> =
-  IsAny<Ref, unknown, Ref> extends State
-    ? Ref<Responded>
-    : IsAny<Writable<any>, unknown, Writable<any>> extends State
-      ? Writable<Responded>
-      : Responded;
-export type ExportedComputed<Responded, Computed> =
-  IsAny<ComputedRef, unknown, ComputedRef> extends Computed
-    ? ComputedRef<Responded>
-    : IsAny<Readable<any>, unknown, Readable<any>> extends Computed
-      ? Readable<Responded>
-      : Responded;
+type TTT<State, CollapsedState, Otherwise> = IsAny<CollapsedState, unknown, CollapsedState> extends State ? CollapsedState : Otherwise;
+export type ExportedState<Responded, State> = TTT<State, Ref<Responded>, TTT<State, Writable<Responded>, Responded>>;
+export type ExportedComputed<Responded, Computed> = TTT<Computed, ComputedRef<Responded>, TTT<Computed, Readable<Responded>, Responded>>;
 
 export type SendHandler<R> = (...args: any[]) => Promise<R>;
 export type UseHookReturnType<AG extends AlovaGenerics = AlovaGenerics> = FrontRequestState<

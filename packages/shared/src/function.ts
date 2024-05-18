@@ -1,7 +1,6 @@
 import type {
   Alova,
   AlovaGenerics,
-  AlovaMethodHandler,
   CacheExpire,
   CacheMode,
   EffectRequestParams,
@@ -9,6 +8,7 @@ import type {
   ReferingObject,
   StatesHook
 } from '../../alova/typings';
+import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings';
 import { FrameworkReadableState, FrameworkState } from './model/FrameworkState';
 import { GeneralFn, GeneralState } from './types';
 import {
@@ -282,10 +282,13 @@ export const walkObject = (
  * @param referingObject refering object exported from `promiseStatesHook` function
  * @returns simple and unified states creators and handlers
  */
-export function statesHookHelper(statesHook: StatesHook<GeneralState, GeneralState>, referingObject: ReferingObject = {}) {
-  const ref = <D>(initialValue: D) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
+export function statesHookHelper<AG extends AlovaGenerics>(
+  statesHook: StatesHook<GeneralState, GeneralState>,
+  referingObject: ReferingObject = {}
+) {
+  const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
-  const exportState = <D>(state: GeneralState<D>) => (statesHook.export || $self)(state, referingObject) as GeneralState<D>;
+  const exportState = <Data>(state: GeneralState<Data>) => (statesHook.export || $self)(state, referingObject) as GeneralState<Data>;
   const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) => (statesHook.memorize ? statesHook.memorize(fn) : fn);
   const update = (newValue: any, state: GeneralState, key: string) =>
     statesHook.update({ [key]: newValue }, { [key]: state }, referingObject);
@@ -293,21 +296,22 @@ export function statesHookHelper(statesHook: StatesHook<GeneralState, GeneralSta
     mapItem(deps, item => (instanceOf(item, FrameworkReadableState) ? item.e : item));
   const { dehydrate } = statesHook;
   const statesList = [] as string[];
+
   return {
-    create: <D>(initialValue: D, key: string, isRef = falseValue) => {
+    create: <Data>(initialValue: Data, key: string, isRef = falseValue) => {
       pushItem(statesList, key); // record the keys of created states.
       return newInstance(
-        FrameworkState<D>,
-        statesHook.create(initialValue, referingObject, isRef) as GeneralState<D>,
+        FrameworkState<Data>,
+        statesHook.create(initialValue, referingObject, isRef) as GeneralState<Data>,
         state => dehydrate(state, key, referingObject),
         exportState,
         (state, newValue) => update(newValue, state, key)
       );
     },
-    computed: <D>(getter: () => D, depList: (GeneralState | FrameworkReadableState<any>)[], key: string, isRef = falseValue) =>
+    computed: <Data>(getter: () => Data, depList: (GeneralState | FrameworkReadableState<any>)[], key: string, isRef = falseValue) =>
       newInstance(
-        FrameworkReadableState<D>,
-        statesHook.computed(getter, mapDeps(depList), referingObject, isRef) as GeneralState<D>,
+        FrameworkReadableState<Data>,
+        statesHook.computed(getter, mapDeps(depList), referingObject, isRef) as GeneralState<Data>,
         state => dehydrate(state, key, referingObject),
         exportState
       ),
@@ -329,20 +333,26 @@ export function statesHookHelper(statesHook: StatesHook<GeneralState, GeneralSta
      * @param coreHookStates the returns of useRequest/useWatcher/useFetcher that contains update function
      * @returns exported states and update function
      */
-    exportObject: <S extends Record<string, any>>(states: S, coreHookStates: Record<string, any> = {}) => {
+    exportObject: <S extends Record<string, FrameworkReadableState<any>>>(states: S, coreHookStates: Record<string, any> = {}) => {
       const exportedStates = objectKeys(states).reduce(
         (result, key) => {
-          result[key] = exportState(states[key]);
+          result[key] = states[key].e;
           return result;
         },
         {} as Record<string, GeneralState>
       );
 
+      type ExportedStateRecord<S extends Record<string, FrameworkReadableState<any>>> = {
+        [K in keyof S]: S[K] extends FrameworkState<any>
+          ? ExportedState<S[K]['v'], AG['State']>
+          : ExportedComputed<S[K]['v'], AG['Computed']>;
+      };
+
       return {
-        ...(exportedStates as S),
+        ...(exportedStates as ExportedStateRecord<S>),
         __referingObj: referingObject,
         update: memorize((newStates: Record<string, any>, targetStates?: Record<string, GeneralState>) => {
-          targetStates = targetStates || states;
+          targetStates = targetStates || exportedStates;
           objectKeys(newStates).forEach(key => {
             if (statesList.includes(key)) {
               update(newStates[key], targetStates[key], key);
