@@ -1,6 +1,6 @@
-import { getAlovaInstance, untilReject } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { createAlova } from '@/index';
-import { Result, delay } from 'root/testUtils';
+import { Result, delay, untilReject } from 'root/testUtils';
 
 describe('Request shared', () => {
   test('should share request when use usehooks', async () => {

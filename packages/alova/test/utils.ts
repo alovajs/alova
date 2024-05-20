@@ -45,10 +45,4 @@ export const getAlovaInstance = ({
   return alovaInst;
 };
 
-/**
- * resolve returned promise when param promise is rejected
- */
-export const untilReject = (promise: Promise<any> | Method) =>
-  new Promise<Error>(resolve => {
-    promise.catch(resolve);
-  });
+export const tt = {};

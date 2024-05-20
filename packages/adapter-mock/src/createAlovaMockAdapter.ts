@@ -1,4 +1,4 @@
-import { Mock, MockRequestInit } from '../typings';
+import { Mock, MockRequestInit } from '~/typings';
 import MockRequest from './MockRequest';
 
 type MockWrapper = {
@@ -11,9 +11,9 @@ type MockWrapper = {
  * @param baseURL 模拟的基础url，用于命名空间使用，与createAlova函数的baseURL参数保持一致
  * @returns 创建一个模拟定义器
  */
-export default function createAlovaMockAdapter<RC, RE, RH>(
+export default function createAlovaMockAdapter<RequestConfig, Response, ResponseHeader>(
   mockWrapper: MockWrapper[],
-  options: MockRequestInit<any, any, RC, RE, RH> = { enable: true }
+  options: MockRequestInit<RequestConfig, Response, ResponseHeader> = { enable: true }
 ) {
   let uniqueMockMap: Mock = {};
   mockWrapper

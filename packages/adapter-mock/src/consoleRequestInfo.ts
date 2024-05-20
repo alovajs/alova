@@ -1,4 +1,4 @@
-import { MockRequestLoggerAdapter } from '../typings';
+import { MockRequestLoggerAdapter } from '~/typings';
 
 // 预定义的样式和固定文本
 const mockLabel = 'Mock';

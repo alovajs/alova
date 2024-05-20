@@ -1,7 +1,7 @@
-import { getAlovaInstance, untilReject } from '#/utils';
+import { getAlovaInstance } from '#/utils';
 import { Method, createAlova, queryCache } from '@/index';
 import GlobalFetch from '@/predefine/adapterFetch';
-import { Result } from 'root/testUtils';
+import { Result, untilReject } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', () => {

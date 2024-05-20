@@ -1,9 +1,8 @@
-import { createAlova, useRequest } from 'alova';
-import VueHook from 'alova/vue';
+import { xhrRequestAdapter } from '@/index';
+import { createAlova } from 'alova';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
-import { xhrRequestAdapter } from '@/index';
 import { AlovaXHRResponse } from '~/typings';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -12,9 +11,8 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
       timeout: 100000,
-      responsed(response) {
+      responded(response) {
         const { status, statusText, data } = response;
         expect(status).toBe(200);
         expect(statusText).toBe('OK');
@@ -29,31 +27,21 @@ describe('request adapter', () => {
       }
     });
 
-    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
-
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.code).toBe(200);
-    expect(data.value.data.method).toBe('GET');
-    expect(data.value.data.params).toStrictEqual({
+    const data = await Get;
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('GET');
+    expect(data.data.params).toStrictEqual({
       a: '1',
       b: '2'
     });
-    expect(data.value.data.path).toBe('/unit-test');
-    expect(downloading.value).toStrictEqual({ total: 92, loaded: 92 });
-    expect(error.value).toBeUndefined();
+    expect(data.data.path).toBe('/unit-test');
   });
 
   test('should send post requset without `content-type`', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -73,25 +61,20 @@ describe('request adapter', () => {
       }
     );
 
-    const { loading, data, onSuccess } = useRequest(Post);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-
-    const dataObj = data.value;
-    expect(dataObj.code).toBe(200);
-    expect(dataObj.data.method).toBe('POST');
-    expect(dataObj.data.data).toStrictEqual({
+    const data = await Post;
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('POST');
+    expect(data.data.data).toStrictEqual({
       post1: 'p1',
       post2: 'p2'
     });
-    expect(dataObj.data.path).toBe('/unit-test');
+    expect(data.data.path).toBe('/unit-test');
   });
 
   test('should throw error when set wrong param', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook
+      requestAdapter: xhrRequestAdapter()
     });
 
     Object.defineProperty(XMLHttpRequest.prototype, 'timeout', {
@@ -107,7 +90,7 @@ describe('request adapter', () => {
         b: '2'
       }
     });
-    await expect(() => Get.send()).rejects.toThrow('mock timeout set error');
+    await expect(Get).rejects.toThrow('mock timeout set error');
     delete (XMLHttpRequest.prototype as any).timeout;
   });
 
@@ -115,8 +98,7 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -133,15 +115,11 @@ describe('request adapter', () => {
         mimeType: 'text/plain; charset=x-user-defined'
       });
 
-    const { loading, data, onSuccess } = useRequest(Post({ post1: 'p1', post2: 'p2' }));
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-
-    const dataObj = data.value;
-    expect(dataObj.code).toBe(200);
-    expect(dataObj.data.method).toBe('POST');
-    expect(dataObj.data.data).toStrictEqual({ post1: 'p1', post2: 'p2' });
-    expect(dataObj.data.path).toBe('/unit-test');
+    const data = await Post({ post1: 'p1', post2: 'p2' });
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('POST');
+    expect(data.data.data).toStrictEqual({ post1: 'p1', post2: 'p2' });
+    expect(data.data.path).toBe('/unit-test');
 
     // 再次测试提交复杂层级数据
     const dataRaw = await Post({
@@ -169,7 +147,7 @@ describe('request adapter', () => {
     }).send();
     expect(dataRaw.code).toBe(200);
     expect(dataRaw.data.method).toBe('POST');
-    expect(dataObj.data.path).toBe('/unit-test');
+    expect(data.data.path).toBe('/unit-test');
     expect(dataRaw.data.data).toStrictEqual({
       a: 'null',
       'b[0]': '2',
@@ -187,8 +165,7 @@ describe('request adapter', () => {
   test('api not found when request', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook
+      requestAdapter: xhrRequestAdapter()
     });
 
     const Get = alovaInst.Get<AlovaXHRResponse<Result>>('/unit-test-404');
@@ -209,8 +186,7 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -234,10 +210,9 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
       timeout: 1,
       errorLogger: false,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -258,9 +233,8 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
       errorLogger: false,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -284,8 +258,7 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -319,8 +292,7 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });

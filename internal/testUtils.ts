@@ -1,3 +1,5 @@
+import { Method } from '../packages/alova/src';
+
 type GetData = {
   path: string;
   method: string;
@@ -29,6 +31,14 @@ export const untilCbCalled = <T>(setCb: (cb: (arg: T) => void, ...others: any[])
 export const delay = (ts = 0) =>
   new Promise<void>(resolve => {
     setTimeout(resolve, ts);
+  });
+
+/**
+ * resolve returned promise when param promise is rejected
+ */
+export const untilReject = (promise: Promise<any> | Method) =>
+  new Promise<Error>(resolve => {
+    promise.catch(resolve);
   });
 
 export const generateContinuousNumbers = (

@@ -39,10 +39,13 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^2.19.2"
+    "alova": "^3.0.0"
   },
   "devDependencies": {
-    "alova": "workspace:*",
-    "@alova/scripts": "workspace:*"
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*"
+  },
+  "dependencies": {
+    "@alova/shared": "workspace:*"
   }
 }

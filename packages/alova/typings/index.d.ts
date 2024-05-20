@@ -157,7 +157,7 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
 export type AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader> = Partial<MethodRequestConfig> &
   AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
 
-export type RespondedHandler<AG extends AlovaGenerics> = (response: Response, methodInstance: Method<AG>) => any;
+export type RespondedHandler<AG extends AlovaGenerics> = (response: AG['Response'], methodInstance: Method<AG>) => any;
 export type ResponseErrorHandler<AG extends AlovaGenerics> = (error: any, methodInstance: Method<AG>) => void | Promise<void>;
 export type ResponseCompleteHandler<AG extends AlovaGenerics> = (methodInstance: Method<AG>) => any;
 export type RespondedHandlerRecord<AG extends AlovaGenerics> = {

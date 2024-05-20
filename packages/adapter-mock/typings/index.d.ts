@@ -1,30 +1,30 @@
-import { AlovaRequestAdapter, Method } from 'alova';
+import { AlovaGenerics, AlovaRequestAdapter, Method } from 'alova';
 import { FetchRequestInit } from 'alova/GlobalFetch';
 
-interface MockServerRequest {
+export interface MockServerRequest {
   headers: Record<string, any>;
   query: Record<string, any>;
   params: Record<string, any>;
   data: Record<string, any>;
 }
 
-interface ResponseHeaders {
+export interface ResponseHeaders {
   [x: string]: any;
 }
-interface LoggerMockRequestResponse extends MockServerRequest {
+export interface LoggerMockRequestResponse extends MockServerRequest {
   isMock: boolean;
   url: string;
   method: string;
   responseHeaders: ResponseHeaders;
   response?: any;
 }
-interface MockRequestLoggerAdapter {
+export interface MockRequestLoggerAdapter {
   (loggerData: LoggerMockRequestResponse): void;
 }
 /**
  * 模拟响应函数
  */
-interface MockResponse<RC, RE, RH> {
+export interface MockResponse<RequestConfig, Response, ResponseHeader> {
   (
     response: {
       status: number;
@@ -33,16 +33,16 @@ interface MockResponse<RC, RE, RH> {
       body: any;
     },
     request: MockServerRequest,
-    currentMethod: Method<any, any, any, any, RC, RE, RH>
+    currentMethod: Method<AlovaGenerics<any, any, any, any, any, any, RequestConfig, Response, ResponseHeader>>
   ): {
-    response: RE;
-    headers: RH;
+    response: Response;
+    headers: ResponseHeader;
   };
 }
-interface MockError {
+export interface MockError {
   (error: Error, currentMethod: Method): any;
 }
-interface MockRequestInit<R, T, RC, RE, RH> {
+export interface MockRequestInit<RequestConfig, Response, ResponseHeader> {
   /**
    * 是否启用模拟数据
    * @default true
@@ -56,13 +56,13 @@ interface MockRequestInit<R, T, RC, RE, RH> {
   /**
    * 当未匹配模拟接口时将使用此请求适配器请求
    */
-  httpAdapter?: AlovaRequestAdapter<R, T, RC, RE, RH>;
+  httpAdapter?: AlovaRequestAdapter<RequestConfig, Response, ResponseHeader>;
 
   /**
    * 是否打印模拟请求信息，便于调试
    */
   mockRequestLogger?: boolean | MockRequestLoggerAdapter;
-  onMockResponse?: MockResponse<RC, RE, RH>;
+  onMockResponse?: MockResponse<RequestConfig, Response, ResponseHeader>;
   onMockError?: MockError;
 
   /**
@@ -74,23 +74,23 @@ interface MockRequestInit<R, T, RC, RE, RH> {
   matchMode?: 'pathname' | 'methodurl';
 }
 
-interface StatusResponse {
+export interface StatusResponse {
   status: number;
   statusText: string;
   responseHeaders?: ResponseHeaders;
   body?: any;
 }
-type MockFunction = (request: MockServerRequest) => StatusResponse | any;
-type Mock = Record<string, MockFunction | string | number | Record<string, any> | any[]>;
+export type MockFunction = (request: MockServerRequest) => StatusResponse | any;
+export type Mock = Record<string, MockFunction | string | number | Record<string, any> | any[]>;
 
-interface MockWrapper {
+export interface MockWrapper {
   enable: boolean;
   data: Mock;
 }
 
-export declare function createAlovaMockAdapter<RC = FetchRequestInit, RE = Response, RH = Headers>(
+export declare function createAlovaMockAdapter<RequestConfig = FetchRequestInit, RE = Response, ResponseHeader = Headers>(
   mockWrapper: MockWrapper[],
-  options?: MockRequestInit<any, any, RC, RE, RH>
-): AlovaRequestAdapter<any, any, RC, RE, RH>;
+  options?: MockRequestInit<RequestConfig, RE, ResponseHeader>
+): AlovaRequestAdapter<RequestConfig, RE, ResponseHeader>;
 
 export declare function defineMock(mock: Mock, enable?: boolean): MockWrapper;

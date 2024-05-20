@@ -1,11 +1,15 @@
-import { Method, RequestElements } from 'alova';
-import { Mock, MockRequestInit } from '../typings';
+import { isFn, isNumber, isString, noop } from '@alova/shared/function';
+import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import type { AlovaGenerics, Method, RequestElements } from 'alova';
+import { Mock, MockRequestInit } from '~/typings';
 import consoleRequestInfo from './consoleRequestInfo';
 import { defaultMockError, defaultMockResponse } from './defaults';
-import { falseValue, isFn, isNumber, isString, noop, parseUrl, trueValue, undefinedValue } from './helper';
+import { parseUrl } from './helper';
 
-type MockRequestInitWithMock<R, T, RC, RE, RH> = MockRequestInit<R, T, RC, RE, RH> & { mock: Mock };
-export default function MockRequest<RC, RE, RH>(
+type MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = MockRequestInit<RequestConfig, Response, ResponseHeader> & {
+  mock: Mock;
+};
+export default function MockRequest<RequestConfig, Response, ResponseHeader>(
   {
     // 此enable为总开关
     enable = trueValue,
@@ -16,9 +20,12 @@ export default function MockRequest<RC, RE, RH>(
     onMockResponse = defaultMockResponse,
     onMockError = defaultMockError,
     matchMode = 'pathname'
-  }: MockRequestInitWithMock<any, any, RC, RE, RH> = { mock: {} }
+  }: MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = { mock: {} }
 ) {
-  return (elements: RequestElements, method: Method<any, any, any, any, RC, RE, RH>) => {
+  return (
+    elements: RequestElements,
+    method: Method<AlovaGenerics<any, any, any, any, any, any, RequestConfig, Response, ResponseHeader>>
+  ) => {
     // 获取当前请求的模拟数据集合，如果enable为false，则不返回模拟数据
     mock = (enable && mock) || {};
 

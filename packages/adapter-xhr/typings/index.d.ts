@@ -4,7 +4,7 @@ import { AlovaRequestAdapter } from 'alova';
 /**
  * xhr请求配置参数
  */
-interface AlovaXHRRequestConfig {
+export interface AlovaXHRRequestConfig {
   /**
    * 设置响应数据类型。
    *
@@ -44,14 +44,14 @@ interface AlovaXHRRequestConfig {
 /**
  * 响应头信息
  */
-interface AlovaXHRResponseHeaders {
+export interface AlovaXHRResponseHeaders {
   [x: string]: any;
 }
 
 /**
  * 响应数据结构
  */
-interface AlovaXHRResponse<T = any> {
+export interface AlovaXHRResponse<T = any> {
   status: number;
   statusText: string;
   data: T;
@@ -61,7 +61,7 @@ interface AlovaXHRResponse<T = any> {
 /**
  * XMLHttpRequest请求适配器类型
  */
-type AlovaXHRAdapter = AlovaRequestAdapter<any, any, AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders>;
+export type AlovaXHRAdapter = AlovaRequestAdapter<AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders>;
 
 /**
  * XMLHttpRequest请求适配器

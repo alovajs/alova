@@ -194,6 +194,10 @@ importers:
         version: 4.0.0
 
   packages/adapter-mock:
+    dependencies:
+      '@alova/shared':
+        specifier: workspace:^
+        version: link:../shared
     devDependencies:
       '@alova/scripts':
         specifier: workspace:*
