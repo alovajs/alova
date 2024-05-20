@@ -292,32 +292,39 @@ export function statesHookHelper<AG extends AlovaGenerics>(
   const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) => (statesHook.memorize ? statesHook.memorize(fn) : fn);
   const update = (newValue: any, state: GeneralState, key: string) =>
     statesHook.update({ [key]: newValue }, { [key]: state }, referingObject);
-  const mapDeps = (deps: (GeneralState | FrameworkReadableState<any>)[]) =>
+  const mapDeps = (deps: (GeneralState | FrameworkReadableState<any, string>)[]) =>
     mapItem(deps, item => (instanceOf(item, FrameworkReadableState) ? item.e : item));
   const { dehydrate } = statesHook;
   const statesList = [] as string[];
 
   return {
-    create: <Data>(initialValue: Data, key: string, isRef = falseValue) => {
+    create: <Data, Key extends string>(initialValue: Data, key: Key, isRef = falseValue) => {
       pushItem(statesList, key); // record the keys of created states.
       return newInstance(
-        FrameworkState<Data>,
+        FrameworkState<Data, Key>,
         statesHook.create(initialValue, referingObject, isRef) as GeneralState<Data>,
+        key,
         state => dehydrate(state, key, referingObject),
         exportState,
         (state, newValue) => update(newValue, state, key)
       );
     },
-    computed: <Data>(getter: () => Data, depList: (GeneralState | FrameworkReadableState<any>)[], key: string, isRef = falseValue) =>
+    computed: <Data, Key extends string>(
+      getter: () => Data,
+      depList: (GeneralState | FrameworkReadableState<any, string>)[],
+      key: Key,
+      isRef = falseValue
+    ) =>
       newInstance(
-        FrameworkReadableState<Data>,
+        FrameworkReadableState<Data, Key>,
         statesHook.computed(getter, mapDeps(depList), referingObject, isRef) as GeneralState<Data>,
+        key,
         state => dehydrate(state, key, referingObject),
         exportState
       ),
     effectRequest: (effectRequestParams: EffectRequestParams<any>) => statesHook.effectRequest(effectRequestParams, referingObject),
     ref,
-    watch: (source: (GeneralState | FrameworkReadableState<any>)[], callback: () => void) =>
+    watch: (source: (GeneralState | FrameworkReadableState<any, string>)[], callback: () => void) =>
       statesHook.watch(mapDeps(source), callback, referingObject),
     onMounted: (callback: () => void) => statesHook.onMounted(callback, referingObject),
     onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, referingObject),
@@ -329,23 +336,23 @@ export function statesHookHelper<AG extends AlovaGenerics>(
 
     /**
      * batch export states and provide a update function that update states simply.
-     * @param states new States
+     * @param states framework state proxy array
      * @param coreHookStates the returns of useRequest/useWatcher/useFetcher that contains update function
      * @returns exported states and update function
      */
-    exportObject: <S extends Record<string, FrameworkReadableState<any>>>(states: S, coreHookStates: Record<string, any> = {}) => {
-      const exportedStates = objectKeys(states).reduce(
-        (result, key) => {
-          result[key] = states[key].e;
+    exportObject: <S extends FrameworkReadableState<any, string>[]>(states: S, coreHookStates: Record<string, any> = {}) => {
+      const exportedStates = states.reduce(
+        (result, item) => {
+          result[item.k] = item.e;
           return result;
         },
         {} as Record<string, GeneralState>
       );
 
-      type ExportedStateRecord<S extends Record<string, FrameworkReadableState<any>>> = {
-        [K in keyof S]: S[K] extends FrameworkState<any>
-          ? ExportedState<S[K]['v'], AG['State']>
-          : ExportedComputed<S[K]['v'], AG['Computed']>;
+      type ExportedStateRecord<S extends FrameworkReadableState<any, string>[]> = {
+        [K in S[number]['k']]: Extract<S[number], { k: K }> extends FrameworkState<any, string>
+          ? ExportedState<Extract<S[number], { k: K }>['v'], AG['State']>
+          : ExportedComputed<Extract<S[number], { k: K }>['v'], AG['Computed']>;
       };
 
       return {
@@ -365,6 +372,22 @@ export function statesHookHelper<AG extends AlovaGenerics>(
         })
       };
     },
+
+    /**
+     * state proxies to framework related states.
+     * @param framework state proxy array
+     * @returns framework related states array
+     */
+    statesObject: <S extends FrameworkReadableState<any, string>[]>(states: S) =>
+      states.reduce(
+        (result, item) => {
+          (result as any)[item.k] = item.e;
+          return result;
+        },
+        {} as {
+          [K in S[number]['k']]: Extract<S[number], { k: K }>['s'];
+        }
+      ),
 
     /**
      * batch memorize operate functions.

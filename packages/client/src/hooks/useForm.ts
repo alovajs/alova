@@ -33,7 +33,6 @@ const cloneFormData = <T>(form: T): T => {
   return walkObject(shallowClone(form), shallowClone);
 };
 const assert = createAssert('useForm');
-const keyForm = 'form';
 
 export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
   handler: FormHookHandler<AG, FormData> | ID,
@@ -50,7 +49,6 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   const { id, initialForm, store, resetAfterSubmiting, immediate = falseValue, middleware } = config;
   const {
     create: $,
-    computed,
     ref: useFlag$,
     onMounted: onMounted$,
     watch: watch$,
@@ -63,7 +61,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   // 如果config中的id也有对应的共享状态，则也会返回它
   // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
   const sharedState = id ? sharedStates[id] : undefinedValue;
-  const form = $(cloneFormData(initialForm), keyForm);
+  const form = $(cloneFormData(initialForm), 'form');
   const methodHandler = handler as FormHookHandler<AG, FormData>;
   const eventManager = createEventManager<{
     [RestoreEventKey]: void;
@@ -121,24 +119,10 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     };
   };
 
-  const vv = computed(() => 123, [], 'vv');
-  const tt = exportObject(
-    {
-      [keyForm]: form,
-      vv
-    },
-    originalHookReturns
-  );
-
   const hookReturns = {
     // 第一个参数固定为form数据
     ...originalHookReturns,
-    ...exportObject(
-      {
-        [keyForm]: form
-      },
-      originalHookReturns
-    ),
+    ...exportObject([form], originalHookReturns),
     ...memorizeOperators({
       updateForm,
       reset

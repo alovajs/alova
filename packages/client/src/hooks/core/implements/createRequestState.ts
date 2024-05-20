@@ -36,11 +36,6 @@ import createHook from './createHook';
 import useHookToSendRequest from './useHookToSendRequest';
 
 const refCurrent = <T>(ref: { current: T }) => ref.current;
-const keyData = 'data';
-const keyLoading = 'loading';
-const keyError = 'error';
-const keyDownloading = 'downloading';
-const keyUploading = 'uploading';
 /**
  * 创建请求状态，统一处理useRequest、useWatcher、useFetcher中一致的逻辑
  * 该函数会调用statesHook的创建函数来创建对应的请求状态
@@ -94,31 +89,26 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     } catch (error) {}
   }
 
-  const { create, effectRequest, ref, exportObject, memorizeOperators } = statesHookHelper<AG>(promiseStatesHook(), referingObject);
+  const { create, effectRequest, ref, exportObject, statesObject, memorizeOperators } = statesHookHelper<AG>(
+    promiseStatesHook(),
+    referingObject
+  );
   const progress: Progress = {
     total: 0,
     loaded: 0
   };
   // 将外部传入的受监管的状态一同放到frontStates集合中
   const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG>;
-  const data = create<AG['Responded']>(isFn(initialData) ? initialData() : initialData, keyData);
-  const loading = create(initialLoading, keyLoading);
-  const error = create(undefinedValue as Error | undefined, keyError);
-  const downloading = create({ ...progress }, keyDownloading);
-  const uploading = create({ ...progress }, keyUploading);
+  const data = create((isFn(initialData) ? initialData() : initialData) as AG['Responded'], 'data');
+  const loading = create(initialLoading, 'loading');
+  const error = create(undefinedValue as Error | undefined, 'error');
+  const downloading = create({ ...progress }, 'downloading');
+  const uploading = create({ ...progress }, 'uploading');
   const frontStates = {
     ...managedStates,
-    [keyData]: data.s,
-    [keyLoading]: loading.s,
-    [keyError]: error.s,
-    [keyDownloading]: downloading.s,
-    [keyUploading]: uploading.s
+    ...statesObject([data, loading, error, downloading, uploading])
   };
-  const exportings = exportObject({
-    [keyData]: data,
-    [keyLoading]: loading,
-    [keyError]: error
-  });
+  const exportings = exportObject([data, loading, error]);
   const eventManager = createEventManager<{
     success: AlovaSuccessEvent<AG>;
     error: AlovaErrorEvent<AG>;
@@ -169,11 +159,11 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
 
   return {
     ...exportings,
-    get [keyDownloading]() {
+    get downloading() {
       hookInstance.ed = trueValue;
       return downloading.e as unknown as ExportedState<Progress, AG['State']>;
     },
-    get [keyUploading]() {
+    get uploading() {
       hookInstance.eu = trueValue;
       return uploading.e as unknown as ExportedState<Progress, AG['State']>;
     },

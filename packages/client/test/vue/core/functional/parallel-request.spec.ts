@@ -13,9 +13,6 @@ describe('parallel request', () => {
       transformData: ({ data }: Result) => data
     });
     const firstState = useRequest(Getter, { immediate: false });
-    firstState.data.value;
-    firstState.loading.value;
-    firstState.eeeee.value;
     const secondState = useRequest(Getter, { immediate: false });
     const [firstResponse, secondResponse] = await Promise.all([firstState.send(), secondState.send()]);
 
