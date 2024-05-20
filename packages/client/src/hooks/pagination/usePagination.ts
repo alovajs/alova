@@ -1,5 +1,6 @@
 import { createAssert } from '@alova/shared/assert';
 import { createSyncOnceRunner, getLocalCacheConfigParam, getTime, isFn, isNumber, noop, statesHookHelper } from '@alova/shared/function';
+import { GeneralState } from '@alova/shared/types';
 import {
   falseValue,
   filterItem,
@@ -21,9 +22,8 @@ import {
 } from '@alova/shared/vars';
 import { Method, getMethodKey, invalidateCache, promiseStatesHook, queryCache, setCache, useFetcher, useWatcher } from 'alova';
 import { AnyFn, PaginationHookConfig } from '~/typings/general';
-import createSnapshotMethodsManager from './createSnapshotMethodsManager';
 import { FrameworkReadableState, FrameworkState } from '../../../../shared/dist/model/FrameworkState';
-import { GeneralState } from '@alova/shared/types';
+import createSnapshotMethodsManager from './createSnapshotMethodsManager';
 
 const paginationAssert = createAssert('usePagination');
 const indexAssert = (index: number, rawData: any[]) =>
@@ -587,16 +587,6 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
       replace,
       reload
     }),
-    ...exportObject(
-      {
-        data,
-        page,
-        pageCount,
-        pageSize,
-        total,
-        isLastPage
-      },
-      states
-    )
+    ...exportObject([data, page, pageCount, pageSize, total, isLastPage], states)
   };
 };

@@ -52,11 +52,6 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     ...memorizeOperators({
       send
     }),
-    ...exportObject(
-      {
-        countdown
-      },
-      requestReturned
-    )
+    ...exportObject([countdown], requestReturned)
   };
 };

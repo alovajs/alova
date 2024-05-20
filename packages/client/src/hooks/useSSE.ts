@@ -385,11 +385,7 @@ export default <
     onMessage,
     onError,
     onOpen,
-    ...exportObject({
-      readyState,
-      data,
-      eventSource
-    }),
+    ...exportObject([readyState, data, eventSource]),
     __referingObj: referingObject
   };
 };
