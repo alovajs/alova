@@ -13,11 +13,11 @@
 </template>
 
 <script setup lang="ts">
+import { useForm } from '@/index';
 import { createAlova } from 'alova';
 import VueHook from 'alova/vue';
 import { ref } from 'vue';
 import { mockRequestAdapter } from '~/test/mockData';
-import { useForm } from '../..';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',

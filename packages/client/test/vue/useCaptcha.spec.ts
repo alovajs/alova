@@ -1,8 +1,8 @@
+import { accessAction, actionDelegationMiddleware, useCaptcha } from '@/index';
 import { createAlova } from 'alova';
 import VueHook from 'alova/vue';
+import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
-import { untilCbCalled } from '~/test/utils';
-import { accessAction, actionDelegationMiddleware, useCaptcha } from '..';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',

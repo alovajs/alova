@@ -43,7 +43,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -86,7 +86,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const page = 1;
@@ -101,10 +101,10 @@ describe('react => usePagination', () => {
     });
 
     // 检查预加载缓存
-    await waitFor(() => {
-      let cache = queryCache(getter(page + 1, pageSize));
+    await waitFor(async () => {
+      let cache = await queryCache(getter(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
-      cache = queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter(page - 1, pageSize));
       expect(cache).toBeUndefined();
     });
 
@@ -129,21 +129,21 @@ describe('react => usePagination', () => {
     });
 
     // 检查预加载缓存
-    await waitFor(() => {
-      let cache = queryCache(getter(3, 20));
+    await waitFor(async () => {
+      let cache = await queryCache(getter(3, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(59, 40));
-      cache = queryCache(getter(1, 20));
+      cache = await queryCache(getter(1, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19));
     });
 
     // 最后一页
     fireEvent.click(screen.getByRole('setLastPage'));
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('true');
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(299, 280)));
-      let cache = queryCache(getter(16, 20));
+      let cache = await queryCache(getter(16, 20));
       expect(cache).toBeUndefined();
-      cache = queryCache(getter(14, 20));
+      cache = await queryCache(getter(14, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(279, 260));
     });
   });
@@ -158,12 +158,12 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const { error } = usePagination(getter, {
         data: ({ wrongList }: any) => wrongList
       });
       return <span role="error">{error?.message}</span>;
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -184,7 +184,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         loading,
         pageSize: [pageSize, setPageSize],
@@ -224,7 +224,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -258,7 +258,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const [keyword, setKeyword] = useState('');
       const {
         loading,
@@ -299,7 +299,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -350,7 +350,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         loading,
         data,
@@ -399,7 +399,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     setMockListData(data => {
@@ -420,7 +420,7 @@ describe('react => usePagination', () => {
     });
     fireEvent.click(screen.getByRole('refresh1')); // 在翻页模式下，不是当前页会使用fetch
     await waitFor(() => {
-      const cache = queryCache(getter(1, 10));
+      const cache = await queryCache(getter(1, 10));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(9, 0, i => (i === 0 ? 100 : i)));
     });
   });
@@ -436,7 +436,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -493,17 +493,17 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
     render((<Page />) as ReactElement<any, any>);
 
     const page = 2;
     const pageSize = 10;
     let total = 300;
     // 检查预加载缓存
-    await waitFor(() => {
-      let cache = queryCache(getter(page + 1, pageSize));
+    await waitFor(async () => {
+      let cache = await queryCache(getter(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(29, 20));
-      cache = queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter(page - 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(9));
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
@@ -513,31 +513,31 @@ describe('react => usePagination', () => {
       data.splice(10, 0, 300);
       return data;
     });
-    total++;
-    await waitFor(() => {
+    total += 1;
+    await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 })));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
       // 检查当前页缓存
-      let cache = queryCache(getter(page, pageSize));
+      let cache = await queryCache(getter(page, pageSize));
       expect(cache?.list).toStrictEqual([300, ...generateContinuousNumbers(18, 10)]);
 
       // insert时不会重新fetch后一页的数据
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
-      cache = queryCache(getter(page + 1, pageSize));
+      cache = await queryCache(getter(page + 1, pageSize));
       // insert时会将缓存末尾去掉，因此还是剩下10项
       expect(cache?.list).toEqual(generateContinuousNumbers(28, 19));
     });
 
     fireEvent.click(screen.getByRole('batchInsert'));
     total += 3;
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
       const curData = [400, 300, 500, ...generateContinuousNumbers(15, 10), 600];
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(curData));
 
       // 当前页缓存要保持一致
-      const cache = queryCache(getter(page, pageSize));
+      const cache = await queryCache(getter(page, pageSize));
       expect(cache?.list).toStrictEqual(curData);
 
       expect(fetchMockFn).toHaveBeenCalledTimes(2); // insert不会触发下一页预加载
@@ -566,7 +566,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -613,17 +613,17 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 300;
 
     // 通过检查缓存数据表示预加载数据成功
-    await waitFor(() => {
-      let cache = queryCache(getter(page - 1, pageSize));
+    await waitFor(async () => {
+      let cache = await queryCache(getter(page - 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(3));
-      cache = queryCache(getter(page + 1, pageSize));
+      cache = await queryCache(getter(page + 1, pageSize));
       expect(cache?.list).toEqual(generateContinuousNumbers(11, 8));
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
@@ -664,7 +664,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -747,7 +747,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await screen.findByText(/loaded/);
@@ -762,30 +762,30 @@ describe('react => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('replace1'));
-    await waitFor(() => {
+    await waitFor(async () => {
       // 第一项被替换了
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300 })));
 
       // 检查当前页缓存
-      expect(queryCache(getter(1, 10))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300 }));
+      expect((await queryCache(getter(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300 }));
     });
 
     // 正向顺序替换
     fireEvent.click(screen.getByRole('replace2'));
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 })));
 
       // 检查当前页缓存
-      expect(queryCache(getter(1, 10))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }));
+      expect((await queryCache(getter(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }));
     });
 
     // 逆向顺序替换
     fireEvent.click(screen.getByRole('replace3'));
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 })));
 
       // 检查当前页缓存
-      expect(queryCache(getter(1, 10))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 }));
+      expect((await queryCache(getter(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 }));
     });
   });
 
@@ -799,7 +799,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -855,7 +855,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -891,7 +891,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         pageCount,
@@ -940,7 +940,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -948,9 +948,9 @@ describe('react => usePagination', () => {
     await screen.findByText(/loaded/);
 
     // 检查预加载缓存
-    let cache = queryCache(getter(page + 1, pageSize));
+    let cache = await queryCache(getter(page + 1, pageSize));
     expect(cache).toBeUndefined();
-    cache = queryCache(getter(page - 1, pageSize));
+    cache = await queryCache(getter(page - 1, pageSize));
     expect(cache).toBeUndefined();
 
     fireEvent.click(screen.getByRole('insert1'));
@@ -960,9 +960,9 @@ describe('react => usePagination', () => {
 
     // 预加载设置为false了，因此不会fetch前后一页的数据
     await untilCbCalled(setTimeout, 100);
-    cache = queryCache(getter(page + 1, pageSize));
+    cache = await queryCache(getter(page + 1, pageSize));
     expect(cache).toBeUndefined();
-    cache = queryCache(getter(page - 1, pageSize));
+    cache = await queryCache(getter(page - 1, pageSize));
     expect(cache).toBeUndefined();
   });
 
@@ -976,7 +976,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -1032,7 +1032,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -1070,7 +1070,7 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     const successMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -1139,17 +1139,17 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 300;
-    await waitFor(() => {
+    await waitFor(async () => {
       // 检查预加载缓存
-      let cache = queryCache(getter(page + 1, pageSize));
+      let cache = await queryCache(getter(page + 1, pageSize));
       expect(!!cache).toBeTruthy();
-      cache = queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter(page - 1, pageSize));
       expect(!!cache).toBeTruthy();
     });
     expect(fetchMockFn).toHaveBeenCalledTimes(2); // 初始化时2次
@@ -1163,13 +1163,13 @@ describe('react => usePagination', () => {
     });
     total -= 2;
     // 下一页缓存已经被使用了2项
-    expect(queryCache(getter(page + 1, pageSize))?.list).toStrictEqual([10, 11]);
-    await waitFor(() => {
+    expect((await queryCache(getter(page + 1, pageSize)))?.list).toStrictEqual([10, 11]);
+    await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
       // 当前页缓存要保持一致
-      expect(queryCache(getter(page, pageSize))?.list).toStrictEqual([4, 7, 8, 9]);
+      expect((await queryCache(getter(page, pageSize)))?.list).toStrictEqual([4, 7, 8, 9]);
     });
 
     // 等待删除后重新fetch下一页完成再继续
@@ -1183,9 +1183,9 @@ describe('react => usePagination', () => {
       data.splice(6, 1);
       return data;
     });
-    total--;
+    total -= 1;
     // 下一页缓存又被使用了1项
-    expect(queryCache(getter(page + 1, pageSize))?.list).toStrictEqual([11, 12, 13]);
+    expect((await queryCache(getter(page + 1, pageSize)))?.list).toStrictEqual([11, 12, 13]);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 9, 10]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
@@ -1193,11 +1193,11 @@ describe('react => usePagination', () => {
     });
 
     // 检查是否重新fetch了前后一页的数据
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(fetchMockFn).toHaveBeenCalledTimes(4);
-      let cache = queryCache(getter(page - 1, pageSize));
+      let cache = await queryCache(getter(page - 1, pageSize));
       expect(cache?.list).toStrictEqual([0, 1, 2, 3]);
-      cache = queryCache(getter(page + 1, pageSize));
+      cache = await queryCache(getter(page + 1, pageSize));
       expect(cache?.list).toStrictEqual([11, 12, 13, 14]);
     });
 
@@ -1216,16 +1216,16 @@ describe('react => usePagination', () => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
-    await waitFor(() => {
+    await waitFor(async () => {
       // 当同步删除多于1页的数据时会refrefh当前页，也会重新fetch下一页
       expect(fetchMockFn).toHaveBeenCalledTimes(5);
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([12, 13, 14, 15]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
-      let cache = queryCache(getter(page - 1, pageSize));
+      let cache = await queryCache(getter(page - 1, pageSize));
       expect(cache?.list).toStrictEqual([0, 1, 2, 3]);
-      cache = queryCache(getter(page + 1, pageSize));
+      cache = await queryCache(getter(page + 1, pageSize));
       expect(cache?.list).toStrictEqual([16, 17, 18, 19]);
     });
   });
@@ -1241,7 +1241,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -1299,7 +1299,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     let currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -1345,7 +1345,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -1393,17 +1393,17 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 300;
-    await waitFor(() => {
+    await waitFor(async () => {
       // 检查预加载缓存
-      let cache = queryCache(getter(page + 1, pageSize));
+      let cache = await queryCache(getter(page + 1, pageSize));
       expect(!!cache).toBeTruthy();
-      cache = queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter(page - 1, pageSize));
       expect(!!cache).toBeTruthy();
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
@@ -1450,7 +1450,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const [min, setMin] = useState(0);
       const {
         data,
@@ -1526,7 +1526,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -1534,10 +1534,10 @@ describe('react => usePagination', () => {
     let total = 300;
     const min = 0;
     // 等待预加载数据完成
-    await waitFor(() => {
-      let cache = queryCache(getter(page + 1, pageSize, min));
+    await waitFor(async () => {
+      let cache = await queryCache(getter(page + 1, pageSize, min));
       expect(!!cache).toBeTruthy();
-      cache = queryCache(getter(page - 1, pageSize, min));
+      cache = await queryCache(getter(page - 1, pageSize, min));
       expect(!!cache).toBeTruthy();
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
@@ -1586,8 +1586,8 @@ describe('react => usePagination', () => {
 
     // 删除一条
     fireEvent.click(screen.getByRole('remove2'));
-    total--;
-    totalBackup--;
+    total -= 1;
+    totalBackup -= 1;
     setMockListData(data =>
       // 模拟数据中同步删除，这样fetch的数据校验才正常
       data.filter((i: number) => ![105].includes(i))
@@ -1621,7 +1621,7 @@ describe('react => usePagination', () => {
       });
 
     const successMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -1682,7 +1682,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const page = 3;
@@ -1700,18 +1700,18 @@ describe('react => usePagination', () => {
       data.filter((i: number) => ![9].includes(i))
     );
 
-    await waitFor(() => {
+    await waitFor(async () => {
       // 有两项用于填补前一页数据了
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([8]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
       // 当前页缓存要保持一致
-      const cache = queryCache(getter(page, pageSize));
+      const cache = await queryCache(getter(page, pageSize));
       expect(cache?.list).toStrictEqual([8]);
     });
 
     fireEvent.click(screen.getByRole('remove2'));
-    total--;
+    total -= 1;
     setMockShortListData(data => data.filter((i: number) => ![8].includes(i)));
 
     // 当最后一页没数据后，会自动切换到上一页
@@ -1727,7 +1727,7 @@ describe('react => usePagination', () => {
     const alovaInst = createMockAlova();
     const getter = (page: number, pageSize: number) =>
       alovaInst.Get<ListResponse>('/list-short', {
-        localCache: 0,
+        cacheFor: 0,
         params: {
           page,
           pageSize
@@ -1736,7 +1736,7 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     const successMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -1807,7 +1807,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -1827,17 +1827,17 @@ describe('react => usePagination', () => {
       data.filter((i: number) => ![5].includes(i))
     );
 
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 6, 7, 8]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
       // 当前缓存已关闭
-      expect(queryCache(getter(page, pageSize))).toBeUndefined();
+      expect(await queryCache(getter(page, pageSize))).toBeUndefined();
     });
 
     // 插入数据，插入时不会刷新数据
     fireEvent.click(screen.getByRole('insert1'));
-    total++;
+    total += 1;
     setMockShortListData(data => {
       data.splice(4, 0, 100);
       return data;
@@ -1876,7 +1876,7 @@ describe('react => usePagination', () => {
       });
 
     const successMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -1928,7 +1928,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     let page = 1;
@@ -1947,10 +1947,10 @@ describe('react => usePagination', () => {
 
     // 检查预加载缓存
     await untilCbCalled(setTimeout, 100);
-    expect(queryCache(getter(page + 1, pageSize))?.list).toBeUndefined();
+    expect((await queryCache(getter(page + 1, pageSize)))?.list).toBeUndefined();
 
     fireEvent.click(screen.getByRole('addPage'));
-    page++;
+    page += 1;
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('page')).toHaveTextContent(page.toString());
@@ -1962,7 +1962,7 @@ describe('react => usePagination', () => {
     });
 
     await untilCbCalled(setTimeout, 100);
-    expect(queryCache(getter(page + 1, pageSize))?.list).toBeUndefined();
+    expect((await queryCache(getter(page + 1, pageSize)))?.list).toBeUndefined();
 
     // 翻页到没有数据的一页，没有提供total时，数据少于pageSize条时将会把isLastPage判断为true
     fireEvent.click(screen.getByRole('toNoDataPage'));
@@ -1985,7 +1985,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const [keyword, setKeyword] = useState('');
       const {
         loading,
@@ -2027,7 +2027,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2078,7 +2078,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const [error, setError] = useState(undefined as Error | undefined);
       const {
         data,
@@ -2137,7 +2137,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2176,7 +2176,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -2220,7 +2220,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     let currentList = generateContinuousNumbers(9, 0, i => {
@@ -2270,7 +2270,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -2334,7 +2334,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
     render((<Page />) as ReactElement<any, any>);
 
     // 等待fetch完成
@@ -2381,7 +2381,7 @@ describe('react => usePagination', () => {
 
     const successMockFn = jest.fn();
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -2434,7 +2434,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2470,7 +2470,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -2517,7 +2517,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
     render((<Page />) as ReactElement<any, any>);
 
     // 等待fetch完成
@@ -2564,7 +2564,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -2609,7 +2609,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
     render((<Page />) as ReactElement<any, any>);
     let page = 2;
     const pageSize = 4;
@@ -2620,12 +2620,12 @@ describe('react => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('addPage'));
-    page++;
-    await waitFor(() => {
+    page += 1;
+    await waitFor(async () => {
       // 已经到最后一页了，不需要再预加载下一页数据了，同时上一页也有缓存不会触发预加载
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 4)));
-      expect(queryCache(getter(page + 1, pageSize))).toBeUndefined();
+      expect(await queryCache(getter(page + 1, pageSize))).toBeUndefined();
     });
   });
 
@@ -2639,7 +2639,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const {
         data,
         loading,
@@ -2686,7 +2686,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    }
+    };
     render((<Page />) as ReactElement<any, any>);
 
     await waitFor(() => {
@@ -2709,7 +2709,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    function Page() {
+    const Page = () => {
       const { data, total } = usePagination(getter, {
         total: res => res.total,
         data: res => res.list,
@@ -2728,7 +2728,7 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
         </div>
       );
-    }
+    };
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([1, 2, 3]));
@@ -2751,7 +2751,7 @@ describe('react => usePagination', () => {
 
     const errorFn = jest.fn();
     const completeFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const { data, total, reload, onError, onComplete } = usePagination(getter, {
         total: res => res.total,
         data: res => res.list
@@ -2764,11 +2764,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="reload"
-            onClick={reload}
-          />
+            onClick={reload}>
+            Reload
+          </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2801,7 +2802,7 @@ describe('react => usePagination', () => {
       });
 
     const successFn = jest.fn();
-    function Page() {
+    const Page = () => {
       const [keyword, setKeyword] = useState('');
       const { data, onSuccess, total } = usePagination((p, ps) => getter(p, ps, keyword), {
         watchingStates: [keyword],
@@ -2815,15 +2816,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setKeyword-bbb"
-            onClick={() => setKeyword('bbb')}
-          />
+            onClick={() => setKeyword('bbb')}>
+            SetKeyword
+          </button>
           <button
             role="resetKeyword"
-            onClick={() => setKeyword('')}
-          />
+            onClick={() => setKeyword('')}>
+            ResetKeyword
+          </button>
         </div>
       );
-    }
+    };
 
     render((<Page />) as ReactElement<any, any>);
     const currentList = generateContinuousNumbers(9, 0, i => {

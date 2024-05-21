@@ -1,10 +1,10 @@
+import { accessAction, actionDelegationMiddleware, useRetriableRequest } from '@/index';
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { mockRequestAdapter } from '~/test/mockData';
-import { accessAction, actionDelegationMiddleware, useRetriableRequest } from '..';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
@@ -215,7 +215,7 @@ describe('react => useRetriableRequest', () => {
       const { loading, error, onError, onRetry, onFail, onComplete, onSuccess } = useRetriableRequest(methodInstance, {
         retry(error) {
           expect(error).toBeInstanceOf(Error);
-          retryTimesCount++;
+          retryTimesCount += 1;
           return retryTimesCount <= 2;
         }
       });

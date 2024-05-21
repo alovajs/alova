@@ -2,7 +2,7 @@
 import { uuid } from '@/util/helper';
 import { getContext, instanceOf } from '@alova/shared/function';
 import { falseValue, isArray, splice, undefinedValue } from '@alova/shared/vars';
-import { Method } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
 import type {
   BackoffPolicy,
   FallbackHandler,
@@ -16,9 +16,7 @@ import { silentQueueMap } from './silentQueue';
 import { persistSilentMethod, spliceStorageSilentMethod } from './storage/silentMethodStorage';
 
 export type PromiseExecuteParameter = Parameters<ConstructorParameters<typeof Promise<any>>['0']>;
-export type MethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  ...args: any[]
-) => Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+export type MethodHandler<AG extends AlovaGenerics> = (...args: any[]) => Method<AG>;
 export type MaxRetryTimes = NonNullable<SilentMethodInterface['maxRetryTimes']>;
 export type RetryError = NonNullable<SilentMethodInterface['retryError']>;
 
@@ -26,10 +24,8 @@ export type RetryError = NonNullable<SilentMethodInterface['retryError']>;
  * 定位silentMethod实例所在的位置
  * @param silentMethodInstance silentMethod实例
  */
-const getBelongQueuePosition = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => {
-  let queue: SilentQueueMap[string] | undefined = undefinedValue;
+const getBelongQueuePosition = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>) => {
+  let queue: SilentQueueMap<AG>[string] | undefined = undefinedValue;
   let queueName = '';
   let position = 0;
   for (const queueNameLoop in silentQueueMap) {
@@ -47,7 +43,7 @@ const getBelongQueuePosition = <State, Computed, Watched, Export, Responded, Tra
  * silentMethod实例
  * 需要进入silentQueue的请求都将被包装成silentMethod实例，它将带有请求策略的各项参数
  */
-export class SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+export class SilentMethod<AG extends AlovaGenerics> {
   public id: string;
 
   /** 是否为持久化实例 */
@@ -57,7 +53,7 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
   public behavior: SQHookBehavior;
 
   /** method实例 */
-  public entity: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  public entity: Method<AG>;
 
   /** 重试错误规则 */
   public retryError?: RetryError;
@@ -69,17 +65,7 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
   public backoff?: BackoffPolicy;
 
   /** 回退事件回调，当重试次数达到上限但仍然失败时，此回调将被调用 */
-  public fallbackHandlers?: FallbackHandler<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >[];
+  public fallbackHandlers?: FallbackHandler<AG>[];
 
   /** Promise的resolve函数，调用将通过对应的promise对象 */
   public resolveHandler?: PromiseExecuteParameter['0'];
@@ -104,13 +90,13 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
    * 当调用updateStateEffect时将会更新状态的目标method实例保存在此
    * 目的是为了让刷新页面后，提交数据也还能找到需要更新的状态
    */
-  public targetRefMethod?: Method;
+  public targetRefMethod?: Method<AG>;
 
   /** 调用updateStateEffect更新了哪些状态 */
   public updateStates?: string[];
 
   /** 重试回调函数 */
-  public retryHandlers?: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[];
+  public retryHandlers?: RetryHandler<AG>[];
 
   /** 当前是否正在请求中 */
   public active?: boolean;
@@ -119,19 +105,19 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
   public force: boolean;
 
   constructor(
-    entity: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+    entity: Method<AG>,
     behavior: SQHookBehavior,
     id = uuid(),
     force?: boolean,
     retryError?: RetryError,
     maxRetryTimes?: MaxRetryTimes,
     backoff?: BackoffPolicy,
-    fallbackHandlers?: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[],
+    fallbackHandlers?: FallbackHandler<AG>[],
     resolveHandler?: PromiseExecuteParameter['0'],
     rejectHandler?: PromiseExecuteParameter['1'],
     handlerArgs?: any[],
     vDatas?: string[],
-    retryHandlers?: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
+    retryHandlers?: RetryHandler<AG>[]
   ) {
     const thisObj = this;
     thisObj.entity = entity;
@@ -161,9 +147,7 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
    * 如果有持久化缓存也将会更新缓存
    * @param newSilentMethod 新的silentMethod实例
    */
-  public replace(
-    newSilentMethod: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) {
+  public replace(newSilentMethod: SilentMethod<AG>) {
     const targetSilentMethod = this;
     silentAssert(newSilentMethod.cache === targetSilentMethod.cache, 'the cache of new silentMethod must equal with this silentMethod');
     const [queue, queueName, position] = getBelongQueuePosition(targetSilentMethod);
@@ -192,8 +176,8 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
    * @param matcher method实例匹配器
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  public setUpdateState(matcher: Method, updateStateName: string | string[] = 'data') {
-    const methodInstance = instanceOf(matcher, Method) ? matcher : getContext(this.entity).snapshots.match(matcher, falseValue);
+  public setUpdateState(matcher: Method<AG>, updateStateName: string | string[] = 'data') {
+    const methodInstance = instanceOf(matcher, Method<AG>) ? matcher : getContext(this.entity).snapshots.match(matcher, falseValue);
     if (methodInstance) {
       this.targetRefMethod = methodInstance;
       this.updateStates = isArray(updateStateName) ? (updateStateName as string[]) : [updateStateName as string];
@@ -201,7 +185,7 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
   }
 }
 
-type MethodEntityPayload = Omit<Method<any, any, any, any, any, any, any>, 'context' | 'response' | 'send'>;
+type MethodEntityPayload = Omit<Method, 'context' | 'response' | 'send'>;
 export type SerializedSilentMethod = SilentMethodInterface & {
   entity: MethodEntityPayload;
   targetRefMethod?: MethodEntityPayload;

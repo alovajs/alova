@@ -1,4 +1,4 @@
-import { AlovaMethodHandler, Method, RequestHookConfig, useWatcher } from 'alova';
+import { AlovaGenerics, AlovaMethodHandler, Method, RequestHookConfig, useWatcher } from 'alova';
 import { assertSerialHandlers, serialMiddleware } from './general';
 
 /**
@@ -8,16 +8,10 @@ import { assertSerialHandlers, serialMiddleware } from './general';
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  serialHandlers: [
-    (
-      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    ),
-    ...AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
-  ],
-  watchingStates: Watched,
-  config: RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {} as any
+export default <AG extends AlovaGenerics>(
+  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<AG>[]],
+  watchingStates: AG['Watched'][],
+  config: RequestHookConfig<AG> = {} as any
 ) => {
   assertSerialHandlers('useSerialWatcher', serialHandlers);
   return useWatcher(serialHandlers[0], watchingStates, {

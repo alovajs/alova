@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import { Method, setCache, updateState, UpdateStateCollection } from 'alova';
+import { AlovaGenerics, Method, setCache, updateState, UpdateStateCollection } from 'alova';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {
   BeforeEventKey,
@@ -37,13 +37,13 @@ import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
 
 /** 静默方法队列集合 */
-export let silentQueueMap = {} as SilentQueueMap;
+export let silentQueueMap = {} as SilentQueueMap<any>;
 
 /**
  * 合并queueMap到silentMethod队列集合
  * @param queueMap silentMethod队列集合
  */
-export const merge2SilentQueueMap = (queueMap: SilentQueueMap) => {
+export const merge2SilentQueueMap = (queueMap: SilentQueueMap<AlovaGenerics>) => {
   forEach(objectKeys(queueMap), targetQueueName => {
     const currentQueue = (silentQueueMap[targetQueueName] = silentQueueMap[targetQueueName] || []);
     pushItem(currentQueue, ...queueMap[targetQueueName]);
@@ -91,7 +91,10 @@ export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>
  * @param vDataResponse 虚拟id和对应真实数据的集合
  * @param targetQueue 目标队列
  */
-const updateQueueMethodEntities = (vDataResponse: Record<string, any>, targetQueue: SilentQueueMap[string]) => {
+const updateQueueMethodEntities = <AG extends AlovaGenerics>(
+  vDataResponse: Record<string, any>,
+  targetQueue: SilentQueueMap<AG>[string]
+) => {
   forEach(targetQueue, silentMethodItem => {
     // 深层遍历entity对象，如果发现有虚拟数据或虚拟数据id，则替换为实际数据
     deepReplaceVData(silentMethodItem.entity, vDataResponse);
@@ -131,10 +134,7 @@ const replaceVirtualResponseWithResponse = (virtualResponse: any, response: any)
  *
  * @param queue SilentMethod队列
  */
-const setSilentMethodActive = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  active: boolean
-) => {
+const setSilentMethodActive = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>, active: boolean) => {
   if (active) {
     silentMethodInstance.active = active;
   } else {
@@ -143,7 +143,7 @@ const setSilentMethodActive = <State, Computed, Watched, Export, Responded, Tran
 };
 
 const defaultBackoffDelay = 1000;
-export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string) => {
+export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<AG>[string], queueName: string) => {
   /**
    * 根据请求等待参数控制回调函数的调用，如果未设置或小于等于0则立即触发
    * @param queueName 队列名称
@@ -167,10 +167,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
    * @param silentMethodInstance silentMethod实例
    * @param retryTimes 重试的次数
    */
-  const silentMethodRequest = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-    silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-    retryTimes = 0
-  ) => {
+  const silentMethodRequest = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>, retryTimes = 0) => {
     // 将当前silentMethod实例设置活跃状态
     setSilentMethodActive(silentMethodInstance, trueValue);
     const {
@@ -231,7 +228,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           // 触发全局的成功事件
           globalSQEventManager.emit(
             SuccessEventKey,
-            createHookEvent(
+            createHookEvent<AG>(
               1,
               entity,
               behavior,
@@ -362,24 +359,14 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
  * @param targetQueueName 目标队列名
  * @param onBeforePush silentMethod实例push前的事件
  */
-export const pushNewSilentMethod2Queue = <
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+export const pushNewSilentMethod2Queue = <AG extends AlovaGenerics>(
+  silentMethodInstance: SilentMethod<AG>,
   cache: boolean,
   targetQueueName = DEFAUT_QUEUE_NAME,
   onBeforePush = noop
 ) => {
   silentMethodInstance.cache = cache;
-  const currentQueue = (silentQueueMap[targetQueueName] = silentQueueMap[targetQueueName] || []);
+  const currentQueue = (silentQueueMap[targetQueueName] = silentQueueMap[targetQueueName] || []) as unknown as SilentMethod<AG>[];
   const isNewQueue = len(currentQueue) <= 0;
   const isPush2Queue = (onBeforePush() as any) !== falseValue;
 

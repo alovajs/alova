@@ -1,6 +1,6 @@
 import { $self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
-import { AlovaRequestAdapter, RespondedHandlerRecord, StatesHook } from 'alova';
+import { AlovaGenerics, AlovaRequestAdapter, RespondedHandlerRecord, StatesHook } from 'alova';
 import { ClientTokenAuthenticationOptions, ServerTokenAuthenticationOptions, TokenAuthenticationResult } from '~/typings/general';
 import {
   PosibbleAuthMap,
@@ -71,7 +71,7 @@ export const createClientTokenAuthentication = ({
           await callHandlerIfMatchesMeta(method, logout, defaultLogoutMeta, response);
           return (respondedRecord.onSuccess || $self)(response, method);
         }
-      } as RespondedHandlerRecord<any, any, any, any, any, any>;
+      } as RespondedHandlerRecord<AlovaGenerics>;
     }
   } as TokenAuthenticationResult<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>;
 };
@@ -164,7 +164,7 @@ export const createServerTokenAuthentication = ({
           }
           return (respondedRecord.onError || noop)(error, method);
         }
-      } as RespondedHandlerRecord<any, any, any, any, any, any>;
+      } as RespondedHandlerRecord<AlovaGenerics>;
     }
   } as TokenAuthenticationResult<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>;
 };

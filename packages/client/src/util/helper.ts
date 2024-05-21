@@ -2,7 +2,7 @@ import { createAssert } from '@alova/shared/assert';
 import { instanceOf, isFn, isNumber, noop } from '@alova/shared/function';
 import { GeneralFn } from '@alova/shared/types';
 import { clearTimeoutTimer, falseValue, filterItem, forEach, nullValue, setTimeoutFn, undefinedValue } from '@alova/shared/vars';
-import { Method, AlovaMethodHandler } from 'alova';
+import { AlovaGenerics, AlovaMethodHandler, Method } from 'alova';
 import { AnyFn, BackoffPolicy, UsePromiseReturnType } from '~/typings/general';
 
 /**
@@ -155,10 +155,7 @@ export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
  * @param args 方法调用参数
  * @returns 请求方法对象
  */
-export const getHandlerMethod = (
-  methodHandler: Method | AlovaMethodHandler<any, any, any, any, any, any, any, any, any>,
-  args: any[] = []
-) => {
+export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler<AlovaGenerics>, args: any[] = []) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
   createAssert('scene')(
     instanceOf(methodInstance, Method),

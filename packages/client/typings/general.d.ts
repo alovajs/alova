@@ -6,6 +6,7 @@ import {
   AlovaEvent,
   AlovaFetcherMiddlewareContext,
   AlovaFrontMiddlewareContext,
+  AlovaGenerics,
   AlovaGuardNext,
   AlovaOptions,
   AlovaRequestAdapter,
@@ -25,8 +26,7 @@ type IsUnknown<T, P, N> = IsAny<T, P, N> extends P ? N : unknown extends T ? P :
 
 /** @description usePagination相关 */
 type ArgGetter<R, LD> = (data: R) => LD | undefined;
-interface PaginationHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, LD, WS>
-  extends WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+interface PaginationHookConfig<AG extends AlovaGenerics, LD, WS> extends WatcherHookConfig<AG> {
   /**
    * 是否预加载上一页
    * @default true
@@ -194,7 +194,7 @@ interface BackoffPolicy {
  * silentMethod实例
  * 需要进入silentQueue的请求都将被包装成silentMethod实例，它将带有请求策略的各项参数
  */
-interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
+interface SilentMethod<AG extends AlovaGenerics = AlovaGenerics> {
   /** silentMethod实例id */
   readonly id: string;
   /** 是否为持久化实例 */
@@ -202,7 +202,7 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
   /** 实例的行为，queue或silent */
   readonly behavior: SQHookBehavior;
   /** method实例 */
-  readonly entity: Method<S, E, R, T, RC, RE, RH>;
+  readonly entity: Method<AG>;
 
   /** 重试错误规则
    * 当错误符合以下表达式时才进行重试
@@ -220,7 +220,7 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
   /**
    * 回退事件回调，当重试次数达到上限但仍然失败时，此回调将被调用
    */
-  readonly fallbackHandlers?: FallbackHandler<S, E, R, T, RC, RE, RH>[];
+  readonly fallbackHandlers?: FallbackHandler<AG>[];
 
   /**
    * Promise的resolve函数，调用将通过对应的promise对象
@@ -277,7 +277,7 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
    * 当调用updateStateEffect时将会更新状态的目标method实例保存在此
    * 目的是为了让刷新页面后，提交数据也还能找到需要更新的状态
    */
-  targetRefMethod?: Method;
+  targetRefMethod?: Method<AG>;
 
   /** 重试回调函数 */
   retryHandlers?: RetryHandler<S, E, R, T, RC, RE, RH>[];
@@ -298,7 +298,7 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
    * 如果有持久化缓存也将会更新缓存
    * @param newSilentMethod 新的silentMethod实例
    */
-  replace(newSilentMethod: SilentMethod): void;
+  replace(newSilentMethod: SilentMethod<AG>): void;
 
   /**
    * 移除当前实例，它将在持久化存储中同步移除
@@ -312,12 +312,12 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
    * @param matcher method实例匹配器
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  setUpdateState(matcher: Method, updateStateName?: string | string[]): void;
+  setUpdateState(matcher: Method<AG>, updateStateName?: string | string[]): void;
 }
 
 // 静默队列hooks相关
 type SQHookBehavior = 'static' | 'queue' | 'silent';
-interface SQHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+interface SQHookConfig<AG extends AlovaGenerics> {
   /**
    * hook行为，可选值为silent、queue、static，默认为queue
    * 可以设置为可选值，或一个带返回可选值的回调函数
@@ -358,50 +358,18 @@ interface SQHookConfig<State, Computed, Watched, Export, Responded, Transformed,
    * @param {Method} method method实例
    * @returns {R} 与响应数据相同格式的数据
    */
-  vDataCaptured?: (
-    method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) => R | undefined | void;
+  vDataCaptured?: (method: Method<AG>) => R | undefined | void;
 }
 
-type SQRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = SQHookConfig<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> &
-  RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-type SQWatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = SQHookConfig<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> &
-  WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+type SQRequestHookConfig<AG extends AlovaGenerics> = SQHookConfig<AG> & RequestHookConfig<AG>;
+type SQWatcherHookConfig<AG extends AlovaGenerics> = SQHookConfig<AG> & WatcherHookConfig<AG>;
 
-type FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => void;
-type RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQRetryEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => void;
-type BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => void;
-type PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-) => void;
-type SQHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = Pick<
-  UseHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+type FallbackHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
+type RetryHandler<AG extends AlovaGenerics> = (event: ScopedSQRetryEvent<AG>) => void;
+type BeforePushQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
+type PushedQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
+type SQHookReturnType<AG extends AlovaGenerics> = Pick<
+  UseHookReturnType<AG>,
   'loading' | 'data' | 'error' | 'downloading' | 'uploading' | 'abort' | 'update' | 'send'
 > & {
   /**
@@ -416,45 +384,25 @@ type SQHookReturnType<State, Computed, Watched, Export, Responded, Transformed, 
    * 1. 只在重试次数达到后仍然失败时触发
    * 2. 在onComplete之前触发
    */
-  onFallback: (
-    handler: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) => void;
+  onFallback: (handler: FallbackHandler<AG>) => void;
 
   /** 在入队列前调用，在此可以过滤队列中重复的SilentMethod，在static行为下无效 */
-  onBeforePushQueue: (
-    handler: BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) => boolean | void;
+  onBeforePushQueue: (handler: BeforePushQueueHandler<AG>) => boolean | void;
 
   /** 在入队列后调用，在static行为下无效 */
-  onPushedQueue: (
-    handler: PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) => void;
+  onPushedQueue: (handler: PushedQueueHandler<AG>) => void;
 
   /** 重试事件绑定 */
-  onRetry: (
-    handler: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) => void;
+  onRetry: (handler: RetryHandler<AG>) => void;
 
   /** @override 重写alova的onSuccess事件 */
-  onSuccess: (
-    handler: (
-      event: ScopedSQSuccessEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    ) => void
-  ) => void;
+  onSuccess: (handler: (event: ScopedSQSuccessEvent<AG>) => void) => void;
 
   /** @override 重写alova的onError事件 */
-  onError: (
-    handler: (
-      event: ScopedSQErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    ) => void
-  ) => void;
+  onError: (handler: (event: ScopedSQErrorEvent<AG>) => void) => void;
 
   /** @override 重写alova的onComplete事件 */
-  onComplete: (
-    handler: (
-      event: ScopedSQCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    ) => void
-  ) => void;
+  onComplete: (handler: (event: ScopedSQCompleteEvent<AG>) => void) => void;
 };
 
 interface DataSerializer {
@@ -517,33 +465,33 @@ type SilentSubmitSuccessHandler = (event: GlobalSQSuccessEvent) => void;
 type SilentSubmitErrorHandler = (event: GlobalSQErrorEvent) => void;
 type SilentSubmitFailHandler = (event: GlobalSQFailEvent) => void;
 type OffEventCallback = () => void;
-type SilentQueueMap = Record<string, SilentMethod[]>;
+type SilentQueueMap<AG extends AlovaGenerics = AlovaGenerics> = Record<string, SilentMethod<AG>[]>;
 
 /**
  * useCaptcha配置
  */
-type CaptchaHookConfig<S, E, R, T, RC, RE, RH> = {
+type CaptchaHookConfig<AG extends AlovaGenerics> = {
   /**
    * 初始倒计时，当验证码发送成功时将会以此数据来开始倒计时
    * @default 60
    */
   initialCountdown?: number;
-} & RequestHookConfig<S, E, R, T, RC, RE, RH>;
+} & RequestHookConfig<AG>;
 
 /**
  * useCaptcha返回值
  */
-type CaptchaReturnType<S, E, R, T, RC, RE, RH> = UseHookReturnType<S, E, R, T, RC, RE, RH> & {
+type CaptchaReturnType<AG extends AlovaGenerics> = UseHookReturnType<AG> & {
   /**
    * 当前倒计时，每秒-1，当倒计时到0时可再次发送验证码
    */
-  countdown: ExportedType<number, S>;
+  countdown: ExportedType<number, AG['State']>;
 };
 
 /**
  * useForm的handler函数类型
  */
-type FormHookHandler<S, E, R, T, RC, RE, RH, F> = (form: F, ...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
+type FormHookHandler<AG extends AlovaGenerics, F> = (form: F, ...args: any[]) => Method<AG>;
 
 /**
  * useForm配置
@@ -567,18 +515,7 @@ interface StoreDetailConfig {
    */
   serializers?: Record<string | number, DataSerializer>;
 }
-type FormHookConfig<
-  State = any,
-  Computed = any,
-  Watched = any,
-  Export = any,
-  Responded = any,
-  Transformed = any,
-  RequestConfig = any,
-  Response = any,
-  ResponseHeader = any,
-  FormData = any
-> = {
+type FormHookConfig<AG extends AlovaGenerics, FormData> = {
   /**
    * 初始表单数据
    */
@@ -601,17 +538,17 @@ type FormHookConfig<
    * @default false
    */
   resetAfterSubmiting?: boolean;
-} & RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+} & RequestHookConfig<AG>;
 
 type RestoreHandler = () => void;
 /**
  * useForm返回值
  */
-type FormReturnType<S, E, R, T, RC, RE, RH, F> = UseHookReturnType<S, E, R, T, RC, RE, RH> & {
+type FormReturnType<AG extends AlovaGenerics, F> = UseHookReturnType<AG> & {
   /**
    * 表单数据
    */
-  form: ExportedType<F, S>;
+  form: ExportedType<F, AG['State']>;
 
   /**
    * 持久化数据恢复事件绑定，数据恢复后触发

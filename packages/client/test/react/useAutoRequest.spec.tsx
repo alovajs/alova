@@ -1,16 +1,16 @@
+import { useAutoRequest } from '@/index';
 import '@testing-library/jest-dom';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 import React, { ReactElement } from 'react';
+import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
-import { untilCbCalled } from '~/test/utils';
-import { useAutoRequest } from '..';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
   statesHook: ReactHook,
-  localCache: null,
+  cacheFor: null,
   requestAdapter: mockRequestAdapter,
   cacheLogger: false
 });
@@ -57,12 +57,11 @@ describe('react => useAutoRequest', () => {
     let tag = 'init';
     const Page = () => {
       const { data } = useAutoRequest(
-        () => {
-          return alovaInst.Get('/return-query', {
+        () =>
+          alovaInst.Get('/return-query', {
             params: { tag },
             transformData: ({ query }: any) => query
-          });
-        },
+          }),
         {
           throttle: 0
         }
@@ -119,15 +118,14 @@ describe('react => useAutoRequest', () => {
       return (originalOnPolling as any)(...args);
     };
 
-    let tag = 'init';
+    const tag = 'init';
     const Page = () => {
       const { data } = useAutoRequest(
-        () => {
-          return alovaInst.Get('/return-query', {
+        () =>
+          alovaInst.Get('/return-query', {
             params: { tag },
             transformData: ({ query }: any) => query
-          });
-        },
+          }),
         {
           enableNetwork: false,
           enableFocus: false,
@@ -171,12 +169,11 @@ describe('react => useAutoRequest', () => {
     let tag = 'init';
     const Page = () => {
       const { data } = useAutoRequest(
-        () => {
-          return alovaInst.Get('/return-query', {
+        () =>
+          alovaInst.Get('/return-query', {
             params: { tag },
             transformData: ({ query }: any) => query
-          });
-        },
+          }),
         {
           enableNetwork: false,
           enableFocus: false,
@@ -242,15 +239,14 @@ describe('react => useAutoRequest', () => {
       };
     };
 
-    let tag = 'init';
+    const tag = 'init';
     const Page = () => {
       const { data } = useAutoRequest(
-        () => {
-          return alovaInst.Get('/return-query', {
+        () =>
+          alovaInst.Get('/return-query', {
             params: { tag },
             transformData: ({ query }: any) => query
-          });
-        },
+          }),
         {
           pollingTime: 100
         }
@@ -274,12 +270,12 @@ describe('react => useAutoRequest', () => {
   test('should request once when emit multiple events within one second defaultly', async () => {
     let tag = 'init';
     const Page = () => {
-      const { data } = useAutoRequest(() => {
-        return alovaInst.Get('/return-query', {
+      const { data } = useAutoRequest(() =>
+        alovaInst.Get('/return-query', {
           params: { tag },
           transformData: ({ query }: any) => query
-        });
-      });
+        })
+      );
       return <span role="data">{JSON.stringify(data)}</span>;
     };
     render((<Page />) as ReactElement<any, any>);

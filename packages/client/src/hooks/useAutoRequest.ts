@@ -8,32 +8,32 @@ interface AutoRequestHook<State, Computed, Watched, Export, Responded, Transform
     handler:
       | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
       | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config?: AutoRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): UseHookReturnType<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   onNetwork(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): UnbindHandler;
   onPolling(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): UnbindHandler;
   onVisibility(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): UnbindHandler;
   onFocus(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): UnbindHandler;
 }
 
-export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, any> = {
+export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, any, any, any> = {
   enableFocus: trueValue,
   enableNetwork: trueValue,
   throttle: 1000
 };
-const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any, any, any> = (handler, config) => {
+const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any, any, any> = (handler, config = {}) => {
   let notifiable = trueValue;
   const { enableFocus = trueValue, enableVisibility = trueValue, enableNetwork = trueValue, pollingTime = 0, throttle = 1000 } = config;
   const { onMounted, onUnmounted, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());

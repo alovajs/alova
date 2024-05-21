@@ -20,27 +20,33 @@ import { RetriableFailEvent, RetriableHookConfig, RetriableRetryEvent } from '~/
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');
 
-export type RetriableEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
-  [RetryEventKey]: RetriableRetryEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-  [FailEventKey]: RetriableFailEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+export type RetriableEvents<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
+  [RetryEventKey]: RetriableRetryEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  [FailEventKey]: RetriableFailEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 };
 
-type RetryHandler<S, E, R, T, RC, RE, RH> = (event: RetriableRetryEvent<S, E, R, T, RC, RE, RH>) => void;
-type FailHandler<S, E, R, T, RC, RE, RH> = (event: RetriableFailEvent<S, E, R, T, RC, RE, RH>) => void;
+type RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: RetriableRetryEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+) => void;
+type FailHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+  event: RetriableFailEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+) => void;
 const hookPrefix = 'useRetriableRequest';
 const assert = createAssert(hookPrefix);
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
     | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  config: RetriableHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
+  config: RetriableHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
 
   const { ref: useFlag$, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
 
   const eventManager =
-    createEventManager<RetriableEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
+    createEventManager<
+      RetriableEvents<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    >();
   const retryTimes = useFlag$(0);
   const stopManuallyError = useFlag$(undefinedValue as Error | undefined); // 停止错误对象，在手动触发停止时有值
   const methodInstanceLastest = useFlag$(
@@ -170,7 +176,9 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * 它们将在重试发起后触发
    * @param handler 重试事件回调
    */
-  const onRetry = (handler: RetryHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => {
+  const onRetry = (
+    handler: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => {
     eventManager.on(RetryEventKey, event => handler(event));
   };
 
@@ -183,7 +191,9 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    *
    * @param handler 失败事件回调
    */
-  const onFail = (handler: FailHandler<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => {
+  const onFail = (
+    handler: FailHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  ) => {
     eventManager.on(FailEventKey, event => handler(event));
   };
 
