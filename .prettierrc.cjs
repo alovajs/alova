@@ -1,6 +1,6 @@
 module.exports = {
   // newline string threshold
-  printWidth: 140,
+  printWidth: 120,
 
   // Set the number of spaces for each horizontal indentation of the tool
   tabWidth: 2,

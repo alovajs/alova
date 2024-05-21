@@ -16,7 +16,17 @@ import { silentQueueMap } from './silentQueue';
 import { persistSilentMethod, spliceStorageSilentMethod } from './storage/silentMethodStorage';
 
 export type PromiseExecuteParameter = Parameters<ConstructorParameters<typeof Promise<any>>['0']>;
-export type MethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
+export type MethodHandler<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> = (
   ...args: any[]
 ) => Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 export type MaxRetryTimes = NonNullable<SilentMethodInterface['maxRetryTimes']>;
@@ -26,8 +36,28 @@ export type RetryError = NonNullable<SilentMethodInterface['retryError']>;
  * 定位silentMethod实例所在的位置
  * @param silentMethodInstance silentMethod实例
  */
-const getBelongQueuePosition = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+const getBelongQueuePosition = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  silentMethodInstance: SilentMethod<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => {
   let queue: SilentQueueMap[string] | undefined = undefinedValue;
   let queueName = '';
@@ -47,7 +77,17 @@ const getBelongQueuePosition = <State, Computed, Watched, Export, Responded, Tra
  * silentMethod实例
  * 需要进入silentQueue的请求都将被包装成silentMethod实例，它将带有请求策略的各项参数
  */
-export class SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+export class SilentMethod<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> {
   public id: string;
 
   /** 是否为持久化实例 */
@@ -57,7 +97,17 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
   public behavior: SQHookBehavior;
 
   /** method实例 */
-  public entity: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  public entity: Method<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >;
 
   /** 重试错误规则 */
   public retryError?: RetryError;
@@ -110,7 +160,17 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
   public updateStates?: string[];
 
   /** 重试回调函数 */
-  public retryHandlers?: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[];
+  public retryHandlers?: RetryHandler<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >[];
 
   /** 当前是否正在请求中 */
   public active?: boolean;
@@ -126,12 +186,32 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
     retryError?: RetryError,
     maxRetryTimes?: MaxRetryTimes,
     backoff?: BackoffPolicy,
-    fallbackHandlers?: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[],
+    fallbackHandlers?: FallbackHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >[],
     resolveHandler?: PromiseExecuteParameter['0'],
     rejectHandler?: PromiseExecuteParameter['1'],
     handlerArgs?: any[],
     vDatas?: string[],
-    retryHandlers?: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
+    retryHandlers?: RetryHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >[]
   ) {
     const thisObj = this;
     thisObj.entity = entity;
@@ -162,10 +242,23 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
    * @param newSilentMethod 新的silentMethod实例
    */
   public replace(
-    newSilentMethod: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    newSilentMethod: SilentMethod<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) {
     const targetSilentMethod = this;
-    silentAssert(newSilentMethod.cache === targetSilentMethod.cache, 'the cache of new silentMethod must equal with this silentMethod');
+    silentAssert(
+      newSilentMethod.cache === targetSilentMethod.cache,
+      'the cache of new silentMethod must equal with this silentMethod'
+    );
     const [queue, queueName, position] = getBelongQueuePosition(targetSilentMethod);
     if (queue) {
       splice(queue, position, 1, newSilentMethod);
@@ -193,7 +286,9 @@ export class SilentMethod<State, Computed, Watched, Export, Responded, Transform
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
   public setUpdateState(matcher: Method, updateStateName: string | string[] = 'data') {
-    const methodInstance = instanceOf(matcher, Method) ? matcher : getContext(this.entity).snapshots.match(matcher, falseValue);
+    const methodInstance = instanceOf(matcher, Method)
+      ? matcher
+      : getContext(this.entity).snapshots.match(matcher, falseValue);
     if (methodInstance) {
       this.targetRefMethod = methodInstance;
       this.updateStates = isArray(updateStateName) ? (updateStateName as string[]) : [updateStateName as string];

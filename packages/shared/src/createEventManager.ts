@@ -45,7 +45,9 @@ const createEventManager = <E extends object>() => {
     emit(type, event) {
       const decorator = decoratorMap[type];
       const handlers = eventMap[type] || [];
-      forEach(handlers, (handler, index) => (isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)));
+      forEach(handlers, (handler, index) =>
+        isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)
+      );
     },
     setDecorator(type, decorator) {
       decoratorMap[type] = decorator;

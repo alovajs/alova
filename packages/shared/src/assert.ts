@@ -18,6 +18,9 @@ export const createAssert =
   (prefix = '') =>
   (expression: boolean, msg: string, errCode?: number) => {
     if (!expression) {
-      throw newInstance(Error, buildErrorMsg(prefix, msg + (errCode ? `\n\nDetaild: https://alova.js.org/err#${errCode}` : '')));
+      throw newInstance(
+        Error,
+        buildErrorMsg(prefix, msg + (errCode ? `\n\nDetaild: https://alova.js.org/err#${errCode}` : ''))
+      );
     }
   };

@@ -11,6 +11,5 @@
       "root/*": ["../../internal/*"]
     }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"],
-  "exclude": ["node_modules", "**.d.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

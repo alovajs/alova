@@ -1,4 +1,12 @@
-import { getConfig, getContextOptions, getMethodInternalKey, instanceOf, isPlainObject, key, noop } from '@alova/shared/function';
+import {
+  getConfig,
+  getContextOptions,
+  getMethodInternalKey,
+  instanceOf,
+  isPlainObject,
+  key,
+  noop
+} from '@alova/shared/function';
 import {
   deleteAttr,
   falseValue,
@@ -36,7 +44,8 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   public url: string;
 
-  public config: MethodRequestConfig & AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>;
+  public config: MethodRequestConfig &
+    AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>;
 
   public data?: RequestBody;
 
@@ -148,7 +157,8 @@ export default class Method<AG extends AlovaGenerics = any> {
   public send(forceRequest = falseValue): Promise<AG['Responded']> {
     const instance = this;
     const { response, onDownload, onUpload, abort, fromCache } = sendRequest(instance, forceRequest);
-    len(instance.dhs) > 0 && onDownload((loaded, total) => forEach(instance.dhs, handler => handler({ loaded, total })));
+    len(instance.dhs) > 0 &&
+      onDownload((loaded, total) => forEach(instance.dhs, handler => handler({ loaded, total })));
     len(instance.uhs) > 0 && onUpload((loaded, total) => forEach(instance.uhs, handler => handler({ loaded, total })));
 
     // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求

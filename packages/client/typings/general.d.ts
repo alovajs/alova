@@ -26,8 +26,29 @@ type IsUnknown<T, P, N> = IsAny<T, P, N> extends P ? N : unknown extends T ? P :
 
 /** @description usePagination相关 */
 type ArgGetter<R, LD> = (data: R) => LD | undefined;
-interface PaginationHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader, LD, WS>
-  extends WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+interface PaginationHookConfig<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader,
+  LD,
+  WS
+> extends WatcherHookConfig<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  > {
   /**
    * 是否预加载上一页
    * @default true
@@ -318,7 +339,17 @@ interface SilentMethod<S = any, E = any, R = any, T = any, RC = any, RE = any, R
 
 // 静默队列hooks相关
 type SQHookBehavior = 'static' | 'queue' | 'silent';
-interface SQHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+interface SQHookConfig<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> {
   /**
    * hook行为，可选值为silent、queue、static，默认为queue
    * 可以设置为可选值，或一个带返回可选值的回调函数
@@ -364,7 +395,7 @@ interface SQHookConfig<State, Computed, Watched, Export, Responded, Transformed,
   ) => R | undefined | void;
 }
 
-type SQRequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = SQHookConfig<
+type SQRequestHookConfig<
   State,
   Computed,
   Watched,
@@ -374,9 +405,9 @@ type SQRequestHookConfig<State, Computed, Watched, Export, Responded, Transforme
   RequestConfig,
   Response,
   ResponseHeader
-> &
+> = SQHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> &
   RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-type SQWatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = SQHookConfig<
+type SQWatcherHookConfig<
   State,
   Computed,
   Watched,
@@ -386,22 +417,102 @@ type SQWatcherHookConfig<State, Computed, Watched, Export, Responded, Transforme
   RequestConfig,
   Response,
   ResponseHeader
-> &
+> = SQHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> &
   WatcherHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 
-type FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+type FallbackHandler<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> = (
+  event: ScopedSQEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => void;
 type RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQRetryEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  event: ScopedSQRetryEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => void;
-type BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+type BeforePushQueueHandler<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> = (
+  event: ScopedSQEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => void;
-type PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: ScopedSQEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+type PushedQueueHandler<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> = (
+  event: ScopedSQEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => void;
-type SQHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = Pick<
+type SQHookReturnType<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> = Pick<
   UseHookReturnType<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
   'loading' | 'data' | 'error' | 'downloading' | 'uploading' | 'abort' | 'update' | 'send'
 > & {
@@ -418,42 +529,112 @@ type SQHookReturnType<State, Computed, Watched, Export, Responded, Transformed, 
    * 2. 在onComplete之前触发
    */
   onFallback: (
-    handler: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: FallbackHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => void;
 
   /** 在入队列前调用，在此可以过滤队列中重复的SilentMethod，在static行为下无效 */
   onBeforePushQueue: (
-    handler: BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: BeforePushQueueHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => boolean | void;
 
   /** 在入队列后调用，在static行为下无效 */
   onPushedQueue: (
-    handler: PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: PushedQueueHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => void;
 
   /** 重试事件绑定 */
   onRetry: (
-    handler: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: RetryHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => void;
 
   /** @override 重写alova的onSuccess事件 */
   onSuccess: (
     handler: (
-      event: ScopedSQSuccessEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      event: ScopedSQSuccessEvent<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >
     ) => void
   ) => void;
 
   /** @override 重写alova的onError事件 */
   onError: (
     handler: (
-      event: ScopedSQErrorEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      event: ScopedSQErrorEvent<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >
     ) => void
   ) => void;
 
   /** @override 重写alova的onComplete事件 */
   onComplete: (
     handler: (
-      event: ScopedSQCompleteEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      event: ScopedSQCompleteEvent<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >
     ) => void
   ) => void;
 };
@@ -602,7 +783,17 @@ type FormHookConfig<
    * @default false
    */
   resetAfterSubmiting?: boolean;
-} & RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+} & RequestHookConfig<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>;
 
 type RestoreHandler = () => void;
 /**
@@ -713,7 +904,10 @@ interface Actions {
  * @returns alova中间件函数
  */
 type ActionDelegationMiddleware = (id: string | number | symbol) => <S, E, R, T, RC, RE, RH>(
-  context: (AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH> | AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>) & {
+  context: (
+    | AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>
+    | AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>
+  ) & {
     delegatingActions?: Actions;
   },
   next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
@@ -769,7 +963,8 @@ interface TokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, an
    */
   assignToken?: (method: Parameters<RA>[1]) => void | Promise<void>;
 }
-interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>> extends TokenAuthenticationOptions<RA> {
+interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>>
+  extends TokenAuthenticationOptions<RA> {
   /**
    * 在请求前的拦截器中判断token是否过期，并刷新token
    */
@@ -788,7 +983,8 @@ interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, a
     metaMatches?: MetaMatches;
   };
 }
-interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>> extends TokenAuthenticationOptions<RA> {
+interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>>
+  extends TokenAuthenticationOptions<RA> {
   /**
    * 在请求成功拦截器中判断token是否过期，并刷新token
    */
@@ -831,7 +1027,10 @@ type AlovaBeforeRequest<SH extends StatesHook<any, any>, RA extends AlovaRequest
     ? Method<ReturnType<SH['create']>, ReturnType<SH['export']>, any, any, RC, RT, RH>
     : never
 ) => void | Promise<void>;
-type AlovaResponded<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any, any, any>> = NonNullable<
+type AlovaResponded<
+  SH extends StatesHook<any, any>,
+  RA extends AlovaRequestAdapter<any, any, any, any, any>
+> = NonNullable<
   AlovaOptions<
     ReturnType<SH['create']>,
     ReturnType<SH['export']>,
@@ -840,7 +1039,10 @@ type AlovaResponded<SH extends StatesHook<any, any>, RA extends AlovaRequestAdap
     Parameters<RA>[1] extends Method<any, any, any, any, any, any, infer RH> ? RH : never
   >['responded']
 >;
-interface TokenAuthenticationResult<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any, any, any>> {
+interface TokenAuthenticationResult<
+  SH extends StatesHook<any, any>,
+  RA extends AlovaRequestAdapter<any, any, any, any, any>
+> {
   onAuthRequired(originalBeforeRequest?: AlovaBeforeRequest<SH, RA>): AlovaBeforeRequest<SH, RA>;
   onResponseRefreshToken(originalResponded?: AlovaResponded<SH, RA>): AlovaResponded<SH, RA>;
   waitingList: {
@@ -906,7 +1108,9 @@ interface AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH> extends AlovaSSEEve
   data: Data; // 每次响应的，经过拦截器转换后的数据
 }
 type SSEOnOpenTrigger<S, E, R, T, RC, RE, RH> = (event: AlovaSSEEvent<S, E, R, T, RC, RE, RH>) => void;
-type SSEOnMessageTrigger<Data, S, E, R, T, RC, RE, RH> = (event: AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH>) => void;
+type SSEOnMessageTrigger<Data, S, E, R, T, RC, RE, RH> = (
+  event: AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH>
+) => void;
 type SSEOnErrorTrigger<S, E, R, T, RC, RE, RH> = (event: AlovaSSEErrorEvent<S, E, R, T, RC, RE, RH>) => void;
 type SSEOn<S, E, R, T, RC, RE, RH> = (
   eventName: string,

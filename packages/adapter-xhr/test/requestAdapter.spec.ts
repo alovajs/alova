@@ -2,7 +2,7 @@ import { xhrRequestAdapter } from '@/index';
 import { createAlova } from 'alova';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
+import { Result, delay, untilReject } from 'root/testUtils';
 import { AlovaXHRResponse } from '~/typings';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -169,17 +169,11 @@ describe('request adapter', () => {
     });
 
     const Get = alovaInst.Get<AlovaXHRResponse<Result>>('/unit-test-404');
-    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
 
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.data).toBeNull();
-    expect(data.value.status).toBe(404);
-    expect(data.value.statusText).toBe('api not found');
+    const data = await Get;
+    expect(data.data).toBeNull();
+    expect(data.status).toBe(404);
+    expect(data.statusText).toBe('api not found');
   });
 
   test('request fail', async () => {
@@ -192,17 +186,10 @@ describe('request adapter', () => {
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-error');
-    const { loading, data, downloading, error, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
 
-    const { error: errRaw } = await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBe(errRaw);
-    expect(error.value?.message).toMatch(/Network Error/);
+    const error = await untilReject(Get);
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toMatch(/Network Error/);
   });
 
   // 单独跑这个单测可以通过，整体测试报错，暂时先skip
@@ -211,47 +198,31 @@ describe('request adapter', () => {
       baseURL,
       requestAdapter: xhrRequestAdapter(),
       timeout: 1,
-      errorLogger: false,
       responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-passthrough');
-    const { loading, data, error, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
-
-    await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(error.value?.message).toBe('Network Timeout');
+    const error = await untilReject(Get);
+    expect(error.message).toBe('Network Timeout');
   });
 
   test('should cancel request when call `abort`', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      errorLogger: false,
       responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-passthrough');
-    const { loading, data, downloading, error, abort, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
-
-    delay(0).then(abort);
-    await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value?.message).toBe('The user aborted a request.');
+    delay(0).then(() => {
+      Get.abort();
+    });
+    const error = await untilReject(Get);
+    expect(error.message).toBe('The user aborted a request.');
   });
 
   test('should upload file and pass the right args', async () => {
@@ -271,21 +242,16 @@ describe('request adapter', () => {
       type: 'image/jpeg'
     });
     formData.append('file', imageFile);
+    // msw的xhr.upload不支持上传功能
     const Post = alovaInst.Post<Result<string>>('/unit-test-upload', formData, {
-      withCredentials: true,
-      // jsdom的xhr.upload不支持上传功能，因此即使设置为true了也无法获取上传进度
-      enableUpload: true
+      withCredentials: true
     });
 
-    const { loading, data, uploading, error, onSuccess } = useRequest(Post);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.code).toBe(200);
-    expect(data.value.data.method).toBe('POST');
-    expect(data.value.data.path).toBe('/unit-test-upload');
-    expect(data.value.data.params.contentType).toMatch('multipart/form-data;');
-    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    const data = await Post;
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('POST');
+    expect(data.data.path).toBe('/unit-test-upload');
+    expect(data.data.params.contentType).toMatch('multipart/form-data;');
   });
 
   test('should download file and pass the right args', async () => {
@@ -298,16 +264,14 @@ describe('request adapter', () => {
     });
 
     const Get = alovaInst.Get('/unit-test-download', {
-      enableDownload: true,
       responseType: 'blob'
     });
 
-    const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Get);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeInstanceOf(Blob);
-    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(downloading.value).toStrictEqual({ total: 250569, loaded: 250569 });
-    expect(error.value).toBeUndefined();
+    let downloading = {};
+    Get.onDownload(progress => {
+      downloading = progress;
+    });
+    await Get;
+    expect(downloading).toStrictEqual({ total: 250569, loaded: 250569 });
   });
 });

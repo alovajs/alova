@@ -410,7 +410,9 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('refreshCurPage'));
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(29, 20, i => (i === 20 ? 200 : i))));
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(29, 20, i => (i === 20 ? 200 : i)))
+      );
     });
 
     // 修改第1页数据
@@ -515,7 +517,9 @@ describe('react => usePagination', () => {
     });
     total++;
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 })));
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 }))
+      );
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
       // 检查当前页缓存
@@ -758,13 +762,17 @@ describe('react => usePagination', () => {
     });
     fireEvent.click(screen.getByRole('replaceError2'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova/usePagination]index must be a number that less than list length___2');
+      expect(screen.getByRole('error')).toHaveTextContent(
+        '[alova/usePagination]index must be a number that less than list length___2'
+      );
     });
 
     fireEvent.click(screen.getByRole('replace1'));
     await waitFor(() => {
       // 第一项被替换了
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300 })));
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300 }))
+      );
 
       // 检查当前页缓存
       expect(queryCache(getter(1, 10))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300 }));
@@ -773,7 +781,9 @@ describe('react => usePagination', () => {
     // 正向顺序替换
     fireEvent.click(screen.getByRole('replace2'));
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 })));
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }))
+      );
 
       // 检查当前页缓存
       expect(queryCache(getter(1, 10))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }));
@@ -782,7 +792,9 @@ describe('react => usePagination', () => {
     // 逆向顺序替换
     fireEvent.click(screen.getByRole('replace3'));
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 })));
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 }))
+      );
 
       // 检查当前页缓存
       expect(queryCache(getter(1, 10))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 }));
@@ -955,7 +967,9 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('insert1'));
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 })));
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 }))
+      );
     });
 
     // 预加载设置为false了，因此不会fetch前后一页的数据
@@ -2162,7 +2176,9 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('refresh1'));
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19, 0, { 0: 100 })));
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(19, 0, { 0: 100 }))
+      );
     });
   });
 

@@ -45,7 +45,10 @@ export const setWithCacheAdapter = async (
   // not to cache if expireTimestamp is less than current timestamp
   if (expireTimestamp > getTime() && data) {
     const methodCacheKey = buildNamespacedCacheKey(namespace, key);
-    await cacheAdapter.set(methodCacheKey, filterItem([data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag], Boolean));
+    await cacheAdapter.set(
+      methodCacheKey,
+      filterItem([data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag], Boolean)
+    );
 
     // save the relationship between this method and its hitSources.
     // cache structure is like this:
@@ -86,7 +89,10 @@ export const setWithCacheAdapter = async (
           if (isRegexp && !hitSourceKeys[targetHitSourceKey]) {
             pushItem(hitSourceRegexpSources, targetHitSourceKey);
           }
-          addItem(hitSourceKeys, isRegexp ? hitSourceRegexpCacheKey(targetHitSourceKey) : hitSourceStringCacheKey(targetHitSourceKey));
+          addItem(
+            hitSourceKeys,
+            isRegexp ? hitSourceRegexpCacheKey(targetHitSourceKey) : hitSourceStringCacheKey(targetHitSourceKey)
+          );
         }
       });
 
@@ -137,7 +143,9 @@ export const getRawWithCacheAdapter = async (
   cacheAdapter: AlovaGlobalCacheAdapter,
   tag?: DetailCacheConfig['tag']
 ) => {
-  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig['tag']]>(buildNamespacedCacheKey(namespace, key));
+  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig['tag']]>(
+    buildNamespacedCacheKey(namespace, key)
+  );
   if (storagedData) {
     // eslint-disable-next-line
     const [_, expireTimestamp, storedTag] = storagedData;

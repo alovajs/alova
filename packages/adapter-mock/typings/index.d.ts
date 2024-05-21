@@ -88,7 +88,11 @@ export interface MockWrapper {
   data: Mock;
 }
 
-export declare function createAlovaMockAdapter<RequestConfig = FetchRequestInit, RE = Response, ResponseHeader = Headers>(
+export declare function createAlovaMockAdapter<
+  RequestConfig = FetchRequestInit,
+  RE = Response,
+  ResponseHeader = Headers
+>(
   mockWrapper: MockWrapper[],
   options?: MockRequestInit<RequestConfig, RE, ResponseHeader>
 ): AlovaRequestAdapter<RequestConfig, RE, ResponseHeader>;

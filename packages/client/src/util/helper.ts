@@ -1,7 +1,15 @@
 import { createAssert } from '@alova/shared/assert';
 import { instanceOf, isFn, isNumber, noop } from '@alova/shared/function';
 import { GeneralFn } from '@alova/shared/types';
-import { clearTimeoutTimer, falseValue, filterItem, forEach, nullValue, setTimeoutFn, undefinedValue } from '@alova/shared/vars';
+import {
+  clearTimeoutTimer,
+  falseValue,
+  filterItem,
+  forEach,
+  nullValue,
+  setTimeoutFn,
+  undefinedValue
+} from '@alova/shared/vars';
 import { Method, AlovaMethodHandler } from 'alova';
 import { AnyFn, BackoffPolicy, UsePromiseReturnType } from '~/typings/general';
 
@@ -66,7 +74,8 @@ export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => 
   if (startQuiver || endQuiver) {
     startQuiver = startQuiver || 0;
     endQuiver = endQuiver || 1;
-    retryDelayFinally += retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
+    retryDelayFinally +=
+      retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
     retryDelayFinally = Math.floor(retryDelayFinally); // 取整数延迟
   }
   return retryDelayFinally;

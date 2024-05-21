@@ -99,7 +99,9 @@ export const setSilentFactoryStatus = (status: 0 | 1 | 2) => {
  * >>> 它只在请求成功时起作用，如果失败则会使用重试策略参数
  */
 export let queueRequestWaitSetting: QueueRequestWaitSetting[] = [];
-export const setQueueRequestWaitSetting = (requestWaitSetting: QueueRequestWaitSetting[] | QueueRequestWaitSetting['wait'] = 0) => {
+export const setQueueRequestWaitSetting = (
+  requestWaitSetting: QueueRequestWaitSetting[] | QueueRequestWaitSetting['wait'] = 0
+) => {
   queueRequestWaitSetting = isArray(requestWaitSetting)
     ? (requestWaitSetting as QueueRequestWaitSetting[])
     : [

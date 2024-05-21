@@ -62,7 +62,10 @@ export const actionDelegationMiddleware = (id: string | number | symbol) => {
  * @param id 委托者id，或正则表达式
  * @param onMatch 匹配的订阅者
  */
-export const accessAction = (id: string | number | symbol | RegExp, onMatch: (matchedSubscriber: Actions, index: number) => void) => {
+export const accessAction = (
+  id: string | number | symbol | RegExp,
+  onMatch: (matchedSubscriber: Actions, index: number) => void
+) => {
   const matched = [] as Actions[];
   if (typeof id === 'symbol' || isString(id) || isNumber(id)) {
     assert(!!actionsMap[id], `no handler which id is \`${id.toString()}\` is matched`);

@@ -68,8 +68,11 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
     // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
     const guardNext: AlovaGuardNext<AG> = guardNextConfig => {
       isNextCalled = trueValue;
-      const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } = guardNextConfig || {};
-      const forceRequestFinally = sloughConfig(guardNextForceRequest, [new AlovaEventBase(methodInstance, sendCallingArgs)]);
+      const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
+        guardNextConfig || {};
+      const forceRequestFinally = sloughConfig(guardNextForceRequest, [
+        new AlovaEventBase(methodInstance, sendCallingArgs)
+      ]);
       const progressUpdater =
         (stage: 'downloading' | 'uploading') =>
         ({ loaded, total }: Progress) =>
@@ -115,7 +118,8 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
       }
     };
     // 是否需要更新响应数据，以及调用响应回调
-    const toUpdateResponse = () => hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
+    const toUpdateResponse = () =>
+      hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
     // 调用中间件函数
     const middlewareCompletePromise = isFetcher
       ? (middleware as AlovaFetcherMiddleware<AG>)(
@@ -170,7 +174,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
           !controlledLoading && (newStates.loading = falseValue);
           update(newStates);
           eventManager.emit(KEY_SUCCESS, new AlovaSuccessEvent(baseEvent, data, fromCache()));
-          eventManager.emit(KEY_COMPLETE, new AlovaCompleteEvent(baseEvent, KEY_SUCCESS, data, fromCache(), undefinedValue));
+          eventManager.emit(
+            KEY_COMPLETE,
+            new AlovaCompleteEvent(baseEvent, KEY_SUCCESS, data, fromCache(), undefinedValue)
+          );
         }
         return data;
       };
@@ -198,7 +205,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
         !controlledLoading && (newStates.loading = falseValue);
         update(newStates);
         eventManager.emit(KEY_ERROR, new AlovaErrorEvent(baseEvent, error));
-        eventManager.emit(KEY_COMPLETE, new AlovaCompleteEvent(baseEvent, KEY_ERROR, undefinedValue, fromCache(), error));
+        eventManager.emit(
+          KEY_COMPLETE,
+          new AlovaCompleteEvent(baseEvent, KEY_ERROR, undefinedValue, fromCache(), error)
+        );
       }
 
       throw error;

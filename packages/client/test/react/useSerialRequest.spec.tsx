@@ -33,7 +33,9 @@ describe('react => useSerialRequest', () => {
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova/useSerialRequest]please use an array to represent serial requests');
+      expect(screen.getByRole('error')).toHaveTextContent(
+        '[alova/useSerialRequest]please use an array to represent serial requests'
+      );
     });
   });
 
@@ -66,7 +68,10 @@ describe('react => useSerialRequest', () => {
             }
           ]);
           methodHandlerMockFn();
-          return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(`/detail/${ret2[0].id}`, ret2[1]);
+          return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(
+            `/detail/${ret2[0].id}`,
+            ret2[1]
+          );
         }
       ]);
       onError(mockErrorFn);
@@ -140,7 +145,10 @@ describe('react => useSerialRequest', () => {
               }
             ]);
             methodHandlerMockFn();
-            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(`/detail/${ret2[0].id + args.join()}`, ret2[1]);
+            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(
+              `/detail/${ret2[0].id + args.join()}`,
+              ret2[1]
+            );
           }
         ],
         {
@@ -208,7 +216,10 @@ describe('react => useSerialRequest', () => {
         },
         ret2 => {
           methodHandlerMockFn();
-          return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(`/detail/${ret2[0].id}`, ret2[1]);
+          return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(
+            `/detail/${ret2[0].id}`,
+            ret2[1]
+          );
         }
       ]);
       onError(event => {

@@ -154,11 +154,14 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
    */
   meta?: AlovaCustomTypes['meta'];
 } & RequestConfig;
-export type AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader> = Partial<MethodRequestConfig> &
-  AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
+export type AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader> =
+  Partial<MethodRequestConfig> & AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
 
 export type RespondedHandler<AG extends AlovaGenerics> = (response: AG['Response'], methodInstance: Method<AG>) => any;
-export type ResponseErrorHandler<AG extends AlovaGenerics> = (error: any, methodInstance: Method<AG>) => void | Promise<void>;
+export type ResponseErrorHandler<AG extends AlovaGenerics> = (
+  error: any,
+  methodInstance: Method<AG>
+) => void | Promise<void>;
 export type ResponseCompleteHandler<AG extends AlovaGenerics> = (methodInstance: Method<AG>) => any;
 export type RespondedHandlerRecord<AG extends AlovaGenerics> = {
   /**
@@ -425,7 +428,8 @@ export interface Method<AG extends AlovaGenerics = any> {
   /**
    * method配置
    */
-  config: MethodRequestConfig & AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>;
+  config: MethodRequestConfig &
+    AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>;
   /**
    * 请求体
    */
@@ -556,7 +560,10 @@ export interface MethodSnapshotContainer<AG extends AlovaGenerics> {
    * @param {boolean} matchAll is match all, default is true
    * @returns {Method[] | Method} method list when `matchAll` is true, otherwise return method instance or undefined
    */
-  match<M extends boolean = true>(matcher: MethodFilter<AG>, matchAll?: M): M extends true ? Method<AG>[] : Method<AG> | undefined;
+  match<M extends boolean = true>(
+    matcher: MethodFilter<AG>,
+    matchAll?: M
+  ): M extends true ? Method<AG>[] : Method<AG> | undefined;
 }
 
 export interface Alova<AG extends AlovaGenerics> {
@@ -732,7 +739,9 @@ export interface AlovaGlobalConfig {
  * @returns alova instance
  */
 export declare function createAlova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
-  options: AlovaOptions<AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>
+  options: AlovaOptions<
+    AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>
+  >
 ): Alova<AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>;
 
 /**
@@ -791,7 +800,9 @@ export interface CacheSetOptions {
  * @param matcher method instance(s)
  */
 export declare function setCache<Responded>(
-  matcher: Method<AlovaGenerics<any, any, any, any, Responded>> | Method<AlovaGenerics<any, any, any, any, Responded>>[],
+  matcher:
+    | Method<AlovaGenerics<any, any, any, any, Responded>>
+    | Method<AlovaGenerics<any, any, any, any, Responded>>[],
   dataOrUpdater: Responded | ((oldCache: Responded) => Responded | undefined | void),
   options?: CacheSetOptions
 ): Promise<void>;

@@ -14,8 +14,28 @@ import {
  * 序列化并保存silentMethod实例
  * @param silentMethodInstance silentMethod实例
  */
-export const persistSilentMethod = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+export const persistSilentMethod = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  silentMethodInstance: SilentMethod<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => {
   storageSetItem(silentMethodStorageKeyPrefix + silentMethodInstance.id, silentMethodInstance);
 };
@@ -37,12 +57,23 @@ export const push2PersistentSilentQueue = <
   Response,
   ResponseHeader
 >(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  silentMethodInstance: SilentMethod<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >,
   queueName: string
 ) => {
   persistSilentMethod(silentMethodInstance);
   // 将silentMethod实例id保存到queue存储中
-  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) || {}) as SerializedSilentMethodIdQueueMap;
+  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) ||
+    {}) as SerializedSilentMethodIdQueueMap;
   const currentQueue = (silentMethodIdQueueMap[queueName] = silentMethodIdQueueMap[queueName] || []);
   pushItem(currentQueue, silentMethodInstance.id);
   storageSetItem(silentMethodIdQueueMapStorageKey, silentMethodIdQueueMap);
@@ -67,10 +98,21 @@ export const spliceStorageSilentMethod = <
 >(
   queueName: string,
   targetSilentMethodId: string,
-  newSilentMethod?: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  newSilentMethod?: SilentMethod<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => {
   // 将silentMethod实例id从queue中移除
-  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) || {}) as SerializedSilentMethodIdQueueMap;
+  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) ||
+    {}) as SerializedSilentMethodIdQueueMap;
   const currentQueue = silentMethodIdQueueMap[queueName] || [];
   const index = currentQueue.findIndex(id => id === targetSilentMethodId);
   if (index >= 0) {

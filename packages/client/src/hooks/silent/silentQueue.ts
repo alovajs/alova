@@ -32,7 +32,11 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { SilentMethod } from './SilentMethod';
-import { persistSilentMethod, push2PersistentSilentQueue, spliceStorageSilentMethod } from './storage/silentMethodStorage';
+import {
+  persistSilentMethod,
+  push2PersistentSilentQueue,
+  spliceStorageSilentMethod
+} from './storage/silentMethodStorage';
 import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
 
@@ -74,7 +78,9 @@ export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>
       return vDataResponse[vData];
     }
     if (isString(value)) {
-      return value.replace(newInstance(RegExpCls, regVDataId.source, 'g'), mat => (mat in vDataResponse ? vDataResponse[mat] : mat));
+      return value.replace(newInstance(RegExpCls, regVDataId.source, 'g'), mat =>
+        mat in vDataResponse ? vDataResponse[mat] : mat
+      );
     }
     return value;
   };
@@ -131,8 +137,28 @@ const replaceVirtualResponseWithResponse = (virtualResponse: any, response: any)
  *
  * @param queue SilentMethod队列
  */
-const setSilentMethodActive = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+const setSilentMethodActive = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
+  silentMethodInstance: SilentMethod<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >,
   active: boolean
 ) => {
   if (active) {
@@ -167,8 +193,28 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
    * @param silentMethodInstance silentMethod实例
    * @param retryTimes 重试的次数
    */
-  const silentMethodRequest = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-    silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  const silentMethodRequest = <
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >(
+    silentMethodInstance: SilentMethod<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >,
     retryTimes = 0
   ) => {
     // 将当前silentMethod实例设置活跃状态
@@ -191,7 +237,10 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
     } = silentMethodInstance;
 
     // 触发请求前事件
-    globalSQEventManager.emit(BeforeEventKey, createHookEvent(0, entity, behavior, silentMethodInstance, queueName, retryTimes) as any);
+    globalSQEventManager.emit(
+      BeforeEventKey,
+      createHookEvent(0, entity, behavior, silentMethodInstance, queueName, retryTimes) as any
+    );
     promiseThen(
       entity.send(force),
       data => {
@@ -291,7 +340,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           }
 
           const matchRetryError =
-            (regRetryErrorName && regexpTest(regRetryErrorName, errorName)) || (regRetryErrorMsg && regexpTest(regRetryErrorMsg, errorMsg));
+            (regRetryErrorName && regexpTest(regRetryErrorName, errorName)) ||
+            (regRetryErrorMsg && regexpTest(regRetryErrorMsg, errorMsg));
           // 如果还有重试次数则进行重试
           if (retryTimes < maxRetryTimes && matchRetryError) {
             // 需要使用下次的retryTimes来计算延迟时间，因此这边需+1
@@ -303,7 +353,16 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
                 silentMethodRequest(silentMethodInstance, retryTimes);
                 runArgsHandler(
                   retryHandlers,
-                  createHookEvent(8, entity, behavior, silentMethodInstance, undefinedValue, retryTimes, retryDelay, handlerArgs)
+                  createHookEvent(
+                    8,
+                    entity,
+                    behavior,
+                    silentMethodInstance,
+                    undefinedValue,
+                    retryTimes,
+                    retryDelay,
+                    handlerArgs
+                  )
                 );
               },
               // 还有重试次数时使用timeout作为下次请求时间
@@ -373,7 +432,17 @@ export const pushNewSilentMethod2Queue = <
   Response,
   ResponseHeader
 >(
-  silentMethodInstance: SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  silentMethodInstance: SilentMethod<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >,
   cache: boolean,
   targetQueueName = DEFAUT_QUEUE_NAME,
   onBeforePush = noop

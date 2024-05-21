@@ -1,0 +1,14 @@
+{
+  "input": "src/index.ts",
+  "output": "dist/alova-adapter-uniapp.{suffix}.{ext}",
+  "packageName": "AlovaAdapterUniapp",
+  "external": {
+    "alova": "alova",
+    "alova/vue": null,
+    "vue": null,
+    "@dcloudio/uni-app": null,
+    "@alova/shared/function": null,
+    "@alova/shared/vars": null,
+    "@alova/shared/assert": null
+  }
+}

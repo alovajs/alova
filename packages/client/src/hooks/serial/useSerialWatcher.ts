@@ -12,12 +12,42 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   serialHandlers: [
     (
       | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      | AlovaMethodHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >
     ),
-    ...AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[]
+    ...AlovaMethodHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >[]
   ],
   watchingStates: Watched,
-  config: RequestHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {} as any
+  config: RequestHookConfig<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  > = {} as any
 ) => {
   assertSerialHandlers('useSerialWatcher', serialHandlers);
   return useWatcher(serialHandlers[0], watchingStates, {

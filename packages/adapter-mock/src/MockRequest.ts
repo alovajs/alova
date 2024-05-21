@@ -6,7 +6,11 @@ import consoleRequestInfo from './consoleRequestInfo';
 import { defaultMockError, defaultMockResponse } from './defaults';
 import { parseUrl } from './helper';
 
-type MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = MockRequestInit<RequestConfig, Response, ResponseHeader> & {
+type MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = MockRequestInit<
+  RequestConfig,
+  Response,
+  ResponseHeader
+> & {
   mock: Mock;
 };
 export default function MockRequest<RequestConfig, Response, ResponseHeader>(

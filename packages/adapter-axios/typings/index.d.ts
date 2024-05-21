@@ -5,24 +5,33 @@ import { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders 
 /**
  * axios请求配置参数
  */
-type AlovaAxiosRequestConfig = Omit<
+export type AlovaAxiosRequestConfig = Omit<
   AxiosRequestConfig,
-  'url' | 'method' | 'baseURL' | 'params' | 'data' | 'timeout' | 'cancelToken' | 'signal' | 'onUploadProgress' | 'onDownloadProgress'
+  | 'url'
+  | 'method'
+  | 'baseURL'
+  | 'params'
+  | 'data'
+  | 'timeout'
+  | 'cancelToken'
+  | 'signal'
+  | 'onUploadProgress'
+  | 'onDownloadProgress'
 >;
 
 /**
  * axios请求适配器
  */
-type AxiosRequestAdapter = AlovaRequestAdapter<any, any, AlovaAxiosRequestConfig, AxiosResponse, AxiosResponseHeaders>;
+export type AxiosRequestAdapter = AlovaRequestAdapter<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponseHeaders>;
 
-interface AdapterCreateOptions {
+export interface AdapterCreateOptions {
   axios?: AxiosInstance;
 }
 /**
  * axios请求适配器
  * @param options 选项参数
  */
-declare function axiosRequestAdapter(options?: AdapterCreateOptions): AxiosRequestAdapter;
+export declare function axiosRequestAdapter(options?: AdapterCreateOptions): AxiosRequestAdapter;
 
 /**
  * 模拟响应适配器，它用于@alova/mock中，让模拟请求时也能返回axios响应数据兼容的格式
@@ -43,7 +52,7 @@ declare function axiosRequestAdapter(options?: AdapterCreateOptions): AxiosReque
  *	});
  * ```
  */
-declare const axiosMockResponse: {
+export declare const axiosMockResponse: {
   onMockResponse: MockResponse<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponse['headers']>;
   onMockError: MockError;
 };

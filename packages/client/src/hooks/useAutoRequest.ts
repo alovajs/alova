@@ -3,11 +3,31 @@ import { falseValue, isSSR, trueValue } from '@alova/shared/vars';
 import { AlovaMethodHandler, Method, UseHookReturnType, promiseStatesHook, useRequest } from 'alova';
 import { AutoRequestHookConfig, NotifyHandler, UnbindHandler } from '~/typings/general';
 
-interface AutoRequestHook<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> {
+interface AutoRequestHook<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> {
   (
     handler:
       | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+      | AlovaMethodHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >,
     config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
   ): UseHookReturnType<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   onNetwork(
@@ -35,7 +55,13 @@ export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, 
 };
 const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any, any, any> = (handler, config) => {
   let notifiable = trueValue;
-  const { enableFocus = trueValue, enableVisibility = trueValue, enableNetwork = trueValue, pollingTime = 0, throttle = 1000 } = config;
+  const {
+    enableFocus = trueValue,
+    enableVisibility = trueValue,
+    enableNetwork = trueValue,
+    pollingTime = 0,
+    throttle = 1000
+  } = config;
   const { onMounted, onUnmounted, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
   const states = useRequest(handler, {
     ...config,

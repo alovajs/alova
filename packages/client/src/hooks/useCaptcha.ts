@@ -9,12 +9,28 @@ const captchaAssert = createAssert(hookPrefix);
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+    | AlovaMethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >,
   config: CaptchaHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
 ) => {
   const { initialCountdown, middleware } = config;
   captchaAssert(initialCountdown === undefinedValue || initialCountdown > 0, 'initialCountdown must be greater than 0');
-  const { create, ref, exportObject, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const {
+    create,
+    ref,
+    exportObject,
+    memorizeOperators,
+    __referingObj: referingObject
+  } = statesHookHelper(promiseStatesHook());
 
   const requestReturned = useRequest(handler, {
     ...config,

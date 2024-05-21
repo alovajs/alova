@@ -129,9 +129,14 @@ export interface Hook {
  * 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
  * 使用不同库的特征作为父类进行判断
  */
-type TTT<State, CollapsedState, Otherwise> = IsAny<CollapsedState, unknown, CollapsedState> extends State ? CollapsedState : Otherwise;
+type TTT<State, CollapsedState, Otherwise> =
+  IsAny<CollapsedState, unknown, CollapsedState> extends State ? CollapsedState : Otherwise;
 export type ExportedState<Responded, State> = TTT<State, Ref<Responded>, TTT<State, Writable<Responded>, Responded>>;
-export type ExportedComputed<Responded, Computed> = TTT<Computed, ComputedRef<Responded>, TTT<Computed, Readable<Responded>, Responded>>;
+export type ExportedComputed<Responded, Computed> = TTT<
+  Computed,
+  ComputedRef<Responded>,
+  TTT<Computed, Readable<Responded>, Responded>
+>;
 
 export type SendHandler<R> = (...args: any[]) => Promise<R>;
 export type UseHookReturnType<AG extends AlovaGenerics = AlovaGenerics> = FrontRequestState<
@@ -166,7 +171,9 @@ export type UseFetchHookReturnType<State> = FetchRequestState<
 export type FrontExportedUpdate<R> = (
   newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
 ) => void;
-export type FetcherExportedUpdate = (newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>) => void;
+export type FetcherExportedUpdate = (
+  newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
+) => void;
 export interface AlovaMiddlewareContext<AG extends AlovaGenerics> {
   /** 当前的method对象 */
   method: Method<AG>;
@@ -181,10 +188,14 @@ export interface AlovaMiddlewareContext<AG extends AlovaGenerics> {
   abort: UseHookReturnType['abort'];
 
   /** 成功回调装饰 */
-  decorateSuccess: (decorator: (handler: SuccessHandler<AG>, event: AlovaSuccessEvent<AG>, index: number, length: number) => void) => void;
+  decorateSuccess: (
+    decorator: (handler: SuccessHandler<AG>, event: AlovaSuccessEvent<AG>, index: number, length: number) => void
+  ) => void;
 
   /** 失败回调装饰 */
-  decorateError: (decorator: (handler: ErrorHandler<AG>, event: AlovaErrorEvent<AG>, index: number, length: number) => void) => void;
+  decorateError: (
+    decorator: (handler: ErrorHandler<AG>, event: AlovaErrorEvent<AG>, index: number, length: number) => void
+  ) => void;
 
   /** 完成回调装饰 */
   decorateComplete: (
@@ -378,7 +389,9 @@ export declare function useWatcher<AG extends AlovaGenerics>(
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useFetcher<SE extends FetcherType<any>>(config?: FetcherHookConfig): UseFetchHookReturnType<SE['state']>;
+export declare function useFetcher<SE extends FetcherType<any>>(
+  config?: FetcherHookConfig
+): UseFetchHookReturnType<SE['state']>;
 
 export type UpdateStateCollection<Responded> = {
   [key: string | number | symbol]: (data: any) => any;
@@ -480,7 +493,17 @@ type UsePaginationReturnType<S, E, R, T, RC, RE, RH, LD extends unknown[]> = Omi
  * @param config pagination hook配置
  * @returns {UsePaginationReturnType}
  */
-declare function usePagination<S extends Ref, E extends Ref, R, T, RC, RE, RH, LD extends unknown[], WS extends (WatchSource | object)[]>(
+declare function usePagination<
+  S extends Ref,
+  E extends Ref,
+  R,
+  T,
+  RC,
+  RE,
+  RH,
+  LD extends unknown[],
+  WS extends (WatchSource | object)[]
+>(
   handler: (page: number, pageSize: number) => Method<S, E, R, T, RC, RE, RH>,
   config?: PaginationHookConfig<S, E, R, T, RC, RE, RH, LD, WS>
 ): UsePaginationReturnType<S, E, R, T, RC, RE, RH, LD>;
@@ -539,7 +562,16 @@ declare function useCaptcha<S, E, R, T, RC, RE, RH>(
  * @param config 配置参数
  * @return useForm相关数据和操作函数
  */
-declare function useForm<F extends Record<string | symbol, any> = any, S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any>(
+declare function useForm<
+  F extends Record<string | symbol, any> = any,
+  S = any,
+  E = any,
+  R = any,
+  T = any,
+  RC = any,
+  RE = any,
+  RH = any
+>(
   handler: FormHookHandler<S, E, R, T, RC, RE, RH, F> | NonNullable<FormHookConfig<S, E, R, T, RC, RE, RH, F>['id']>,
   config?: FormHookConfig<S, E, R, T, RC, RE, RH, F>
 ): FormReturnType<S, E, R, T, RC, RE, RH, F>;
@@ -892,7 +924,9 @@ export function createClientTokenAuthentication<
   RA extends
     | AlovaRequestAdapter<any, any, any, any, any>
     | ((...args: any[]) => AlovaRequestAdapter<any, any, any, any, any>) = typeof GlobalFetch
->(options: ClientTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
+>(
+  options: ClientTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>
+): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
 
 /**
  * 创建服务端的token认证拦截器
@@ -922,7 +956,9 @@ export function createServerTokenAuthentication<
   RA extends
     | AlovaRequestAdapter<any, any, any, any, any>
     | ((...args: any[]) => AlovaRequestAdapter<any, any, any, any, any>) = typeof GlobalFetch
->(options: ServerTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
+>(
+  options: ServerTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>
+): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
 
 /**
  * 在一定条件下可以自动重新拉取数据，从而刷新页面，使用场景有：
@@ -940,8 +976,20 @@ declare function useAutoRequest<S, E, R, T, RC, RE, RH>(
   config?: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>
 ): UseHookReturnType<S, E, R, T, RC, RE, RH>;
 declare namespace useAutoRequest {
-  function onNetwork(notify: NotifyHandler, config: AutoRequestHookConfig<any, any, any, any, any, any, any>): UnbindHandler;
-  function onPolling(notify: NotifyHandler, config: AutoRequestHookConfig<any, any, any, any, any, any, any>): UnbindHandler;
-  function onVisibility(notify: NotifyHandler, config: AutoRequestHookConfig<any, any, any, any, any, any, any>): UnbindHandler;
-  function onFocus(notify: NotifyHandler, config: AutoRequestHookConfig<any, any, any, any, any, any, any>): UnbindHandler;
+  function onNetwork(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
+  ): UnbindHandler;
+  function onPolling(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
+  ): UnbindHandler;
+  function onVisibility(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
+  ): UnbindHandler;
+  function onFocus(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
+  ): UnbindHandler;
 }

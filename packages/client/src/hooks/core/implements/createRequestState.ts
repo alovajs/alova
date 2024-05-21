@@ -12,7 +12,17 @@ import {
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
-import { PromiseCls, falseValue, forEach, isArray, isSSR, len, promiseCatch, trueValue, undefinedValue } from '@alova/shared/vars';
+import {
+  PromiseCls,
+  falseValue,
+  forEach,
+  isArray,
+  isSSR,
+  len,
+  promiseCatch,
+  trueValue,
+  undefinedValue
+} from '@alova/shared/vars';
 import type { FrontRequestState, Method, Progress } from 'alova';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
 import {
@@ -84,7 +94,9 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
           cachedResponse = data;
         }
       }
-      const forceRequestFinally = sloughConfig((useHookConfig as FrontRequestHookConfig<AG> | FetcherHookConfig).force ?? falseValue);
+      const forceRequestFinally = sloughConfig(
+        (useHookConfig as FrontRequestHookConfig<AG> | FetcherHookConfig).force ?? falseValue
+      );
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
   }
@@ -114,7 +126,9 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     error: AlovaErrorEvent<AG>;
     complete: AlovaCompleteEvent<AG>;
   }>();
-  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject, exportings.update)));
+  const hookInstance = refCurrent(
+    ref(createHook(hookType, useHookConfig, eventManager, referingObject, exportings.update))
+  );
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数

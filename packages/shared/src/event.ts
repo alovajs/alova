@@ -53,7 +53,13 @@ export class AlovaCompleteEvent<AG extends AlovaGenerics> extends AlovaEventBase
 
   readonly error: any;
 
-  constructor(base: AlovaEventBase<AG>, status: 'success' | 'error', data: AG['Responded'], fromCache: boolean, error: any) {
+  constructor(
+    base: AlovaEventBase<AG>,
+    status: 'success' | 'error',
+    data: AG['Responded'],
+    fromCache: boolean,
+    error: any
+  ) {
     super(base.method, base.sendArgs);
     this.status = status;
     this.data = data;

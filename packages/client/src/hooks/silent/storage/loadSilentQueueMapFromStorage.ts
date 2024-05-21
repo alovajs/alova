@@ -13,13 +13,15 @@ import { forEach, objectKeys, pushItem } from '@alova/shared/vars';
  * @returns 所有队列数据
  */
 export default () => {
-  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) || {}) as SerializedSilentMethodIdQueueMap;
+  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) ||
+    {}) as SerializedSilentMethodIdQueueMap;
   const silentQueueMap = {} as SilentQueueMap;
   forEach(objectKeys(silentMethodIdQueueMap), queueName => {
     const currentQueue = (silentQueueMap[queueName] = silentQueueMap[queueName] || []);
     forEach(silentMethodIdQueueMap[queueName], silentMethodId => {
       const serializedSilentMethodPayload = storageGetItem(silentMethodStorageKeyPrefix + silentMethodId);
-      serializedSilentMethodPayload && pushItem(currentQueue, convertPayload2SilentMethod(serializedSilentMethodPayload));
+      serializedSilentMethodPayload &&
+        pushItem(currentQueue, convertPayload2SilentMethod(serializedSilentMethodPayload));
     });
   });
   return silentQueueMap;

@@ -31,7 +31,13 @@ export class FrameworkReadableState<Data, Key extends string> {
 export class FrameworkState<Data, Key extends string> extends FrameworkReadableState<Data, Key> {
   private $upd: UpdateFn<Data>;
 
-  constructor(state: GeneralState<Data>, key: Key, dehydrate: DehydrateFn<Data>, exportState: ExportFn<Data>, update: UpdateFn<Data>) {
+  constructor(
+    state: GeneralState<Data>,
+    key: Key,
+    dehydrate: DehydrateFn<Data>,
+    exportState: ExportFn<Data>,
+    update: UpdateFn<Data>
+  ) {
     super(state, key, dehydrate, exportState);
     this.$upd = update;
   }

@@ -104,7 +104,8 @@ export const getContextOptions = <AG extends AlovaGenerics>(alovaInstance: Alova
  * 通过method实例获取alova配置数据
  * @returns alova配置对象
  */
-export const getOptions = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => getContextOptions(getContext(methodInstance));
+export const getOptions = <AG extends AlovaGenerics>(methodInstance: Method<AG>) =>
+  getContextOptions(getContext(methodInstance));
 
 /**
  * 获取请求方式的key值
@@ -143,7 +144,9 @@ export const getHandlerMethod = <AG extends AlovaGenerics>(
  */
 export const isSpecialRequestBody = (data: any) => {
   const dataTypeString = globalToString(data);
-  return /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) || instanceOf(data, ArrayBuffer);
+  return (
+    /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) || instanceOf(data, ArrayBuffer)
+  );
 };
 export const objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T =>
   ObjectCls.assign(target, ...sources);
@@ -212,14 +215,17 @@ export const getLocalCacheConfigParam = <AG extends AlovaGenerics>(methodInstanc
  * @param args 构造函数参数
  * @returns 类实例
  */
-export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(Cls: T, ...args: ConstructorParameters<T>) =>
-  new Cls(...args);
+export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(
+  Cls: T,
+  ...args: ConstructorParameters<T>
+) => new Cls(...args);
 /**
  * 统一配置
  * @param 数据
  * @returns 统一的配置
  */
-export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) => (isFn(config) ? config(...args) : config);
+export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) =>
+  isFn(config) ? config(...args) : config;
 export const sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
   isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop;
 
@@ -288,8 +294,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
 ) {
   const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
-  const exportState = <Data>(state: GeneralState<Data>) => (statesHook.export || $self)(state, referingObject) as GeneralState<Data>;
-  const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) => (statesHook.memorize ? statesHook.memorize(fn) : fn);
+  const exportState = <Data>(state: GeneralState<Data>) =>
+    (statesHook.export || $self)(state, referingObject) as GeneralState<Data>;
+  const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) =>
+    statesHook.memorize ? statesHook.memorize(fn) : fn;
   const update = (newValue: any, state: GeneralState, key: string) =>
     statesHook.update({ [key]: newValue }, { [key]: state }, referingObject);
   const mapDeps = (deps: (GeneralState | FrameworkReadableState<any, string>)[]) =>
@@ -322,7 +330,8 @@ export function statesHookHelper<AG extends AlovaGenerics>(
         state => dehydrate(state, key, referingObject),
         exportState
       ),
-    effectRequest: (effectRequestParams: EffectRequestParams<any>) => statesHook.effectRequest(effectRequestParams, referingObject),
+    effectRequest: (effectRequestParams: EffectRequestParams<any>) =>
+      statesHook.effectRequest(effectRequestParams, referingObject),
     ref,
     watch: (source: (GeneralState | FrameworkReadableState<any, string>)[], callback: () => void) =>
       statesHook.watch(mapDeps(source), callback, referingObject),
@@ -340,7 +349,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
      * @param coreHookStates the returns of useRequest/useWatcher/useFetcher that contains update function
      * @returns exported states and update function
      */
-    exportObject: <S extends FrameworkReadableState<any, string>[]>(states: S, coreHookStates: Record<string, any> = {}) => {
+    exportObject: <S extends FrameworkReadableState<any, string>[]>(
+      states: S,
+      coreHookStates: Record<string, any> = {}
+    ) => {
       const exportedStates = states.reduce(
         (result, item) => {
           result[item.k] = item.e;

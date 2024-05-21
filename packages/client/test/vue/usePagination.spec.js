@@ -111,7 +111,9 @@ describe('vue => usePagination', () => {
     });
 
     const ev = await untilCbCalled(onError);
-    expect(ev.error.message).toBe('[alova/usePagination]Got wrong array, did you return the correct array of list in `data` function');
+    expect(ev.error.message).toBe(
+      '[alova/usePagination]Got wrong array, did you return the correct array of list in `data` function'
+    );
   });
 
   // 不立即发送请求

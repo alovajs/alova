@@ -44,12 +44,10 @@ describe('vue => useSQRequest', () => {
   test('request immediately with queue behavior', async () => {
     const queue = 'tb1';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
-    const { loading, data, error, downloading, uploading, onSuccess, onComplete, onBeforePushQueue, onPushedQueue } = useSQRequest(
-      () => Get,
-      {
+    const { loading, data, error, downloading, uploading, onSuccess, onComplete, onBeforePushQueue, onPushedQueue } =
+      useSQRequest(() => Get, {
         queue
-      }
-    );
+      });
     const beforePushMockFn = jest.fn();
     onBeforePushQueue(event => {
       beforePushMockFn();
@@ -78,7 +76,15 @@ describe('vue => useSQRequest', () => {
     expect(uploading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(loading.value).toBeFalsy();
     expect(data.value.total).toBe(300);
     expect(data.value.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
@@ -165,13 +171,11 @@ describe('vue => useSQRequest', () => {
           pageSize
         }
       });
-    const { loading, data, error, downloading, uploading, send, onSuccess, onBeforePushQueue, onPushedQueue } = useSQRequest(
-      (page, pageSize) => Get(page, pageSize),
-      {
+    const { loading, data, error, downloading, uploading, send, onSuccess, onBeforePushQueue, onPushedQueue } =
+      useSQRequest((page, pageSize) => Get(page, pageSize), {
         immediate: false,
         queue
-      }
-    );
+      });
 
     const beforePushMockFn = jest.fn();
     onBeforePushQueue(event => {
@@ -200,7 +204,15 @@ describe('vue => useSQRequest', () => {
     expect(uploading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(loading.value).toBeFalsy();
     expect(data.value.total).toBe(300);
     expect(data.value.list).toStrictEqual([8, 9, 10, 11, 12, 13, 14, 15]);
@@ -224,7 +236,15 @@ describe('vue => useSQRequest', () => {
     });
 
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQErrorEvent = (await untilCbCalled(onError)) as unknown as ScopedSQErrorEvent<any, any, any, any, any, any, any>;
+    const scopedSQErrorEvent = (await untilCbCalled(onError)) as unknown as ScopedSQErrorEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value?.message).toBe('server error');
@@ -299,7 +319,15 @@ describe('vue => useSQRequest', () => {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(pushMockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({
@@ -461,7 +489,15 @@ describe('vue => useSQRequest', () => {
       queue
     });
 
-    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(event.behavior).toBe('silent');
     expect(event.method).not.toBeUndefined();
     expect(event.silentMethod).not.toBeUndefined();
@@ -478,7 +514,15 @@ describe('vue => useSQRequest', () => {
         b: 'bb'
       })
     });
-    const event2 = (await untilCbCalled(onSuccess2)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    const event2 = (await untilCbCalled(onSuccess2)) as unknown as ScopedSQSuccessEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(data2.value[symbolVDataId]).not.toBeUndefined();
     expect(data2.value.a.toFixed(2)).toBe('1.00');
     expect(data2.value.b.replace('b', 'a')).toBe('ab');

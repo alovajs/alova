@@ -76,6 +76,8 @@ export default class MethodSnapshotContainer<AG extends AlovaGenerics> {
     }
 
     const fromMatchesArray = isFn(matchHandler) ? filterItem([...matches], matchHandler) : [...matches];
-    return (matchAll ? fromMatchesArray : fromMatchesArray[0]) as M extends true ? Method<AG>[] : Method<AG> | undefined;
+    return (matchAll ? fromMatchesArray : fromMatchesArray[0]) as M extends true
+      ? Method<AG>[]
+      : Method<AG> | undefined;
   }
 }

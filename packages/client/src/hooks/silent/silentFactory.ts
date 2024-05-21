@@ -28,7 +28,8 @@ import loadSilentQueueMapFromStorage from './storage/loadSilentQueueMapFromStora
  * @param {SilentSubmitBootHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) => globalSQEventManager.on(BootEventKey, () => handler());
+export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) =>
+  globalSQEventManager.on(BootEventKey, () => handler());
 
 /**
  * 绑定silentSubmit成功事件
@@ -44,7 +45,8 @@ export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) =>
  * @param {SilentSubmitErrorHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) => globalSQEventManager.on(ErrorEventKey, event => handler(event));
+export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) =>
+  globalSQEventManager.on(ErrorEventKey, event => handler(event));
 
 /**
  * 绑定silentSubmit失败事件
@@ -52,7 +54,8 @@ export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) => global
  * @param {SilentSubmitFailHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) => globalSQEventManager.on(FailEventKey, event => handler(event));
+export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) =>
+  globalSQEventManager.on(FailEventKey, event => handler(event));
 
 /**
  * 绑定silentSubmit发起请求前事件

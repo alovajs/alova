@@ -7,7 +7,14 @@ import {
   removeWithCacheAdapter,
   setWithCacheAdapter
 } from '@/storage/cacheWrapper';
-import { getConfig, getContext, getLocalCacheConfigParam, getMethodInternalKey, getTime, isFn } from '@alova/shared/function';
+import {
+  getConfig,
+  getContext,
+  getLocalCacheConfigParam,
+  getMethodInternalKey,
+  getTime,
+  isFn
+} from '@alova/shared/function';
 import { PromiseCls, isArray, len, mapItem, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
@@ -37,7 +44,8 @@ export const queryCache = async <Responded>(
       return (cacheFor as CacheController<Responded>)();
     }
 
-    let cachedData: Responded | undefined = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
+    let cachedData: Responded | undefined =
+      policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
     if (policy === 'l2') {
       cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
     } else if (policy === 'all' && !cachedData) {
@@ -55,7 +63,9 @@ export const queryCache = async <Responded>(
  * @param data 缓存数据
  */
 export const setCache = async <Responded>(
-  matcher: Method<AlovaGenerics<any, any, any, any, Responded>> | Method<AlovaGenerics<any, any, any, any, Responded>>[],
+  matcher:
+    | Method<AlovaGenerics<any, any, any, any, Responded>>
+    | Method<AlovaGenerics<any, any, any, any, Responded>>[],
   dataOrUpdater: Responded | ((oldCache?: Responded) => Responded | undefined | void),
   { policy = 'all' }: CacheSetOptions = {}
 ) => {
@@ -108,7 +118,10 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
       return;
     }
     const methodKey = getMethodInternalKey(methodInstance);
-    return PromiseCls.all([removeWithCacheAdapter(id, methodKey, l1Cache), removeWithCacheAdapter(id, methodKey, l2Cache)]);
+    return PromiseCls.all([
+      removeWithCacheAdapter(id, methodKey, l1Cache),
+      removeWithCacheAdapter(id, methodKey, l2Cache)
+    ]);
   });
   await PromiseCls.all(batchPromises);
 };
@@ -132,7 +145,9 @@ export const hitCacheBySource = async <AG extends AlovaGenerics>(sourceMethod: M
   }[autoHitCache];
   if (cacheAdaptersInvolved && len(cacheAdaptersInvolved)) {
     await PromiseCls.all(
-      mapItem(cacheAdaptersInvolved, involvedCacheAdapter => hitTargetCacheWithCacheAdapter(sourceKey, sourceName, involvedCacheAdapter))
+      mapItem(cacheAdaptersInvolved, involvedCacheAdapter =>
+        hitTargetCacheWithCacheAdapter(sourceKey, sourceName, involvedCacheAdapter)
+      )
     );
   }
 };
