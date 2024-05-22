@@ -1,10 +1,10 @@
+import { getConfig, instanceOf } from '@alova/shared/function';
+import { falseValue, regexpTest, trueValue, undefinedValue } from '@alova/shared/vars';
 import { SilentQueueMap } from '~/typings/general';
-import { DEFAUT_QUEUE_NAME, silentFactoryStatus } from '../globalVariables';
 import { SilentMethod } from '../SilentMethod';
+import { DEFAUT_QUEUE_NAME, silentFactoryStatus } from '../globalVariables';
 import { silentQueueMap } from '../silentQueue';
 import loadSilentQueueMapFromStorage from '../storage/loadSilentQueueMapFromStorage';
-import { getConfig, instanceOf } from '@alova/shared/function';
-import { falseValue, undefinedValue, trueValue, regexpTest } from '@alova/shared/vars';
 
 /**
  * 按method名称或正则表达式筛选满足条件的所有silentMethod实例
@@ -45,20 +45,8 @@ export const filterSilentMethods = (
  * @param filterActive 是否过滤掉激活状态的实例
  * @returns silentMethod实例，未找到时为undefined
  */
-export const getSilentMethod = <
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export const getSilentMethod = (
   methodNameMatcher?: string | number | RegExp,
   queueName = DEFAUT_QUEUE_NAME,
   filterActive = falseValue
-):
-  | SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  | undefined => filterSilentMethods(methodNameMatcher, queueName, filterActive)[0];
+): SilentMethod<any> | undefined => filterSilentMethods(methodNameMatcher, queueName, filterActive)[0];

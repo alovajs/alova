@@ -167,6 +167,9 @@ importers:
       vue:
         specifier: ^3.4.21
         version: 3.4.27(typescript@5.4.5)
+      vue-demi:
+        specifier: ^0.14.7
+        version: 0.14.7(vue@3.4.27(typescript@5.4.5))
       web-streams-polyfill:
         specifier: ^4.0.0
         version: 4.0.0
@@ -218,10 +221,10 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@tarojs/shared':
-        specifier: ^3.6.2
+        specifier: ^3.6.30
         version: 3.6.30
       '@tarojs/taro':
-        specifier: ^3.6.2
+        specifier: ^3.6.30
         version: 3.6.30(@tarojs/helper@3.6.30)(@tarojs/runtime@3.6.30(@tarojs/shared@3.6.30))(@types/react@18.3.2)(vue@3.4.27(typescript@5.4.5))
       alova:
         specifier: workspace:*

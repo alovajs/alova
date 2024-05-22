@@ -12,7 +12,8 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import { AlovaFrontMiddleware, AlovaMethodHandler, Method } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings';
 import {
   BeforePushQueueHandler,
   FallbackHandler,
@@ -41,96 +42,40 @@ const RetryEventKey = Symbol('SQRetry');
 const BeforePushQueueEventKey = Symbol('SQBeforePushQueue');
 const PushedQueueEventKey = Symbol('SQPushedQueue');
 
-export type SQEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
-  [FallbackEventKey]: ScopedSQEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-  [RetryEventKey]: ScopedSQRetryEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-  [BeforePushQueueEventKey]: ScopedSQEvent<
-    State,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >;
-  [PushedQueueEventKey]: ScopedSQEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+export type SQEvents<AG extends AlovaGenerics> = {
+  [FallbackEventKey]: ScopedSQEvent<AG>;
+  [RetryEventKey]: ScopedSQRetryEvent<AG>;
+  [BeforePushQueueEventKey]: ScopedSQEvent<AG>;
+  [PushedQueueEventKey]: ScopedSQEvent<AG>;
 };
 
 /**
  * 全局的silentMethod实例，它将在第一个成功事件触发前到最后一个成功事件触发后有值（同步时段）
  * 通过此方式让onSuccess中的updateStateEffect内获得当前的silentMethod实例
  */
-export let currentSilentMethod: SilentMethod<any, any, any, any, any, any, any, any, any> | undefined = undefinedValue;
+export let currentSilentMethod: SilentMethod<any> | undefined = undefinedValue;
 
 /**
  * 创建SilentQueue中间件函数
  * @param config 配置对象
  * @returns 中间件函数
  */
-export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  handler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-  config?: SQHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
-) => {
+export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandler<AG>, config?: SQHookConfig<AG>) => {
   const { behavior = 'queue', queue, retryError, maxRetryTimes, backoff } = config || {};
-  const eventManager =
-    createEventManager<SQEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
-  const retryHandlers: RetryHandler<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >[] = [];
+  const eventManager = createEventManager<SQEvents<AG>>();
+  const retryHandlers: RetryHandler<AG>[] = [];
   let handlerArgs: any[] | undefined;
 
   /**
    * method实例创建函数
-   * @param {any[]} args 调用send传入的函数
-   * @returns {Method}
+   * @param args 调用send传入的函数
+   * @returns method实例
    */
   const createMethod = (...args: any[]) => {
     silentAssert(isFn(handler), 'method handler must be a function. eg. useSQRequest(() => method)');
     setVDataIdCollectBasket({});
     handlerArgs = args;
-    return (
-      handler as MethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >
-    )(...args);
+    return (handler as MethodHandler<AG>)(...args);
   };
 
   /**
@@ -139,17 +84,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * @param next 继续执行函数
    * @returns {Promise}
    */
-  const middleware: AlovaFrontMiddleware<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > = (
+  const middleware: AlovaFrontMiddleware<AG> = (
     { method, sendArgs, cachedResponse, update, decorateSuccess, decorateError, decorateComplete, config },
     next
   ) => {
@@ -257,7 +192,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
         const queueResolvePromise = newInstance(PromiseCls, (resolveHandler, rejectHandler) => {
           silentMethodInstance = newInstance(
             SilentMethod,
-            method as Method<any, any, any, any, any, any, any>,
+            method as Method,
             behaviorFinally,
             undefinedValue,
             !!forceRequest,
@@ -350,19 +285,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * 绑定回退事件
        * @param handler 回退事件回调
        */
-      onFallback: (
-        handler: FallbackHandler<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        >
-      ) => {
+      onFallback: (handler: FallbackHandler<AG>) => {
         eventManager.on(FallbackEventKey, event => handler(event));
       },
 
@@ -370,19 +293,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * 绑定入队列前事件
        * @param handler 入队列前的事件回调
        */
-      onBeforePushQueue: (
-        handler: BeforePushQueueHandler<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        >
-      ) => {
+      onBeforePushQueue: (handler: BeforePushQueueHandler<AG>) => {
         eventManager.on(BeforePushQueueEventKey, event => handler(event));
       },
 
@@ -390,19 +301,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * 绑定入队列后事件
        * @param handler 入队列后的事件回调
        */
-      onPushedQueue: (
-        handler: PushedQueueHandler<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        >
-      ) => {
+      onPushedQueue: (handler: PushedQueueHandler<AG>) => {
         eventManager.on(PushedQueueEventKey, event => handler(event));
       },
 
@@ -410,19 +309,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * 重试事件
        * @param handler 重试事件回调
        */
-      onRetry: (
-        handler: RetryHandler<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        >
-      ) => {
+      onRetry: (handler: RetryHandler<AG>) => {
         eventManager.on(RetryEventKey, event => handler(event));
       }
     }

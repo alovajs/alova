@@ -1,4 +1,5 @@
 import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { StatesHook } from 'alova';
 import {
   ComputedRef,
   Ref,
@@ -10,7 +11,6 @@ import {
   ref,
   watch
 } from 'vue-demi';
-import { StatesHook } from '~/typings';
 
 type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks

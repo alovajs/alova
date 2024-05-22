@@ -1,4 +1,6 @@
-import { AlovaGenerics, AlovaMethodHandler, Method, RequestHookConfig, useRequest } from 'alova';
+import { useRequest } from '@/index';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
 import { assertSerialHandlers, serialMiddleware } from './general';
 
 /**

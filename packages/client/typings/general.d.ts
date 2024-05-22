@@ -1,22 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Alova, AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
 import {
-  Alova,
   AlovaCompleteEvent,
   AlovaErrorEvent,
   AlovaEvent,
   AlovaFetcherMiddlewareContext,
   AlovaFrontMiddlewareContext,
-  AlovaGenerics,
   AlovaGuardNext,
-  AlovaOptions,
-  AlovaRequestAdapter,
   ExportedType,
-  Method,
   RequestHookConfig,
-  StatesHook,
   UseHookReturnType,
   WatcherHookConfig
-} from 'alova';
+} from '.';
 
 /** 判断是否为any */
 type IsAny<T, P, N> = 0 extends 1 & T ? P : N;
@@ -26,7 +21,7 @@ type IsUnknown<T, P, N> = IsAny<T, P, N> extends P ? N : unknown extends T ? P :
 
 /** @description usePagination相关 */
 type ArgGetter<R, LD> = (data: R) => LD | undefined;
-interface PaginationHookConfig<AG extends AlovaGenerics, LD, WS> extends WatcherHookConfig<AG> {
+interface PaginationHookConfig<AG extends AlovaGenerics, LD> extends WatcherHookConfig<AG> {
   /**
    * 是否预加载上一页
    * @default true
@@ -66,7 +61,7 @@ interface PaginationHookConfig<AG extends AlovaGenerics, LD, WS> extends Watcher
    * 状态监听触发请求，使用 useWatcher 实现
    * @default [page, pageSize]
    */
-  watchingStates?: WS;
+  watchingStates?: AG['Watched'][];
 }
 
 // =========================
@@ -127,29 +122,29 @@ interface GlobalSQFailEvent extends GlobalSQEvent {
 }
 
 /** 局部事件 */
-interface ScopedSQEvent<S, E, R, T, RC, RE, RH> extends SQEvent<S, E, R, T, RC, RE, RH> {
+interface ScopedSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> {
   /** 通过send触发请求时传入的参数 */
   sendArgs: any[];
 }
 /** 局部成功事件 */
-interface ScopedSQSuccessEvent<S, E, R, T, RC, RE, RH> extends ScopedSQEvent<S, E, R, T, RC, RE, RH> {
+interface ScopedSQSuccessEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
   /** 响应数据 */
   data: R;
 }
 /** 局部失败事件 */
-interface ScopedSQErrorEvent<S, E, R, T, RC, RE, RH> extends ScopedSQEvent<S, E, R, T, RC, RE, RH> {
+interface ScopedSQErrorEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
   /** 失败时抛出的错误 */
   error: any;
 }
 /** 局部失败事件 */
-interface ScopedSQRetryEvent<S, E, R, T, RC, RE, RH> extends ScopedSQEvent<S, E, R, T, RC, RE, RH> {
+interface ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
   retryTimes: number;
   retryDelay: number;
 }
 /** 局部完成事件 */
-interface ScopedSQCompleteEvent<S, E, R, T, RC, RE, RH> extends ScopedSQEvent<S, E, R, T, RC, RE, RH> {
+interface ScopedSQCompleteEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
   /** 响应状态 */
-  status: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>['status'];
+  status: AlovaCompleteEvent<AG>['status'];
   /** 响应数据 */
   data?: R;
   /** 失败时抛出的错误 */
@@ -570,7 +565,7 @@ type FormReturnType<AG extends AlovaGenerics, F> = UseHookReturnType<AG> & {
 /**
  * useRetriableRequest配置
  */
-type RetriableHookConfig<S, E, R, T, RC, RE, RH> = {
+type RetriableHookConfig<AG extends AlovaGenerics> = {
   /**
    * 最大重试次数，也可以设置为返回 boolean 值的函数，来动态判断是否继续重试。
    * @default 3
@@ -581,12 +576,12 @@ type RetriableHookConfig<S, E, R, T, RC, RE, RH> = {
    * 避让策略
    */
   backoff?: BackoffPolicy;
-} & RequestHookConfig<S, E, R, T, RC, RE, RH>;
+} & RequestHookConfig<AG>;
 
 /**
  * useRetriableRequest onRetry回调事件实例
  */
-interface RetriableRetryEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+interface RetriableRetryEvent<AG extends AlovaGenerics> extends AlovaEvent<AG> {
   /**
    * 当前的重试次数
    */
@@ -600,7 +595,7 @@ interface RetriableRetryEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R
 /**
  * useRetriableRequest onFail回调事件实例
  */
-interface RetriableFailEvent<S, E, R, T, RC, RE, RH> extends AlovaErrorEvent<S, E, R, T, RC, RE, RH> {
+interface RetriableFailEvent<AG extends AlovaGenerics> extends AlovaErrorEvent<AG> {
   /**
    * 失败时的重试次数
    */
@@ -609,7 +604,7 @@ interface RetriableFailEvent<S, E, R, T, RC, RE, RH> extends AlovaErrorEvent<S, 
 /**
  * useRetriableRequest返回值
  */
-type RetriableReturnType<S, E, R, T, RC, RE, RH> = UseHookReturnType<S, E, R, T, RC, RE, RH> & {
+type RetriableReturnType<AG extends AlovaGenerics> = UseHookReturnType<AG> & {
   /**
    * 停止重试，只在重试期间调用有效
    * 停止后将立即触发onFail事件
@@ -622,7 +617,7 @@ type RetriableReturnType<S, E, R, T, RC, RE, RH> = UseHookReturnType<S, E, R, T,
    * 它们将在重试发起后触发
    * @param handler 重试事件回调
    */
-  onRetry(handler: (event: RetriableRetryEvent<S, E, R, T, RC, RE, RH>) => void): void;
+  onRetry(handler: (event: RetriableRetryEvent<AG>) => void): void;
 
   /**
    * 失败事件绑定
@@ -633,7 +628,7 @@ type RetriableReturnType<S, E, R, T, RC, RE, RH> = UseHookReturnType<S, E, R, T,
    *
    * @param handler 失败事件回调
    */
-  onFail(handler: (event: RetriableFailEvent<S, E, R, T, RC, RE, RH>) => void): void;
+  onFail(handler: (event: RetriableFailEvent<AG>) => void): void;
 };
 
 // middlewares
@@ -808,7 +803,7 @@ type AlovaRequestAdapterUnified<
 /**
  * useAutoRequest配置
  */
-type AutoRequestHookConfig<S, E, R, T, RC, RE, RH> = {
+type AutoRequestHookConfig<AG extends AlovaGenerics> = {
   /**
    * 轮询事件，单位ms，0表示不开启
    * @default 0
@@ -834,7 +829,7 @@ type AutoRequestHookConfig<S, E, R, T, RC, RE, RH> = {
    * @default 1000
    */
   throttle?: number;
-} & RequestHookConfig<S, E, R, T, RC, RE, RH>;
+} & RequestHookConfig<AG>;
 
 const enum SSEHookReadyState {
   CONNECTING = 0,
@@ -842,24 +837,22 @@ const enum SSEHookReadyState {
   CLOSED = 2
 }
 
-interface AlovaSSEEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+interface AlovaSSEEvent<AG extends AlovaGenerics> extends AlovaEvent<AG> {
   method: Method;
   eventSource: EventSource; // eventSource实例
 }
-interface AlovaSSEErrorEvent<S, E, R, T, RC, RE, RH> extends AlovaSSEEvent<S, E, R, T, RC, RE, RH> {
+interface AlovaSSEErrorEvent<AG extends AlovaGenerics> extends AlovaSSEEvent<AG> {
   error: Error; // 错误对象
 }
-interface AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH> extends AlovaSSEEvent<S, E, R, T, RC, RE, RH> {
+interface AlovaSSEMessageEvent<Data, AG extends AlovaGenerics> extends AlovaSSEEvent<AG> {
   data: Data; // 每次响应的，经过拦截器转换后的数据
 }
-type SSEOnOpenTrigger<S, E, R, T, RC, RE, RH> = (event: AlovaSSEEvent<S, E, R, T, RC, RE, RH>) => void;
-type SSEOnMessageTrigger<Data, S, E, R, T, RC, RE, RH> = (
-  event: AlovaSSEMessageEvent<Data, S, E, R, T, RC, RE, RH>
-) => void;
-type SSEOnErrorTrigger<S, E, R, T, RC, RE, RH> = (event: AlovaSSEErrorEvent<S, E, R, T, RC, RE, RH>) => void;
-type SSEOn<S, E, R, T, RC, RE, RH> = (
+type SSEOnOpenTrigger<AG extends AlovaGenerics> = (event: AlovaSSEEvent<AG>) => void;
+type SSEOnMessageTrigger<Data, AG extends AlovaGenerics> = (event: AlovaSSEMessageEvent<Data, AG>) => void;
+type SSEOnErrorTrigger<AG extends AlovaGenerics> = (event: AlovaSSEErrorEvent<AG>) => void;
+type SSEOn<AG extends AlovaGenerics> = (
   eventName: string,
-  handler: (event: AlovaSSEMessageEvent<S, E, R, T, RC, RE, RH>) => void
+  handler: (event: AlovaSSEMessageEvent<AG>) => void
 ) => () => void;
 
 type NotifyHandler = () => void;

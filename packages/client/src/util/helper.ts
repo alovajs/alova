@@ -10,7 +10,8 @@ import {
   setTimeoutFn,
   undefinedValue
 } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaMethodHandler, Method } from 'alova';
+import { Method } from 'alova';
+import { AlovaMethodHandler } from '~/typings';
 import { AnyFn, BackoffPolicy, UsePromiseReturnType } from '~/typings/general';
 
 /**
@@ -164,7 +165,7 @@ export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
  * @param args 方法调用参数
  * @returns 请求方法对象
  */
-export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler<AlovaGenerics>, args: any[] = []) => {
+export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler, args: any[] = []) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
   createAssert('scene')(
     instanceOf(methodInstance, Method),

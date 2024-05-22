@@ -1,7 +1,9 @@
+import { useRequest } from '@/index';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaMethodHandler, Method, promiseStatesHook, useRequest } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { AlovaMethodHandler } from '~/typings';
 import { CaptchaHookConfig, CaptchaReturnType } from '~/typings/general';
 
 const hookPrefix = 'useCaptcha';
@@ -56,11 +58,6 @@ export default <AG extends AlovaGenerics>(
     ...memorizeOperators({
       send
     }),
-    ...exportObject(
-      {
-        countdown
-      },
-      requestReturned
-    )
+    ...exportObject([countdown], requestReturned)
   } as unknown as CaptchaReturnType<AG>;
 };

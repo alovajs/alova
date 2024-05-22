@@ -800,9 +800,7 @@ export interface CacheSetOptions {
  * @param matcher method instance(s)
  */
 export declare function setCache<Responded>(
-  matcher:
-    | Method<AlovaGenerics<any, any, any, any, Responded>>
-    | Method<AlovaGenerics<any, any, any, any, Responded>>[],
+  matcher: Method | Method[],
   dataOrUpdater: Responded | ((oldCache: Responded) => Responded | undefined | void),
   options?: CacheSetOptions
 ): Promise<void>;
@@ -826,10 +824,10 @@ export interface CacheQueryOptions {
  * @param matcher method instance
  * @returns cache data, return undefined if not found
  */
-export declare function queryCache<Responded>(
-  matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
+export declare function queryCache<AG extends AlovaGenerics>(
+  matcher: Method<AG>,
   options?: CacheQueryOptions
-): Promise<Responded | undefined>;
+): Promise<AG['Responded'] | undefined>;
 
 /**
  * hit(invalidate) target caches by source method
@@ -847,7 +845,7 @@ export declare function hitCacheBySource<AG extends AlovaGenerics>(sourceMethod:
  * @param {Method} method method实例
  * @returns — 此请求方式的key值
  */
-export declare function getMethodKey(method: Method): string;
+export declare function getMethodKey<AG extends AlovaGenerics>(method: Method<AG>): string;
 
 /**
  * Set global configuration

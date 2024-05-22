@@ -17,6 +17,7 @@ import {
   ObjectCls,
   STORAGE_RESTORE,
   falseValue,
+  forEach,
   mapItem,
   nullValue,
   objectKeys,
@@ -353,13 +354,12 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       states: S,
       coreHookStates: Record<string, any> = {}
     ) => {
-      const exportedStates = states.reduce(
-        (result, item) => {
-          result[item.k] = item.e;
-          return result;
-        },
-        {} as Record<string, GeneralState>
-      );
+      const originalStatesMap: Record<string, GeneralState> = {};
+      const exportedStatesMap: Record<string, GeneralState> = {};
+      forEach(states, item => {
+        originalStatesMap[item.k] = item.s;
+        exportedStatesMap[item.k] = item.e;
+      });
 
       type ExportedStateRecord<S extends FrameworkReadableState<any, string>[]> = {
         [K in S[number]['k']]: Extract<S[number], { k: K }> extends FrameworkState<any, string>
@@ -368,10 +368,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       };
 
       return {
-        ...(exportedStates as ExportedStateRecord<S>),
+        ...(exportedStatesMap as ExportedStateRecord<S>),
         __referingObj: referingObject,
         update: memorize((newStates: Record<string, any>, targetStates?: Record<string, GeneralState>) => {
-          targetStates = targetStates || exportedStates;
+          targetStates = targetStates || originalStatesMap;
           objectKeys(newStates).forEach(key => {
             if (statesList.includes(key)) {
               update(newStates[key], targetStates[key], key);
@@ -393,7 +393,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
     statesObject: <S extends FrameworkReadableState<any, string>[]>(states: S) =>
       states.reduce(
         (result, item) => {
-          (result as any)[item.k] = item.e;
+          (result as any)[item.k] = item.s;
           return result;
         },
         {} as {

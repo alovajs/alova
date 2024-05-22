@@ -38,7 +38,7 @@ import {
   UnbindHandler
 } from './general';
 
-export type AlovaMethodHandler<AG extends AlovaGenerics> = (...args: any[]) => Method<AG>;
+export type AlovaMethodHandler<AG extends AlovaGenerics = any> = (...args: any[]) => Method<AG>;
 
 /**
  * alova base event

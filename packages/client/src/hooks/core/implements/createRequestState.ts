@@ -120,7 +120,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     ...managedStates,
     ...statesObject([data, loading, error, downloading, uploading])
   };
-  const exportings = exportObject([data, loading, error]);
+  const exportings = exportObject([data, loading, error, downloading, uploading]);
   const eventManager = createEventManager<{
     success: AlovaSuccessEvent<AG>;
     error: AlovaErrorEvent<AG>;

@@ -119,6 +119,7 @@
     "typescript": "^5.4.5",
     "undici": "^6.16.1",
     "vue": "^3.4.21",
+    "vue-demi": "^0.14.7",
     "web-streams-polyfill": "^4.0.0"
   },
   "config": {

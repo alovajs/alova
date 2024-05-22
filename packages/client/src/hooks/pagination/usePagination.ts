@@ -1,3 +1,4 @@
+import { useFetcher, useWatcher } from '@/index';
 import { createAssert } from '@alova/shared/assert';
 import {
   createSyncOnceRunner,
@@ -8,7 +9,6 @@ import {
   noop,
   statesHookHelper
 } from '@alova/shared/function';
-import { GeneralState } from '@alova/shared/types';
 import {
   falseValue,
   filterItem,
@@ -28,19 +28,8 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import {
-  AlovaGenerics,
-  Method,
-  getMethodKey,
-  invalidateCache,
-  promiseStatesHook,
-  queryCache,
-  setCache,
-  useFetcher,
-  useWatcher
-} from 'alova';
+import { AlovaGenerics, Method, getMethodKey, invalidateCache, promiseStatesHook, queryCache, setCache } from 'alova';
 import { AnyFn, PaginationHookConfig } from '~/typings/general';
-import { FrameworkReadableState, FrameworkState } from '../../../../shared/dist/model/FrameworkState';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';
 
 const paginationAssert = createAssert('usePagination');
@@ -49,7 +38,7 @@ const indexAssert = (index: number, rawData: any[]) =>
 
 export default <AG extends AlovaGenerics>(
   handler: <AG extends AlovaGenerics>(page: number, pageSize: number) => Method<AG>,
-  config: PaginationHookConfig<AG, unknown[], (GeneralState | FrameworkReadableState<any>)[]> = {}
+  config: PaginationHookConfig<AG, unknown[]> = {}
 ) => {
   const {
     create,
@@ -148,7 +137,7 @@ export default <AG extends AlovaGenerics>(
             replace: createDelegationAction('replace'),
             reload: createDelegationAction('reload'),
             getState: (stateKey: string) => {
-              const states: Record<string, FrameworkState<any>> = {
+              const states: Record<string, AG['Export']> = {
                 page,
                 pageSize,
                 data,

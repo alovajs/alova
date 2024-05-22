@@ -1,3 +1,4 @@
+import { useRequest } from '@/index';
 import createSerializerPerformer from '@/util/serializer';
 import { createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
@@ -12,7 +13,7 @@ import {
   walkObject
 } from '@alova/shared/function';
 import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGenerics, Method, promiseStatesHook, useRequest } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
 
 const RestoreEventKey = Symbol('FormRestore');
@@ -26,10 +27,9 @@ const cloneFormData = <T>(form: T): T => {
   return walkObject(shallowClone(form), shallowClone);
 };
 const assert = createAssert('useForm');
-const keyForm = 'form';
 
 export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
-  handler: FormHookHandler<AG, FormData> | ID,
+  handler: FormHookHandler<AG, FormData | undefined> | ID,
   config: FormHookConfig<AG, FormData> = {}
 ) => {
   const typedSharedStates = sharedStates as Record<
@@ -62,7 +62,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   // 如果config中的id也有对应的共享状态，则也会返回它
   // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
   const sharedState = id ? typedSharedStates[id] : undefinedValue;
-  const form = $(cloneFormData(initialForm), keyForm);
+  const form = $(cloneFormData(initialForm), 'form');
   const methodHandler = handler;
   const eventManager = createEventManager<{
     [RestoreEventKey]: void;
@@ -151,7 +151,6 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
       };
     }
   }
-
   const { send, onSuccess } = hookReturns;
   onMounted$(() => {
     // 需要持久化时更新data

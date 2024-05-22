@@ -1,109 +1,24 @@
+import { useRequest } from '@/index';
 import { noop, statesHookHelper } from '@alova/shared/function';
 import { falseValue, isSSR, trueValue } from '@alova/shared/vars';
-import { AlovaMethodHandler, Method, UseHookReturnType, promiseStatesHook, useRequest } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { AlovaMethodHandler, UseHookReturnType } from '~/typings';
 import { AutoRequestHookConfig, NotifyHandler, UnbindHandler } from '~/typings/general';
 
-interface AutoRequestHook<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> {
-  (
-    handler:
-      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      | AlovaMethodHandler<
-          State,
-          Computed,
-          Watched,
-          Export,
-          Responded,
-          Transformed,
-          RequestConfig,
-          Response,
-          ResponseHeader
-        >,
-    config?: AutoRequestHookConfig<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ): UseHookReturnType<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-  onNetwork(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ): UnbindHandler;
-  onPolling(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ): UnbindHandler;
-  onVisibility(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ): UnbindHandler;
-  onFocus(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ): UnbindHandler;
+interface AutoRequestHook<AG extends AlovaGenerics> {
+  (handler: Method<AG> | AlovaMethodHandler<AG>, config?: AutoRequestHookConfig<AG>): UseHookReturnType<AG>;
+  onNetwork(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+  onPolling(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+  onVisibility(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+  onFocus(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
 }
 
-export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, any, any, any> = {
+export const defaultConfig: AutoRequestHookConfig<AlovaGenerics> = {
   enableFocus: trueValue,
   enableNetwork: trueValue,
   throttle: 1000
 };
-const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any, any, any> = (handler, config = {}) => {
+const useAutoRequest: AutoRequestHook<AlovaGenerics> = (handler, config = {}) => {
   let notifiable = trueValue;
   const {
     enableFocus = trueValue,

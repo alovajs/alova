@@ -1,7 +1,7 @@
 import { len, objectKeys, pushItem, splice } from '@alova/shared/vars';
 // eslint-disable-next-line import/no-cycle
 import { AlovaGenerics } from 'alova';
-import { SilentMethod } from '../SilentMethod';
+import type { SilentMethod } from '../SilentMethod';
 import {
   SerializedSilentMethodIdQueueMap,
   silentMethodIdQueueMapStorageKey,

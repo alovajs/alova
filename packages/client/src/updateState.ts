@@ -1,6 +1,7 @@
 import { getContext, getMethodInternalKey, isFn } from '@alova/shared/function';
 import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
-import { Method, UpdateStateCollection, promiseStatesHook, setCache } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook, setCache } from 'alova';
+import { UpdateStateCollection } from '~/typings';
 import { coreAssert } from './hooks/core/implements/assert';
 import { getStateCache } from './hooks/core/implements/stateCache';
 
@@ -10,19 +11,9 @@ import { getStateCache } from './hooks/core/implements/stateCache';
  * @param handleUpdate 更新回调
  * @returns 是否更新成功，未找到对应的状态时不会更新成功
  */
-export default async function updateState<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
-  matcher: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  handleUpdate: ((data: Responded) => any) | UpdateStateCollection<Responded>
+export default async function updateState<AG extends AlovaGenerics>(
+  matcher: Method<AG>,
+  handleUpdate: ((data: AG['Responded']) => any) | UpdateStateCollection<AG['Responded']>
 ) {
   let updated = falseValue;
 
@@ -33,7 +24,7 @@ export default async function updateState<
     const { id } = getContext(matcher);
     const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
     const updateStateCollection = isFn(handleUpdate)
-      ? ({ data: handleUpdate } as UpdateStateCollection<Responded>)
+      ? ({ data: handleUpdate } as UpdateStateCollection<AG['Responded']>)
       : handleUpdate;
 
     let updatedDataColumnData = undefinedValue as any;

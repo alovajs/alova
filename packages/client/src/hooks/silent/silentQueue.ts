@@ -1,36 +1,38 @@
 /* eslint-disable import/no-cycle */
-import { AlovaGenerics, Method, setCache, updateState, UpdateStateCollection } from 'alova';
+import { AlovaGenerics, Method, setCache } from 'alova';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {
-  BeforeEventKey,
   BEHAVIOR_SILENT,
+  BeforeEventKey,
   DEFAUT_QUEUE_NAME,
   ErrorEventKey,
   FailEventKey,
+  SuccessEventKey,
   globalSQEventManager,
   queueRequestWaitSetting,
   setSilentFactoryStatus,
-  silentFactoryStatus,
-  SuccessEventKey
+  silentFactoryStatus
 } from './globalVariables';
 // eslint-disable-next-line import/no-cycle
+import updateState from '@/updateState';
 import createHookEvent from '@/util/createHookEvent';
 import { delayWithBackoff, runArgsHandler } from '@/util/helper';
 import { instanceOf, isObject, isString, newInstance, noop, sloughConfig, walkObject } from '@alova/shared/function';
 import {
+  RegExpCls,
   falseValue,
   forEach,
   len,
   objectKeys,
   promiseThen,
   pushItem,
-  RegExpCls,
   regexpTest,
   setTimeoutFn,
   shift,
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
+import { UpdateStateCollection } from '~/typings';
 import { SilentMethod } from './SilentMethod';
 import {
   persistSilentMethod,

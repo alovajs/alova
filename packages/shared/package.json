@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "type": "module",
   "author": "Scott Hu",
-  "types": "typings/index.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
     "test": "jest",
@@ -28,28 +27,6 @@
     "./types": "./dist/types.js",
     "./event": "./dist/event.js",
     "./createEventManager": "./dist/createEventManager.js"
-  },
-  "typesVersions": {
-    "*": {
-      "assert": [
-        "./dist/assert.d.ts"
-      ],
-      "function": [
-        "./dist/function.d.ts"
-      ],
-      "vars": [
-        "./dist/vars.d.ts"
-      ],
-      "types": [
-        "./dist/types.d.ts"
-      ],
-      "event": [
-        "./dist/event.d.ts"
-      ],
-      "createEventManager": [
-        "./dist/createEventManager.d.ts"
-      ]
-    }
   },
   "files": [
     "dist"

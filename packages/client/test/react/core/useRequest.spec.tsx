@@ -265,7 +265,8 @@ describe('useRequest hook with react', () => {
 
     let i = 0;
     function Page() {
-      const { loading, abort, send, error, data = { path: '', method: '' }, update } = useRequest(Get);
+      const { loading, abort, send, error, data = { path: '', method: '' }, update, onError } = useRequest(Get);
+      onError(() => {});
       return (
         <div role="wrap">
           <span role="status">{loading ? 'loading' : 'loaded'}</span>
