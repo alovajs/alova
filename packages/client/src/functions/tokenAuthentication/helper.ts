@@ -1,6 +1,7 @@
 import { instanceOf, isFn, isPlainObject, newInstance, noop } from '@alova/shared/function';
 import { PromiseCls, falseValue, forEach, len, pushItem, splice, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
+  AlovaGenerics,
   AlovaRequestAdapter,
   Method,
   RespondedHandler,
@@ -122,9 +123,9 @@ export const refreshTokenIfExpired = async (
 export const onResponded2Record = (
   onRespondedHandlers?: AlovaResponded<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>
 ) => {
-  let successHandler: RespondedHandler<any, any, any, any, any, any> | undefined = undefinedValue;
-  let errorHandler: ResponseErrorHandler<any, any, any, any, any, any> | undefined = undefinedValue;
-  let onCompleteHandler: ResponseCompleteHandler<any, any, any, any, any, any> | undefined = undefinedValue;
+  let successHandler: RespondedHandler<AlovaGenerics> | undefined = undefinedValue;
+  let errorHandler: ResponseErrorHandler<AlovaGenerics> | undefined = undefinedValue;
+  let onCompleteHandler: ResponseCompleteHandler<AlovaGenerics> | undefined = undefinedValue;
   if (isFn(onRespondedHandlers)) {
     successHandler = onRespondedHandlers;
   } else if (isPlainObject(onRespondedHandlers)) {

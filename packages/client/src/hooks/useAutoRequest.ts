@@ -28,32 +28,82 @@ interface AutoRequestHook<
           Response,
           ResponseHeader
         >,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config?: AutoRequestHookConfig<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ): UseHookReturnType<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   onNetwork(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ): UnbindHandler;
   onPolling(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ): UnbindHandler;
   onVisibility(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ): UnbindHandler;
   onFocus(
     notify: NotifyHandler,
-    config: AutoRequestHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    config: AutoRequestHookConfig<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ): UnbindHandler;
 }
 
-export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, any> = {
+export const defaultConfig: AutoRequestHookConfig<any, any, any, any, any, any, any, any, any> = {
   enableFocus: trueValue,
   enableNetwork: trueValue,
   throttle: 1000
 };
-const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any, any, any> = (handler, config) => {
+const useAutoRequest: AutoRequestHook<any, any, any, any, any, any, any, any, any> = (handler, config = {}) => {
   let notifiable = trueValue;
   const {
     enableFocus = trueValue,

@@ -1,5 +1,6 @@
 import { len, objectKeys, pushItem, splice } from '@alova/shared/vars';
 // eslint-disable-next-line import/no-cycle
+import { AlovaGenerics } from 'alova';
 import { SilentMethod } from '../SilentMethod';
 import {
   SerializedSilentMethodIdQueueMap,
@@ -14,29 +15,7 @@ import {
  * 序列化并保存silentMethod实例
  * @param silentMethodInstance silentMethod实例
  */
-export const persistSilentMethod = <
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
-  silentMethodInstance: SilentMethod<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
-) => {
+export const persistSilentMethod = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>) => {
   storageSetItem(silentMethodStorageKeyPrefix + silentMethodInstance.id, silentMethodInstance);
 };
 
@@ -46,28 +25,8 @@ export const persistSilentMethod = <
  * @param silentMethod SilentMethod实例
  * @param queue 操作的队列名
  */
-export const push2PersistentSilentQueue = <
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
-  silentMethodInstance: SilentMethod<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >,
+export const push2PersistentSilentQueue = <AG extends AlovaGenerics>(
+  silentMethodInstance: SilentMethod<AG>,
   queueName: string
 ) => {
   persistSilentMethod(silentMethodInstance);
@@ -85,30 +44,10 @@ export const push2PersistentSilentQueue = <
  * @param targetSilentMethodId 目标silentMethod实例id
  * @param newSilentMethod 替换的新silentMethod实例，未传则表示删除
  */
-export const spliceStorageSilentMethod = <
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
->(
+export const spliceStorageSilentMethod = <AG extends AlovaGenerics>(
   queueName: string,
   targetSilentMethodId: string,
-  newSilentMethod?: SilentMethod<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
+  newSilentMethod?: SilentMethod<AG>
 ) => {
   // 将silentMethod实例id从queue中移除
   const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) ||

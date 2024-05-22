@@ -1,5 +1,5 @@
 import { ObjectCls, forEach, objectKeys, undefinedValue } from '@alova/shared/vars';
-import { AlovaCompleteEvent, Method } from 'alova';
+import { AlovaCompleteEvent, AlovaGenerics, Method } from 'alova';
 import { SQHookBehavior, SilentMethod } from '~/typings/general';
 
 /**
@@ -41,29 +41,19 @@ export const enum AlovaHookEventType {
   SSEErrorEvent = 13
 }
 
-export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+export default <AG extends AlovaGenerics>(
   eventType: AlovaHookEventType,
-  method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
+  method: Method<AG>,
   behavior?: SQHookBehavior,
-  silentMethod?: SilentMethod,
+  silentMethod?: SilentMethod<AG>,
   queueName?: string,
   retryTimes?: number,
   retryDelay?: number,
   sendArgs?: any[],
-  data?: Responded,
+  data?: AG['Responded'],
   vDataResponse?: Record<string, any>,
   error?: any,
-  status?: AlovaCompleteEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >['status']
+  status?: AlovaCompleteEvent<AG>['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */

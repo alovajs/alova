@@ -157,17 +157,48 @@ export default <
   // 储存自定义事件的 useCallback 对象，其中 key 为 eventName
   const customEventMap: Map<string, ReturnType<typeof useCallback>> = new Map();
   const onOpen = (
-    handler: SSEOnOpenTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: SSEOnOpenTrigger<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => {
     eventManager.on(SSEOpenEventKey, handler);
   };
   const onMessage = (
-    handler: SSEOnMessageTrigger<Data, State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: SSEOnMessageTrigger<
+      Data,
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => {
     eventManager.on(SSEMessageEventKey, handler);
   };
   const onError = (
-    handler: SSEOnErrorTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: SSEOnErrorTrigger<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => {
     eventManager.on(SSEErrorEventKey, handler);
   };
@@ -276,13 +307,32 @@ export default <
 
   // * MARK: EventSource 的事件处理
 
-  const onCustomEvent: SSEOn<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-    eventName,
-    callbackHandler
-  ) => {
+  const onCustomEvent: SSEOn<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  > = (eventName, callbackHandler) => {
     if (!customEventMap.has(eventName)) {
       const useCallbackObject = useCallback<
-        (event: AlovaSSEEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>) => void
+        (
+          event: AlovaSSEEvent<
+            State,
+            Computed,
+            Watched,
+            Export,
+            Responded,
+            Transformed,
+            RequestConfig,
+            Response,
+            ResponseHeader
+          >
+        ) => void
       >(callbacks => {
         if (callbacks.length === 0) {
           eventSource.current?.removeEventListener(eventName, useCallbackObject[1] as any);

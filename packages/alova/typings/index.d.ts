@@ -826,8 +826,8 @@ export interface CacheQueryOptions {
  * @param matcher method instance
  * @returns cache data, return undefined if not found
  */
-export declare function queryCache<Responded>(
-  matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
+export declare function queryCache<AG extends AlovaGenerics, Responded>(
+  matcher: Method<Omit<AG, 'Responded'> & Responded>,
   options?: CacheQueryOptions
 ): Promise<Responded | undefined>;
 
@@ -847,7 +847,7 @@ export declare function hitCacheBySource<AG extends AlovaGenerics>(sourceMethod:
  * @param {Method} method method实例
  * @returns — 此请求方式的key值
  */
-export declare function getMethodKey(method: Method): string;
+export declare function getMethodKey<AG extends AlovaGenerics>(method: Method<AG>): string;
 
 /**
  * Set global configuration

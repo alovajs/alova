@@ -45,7 +45,9 @@
   "devDependencies": {
     "@alova/mock": "workspace:*",
     "@alova/scripts": "workspace:*",
-    "alova": "workspace:*"
+    "@types/eventsource": "^1.1.15",
+    "alova": "workspace:*",
+    "eventsource": "^2.0.2"
   },
   "config": {
     "commitizen": {

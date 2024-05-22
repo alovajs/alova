@@ -1,27 +1,27 @@
 import { mockRequestAdapter } from '#/mockData';
-import { untilCbCalled } from '#/utils';
+import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { setSilentFactoryStatus } from '@/hooks/silent/globalVariables';
 import { bootSilentFactory, onSilentSubmitSuccess } from '@/hooks/silent/silentFactory';
-import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { silentQueueMap } from '@/hooks/silent/silentQueue';
 import loadSilentQueueMapFromStorage from '@/hooks/silent/storage/loadSilentQueueMapFromStorage';
 import useSQRequest from '@/hooks/silent/useSQRequest';
+import Undefined from '@/hooks/silent/virtualResponse/Undefined';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import dehydrateVData from '@/hooks/silent/virtualResponse/dehydrateVData';
 import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
-import Undefined from '@/hooks/silent/virtualResponse/Undefined';
 import updateStateEffect from '@/hooks/silent/virtualResponse/updateStateEffect';
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
+import { accessAction, actionDelegationMiddleware } from '@/index';
 import { createAlova } from 'alova';
 import VueHook from 'alova/vue';
-import { ScopedSQErrorEvent, ScopedSQSuccessEvent, SQHookBehavior } from '~/typings/general';
-import { accessAction, actionDelegationMiddleware } from '..';
+import { untilCbCalled } from 'root/testUtils';
+import { SQHookBehavior, ScopedSQErrorEvent, ScopedSQSuccessEvent } from '~/typings/general';
 
 const alovaInst = createAlova({
   baseURL: 'http://xxx',
   statesHook: VueHook,
   requestAdapter: mockRequestAdapter,
-  localCache: {
+  cacheFor: {
     // 不设置缓存，否则有些会因为缓存而不延迟50毫秒，而导致结果不一致
     GET: 0
   }
@@ -32,7 +32,7 @@ beforeEach(() => {
   // 每次运行用例前将状态重置为1，否则上面的请求错误会将状态改为2而不再执行下面的silentMethod了
   // 第一次因为还未启动，则不需要重置
   testNum > 0 && setSilentFactoryStatus(1);
-  testNum++;
+  testNum += 1;
 });
 
 beforeAll(() => {
@@ -129,7 +129,7 @@ describe('vue => useSQRequest', () => {
           expect(arg2).toBe(2);
           return 'queue';
         },
-        force(arg1, arg2) {
+        force({ sendArgs: [arg1, arg2] }) {
           expect(arg1).toBe(1);
           expect(arg2).toBe(2);
           return false;
@@ -272,9 +272,7 @@ describe('vue => useSQRequest', () => {
       behavior: 'queue',
       queue
     });
-    onBeforePushQueue(() => {
-      return false;
-    });
+    onBeforePushQueue(() => false);
 
     const successMockFn = jest.fn();
     onSuccess(successMockFn);
@@ -287,12 +285,8 @@ describe('vue => useSQRequest', () => {
       behavior: 'queue',
       queue
     });
-    onBeforePushQueue2(() => {
-      return false;
-    });
-    onBeforePushQueue2(() => {
-      return true;
-    });
+    onBeforePushQueue2(() => false);
+    onBeforePushQueue2(() => true);
     onSuccess2(successMockFn);
     await untilCbCalled(setTimeout, 0);
     expect(silentQueueMap[queue]?.[0]?.active).toBeTruthy();
@@ -440,7 +434,7 @@ describe('vue => useSQRequest', () => {
     const vDataId = createVirtualResponse(undefined);
     const poster = (id: number) =>
       alovaInst.Post<any>('/detail', {
-        id: 'id is ' + stringifyVData(id)
+        id: `id is ${stringifyVData(id)}`
       });
     const { data, onSuccess } = useSQRequest(() => poster(vDataId), {
       behavior: 'static', // vDataCaptured在任何行为模式下都有效
@@ -452,7 +446,15 @@ describe('vue => useSQRequest', () => {
       }
     });
 
-    let event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(event.data).toStrictEqual({ localData: 'abc' });
     expect(data.value).toStrictEqual({ localData: 'abc' });
   });
@@ -476,7 +478,15 @@ describe('vue => useSQRequest', () => {
       }
     });
 
-    let event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >;
     expect(event.data).toStrictEqual({ localData: 'abc' });
     expect(data.value).toStrictEqual({ localData: 'abc' });
   });
@@ -564,7 +574,7 @@ describe('vue => useSQRequest', () => {
       })
     });
     onPostSuccess(event => {
-      const data = event.data;
+      const { data } = event;
       expect(postRes.value[symbolVDataId]).toBeTruthy(); // 此时还是虚拟响应数据
 
       // 调用updateStateEffect后将首先立即更新虚拟数据到listData中

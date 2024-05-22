@@ -1,7 +1,7 @@
 import { createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import { isArray } from '@alova/shared/vars';
-import { Alova } from 'alova';
+import { Alova, AlovaGenerics } from 'alova';
 import {
   BeforeSilentSubmitHandler,
   DataSerializer,
@@ -56,8 +56,8 @@ export const setVDataIdCollectBasket = (value: typeof vDataIdCollectBasket) => {
 /**
  * 依赖的alova实例，它的存储适配器、请求适配器等将用于存取SilentMethod实例，以及发送静默提交
  */
-export let dependentAlovaInstance: Alova<any, any, any, any, any, any, any>;
-export const setDependentAlova = (alovaInst: Alova<any, any, any, any, any, any, any>) => {
+export let dependentAlovaInstance: Alova<AlovaGenerics>;
+export const setDependentAlova = (alovaInst: Alova<AlovaGenerics>) => {
   dependentAlovaInstance = alovaInst;
 };
 

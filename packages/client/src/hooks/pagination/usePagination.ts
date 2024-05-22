@@ -29,6 +29,7 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import {
+  AlovaGenerics,
   Method,
   getMethodKey,
   invalidateCache,
@@ -46,24 +47,9 @@ const paginationAssert = createAssert('usePagination');
 const indexAssert = (index: number, rawData: any[]) =>
   paginationAssert(isNumber(index) && index < len(rawData), 'index must be a number that less than list length');
 
-export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  handler: (
-    page: number,
-    pageSize: number
-  ) => Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  config: PaginationHookConfig<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader,
-    unknown[],
-    (GeneralState | FrameworkReadableState<any>)[]
-  > = {}
+export default <AG extends AlovaGenerics>(
+  handler: <AG extends AlovaGenerics>(page: number, pageSize: number) => Method<AG>,
+  config: PaginationHookConfig<AG, unknown[], (GeneralState | FrameworkReadableState<any>)[]> = {}
 ) => {
   const {
     create,
@@ -105,8 +91,8 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     get: getSnapshotMethods,
     save: saveSnapshot,
     remove: removeSnapshot
-  } = ref(createSnapshotMethodsManager(page => handlerRef.current(page, pageSize.v))).current;
-  const listDataGetter = (rawData: any[]) => dataGetter(rawData) || rawData;
+  } = ref(createSnapshotMethodsManager<AG>(page => handlerRef.current(page, pageSize.v))).current;
+  const listDataGetter = (rawData: any) => dataGetter(rawData) || rawData;
   // 初始化fetcher
   const fetchStates = useFetcher({
     __referingObj: referingObject,
@@ -117,7 +103,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
 
   const getHandlerMethod = (refreshPage = page.v) => {
     const pageSizeVal = pageSize.v;
-    const handlerMethod = handler(refreshPage, pageSizeVal);
+    const handlerMethod = handler<AG>(refreshPage, pageSizeVal);
 
     // 定义统一的额外名称，方便管理
     saveSnapshot(handlerMethod);
@@ -206,17 +192,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   const canPreload = async (payload: {
     rawData?: any;
     preloadPage: number;
-    fetchMethod: Method<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >;
+    fetchMethod: Method<AG>;
     isNextPage?: boolean;
     forceRequest?: boolean;
   }) => {

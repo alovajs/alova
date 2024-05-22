@@ -12,36 +12,37 @@ import {
   walkObject
 } from '@alova/shared/function';
 import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook, useRequest } from 'alova';
 import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
-import useRequest from './core/useRequest';
 
 const RestoreEventKey = Symbol('FormRestore');
-const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
-type ID = NonNullable<FormHookConfig['id']>;
+const getStoragedKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>, id?: ID) =>
+  `alova/form-${id || getMethodInternalKey(methodInstance)}`;
+type ID = NonNullable<FormHookConfig<AlovaGenerics, any>['id']>;
 
-const sharedStates = {} as Record<
-  ID,
-  {
-    // hookReturns: UseHookReturnType<any, any, any, any, any, any, any>;
-    hookReturns: FormReturnType<any, any, any, any, any, any, any, any>;
-    config: FormHookConfig<any, any, any, any, any, any, any, any>;
-  }
->;
+const sharedStates = {};
 const cloneFormData = <T>(form: T): T => {
   const shallowClone = (value: any) => (isArray(value) ? [...value] : isPlainObject(value) ? { ...value } : value);
   return walkObject(shallowClone(form), shallowClone);
 };
 const assert = createAssert('useForm');
+const keyForm = 'form';
 
 export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
   handler: FormHookHandler<AG, FormData> | ID,
   config: FormHookConfig<AG, FormData> = {}
 ) => {
+  const typedSharedStates = sharedStates as Record<
+    ID,
+    {
+      hookReturns: FormReturnType<AG, any>;
+      config: FormHookConfig<AG, any>;
+    }
+  >;
   // 如果第一个参数传入的是id，则获取它的初始化数据并返回
   if (isNumber(handler) || isString(handler)) {
     const id = handler as ID;
-    const sharedState = sharedStates[id];
+    const sharedState = typedSharedStates[id];
     assert(!!sharedState, `the form data of id \`${id}\` is not initial`);
     return sharedState.hookReturns;
   }
@@ -60,9 +61,9 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   const enableStore = isStoreObject ? (store as StoreDetailConfig).enable : store;
   // 如果config中的id也有对应的共享状态，则也会返回它
   // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
-  const sharedState = id ? sharedStates[id] : undefinedValue;
-  const form = $(cloneFormData(initialForm), 'form');
-  const methodHandler = handler as FormHookHandler<AG, FormData>;
+  const sharedState = id ? typedSharedStates[id] : undefinedValue;
+  const form = $(cloneFormData(initialForm), keyForm);
+  const methodHandler = handler;
   const eventManager = createEventManager<{
     [RestoreEventKey]: void;
   }>();
@@ -116,7 +117,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     form.v = {
       ...form.v,
       ...newForm
-    };
+    } as FormData;
   };
 
   const hookReturns = {
@@ -144,7 +145,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
 
     // 只保存创建hook的共享状态
     if (isCreateShardState.current) {
-      sharedStates[id] = {
+      typedSharedStates[id] = {
         hookReturns,
         config
       };

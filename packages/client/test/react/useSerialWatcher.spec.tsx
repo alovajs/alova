@@ -1,11 +1,11 @@
-import { undefinedValue } from '@/helper/variables';
+import { useSerialWatcher } from '@/index';
+import { undefinedValue } from '@alova/shared/vars';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createAlova, Method } from 'alova';
+import { Method, createAlova } from 'alova';
 import ReactHook from 'alova/react';
 import React, { ReactElement, useState } from 'react';
 import { mockRequestAdapter } from '~/test/mockData';
-import { useSerialWatcher } from '..';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
@@ -229,7 +229,8 @@ describe('react => useSerialWatcher', () => {
           ret1 => {
             expect(ret1).toStrictEqual({ id: 1 });
             methodHandlerMockFn();
-            return (errorMethod = alovaInst.Get<{ id: number; text: string }[]>('/list-error'));
+            errorMethod = alovaInst.Get<{ id: number; text: string }[]>('/list-error');
+            return errorMethod as any;
           },
           ret2 => {
             methodHandlerMockFn();

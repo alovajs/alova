@@ -1,26 +1,14 @@
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaMethodHandler, Method, promiseStatesHook, useRequest } from 'alova';
-import { CaptchaHookConfig } from '~/typings/general';
+import { AlovaGenerics, AlovaMethodHandler, Method, promiseStatesHook, useRequest } from 'alova';
+import { CaptchaHookConfig, CaptchaReturnType } from '~/typings/general';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
-export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  handler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-  config: CaptchaHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
+export default <AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  config: CaptchaHookConfig<AG> = {}
 ) => {
   const { initialCountdown, middleware } = config;
   captchaAssert(initialCountdown === undefinedValue || initialCountdown > 0, 'initialCountdown must be greater than 0');
@@ -68,6 +56,11 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     ...memorizeOperators({
       send
     }),
-    ...exportObject([countdown], requestReturned)
-  };
+    ...exportObject(
+      {
+        countdown
+      },
+      requestReturned
+    )
+  } as unknown as CaptchaReturnType<AG>;
 };
