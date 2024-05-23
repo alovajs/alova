@@ -77,10 +77,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
         (stage: 'downloading' | 'uploading') =>
         ({ loaded, total }: Progress) =>
           update({
-            [stage]: {
-              loaded,
-              total
-            }
+            [stage]: { loaded, total }
           });
 
       methodInstance = guardNextReplacingMethod;

@@ -49,7 +49,7 @@ const requestAdapter: UniappRequestAdapter = (elements, method) => {
       // 监听上传进度
       onUpload = (handler: ProgressUpdater) => {
         uploadTask.onProgressUpdate(({ totalBytesSent, totalBytesExpectedToSend }) => {
-          handler(totalBytesExpectedToSend, totalBytesSent);
+          handler(totalBytesSent, totalBytesExpectedToSend);
         });
       };
     } else if (requestType === 'download') {
@@ -67,7 +67,7 @@ const requestAdapter: UniappRequestAdapter = (elements, method) => {
       // 监听下载进度
       onDownload = (handler: ProgressUpdater) => {
         downloadTask.onProgressUpdate(({ totalBytesWritten, totalBytesExpectedToWrite }) => {
-          handler(totalBytesExpectedToWrite, totalBytesWritten);
+          handler(totalBytesWritten, totalBytesExpectedToWrite);
         });
       };
     } else {

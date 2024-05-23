@@ -21,6 +21,17 @@
     },
     "output": "../alova/dist/stateshook/vue.{suffix}.{ext}"
   },
+  "vue-demi": {
+    "packageName": "vueHook",
+    "input": "src/statesHook/vue-demi.ts",
+    "external": {
+      "vue-demi": "Vue",
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "output": "../alova/dist/stateshook/vue-demi.{suffix}.{ext}"
+  },
   "react": {
     "packageName": "reactHook",
     "input": "src/statesHook/react.ts",

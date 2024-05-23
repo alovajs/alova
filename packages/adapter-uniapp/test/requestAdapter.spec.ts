@@ -1,6 +1,7 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
 import { noop } from '@alova/shared/function';
 import { createAlova } from 'alova';
+import { useRequest } from 'alova/client';
 import { untilCbCalled } from 'root/testUtils';
 import AdapterUniapp from '../src/index';
 import { onDownloadCall, onRequestCall, onUploadCall } from './utils';
@@ -198,7 +199,7 @@ describe('request adapter', () => {
     expect(error.value).toBeUndefined();
 
     // 过100毫秒后中断请求
-    await untilCbCalled(setTimeout, 100);
+    await untilCbCalled(setTimeout, 50);
     abort();
 
     await untilCbCalled(onError);

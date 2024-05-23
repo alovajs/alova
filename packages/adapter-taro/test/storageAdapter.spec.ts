@@ -6,7 +6,7 @@ import { mockStorageContainer } from './utils';
 jest.mock('@tarojs/taro');
 const alovaInst = createAlova({
   baseURL: 'http://xxx',
-  responsed(data) {
+  responded(data) {
     const { data: subData } = data as Taro.request.SuccessCallbackResult<any>;
     if (subData) {
       return subData;
@@ -28,7 +28,7 @@ beforeEach(() => invalidateCache());
 describe('storage adapter', () => {
   test('set storage', async () => {
     const Get = alovaInst.Get<ResponseData>('/unit-test', {
-      localCache: {
+      cacheFor: {
         mode: 'placeholder',
         expire: 100 * 1000
       }
@@ -49,7 +49,7 @@ describe('storage adapter', () => {
 
   test('remove storage', async () => {
     const Get = alovaInst.Get<ResponseData>('/unit-test', {
-      localCache: {
+      cacheFor: {
         mode: 'placeholder',
         expire: 100 * 1000
       }

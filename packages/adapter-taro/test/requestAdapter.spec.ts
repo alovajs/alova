@@ -2,6 +2,7 @@ import AdapterTaro from '@/adapterVue';
 import { noop } from '@alova/shared/function';
 import Taro from '@tarojs/taro';
 import { createAlova } from 'alova';
+import { useRequest } from 'alova/client';
 import { onDownloadCall, onRequestCall, onUploadCall, untilCbCalled } from './utils';
 
 jest.mock('@tarojs/taro');

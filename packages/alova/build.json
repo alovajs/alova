@@ -9,27 +9,6 @@
       "@alova/shared/assert": null
     }
   },
-  "client": {
-    "packageName": "alovaClient",
-    "input": "src/client.ts",
-    "external": {
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
-    },
-    "output": "./dist/clienthook/index.{suffix}.{ext}"
-  },
-  "server": {
-    "packageName": "alovaServer",
-    "input": "src/server.ts",
-    "external": {
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
-    },
-    "output": "./dist/serverhook/index.{suffix}.{ext}",
-    "formats": ["esm", "cjs"]
-  },
   "fetch": {
     "packageName": "alovaFetch",
     "input": "src/predefine/adapterFetch.ts",
