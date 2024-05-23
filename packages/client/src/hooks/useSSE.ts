@@ -24,7 +24,7 @@ import {
   SSEOnErrorTrigger,
   SSEOnMessageTrigger,
   SSEOnOpenTrigger,
-  UsePromiseReturnType
+  UsePromiseExposure
 } from '~/typings/general';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
@@ -62,19 +62,11 @@ export default <Data, AG extends AlovaGenerics>(
   // ! 暂时不支持指定 abortLast
   const abortLast = trueValue;
 
-  const {
-    create,
-    ref,
-    onMounted,
-    onUnmounted,
-    memorizeOperators,
-    exportObject,
-    __referingObj: referingObject
-  } = statesHookHelper(promiseStatesHook());
+  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper(promiseStatesHook());
 
   const usingSendArgs = ref<any[]>([]);
   const eventSource = ref<EventSource | undefined>(undefinedValue);
-  const sendPromiseObject = ref<UsePromiseReturnType<void> | undefined>(undefinedValue);
+  const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
   const data = create(initialData as Data, 'data', trueValue);
   const readyState = create(SSEHookReadyState.CLOSED, 'readyState', trueValue);
@@ -288,9 +280,10 @@ export default <Data, AG extends AlovaGenerics>(
     if (!promiseObj) {
       promiseObj = sendPromiseObject.current = usePromise();
       // open 后清除 promise 对象
-      promiseObj.promise.finally(() => {
-        promiseObj = undefinedValue;
-      });
+      promiseObj &&
+        promiseObj.promise.finally(() => {
+          promiseObj = undefinedValue;
+        });
     }
 
     usingSendArgs.current = sendArgs;
@@ -342,17 +335,14 @@ export default <Data, AG extends AlovaGenerics>(
     }
   });
 
-  return {
-    ...memorizeOperators({
-      send: connect,
-      close,
-      on: onCustomEvent
-    }),
+  return exposeProvider({
+    send: connect,
+    close,
+    on: onCustomEvent,
     onMessage,
     onError,
     onOpen,
     eventSource,
-    ...exportObject([readyState, data]),
-    __referingObj: referingObject
-  };
+    ...objectify([readyState, data])
+  });
 };

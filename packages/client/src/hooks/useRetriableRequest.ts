@@ -37,7 +37,7 @@ export default <AG extends AlovaGenerics>(
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
 
-  const { ref: useFlag$, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const { ref: useFlag$, exposeProvider, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
 
   const eventManager = createEventManager<RetriableEvents<AG>>();
   const retryTimes = useFlag$(0);
@@ -72,7 +72,7 @@ export default <AG extends AlovaGenerics>(
     });
   };
 
-  const requestReturns = useRequest(handler, {
+  const nestedHookProvider = useRequest(handler, {
     ...config,
     __referingObj: referingObject,
     middleware(ctx, next) {
@@ -161,10 +161,10 @@ export default <AG extends AlovaGenerics>(
     assert(currentLoadingState.current, 'there are no requests being retried');
     stopManuallyError.current = new Error(buildErrorMsg(hookPrefix, 'stop retry manually'));
     if (requesting.current) {
-      requestReturns.abort();
+      nestedHookProvider.abort();
     } else {
       emitOnFail(methodInstanceLastest.current as any, sendArgsLatest.current as any, stopManuallyError.current);
-      requestReturns.update({ error: stopManuallyError.current, loading: falseValue });
+      nestedHookProvider.update({ error: stopManuallyError.current, loading: falseValue });
       currentLoadingState.current = falseValue;
       clearTimeout(retryTimer.current); // 清除重试定时器
     }
@@ -192,13 +192,10 @@ export default <AG extends AlovaGenerics>(
     eventManager.on(FailEventKey, event => handler(event));
   };
 
-  return {
-    ...requestReturns,
-    __referingObj: referingObject,
-    ...memorizeOperators({
-      stop
-    }),
+  return exposeProvider({
+    ...nestedHookProvider,
+    stop,
     onRetry,
     onFail
-  };
+  });
 };

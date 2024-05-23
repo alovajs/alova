@@ -1,13 +1,5 @@
 import { createSyncOnceRunner } from '@alova/shared/function';
-import {
-  clearTimeoutTimer,
-  falseValue,
-  forEach,
-  objectKeys,
-  setTimeoutFn,
-  trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
+import { clearTimeoutTimer, falseValue, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { onDestroy, onMount } from 'svelte';
 import { Readable, Writable, derived, writable } from 'svelte/store';
@@ -23,11 +15,8 @@ export default {
     })();
     return raw;
   },
-  update: (newVal, states) => {
-    forEach(objectKeys(newVal), key => {
-      const sItem = states[key];
-      sItem.set(newVal[key]);
-    });
+  update: (newVal, state) => {
+    state.set(newVal);
   },
   effectRequest({ handler, removeStates, immediate, watchingStates }) {
     // 组件卸载时移除对应状态

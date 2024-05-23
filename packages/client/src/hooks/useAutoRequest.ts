@@ -2,11 +2,11 @@ import { useRequest } from '@/index';
 import { noop, statesHookHelper } from '@alova/shared/function';
 import { falseValue, isSSR, trueValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler, UseHookReturnType } from '~/typings';
+import { AlovaMethodHandler, UseHookExposure } from '~/typings';
 import { AutoRequestHookConfig, NotifyHandler, UnbindHandler } from '~/typings/general';
 
 interface AutoRequestHook<AG extends AlovaGenerics> {
-  (handler: Method<AG> | AlovaMethodHandler<AG>, config?: AutoRequestHookConfig<AG>): UseHookReturnType<AG>;
+  (handler: Method<AG> | AlovaMethodHandler<AG>, config?: AutoRequestHookConfig<AG>): UseHookExposure<AG>;
   onNetwork(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
   onPolling(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
   onVisibility(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
@@ -62,10 +62,7 @@ const useAutoRequest: AutoRequestHook<AlovaGenerics> = (handler, config = {}) =>
     offVisiblity();
     offPolling();
   });
-  return {
-    ...states,
-    __referingObj: referingObject
-  };
+  return states;
 };
 
 const on = (type: string, handler: NotifyHandler) => {

@@ -1,7 +1,7 @@
 import { objAssign } from '@alova/shared/function';
 import { len } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
-import { AlovaMethodHandler, EnumHookType, WatcherHookConfig, type UseHookReturnType } from '~/typings';
+import { AlovaMethodHandler, EnumHookType, WatcherHookConfig, type UseHookExposure } from '~/typings';
 import { watcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 
@@ -24,5 +24,5 @@ export default function useWatcher<AG extends AlovaGenerics>(
   const { send } = props;
   return objAssign(props, {
     send: (...args: any[]) => send(args)
-  }) as UseHookReturnType<AG>;
+  }) as UseHookExposure<AG>;
 }

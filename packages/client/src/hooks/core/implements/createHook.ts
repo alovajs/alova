@@ -1,4 +1,4 @@
-import { falseValue, undefinedValue } from '@alova/shared/vars';
+import { undefinedValue } from '@alova/shared/vars';
 import type { AlovaGenerics, FrontRequestState, ReferingObject } from 'alova';
 import { Method } from 'alova';
 import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
@@ -31,12 +31,6 @@ export default <AG extends AlovaGenerics>(
 
     /** hook config */
     c,
-
-    /** enableDownload */
-    ed: falseValue,
-
-    /** enableUpload */
-    eu: falseValue,
 
     /** update states */
     upd,

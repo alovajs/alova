@@ -10,22 +10,22 @@ import {
   AlovaRequestAdapterUnified,
   AutoRequestHookConfig,
   BeforeSilentSubmitHandler,
+  CaptchaExposure,
   CaptchaHookConfig,
-  CaptchaReturnType,
   ClientTokenAuthenticationOptions,
+  FormExposure,
   FormHookConfig,
   FormHookHandler,
-  FormReturnType,
   IsUnknown,
   NotifyHandler,
   OffEventCallback,
   PaginationHookConfig,
+  RetriableExposure,
   RetriableHookConfig,
-  RetriableReturnType,
-  SQHookReturnType,
+  SQHookExposure,
   SQRequestHookConfig,
+  SSEExposure,
   SSEHookConfig,
-  SSEReturnType,
   ServerTokenAuthenticationOptions,
   SilentFactoryBootOptions,
   SilentMethod,
@@ -117,19 +117,12 @@ export interface Hook {
 
   /** refering object */
   ro: ReferingObject;
-
-  /** enableDownload */
-  ed: boolean;
-
-  /** enableUpload */
-  eu: boolean;
 }
 
 /**
  * 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
  * 使用不同库的特征作为父类进行判断
  */
-// type TTT<State, CollapsedState, Otherwise> = IsAny<CollapsedState, unknown, CollapsedState> extends State ? CollapsedState : Otherwise;
 export type ExportedState<Responded, State> =
   IsAny<Ref, unknown, Ref> extends State
     ? Ref<Responded>
@@ -144,7 +137,7 @@ export type ExportedComputed<Responded, Computed> =
       : Responded;
 
 export type SendHandler<R> = (...args: any[]) => Promise<R>;
-export type UseHookReturnType<AG extends AlovaGenerics = AlovaGenerics> = FrontRequestState<
+export type UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> = FrontRequestState<
   ExportedState<boolean, AG['State']>,
   ExportedState<AG['Responded'], AG['State']>,
   ExportedState<Error | undefined, AG['State']>,
@@ -159,7 +152,7 @@ export type UseHookReturnType<AG extends AlovaGenerics = AlovaGenerics> = FrontR
   onComplete: (handler: CompleteHandler<AG>) => void;
   __referingObj: ReferingObject;
 };
-export type UseFetchHookReturnType<State> = FetchRequestState<
+export type UseFetchHookExposure<State> = FetchRequestState<
   ExportedState<boolean, State>,
   ExportedState<Error | undefined, State>,
   ExportedState<Progress, State>,
@@ -167,10 +160,10 @@ export type UseFetchHookReturnType<State> = FetchRequestState<
 > & {
   fetch<R>(matcher: Method, ...args: any[]): Promise<R>;
   update: FetcherExportedUpdate;
-  abort: UseHookReturnType['abort'];
-  onSuccess: UseHookReturnType['onSuccess'];
-  onError: UseHookReturnType['onError'];
-  onComplete: UseHookReturnType['onComplete'];
+  abort: UseHookExposure['abort'];
+  onSuccess: UseHookExposure['onSuccess'];
+  onError: UseHookExposure['onError'];
+  onComplete: UseHookExposure['onComplete'];
 };
 
 export type FrontExportedUpdate<R> = (
@@ -190,7 +183,7 @@ export interface AlovaMiddlewareContext<AG extends AlovaGenerics> {
   config: any;
 
   /** 中断函数 */
-  abort: UseHookReturnType['abort'];
+  abort: UseHookExposure['abort'];
 
   /** 成功回调装饰 */
   decorateSuccess: (
@@ -363,7 +356,7 @@ export type FetcherType<A extends Alova<any>> = {
 export declare function useRequest<AG extends AlovaGenerics>(
   methodHandler: Method<AG> | AlovaMethodHandler<AG>,
   config?: RequestHookConfig<AG>
-): UseHookReturnType<AG>;
+): UseHookExposure<AG>;
 
 /**
  * 监听特定状态值变化后请求
@@ -380,7 +373,7 @@ export declare function useWatcher<AG extends AlovaGenerics>(
   methodHandler: Method<AG> | AlovaMethodHandler<AG>,
   watchingStates: AG['Watched'],
   config?: WatcherHookConfig<AG>
-): UseHookReturnType<AG>;
+): UseHookExposure<AG>;
 
 /**
  * 数据预拉取
@@ -396,7 +389,7 @@ export declare function useWatcher<AG extends AlovaGenerics>(
  */
 export declare function useFetcher<SE extends FetcherType<any>>(
   config?: FetcherHookConfig
-): UseFetchHookReturnType<SE['state']>;
+): UseFetchHookExposure<SE['state']>;
 
 export type UpdateStateCollection<Responded> = {
   [key: string | number | symbol]: (data: any) => any;
@@ -426,8 +419,8 @@ export declare function updateState<Responded>(
 // ===================================================
 // ===================================================
 
-type UsePaginationReturnType<S, E, R, T, RC, RE, RH, LD extends unknown[]> = Omit<
-  UseHookReturnType<S, E, R, T, RC, RE, RH>,
+type UsePaginationExposure<S, E, R, T, RC, RE, RH, LD extends unknown[]> = Omit<
+  UseHookExposure<S, E, R, T, RC, RE, RH>,
   'data' | 'update'
 > & {
   page: Ref<number>;
@@ -496,7 +489,7 @@ type UsePaginationReturnType<S, E, R, T, RC, RE, RH, LD extends unknown[]> = Omi
  *
  * @param handler method创建函数
  * @param config pagination hook配置
- * @returns {UsePaginationReturnType}
+ * @returns {UsePaginationExposure}
  */
 declare function usePagination<
   S extends Ref,
@@ -511,7 +504,7 @@ declare function usePagination<
 >(
   handler: (page: number, pageSize: number) => Method<S, E, R, T, RC, RE, RH>,
   config?: PaginationHookConfig<S, E, R, T, RC, RE, RH, LD, WS>
-): UsePaginationReturnType<S, E, R, T, RC, RE, RH, LD>;
+): UsePaginationExposure<S, E, R, T, RC, RE, RH, LD>;
 
 /**
  * 带silentQueue的request hook
@@ -520,7 +513,7 @@ declare function usePagination<
 declare function useSQRequest<S, E, R, T, RC, RE, RH>(
   handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: SQRequestHookConfig<S, E, R, T, RC, RE, RH>
-): SQHookReturnType<S, E, R, T, RC, RE, RH>;
+): SQHookExposure<S, E, R, T, RC, RE, RH>;
 declare function bootSilentFactory(options: SilentFactoryBootOptions): void;
 declare function onSilentSubmitBoot(handler: SilentSubmitBootHandler): OffEventCallback;
 declare function onSilentSubmitSuccess(handler: SilentSubmitSuccessHandler): OffEventCallback;
@@ -553,7 +546,7 @@ declare const silentQueueMap: SilentQueueMap;
 declare function useCaptcha<S, E, R, T, RC, RE, RH>(
   handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: CaptchaHookConfig<S, E, R, T, RC, RE, RH>
-): CaptchaReturnType<S, E, R, T, RC, RE, RH>;
+): CaptchaExposure<S, E, R, T, RC, RE, RH>;
 
 /**
  * useForm
@@ -579,7 +572,7 @@ declare function useForm<
 >(
   handler: FormHookHandler<S, E, R, T, RC, RE, RH, F> | NonNullable<FormHookConfig<S, E, R, T, RC, RE, RH, F>['id']>,
   config?: FormHookConfig<S, E, R, T, RC, RE, RH, F>
-): FormReturnType<S, E, R, T, RC, RE, RH, F>;
+): FormExposure<S, E, R, T, RC, RE, RH, F>;
 
 /**
  * useSSE
@@ -593,7 +586,7 @@ declare function useForm<
 declare function useSSE<Data = any, S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any>(
   handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: SSEHookConfig
-): SSEReturnType<S, Data>;
+): SSEExposure<S, Data>;
 
 /**
  * useRetriableRequest
@@ -609,7 +602,7 @@ declare function useSSE<Data = any, S = any, E = any, R = any, T = any, RC = any
 declare function useRetriableRequest<S, E, R, T, RC, RE, RH>(
   handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: RetriableHookConfig<S, E, R, T, RC, RE, RH>
-): RetriableReturnType<S, E, R, T, RC, RE, RH>;
+): RetriableExposure<S, E, R, T, RC, RE, RH>;
 
 /**
  * useSerialRequest
@@ -625,7 +618,7 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2>(
     (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>
   ],
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R2, T, RC, RE, RH>;
+): UseHookExposure<S, E, R2, T, RC, RE, RH>;
 
 /**
  * useSerialRequest(重载)
@@ -642,7 +635,7 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3>(
     (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>
   ],
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R3, T, RC, RE, RH>;
+): UseHookExposure<S, E, R3, T, RC, RE, RH>;
 
 /**
  * useSerialRequest(重载)
@@ -660,7 +653,7 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4>(
     (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>
   ],
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R4, T, RC, RE, RH>;
+): UseHookExposure<S, E, R4, T, RC, RE, RH>;
 
 /**
  * useSerialRequest(重载)
@@ -679,7 +672,7 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5>(
     (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>
   ],
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R5, T, RC, RE, RH>;
+): UseHookExposure<S, E, R5, T, RC, RE, RH>;
 
 /**
  * useSerialRequest(重载)
@@ -699,7 +692,7 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6>(
     (value: R5, ...args: any[]) => Method<S, E, R6, T, RC, RE, RH>
   ],
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R6, T, RC, RE, RH>;
+): UseHookExposure<S, E, R6, T, RC, RE, RH>;
 
 /**
  * useSerialRequest(重载)
@@ -720,7 +713,7 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7
     (value: R6, ...args: any[]) => Method<S, E, R7, T, RC, RE, RH>
   ],
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R7, T, RC, RE, RH>;
+): UseHookExposure<S, E, R7, T, RC, RE, RH>;
 
 /**
  * useSerialRequest(重载)
@@ -742,7 +735,7 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7
     (value: R7, ...args: any[]) => Method<S, E, R8, T, RC, RE, RH>
   ],
   config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R8, T, RC, RE, RH>;
+): UseHookExposure<S, E, R8, T, RC, RE, RH>;
 
 /**
  * useSerialWatcher
@@ -759,7 +752,7 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2>(
   ],
   watchingStates: (WatchSource<any> | object)[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R2, T, RC, RE, RH>;
+): UseHookExposure<S, E, R2, T, RC, RE, RH>;
 
 /**
  * useSerialWatcher(重载)
@@ -777,7 +770,7 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3>(
   ],
   watchingStates: (WatchSource<any> | object)[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R3, T, RC, RE, RH>;
+): UseHookExposure<S, E, R3, T, RC, RE, RH>;
 
 /**
  * useSerialWatcher(重载)
@@ -796,7 +789,7 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4>(
   ],
   watchingStates: (WatchSource<any> | object)[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R4, T, RC, RE, RH>;
+): UseHookExposure<S, E, R4, T, RC, RE, RH>;
 
 /**
  * useSerialWatcher(重载)
@@ -816,7 +809,7 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5>(
   ],
   watchingStates: (WatchSource<any> | object)[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R5, T, RC, RE, RH>;
+): UseHookExposure<S, E, R5, T, RC, RE, RH>;
 
 /**
  * useSerialWatcher(重载)
@@ -837,7 +830,7 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6>(
   ],
   watchingStates: (WatchSource<any> | object)[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R6, T, RC, RE, RH>;
+): UseHookExposure<S, E, R6, T, RC, RE, RH>;
 
 /**
  * useSerialWatcher(重载)
@@ -859,7 +852,7 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7
   ],
   watchingStates: (WatchSource<any> | object)[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R7, T, RC, RE, RH>;
+): UseHookExposure<S, E, R7, T, RC, RE, RH>;
 
 /**
  * useSerialWatcher(重载)
@@ -882,7 +875,7 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7
   ],
   watchingStates: (WatchSource<any> | object)[],
   config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R8, T, RC, RE, RH>;
+): UseHookExposure<S, E, R8, T, RC, RE, RH>;
 
 /**
  * 操作函数委托中间件
@@ -979,7 +972,7 @@ export function createServerTokenAuthentication<
 declare function useAutoRequest<S, E, R, T, RC, RE, RH>(
   handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
   config?: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R, T, RC, RE, RH>;
+): UseHookExposure<S, E, R, T, RC, RE, RH>;
 declare namespace useAutoRequest {
   function onNetwork(
     notify: NotifyHandler,

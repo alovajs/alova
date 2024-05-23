@@ -16,7 +16,7 @@ export default <AG extends AlovaGenerics>(
   config: RequestHookConfig<AG> = {} as any
 ) => {
   assertSerialHandlers('useSerialWatcher', serialHandlers);
-  return useWatcher(serialHandlers[0], watchingStates, {
+  return useWatcher<AG>(serialHandlers[0], watchingStates, {
     ...config,
     middleware: serialMiddleware(serialHandlers, config.middleware)
   });

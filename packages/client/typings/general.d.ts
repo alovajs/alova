@@ -9,7 +9,7 @@ import {
   AlovaGuardNext,
   ExportedType,
   RequestHookConfig,
-  UseHookReturnType,
+  UseHookExposure,
   WatcherHookConfig
 } from '.';
 
@@ -363,8 +363,8 @@ type FallbackHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => v
 type RetryHandler<AG extends AlovaGenerics> = (event: ScopedSQRetryEvent<AG>) => void;
 type BeforePushQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
 type PushedQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
-type SQHookReturnType<AG extends AlovaGenerics> = Pick<
-  UseHookReturnType<AG>,
+type SQHookExposure<AG extends AlovaGenerics> = Pick<
+  UseHookExposure<AG>,
   'loading' | 'data' | 'error' | 'downloading' | 'uploading' | 'abort' | 'update' | 'send'
 > & {
   /**
@@ -476,7 +476,7 @@ type CaptchaHookConfig<AG extends AlovaGenerics> = {
 /**
  * useCaptcha返回值
  */
-type CaptchaReturnType<AG extends AlovaGenerics> = UseHookReturnType<AG> & {
+type CaptchaExposure<AG extends AlovaGenerics> = UseHookExposure<AG> & {
   /**
    * 当前倒计时，每秒-1，当倒计时到0时可再次发送验证码
    */
@@ -539,7 +539,7 @@ type RestoreHandler = () => void;
 /**
  * useForm返回值
  */
-type FormReturnType<AG extends AlovaGenerics, F> = UseHookReturnType<AG> & {
+type FormExposure<AG extends AlovaGenerics, F> = UseHookExposure<AG> & {
   /**
    * 表单数据
    */
@@ -604,7 +604,7 @@ interface RetriableFailEvent<AG extends AlovaGenerics> extends AlovaErrorEvent<A
 /**
  * useRetriableRequest返回值
  */
-type RetriableReturnType<AG extends AlovaGenerics> = UseHookReturnType<AG> & {
+type RetriableExposure<AG extends AlovaGenerics> = UseHookExposure<AG> & {
   /**
    * 停止重试，只在重试期间调用有效
    * 停止后将立即触发onFail事件
@@ -895,7 +895,7 @@ type SSEHookConfig = {
 /**
  * useSSE() 返回类型
  */
-type SSEReturnType<S, Data> = {
+type SSEExposure<S, Data> = {
   readyState: ExportedType<SSEHookReadyState, S>;
   data: ExportedType<Data | undefined, S>;
   eventSource: ExportedType<EventSource | undefined, S>;
@@ -938,7 +938,7 @@ type SSEReturnType<S, Data> = {
 
 type AnyFn<T = Any> = (...args: any[]) => T;
 
-type UsePromiseReturnType<T> = {
+type UsePromiseExposure<T> = {
   promise: Promise<T>;
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: any) => void;

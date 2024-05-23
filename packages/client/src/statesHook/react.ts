@@ -1,5 +1,5 @@
 import { isNumber, noop } from '@alova/shared/function';
-import { falseValue, forEach, mapItem, objectKeys, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, forEach, mapItem, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -15,10 +15,9 @@ export default {
   create: initialValue => useState(initialValue),
   export: stateToData,
   dehydrate: stateToData,
-  update: (newVal, states) =>
-    forEach(objectKeys(newVal), key => {
-      states[key][1](newVal[key] as any);
-    }),
+  update: (newVal, state) => {
+    state[1](newVal);
+  },
   memorize: fn => {
     // 使用useCallback使用同一个引用，同事通过useRef来引用最新函数
     const fnRef = useRef(noop as typeof fn);

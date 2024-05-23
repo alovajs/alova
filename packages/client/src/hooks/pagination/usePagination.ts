@@ -45,8 +45,8 @@ export default <AG extends AlovaGenerics>(
     computed,
     ref,
     watch,
-    exportObject,
-    memorizeOperators,
+    exposeProvider,
+    objectify,
     __referingObj: referingObject
   } = statesHookHelper(promiseStatesHook());
 
@@ -577,20 +577,18 @@ export default <AG extends AlovaGenerics>(
     reload
   };
   /** @Returns */
-  return {
+  return exposeProvider({
     ...states,
 
     fetching: fetchStates.loading,
     onFetchSuccess: fetchStates.onSuccess,
     onFetchError: fetchStates.onError,
     onFetchComplete: fetchStates.onComplete,
-    ...memorizeOperators({
-      refresh,
-      insert,
-      remove,
-      replace,
-      reload
-    }),
-    ...exportObject([data, page, pageCount, pageSize, total, isLastPage], states)
-  };
+    refresh,
+    insert,
+    remove,
+    replace,
+    reload,
+    ...objectify([data, page, pageCount, pageSize, total, isLastPage])
+  });
 };

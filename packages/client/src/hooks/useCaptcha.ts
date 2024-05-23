@@ -4,7 +4,7 @@ import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
-import { CaptchaHookConfig, CaptchaReturnType } from '~/typings/general';
+import { CaptchaHookConfig } from '~/typings/general';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
@@ -17,8 +17,8 @@ export default <AG extends AlovaGenerics>(
   const {
     create,
     ref,
-    exportObject,
-    memorizeOperators,
+    objectify,
+    exposeProvider,
     __referingObj: referingObject
   } = statesHookHelper(promiseStatesHook());
 
@@ -53,11 +53,9 @@ export default <AG extends AlovaGenerics>(
         reject(new Error(buildErrorMsg(hookPrefix, 'the countdown is not over yet')));
       }
     });
-  return {
+  return exposeProvider({
     ...requestReturned,
-    ...memorizeOperators({
-      send
-    }),
-    ...exportObject([countdown], requestReturned)
-  } as unknown as CaptchaReturnType<AG>;
+    send,
+    ...objectify([countdown])
+  });
 };

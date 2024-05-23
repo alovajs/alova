@@ -1,4 +1,4 @@
-import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { ComputedRef, Ref, WatchSource, computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 
@@ -7,10 +7,9 @@ type UnknownRef = Ref<unknown>;
 export default {
   create: data => ref(data),
   dehydrate: state => state.value,
-  update: (newVal, states) =>
-    forEach(objectKeys(newVal), key => {
-      states[key].value = newVal[key];
-    }),
+  update: (newVal, state) => {
+    state.value = newVal;
+  },
   effectRequest({ handler, removeStates, immediate, watchingStates }) {
     // 当在组件内部使用时，组件卸载时移除对应状态
     if (getCurrentInstance()) {

@@ -9,6 +9,7 @@ import {
   instanceOf,
   isFn,
   isNumber,
+  objAssign,
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
@@ -33,7 +34,6 @@ import {
   CompleteHandler,
   EnumHookType,
   ErrorHandler,
-  ExportedState,
   FetcherHookConfig,
   FrontRequestHookConfig,
   SuccessHandler,
@@ -69,7 +69,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
-  const { middleware, __referingObj: referingObject = {} } = useHookConfig;
+  const { middleware, __referingObj: referingObject = { trackedKeys: {} } } = useHookConfig;
   let initialLoading = middleware ? falseValue : !!immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
@@ -101,7 +101,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     } catch (error) {}
   }
 
-  const { create, effectRequest, ref, exportObject, statesObject, memorizeOperators } = statesHookHelper<AG>(
+  const { create, effectRequest, ref, objectify, exposeProvider } = statesHookHelper<AG>(
     promiseStatesHook(),
     referingObject
   );
@@ -118,17 +118,27 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   const uploading = create({ ...progress }, 'uploading');
   const frontStates = {
     ...managedStates,
-    ...statesObject([data, loading, error, downloading, uploading])
+    ...objectify([data, loading, error, downloading, uploading], 's')
   };
-  const exportings = exportObject([data, loading, error, downloading, uploading]);
   const eventManager = createEventManager<{
     success: AlovaSuccessEvent<AG>;
     error: AlovaErrorEvent<AG>;
     complete: AlovaCompleteEvent<AG>;
   }>();
+
+  const hookProvider = exposeProvider(objectify([data, loading, error, downloading, uploading]));
   const hookInstance = refCurrent(
-    ref(createHook(hookType, useHookConfig, eventManager, referingObject, exportings.update))
+    ref(createHook(hookType, useHookConfig, eventManager, referingObject, hookProvider.update))
   );
+
+  /**
+   * ## react ##每次执行函数都需要重置以下项
+   * */
+  hookInstance.fs = frontStates;
+  hookInstance.em = eventManager;
+  hookInstance.c = useHookConfig;
+  hookInstance.ro = referingObject;
+
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
@@ -138,21 +148,13 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   // 捕获异常避免异常继续向外抛出
   const wrapEffectRequest = () => {
     promiseCatch(handleRequest(), error => {
-      // the existence of error handlers indicates that the error is catched.
-      // in this case, we should not throw error.
-      if (len(eventManager.eventMap[KEY_ERROR] || []) <= 0) {
+      // the existence of error handlers and the error tracking indicates that the error need to throw.
+      if (len(eventManager.eventMap[KEY_ERROR] || []) <= 0 && !referingObject.trackedKeys.error) {
         throw error;
       }
     });
   };
 
-  /**
-   * ## react ##每次执行函数都需要重置以下项
-   * */
-  hookInstance.fs = frontStates;
-  hookInstance.em = eventManager;
-  hookInstance.c = useHookConfig;
-  hookInstance.ro = referingObject;
   // 在服务端渲染时不发送请求
   if (!isSSR) {
     effectRequest({
@@ -171,27 +173,16 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     });
   }
 
-  return {
-    ...exportings,
-    get downloading() {
-      hookInstance.ed = trueValue;
-      return downloading.e as unknown as ExportedState<Progress, AG['State']>;
-    },
-    get uploading() {
-      hookInstance.eu = trueValue;
-      return uploading.e as unknown as ExportedState<Progress, AG['State']>;
-    },
-    ...memorizeOperators({
-      abort: () => hookInstance.m && hookInstance.m.abort(),
-      /**
-       * 通过执行该方法来手动发起请求
-       * @param sendCallingArgs 调用send函数时传入的参数
-       * @param methodInstance 方法对象
-       * @param isFetcher 是否为isFetcher调用
-       * @returns 请求promise
-       */
-      send: (sendCallingArgs?: any[], methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs)
-    }),
+  return objAssign(hookProvider, {
+    abort: () => hookInstance.m && hookInstance.m.abort(),
+    /**
+     * 通过执行该方法来手动发起请求
+     * @param sendCallingArgs 调用send函数时传入的参数
+     * @param methodInstance 方法对象
+     * @param isFetcher 是否为isFetcher调用
+     * @returns 请求promise
+     */
+    send: (sendCallingArgs?: any[], methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs),
     onSuccess(handler: SuccessHandler<AG>) {
       eventManager.on(KEY_SUCCESS, event => {
         handler(event);
@@ -203,5 +194,5 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     onComplete(handler: CompleteHandler<AG>) {
       eventManager.on(KEY_COMPLETE, handler);
     }
-  };
+  });
 }

@@ -6,7 +6,7 @@ import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, StrictMode } from 'react';
-import { Result, delay } from 'root/testUtils';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 const StrictModeReact = StrictMode as any;
 
@@ -33,6 +33,7 @@ describe('useRequest hook with react', () => {
 
     render((<Page />) as ReactElement<any, any>);
     expect(screen.getByRole('status')).toHaveTextContent('loading');
+    await untilCbCalled(setTimeout, 1000);
     const loadingEl = await screen.findByText(/loaded/);
     expect(loadingEl).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -265,8 +266,7 @@ describe('useRequest hook with react', () => {
 
     let i = 0;
     function Page() {
-      const { loading, abort, send, error, data = { path: '', method: '' }, update, onError } = useRequest(Get);
-      onError(() => {});
+      const { loading, abort, send, error, data = { path: '', method: '' }, update } = useRequest(Get);
       return (
         <div role="wrap">
           <span role="status">{loading ? 'loading' : 'loaded'}</span>

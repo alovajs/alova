@@ -202,7 +202,12 @@ export interface EffectRequestParams<E> {
   immediate: boolean;
 }
 
-export type ReferingObject = Record<any, any>;
+export interface ReferingObject {
+  /**
+   * the map of tracked state keys
+   */
+  trackedKeys: Record<string, boolean>;
+}
 export interface StatesHook<State, Computed, Watched = State | Computed, Export = State> {
   /**
    * 创建状态
@@ -235,7 +240,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * @param state 原状态值
    * @param @param referingObject refering object
    */
-  update: (newVal: Record<string, any>, state: Record<string, State>, referingObject: ReferingObject) => void;
+  update: (newVal: any, state: State, key: string, referingObject: ReferingObject) => void;
 
   /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次

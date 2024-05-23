@@ -34,15 +34,3 @@ export { default as useCaptcha } from '@/hooks/useCaptcha';
 export { default as useForm } from '@/hooks/useForm';
 export { default as useRetriableRequest } from '@/hooks/useRetriableRequest';
 export { default as useSSE } from '@/hooks/useSSE';
-
-// forEach(objectKeys(useAutoRequest_unified), key => {
-//   defineProperty(
-//     useAutoRequest,
-//     key,
-//     {
-//       get: () => useAutoRequest_unified[key],
-//       set: value => (useAutoRequest_unified[key] = value)
-//     },
-//     trueValue
-//   );
-// });
