@@ -1,5 +1,6 @@
+import { buildNamespacedCacheKey } from '@alova/shared/function';
 import Taro from '@tarojs/taro';
-import { createAlova, getMethodKey, invalidateCache } from 'alova';
+import { createAlova, invalidateCache } from 'alova';
 import AdapterTaro from '../src/adapterReact';
 import { mockStorageContainer } from './utils';
 
@@ -29,42 +30,47 @@ describe('storage adapter', () => {
   test('set storage', async () => {
     const Get = alovaInst.Get<ResponseData>('/unit-test', {
       cacheFor: {
-        mode: 'placeholder',
+        mode: 'restore',
         expire: 100 * 1000
       }
     });
 
-    await Get.send();
+    await Get;
 
     /**
      * 缓存数据如下：
-     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831,null]
+     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831]
      */
-    const storagedData = mockStorageContainer[`alova.${alovaInst.id}${getMethodKey(Get)}`] || {};
+    const storagedData = mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.__key__)] || {};
     expect(storagedData[0]?.url).toBe('http://xxx/unit-test');
     expect(storagedData[0]?.method).toBe('GET');
     expect(storagedData[0]?.header).toStrictEqual({});
-    expect(storagedData[2]).toBeNull();
+    expect(storagedData[2]).toBeUndefined();
   });
 
   test('remove storage', async () => {
     const Get = alovaInst.Get<ResponseData>('/unit-test', {
       cacheFor: {
-        mode: 'placeholder',
+        mode: 'restore',
         expire: 100 * 1000
       }
     });
 
-    await Get.send();
+    await Get;
 
     /**
      * 缓存数据如下：
-     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831,null]
+     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831]
      */
-    const getStoragedData = () => mockStorageContainer[`alova.${alovaInst.id}${getMethodKey(Get)}`];
-    expect(!!getStoragedData()).toBeTruthy();
+    const getStoragedData = () => mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.__key__)];
+    expect(getStoragedData()[0]).toStrictEqual({
+      data: undefined,
+      header: {},
+      method: 'GET',
+      url: 'http://xxx/unit-test'
+    });
 
     invalidateCache(Get);
-    expect(!!getStoragedData()).toBeFalsy();
+    expect(getStoragedData()).toBeUndefined();
   });
 });

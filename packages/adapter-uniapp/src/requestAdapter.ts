@@ -1,6 +1,6 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
 import { isPlainObject, noop } from '@alova/shared/function';
-import { AlovaRequestAdapter, Arg, ProgressUpdater } from 'alova';
+import { Arg, ProgressUpdater } from 'alova';
 import { UniappRequestAdapter } from '~/typings';
 
 /**
@@ -9,8 +9,8 @@ import { UniappRequestAdapter } from '~/typings';
 const requestAdapter: UniappRequestAdapter = (elements, method) => {
   const { url, data, type, headers: header } = elements;
   let taskInstance: UniApp.RequestTask | UniApp.UploadTask | UniApp.DownloadTask;
-  let onDownload: ReturnType<AlovaRequestAdapter<any, any, any>>['onDownload'] = noop;
-  let onUpload: ReturnType<AlovaRequestAdapter<any, any, any>>['onUpload'] = noop;
+  let onDownload: ReturnType<UniappRequestAdapter>['onDownload'] = noop;
+  let onUpload: ReturnType<UniappRequestAdapter>['onUpload'] = noop;
 
   const responsePromise = new Promise<
     | UniNamespace.RequestSuccessCallbackResult

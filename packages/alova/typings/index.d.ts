@@ -207,6 +207,7 @@ export interface ReferingObject {
    * the map of tracked state keys
    */
   trackedKeys: Record<string, boolean>;
+  [key: string]: any;
 }
 export interface StatesHook<State, Computed, Watched = State | Computed, Export = State> {
   /**

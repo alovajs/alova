@@ -61,10 +61,5 @@
     "@tarojs/shared": "^3.6.30",
     "@tarojs/taro": "^3.6.30",
     "alova": "workspace:*"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }

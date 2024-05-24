@@ -1,5 +1,5 @@
+import l2CacheAdapter from '@/l2CacheAdapter';
 import requestAdapter from '@/requestAdapter';
-import storageAdapter from '@/storageAdapter';
 import { AdapterTaroOptions } from '~/typings';
 
 /**
@@ -12,6 +12,6 @@ export default function exportedAdapter<StatesHook>(statesHook: StatesHook, { mo
   return {
     statesHook,
     requestAdapter: mockRequest || requestAdapter,
-    storageAdapter
+    l2Cache: l2CacheAdapter
   };
 }

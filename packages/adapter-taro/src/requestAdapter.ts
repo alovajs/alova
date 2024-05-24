@@ -1,6 +1,6 @@
 import { isPlainObject, noop } from '@alova/shared/function';
 import Taro from '@tarojs/taro';
-import { AlovaRequestAdapter, Arg, ProgressUpdater } from 'alova';
+import { Arg, ProgressUpdater } from 'alova';
 import { TaroRequestAdapter } from '~/typings';
 
 /**
@@ -9,8 +9,8 @@ import { TaroRequestAdapter } from '~/typings';
 const requestAdapter: TaroRequestAdapter = (elements, method) => {
   const { url, data, type, headers: header } = elements;
   let taskInstance: Taro.RequestTask<any> | Taro.UploadTask.UploadTaskPromise | Taro.DownloadTask.DownloadTaskPromise;
-  let onDownload: ReturnType<AlovaRequestAdapter<any, any, any>>['onDownload'] = noop;
-  let onUpload: ReturnType<AlovaRequestAdapter<any, any, any>>['onUpload'] = noop;
+  let onDownload: ReturnType<TaroRequestAdapter>['onDownload'] = noop;
+  let onUpload: ReturnType<TaroRequestAdapter>['onUpload'] = noop;
 
   const responsePromise = new Promise<
     | Taro.uploadFile.SuccessCallbackResult
