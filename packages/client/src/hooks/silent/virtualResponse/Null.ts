@@ -12,7 +12,7 @@ interface NullInterface {
 /**
  * Null包装类实现
  */
-const Null = function (this: NullInterface) {} as unknown as NullConstructor;
+const Null = function Null(this: NullInterface) {} as unknown as NullConstructor;
 Null.prototype = ObjectCls.create(nullValue, {
   [STR_VALUE_OF]: valueObject(stringifyWithThis)
 });

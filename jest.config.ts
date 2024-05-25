@@ -9,7 +9,8 @@ const config: Config = {
     '<rootDir>/packages/adapter-uniapp',
     '<rootDir>/packages/adapter-taro',
     '<rootDir>/packages/shared',
-    '<rootDir>/packages/client'
+    '<rootDir>/packages/client',
+    '<rootDir>/packages/vue-options'
   ]
 };
 

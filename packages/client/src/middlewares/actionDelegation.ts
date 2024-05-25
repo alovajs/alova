@@ -1,11 +1,12 @@
 import { createAssert } from '@alova/shared/assert';
 import { instanceOf, isNumber, isString, statesHookHelper } from '@alova/shared/function';
 import { falseValue, filterItem, forEach, objectKeys, pushItem, trueValue } from '@alova/shared/vars';
-import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext, promiseStatesHook } from 'alova';
+import { AlovaGenerics, promiseStatesHook } from 'alova';
+import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext } from '~/typings';
 import { Actions } from '~/typings/general';
 
-type AnyAlovaFrontMiddlewareContext = AlovaFrontMiddlewareContext<any, any, any, any, any, any, any, any, any>;
-type AnyAlovaFetcherMiddlewareContext = AlovaFetcherMiddlewareContext<any, any, any, any, any, any, any, any, any>;
+type AnyAlovaFrontMiddlewareContext = AlovaFrontMiddlewareContext<AlovaGenerics>;
+type AnyAlovaFetcherMiddlewareContext = AlovaFetcherMiddlewareContext<AlovaGenerics>;
 
 const actionsMap: Record<string | number | symbol, Actions[]> = {};
 const isFrontMiddlewareContext = (
@@ -28,7 +29,7 @@ export const actionDelegationMiddleware = (id: string | number | symbol) => {
   const delegated = ref(falseValue);
   return (
     context: (AnyAlovaFrontMiddlewareContext | AnyAlovaFetcherMiddlewareContext) & { delegatingActions?: Actions },
-    next: AlovaGuardNext<any, any, any, any, any, any, any, any, any>
+    next: AlovaGuardNext<AlovaGenerics>
   ) => {
     // 中间件会重复调用，已经订阅过了就无需再订阅了
     if (!delegated.current) {

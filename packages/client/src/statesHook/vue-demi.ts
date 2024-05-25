@@ -1,4 +1,5 @@
-import { clearTimeoutTimer, forEach, objectKeys, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { StatesHook } from 'alova';
 import {
   ComputedRef,
   Ref,
@@ -10,17 +11,15 @@ import {
   ref,
   watch
 } from 'vue-demi';
-import { StatesHook } from '~/typings';
 
 type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks
 export default {
   create: data => ref(data),
   dehydrate: state => state.value,
-  update: (newVal, states) =>
-    forEach(objectKeys(newVal), key => {
-      states[key].value = newVal[key];
-    }),
+  update: (newVal, state) => {
+    state.value = newVal;
+  },
   effectRequest({ handler, removeStates, immediate, watchingStates }) {
     // 当在组件内部使用时，组件卸载时移除对应状态
     if (getCurrentInstance()) {

@@ -1,4 +1,6 @@
-import { AlovaGenerics, AlovaMethodHandler, Method, RequestHookConfig, useWatcher } from 'alova';
+import { useWatcher } from '@/index';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
 import { assertSerialHandlers, serialMiddleware } from './general';
 
 /**
@@ -14,7 +16,7 @@ export default <AG extends AlovaGenerics>(
   config: RequestHookConfig<AG> = {} as any
 ) => {
   assertSerialHandlers('useSerialWatcher', serialHandlers);
-  return useWatcher(serialHandlers[0], watchingStates, {
+  return useWatcher<AG>(serialHandlers[0], watchingStates, {
     ...config,
     middleware: serialMiddleware(serialHandlers, config.middleware)
   });

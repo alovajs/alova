@@ -1,7 +1,11 @@
 import { $self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
 import { AlovaGenerics, AlovaRequestAdapter, RespondedHandlerRecord, StatesHook } from 'alova';
-import { ClientTokenAuthenticationOptions, ServerTokenAuthenticationOptions, TokenAuthenticationResult } from '~/typings/general';
+import {
+  ClientTokenAuthenticationOptions,
+  ServerTokenAuthenticationOptions,
+  TokenAuthenticationResult
+} from '~/typings/general';
 import {
   PosibbleAuthMap,
   WaitingRequestList,

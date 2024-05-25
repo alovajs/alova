@@ -1,16 +1,16 @@
 import { AdapterUniappOptions } from '~/typings';
+import l2CacheAdapter from './l2CacheAdapter';
 import requestAdapter from './requestAdapter';
 import statesHook from './statesHook';
-import storageAdapter from './storageAdapter';
 
+export { default as uniappL2CacheAdapter } from './l2CacheAdapter';
 export { default as uniappMockResponse } from './mockResponse';
 export { default as uniappRequestAdapter } from './requestAdapter';
-export { default as uniappStorageAdapter } from './storageAdapter';
 
 export default function AdapterUniapp({ mockRequest }: AdapterUniappOptions = {}) {
   return {
     statesHook,
     requestAdapter: mockRequest || requestAdapter,
-    storageAdapter
+    l2Cache: l2CacheAdapter
   };
 }

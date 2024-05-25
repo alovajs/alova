@@ -17,6 +17,7 @@ import {
   ObjectCls,
   STORAGE_RESTORE,
   falseValue,
+  includes,
   mapItem,
   nullValue,
   objectKeys,
@@ -148,8 +149,11 @@ export const isSpecialRequestBody = (data: any) => {
     /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) || instanceOf(data, ArrayBuffer)
   );
 };
-export const objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T =>
-  ObjectCls.assign(target, ...sources);
+
+export const objAssign = <T extends Record<string, any>, U extends Record<string, any>[]>(
+  target: T,
+  ...sources: U
+): T & U[number] => ObjectCls.assign(target, ...sources);
 
 // 编写一个omit的函数类型
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
@@ -282,6 +286,10 @@ export const walkObject = (
   return target;
 };
 
+interface MemorizedFunction {
+  (...args: any[]): any;
+  memorized: true;
+}
 /**
  * create simpe and unified, framework-independent states creators and handlers.
  * @param statesHook states hook from `promiseStatesHook` function of alova
@@ -290,24 +298,34 @@ export const walkObject = (
  */
 export function statesHookHelper<AG extends AlovaGenerics>(
   statesHook: StatesHook<GeneralState, GeneralState>,
-  referingObject: ReferingObject = {}
+  referingObject: ReferingObject = { trackedKeys: {} }
 ) {
   const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
   const exportState = <Data>(state: GeneralState<Data>) =>
     (statesHook.export || $self)(state, referingObject) as GeneralState<Data>;
-  const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) =>
-    statesHook.memorize ? statesHook.memorize(fn) : fn;
+  const memorize = <Callback extends GeneralFn>(fn: Callback) => {
+    if (!isFn(statesHook.memorize)) {
+      return fn;
+    }
+    const memorizedFn = statesHook.memorize(fn);
+    (memorizedFn as unknown as MemorizedFunction).memorized = true;
+    return memorizedFn;
+  };
+  const { dehydrate } = statesHook;
+
+  // For performance reasons, only value is different, and the key is tracked can be updated.
   const update = (newValue: any, state: GeneralState, key: string) =>
-    statesHook.update({ [key]: newValue }, { [key]: state }, referingObject);
+    newValue !== dehydrate(state, key, referingObject) &&
+    referingObject.trackedKeys[key] &&
+    statesHook.update(newValue, state, key, referingObject);
   const mapDeps = (deps: (GeneralState | FrameworkReadableState<any, string>)[]) =>
     mapItem(deps, item => (instanceOf(item, FrameworkReadableState) ? item.e : item));
-  const { dehydrate } = statesHook;
-  const statesList = [] as string[];
+  const createdStateList = [] as string[];
 
   return {
     create: <Data, Key extends string>(initialValue: Data, key: Key, isRef = falseValue) => {
-      pushItem(statesList, key); // record the keys of created states.
+      pushItem(createdStateList, key); // record the keys of created states.
       return newInstance(
         FrameworkState<Data, Key>,
         statesHook.create(initialValue, referingObject, isRef) as GeneralState<Data>,
@@ -344,77 +362,92 @@ export function statesHookHelper<AG extends AlovaGenerics>(
     __referingObj: referingObject,
 
     /**
-     * batch export states and provide a update function that update states simply.
-     * @param states framework state proxy array
-     * @param coreHookStates the returns of useRequest/useWatcher/useFetcher that contains update function
-     * @returns exported states and update function
+     * expose provider for specified use hook.
+     * @param object object that contains state proxy, framework state, operating function and event binder.
+     * @returns provider component.
      */
-    exportObject: <S extends FrameworkReadableState<any, string>[]>(
-      states: S,
-      coreHookStates: Record<string, any> = {}
-    ) => {
-      const exportedStates = states.reduce(
-        (result, item) => {
-          result[item.k] = item.e;
-          return result;
-        },
-        {} as Record<string, GeneralState>
-      );
+    exposeProvider: <O extends Record<string | number | symbol, any>>(object: O) => {
+      const provider: Record<string | number | symbol, any> = {};
+      const originalStatesMap: Record<string, GeneralState> = {};
+      for (const key in object) {
+        const value = object[key];
+        const isValueFunction = isFn(value);
+        // if it's a memorized function, don't memorize it any more, add it to provider directly.
+        // if it's start with `on`, it indicates it is an event binder. add it to provider directly.
+        // if it's a common function, add it to provider with momemorize mode.
+        if (isValueFunction) {
+          provider[key] = (value as MemorizedFunction).memorized || key.startsWith('on') ? value : memorize(value);
+        } else {
+          const isFrameworkState = instanceOf(value, FrameworkReadableState);
+          if (isFrameworkState) {
+            originalStatesMap[key] = value.s;
+          }
+          // otherwise, it's a state proxy or framework state, add it to provider with getter mode.
+          ObjectCls.defineProperty(provider, key, {
+            get: () => {
+              // record the key that is being tracked.
+              referingObject.trackedKeys[key] = trueValue;
+              return isFrameworkState ? value.e : value;
+            },
+            enumerable: trueValue,
+            configurable: trueValue
+          });
+        }
+      }
 
-      type ExportedStateRecord<S extends FrameworkReadableState<any, string>[]> = {
-        [K in S[number]['k']]: Extract<S[number], { k: K }> extends FrameworkState<any, string>
-          ? ExportedState<Extract<S[number], { k: K }>['v'], AG['State']>
-          : ExportedComputed<Extract<S[number], { k: K }>['v'], AG['Computed']>;
-      };
+      const nestedHookUpdate = provider.update;
 
-      return {
-        ...(exportedStates as ExportedStateRecord<S>),
+      type ActualStateTranslator<StateProxy extends FrameworkReadableState<any, string>> =
+        StateProxy extends FrameworkState<any, string>
+          ? ExportedState<StateProxy['v'], AG['State']>
+          : ExportedComputed<StateProxy['v'], AG['Computed']>;
+
+      // reset the tracked keys, so that the nest hook providers can be inited.
+      referingObject.trackedKeys = {};
+      const extraProvider = {
+        // expose referingObject automatically.
         __referingObj: referingObject,
-        update: memorize((newStates: Record<string, any>, targetStates?: Record<string, GeneralState>) => {
-          targetStates = targetStates || exportedStates;
+
+        // the new updating function that can update the new states and nested hook states.
+        update: memorize((newStates: Record<string, any>, updatingStates?: Record<string, GeneralState>) => {
+          updatingStates = updatingStates || originalStatesMap;
           objectKeys(newStates).forEach(key => {
-            if (statesList.includes(key)) {
-              update(newStates[key], targetStates[key], key);
-            } else if (coreHookStates[key] && isFn(coreHookStates.update)) {
-              coreHookStates.update({
+            if (includes(createdStateList, key)) {
+              update(newStates[key], updatingStates[key], key);
+            } else if (provider[key] && isFn(nestedHookUpdate)) {
+              nestedHookUpdate({
                 [key]: newStates[key]
               });
             }
           });
         })
       };
+      return objAssign(provider, extraProvider) as {
+        [K in keyof O]: O[K] extends FrameworkReadableState<any, string> ? ActualStateTranslator<O[K]> : O[K];
+      } & typeof extraProvider;
     },
 
     /**
-     * state proxies to framework related states.
-     * @param framework state proxy array
-     * @returns framework related states array
+     * transform state proxies to object.
+     * @param states proxy array of framework states
+     * @param filterKey filter key of state proxy
+     * @returns an object that contains the states of target form
      */
-    statesObject: <S extends FrameworkReadableState<any, string>[]>(states: S) =>
+    objectify: <S extends FrameworkReadableState<any, string>[], Key extends 's' | 'v' | 'e' | undefined = undefined>(
+      states: S,
+      filterKey?: Key
+    ) =>
       states.reduce(
         (result, item) => {
-          (result as any)[item.k] = item.e;
+          (result as any)[item.k] = filterKey ? item[filterKey] : item;
           return result;
         },
         {} as {
-          [K in S[number]['k']]: Extract<S[number], { k: K }>['s'];
+          [K in S[number]['k']]: Key extends undefined
+            ? Extract<S[number], { k: K }>
+            : Extract<S[number], { k: K }>[NonNullable<Key>];
         }
-      ),
-
-    /**
-     * batch memorize operate functions.
-     * they will be wrapped with `useCallback` on React, and return self function on other UI frameworks
-     * @param operators operating functions
-     * @returns memorized operating functions
-     */
-    memorizeOperators: <O extends Record<string, GeneralFn>>(operators: O) =>
-      objectKeys(operators).reduce(
-        (result, key) => {
-          result[key] = memorize(operators[key]);
-          return result;
-        },
-        {} as Record<string, GeneralFn>
-      ) as O
+      )
   };
 }
 

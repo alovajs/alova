@@ -1,6 +1,16 @@
 import { createAssert } from '@alova/shared/assert';
-import { falseValue, isArray, len, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaFrontMiddleware, AlovaGenerics, AlovaMethodHandler, Method } from 'alova';
+import {
+  falseValue,
+  isArray,
+  len,
+  promiseResolve,
+  promiseThen,
+  pushItem,
+  trueValue,
+  undefinedValue
+} from '@alova/shared/vars';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings';
 
 /**
  * 断言serialHandlers
@@ -8,9 +18,15 @@ import { AlovaFrontMiddleware, AlovaGenerics, AlovaMethodHandler, Method } from 
  * @param serialHandlers 串行请求method获取函数
  */
 export const assertSerialHandlers = (hookName: string, serialHandlers: any) =>
-  createAssert(hookName)(isArray(serialHandlers) && len(serialHandlers) > 0, 'please use an array to represent serial requests');
+  createAssert(hookName)(
+    isArray(serialHandlers) && len(serialHandlers) > 0,
+    'please use an array to represent serial requests'
+  );
 
-export type SerialHandlers<AG extends AlovaGenerics> = [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<AG>[]];
+export type SerialHandlers<AG extends AlovaGenerics> = [
+  Method<AG> | AlovaMethodHandler<AG>,
+  ...AlovaMethodHandler<AG>[]
+];
 
 /**
  * 创建串行请求中间件

@@ -1,6 +1,7 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
 import AdapterUniapp from '@/index';
-import { createAlova, getMethodKey, invalidateCache } from 'alova';
+import { buildNamespacedCacheKey } from '@alova/shared/function';
+import { createAlova, invalidateCache } from 'alova';
 import { mockStorageContainer } from './utils';
 
 const alovaInst = createAlova({
@@ -29,7 +30,8 @@ describe('storage adapter', () => {
     const Get = alovaInst.Get<ResponseData>('/unit-test', {
       cacheFor: {
         mode: 'restore',
-        expire: 100 * 1000
+        expire: 100 * 1000,
+        tag: 'v1'
       }
     });
 
@@ -37,13 +39,13 @@ describe('storage adapter', () => {
 
     /**
      * 缓存数据如下：
-     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831,null]
+     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831]
      */
-    const storagedData = mockStorageContainer[`alova.${alovaInst.id}${getMethodKey(Get)}`] || {};
+    const storagedData = mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.__key__)] || {};
     expect(storagedData[0]?.url).toBe('http://xxx/unit-test');
     expect(storagedData[0]?.method).toBe('GET');
     expect(storagedData[0]?.header).toStrictEqual({});
-    expect(storagedData[2]).toBeNull();
+    expect(storagedData[2]).toBe('v1');
   });
 
   test('remove storage', async () => {
@@ -57,12 +59,17 @@ describe('storage adapter', () => {
 
     /**
      * 缓存数据如下：
-     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831,null]
+     * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831]
      */
-    const getStoragedData = () => mockStorageContainer[`alova.${alovaInst.id}${getMethodKey(Get)}`];
-    expect(!!getStoragedData()).toBeTruthy();
+    const getStoragedData = () => mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.__key__)];
+    expect(getStoragedData()[0]).toStrictEqual({
+      data: undefined,
+      header: {},
+      method: 'GET',
+      url: 'http://xxx/unit-test'
+    });
 
     invalidateCache(Get);
-    expect(!!getStoragedData()).toBeFalsy();
+    expect(getStoragedData()).toBeUndefined();
   });
 });

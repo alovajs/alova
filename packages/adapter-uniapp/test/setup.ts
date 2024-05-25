@@ -1,11 +1,11 @@
 import { noop } from '@alova/shared/function';
+import { GeneralFn } from '@alova/shared/types';
 import { mockStorageContainer, uniDownloadConfig, uniRequestConfig, uniUploadConfig } from './utils';
 
-type AnyFn = (options: any) => any;
 interface UniMockMap {
-  request: AnyFn;
-  uploadFile: AnyFn;
-  downloadFile: AnyFn;
+  request: GeneralFn;
+  uploadFile: GeneralFn;
+  downloadFile: GeneralFn;
   getStorageSync: UniNamespace.Uni['getStorageSync'];
   setStorageSync: UniNamespace.Uni['setStorageSync'];
   removeStorageSync: UniNamespace.Uni['removeStorageSync'];

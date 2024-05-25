@@ -12,7 +12,7 @@ interface UndefinedInterface {
 /**
  * Undefined包装类实现
  */
-const Undefined = function (this: UndefinedInterface) {} as unknown as UndefinedConstructor;
+const Undefined = function Undefined(this: UndefinedInterface) {} as unknown as UndefinedConstructor;
 Undefined.prototype = ObjectCls.create(nullValue, {
   [STR_VALUE_OF]: valueObject(stringifyWithThis)
 });

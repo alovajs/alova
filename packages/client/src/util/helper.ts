@@ -10,8 +10,9 @@ import {
   setTimeoutFn,
   undefinedValue
 } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaMethodHandler, Method } from 'alova';
-import { AnyFn, BackoffPolicy, UsePromiseReturnType } from '~/typings/general';
+import { Method } from 'alova';
+import { AlovaMethodHandler } from '~/typings';
+import { AnyFn, BackoffPolicy, UsePromiseExposure } from '~/typings/general';
 
 /**
  * 创建uuid简易版
@@ -110,9 +111,9 @@ export function useCallback<Fn extends AnyFn = AnyFn>(onCallbackChange: (callbac
   return [setCallback, triggerCallback as Fn, removeAllCallback] as const;
 }
 
-export function usePromise<T = any>(): UsePromiseReturnType<T> {
-  let retResolve: UsePromiseReturnType<T>['resolve'];
-  let retReject: UsePromiseReturnType<T>['reject'];
+export function usePromise<T = any>(): UsePromiseExposure<T> {
+  let retResolve: UsePromiseExposure<T>['resolve'];
+  let retReject: UsePromiseExposure<T>['reject'];
 
   const promise = new Promise<T>((resolve, reject) => {
     retResolve = resolve;
@@ -164,7 +165,7 @@ export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
  * @param args 方法调用参数
  * @returns 请求方法对象
  */
-export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler<AlovaGenerics>, args: any[] = []) => {
+export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler, args: any[] = []) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
   createAssert('scene')(
     instanceOf(methodInstance, Method),

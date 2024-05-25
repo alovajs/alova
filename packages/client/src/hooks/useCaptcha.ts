@@ -1,15 +1,26 @@
+import { useRequest } from '@/index';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaMethodHandler, Method, promiseStatesHook, useRequest } from 'alova';
-import { CaptchaHookConfig, CaptchaReturnType } from '~/typings/general';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { AlovaMethodHandler } from '~/typings';
+import { CaptchaHookConfig } from '~/typings/general';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
-export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandler<AG>, config: CaptchaHookConfig<AG> = {}) => {
+export default <AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  config: CaptchaHookConfig<AG> = {}
+) => {
   const { initialCountdown, middleware } = config;
   captchaAssert(initialCountdown === undefinedValue || initialCountdown > 0, 'initialCountdown must be greater than 0');
-  const { create, ref, exportObject, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const {
+    create,
+    ref,
+    objectify,
+    exposeProvider,
+    __referingObj: referingObject
+  } = statesHookHelper(promiseStatesHook());
 
   const requestReturned = useRequest(handler, {
     ...config,
@@ -42,16 +53,9 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
         reject(new Error(buildErrorMsg(hookPrefix, 'the countdown is not over yet')));
       }
     });
-  return {
+  return exposeProvider({
     ...requestReturned,
-    ...memorizeOperators({
-      send
-    }),
-    ...exportObject(
-      {
-        countdown
-      },
-      requestReturned
-    )
-  } as unknown as CaptchaReturnType<AG>;
+    send,
+    ...objectify([countdown])
+  });
 };

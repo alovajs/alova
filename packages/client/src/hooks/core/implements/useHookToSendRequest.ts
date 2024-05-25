@@ -77,10 +77,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
         (stage: 'downloading' | 'uploading') =>
         ({ loaded, total }: Progress) =>
           update({
-            [stage]: {
-              loaded,
-              total
-            }
+            [stage]: { loaded, total }
           });
 
       methodInstance = guardNextReplacingMethod;
@@ -92,7 +89,8 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
       // 未命中缓存，或强制请求时需要设置loading为true
       !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse });
 
-      const { ed: enableDownload, eu: enableUpload } = hookInstance;
+      // 根据downloading、uploading的追踪状态来判断是否触发进度更新
+      const { downloading: enableDownload, uploading: enableUpload } = hookInstance.ro.trackedKeys;
       offDownloadEvent = enableDownload ? methodInstance.onDownload(progressUpdater('downloading')) : offDownloadEvent;
       offUploadEvent = enableUpload ? methodInstance.onUpload(progressUpdater('uploading')) : offUploadEvent;
       responseHandlePromise = methodInstance.send(forceRequestFinally);

@@ -120,7 +120,9 @@ export const refreshTokenIfExpired = async (
     }
   }
 };
-export const onResponded2Record = (onRespondedHandlers?: AlovaResponded<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>) => {
+export const onResponded2Record = (
+  onRespondedHandlers?: AlovaResponded<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>
+) => {
   let successHandler: RespondedHandler<AlovaGenerics> | undefined = undefinedValue;
   let errorHandler: ResponseErrorHandler<AlovaGenerics> | undefined = undefinedValue;
   let onCompleteHandler: ResponseCompleteHandler<AlovaGenerics> | undefined = undefinedValue;

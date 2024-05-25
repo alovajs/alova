@@ -59,9 +59,9 @@ export interface AdapterUniappOptions {
  */
 export declare const uniappRequestAdapter: UniappRequestAdapter;
 /**
- * uniapp存储适配器
+ * uniapp L2存储适配器
  */
-export declare const uniappStorageAdapter: AlovaGlobalCacheAdapter;
+export declare const uniappL2CacheAdapter: AlovaGlobalCacheAdapter;
 
 /**
  * 适配器集合
@@ -70,7 +70,7 @@ export declare const uniappStorageAdapter: AlovaGlobalCacheAdapter;
 declare function AdapterUniapp(options?: AdapterUniappOptions): {
   statesHook: typeof VueHook;
   requestAdapter: UniappRequestAdapter;
-  storageAdapter: AlovaGlobalCacheAdapter;
+  l2Cache: AlovaGlobalCacheAdapter;
 };
 export default AdapterUniapp;
 

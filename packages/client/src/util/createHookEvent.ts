@@ -1,5 +1,6 @@
 import { ObjectCls, forEach, objectKeys, undefinedValue } from '@alova/shared/vars';
-import { AlovaCompleteEvent, AlovaGenerics, Method } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaCompleteEvent } from '~/typings';
 import { SQHookBehavior, SilentMethod } from '~/typings/general';
 
 /**

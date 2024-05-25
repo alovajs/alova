@@ -1,38 +1,44 @@
 /* eslint-disable import/no-cycle */
-import { AlovaGenerics, Method, setCache, updateState, UpdateStateCollection } from 'alova';
+import { AlovaGenerics, Method, setCache } from 'alova';
 import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
 import {
-  BeforeEventKey,
   BEHAVIOR_SILENT,
+  BeforeEventKey,
   DEFAUT_QUEUE_NAME,
   ErrorEventKey,
   FailEventKey,
+  SuccessEventKey,
   globalSQEventManager,
   queueRequestWaitSetting,
   setSilentFactoryStatus,
-  silentFactoryStatus,
-  SuccessEventKey
+  silentFactoryStatus
 } from './globalVariables';
 // eslint-disable-next-line import/no-cycle
+import updateState from '@/updateState';
 import createHookEvent from '@/util/createHookEvent';
 import { delayWithBackoff, runArgsHandler } from '@/util/helper';
 import { instanceOf, isObject, isString, newInstance, noop, sloughConfig, walkObject } from '@alova/shared/function';
 import {
+  RegExpCls,
   falseValue,
   forEach,
   len,
   objectKeys,
   promiseThen,
   pushItem,
-  RegExpCls,
   regexpTest,
   setTimeoutFn,
   shift,
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
+import { UpdateStateCollection } from '~/typings';
 import { SilentMethod } from './SilentMethod';
-import { persistSilentMethod, push2PersistentSilentQueue, spliceStorageSilentMethod } from './storage/silentMethodStorage';
+import {
+  persistSilentMethod,
+  push2PersistentSilentQueue,
+  spliceStorageSilentMethod
+} from './storage/silentMethodStorage';
 import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
 
@@ -74,7 +80,9 @@ export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>
       return vDataResponse[vData];
     }
     if (isString(value)) {
-      return value.replace(newInstance(RegExpCls, regVDataId.source, 'g'), mat => (mat in vDataResponse ? vDataResponse[mat] : mat));
+      return value.replace(newInstance(RegExpCls, regVDataId.source, 'g'), mat =>
+        mat in vDataResponse ? vDataResponse[mat] : mat
+      );
     }
     return value;
   };
@@ -188,7 +196,10 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
     } = silentMethodInstance;
 
     // 触发请求前事件
-    globalSQEventManager.emit(BeforeEventKey, createHookEvent(0, entity, behavior, silentMethodInstance, queueName, retryTimes) as any);
+    globalSQEventManager.emit(
+      BeforeEventKey,
+      createHookEvent(0, entity, behavior, silentMethodInstance, queueName, retryTimes) as any
+    );
     promiseThen(
       entity.send(force),
       data => {
@@ -288,7 +299,8 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
           }
 
           const matchRetryError =
-            (regRetryErrorName && regexpTest(regRetryErrorName, errorName)) || (regRetryErrorMsg && regexpTest(regRetryErrorMsg, errorMsg));
+            (regRetryErrorName && regexpTest(regRetryErrorName, errorName)) ||
+            (regRetryErrorMsg && regexpTest(regRetryErrorMsg, errorMsg));
           // 如果还有重试次数则进行重试
           if (retryTimes < maxRetryTimes && matchRetryError) {
             // 需要使用下次的retryTimes来计算延迟时间，因此这边需+1
@@ -300,7 +312,16 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
                 silentMethodRequest(silentMethodInstance, retryTimes);
                 runArgsHandler(
                   retryHandlers,
-                  createHookEvent(8, entity, behavior, silentMethodInstance, undefinedValue, retryTimes, retryDelay, handlerArgs)
+                  createHookEvent(
+                    8,
+                    entity,
+                    behavior,
+                    silentMethodInstance,
+                    undefinedValue,
+                    retryTimes,
+                    retryDelay,
+                    handlerArgs
+                  )
                 );
               },
               // 还有重试次数时使用timeout作为下次请求时间
@@ -366,7 +387,8 @@ export const pushNewSilentMethod2Queue = <AG extends AlovaGenerics>(
   onBeforePush = noop
 ) => {
   silentMethodInstance.cache = cache;
-  const currentQueue = (silentQueueMap[targetQueueName] = silentQueueMap[targetQueueName] || []) as unknown as SilentMethod<AG>[];
+  const currentQueue = (silentQueueMap[targetQueueName] =
+    silentQueueMap[targetQueueName] || []) as unknown as SilentMethod<AG>[];
   const isNewQueue = len(currentQueue) <= 0;
   const isPush2Queue = (onBeforePush() as any) !== falseValue;
 

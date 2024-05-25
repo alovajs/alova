@@ -24,7 +24,7 @@ export interface RequestElements {
   readonly headers: Arg;
   readonly data?: RequestBody;
 }
-export type ProgressUpdater = (total: number, loaded: number) => void;
+export type ProgressUpdater = (loaded: number, total: number) => void;
 export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader> = (
   elements: RequestElements,
   method: Method<AlovaGenerics<any, any, any, any, any, any, RequestConfig, Response, ResponseHeader>>
@@ -202,7 +202,13 @@ export interface EffectRequestParams<E> {
   immediate: boolean;
 }
 
-export type ReferingObject = Record<any, any>;
+export interface ReferingObject {
+  /**
+   * the map of tracked state keys
+   */
+  trackedKeys: Record<string, boolean>;
+  [key: string]: any;
+}
 export interface StatesHook<State, Computed, Watched = State | Computed, Export = State> {
   /**
    * 创建状态
@@ -235,7 +241,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * @param state 原状态值
    * @param @param referingObject refering object
    */
-  update: (newVal: Record<string, any>, state: Record<string, State>, referingObject: ReferingObject) => void;
+  update: (newVal: any, state: State, key: string, referingObject: ReferingObject) => void;
 
   /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
@@ -800,9 +806,7 @@ export interface CacheSetOptions {
  * @param matcher method instance(s)
  */
 export declare function setCache<Responded>(
-  matcher:
-    | Method<AlovaGenerics<any, any, any, any, Responded>>
-    | Method<AlovaGenerics<any, any, any, any, Responded>>[],
+  matcher: Method | Method[],
   dataOrUpdater: Responded | ((oldCache: Responded) => Responded | undefined | void),
   options?: CacheSetOptions
 ): Promise<void>;
@@ -826,10 +830,10 @@ export interface CacheQueryOptions {
  * @param matcher method instance
  * @returns cache data, return undefined if not found
  */
-export declare function queryCache<AG extends AlovaGenerics, Responded>(
-  matcher: Method<Omit<AG, 'Responded'> & Responded>,
+export declare function queryCache<AG extends AlovaGenerics>(
+  matcher: Method<AG>,
   options?: CacheQueryOptions
-): Promise<Responded | undefined>;
+): Promise<AG['Responded'] | undefined>;
 
 /**
  * hit(invalidate) target caches by source method

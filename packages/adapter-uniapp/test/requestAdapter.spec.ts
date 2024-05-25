@@ -1,8 +1,9 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
+import AdapterUniapp from '@/index';
 import { noop } from '@alova/shared/function';
 import { createAlova } from 'alova';
-import { untilCbCalled } from 'root/testUtils';
-import AdapterUniapp from '../src/index';
+import { useRequest } from 'alova/client';
+import { delay, untilCbCalled } from 'root/testUtils';
 import { onDownloadCall, onRequestCall, onUploadCall } from './utils';
 
 describe('request adapter', () => {
@@ -175,10 +176,7 @@ describe('request adapter', () => {
       baseURL: 'http://xxx',
       responded(data) {
         const { data: subData } = data as UniNamespace.RequestSuccessCallbackResult;
-        if (subData) {
-          return subData;
-        }
-        return null;
+        return subData || null;
       },
       ...AdapterUniapp()
     });
@@ -197,9 +195,10 @@ describe('request adapter', () => {
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
-    // 过100毫秒后中断请求
-    await untilCbCalled(setTimeout, 100);
-    abort();
+    // 过120毫秒后中断请求，因为在[src/statesHook.ts]中延迟了100毫秒请求
+    delay(120).then(() => {
+      abort();
+    });
 
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();

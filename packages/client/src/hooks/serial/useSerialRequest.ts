@@ -1,4 +1,6 @@
-import { AlovaGenerics, AlovaMethodHandler, Method, RequestHookConfig, useRequest } from 'alova';
+import { useRequest } from '@/index';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
 import { assertSerialHandlers, serialMiddleware } from './general';
 
 /**
@@ -13,7 +15,7 @@ export default <AG extends AlovaGenerics>(
   config: RequestHookConfig<AG> = {} as any
 ) => {
   assertSerialHandlers('useSerialRequest', serialHandlers);
-  return useRequest(serialHandlers[0], {
+  return useRequest<AG>(serialHandlers[0], {
     ...config,
     middleware: serialMiddleware(serialHandlers, config.middleware)
   });

@@ -1,3 +1,4 @@
+import { useRequest } from '@/index';
 import createSerializerPerformer from '@/util/serializer';
 import { createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
@@ -13,8 +14,7 @@ import {
 } from '@alova/shared/function';
 import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
-import useRequest from './core/useRequest';
+import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/general';
 
 const RestoreEventKey = Symbol('FormRestore');
 const getStoragedKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>, id?: ID) =>
@@ -27,16 +27,15 @@ const cloneFormData = <T>(form: T): T => {
   return walkObject(shallowClone(form), shallowClone);
 };
 const assert = createAssert('useForm');
-const keyForm = 'form';
 
 export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
-  handler: FormHookHandler<AG, FormData> | ID,
+  handler: FormHookHandler<AG, FormData | undefined> | ID,
   config: FormHookConfig<AG, FormData> = {}
 ) => {
   const typedSharedStates = sharedStates as Record<
     ID,
     {
-      hookReturns: FormReturnType<AG, any>;
+      hookProvider: FormExposure<AG, any>;
       config: FormHookConfig<AG, any>;
     }
   >;
@@ -45,7 +44,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     const id = handler as ID;
     const sharedState = typedSharedStates[id];
     assert(!!sharedState, `the form data of id \`${id}\` is not initial`);
-    return sharedState.hookReturns;
+    return sharedState.hookProvider;
   }
 
   const { id, initialForm, store, resetAfterSubmiting, immediate = falseValue, middleware } = config;
@@ -54,8 +53,8 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     ref: useFlag$,
     onMounted: onMounted$,
     watch: watch$,
-    exportObject,
-    memorizeOperators,
+    objectify,
+    exposeProvider,
     __referingObj: referingObject
   } = statesHookHelper(promiseStatesHook());
   const isStoreObject = isPlainObject(store);
@@ -63,7 +62,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   // 如果config中的id也有对应的共享状态，则也会返回它
   // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
   const sharedState = id ? typedSharedStates[id] : undefinedValue;
-  const form = $(cloneFormData(initialForm), keyForm);
+  const form = $(cloneFormData(initialForm), 'form');
   const methodHandler = handler;
   const eventManager = createEventManager<{
     [RestoreEventKey]: void;
@@ -78,7 +77,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   );
   // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
   const isCreateShardState = useFlag$(false);
-  const originalHookReturns = useRequest((...args: any[]) => methodHandler(form.v, ...args), {
+  const originalHookProvider = useRequest((...args: any[]) => methodHandler(form.v, ...args), {
     ...config,
     __referingObj: referingObject,
 
@@ -121,20 +120,18 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     } as FormData;
   };
 
-  const hookReturns = {
+  const hookProvider = exposeProvider({
     // 第一个参数固定为form数据
-    ...originalHookReturns,
-    ...exportObject([form], originalHookReturns),
-    ...memorizeOperators({
-      updateForm,
-      reset
-    }),
+    ...originalHookProvider,
+    ...objectify([form]),
+    updateForm,
+    reset,
 
     // 持久化数据恢复事件绑定
     onRestore(handler: RestoreHandler) {
       eventManager.on(RestoreEventKey, handler);
     }
-  };
+  });
 
   // 有id时，才保存到sharedStates中
   // 在react中，因为更新form后会产生新的form，因此需要每次调用重新保存
@@ -147,13 +144,12 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     // 只保存创建hook的共享状态
     if (isCreateShardState.current) {
       typedSharedStates[id] = {
-        hookReturns,
+        hookProvider: hookProvider as FormExposure<AG, any>,
         config
       };
     }
   }
-
-  const { send, onSuccess } = hookReturns;
+  const { send, onSuccess } = hookProvider;
   onMounted$(() => {
     // 需要持久化时更新data
     if (enableStore && !sharedState) {
@@ -186,5 +182,5 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
 
   // 有已保存的sharedState，则返回它
   // 如果是当前hook创建的共享状态，则返回最新的而非缓存的
-  return sharedState && !isCreateShardState.current ? sharedState.hookReturns : hookReturns;
+  return sharedState && !isCreateShardState.current ? sharedState.hookProvider : hookProvider;
 };

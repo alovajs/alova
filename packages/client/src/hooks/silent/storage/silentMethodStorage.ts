@@ -1,7 +1,7 @@
 import { len, objectKeys, pushItem, splice } from '@alova/shared/vars';
 // eslint-disable-next-line import/no-cycle
 import { AlovaGenerics } from 'alova';
-import { SilentMethod } from '../SilentMethod';
+import type { SilentMethod } from '../SilentMethod';
 import {
   SerializedSilentMethodIdQueueMap,
   silentMethodIdQueueMapStorageKey,
@@ -25,10 +25,14 @@ export const persistSilentMethod = <AG extends AlovaGenerics>(silentMethodInstan
  * @param silentMethod SilentMethod实例
  * @param queue 操作的队列名
  */
-export const push2PersistentSilentQueue = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>, queueName: string) => {
+export const push2PersistentSilentQueue = <AG extends AlovaGenerics>(
+  silentMethodInstance: SilentMethod<AG>,
+  queueName: string
+) => {
   persistSilentMethod(silentMethodInstance);
   // 将silentMethod实例id保存到queue存储中
-  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) || {}) as SerializedSilentMethodIdQueueMap;
+  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) ||
+    {}) as SerializedSilentMethodIdQueueMap;
   const currentQueue = (silentMethodIdQueueMap[queueName] = silentMethodIdQueueMap[queueName] || []);
   pushItem(currentQueue, silentMethodInstance.id);
   storageSetItem(silentMethodIdQueueMapStorageKey, silentMethodIdQueueMap);
@@ -46,7 +50,8 @@ export const spliceStorageSilentMethod = <AG extends AlovaGenerics>(
   newSilentMethod?: SilentMethod<AG>
 ) => {
   // 将silentMethod实例id从queue中移除
-  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) || {}) as SerializedSilentMethodIdQueueMap;
+  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) ||
+    {}) as SerializedSilentMethodIdQueueMap;
   const currentQueue = silentMethodIdQueueMap[queueName] || [];
   const index = currentQueue.findIndex(id => id === targetSilentMethodId);
   if (index >= 0) {

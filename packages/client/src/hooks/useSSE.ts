@@ -7,7 +7,7 @@ import { AlovaEventBase } from '@alova/shared/event';
 import { $self, getConfig, getOptions, isFn, isPlainObject, noop, statesHookHelper } from '@alova/shared/function';
 import { falseValue, promiseFinally, promiseThen, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
-  AlovaMethodHandler,
+  AlovaGenerics,
   Method,
   RespondedHandler,
   RespondedHandlerRecord,
@@ -16,6 +16,7 @@ import {
   hitCacheBySource,
   promiseStatesHook
 } from 'alova';
+import { AlovaMethodHandler } from '~/typings';
 import {
   SSEHookConfig,
   SSEHookReadyState,
@@ -23,64 +24,22 @@ import {
   SSEOnErrorTrigger,
   SSEOnMessageTrigger,
   SSEOnOpenTrigger,
-  UsePromiseReturnType
+  UsePromiseExposure
 } from '~/typings/general';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
 const SSEErrorEventKey = Symbol('SSEError');
 
-export type SSEEvents<
-  Data,
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> = {
-  [SSEOpenEventKey]: AlovaSSEEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >;
-  [SSEMessageEventKey]: AlovaSSEMessageEvent<
-    Data,
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >;
-  [SSEErrorEventKey]: AlovaSSEErrorEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >;
+export type SSEEvents<Data, AG extends AlovaGenerics> = {
+  [SSEOpenEventKey]: AlovaSSEEvent<AG>;
+  [SSEMessageEventKey]: AlovaSSEMessageEvent<AG, Data>;
+  [SSEErrorEventKey]: AlovaSSEErrorEvent<AG>;
 };
 
-type AnySSEEventType = AlovaSSEMessageEvent<any, any, any, any, any, any, any, any, any, any> &
-  AlovaSSEErrorEvent<any, any, any, any, any, any, any, any, any> &
-  AlovaSSEEvent<any, any, any, any, any, any, any>;
+type AnySSEEventType<Data, AG extends AlovaGenerics> = AlovaSSEMessageEvent<AG, Data> &
+  AlovaSSEErrorEvent<AG> &
+  AlovaSSEEvent<AG>;
 
 const assert = createAssert('useSSE');
 const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSourceEventMap> = {
@@ -89,31 +48,8 @@ const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSour
   Message: 'message'
 } as const;
 
-export default <
-  Data,
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig extends Record<any, any>,
-  Response,
-  ResponseHeader
->(
-  handler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
+export default <Data, AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
   config: SSEHookConfig = {}
 ) => {
   const {
@@ -126,75 +62,35 @@ export default <
   // ! 暂时不支持指定 abortLast
   const abortLast = trueValue;
 
-  const {
-    create,
-    ref,
-    onMounted,
-    onUnmounted,
-    memorizeOperators,
-    exportObject,
-    __referingObj: referingObject
-  } = statesHookHelper(promiseStatesHook());
+  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper(promiseStatesHook());
 
   const usingSendArgs = ref<any[]>([]);
   const eventSource = ref<EventSource | undefined>(undefinedValue);
-  const sendPromiseObject = ref<UsePromiseReturnType<void> | undefined>(undefinedValue);
+  const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
-  const data = create<Data>(initialData, 'data', trueValue);
-  const readyState = create<SSEHookReadyState>(SSEHookReadyState.CLOSED, 'readyState', trueValue);
+  const data = create(initialData as Data, 'data', trueValue);
+  const readyState = create(SSEHookReadyState.CLOSED, 'readyState', trueValue);
 
   let methodInstance = getHandlerMethod(handler);
 
-  let responseUnified:
-    | RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader>
-    | RespondedHandlerRecord<State, Computed, Export, RequestConfig, Response, ResponseHeader>
-    | undefined;
+  let responseUnified: RespondedHandler<AG> | RespondedHandlerRecord<AG> | undefined;
 
-  const eventManager =
-    createEventManager<
-      SSEEvents<Data, State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    >();
+  const eventManager = createEventManager<SSEEvents<Data, AG>>();
   // 储存自定义事件的 useCallback 对象，其中 key 为 eventName
   const customEventMap: Map<string, ReturnType<typeof useCallback>> = new Map();
-  const onOpen = (
-    handler: SSEOnOpenTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) => {
+  const onOpen = (handler: SSEOnOpenTrigger<AG>) => {
     eventManager.on(SSEOpenEventKey, handler);
   };
-  const onMessage = (
-    handler: SSEOnMessageTrigger<
-      Data,
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ) => {
+  const onMessage = (handler: SSEOnMessageTrigger<Data, AG>) => {
     eventManager.on(SSEMessageEventKey, handler);
   };
-  const onError = (
-    handler: SSEOnErrorTrigger<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-  ) => {
+  const onError = (handler: SSEOnErrorTrigger<AG>) => {
     eventManager.on(SSEErrorEventKey, handler);
   };
 
-  let responseSuccessHandler: RespondedHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> =
-    $self;
-  let responseErrorHandler: ResponseErrorHandler<State, Computed, Export, RequestConfig, Response, ResponseHeader> =
-    throwFn;
-  let responseCompleteHandler: ResponseCompleteHandler<
-    State,
-    Computed,
-    Export,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > = noop;
+  let responseSuccessHandler: RespondedHandler<AG> = $self;
+  let responseErrorHandler: ResponseErrorHandler<AG> = throwFn;
+  let responseCompleteHandler: ResponseCompleteHandler<AG> = noop;
 
   /**
    * 设置响应拦截器，在每次 send 之后都需要调用
@@ -223,7 +119,7 @@ export default <
     const { headers, transformData: transformDataFn = $self } = getConfig(methodInstance);
 
     const returnsData = await handlerReturns;
-    const transformedData = await transformDataFn(returnsData, (headers || {}) as ResponseHeader);
+    const transformedData = await transformDataFn(returnsData, (headers || {}) as AG['ResponseHeader']);
 
     data.v = transformedData as any;
 
@@ -278,7 +174,7 @@ export default <
    * 根据事件选择需要的触发函数。如果事件无错误则触发传传入的回调函数
    * @param callback 无错误时触发的回调函数
    */
-  const sendSSEEvent = (callback: (event: AnySSEEventType) => any) => (event: AnySSEEventType) => {
+  const sendSSEEvent = (callback: (event: AnySSEEventType<Data, AG>) => any) => (event: AnySSEEventType<Data, AG>) => {
     if (event.error === undefinedValue) {
       return callback(event);
     }
@@ -287,33 +183,9 @@ export default <
 
   // * MARK: EventSource 的事件处理
 
-  const onCustomEvent: SSEOn<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  > = (eventName, callbackHandler) => {
+  const onCustomEvent: SSEOn<AG> = (eventName, callbackHandler) => {
     if (!customEventMap.has(eventName)) {
-      const useCallbackObject = useCallback<
-        (
-          event: AlovaSSEEvent<
-            State,
-            Computed,
-            Watched,
-            Export,
-            Responded,
-            Transformed,
-            RequestConfig,
-            Response,
-            ResponseHeader
-          >
-        ) => void
-      >(callbacks => {
+      const useCallbackObject = useCallback<(event: AlovaSSEEvent<AG>) => void>(callbacks => {
         if (callbacks.length === 0) {
           eventSource.current?.removeEventListener(eventName, useCallbackObject[1] as any);
           customEventMap.delete(eventName);
@@ -408,9 +280,10 @@ export default <
     if (!promiseObj) {
       promiseObj = sendPromiseObject.current = usePromise();
       // open 后清除 promise 对象
-      promiseObj.promise.finally(() => {
-        promiseObj = undefinedValue;
-      });
+      promiseObj &&
+        promiseObj.promise.finally(() => {
+          promiseObj = undefinedValue;
+        });
     }
 
     usingSendArgs.current = sendArgs;
@@ -462,16 +335,14 @@ export default <
     }
   });
 
-  return {
-    ...memorizeOperators({
-      send: connect,
-      close,
-      on: onCustomEvent
-    }),
+  return exposeProvider({
+    send: connect,
+    close,
+    on: onCustomEvent,
     onMessage,
     onError,
     onOpen,
-    ...exportObject([readyState, data, eventSource]),
-    __referingObj: referingObject
-  };
+    eventSource,
+    ...objectify([readyState, data])
+  });
 };

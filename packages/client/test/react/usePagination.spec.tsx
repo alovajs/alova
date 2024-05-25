@@ -43,7 +43,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -86,7 +86,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const page = 1;
@@ -158,12 +158,12 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const { error } = usePagination(getter, {
         data: ({ wrongList }: any) => wrongList
       });
       return <span role="error">{error?.message}</span>;
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -184,7 +184,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         loading,
         pageSize: [pageSize, setPageSize],
@@ -224,7 +224,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -258,7 +258,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const [keyword, setKeyword] = useState('');
       const {
         loading,
@@ -299,7 +299,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -350,7 +350,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         loading,
         data,
@@ -399,7 +399,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     setMockListData(data => {
@@ -438,7 +438,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -495,7 +495,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
     render((<Page />) as ReactElement<any, any>);
 
     const page = 2;
@@ -570,7 +570,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -617,7 +617,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
@@ -668,7 +668,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -751,7 +751,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await screen.findByText(/loaded/);
@@ -813,7 +813,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -869,7 +869,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -905,7 +905,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         pageCount,
@@ -954,7 +954,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -992,7 +992,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -1048,7 +1048,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -1086,7 +1086,7 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     const successMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -1155,7 +1155,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -1257,7 +1257,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -1315,7 +1315,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     let currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -1361,7 +1361,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -1409,7 +1409,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -1466,7 +1466,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const [min, setMin] = useState(0);
       const {
         data,
@@ -1542,7 +1542,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -1637,7 +1637,7 @@ describe('react => usePagination', () => {
       });
 
     const successMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -1698,7 +1698,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const page = 3;
@@ -1752,7 +1752,7 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     const successMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -1823,7 +1823,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const page = 2;
@@ -1892,7 +1892,7 @@ describe('react => usePagination', () => {
       });
 
     const successMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -1944,7 +1944,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     let page = 1;
@@ -2001,7 +2001,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const [keyword, setKeyword] = useState('');
       const {
         loading,
@@ -2043,7 +2043,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2094,7 +2094,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const [error, setError] = useState(undefined as Error | undefined);
       const {
         data,
@@ -2153,7 +2153,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2194,7 +2194,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -2238,7 +2238,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     let currentList = generateContinuousNumbers(9, 0, i => {
@@ -2288,7 +2288,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -2352,7 +2352,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
     render((<Page />) as ReactElement<any, any>);
 
     // 等待fetch完成
@@ -2399,7 +2399,7 @@ describe('react => usePagination', () => {
 
     const successMockFn = jest.fn();
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -2452,7 +2452,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2488,7 +2488,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -2535,7 +2535,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
     render((<Page />) as ReactElement<any, any>);
 
     // 等待fetch完成
@@ -2582,7 +2582,7 @@ describe('react => usePagination', () => {
       });
 
     const fetchMockFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -2627,7 +2627,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
     render((<Page />) as ReactElement<any, any>);
     let page = 2;
     const pageSize = 4;
@@ -2657,7 +2657,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const {
         data,
         loading,
@@ -2704,7 +2704,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
     render((<Page />) as ReactElement<any, any>);
 
     await waitFor(() => {
@@ -2727,7 +2727,7 @@ describe('react => usePagination', () => {
         }
       });
 
-    const Page = () => {
+    function Page() {
       const { data, total } = usePagination(getter, {
         total: res => res.total,
         data: res => res.list,
@@ -2746,7 +2746,7 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
         </div>
       );
-    };
+    }
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([1, 2, 3]));
@@ -2769,7 +2769,7 @@ describe('react => usePagination', () => {
 
     const errorFn = jest.fn();
     const completeFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const { data, total, reload, onError, onComplete } = usePagination(getter, {
         total: res => res.total,
         data: res => res.list
@@ -2787,7 +2787,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
@@ -2820,7 +2820,7 @@ describe('react => usePagination', () => {
       });
 
     const successFn = jest.fn();
-    const Page = () => {
+    function Page() {
       const [keyword, setKeyword] = useState('');
       const { data, onSuccess, total } = usePagination((p, ps) => getter(p, ps, keyword), {
         watchingStates: [keyword],
@@ -2844,7 +2844,7 @@ describe('react => usePagination', () => {
           </button>
         </div>
       );
-    };
+    }
 
     render((<Page />) as ReactElement<any, any>);
     const currentList = generateContinuousNumbers(9, 0, i => {

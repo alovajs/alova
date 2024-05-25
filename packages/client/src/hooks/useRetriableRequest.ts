@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { useRequest } from '@/index';
 import createHookEvent from '@/util/createHookEvent';
 import { delayWithBackoff } from '@/util/helper';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
@@ -14,116 +15,40 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import { AlovaMethodHandler, Method, promiseStatesHook, useRequest } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { AlovaMethodHandler } from '~/typings';
 import { RetriableFailEvent, RetriableHookConfig, RetriableRetryEvent } from '~/typings/general';
 
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');
 
-export type RetriableEvents<
-  State,
-  Computed,
-  Watched,
-  Export,
-  Responded,
-  Transformed,
-  RequestConfig,
-  Response,
-  ResponseHeader
-> = {
-  [RetryEventKey]: RetriableRetryEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >;
-  [FailEventKey]: RetriableFailEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >;
+export type RetriableEvents<AG extends AlovaGenerics> = {
+  [RetryEventKey]: RetriableRetryEvent<AG>;
+  [FailEventKey]: RetriableFailEvent<AG>;
 };
 
-type RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: RetriableRetryEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
-) => void;
-type FailHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: RetriableFailEvent<
-    State,
-    Computed,
-    Watched,
-    Export,
-    Responded,
-    Transformed,
-    RequestConfig,
-    Response,
-    ResponseHeader
-  >
-) => void;
+type RetryHandler<AG extends AlovaGenerics> = (event: RetriableRetryEvent<AG>) => void;
+type FailHandler<AG extends AlovaGenerics> = (event: RetriableFailEvent<AG>) => void;
 const hookPrefix = 'useRetriableRequest';
 const assert = createAssert(hookPrefix);
-export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
-  handler:
-    | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<
-        State,
-        Computed,
-        Watched,
-        Export,
-        Responded,
-        Transformed,
-        RequestConfig,
-        Response,
-        ResponseHeader
-      >,
-  config: RetriableHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
+export default <AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  config: RetriableHookConfig<AG> = {}
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
 
-  const { ref: useFlag$, memorizeOperators, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const { ref: useFlag$, exposeProvider, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
 
-  const eventManager =
-    createEventManager<
-      RetriableEvents<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    >();
+  const eventManager = createEventManager<RetriableEvents<AG>>();
   const retryTimes = useFlag$(0);
   const stopManuallyError = useFlag$(undefinedValue as Error | undefined); // 停止错误对象，在手动触发停止时有值
-  const methodInstanceLastest = useFlag$(
-    undefinedValue as
-      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-      | undefined
-  );
+  const methodInstanceLastest = useFlag$(undefinedValue as Method<AG> | undefined);
   const sendArgsLatest = useFlag$(undefinedValue as any[] | undefined);
   const currentLoadingState = useFlag$(falseValue);
   const requesting = useFlag$(falseValue); // 是否正在请求
   const retryTimer = useFlag$(undefinedValue as string | number | NodeJS.Timeout | undefined);
 
-  const emitOnFail = (
-    method: Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-    sendArgs: any[],
-    error: any
-  ) => {
+  const emitOnFail = (method: Method<AG>, sendArgs: any[], error: any) => {
     // 需要异步触发onFail，让onError和onComplete先触发
     setTimeoutFn(() => {
       eventManager.emit(
@@ -147,7 +72,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     });
   };
 
-  const requestReturns = useRequest(handler, {
+  const nestedHookProvider = useRequest(handler, {
     ...config,
     __referingObj: referingObject,
     middleware(ctx, next) {
@@ -236,10 +161,10 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     assert(currentLoadingState.current, 'there are no requests being retried');
     stopManuallyError.current = new Error(buildErrorMsg(hookPrefix, 'stop retry manually'));
     if (requesting.current) {
-      requestReturns.abort();
+      nestedHookProvider.abort();
     } else {
       emitOnFail(methodInstanceLastest.current as any, sendArgsLatest.current as any, stopManuallyError.current);
-      requestReturns.update({ error: stopManuallyError.current, loading: falseValue });
+      nestedHookProvider.update({ error: stopManuallyError.current, loading: falseValue });
       currentLoadingState.current = falseValue;
       clearTimeout(retryTimer.current); // 清除重试定时器
     }
@@ -250,19 +175,7 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * 它们将在重试发起后触发
    * @param handler 重试事件回调
    */
-  const onRetry = (
-    handler: RetryHandler<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ) => {
+  const onRetry = (handler: RetryHandler<AG>) => {
     eventManager.on(RetryEventKey, event => handler(event));
   };
 
@@ -275,29 +188,14 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    *
    * @param handler 失败事件回调
    */
-  const onFail = (
-    handler: FailHandler<
-      State,
-      Computed,
-      Watched,
-      Export,
-      Responded,
-      Transformed,
-      RequestConfig,
-      Response,
-      ResponseHeader
-    >
-  ) => {
+  const onFail = (handler: FailHandler<AG>) => {
     eventManager.on(FailEventKey, event => handler(event));
   };
 
-  return {
-    ...requestReturns,
-    __referingObj: referingObject,
-    ...memorizeOperators({
-      stop
-    }),
+  return exposeProvider({
+    ...nestedHookProvider,
+    stop,
     onRetry,
     onFail
-  };
+  });
 };

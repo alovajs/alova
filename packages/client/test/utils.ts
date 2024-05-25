@@ -1,8 +1,8 @@
-import { AlovaGlobalCacheAdapter, GlobalCacheConfig, Method, StatesHook, createAlova } from 'alova';
+import { AlovaGenerics, AlovaGlobalCacheAdapter, GlobalCacheConfig, Method, StatesHook, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
-type FetchMethod = Method<any, any, any, any, any, any, FetchRequestInit, Response, Headers>;
+type FetchMethod = Method<AlovaGenerics<any, any, any, any, any, any, FetchRequestInit, Response, Headers>>;
 export const getAlovaInstance = <State, Computed, Watched, Export>(
   statesHook: StatesHook<State, Computed, Watched, Export>,
   {
