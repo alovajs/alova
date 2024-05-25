@@ -374,7 +374,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
         const isValueFunction = isFn(value);
         // if it's a memorized function, don't memorize it any more, add it to provider directly.
         // if it's start with `on`, it indicates it is an event binder. add it to provider directly.
-        // if it's a common function, add it to provider with momemorize mode.
+        // if it's a common function, add it to provider with memorize mode.
         if (isValueFunction) {
           provider[key] = (value as MemorizedFunction).memorized || key.startsWith('on') ? value : memorize(value);
         } else {
@@ -389,6 +389,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
               referingObject.trackedKeys[key] = trueValue;
               return isFrameworkState ? value.e : value;
             },
+            set: v => {},
             enumerable: trueValue,
             configurable: trueValue
           });
