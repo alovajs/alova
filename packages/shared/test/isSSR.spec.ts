@@ -2,7 +2,8 @@
 // Because the value of 'isSSR' in 'vars. ts' is determined during initialization, so here we create a function which's body has the same content for testing.
 const undefStr = 'undefined';
 const MockGlobal: any = {};
-const isSSR = () => (typeof MockGlobal.process !== undefStr ? !MockGlobal.process.browser : typeof MockGlobal.Deno !== undefStr);
+const isSSR = () =>
+  typeof MockGlobal.process !== undefStr ? !MockGlobal.process.browser : typeof MockGlobal.Deno !== undefStr;
 
 const setGlobalProcess = (process: any) => {
   MockGlobal.process = process;

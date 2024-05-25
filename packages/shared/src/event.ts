@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import { AlovaEvent, AlovaGenerics, Method } from '../../alova/typings';
+import { AlovaGenerics, Method } from '../../alova/typings';
+import { AlovaEvent } from '../../client/typings';
 
 export class AlovaEventBase<AG extends AlovaGenerics> implements AlovaEvent<AG> {
   readonly sendArgs: any[];
@@ -52,7 +53,13 @@ export class AlovaCompleteEvent<AG extends AlovaGenerics> extends AlovaEventBase
 
   readonly error: any;
 
-  constructor(base: AlovaEventBase<AG>, status: 'success' | 'error', data: AG['Responded'], fromCache: boolean, error: any) {
+  constructor(
+    base: AlovaEventBase<AG>,
+    status: 'success' | 'error',
+    data: AG['Responded'],
+    fromCache: boolean,
+    error: any
+  ) {
     super(base.method, base.sendArgs);
     this.status = status;
     this.data = data;

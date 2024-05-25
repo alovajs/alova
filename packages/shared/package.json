@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "type": "module",
   "author": "Scott Hu",
-  "module": "dist/alova.esm.js",
   "types": "typings/index.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",

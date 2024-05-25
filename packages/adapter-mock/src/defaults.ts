@@ -1,4 +1,4 @@
-import { MockResponse } from '../typings';
+import { MockResponse } from '~/typings';
 
 /**
  * 默认的响应数据拦截器，并返回Response数据

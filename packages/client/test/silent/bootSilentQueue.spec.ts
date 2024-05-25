@@ -1,7 +1,12 @@
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
 import { DEFAUT_QUEUE_NAME } from '../../src/helper/variables';
-import { bootSilentFactory, onBeforeSilentSubmit, onSilentSubmitBoot, onSilentSubmitSuccess } from '../../src/hooks/silent/silentFactory';
+import {
+  bootSilentFactory,
+  onBeforeSilentSubmit,
+  onSilentSubmitBoot,
+  onSilentSubmitSuccess
+} from '../../src/hooks/silent/silentFactory';
 import { SilentMethod } from '../../src/hooks/silent/SilentMethod';
 import { deepReplaceVData, pushNewSilentMethod2Queue, silentQueueMap } from '../../src/hooks/silent/silentQueue';
 import { push2PersistentSilentQueue } from '../../src/hooks/silent/storage/silentMethodStorage';

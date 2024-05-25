@@ -3,6 +3,8 @@
   "output": "dist/alova-mock.{suffix}.{ext}",
   "packageName": "AlovaMock",
   "external": {
-    "alova": "alova"
+    "@alova/shared/function": null,
+    "@alova/shared/vars": null,
+    "@alova/shared/assert": null
   }
 }

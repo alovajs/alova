@@ -425,7 +425,9 @@ describe('react => useRetriableRequest', () => {
     act(() => {
       fireEvent.click(screen.getByRole('btnStop'));
     });
-    expect(screen.getByRole('error')).toHaveTextContent('[alova/useRetriableRequest]there are no requests being retried');
+    expect(screen.getByRole('error')).toHaveTextContent(
+      '[alova/useRetriableRequest]there are no requests being retried'
+    );
   });
 
   test('should throws stop error when stop in requseting', async () => {
@@ -509,7 +511,8 @@ describe('react => useRetriableRequest', () => {
     const mockLoadingChangeFn = jest.fn();
 
     const Page = () => {
-      const { loading, error, onError, onComplete, onSuccess, onRetry, onFail, send } = useRetriableRequest(methodInstance);
+      const { loading, error, onError, onComplete, onSuccess, onRetry, onFail, send } =
+        useRetriableRequest(methodInstance);
       onRetry(event => {
         mockRetryFn();
         expect(event.retryTimes).toBeLessThanOrEqual(3);

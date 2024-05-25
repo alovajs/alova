@@ -27,11 +27,21 @@ describe('silent method request in queue with silent behavior', () => {
         id: ''
       });
       let startTs = Date.now();
-      const silentMethodInstance = new SilentMethod(methodInstance, 'silent', undefined, undefined, /.*/, 0, undefined, undefined, () => {
-        const curTs = Date.now();
-        delayRequestTs.push(curTs - startTs);
-        startTs = curTs;
-      });
+      const silentMethodInstance = new SilentMethod(
+        methodInstance,
+        'silent',
+        undefined,
+        undefined,
+        /.*/,
+        0,
+        undefined,
+        undefined,
+        () => {
+          const curTs = Date.now();
+          delayRequestTs.push(curTs - startTs);
+          startTs = curTs;
+        }
+      );
       const silentMethodInstance2 = new SilentMethod(
         methodInstance,
         'silent',
@@ -80,11 +90,21 @@ describe('silent method request in queue with silent behavior', () => {
         id: ''
       });
       let startTs = Date.now();
-      const silentMethodInstance = new SilentMethod(methodInstance, 'silent', undefined, undefined, /.*/, 0, undefined, undefined, () => {
-        const curTs = Date.now();
-        delayRequestTs.push(curTs - startTs);
-        startTs = curTs;
-      });
+      const silentMethodInstance = new SilentMethod(
+        methodInstance,
+        'silent',
+        undefined,
+        undefined,
+        /.*/,
+        0,
+        undefined,
+        undefined,
+        () => {
+          const curTs = Date.now();
+          delayRequestTs.push(curTs - startTs);
+          startTs = curTs;
+        }
+      );
       const silentMethodInstance2 = new SilentMethod(
         methodInstance,
         'silent',
@@ -133,15 +153,45 @@ describe('silent method request in queue with silent behavior', () => {
     const delayRequestTs = [] as number[];
 
     const startTs = Date.now();
-    const silentMethodInstance = new SilentMethod(methodInstance, 'silent', undefined, undefined, /.*/, 0, undefined, undefined, () => {
-      delayRequestTs.push(Date.now() - startTs);
-    });
-    const silentMethodInstance2 = new SilentMethod(methodInstance, 'silent', undefined, undefined, /.*/, 0, undefined, undefined, () => {
-      delayRequestTs.push(Date.now() - startTs);
-    });
-    const silentMethodInstance3 = new SilentMethod(methodInstance, 'silent', undefined, undefined, /.*/, 0, undefined, undefined, () => {
-      delayRequestTs.push(Date.now() - startTs);
-    });
+    const silentMethodInstance = new SilentMethod(
+      methodInstance,
+      'silent',
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      undefined,
+      () => {
+        delayRequestTs.push(Date.now() - startTs);
+      }
+    );
+    const silentMethodInstance2 = new SilentMethod(
+      methodInstance,
+      'silent',
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      undefined,
+      () => {
+        delayRequestTs.push(Date.now() - startTs);
+      }
+    );
+    const silentMethodInstance3 = new SilentMethod(
+      methodInstance,
+      'silent',
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      undefined,
+      () => {
+        delayRequestTs.push(Date.now() - startTs);
+      }
+    );
     pushNewSilentMethod2Queue(silentMethodInstance, false, 'ttt3');
     pushNewSilentMethod2Queue(silentMethodInstance2, false, 'ttt4');
     pushNewSilentMethod2Queue(silentMethodInstance3, false, 'ttt5');
@@ -194,11 +244,21 @@ describe('silent method request in queue with silent behavior', () => {
         id: ''
       });
       let startTs = Date.now();
-      const silentMethodInstance = new SilentMethod(methodInstance, 'silent', undefined, undefined, /.*/, 0, undefined, undefined, () => {
-        const curTs = Date.now();
-        delayRequestTs.push(curTs - startTs);
-        startTs = curTs;
-      });
+      const silentMethodInstance = new SilentMethod(
+        methodInstance,
+        'silent',
+        undefined,
+        undefined,
+        /.*/,
+        0,
+        undefined,
+        undefined,
+        () => {
+          const curTs = Date.now();
+          delayRequestTs.push(curTs - startTs);
+          startTs = curTs;
+        }
+      );
       const silentMethodInstance2 = new SilentMethod(
         methodInstance,
         'silent',

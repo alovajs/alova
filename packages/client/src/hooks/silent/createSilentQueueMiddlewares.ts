@@ -44,7 +44,15 @@ const PushedQueueEventKey = Symbol('SQPushedQueue');
 export type SQEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
   [FallbackEventKey]: ScopedSQEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
   [RetryEventKey]: ScopedSQRetryEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-  [BeforePushQueueEventKey]: ScopedSQEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+  [BeforePushQueueEventKey]: ScopedSQEvent<
+    State,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >;
   [PushedQueueEventKey]: ScopedSQEvent<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
 };
 
@@ -62,13 +70,43 @@ export let currentSilentMethod: SilentMethod<any, any, any, any, any, any, any, 
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  config?: SQHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    | AlovaMethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >,
+  config?: SQHookConfig<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => {
   const { behavior = 'queue', queue, retryError, maxRetryTimes, backoff } = config || {};
-  const eventManager = createEventManager<SQEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
-  const retryHandlers: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>[] =
-    [];
+  const eventManager =
+    createEventManager<SQEvents<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>>();
+  const retryHandlers: RetryHandler<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >[] = [];
   let handlerArgs: any[] | undefined;
 
   /**
@@ -80,9 +118,19 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     silentAssert(isFn(handler), 'method handler must be a function. eg. useSQRequest(() => method)');
     setVDataIdCollectBasket({});
     handlerArgs = args;
-    return (handler as MethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>)(
-      ...args
-    );
+    return (
+      handler as MethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >
+    )(...args);
   };
 
   /**
@@ -101,7 +149,10 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
     RequestConfig,
     Response,
     ResponseHeader
-  > = ({ method, sendArgs, cachedResponse, update, decorateSuccess, decorateError, decorateComplete, config }, next) => {
+  > = (
+    { method, sendArgs, cachedResponse, update, decorateSuccess, decorateError, decorateComplete, config },
+    next
+  ) => {
     const { silentDefaultResponse, vDataCaptured, force = falseValue } = config;
 
     // 因为behavior返回值可能会变化，因此每次请求都应该调用它重新获取返回值
@@ -226,7 +277,16 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
         // onBeforePush和onPushed事件是同步绑定的，因此需要异步执行入队列才能正常触发事件
         promiseThen(promiseResolve(undefinedValue), () => {
           const createPushEvent = () =>
-            createHookEvent(4, method, behaviorFinally, silentMethodInstance, undefinedValue, undefinedValue, undefinedValue, sendArgs);
+            createHookEvent(
+              4,
+              method,
+              behaviorFinally,
+              silentMethodInstance,
+              undefinedValue,
+              undefinedValue,
+              undefinedValue,
+              sendArgs
+            );
 
           // 将silentMethod放入队列并持久化
           const isPushed = pushNewSilentMethod2Queue(
@@ -291,7 +351,17 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * @param handler 回退事件回调
        */
       onFallback: (
-        handler: FallbackHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+        handler: FallbackHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >
       ) => {
         eventManager.on(FallbackEventKey, event => handler(event));
       },
@@ -301,7 +371,17 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * @param handler 入队列前的事件回调
        */
       onBeforePushQueue: (
-        handler: BeforePushQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+        handler: BeforePushQueueHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >
       ) => {
         eventManager.on(BeforePushQueueEventKey, event => handler(event));
       },
@@ -311,7 +391,17 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * @param handler 入队列后的事件回调
        */
       onPushedQueue: (
-        handler: PushedQueueHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+        handler: PushedQueueHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >
       ) => {
         eventManager.on(PushedQueueEventKey, event => handler(event));
       },
@@ -321,7 +411,17 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
        * @param handler 重试事件回调
        */
       onRetry: (
-        handler: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+        handler: RetryHandler<
+          State,
+          Computed,
+          Watched,
+          Export,
+          Responded,
+          Transformed,
+          RequestConfig,
+          Response,
+          ResponseHeader
+        >
       ) => {
         eventManager.on(RetryEventKey, event => handler(event));
       }

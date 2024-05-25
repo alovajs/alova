@@ -1,10 +1,9 @@
-import { createAlova, useRequest } from 'alova';
-import VueHook from 'alova/vue';
+import { axiosRequestAdapter } from '@/index';
+import { createAlova } from 'alova';
 import axios, { AxiosError } from 'axios';
 import { readFileSync } from 'node:fs';
 import path from 'path';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
-import { axiosRequestAdapter } from '@/index';
+import { Result, delay } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('request adapter', () => {
@@ -12,9 +11,8 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: axiosRequestAdapter(),
-      statesHook: VueHook,
       timeout: 100000,
-      responsed(response) {
+      responded(response) {
         const { status, data, config } = response;
         expect(status).toBe(200);
         expect(config.baseURL).toBe(baseURL);
@@ -42,32 +40,30 @@ describe('request adapter', () => {
       xsrfHeaderName: 'xsrf_header'
     });
 
-    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
-
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.code).toBe(200);
-    expect(data.value.data.method).toBe('GET');
-    expect(data.value.data.params).toStrictEqual({
+    const data = await Get;
+    expect(data.data).toStrictEqual({
+      path: '/unit-test',
+      method: 'GET',
+      params: {
+        a: '1',
+        b: '2'
+      }
+    });
+    expect(data.data.method).toBe('GET');
+    expect(data.data.params).toStrictEqual({
       a: '1',
       b: '2'
     });
-    expect(data.value.data.path).toBe('/unit-test');
-    expect(downloading.value).toEqual({ total: 92, loaded: 92 });
-    expect(error.value).toBeUndefined();
   });
 
   test('should call axios with post', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: axiosRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
-        return data;
+      responded: {
+        onSuccess({ data }) {
+          return data;
+        }
       }
     });
 
@@ -84,103 +80,78 @@ describe('request adapter', () => {
       }
     );
 
-    const { loading, data, onSuccess } = useRequest(Post);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-
-    const dataObj = JSON.parse(data.value);
-    expect(dataObj.code).toBe(200);
-    expect(dataObj.data.method).toBe('POST');
-    expect(dataObj.data.data).toStrictEqual({
-      post1: 'p1',
-      post2: 'p2'
+    const data = await Post;
+    const dataObj = JSON.parse(data);
+    expect(dataObj.data).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {
+        a: '1',
+        b: '2'
+      },
+      data: {
+        post1: 'p1',
+        post2: 'p2'
+      }
     });
-    expect(dataObj.data.path).toBe('/unit-test');
   });
 
   test('api not found when request', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: axiosRequestAdapter(),
-      statesHook: VueHook,
-      errorLogger: false,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-404');
-    const { loading, data, downloading, error, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
-
-    const { error: errRaw } = await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeInstanceOf(AxiosError);
-    expect(errRaw).toBeInstanceOf(AxiosError);
-    expect(errRaw.response.status).toBe(404);
-    expect(errRaw.response.statusText).toBe('api not found');
+    try {
+      await Get;
+    } catch (errRaw: any) {
+      expect(errRaw).toBeInstanceOf(AxiosError);
+      expect(errRaw.response.status).toBe(404);
+      expect(errRaw.response.statusText).toBe('api not found');
+    }
   });
 
   test('request fail with axios', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: axiosRequestAdapter(),
-      statesHook: VueHook,
-      errorLogger: false,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-error');
-    const { loading, data, downloading, error, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
-
-    const { error: errRaw } = await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeInstanceOf(AxiosError);
-    expect(errRaw).toBeInstanceOf(AxiosError);
-    expect(error.value?.message).toMatch(/Network Error/);
+    try {
+      await Get;
+    } catch (errRaw: any) {
+      expect(errRaw).toBeInstanceOf(AxiosError);
+      expect(errRaw.message).toMatch(/Network Error/);
+    }
   });
 
   test('should cancel request when call `controller.abort`', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: axiosRequestAdapter(),
-      statesHook: VueHook,
-      errorLogger: false,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-1s');
-    const { loading, data, error, abort, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
-
-    delay(10).then(abort);
-    await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(error.value?.message).toBe('canceled');
+    delay(10).then(Get.abort);
+    await expect(Get).rejects.toThrow('canceled');
   });
 
   test('should upload file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: axiosRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -199,38 +170,31 @@ describe('request adapter', () => {
       // enableUpload: true
     });
 
-    const { loading, data, uploading, error, onSuccess } = useRequest(Post);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.code).toBe(200);
-    expect(data.value.data.method).toBe('POST');
-    expect(data.value.data.path).toBe('/unit-test');
-    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    const data = await Post;
+    expect(data.code).toBe(200);
   });
 
   test('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: axiosRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get('/unit-test-download', {
-      enableDownload: true,
       responseType: 'blob'
     });
 
-    const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Get);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeInstanceOf(Blob);
-    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
-    expect(downloading.value).toEqual({ total: 250569, loaded: 250569 });
-    expect(error.value).toBeUndefined();
+    let downloading = {};
+    Get.onDownload(progress => {
+      downloading = progress;
+    });
+
+    const data = await Get;
+    expect(data).toBeInstanceOf(Blob);
+    expect(downloading).toEqual({ total: 250569, loaded: 250569 });
   });
 
   test('should request with custom axios instance', async () => {
@@ -254,14 +218,13 @@ describe('request adapter', () => {
       requestAdapter: axiosRequestAdapter({
         axios: newAxiosInst
       }),
-      statesHook: VueHook,
       // 比axios的request钩子更早触发
       beforeRequest() {
-        expect(axiosRequestFn).not.toBeCalled();
+        expect(axiosRequestFn).not.toHaveBeenCalled();
       },
       // 比axios的response钩子更迟触发
-      responsed(res) {
-        expect(axiosResponseFn).toBeCalled();
+      responded(res) {
+        expect(axiosResponseFn).toHaveBeenCalled();
         return res;
       }
     });
@@ -277,20 +240,13 @@ describe('request adapter', () => {
       xsrfHeaderName: 'xsrf_header'
     });
 
-    const { loading, data, error, onSuccess } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
-
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.code).toBe(200);
-    expect(data.value.data.method).toBe('GET');
-    expect(data.value.data.params).toStrictEqual({
+    const data = await Get;
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('GET');
+    expect(data.data.params).toStrictEqual({
       a: '1',
       b: '2'
     });
-    expect(data.value.data.path).toBe('/unit-test');
-    expect(error.value).toBeUndefined();
+    expect(data.data.path).toBe('/unit-test');
   });
 });

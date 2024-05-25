@@ -1,5 +1,13 @@
 import { createAssert } from '@alova/shared/assert';
-import { createSyncOnceRunner, getLocalCacheConfigParam, getTime, isFn, isNumber, noop, statesHookHelper } from '@alova/shared/function';
+import {
+  createSyncOnceRunner,
+  getLocalCacheConfigParam,
+  getTime,
+  isFn,
+  isNumber,
+  noop,
+  statesHookHelper
+} from '@alova/shared/function';
 import { GeneralState } from '@alova/shared/types';
 import {
   falseValue,
@@ -188,7 +196,13 @@ export default <AG extends AlovaGenerics>(
     isNextPage?: boolean;
     forceRequest?: boolean;
   }) => {
-    const { rawData = requestDataRef.current, preloadPage, fetchMethod, forceRequest = falseValue, isNextPage = falseValue } = payload;
+    const {
+      rawData = requestDataRef.current,
+      preloadPage,
+      fetchMethod,
+      forceRequest = falseValue,
+      isNextPage = falseValue
+    } = payload;
 
     const { e: expireMilliseconds } = getLocalCacheConfigParam(fetchMethod);
     // 如果缓存时间小于等于当前时间，表示没有设置缓存，此时不再预拉取数据
@@ -365,7 +379,10 @@ export default <AG extends AlovaGenerics>(
     } else {
       paginationAssert(isNumber(refreshPage), 'unable to calculate refresh page by item in pagination mode');
       // 页数相等，则刷新当前页，否则fetch数据
-      promiseCatch(refreshPage === page.v ? send(undefinedValue, trueValue) : fetch(handler(refreshPage, pageSize.v), trueValue), noop);
+      promiseCatch(
+        refreshPage === page.v ? send(undefinedValue, trueValue) : fetch(handler(refreshPage, pageSize.v), trueValue),
+        noop
+      );
     }
   };
 
@@ -380,7 +397,10 @@ export default <AG extends AlovaGenerics>(
     } else {
       // 筛选出上一页、当前页、下一页的数据
       const excludeSnapshotKeys = mapItem(
-        filterItem([getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)], Boolean),
+        filterItem(
+          [getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)],
+          Boolean
+        ),
         ({ entity }) => getMethodKey(entity)
       );
       snapshots = mapItem(
@@ -582,16 +602,6 @@ export default <AG extends AlovaGenerics>(
       replace,
       reload
     }),
-    ...exportObject(
-      {
-        data,
-        page,
-        pageCount,
-        pageSize,
-        total,
-        isLastPage
-      },
-      states
-    )
+    ...exportObject([data, page, pageCount, pageSize, total, isLastPage], states)
   };
 };

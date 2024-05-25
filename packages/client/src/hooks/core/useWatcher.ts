@@ -1,6 +1,7 @@
 import { objAssign } from '@alova/shared/function';
 import { len } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaMethodHandler, EnumHookType, Method, WatcherHookConfig, type UseHookReturnType } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaMethodHandler, EnumHookType, WatcherHookConfig, type UseHookReturnType } from '~/typings';
 import { watcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 

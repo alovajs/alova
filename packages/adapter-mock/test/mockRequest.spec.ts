@@ -1,8 +1,7 @@
-import { createAlova, useRequest } from 'alova';
-import VueHook from 'alova/vue';
-import { untilCbCalled } from 'root/testUtils';
-import defineMock from '@/defineMock';
 import createAlovaMockAdapter from '@/createAlovaMockAdapter';
+import defineMock from '@/defineMock';
+import { createAlova } from 'alova';
+import { delay, untilCbCalled, untilReject } from 'root/testUtils';
 
 declare const isSSR: boolean;
 describe('mock request', () => {
@@ -50,7 +49,6 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
     const payload = await alovaInst
@@ -109,7 +107,6 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
     const payload = await alovaInst
@@ -154,7 +151,6 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
 
@@ -195,7 +191,6 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
 
@@ -221,7 +216,6 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
 
@@ -255,7 +249,6 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
 
@@ -276,17 +269,15 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
-    const { abort, error, onError, onSuccess } = useRequest(alovaInst.Post('/detail'));
-    const mockFn = jest.fn();
-    onError(mockFn);
-    await untilCbCalled(onSuccess);
-    abort();
-    await untilCbCalled(setTimeout, 100);
-    expect(error.value).toBeUndefined();
-    expect(mockFn).not.toBeCalled();
+
+    const Post = alovaInst.Post('/detail');
+    delay(0).then(() => {
+      Post.abort();
+    });
+
+    await expect(Post).rejects.toThrow('The user abort request');
   });
 
   (isSSR ? xtest : test)('should abort request when call abort manually', async () => {
@@ -301,16 +292,19 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
 
-    const { abort, error } = useRequest(alovaInst.Post('/detail'));
-    expect(error.value).toBeUndefined();
+    const fn = jest.fn();
+    const Post = alovaInst.Post('/detail');
+    Post.send().catch(err => {
+      fn(err);
+    });
     await untilCbCalled(setTimeout, 500);
-    abort();
+    Post.abort();
     await untilCbCalled(setTimeout, 100);
-    expect(error.value?.message).toBe('The user abort request');
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.calls[0][0].message).toBe('The user abort request');
   });
 
   (isSSR ? xtest : test)('should abort request even if delay in mock function', async () => {
@@ -330,19 +324,21 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       requestAdapter: mockRequestAdapter
     });
-    const { abort, error } = useRequest(alovaInst.Post('/detail'));
-    expect(error.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
+    const fn = jest.fn();
+    const Post = alovaInst.Post('/detail');
+    Post.send().catch(err => {
+      fn(err);
+    });
     await untilCbCalled(setTimeout, 500);
-    abort();
+    Post.abort();
     await untilCbCalled(setTimeout, 100);
-    expect(error.value?.message).toBe('The user abort request');
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.calls[0][0].message).toBe('The user abort request');
   });
 
-  (isSSR ? xtest : test)('should timeout when timeout', async () => {
+  (isSSR ? xtest : test)('should throw timeout error when timeout', async () => {
     const mocks = defineMock({
       '[POST]/detail': async () => []
     });
@@ -354,17 +350,12 @@ describe('mock request', () => {
 
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       timeout: 500,
       requestAdapter: mockRequestAdapter
     });
 
-    const { error, onError } = useRequest(alovaInst.Post('/detail'));
-    expect(error.value).toBeUndefined();
-    await new Promise(resolve => {
-      onError(resolve);
-    });
-    expect(error.value?.message).toBe('request timeout');
+    const error = await untilReject(alovaInst.Post('/detail'));
+    expect(error.message).toBe('request timeout');
   });
 
   (isSSR ? xtest : test)('should timeout even if delay in mock function', async () => {
@@ -383,17 +374,12 @@ describe('mock request', () => {
     });
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
-      statesHook: VueHook,
       timeout: 500,
       requestAdapter: mockRequestAdapter
     });
 
-    const { error, onError } = useRequest(alovaInst.Post('/detail'));
-    expect(error.value).toBeUndefined();
-    await new Promise(resolve => {
-      onError(resolve);
-    });
-    expect(error.value?.message).toBe('request timeout');
+    const error = await untilReject(alovaInst.Post('/detail'));
+    expect(error.message).toBe('request timeout');
   });
 
   test('should match method url in `methodurl` mode', async () => {
@@ -417,7 +403,6 @@ describe('mock request', () => {
 
     const data = await createAlova({
       baseURL: 'http://xxx/v1/v2',
-      statesHook: VueHook,
       timeout: 500,
       requestAdapter: mockRequestAdapter
     })

@@ -1,6 +1,7 @@
 import { objAssign } from '@alova/shared/function';
 import { trueValue } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaMethodHandler, EnumHookType, Method, RequestHookConfig, type UseHookReturnType } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
+import { AlovaMethodHandler, EnumHookType, RequestHookConfig } from '~/typings';
 import createRequestState from './implements/createRequestState';
 
 export default function useRequest<AG extends AlovaGenerics>(
@@ -12,5 +13,5 @@ export default function useRequest<AG extends AlovaGenerics>(
   const { send } = props;
   return objAssign(props, {
     send: (...args: any[]) => send(args)
-  }) as UseHookReturnType<AG>;
+  });
 }

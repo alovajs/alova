@@ -1,4 +1,4 @@
-import { MockRequestLoggerAdapter } from '../typings';
+import { MockRequestLoggerAdapter } from '~/typings';
 
 // 预定义的样式和固定文本
 const mockLabel = 'Mock';
@@ -23,9 +23,22 @@ const transform2TableData = (obj: AnyObject) => {
 
 type AnyObject = Record<string, any>;
 // 打印请求信息，模拟数据请求专用
-const consoleRequestInfo: MockRequestLoggerAdapter = ({ isMock, url, method, headers, query, data, responseHeaders, response }) => {
+const consoleRequestInfo: MockRequestLoggerAdapter = ({
+  isMock,
+  url,
+  method,
+  headers,
+  query,
+  data,
+  responseHeaders,
+  response
+}) => {
   const cole = console;
-  cole.groupCollapsed(`%c${isMock ? mockLabel : realRequestLabel}`, labelStyle(isMock ? mockLabelColor : realRequestLabelColor), url);
+  cole.groupCollapsed(
+    `%c${isMock ? mockLabel : realRequestLabel}`,
+    labelStyle(isMock ? mockLabelColor : realRequestLabelColor),
+    url
+  );
 
   // 请求方法
   cole.log('%c[Method]', titleStyle, method.toUpperCase());

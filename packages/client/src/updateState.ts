@@ -32,7 +32,9 @@ export default async function updateState<
     const methodKey = getMethodInternalKey(matcher);
     const { id } = getContext(matcher);
     const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
-    const updateStateCollection = isFn(handleUpdate) ? ({ data: handleUpdate } as UpdateStateCollection<Responded>) : handleUpdate;
+    const updateStateCollection = isFn(handleUpdate)
+      ? ({ data: handleUpdate } as UpdateStateCollection<Responded>)
+      : handleUpdate;
 
     let updatedDataColumnData = undefinedValue as any;
     if (frontStates) {

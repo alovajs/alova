@@ -1,4 +1,4 @@
-import { Mock, MockWrapper } from '../typings';
+import { Mock, MockWrapper } from '~/typings';
 
 /**
  * 定义模拟数据

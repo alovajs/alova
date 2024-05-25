@@ -1,7 +1,6 @@
 import type {
   Alova,
   AlovaGenerics,
-  AlovaMethodHandler,
   CacheExpire,
   CacheMode,
   EffectRequestParams,
@@ -9,6 +8,7 @@ import type {
   ReferingObject,
   StatesHook
 } from '../../alova/typings';
+import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings';
 import { FrameworkReadableState, FrameworkState } from './model/FrameworkState';
 import { GeneralFn, GeneralState } from './types';
 import {
@@ -104,7 +104,8 @@ export const getContextOptions = <AG extends AlovaGenerics>(alovaInstance: Alova
  * 通过method实例获取alova配置数据
  * @returns alova配置对象
  */
-export const getOptions = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => getContextOptions(getContext(methodInstance));
+export const getOptions = <AG extends AlovaGenerics>(methodInstance: Method<AG>) =>
+  getContextOptions(getContext(methodInstance));
 
 /**
  * 获取请求方式的key值
@@ -143,7 +144,9 @@ export const getHandlerMethod = <AG extends AlovaGenerics>(
  */
 export const isSpecialRequestBody = (data: any) => {
   const dataTypeString = globalToString(data);
-  return /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) || instanceOf(data, ArrayBuffer);
+  return (
+    /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(dataTypeString) || instanceOf(data, ArrayBuffer)
+  );
 };
 export const objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T =>
   ObjectCls.assign(target, ...sources);
@@ -212,14 +215,17 @@ export const getLocalCacheConfigParam = <AG extends AlovaGenerics>(methodInstanc
  * @param args 构造函数参数
  * @returns 类实例
  */
-export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(Cls: T, ...args: ConstructorParameters<T>) =>
-  new Cls(...args);
+export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(
+  Cls: T,
+  ...args: ConstructorParameters<T>
+) => new Cls(...args);
 /**
  * 统一配置
  * @param 数据
  * @returns 统一的配置
  */
-export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) => (isFn(config) ? config(...args) : config);
+export const sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) =>
+  isFn(config) ? config(...args) : config;
 export const sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
   isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop;
 
@@ -282,38 +288,52 @@ export const walkObject = (
  * @param referingObject refering object exported from `promiseStatesHook` function
  * @returns simple and unified states creators and handlers
  */
-export function statesHookHelper(statesHook: StatesHook<GeneralState, GeneralState>, referingObject: ReferingObject = {}) {
-  const ref = <D>(initialValue: D) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
+export function statesHookHelper<AG extends AlovaGenerics>(
+  statesHook: StatesHook<GeneralState, GeneralState>,
+  referingObject: ReferingObject = {}
+) {
+  const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
-  const exportState = <D>(state: GeneralState<D>) => (statesHook.export || $self)(state, referingObject) as GeneralState<D>;
-  const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) => (statesHook.memorize ? statesHook.memorize(fn) : fn);
+  const exportState = <Data>(state: GeneralState<Data>) =>
+    (statesHook.export || $self)(state, referingObject) as GeneralState<Data>;
+  const memorize = <Callback extends (...args: any[]) => any>(fn: Callback) =>
+    statesHook.memorize ? statesHook.memorize(fn) : fn;
   const update = (newValue: any, state: GeneralState, key: string) =>
     statesHook.update({ [key]: newValue }, { [key]: state }, referingObject);
-  const mapDeps = (deps: (GeneralState | FrameworkReadableState<any>)[]) =>
+  const mapDeps = (deps: (GeneralState | FrameworkReadableState<any, string>)[]) =>
     mapItem(deps, item => (instanceOf(item, FrameworkReadableState) ? item.e : item));
   const { dehydrate } = statesHook;
   const statesList = [] as string[];
+
   return {
-    create: <D>(initialValue: D, key: string, isRef = falseValue) => {
+    create: <Data, Key extends string>(initialValue: Data, key: Key, isRef = falseValue) => {
       pushItem(statesList, key); // record the keys of created states.
       return newInstance(
-        FrameworkState<D>,
-        statesHook.create(initialValue, referingObject, isRef) as GeneralState<D>,
+        FrameworkState<Data, Key>,
+        statesHook.create(initialValue, referingObject, isRef) as GeneralState<Data>,
+        key,
         state => dehydrate(state, key, referingObject),
         exportState,
         (state, newValue) => update(newValue, state, key)
       );
     },
-    computed: <D>(getter: () => D, depList: (GeneralState | FrameworkReadableState<any>)[], key: string, isRef = falseValue) =>
+    computed: <Data, Key extends string>(
+      getter: () => Data,
+      depList: (GeneralState | FrameworkReadableState<any, string>)[],
+      key: Key,
+      isRef = falseValue
+    ) =>
       newInstance(
-        FrameworkReadableState<D>,
-        statesHook.computed(getter, mapDeps(depList), referingObject, isRef) as GeneralState<D>,
+        FrameworkReadableState<Data, Key>,
+        statesHook.computed(getter, mapDeps(depList), referingObject, isRef) as GeneralState<Data>,
+        key,
         state => dehydrate(state, key, referingObject),
         exportState
       ),
-    effectRequest: (effectRequestParams: EffectRequestParams<any>) => statesHook.effectRequest(effectRequestParams, referingObject),
+    effectRequest: (effectRequestParams: EffectRequestParams<any>) =>
+      statesHook.effectRequest(effectRequestParams, referingObject),
     ref,
-    watch: (source: (GeneralState | FrameworkReadableState<any>)[], callback: () => void) =>
+    watch: (source: (GeneralState | FrameworkReadableState<any, string>)[], callback: () => void) =>
       statesHook.watch(mapDeps(source), callback, referingObject),
     onMounted: (callback: () => void) => statesHook.onMounted(callback, referingObject),
     onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, referingObject),
@@ -325,24 +345,33 @@ export function statesHookHelper(statesHook: StatesHook<GeneralState, GeneralSta
 
     /**
      * batch export states and provide a update function that update states simply.
-     * @param states new States
+     * @param states framework state proxy array
      * @param coreHookStates the returns of useRequest/useWatcher/useFetcher that contains update function
      * @returns exported states and update function
      */
-    exportObject: <S extends Record<string, any>>(states: S, coreHookStates: Record<string, any> = {}) => {
-      const exportedStates = objectKeys(states).reduce(
-        (result, key) => {
-          result[key] = exportState(states[key]);
+    exportObject: <S extends FrameworkReadableState<any, string>[]>(
+      states: S,
+      coreHookStates: Record<string, any> = {}
+    ) => {
+      const exportedStates = states.reduce(
+        (result, item) => {
+          result[item.k] = item.e;
           return result;
         },
         {} as Record<string, GeneralState>
       );
 
+      type ExportedStateRecord<S extends FrameworkReadableState<any, string>[]> = {
+        [K in S[number]['k']]: Extract<S[number], { k: K }> extends FrameworkState<any, string>
+          ? ExportedState<Extract<S[number], { k: K }>['v'], AG['State']>
+          : ExportedComputed<Extract<S[number], { k: K }>['v'], AG['Computed']>;
+      };
+
       return {
-        ...(exportedStates as S),
+        ...(exportedStates as ExportedStateRecord<S>),
         __referingObj: referingObject,
         update: memorize((newStates: Record<string, any>, targetStates?: Record<string, GeneralState>) => {
-          targetStates = targetStates || states;
+          targetStates = targetStates || exportedStates;
           objectKeys(newStates).forEach(key => {
             if (statesList.includes(key)) {
               update(newStates[key], targetStates[key], key);
@@ -355,6 +384,22 @@ export function statesHookHelper(statesHook: StatesHook<GeneralState, GeneralSta
         })
       };
     },
+
+    /**
+     * state proxies to framework related states.
+     * @param framework state proxy array
+     * @returns framework related states array
+     */
+    statesObject: <S extends FrameworkReadableState<any, string>[]>(states: S) =>
+      states.reduce(
+        (result, item) => {
+          (result as any)[item.k] = item.e;
+          return result;
+        },
+        {} as {
+          [K in S[number]['k']]: Extract<S[number], { k: K }>['s'];
+        }
+      ),
 
     /**
      * batch memorize operate functions.

@@ -67,7 +67,11 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
     key => `${key}=${params[key]}`
   ).join('&');
   // 将get参数拼接到url后面，注意url可能已存在参数
-  return paramsStr ? (+completeURL.includes('?') ? `${completeURL}&${paramsStr}` : `${completeURL}?${paramsStr}`) : completeURL;
+  return paramsStr
+    ? +completeURL.includes('?')
+      ? `${completeURL}&${paramsStr}`
+      : `${completeURL}?${paramsStr}`
+    : completeURL;
 };
 
 /**
@@ -186,7 +190,8 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
         try {
           await PromiseCls.all([
             setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache, methodHitSource),
-            toStorage && setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
+            toStorage &&
+              setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
           ]);
         } catch (error) {}
       }
@@ -219,18 +224,23 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
   return {
     // 请求中断函数
     abort: () => {
-      promiseThen(requestAdapterCtrlsPromise, requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort());
+      promiseThen(
+        requestAdapterCtrlsPromise,
+        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
+      );
     },
     onDownload: (handler: ProgressUpdater) => {
       promiseThen(
         requestAdapterCtrlsPromise,
-        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler)
+        requestAdapterCtrls =>
+          requestAdapterCtrls && requestAdapterCtrls.onDownload && requestAdapterCtrls.onDownload(handler)
       );
     },
     onUpload: (handler: ProgressUpdater) => {
       promiseThen(
         requestAdapterCtrlsPromise,
-        requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler)
+        requestAdapterCtrls =>
+          requestAdapterCtrls && requestAdapterCtrls.onUpload && requestAdapterCtrls.onUpload(handler)
       );
     },
     response,

@@ -1,9 +1,8 @@
-import { createAlova, useRequest } from 'alova';
-import VueHook from 'alova/vue';
+import { xhrRequestAdapter } from '@/index';
+import { createAlova } from 'alova';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
-import { xhrRequestAdapter } from '@/index';
+import { Result, delay, untilReject } from 'root/testUtils';
 import { AlovaXHRResponse } from '~/typings';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -12,9 +11,8 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
       timeout: 100000,
-      responsed(response) {
+      responded(response) {
         const { status, statusText, data } = response;
         expect(status).toBe(200);
         expect(statusText).toBe('OK');
@@ -29,31 +27,21 @@ describe('request adapter', () => {
       }
     });
 
-    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
-
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.code).toBe(200);
-    expect(data.value.data.method).toBe('GET');
-    expect(data.value.data.params).toStrictEqual({
+    const data = await Get;
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('GET');
+    expect(data.data.params).toStrictEqual({
       a: '1',
       b: '2'
     });
-    expect(data.value.data.path).toBe('/unit-test');
-    expect(downloading.value).toStrictEqual({ total: 92, loaded: 92 });
-    expect(error.value).toBeUndefined();
+    expect(data.data.path).toBe('/unit-test');
   });
 
   test('should send post requset without `content-type`', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -73,25 +61,20 @@ describe('request adapter', () => {
       }
     );
 
-    const { loading, data, onSuccess } = useRequest(Post);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-
-    const dataObj = data.value;
-    expect(dataObj.code).toBe(200);
-    expect(dataObj.data.method).toBe('POST');
-    expect(dataObj.data.data).toStrictEqual({
+    const data = await Post;
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('POST');
+    expect(data.data.data).toStrictEqual({
       post1: 'p1',
       post2: 'p2'
     });
-    expect(dataObj.data.path).toBe('/unit-test');
+    expect(data.data.path).toBe('/unit-test');
   });
 
   test('should throw error when set wrong param', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook
+      requestAdapter: xhrRequestAdapter()
     });
 
     Object.defineProperty(XMLHttpRequest.prototype, 'timeout', {
@@ -107,7 +90,7 @@ describe('request adapter', () => {
         b: '2'
       }
     });
-    await expect(() => Get.send()).rejects.toThrow('mock timeout set error');
+    await expect(Get).rejects.toThrow('mock timeout set error');
     delete (XMLHttpRequest.prototype as any).timeout;
   });
 
@@ -115,8 +98,7 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -133,15 +115,11 @@ describe('request adapter', () => {
         mimeType: 'text/plain; charset=x-user-defined'
       });
 
-    const { loading, data, onSuccess } = useRequest(Post({ post1: 'p1', post2: 'p2' }));
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-
-    const dataObj = data.value;
-    expect(dataObj.code).toBe(200);
-    expect(dataObj.data.method).toBe('POST');
-    expect(dataObj.data.data).toStrictEqual({ post1: 'p1', post2: 'p2' });
-    expect(dataObj.data.path).toBe('/unit-test');
+    const data = await Post({ post1: 'p1', post2: 'p2' });
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('POST');
+    expect(data.data.data).toStrictEqual({ post1: 'p1', post2: 'p2' });
+    expect(data.data.path).toBe('/unit-test');
 
     // 再次测试提交复杂层级数据
     const dataRaw = await Post({
@@ -169,7 +147,7 @@ describe('request adapter', () => {
     }).send();
     expect(dataRaw.code).toBe(200);
     expect(dataRaw.data.method).toBe('POST');
-    expect(dataObj.data.path).toBe('/unit-test');
+    expect(data.data.path).toBe('/unit-test');
     expect(dataRaw.data.data).toStrictEqual({
       a: 'null',
       'b[0]': '2',
@@ -187,46 +165,31 @@ describe('request adapter', () => {
   test('api not found when request', async () => {
     const alovaInst = createAlova({
       baseURL,
-      requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook
+      requestAdapter: xhrRequestAdapter()
     });
 
     const Get = alovaInst.Get<AlovaXHRResponse<Result>>('/unit-test-404');
-    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
 
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.data).toBeNull();
-    expect(data.value.status).toBe(404);
-    expect(data.value.statusText).toBe('api not found');
+    const data = await Get;
+    expect(data.data).toBeNull();
+    expect(data.status).toBe(404);
+    expect(data.statusText).toBe('api not found');
   });
 
   test('request fail', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-error');
-    const { loading, data, downloading, error, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
 
-    const { error: errRaw } = await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBe(errRaw);
-    expect(error.value?.message).toMatch(/Network Error/);
+    const error = await untilReject(Get);
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toMatch(/Network Error/);
   });
 
   // 单独跑这个单测可以通过，整体测试报错，暂时先skip
@@ -234,58 +197,39 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
       timeout: 1,
-      errorLogger: false,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-passthrough');
-    const { loading, data, error, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
-
-    await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(error.value?.message).toBe('Network Timeout');
+    const error = await untilReject(Get);
+    expect(error.message).toBe('Network Timeout');
   });
 
   test('should cancel request when call `abort`', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      errorLogger: false,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get<Result>('/unit-test-passthrough');
-    const { loading, data, downloading, error, abort, onError } = useRequest(Get);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
-
-    delay(0).then(abort);
-    await untilCbCalled(onError);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeUndefined();
-    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value?.message).toBe('The user aborted a request.');
+    delay(0).then(() => {
+      Get.abort();
+    });
+    const error = await untilReject(Get);
+    expect(error.message).toBe('The user aborted a request.');
   });
 
   test('should upload file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
@@ -298,44 +242,36 @@ describe('request adapter', () => {
       type: 'image/jpeg'
     });
     formData.append('file', imageFile);
+    // msw的xhr.upload不支持上传功能
     const Post = alovaInst.Post<Result<string>>('/unit-test-upload', formData, {
-      withCredentials: true,
-      // jsdom的xhr.upload不支持上传功能，因此即使设置为true了也无法获取上传进度
-      enableUpload: true
+      withCredentials: true
     });
 
-    const { loading, data, uploading, error, onSuccess } = useRequest(Post);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.code).toBe(200);
-    expect(data.value.data.method).toBe('POST');
-    expect(data.value.data.path).toBe('/unit-test-upload');
-    expect(data.value.data.params.contentType).toMatch('multipart/form-data;');
-    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error.value).toBeUndefined();
+    const data = await Post;
+    expect(data.code).toBe(200);
+    expect(data.data.method).toBe('POST');
+    expect(data.data.path).toBe('/unit-test-upload');
+    expect(data.data.params.contentType).toMatch('multipart/form-data;');
   });
 
   test('should download file and pass the right args', async () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter(),
-      statesHook: VueHook,
-      responsed({ data }) {
+      responded({ data }) {
         return data;
       }
     });
 
     const Get = alovaInst.Get('/unit-test-download', {
-      enableDownload: true,
       responseType: 'blob'
     });
 
-    const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Get);
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value).toBeInstanceOf(Blob);
-    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(downloading.value).toStrictEqual({ total: 250569, loaded: 250569 });
-    expect(error.value).toBeUndefined();
+    let downloading = {};
+    Get.onDownload(progress => {
+      downloading = progress;
+    });
+    await Get;
+    expect(downloading).toStrictEqual({ total: 250569, loaded: 250569 });
   });
 });

@@ -20,24 +20,84 @@ import { RetriableFailEvent, RetriableHookConfig, RetriableRetryEvent } from '~/
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');
 
-export type RetriableEvents<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {
-  [RetryEventKey]: RetriableRetryEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
-  [FailEventKey]: RetriableFailEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>;
+export type RetriableEvents<
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+> = {
+  [RetryEventKey]: RetriableRetryEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >;
+  [FailEventKey]: RetriableFailEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >;
 };
 
 type RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: RetriableRetryEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  event: RetriableRetryEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => void;
 type FailHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = (
-  event: RetriableFailEvent<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  event: RetriableFailEvent<
+    State,
+    Computed,
+    Watched,
+    Export,
+    Responded,
+    Transformed,
+    RequestConfig,
+    Response,
+    ResponseHeader
+  >
 ) => void;
 const hookPrefix = 'useRetriableRequest';
 const assert = createAssert(hookPrefix);
 export default <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
   handler:
     | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
-    | AlovaMethodHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>,
-  config: RetriableHookConfig<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
+    | AlovaMethodHandler<
+        State,
+        Computed,
+        Watched,
+        Export,
+        Responded,
+        Transformed,
+        RequestConfig,
+        Response,
+        ResponseHeader
+      >,
+  config: RetriableHookConfig<State, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> = {}
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
 
@@ -50,7 +110,9 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
   const retryTimes = useFlag$(0);
   const stopManuallyError = useFlag$(undefinedValue as Error | undefined); // 停止错误对象，在手动触发停止时有值
   const methodInstanceLastest = useFlag$(
-    undefinedValue as Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> | undefined
+    undefinedValue as
+      | Method<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+      | undefined
   );
   const sendArgsLatest = useFlag$(undefinedValue as any[] | undefined);
   const currentLoadingState = useFlag$(falseValue);
@@ -125,7 +187,10 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
         // 请求失败时触发重试机制
         error => {
           // 没有手动触发停止，以及重试次数未到达最大时触发重试
-          if (!stopManuallyError.current && (isNumber(retry) ? retryTimes.current < retry : retry(error, ...sendArgs))) {
+          if (
+            !stopManuallyError.current &&
+            (isNumber(retry) ? retryTimes.current < retry : retry(error, ...sendArgs))
+          ) {
             retryTimes.current += 1;
             // 计算重试延迟时间
             const retryDelay = delayWithBackoff(backoff, retryTimes.current);
@@ -136,7 +201,16 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
               // 触发重试事件
               eventManager.emit(
                 RetryEventKey,
-                createHookEvent(9, method, undefinedValue, undefinedValue, undefinedValue, retryTimes.current, retryDelay, sendArgs) as any
+                createHookEvent(
+                  9,
+                  method,
+                  undefinedValue,
+                  undefinedValue,
+                  undefinedValue,
+                  retryTimes.current,
+                  retryDelay,
+                  sendArgs
+                ) as any
               );
             }, retryDelay);
           } else {
@@ -177,7 +251,17 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * @param handler 重试事件回调
    */
   const onRetry = (
-    handler: RetryHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: RetryHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => {
     eventManager.on(RetryEventKey, event => handler(event));
   };
@@ -192,7 +276,17 @@ export default <State, Computed, Watched, Export, Responded, Transformed, Reques
    * @param handler 失败事件回调
    */
   const onFail = (
-    handler: FailHandler<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+    handler: FailHandler<
+      State,
+      Computed,
+      Watched,
+      Export,
+      Responded,
+      Transformed,
+      RequestConfig,
+      Response,
+      ResponseHeader
+    >
   ) => {
     eventManager.on(FailEventKey, event => handler(event));
   };

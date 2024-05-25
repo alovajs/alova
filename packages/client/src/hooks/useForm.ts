@@ -12,8 +12,9 @@ import {
   walkObject
 } from '@alova/shared/function';
 import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGenerics, Method, promiseStatesHook, useRequest } from 'alova';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { FormHookConfig, FormHookHandler, FormReturnType, RestoreHandler, StoreDetailConfig } from '~/typings/general';
+import useRequest from './core/useRequest';
 
 const RestoreEventKey = Symbol('FormRestore');
 const getStoragedKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>, id?: ID) =>
@@ -77,7 +78,6 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   );
   // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
   const isCreateShardState = useFlag$(false);
-
   const originalHookReturns = useRequest((...args: any[]) => methodHandler(form.v, ...args), {
     ...config,
     __referingObj: referingObject,
@@ -124,12 +124,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   const hookReturns = {
     // 第一个参数固定为form数据
     ...originalHookReturns,
-    ...exportObject(
-      {
-        [keyForm]: form
-      },
-      originalHookReturns
-    ),
+    ...exportObject([form], originalHookReturns),
     ...memorizeOperators({
       updateForm,
       reset

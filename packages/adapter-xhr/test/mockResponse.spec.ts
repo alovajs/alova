@@ -1,9 +1,8 @@
+import { xhrMockResponse, xhrRequestAdapter } from '@/index';
 import { createAlovaMockAdapter, defineMock } from '@alova/mock';
 import { createAlova, invalidateCache } from 'alova';
-import vueHook from 'alova/vue';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { xhrMockResponse, xhrRequestAdapter } from '@/index';
 import { AlovaXHRResponse } from '~/typings';
 
 const mocks = defineMock({
@@ -32,7 +31,6 @@ const mockAdapter = createAlovaMockAdapter([mocks], {
 
 const alovaInst = createAlova({
   baseURL: 'http://xxx',
-  statesHook: vueHook,
   requestAdapter: mockAdapter
 });
 
@@ -77,7 +75,7 @@ describe('mock response adapter', () => {
     const Post = alovaInst.Post<AlovaXHRResponse<{ uploadPath: string }>>('/unit-test-upload', formData, {
       withCredentials: true
     });
-    const result = await Post.send();
+    const result = await Post;
     expect(result.status).toBe(200);
     expect(result.statusText).toBe('ok');
     expect(result.data).toStrictEqual({
@@ -87,7 +85,7 @@ describe('mock response adapter', () => {
 
   test('downloadFile', async () => {
     const Get = alovaInst.Get<AlovaXHRResponse<string>>('/unit-test-download');
-    const result = await Get.send();
+    const result = await Get;
     expect(result.status).toBe(200);
     expect(result.statusText).toBe('ok');
     expect(result.data).toBe('http://download-xxxxx');

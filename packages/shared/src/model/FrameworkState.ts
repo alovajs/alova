@@ -1,17 +1,20 @@
 import { GeneralState } from '@/types';
 
-type UpdateFn<D> = (state: GeneralState<D>, newValue: D) => void;
-type DehydrateFn<D> = (state: GeneralState<D>) => D;
-type ExportFn<D> = (state: GeneralState<D>) => GeneralState<D>;
-export class FrameworkReadableState<D> {
-  s: GeneralState<D>;
+type UpdateFn<Data> = (state: GeneralState<Data>, newValue: Data) => void;
+type DehydrateFn<Data> = (state: GeneralState<Data>) => Data;
+type ExportFn<Data> = (state: GeneralState<Data>) => GeneralState<Data>;
+export class FrameworkReadableState<Data, Key extends string> {
+  s: GeneralState<Data>;
 
-  protected $dhy: DehydrateFn<D>;
+  k: Key;
 
-  protected $exp: ExportFn<D>;
+  protected $dhy: DehydrateFn<Data>;
 
-  constructor(state: GeneralState<D>, dehydrate: DehydrateFn<D>, exportState: ExportFn<D>) {
+  protected $exp: ExportFn<Data>;
+
+  constructor(state: GeneralState<Data>, key: Key, dehydrate: DehydrateFn<Data>, exportState: ExportFn<Data>) {
     this.s = state;
+    this.k = key;
     this.$dhy = dehydrate;
     this.$exp = exportState;
   }
@@ -25,15 +28,21 @@ export class FrameworkReadableState<D> {
   }
 }
 
-export class FrameworkState<D> extends FrameworkReadableState<D> {
-  private $upd: UpdateFn<D>;
+export class FrameworkState<Data, Key extends string> extends FrameworkReadableState<Data, Key> {
+  private $upd: UpdateFn<Data>;
 
-  constructor(state: GeneralState<D>, dehydrate: DehydrateFn<D>, exportState: ExportFn<D>, update: UpdateFn<D>) {
-    super(state, dehydrate, exportState);
+  constructor(
+    state: GeneralState<Data>,
+    key: Key,
+    dehydrate: DehydrateFn<Data>,
+    exportState: ExportFn<Data>,
+    update: UpdateFn<Data>
+  ) {
+    super(state, key, dehydrate, exportState);
     this.$upd = update;
   }
 
-  set v(newValue: D) {
+  set v(newValue: Data) {
     this.$upd(this.s, newValue);
   }
 }

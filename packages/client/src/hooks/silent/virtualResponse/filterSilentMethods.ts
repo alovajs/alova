@@ -24,7 +24,9 @@ export const filterSilentMethods = (
         return trueValue;
       }
       const name = getConfig(silentMethodItem.entity).name || '';
-      const retain = instanceOf(methodNameMatcher, RegExp) ? regexpTest(methodNameMatcher, name) : name === methodNameMatcher;
+      const retain = instanceOf(methodNameMatcher, RegExp)
+        ? regexpTest(methodNameMatcher, name)
+        : name === methodNameMatcher;
       return retain && (filterActive ? silentMethodItem.active : trueValue);
     });
 
@@ -43,9 +45,20 @@ export const filterSilentMethods = (
  * @param filterActive 是否过滤掉激活状态的实例
  * @returns silentMethod实例，未找到时为undefined
  */
-export const getSilentMethod = <State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>(
+export const getSilentMethod = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  Responded,
+  Transformed,
+  RequestConfig,
+  Response,
+  ResponseHeader
+>(
   methodNameMatcher?: string | number | RegExp,
   queueName = DEFAUT_QUEUE_NAME,
   filterActive = falseValue
-): SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader> | undefined =>
-  filterSilentMethods(methodNameMatcher, queueName, filterActive)[0];
+):
+  | SilentMethod<State, Computed, Watched, Export, Responded, Transformed, RequestConfig, Response, ResponseHeader>
+  | undefined => filterSilentMethods(methodNameMatcher, queueName, filterActive)[0];

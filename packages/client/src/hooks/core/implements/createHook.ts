@@ -1,6 +1,7 @@
 import { falseValue, undefinedValue } from '@alova/shared/vars';
-import type { AlovaGenerics, FrontRequestState, Hook, ReferingObject, EnumHookType as TEnumHookType, UseHookConfig } from 'alova';
+import type { AlovaGenerics, FrontRequestState, ReferingObject } from 'alova';
 import { Method } from 'alova';
+import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
 
 export default <AG extends AlovaGenerics>(
   ht: TEnumHookType,

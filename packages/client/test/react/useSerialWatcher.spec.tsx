@@ -33,7 +33,9 @@ describe('react => useSerialWatcher', () => {
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova/useSerialWatcher]please use an array to represent serial requests');
+      expect(screen.getByRole('error')).toHaveTextContent(
+        '[alova/useSerialWatcher]please use an array to represent serial requests'
+      );
     });
   });
 
@@ -68,7 +70,10 @@ describe('react => useSerialWatcher', () => {
               }
             ]);
             methodHandlerMockFn();
-            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(`/detail/${ret2[0].id}`, ret2[1]);
+            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(
+              `/detail/${ret2[0].id}`,
+              ret2[1]
+            );
           }
         ],
         [state1]
@@ -158,7 +163,10 @@ describe('react => useSerialWatcher', () => {
               }
             ]);
             methodHandlerMockFn();
-            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(`/detail/${ret2[0].id + args.join()}`, ret2[1]);
+            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(
+              `/detail/${ret2[0].id + args.join()}`,
+              ret2[1]
+            );
           }
         ],
         [0]
@@ -226,7 +234,10 @@ describe('react => useSerialWatcher', () => {
           },
           ret2 => {
             methodHandlerMockFn();
-            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(`/detail/${ret2[0].id}`, ret2[1]);
+            return alovaInst.Delete<{ params: Record<any, any>; data: Record<any, any> }>(
+              `/detail/${ret2[0].id}`,
+              ret2[1]
+            );
           }
         ],
         [0],

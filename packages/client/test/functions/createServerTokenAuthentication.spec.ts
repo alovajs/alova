@@ -100,18 +100,19 @@ describe('createServerTokenAuthentication', () => {
     expect(res.list).toStrictEqual(generateContinuousNumbers(9));
     expect(loginInterceptorFn).toHaveBeenCalledTimes(1);
 
-    const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } = createServerTokenAuthentication({
-      login: {
-        metaMatches: {
-          login: true
-        },
-        handler(response, method) {
-          expect(response.total).toBe(300);
-          expect(method).toBeInstanceOf(Method);
-          loginInterceptorFn();
+    const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
+      createServerTokenAuthentication({
+        login: {
+          metaMatches: {
+            login: true
+          },
+          handler(response, method) {
+            expect(response.total).toBe(300);
+            expect(method).toBeInstanceOf(Method);
+            loginInterceptorFn();
+          }
         }
-      }
-    });
+      });
     const alovaInst2 = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -151,18 +152,19 @@ describe('createServerTokenAuthentication', () => {
     expect(res.list).toStrictEqual(generateContinuousNumbers(9));
     expect(logoutInterceptorFn).toHaveBeenCalledTimes(1);
 
-    const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } = createServerTokenAuthentication({
-      logout: {
-        metaMatches: {
-          logout: true
-        },
-        handler(response, method) {
-          expect(response.total).toBe(300);
-          expect(method).toBeInstanceOf(Method);
-          logoutInterceptorFn();
+    const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
+      createServerTokenAuthentication({
+        logout: {
+          metaMatches: {
+            logout: true
+          },
+          handler(response, method) {
+            expect(response.total).toBe(300);
+            expect(method).toBeInstanceOf(Method);
+            logoutInterceptorFn();
+          }
         }
-      }
-    });
+      });
     const alovaInst2 = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -512,29 +514,30 @@ describe('createServerTokenAuthentication', () => {
     expect(expireFn).not.toHaveBeenCalled();
 
     // 自定义忽略method规则;
-    const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } = createServerTokenAuthentication({
-      visitorMeta: {
-        loginRequired: false
-      },
-      refreshTokenOnError: {
-        isExpired: error => {
-          expireFn();
-          return error.status === '401';
+    const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
+      createServerTokenAuthentication({
+        visitorMeta: {
+          loginRequired: false
         },
-        handler: async method => {
-          expect(method).toBeInstanceOf(Method);
-          const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
-          refreshMethod.meta = {
-            authRole: 'refreshToken'
-          };
-          token = (await refreshMethod).token;
-          refreshTokenFn();
+        refreshTokenOnError: {
+          isExpired: error => {
+            expireFn();
+            return error.status === '401';
+          },
+          handler: async method => {
+            expect(method).toBeInstanceOf(Method);
+            const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
+            refreshMethod.meta = {
+              authRole: 'refreshToken'
+            };
+            token = (await refreshMethod).token;
+            refreshTokenFn();
+          }
+        },
+        assignToken: method => {
+          method.config.headers.Authorization = token;
         }
-      },
-      assignToken: method => {
-        method.config.headers.Authorization = token;
-      }
-    });
+      });
     const alovaInst2 = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
