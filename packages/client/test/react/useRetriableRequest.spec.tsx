@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 import React, { ReactElement, useEffect, useState } from 'react';
+import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 
 const alovaInst = createAlova({
@@ -38,6 +39,7 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 200);
     await screen.findByText(/loaded/);
     expect(mockRetryFn).not.toBeCalled();
     expect(mockErrorFn).not.toBeCalled();
@@ -99,7 +101,13 @@ describe('react => useRetriableRequest', () => {
         expect(mockCompleteFn).toHaveBeenCalledTimes(4);
         expect(mockSuccessFn).not.toBeCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2); // 分别在初始化、恢复为false两次被调用（立即发起请求时loading默认为true）
+        /**
+         * loading defaults to false (even if set immediate to true)
+         * 1 -> React setup
+         * 2 -> loading from false to true
+         * 3 -> loading from true to false
+         */
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(3);
       },
       {
         timeout: 4000
@@ -287,9 +295,12 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-    await waitFor(() => {
-      expect(mockRetryFn).toHaveBeenCalledTimes(2);
-    });
+    await waitFor(
+      () => {
+        expect(mockRetryFn).toHaveBeenCalledTimes(2);
+      },
+      { timeout: 4000 }
+    );
   });
 
   test('retring should effect when call send function', async () => {
@@ -330,6 +341,7 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 200);
     await screen.findByText(/loaded/);
     expect(mockRetryFn).not.toBeCalled();
     expect(mockErrorFn).not.toBeCalled();
@@ -385,13 +397,16 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-    await waitFor(() => {
-      expect(mockRetryFn).not.toBeCalled(); // 第一次重试前停止了重试
-      expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
-      expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
-      expect(mockSuccessFn).not.toBeCalled();
-      expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
-    });
+    await waitFor(
+      () => {
+        expect(mockRetryFn).not.toBeCalled(); // 第一次重试前停止了重试
+        expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
+        expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
+        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
+      },
+      { timeout: 4000 }
+    );
   });
 
   test("should throws error call stop function when isn't requesting", async () => {
@@ -421,6 +436,7 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 200);
     await screen.findByText('loaded');
     act(() => {
       fireEvent.click(screen.getByRole('btnStop'));
@@ -471,12 +487,20 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 200);
     await waitFor(
       () => {
+        expect(screen.getByRole('status')).toHaveTextContent('loaded');
         expect(screen.getByRole('error')).toHaveTextContent('[alova/useRetriableRequest]stop retry manually');
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
         expect(mockFailFn).toHaveBeenCalledTimes(1);
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2); // 分别在初始化、恢复为false两次被调用（立即发起请求时loading默认为true）
+        /**
+         * loading defaults to false (even if set immediate to true)
+         * 1 -> React setup
+         * 2 -> loading from false to true
+         * 3 -> loading from true to false
+         */
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(3);
       },
       {
         timeout: 4000
@@ -486,18 +510,22 @@ describe('react => useRetriableRequest', () => {
     fireEvent.click(screen.getByRole('btnSend'));
     await waitFor(
       () => {
+        expect(screen.getByRole('status')).toHaveTextContent('loaded');
         expect(screen.getByRole('error')).toHaveTextContent('[alova/useRetriableRequest]stop retry manually');
         expect(mockRetryFn).toHaveBeenCalledTimes(4);
         expect(mockFailFn).toHaveBeenCalledTimes(2);
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(4); // 设置为true、设置回false两次被调用
+        /**
+         * 4 -> loading from false to true
+         * 5 -> loading from true to false
+         */
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(5);
       },
       {
         timeout: 4000
       }
     );
-  });
+  }, 10000);
 
-  jest.setTimeout(10000);
   test('should reset retry times when send request again', async () => {
     const methodInstance = alovaInst.Post('/detail-error', {
       id: 'j',
@@ -550,7 +578,13 @@ describe('react => useRetriableRequest', () => {
         expect(mockCompleteFn).toHaveBeenCalledTimes(4);
         expect(mockSuccessFn).not.toBeCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2); // 分别在初始化、恢复为false两次被调用（立即发起请求时loading默认为true）
+        /**
+         * loading defaults to false (even if set immediate to true)
+         * 1 -> React setup
+         * 2 -> loading from false to true
+         * 3 -> loading from true to false
+         */
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(3);
       },
       {
         timeout: 4000
@@ -565,13 +599,13 @@ describe('react => useRetriableRequest', () => {
         expect(mockCompleteFn).toHaveBeenCalledTimes(8);
         expect(mockSuccessFn).not.toBeCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(2);
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(4); // 设置为true、恢复为false两次被调用
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(5);
       },
       {
         timeout: 4000
       }
     );
-  });
+  }, 10000);
 
   test('should access actions by middleware actionDelegation', async () => {
     const methodInstance = alovaInst.Post('/detail');
@@ -608,13 +642,91 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 200);
     await screen.findByText(/loaded/);
     expect(mockSuccessFn).toHaveBeenCalledTimes(1);
     expect(mockCompleteFn).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('btn'));
+    await untilCbCalled(setTimeout, 200);
     await screen.findByText(/loaded/);
     expect(mockSuccessFn).toHaveBeenCalledTimes(2);
     expect(mockCompleteFn).toHaveBeenCalledTimes(2);
-  });
+  }, 10000);
+
+  test('should stop before response', async () => {
+    const methodInstance = alovaInst.Get('/query-1s');
+    const mockFailFn = jest.fn();
+    const mockSuccessFn = jest.fn();
+
+    const Page = () => {
+      const { loading, stop, send, onFail, onSuccess, error } = useRetriableRequest(methodInstance);
+      onFail(event => {
+        mockFailFn();
+        expect(event.error.message).toBe('[alova/useRetriableRequest]stop retry manually');
+      });
+      onSuccess(mockSuccessFn);
+      const handleSend = () => {
+        send().catch(() => {});
+      };
+      const handleStop = async () => {
+        stop();
+      };
+
+      return (
+        <div>
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          {error ? <span role="error">{error.message}</span> : null}
+          <button
+            role="btnSend"
+            onClick={handleSend}>
+            send request
+          </button>
+          <button
+            role="btnStop"
+            onClick={handleStop}>
+            stop retry
+          </button>
+        </div>
+      );
+    };
+
+    render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 100);
+    await screen.findByText('loading');
+    act(() => {
+      fireEvent.click(screen.getByRole('btnStop'));
+    });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('status')).toHaveTextContent('loaded');
+        expect(mockFailFn).toHaveBeenCalledTimes(1);
+        expect(mockSuccessFn).not.toHaveBeenCalled();
+        expect(screen.getByRole('error')).toHaveTextContent('[alova/useRetriableRequest]stop retry manually');
+      },
+      { timeout: 4000 }
+    );
+    act(() => {
+      fireEvent.click(screen.getByRole('btnSend'));
+    });
+
+    // ensure the first request have been responded
+    await untilCbCalled(setTimeout, 1000);
+
+    await waitFor(
+      () => {
+        expect(screen.getByRole('status')).toHaveTextContent('loaded');
+        /**
+         * now both two requests have been responded.
+         * if `stop()` doesn't handle the promise from of middleware properly,
+         * the response of the first request will emit success event
+         */
+        expect(mockFailFn).toHaveBeenCalledTimes(1);
+        // set by the 2nd response, ignoring the first one
+        expect(mockSuccessFn).toHaveBeenCalledTimes(1);
+        expect(screen.queryByRole('error')).toBeNull();
+      },
+      { timeout: 4000 }
+    );
+  }, 10000);
 });

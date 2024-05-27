@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { useRequest } from '@/index';
 import createHookEvent from '@/util/createHookEvent';
-import { delayWithBackoff } from '@/util/helper';
+import { delayWithBackoff, usePromise } from '@/util/helper';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import { isNumber, noop, statesHookHelper } from '@alova/shared/function';
@@ -47,8 +47,14 @@ export default <AG extends AlovaGenerics>(
   const currentLoadingState = useFlag$(falseValue);
   const requesting = useFlag$(falseValue); // 是否正在请求
   const retryTimer = useFlag$(undefinedValue as string | number | NodeJS.Timeout | undefined);
+  const promiseObj = useFlag$(usePromise());
+  const requestResolved = useFlag$(falseValue);
 
   const emitOnFail = (method: Method<AG>, sendArgs: any[], error: any) => {
+    if (requestResolved.current) {
+      return;
+    }
+    requestResolved.current = trueValue;
     // 需要异步触发onFail，让onError和onComplete先触发
     setTimeoutFn(() => {
       eventManager.emit(
@@ -98,12 +104,23 @@ export default <AG extends AlovaGenerics>(
       methodInstanceLastest.current = method;
       sendArgsLatest.current = sendArgs;
       requesting.current = trueValue;
-      return promiseThen(
-        next(),
 
+      // init the resolved flag as `false` before first request.
+      if (retryTimes.current === 0) {
+        requestResolved.current = falseValue;
+      }
+
+      /**
+       * Consider this situation: user call stop() and send another request immediately,
+       * but now the previous request haven't finished. `next()` will raises the branch on completion.
+       *
+       * By using Promise.race(), we can cause the returned promise to be rejected immediately when call `stop()`
+       */
+      return promiseThen(
+        Promise.race([next(), promiseObj.current.promise]),
         // 请求成功时设置loading为false
         val => {
-          retryTimes.current = 0; // 重置已重试次数
+          // retryTimes.current = 0; // 重置已重试次数
           requesting.current = falseValue;
           setLoading();
           return val;
@@ -163,10 +180,17 @@ export default <AG extends AlovaGenerics>(
     if (requesting.current) {
       nestedHookProvider.abort();
     } else {
-      emitOnFail(methodInstanceLastest.current as any, sendArgsLatest.current as any, stopManuallyError.current);
+      promiseObj.current.reject(stopManuallyError.current);
+      setTimeout(() => {
+        promiseObj.current = usePromise();
+      });
       nestedHookProvider.update({ error: stopManuallyError.current, loading: falseValue });
       currentLoadingState.current = falseValue;
       clearTimeout(retryTimer.current); // 清除重试定时器
+
+      // raise fail event at the end, because the above process depends on `stopManuallyError`
+      // emit this event will clears this variable
+      emitOnFail(methodInstanceLastest.current as any, sendArgsLatest.current as any, stopManuallyError.current);
     }
   };
 

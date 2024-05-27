@@ -1,4 +1,5 @@
 import { createAlovaMockAdapter, defineMock } from '@alova/mock';
+import { untilCbCalled } from 'root/testUtils';
 
 const total = 300;
 let mockListData: any;
@@ -98,7 +99,6 @@ const mocks = defineMock({
       detailErrorTimes = 0;
       detailErrorId = id;
     }
-
     if (detailErrorTimes < Number(failTimes)) {
       detailErrorTimes += 1;
       return {
@@ -162,12 +162,16 @@ const mocks = defineMock({
   },
   '/return-query': ({ query }) => ({
     query
-  })
+  }),
+  '/query-1s': async ({ query }) => {
+    await untilCbCalled(setTimeout, 1000);
+    return { query };
+  }
 });
 
 // 模拟数据请求适配器
 export const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-  delay: 50,
+  delay: 150,
   onMockResponse: ({ status, statusText, body }) => {
     // 当status为错误码时，如果包含notError则以body的形式返回错误信息
     if (status >= 300) {
