@@ -17,15 +17,7 @@ import {
   promiseStatesHook
 } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
-import {
-  SSEHookConfig,
-  SSEHookReadyState,
-  SSEOn,
-  SSEOnErrorTrigger,
-  SSEOnMessageTrigger,
-  SSEOnOpenTrigger,
-  UsePromiseExposure
-} from '~/typings/general';
+import { SSEHookConfig, SSEHookReadyState, SSEOn, UsePromiseExposure } from '~/typings/general';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
@@ -48,7 +40,7 @@ const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSour
   Message: 'message'
 } as const;
 
-export default <Data, AG extends AlovaGenerics>(
+export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   handler: Method<AG> | AlovaMethodHandler<AG>,
   config: SSEHookConfig = {}
 ) => {
@@ -62,7 +54,10 @@ export default <Data, AG extends AlovaGenerics>(
   // ! 暂时不支持指定 abortLast
   const abortLast = trueValue;
 
-  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper(promiseStatesHook());
+  let { memorize } = promiseStatesHook();
+  memorize ??= $self;
+
+  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper<AG>(promiseStatesHook());
 
   const usingSendArgs = ref<any[]>([]);
   const eventSource = ref<EventSource | undefined>(undefinedValue);
@@ -77,20 +72,20 @@ export default <Data, AG extends AlovaGenerics>(
 
   const eventManager = createEventManager<SSEEvents<Data, AG>>();
   // 储存自定义事件的 useCallback 对象，其中 key 为 eventName
-  const customEventMap: Map<string, ReturnType<typeof useCallback>> = new Map();
-  const onOpen = (handler: SSEOnOpenTrigger<AG>) => {
+  const customEventMap = ref(new Map<string, ReturnType<typeof useCallback>>());
+  const onOpen = (handler: (event: AlovaSSEEvent<AG>) => void) => {
     eventManager.on(SSEOpenEventKey, handler);
   };
-  const onMessage = (handler: SSEOnMessageTrigger<Data, AG>) => {
+  const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<AG, Data>) => void) => {
     eventManager.on(SSEMessageEventKey, handler);
   };
-  const onError = (handler: SSEOnErrorTrigger<AG>) => {
+  const onError = (handler: (event: AlovaSSEErrorEvent<AG>) => void) => {
     eventManager.on(SSEErrorEventKey, handler);
   };
 
-  let responseSuccessHandler: RespondedHandler<AG> = $self;
-  let responseErrorHandler: ResponseErrorHandler<AG> = throwFn;
-  let responseCompleteHandler: ResponseCompleteHandler<AG> = noop;
+  let responseSuccessHandler = ref<RespondedHandler<AG>>($self);
+  let responseErrorHandler = ref<ResponseErrorHandler<AG>>(throwFn);
+  let responseCompleteHandler = ref<ResponseCompleteHandler<AG>>(noop);
 
   /**
    * 设置响应拦截器，在每次 send 之后都需要调用
@@ -101,12 +96,12 @@ export default <Data, AG extends AlovaGenerics>(
     responseUnified = responded;
 
     if (isFn(responseUnified)) {
-      responseSuccessHandler = responseUnified;
+      responseSuccessHandler.current = responseUnified;
     } else if (responseUnified && isPlainObject(responseUnified)) {
       const { onSuccess: successHandler, onError: errorHandler, onComplete: completeHandler } = responseUnified;
-      responseSuccessHandler = isFn(successHandler) ? successHandler : responseSuccessHandler;
-      responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
-      responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;
+      responseSuccessHandler.current = isFn(successHandler) ? successHandler : responseSuccessHandler.current;
+      responseErrorHandler.current = isFn(errorHandler) ? errorHandler : responseErrorHandler.current;
+      responseCompleteHandler.current = isFn(completeHandler) ? completeHandler : responseCompleteHandler.current;
     }
   };
 
@@ -144,9 +139,9 @@ export default <Data, AG extends AlovaGenerics>(
       return Promise.resolve(baseEvent);
     }
 
-    const globalSuccess = interceptByGlobalResponded ? responseSuccessHandler : $self;
-    const globalError = interceptByGlobalResponded ? responseErrorHandler : throwFn;
-    const globalFinally = interceptByGlobalResponded ? responseCompleteHandler : noop;
+    const globalSuccess = interceptByGlobalResponded ? responseSuccessHandler.current : $self;
+    const globalError = interceptByGlobalResponded ? responseErrorHandler.current : throwFn;
+    const globalFinally = interceptByGlobalResponded ? responseCompleteHandler.current : noop;
 
     const p = promiseFinally(
       promiseThen(
@@ -184,23 +179,24 @@ export default <Data, AG extends AlovaGenerics>(
   // * MARK: EventSource 的事件处理
 
   const onCustomEvent: SSEOn<AG> = (eventName, callbackHandler) => {
-    if (!customEventMap.has(eventName)) {
+    const currentMap = customEventMap.current;
+    if (!currentMap.has(eventName)) {
       const useCallbackObject = useCallback<(event: AlovaSSEEvent<AG>) => void>(callbacks => {
         if (callbacks.length === 0) {
           eventSource.current?.removeEventListener(eventName, useCallbackObject[1] as any);
-          customEventMap.delete(eventName);
+          customEventMap.current.delete(eventName);
         }
       });
 
       const trigger = useCallbackObject[1];
-      customEventMap.set(eventName, useCallbackObject);
+      currentMap.set(eventName, useCallbackObject);
       eventSource.current?.addEventListener(eventName, event => {
         promiseThen(createSSEEvent(eventName as any, Promise.resolve(event.data)), sendSSEEvent(trigger) as any);
       });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const [onEvent] = customEventMap.get(eventName)!;
+    const [onEvent] = currentMap.get(eventName)!;
 
     return onEvent(callbackHandler);
   };
@@ -208,12 +204,12 @@ export default <Data, AG extends AlovaGenerics>(
    * 取消自定义事件在 useCallback 中的注册
    */
   const offCustomEvent = () => {
-    customEventMap.forEach(([_1, _2, offTrigger]) => {
+    customEventMap.current.forEach(([_1, _2, offTrigger]) => {
       offTrigger();
     });
   };
 
-  const esOpen = () => {
+  const esOpen = memorize(() => {
     // resolve 使用 send() 时返回的 promise
     readyState.v = SSEHookReadyState.OPEN;
     promiseThen(createSSEEvent(MessageType.Open, Promise.resolve()), event =>
@@ -221,22 +217,23 @@ export default <Data, AG extends AlovaGenerics>(
     );
     // ! 一定要在调用 onOpen 之后 resolve
     sendPromiseObject.current?.resolve();
-  };
+  });
 
-  const esError = (event: Event) => {
+  const esError = memorize((event: Event) => {
     readyState.v = SSEHookReadyState.CLOSED;
     promiseThen(
       createSSEEvent(MessageType.Error, Promise.reject((event as any)?.message ?? 'SSE Error')),
       sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
     );
-  };
+    sendPromiseObject.current?.resolve();
+  });
 
-  const esMessage = (event: MessageEvent<any>) => {
+  const esMessage = memorize((event: MessageEvent<any>) => {
     promiseThen(
       createSSEEvent(MessageType.Message, Promise.resolve(event.data)),
       sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
     );
-  };
+  });
 
   /**
    * 关闭当前 eventSource 的注册
@@ -260,7 +257,7 @@ export default <Data, AG extends AlovaGenerics>(
     readyState.v = SSEHookReadyState.CLOSED;
     // eventSource 关闭后，取消注册所有自定义事件
     // 否则可能造成内存泄露
-    customEventMap.forEach(([_, eventTrigger], eventName) => {
+    customEventMap.current.forEach(([_, eventTrigger], eventName) => {
       es.removeEventListener(eventName, eventTrigger);
     });
   };
@@ -308,7 +305,7 @@ export default <Data, AG extends AlovaGenerics>(
 
     // 以及 自定义事件
     // 如果在 connect（send）之前就使用了 on 监听，则 customEventMap 里就已经有事件存在
-    customEventMap.forEach(([_, eventTrigger], eventName) => {
+    customEventMap.current.forEach(([_, eventTrigger], eventName) => {
       es?.addEventListener(eventName, event => {
         promiseThen(createSSEEvent(eventName as any, Promise.resolve(event.data)), sendSSEEvent(eventTrigger) as any);
       });
@@ -332,6 +329,7 @@ export default <Data, AG extends AlovaGenerics>(
   onMounted(() => {
     if (immediate) {
       connect();
+      sendPromiseObject.current?.promise.catch(() => {});
     }
   });
 

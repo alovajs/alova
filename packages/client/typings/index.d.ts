@@ -19,13 +19,10 @@ import {
   IsUnknown,
   NotifyHandler,
   OffEventCallback,
-  PaginationHookConfig,
   RetriableExposure,
   RetriableHookConfig,
   SQHookExposure,
   SQRequestHookConfig,
-  SSEExposure,
-  SSEHookConfig,
   ServerTokenAuthenticationOptions,
   SilentFactoryBootOptions,
   SilentMethod,
@@ -419,11 +416,11 @@ export declare function updateState<Responded>(
 // ===================================================
 // ===================================================
 
-type UsePaginationExposure<S, E, R, T, RC, RE, RH, LD extends unknown[]> = Omit<
-  UseHookExposure<S, E, R, T, RC, RE, RH>,
+type UsePaginationExposure<AG extends AlovaGenerics, LD extends unknown[]> = Omit<
+  UseHookExposure<AG>,
   'data' | 'update'
 > & {
-  page: Ref<number>;
+  page: ExportedState<number, AG['State']>;
   pageSize: Ref<number>;
   data: Ref<
     IsUnknown<
@@ -483,28 +480,22 @@ type UsePaginationExposure<S, E, R, T, RC, RE, RH, LD extends unknown[]> = Omit<
   reload: () => void;
 };
 
-/**
- * 基于alova.js的vue分页hook
- * 分页相关状态自动管理、前后一页预加载、自动维护数据的新增/编辑/移除
- *
- * @param handler method创建函数
- * @param config pagination hook配置
- * @returns {UsePaginationExposure}
- */
-declare function usePagination<
-  S extends Ref,
-  E extends Ref,
-  R,
-  T,
-  RC,
-  RE,
-  RH,
-  LD extends unknown[],
-  WS extends (WatchSource | object)[]
->(
-  handler: (page: number, pageSize: number) => Method<S, E, R, T, RC, RE, RH>,
-  config?: PaginationHookConfig<S, E, R, T, RC, RE, RH, LD, WS>
-): UsePaginationExposure<S, E, R, T, RC, RE, RH, LD>;
+// /**
+//  * 基于alova.js的vue分页hook
+//  * 分页相关状态自动管理、前后一页预加载、自动维护数据的新增/编辑/移除
+//  *
+//  * @param handler method创建函数
+//  * @param config pagination hook配置
+//  * @returns {UsePaginationExposure}
+//  */
+// declare function usePagination<
+//   AG extends AlovaGenerics,
+//   LD extends unknown[] = any,
+//   WS extends (WatchSource | object)[] = any
+// >(
+//   handler: (page: number, pageSize: number) => Method<AG>,
+//   config?: PaginationHookConfig<AG, LD, WS>
+// ): UsePaginationExposure<AG, LD>;
 
 /**
  * 带silentQueue的request hook
@@ -583,10 +574,10 @@ declare function useForm<
  * @param config 配置参数
  * @return useSSE相关数据和操作函数
  */
-declare function useSSE<Data = any, S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any>(
-  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: SSEHookConfig
-): SSEExposure<S, Data>;
+// declare function useSSE<Data = any, AG extends AlovaGenerics>(
+//   handler: Method<AG> | AlovaMethodHandler<AG>,
+//   config?: SSEHookConfig
+// ): SSEExposure<AG['State'], Data>;
 
 /**
  * useRetriableRequest

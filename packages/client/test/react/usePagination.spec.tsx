@@ -44,15 +44,7 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize, setPageSize],
-        isLastPage
-      } = usePagination(getter, {
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, update } = usePagination(getter, {
         total: res => res.total,
         data: res => res.list,
         initialData: {
@@ -71,17 +63,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="setPageSize"
-            onClick={() => setPageSize(20)}>
+            onClick={() => update({ pageSize: 20 })}>
             btn2
           </button>
           <button
             role="setLastPage"
-            onClick={() => setPage(pageCount || 1)}>
+            onClick={() => update({ page: pageCount || 1 })}>
             btn3
           </button>
         </div>
@@ -185,15 +177,7 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        loading,
-        pageSize: [pageSize, setPageSize],
-        page: [page, setPage],
-        data,
-        total,
-        pageCount,
-        isLastPage
-      } = usePagination(getter, {
+      const { loading, pageSize, page, data, total, pageCount, isLastPage, update } = usePagination(getter, {
         total: res => res.total,
         data: res => res.list,
         immediate: false
@@ -209,17 +193,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="setPageSize"
-            onClick={() => setPageSize(20)}>
+            onClick={() => update({ pageSize: 20 })}>
             btn2
           </button>
           <button
             role="setLastPage"
-            onClick={() => setPage(pageCount || 1)}>
+            onClick={() => update({ page: pageCount || 1 })}>
             btn3
           </button>
         </div>
@@ -260,19 +244,14 @@ describe('react => usePagination', () => {
 
     function Page() {
       const [keyword, setKeyword] = useState('');
-      const {
-        loading,
-        pageSize: [pageSize, setPageSize],
-        pageCount,
-        isLastPage,
-        page: [page, setPage],
-        data,
-        total
-      } = usePagination((p, ps) => getter(p, ps, keyword), {
-        watchingStates: [keyword],
-        total: res => res.total,
-        data: res => res.list
-      });
+      const { loading, pageSize, pageCount, isLastPage, page, data, total, update } = usePagination(
+        (p, ps) => getter(p, ps, keyword),
+        {
+          watchingStates: [keyword],
+          total: res => res.total,
+          data: res => res.list
+        }
+      );
       return (
         <div>
           <span role="status">{loading ? 'loading' : 'loaded'}</span>
@@ -284,12 +263,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="setPageSize"
-            onClick={() => setPageSize(20)}>
+            onClick={() => update({ pageSize: 20 })}>
             btn2
           </button>
           <button
@@ -351,16 +330,7 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        loading,
-        data,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize, setPageSize],
-        isLastPage,
-        refresh
-      } = usePagination(getter, {
+      const { loading, data, pageCount, total, page, pageSize, isLastPage, refresh, update } = usePagination(getter, {
         total: res => res.total,
         data: res => res.list,
         initialPage: 3
@@ -376,12 +346,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="setPageSize"
-            onClick={() => setPageSize(20)}>
+            onClick={() => update({ pageSize: 20 })}>
             btn2
           </button>
           <button
@@ -421,7 +391,7 @@ describe('react => usePagination', () => {
       return data;
     });
     fireEvent.click(screen.getByRole('refresh1')); // 在翻页模式下，不是当前页会使用fetch
-    await waitFor(() => {
+    await waitFor(async () => {
       const cache = await queryCache(getter(1, 10));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(9, 0, i => (i === 0 ? 100 : i)));
     });
@@ -439,20 +409,11 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize, setPageSize],
-        isLastPage,
-        insert,
-        onFetchSuccess
-      } = usePagination(getter, {
-        data: res => res.list,
-        initialPage: 2 // 默认从第2页开始
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, insert, onFetchSuccess, update } =
+        usePagination(getter, {
+          data: res => res.list,
+          initialPage: 2 // 默认从第2页开始
+        });
       onFetchSuccess(fetchMockFn);
 
       return (
@@ -466,17 +427,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="pageToLast"
-            onClick={() => setPage(31)}>
+            onClick={() => update({ page: 31 })}>
             btn1
           </button>
           <button
             role="setPageSize"
-            onClick={() => setPageSize(20)}>
+            onClick={() => update({ pageSize: 20 })}>
             btn2
           </button>
           <button
@@ -571,21 +532,12 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        insert,
-        onFetchSuccess
-      } = usePagination(getter, {
-        data: res => res.list,
-        initialPage: 2, // 默认从第2页开始
-        initialPageSize: 4
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, insert, onFetchSuccess, update } =
+        usePagination(getter, {
+          data: res => res.list,
+          initialPage: 2, // 默认从第2页开始
+          initialPageSize: 4
+        });
       onFetchSuccess(fetchMockFn);
 
       return (
@@ -599,12 +551,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -669,16 +621,7 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        replace
-      } = usePagination(getter, {
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, replace, update } = usePagination(getter, {
         data: res => res.list
       });
       const [error, setError] = useState(undefined as Error | undefined);
@@ -695,12 +638,12 @@ describe('react => usePagination', () => {
           <span role="error">{error?.message || ''}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -814,19 +757,13 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        replace
-      } = usePagination((p, ps) => getter(p, ps), {
-        total: res => res.total,
-        data: res => res.list
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, replace, update } = usePagination(
+        (p, ps) => getter(p, ps),
+        {
+          total: res => res.total,
+          data: res => res.list
+        }
+      );
       const [error, setError] = useState(undefined as Error | undefined);
 
       return (
@@ -841,12 +778,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -906,22 +843,13 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        insert,
-        onFetchSuccess,
-        onSuccess
-      } = usePagination(getter, {
-        data: res => res.list,
-        preloadNextPage: false,
-        preloadPreviousPage: false,
-        initialPage: 2 // 默认从第2页开始
-      });
+      const { data, pageCount, total, page, pageSize, isLastPage, insert, onFetchSuccess, onSuccess, update } =
+        usePagination(getter, {
+          data: res => res.list,
+          preloadNextPage: false,
+          preloadPreviousPage: false,
+          initialPage: 2 // 默认从第2页开始
+        });
       const [loaded, setLoaded] = useState(false);
       onSuccess(() => setLoaded(true));
       onFetchSuccess(fetchMockFn);
@@ -937,12 +865,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -993,19 +921,13 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        insert
-      } = usePagination((p, ps) => getter(p, ps), {
-        total: res => res.total,
-        data: res => res.list
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, insert, update } = usePagination(
+        (p, ps) => getter(p, ps),
+        {
+          total: res => res.total,
+          data: res => res.list
+        }
+      );
       const [error, setError] = useState(undefined as Error | undefined);
 
       return (
@@ -1020,12 +942,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -1087,22 +1009,12 @@ describe('react => usePagination', () => {
     const fetchMockFn = jest.fn();
     const successMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        remove,
-        onFetchSuccess,
-        onSuccess
-      } = usePagination(getter, {
-        data: res => res.list,
-        initialPage: 2, // 默认从第2页开始
-        initialPageSize: 4
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, onSuccess, update } =
+        usePagination(getter, {
+          data: res => res.list,
+          initialPage: 2, // 默认从第2页开始
+          initialPageSize: 4
+        });
       onFetchSuccess(fetchMockFn);
       onSuccess(successMockFn);
 
@@ -1117,12 +1029,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -1258,20 +1170,11 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        onFetchSuccess,
-        remove
-      } = usePagination((p, ps) => getter(p, ps), {
-        total: res => res.total,
-        data: res => res.list
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, onFetchSuccess, remove, update } =
+        usePagination((p, ps) => getter(p, ps), {
+          total: res => res.total,
+          data: res => res.list
+        });
       onFetchSuccess(fetchMockFn);
       const [error, setError] = useState(undefined as Error | undefined);
 
@@ -1287,12 +1190,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -1362,21 +1265,12 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        remove,
-        onFetchSuccess
-      } = usePagination(getter, {
-        data: res => res.list,
-        initialPage: 2, // 默认从第2页开始
-        initialPageSize: 4
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, update } =
+        usePagination(getter, {
+          data: res => res.list,
+          initialPage: 2, // 默认从第2页开始
+          initialPageSize: 4
+        });
       onFetchSuccess(fetchMockFn);
 
       return (
@@ -1390,12 +1284,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -1468,22 +1362,13 @@ describe('react => usePagination', () => {
     const fetchMockFn = jest.fn();
     function Page() {
       const [min, setMin] = useState(0);
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        remove,
-        onFetchSuccess
-      } = usePagination((p, ps) => getter(p, ps, min), {
-        data: res => res.list,
-        watchingStates: [min],
-        initialPage: 2, // 默认从第2页开始
-        initialPageSize: 4
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, update } =
+        usePagination((p, ps) => getter(p, ps, min), {
+          data: res => res.list,
+          watchingStates: [min],
+          initialPage: 2, // 默认从第2页开始
+          initialPageSize: 4
+        });
       onFetchSuccess(fetchMockFn);
 
       return (
@@ -1497,17 +1382,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="addPage2"
-            onClick={() => setPage(v => v + 2)}>
+            onClick={() => update({ page: page + 2 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -1638,24 +1523,17 @@ describe('react => usePagination', () => {
 
     const successMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        remove,
-        onSuccess
-      } = usePagination(getter, {
-        data: res => res.list,
-        total: res => res.total,
-        initialPage: 3, // 默认从第3页开始
-        initialPageSize: 4,
-        preloadNextPage: false,
-        preloadPreviousPage: false
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onSuccess, update } = usePagination(
+        getter,
+        {
+          data: res => res.list,
+          total: res => res.total,
+          initialPage: 3, // 默认从第3页开始
+          initialPageSize: 4,
+          preloadNextPage: false,
+          preloadPreviousPage: false
+        }
+      );
       onSuccess(successMockFn);
 
       return (
@@ -1669,17 +1547,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="addPage2"
-            onClick={() => setPage(v => v + 2)}>
+            onClick={() => update({ page: page + 2 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -1758,14 +1636,15 @@ describe('react => usePagination', () => {
         loading,
         pageCount,
         total,
-        page: [page, setPage],
-        pageSize: [pageSize],
+        page,
+        pageSize,
         isLastPage,
         remove,
         insert,
         replace,
         onSuccess,
-        onFetchSuccess
+        onFetchSuccess,
+        update
       } = usePagination(getter, {
         data: res => res.list,
         total: res => res.total,
@@ -1786,17 +1665,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="addPage2"
-            onClick={() => setPage(v => v + 2)}>
+            onClick={() => update({ page: page + 2 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -1893,16 +1772,7 @@ describe('react => usePagination', () => {
 
     const successMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        onSuccess
-      } = usePagination(getter, {
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, onSuccess, update } = usePagination(getter, {
         total: () => undefined,
         data: res => res.list,
         append: true,
@@ -1922,23 +1792,23 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="addPage2"
-            onClick={() => setPage(v => v + 2)}>
+            onClick={() => update({ page: page + 2 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
             role="toNoDataPage"
             onClick={() => {
-              setPage(31);
+              update({ page: 31 });
             }}>
             btn3
           </button>
@@ -2003,20 +1873,15 @@ describe('react => usePagination', () => {
 
     function Page() {
       const [keyword, setKeyword] = useState('');
-      const {
-        loading,
-        pageSize: [pageSize, setPageSize],
-        pageCount,
-        isLastPage,
-        page: [page, setPage],
-        data,
-        total
-      } = usePagination((p, ps) => getter(p, ps, keyword), {
-        watchingStates: [keyword],
-        total: () => undefined,
-        data: res => res.list,
-        append: true
-      });
+      const { loading, pageSize, pageCount, isLastPage, page, data, total, update } = usePagination(
+        (p, ps) => getter(p, ps, keyword),
+        {
+          watchingStates: [keyword],
+          total: () => undefined,
+          data: res => res.list,
+          append: true
+        }
+      );
       return (
         <div>
           <span role="status">{loading ? 'loading' : 'loaded'}</span>
@@ -2028,12 +1893,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="setPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="setPageSize"
-            onClick={() => setPageSize(20)}>
+            onClick={() => update({ pageSize: 20 })}>
             btn2
           </button>
           <button
@@ -2096,16 +1961,7 @@ describe('react => usePagination', () => {
 
     function Page() {
       const [error, setError] = useState(undefined as Error | undefined);
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        refresh
-      } = usePagination(getter, {
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, refresh, update } = usePagination(getter, {
         total: () => undefined,
         data: res => res.list,
         append: true,
@@ -2125,12 +1981,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -2195,20 +2051,14 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        refresh
-      } = usePagination((p, ps) => getter(p, ps), {
-        total: res => res.total,
-        data: res => res.list,
-        append: true
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, refresh, update } = usePagination(
+        (p, ps) => getter(p, ps),
+        {
+          total: res => res.total,
+          data: res => res.list,
+          append: true
+        }
+      );
 
       return (
         <div>
@@ -2221,12 +2071,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -2294,13 +2144,14 @@ describe('react => usePagination', () => {
         loading,
         pageCount,
         total,
-        page: [page, setPage],
-        pageSize: [pageSize],
+        page,
+        pageSize,
         isLastPage,
         remove,
         insert,
         replace,
-        onFetchSuccess
+        onFetchSuccess,
+        update
       } = usePagination(getter, {
         total: () => undefined,
         data: res => res.list,
@@ -2320,17 +2171,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="addPage2"
-            onClick={() => setPage(v => v + 2)}>
+            onClick={() => update({ page: page + 2 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -2400,25 +2251,15 @@ describe('react => usePagination', () => {
     const successMockFn = jest.fn();
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        remove,
-        onFetchSuccess,
-        onSuccess
-      } = usePagination(getter, {
-        total: () => undefined,
-        data: res => res.list,
-        append: true,
-        preloadNextPage: false,
-        preloadPreviousPage: false,
-        initialPageSize: 4
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, onSuccess, update } =
+        usePagination(getter, {
+          total: () => undefined,
+          data: res => res.list,
+          append: true,
+          preloadNextPage: false,
+          preloadPreviousPage: false,
+          initialPageSize: 4
+        });
       onFetchSuccess(fetchMockFn);
       onSuccess(successMockFn);
 
@@ -2433,12 +2274,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -2489,22 +2330,13 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        reload,
-        onFetchSuccess
-      } = usePagination(getter, {
-        total: () => undefined,
-        data: res => res.list,
-        append: true,
-        initialPageSize: 4
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, reload, onFetchSuccess, update } =
+        usePagination(getter, {
+          total: () => undefined,
+          data: res => res.list,
+          append: true,
+          initialPageSize: 4
+        });
       onFetchSuccess(fetchMockFn);
 
       return (
@@ -2518,12 +2350,12 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
@@ -2583,22 +2415,16 @@ describe('react => usePagination', () => {
 
     const fetchMockFn = jest.fn();
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page, setPage],
-        pageSize: [pageSize],
-        isLastPage,
-        onFetchSuccess
-      } = usePagination(getter, {
-        total: () => undefined,
-        data: res => res.list,
-        append: true,
-        initialPage: 2,
-        initialPageSize: 4
-      });
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, onFetchSuccess, update } = usePagination(
+        getter,
+        {
+          total: () => undefined,
+          data: res => res.list,
+          append: true,
+          initialPage: 2,
+          initialPageSize: 4
+        }
+      );
       onFetchSuccess(fetchMockFn);
 
       return (
@@ -2612,17 +2438,17 @@ describe('react => usePagination', () => {
           <span role="response">{JSON.stringify(data)}</span>
           <button
             role="addPage"
-            onClick={() => setPage(v => v + 1)}>
+            onClick={() => update({ page: page + 1 })}>
             btn1
           </button>
           <button
             role="subtractPage"
-            onClick={() => setPage(v => v - 1)}>
+            onClick={() => update({ page: page - 1 })}>
             btn2
           </button>
           <button
             role="toLastPage"
-            onClick={() => setPage(v => v + 2)}>
+            onClick={() => update({ page: page + 2 })}>
             btn1
           </button>
         </div>
@@ -2658,16 +2484,7 @@ describe('react => usePagination', () => {
       });
 
     function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page: [page],
-        pageSize: [pageSize],
-        isLastPage,
-        update
-      } = usePagination(getter, {
+      const { data, loading, pageCount, total, page, pageSize, isLastPage, update } = usePagination(getter, {
         total: () => undefined,
         data: res => res.list,
         append: true,

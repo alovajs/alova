@@ -1,10 +1,15 @@
 import { isFn } from './function';
-import { filterItem, forEach, len, pushItem } from './vars';
+import { filterItem, len, mapItem, pushItem, undefinedValue } from './vars';
 
 export interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
   off<K extends keyof E>(type: K, handler?: (event: E[K]) => void): () => void;
-  emit<K extends keyof E>(type: K, event: E[K]): void;
+  /**
+   * @param type
+   * @param event
+   * @param sync Whether to synchronize emit events, if set to `true`, this will wait for all listeners to return results using Promise.all
+   */
+  emit<K extends keyof E>(type: K, event: E[K], sync?: boolean): void;
   setDecorator<K extends keyof E>(
     type: K,
     decorator: (handler: (event: any) => void, event: any, index: number, length: number) => void
@@ -42,12 +47,18 @@ const createEventManager = <E extends object>() => {
         delete eventMap[type];
       }
     },
-    emit(type, event) {
+    emit(type, event, sync = false) {
       const decorator = decoratorMap[type];
       const handlers = eventMap[type] || [];
-      forEach(handlers, (handler, index) =>
-        isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)
-      );
+      const executor: DecoratorMap<E>[any] = isFn(decorator)
+        ? decorator
+        : handler => {
+            return handler(event);
+          };
+
+      const res = mapItem(handlers, (handler, index) => executor(handler, event, index, len(handlers)));
+
+      return sync ? Promise.all(res) : undefinedValue;
     },
     setDecorator(type, decorator) {
       decoratorMap[type] = decorator;
