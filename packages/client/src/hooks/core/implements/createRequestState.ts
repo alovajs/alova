@@ -24,7 +24,7 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import type { FrontRequestState, Method, Progress } from 'alova';
+import type { AlovaGlobalCacheAdapter, FrontRequestState, Method, Progress } from 'alova';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
 import {
   AlovaCompleteEvent,
@@ -81,7 +81,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     try {
       const methodInstance = getHandlerMethod(methodHandler, coreHookAssert(hookType));
       const alovaInstance = getContext(methodInstance);
-      const l1CacheResult = alovaInstance.l1Cache.get<[any, number]>(
+      const l1CacheResult = (alovaInstance.l1Cache as AlovaGlobalCacheAdapter).get<[any, number]>(
         buildNamespacedCacheKey(alovaInstance.id, getMethodInternalKey(methodInstance))
       );
       let cachedResponse: any = undefinedValue;

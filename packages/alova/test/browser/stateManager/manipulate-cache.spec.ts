@@ -3,6 +3,7 @@ import { createAlova, invalidateCache, queryCache, setCache } from '@/index';
 import adapterFetch from '@/predefine/adapterFetch';
 import { setWithCacheAdapter } from '@/storage/cacheWrapper';
 import { Result } from 'root/testUtils';
+import { AlovaGlobalCacheAdapter } from '~/typings';
 
 const alova = getAlovaInstance({
   responseExpect: r => r.json()
@@ -355,21 +356,22 @@ describe('manipulate cache', () => {
   });
   test("shouldn't set cache with method that has a functional `cacheFor` param", async () => {
     let l1Cache = {} as Record<string, any>;
+    const l1CacheAdapter: AlovaGlobalCacheAdapter = {
+      set(key, value) {
+        l1Cache[key] = value;
+      },
+      get: key => l1Cache[key],
+      remove(key) {
+        delete l1Cache[key];
+      },
+      clear: () => {
+        l1Cache = {};
+      }
+    };
     const alova = createAlova({
       requestAdapter: adapterFetch(),
       responded: r => r.json(),
-      l1Cache: {
-        set(key, value) {
-          l1Cache[key] = value;
-        },
-        get: key => l1Cache[key],
-        remove(key) {
-          delete l1Cache[key];
-        },
-        clear: () => {
-          l1Cache = {};
-        }
-      }
+      l1Cache: l1CacheAdapter
     });
     const Get1 = alova.Get('/unit-test', {
       params: { a: 5555 },
@@ -391,21 +393,22 @@ describe('manipulate cache', () => {
   });
   test("shouldn't invalidate cache with method that has a functional `cacheFor` param", async () => {
     let l1Cache = {} as Record<string, any>;
+    const l1CacheAdapter: AlovaGlobalCacheAdapter = {
+      set(key, value) {
+        l1Cache[key] = value;
+      },
+      get: key => l1Cache[key],
+      remove(key) {
+        delete l1Cache[key];
+      },
+      clear: () => {
+        l1Cache = {};
+      }
+    };
     const alova = createAlova({
       requestAdapter: adapterFetch(),
       responded: r => r.json(),
-      l1Cache: {
-        set(key, value) {
-          l1Cache[key] = value;
-        },
-        get: key => l1Cache[key],
-        remove(key) {
-          delete l1Cache[key];
-        },
-        clear: () => {
-          l1Cache = {};
-        }
-      }
+      l1Cache: l1CacheAdapter
     });
     const Get1 = alova.Get('/unit-test', {
       params: { a: 5555 },

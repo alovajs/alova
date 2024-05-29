@@ -157,25 +157,26 @@ describe('auto invalitate cached response data', () => {
   test("shouldn't remove corresponding cache keys when they are fail to invalidate cache", async () => {
     let l1Cache = {} as Record<string, any>;
     let i = 0;
+    const l1CacheAdapter = {
+      set(key: string, value: any) {
+        l1Cache[key] = value;
+      },
+      get: (key: string) => l1Cache[key],
+      remove(key: string) {
+        if (i === 0) {
+          throw new Error('remove failed');
+        }
+        delete l1Cache[key];
+      },
+      clear: () => {
+        l1Cache = {};
+      }
+    };
     const alova = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),
       responded: r => r.json(),
-      l1Cache: {
-        set(key, value) {
-          l1Cache[key] = value;
-        },
-        get: key => l1Cache[key],
-        remove(key) {
-          if (i === 0) {
-            throw new Error('remove failed');
-          }
-          delete l1Cache[key];
-        },
-        clear: () => {
-          l1Cache = {};
-        }
-      }
+      l1Cache: l1CacheAdapter
     });
 
     const sourcePost = alova.Post('/unit-test', { a: 1 });

@@ -1,9 +1,10 @@
 import { isFn, isPlainObject } from '@alova/shared/function';
+import { objectKeys } from '@alova/shared/vars';
 import { WatchOptionsWithHandler } from 'vue';
 import { AlovaWatcherHandlers, VueWatchHandler } from '../typings';
 
 const mapWatcher = (watcherHandlers: AlovaWatcherHandlers, withPrefix = true, parentKey = '') => {
-  const handlerKeys = Object.keys(watcherHandlers || {});
+  const handlerKeys = objectKeys(watcherHandlers || {});
   let finalHandlers = {} as Record<string, VueWatchHandler>;
   handlerKeys.forEach(key => {
     const handlerNames = key.split(/\s*,\s*/);

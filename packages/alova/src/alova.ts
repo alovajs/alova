@@ -1,6 +1,7 @@
 import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
+  AlovaDefaultCacheAdpater,
   AlovaGenerics,
   AlovaGlobalCacheAdapter,
   AlovaMethodCreateConfig,
@@ -54,9 +55,9 @@ export class Alova<AG extends AlovaGenerics> {
 
   public options: AlovaOptions<AG>;
 
-  public l1Cache: AlovaGlobalCacheAdapter;
+  public l1Cache: AG['L1Cache'];
 
-  public l2Cache: AlovaGlobalCacheAdapter;
+  public l2Cache: AG['L2Cache'];
 
   public snapshots: MethodSnapshotContainer<AG>;
 
@@ -175,13 +176,37 @@ export const usingL2CacheAdapters: AlovaGlobalCacheAdapter[] = [];
  * @param options alova configuration.
  * @returns alova instance.
  */
-export const createAlova = <State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
+export const createAlova = <
+  State,
+  Computed,
+  Watched,
+  Export,
+  RequestConfig,
+  Response,
+  ResponseHeader,
+  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater,
+  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater
+>(
   options: AlovaOptions<
-    AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>
+    AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
   >
 ) => {
   const alovaInstance = newInstance(
-    Alova<AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>,
+    Alova<
+      AlovaGenerics<
+        State,
+        Computed,
+        Watched,
+        Export,
+        any,
+        any,
+        RequestConfig,
+        Response,
+        ResponseHeader,
+        L1Cache,
+        L2Cache
+      >
+    >,
     options
   );
   const newStatesHook = alovaInstance.options.statesHook;

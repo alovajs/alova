@@ -1,6 +1,18 @@
 import { EventManager } from '@alova/shared/createEventManager';
 
-export interface AlovaGenerics<S = any, C = any, W = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
+export interface AlovaGenerics<
+  S = any,
+  C = any,
+  W = any,
+  E = any,
+  R = any,
+  T = any,
+  RC = any,
+  RE = any,
+  RH = any,
+  L1 extends AlovaGlobalCacheAdapter = any,
+  L2 extends AlovaGlobalCacheAdapter = any
+> {
   State: S;
   Computed: C;
   Watched: W;
@@ -10,6 +22,8 @@ export interface AlovaGenerics<S = any, C = any, W = any, E = any, R = any, T = 
   RequestConfig: RC;
   Response: RE;
   ResponseHeader: RH;
+  L1Cache: L1;
+  L2Cache: L2;
 }
 
 type Arg = Record<string, any>;
@@ -47,12 +61,6 @@ interface AlovaCustomTypes {
   [customKey: string]: any;
 }
 
-export interface DefaultCacheEvent {
-  type: 'set' | 'get' | 'remove' | 'clear';
-  key: string;
-  value?: any;
-  container: Record<string, any>;
-}
 export interface AlovaGlobalCacheAdapter {
   /**
    * save or update cache
@@ -77,11 +85,19 @@ export interface AlovaGlobalCacheAdapter {
    * clear all cache.
    */
   clear(): void | Promise<void>;
+}
 
+interface CacheEvent {
+  type: 'set' | 'get' | 'remove' | 'clear';
+  key: string;
+  value?: any;
+  container: Record<string, any>;
+}
+export interface AlovaDefaultCacheAdpater extends AlovaGlobalCacheAdapter {
   /**
    * the events related to cache operating emitter.
    */
-  readonly emitter?: EventManager<{ success: DefaultCacheEvent; fail: Omit<DefaultCacheEvent, 'value'> }>;
+  readonly emitter: EventManager<{ success: CacheEvent; fail: Omit<CacheEvent, 'value'> }>;
 }
 
 /**
@@ -354,14 +370,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
    * you can set your own adapter with sync/async function of set/get/remove.
    * see [https://alova.js.org/tutorial/custom/custom-storage-adapter]
    */
-  l1Cache?: AlovaGlobalCacheAdapter;
-
-  /**
-   * limitation of method snapshots.
-   * it indicates not save snapshot when value is set to 0, and the method matcher will not work.
-   * @default 1000
-   */
-  snapshots?: number;
+  l1Cache?: AG['L1Cache'];
 
   /**
    * restore mode cache adapter. it will be used when persist data.
@@ -370,7 +379,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
    * - nodejs/bun: no adapter.(you can use @alova/cache-file).
    * see [https://alova.js.org/tutorial/custom/custom-storage-adapter]
    */
-  l2Cache?: AlovaGlobalCacheAdapter;
+  l2Cache?: AG['L2Cache'];
 
   /**
    * global before request hook
@@ -401,6 +410,13 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
    * @default true
    */
   cacheLogger?: boolean | null | CacheLoggerHandler<AG>;
+
+  /**
+   * limitation of method snapshots.
+   * it indicates not save snapshot when value is set to 0, and the method matcher will not work.
+   * @default 1000
+   */
+  snapshots?: number;
 }
 
 /** 进度信息 */
@@ -575,8 +591,8 @@ export interface MethodSnapshotContainer<AG extends AlovaGenerics> {
 export interface Alova<AG extends AlovaGenerics> {
   id: string;
   options: AlovaOptions<AG>;
-  l1Cache: AlovaGlobalCacheAdapter;
-  l2Cache: AlovaGlobalCacheAdapter;
+  l1Cache: AG['L1Cache'];
+  l2Cache: AG['L2Cache'];
   snapshots: MethodSnapshotContainer<AG>;
   Get<Responded = unknown, Transformed = unknown>(
     url: string,
@@ -591,7 +607,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
   Post<Responded = unknown, Transformed = unknown>(
@@ -608,7 +626,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
   Put<Responded = unknown, Transformed = unknown>(
@@ -625,7 +645,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
   Delete<Responded = unknown, Transformed = unknown>(
@@ -642,7 +664,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
   Put<Responded = unknown, Transformed = unknown>(
@@ -659,7 +683,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
   Head<Responded = unknown, Transformed = unknown>(
@@ -675,7 +701,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
   Options<Responded = unknown, Transformed = unknown>(
@@ -691,7 +719,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
   Patch<Responded = unknown, Transformed = unknown>(
@@ -708,7 +738,9 @@ export interface Alova<AG extends AlovaGenerics> {
       Transformed,
       AG['RequestConfig'],
       AG['Response'],
-      AG['ResponseHeader']
+      AG['ResponseHeader'],
+      AG['L1Cache'],
+      AG['L2Cache']
     >
   >;
 }
@@ -744,11 +776,23 @@ export interface AlovaGlobalConfig {
  * @param options global options
  * @returns alova instance
  */
-export declare function createAlova<State, Computed, Watched, Export, RequestConfig, Response, ResponseHeader>(
+export declare function createAlova<
+  State,
+  Computed,
+  Watched,
+  Export,
+  RequestConfig,
+  Response,
+  ResponseHeader,
+  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater,
+  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater
+>(
   options: AlovaOptions<
-    AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>
+    AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
   >
-): Alova<AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader>>;
+): Alova<
+  AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
+>;
 
 /**
  * invalidate cache
