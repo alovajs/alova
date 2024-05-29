@@ -86,11 +86,18 @@ export type DetailLocalCacheConfig = {
 };
 export type LocalCacheConfig = CacheExpire | DetailLocalCacheConfig;
 export type LocalCacheController<R> = () => R | undefined | Promise<R | undefined>;
+export type ParamsSerializer = (params?: Arg) => string;
 export interface MethodRequestConfig {
   /**
    * url参数
    */
   params: Arg;
+
+  /**
+   * 参数序列化
+   * @param params 参数
+   */
+  paramsSerializer?: ParamsSerializer;
 
   /**
    * 请求头
@@ -369,6 +376,12 @@ export interface AlovaOptions<S, E, RC, RE, RH> {
    * @default true
    */
   cacheLogger?: boolean | null | CacheLoggerHandler<S, E, RC, RE, RH>;
+
+  /**
+   * 参数序列化
+   * @param params 参数
+   */
+  paramsSerializer?: ParamsSerializer;
 }
 
 export type ProgressHandler = (progress: Progress) => void;
