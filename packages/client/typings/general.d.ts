@@ -36,12 +36,12 @@ interface PaginationHookConfig<AG extends AlovaGenerics, LD> extends WatcherHook
    * 指定数据总数量值
    * @default response => response.total
    */
-  total?: ArgGetter<R, number>;
+  total?: ArgGetter<AG['Responded'], number>;
   /**
    * 指定分页的数组数据
    * @default response => response.data
    */
-  data?: ArgGetter<R, LD>;
+  data?: ArgGetter<AG['Responded'], LD>;
   /**
    * 是否开启追加模式
    * @default false

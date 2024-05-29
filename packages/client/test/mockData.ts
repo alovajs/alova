@@ -171,7 +171,7 @@ const mocks = defineMock({
 
 // 模拟数据请求适配器
 export const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-  delay: 150,
+  delay: 50,
   onMockResponse: ({ status, statusText, body }) => {
     // 当status为错误码时，如果包含notError则以body的形式返回错误信息
     if (status >= 300) {

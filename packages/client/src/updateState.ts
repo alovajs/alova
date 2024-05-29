@@ -46,6 +46,7 @@ export default async function updateState<AG extends AlovaGenerics>(
             [stateName]: updatedData
           },
           frontStates as any,
+          stateName,
           hookInstance.ro
         );
       });

@@ -16,10 +16,8 @@ import {
   FormExposure,
   FormHookConfig,
   FormHookHandler,
-  IsUnknown,
   NotifyHandler,
   OffEventCallback,
-  PaginationHookConfig,
   RetriableExposure,
   RetriableHookConfig,
   SQHookExposure,
@@ -418,93 +416,6 @@ export declare function updateState<Responded>(
 // ===================================================
 // ===================================================
 // ===================================================
-
-type UsePaginationExposure<S, E, R, T, RC, RE, RH, LD extends unknown[]> = Omit<
-  UseHookExposure<S, E, R, T, RC, RE, RH>,
-  'data' | 'update'
-> & {
-  page: Ref<number>;
-  pageSize: Ref<number>;
-  data: Ref<
-    IsUnknown<
-      LD[number],
-      R extends {
-        data: any;
-      }
-        ? R['data']
-        : LD,
-      LD
-    >
-  >;
-  pageCount: ComputedRef<number | undefined>;
-  total: ComputedRef<number | undefined>;
-  isLastPage: ComputedRef<boolean>;
-  fetching: Ref<boolean>;
-  onFetchSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH>) => void;
-  onFetchError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
-  onFetchComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
-  update: (newFrontStates: Partial<FrontRequestState<boolean, LD, Error | undefined, Progress, Progress>>) => void;
-
-  /**
-   * 刷新指定页码数据，此函数将忽略缓存强制发送请求
-   * 如果未传入页码则会刷新当前页
-   * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
-   * @param pageOrItemPage 刷新的页码或列表项
-   */
-  refresh: (pageOrItemPage?: number | LD[number]) => void;
-
-  /**
-   * 插入一条数据
-   * 如果未传入index，将默认插入到最前面
-   * 如果传入一个列表项，将插入到这个列表项的后面，如果列表项未在列表数据中将会抛出错误
-   * @param item 插入项
-   * @param position 插入位置（索引）或列表项
-   */
-  insert: (item: LD extends any[] ? LD[number] : any, position?: number | LD[number]) => void;
-
-  /**
-   * 移除一条数据
-   * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
-   * @param position 移除的索引或列表项
-   */
-  remove: (position: number | LD[number]) => void;
-
-  /**
-   * 替换一条数据
-   * 如果position传入的是列表项，将替换此列表项，如果列表项未在列表数据中将会抛出错误
-   * @param item 替换项
-   * @param position 替换位置（索引）或列表项
-   */
-  replace: (item: LD extends any[] ? LD[number] : any, position: number | LD[number]) => void;
-
-  /**
-   * 从第一页开始重新加载列表，并清空缓存
-   */
-  reload: () => void;
-};
-
-/**
- * 基于alova.js的vue分页hook
- * 分页相关状态自动管理、前后一页预加载、自动维护数据的新增/编辑/移除
- *
- * @param handler method创建函数
- * @param config pagination hook配置
- * @returns {UsePaginationExposure}
- */
-declare function usePagination<
-  S extends Ref,
-  E extends Ref,
-  R,
-  T,
-  RC,
-  RE,
-  RH,
-  LD extends unknown[],
-  WS extends (WatchSource | object)[]
->(
-  handler: (page: number, pageSize: number) => Method<S, E, R, T, RC, RE, RH>,
-  config?: PaginationHookConfig<S, E, R, T, RC, RE, RH, LD, WS>
-): UsePaginationExposure<S, E, R, T, RC, RE, RH, LD>;
 
 /**
  * 带silentQueue的request hook

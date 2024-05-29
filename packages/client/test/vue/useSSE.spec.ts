@@ -1,13 +1,12 @@
 import { useSSE } from '@/index';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
-import { Alova, createAlova } from 'alova';
+import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
 import VueHook from 'alova/vue';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
 import { untilCbCalled } from 'root/testUtils';
-import { Ref } from 'vue';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
 import { AlovaSSEMessageEvent, AnyFn, SSEHookReadyState } from '~/typings/general';
 import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
@@ -15,13 +14,11 @@ import CompUseSSE from './components/use-sse.vue';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
 
-let alovaInst: Alova<Ref<unknown>, Ref<unknown>, any, any, Record<string, string | number>, any, any>;
-
 afterEach(() => {
   server.close();
 });
 
-type AnyMessageType<T = any> = AlovaSSEMessageEvent<T, any, any, any, any, any, any, any, any, any>;
+type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
 
 /**
  * 准备 Alova 实例环境，并且开始 SSE 服务器的监听
@@ -29,18 +26,18 @@ type AnyMessageType<T = any> = AlovaSSEMessageEvent<T, any, any, any, any, any, 
 const prepareAlova = async () => {
   await server.listen();
   const { port } = server.address() as AddressInfo;
-  alovaInst = createAlova({
+  return createAlova({
     baseURL: `http://127.0.0.1:${port}`,
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
     cacheLogger: false
-  }) as any;
+  });
 };
 
 describe('vue => useSSE', () => {
   // ! 无初始数据，不立即发送请求
   test('should default NOT request immediately', async () => {
-    await prepareAlova();
+    const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
     const { on, onOpen, data, readyState, send } = useSSE(poster);
     const cb = jest.fn();
@@ -66,7 +63,7 @@ describe('vue => useSSE', () => {
     await untilCbCalled(setTimeout, 100);
     expect(openCb).toHaveBeenCalled();
 
-    const { data: recvData } = (await untilCbCalled(onIntervalCb)) as AnyMessageType<string>;
+    const { data: recvData } = (await untilCbCalled(onIntervalCb)) as AnyMessageType;
 
     expect(readyState.value).toStrictEqual(SSEHookReadyState.OPEN);
     expect(cb).toHaveBeenCalled();
@@ -77,7 +74,7 @@ describe('vue => useSSE', () => {
 
   // ! 有初始数据，不立即发送请求
   test('should get the initial data and NOT send request immediately', async () => {
-    await prepareAlova();
+    const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
     const initialData = {
       id: 9527,
@@ -116,7 +113,7 @@ describe('vue => useSSE', () => {
     await send();
     serverSend(testDataB);
 
-    const { data: recvData } = (await untilCbCalled(onMessage)) as AnyMessageType<string>;
+    const { data: recvData } = (await untilCbCalled(onMessage)) as AnyMessageType;
 
     expect(readyState.value).toStrictEqual(SSEHookReadyState.OPEN);
     expect(cb).toHaveBeenCalled();

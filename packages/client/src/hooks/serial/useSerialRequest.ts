@@ -11,7 +11,7 @@ import { assertSerialHandlers, serialMiddleware } from './general';
  * @return useSerialRequest相关数据和操作函数
  */
 export default <AG extends AlovaGenerics>(
-  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<AG>[]],
+  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
   config: RequestHookConfig<AG> = {} as any
 ) => {
   assertSerialHandlers('useSerialRequest', serialHandlers);

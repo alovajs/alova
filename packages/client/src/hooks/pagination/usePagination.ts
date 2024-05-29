@@ -28,7 +28,17 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import { AlovaGenerics, Method, getMethodKey, invalidateCache, promiseStatesHook, queryCache, setCache } from 'alova';
+import {
+  Alova,
+  AlovaGenerics,
+  Method,
+  getMethodKey,
+  invalidateCache,
+  promiseStatesHook,
+  queryCache,
+  setCache
+} from 'alova';
+import { FetcherType } from 'alova/client';
 import { AnyFn, PaginationHookConfig } from '~/typings/general';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';
 
@@ -37,7 +47,7 @@ const indexAssert = (index: number, rawData: any[]) =>
   paginationAssert(isNumber(index) && index < len(rawData), 'index must be a number that less than list length');
 
 export default <AG extends AlovaGenerics>(
-  handler: <AG extends AlovaGenerics>(page: number, pageSize: number) => Method<AG>,
+  handler: (page: number, pageSize: number) => Method<AG>,
   config: PaginationHookConfig<AG, unknown[]> = {}
 ) => {
   const {
@@ -48,7 +58,7 @@ export default <AG extends AlovaGenerics>(
     exposeProvider,
     objectify,
     __referingObj: referingObject
-  } = statesHookHelper(promiseStatesHook());
+  } = statesHookHelper<AG>(promiseStatesHook());
 
   const {
     preloadPreviousPage = trueValue,
@@ -83,7 +93,7 @@ export default <AG extends AlovaGenerics>(
   } = ref(createSnapshotMethodsManager<AG>(page => handlerRef.current(page, pageSize.v))).current;
   const listDataGetter = (rawData: any) => dataGetter(rawData) || rawData;
   // 初始化fetcher
-  const fetchStates = useFetcher({
+  const fetchStates = useFetcher<FetcherType<Alova<AG>>>({
     __referingObj: referingObject,
     force: ({ sendArgs }) => sendArgs[0]
   });
@@ -92,7 +102,7 @@ export default <AG extends AlovaGenerics>(
 
   const getHandlerMethod = (refreshPage = page.v) => {
     const pageSizeVal = pageSize.v;
-    const handlerMethod = handler<AG>(refreshPage, pageSizeVal);
+    const handlerMethod = handler(refreshPage, pageSizeVal);
 
     // 定义统一的额外名称，方便管理
     saveSnapshot(handlerMethod);
@@ -122,7 +132,7 @@ export default <AG extends AlovaGenerics>(
     (actionName: string) =>
     (...args: any[]) =>
       delegationActions.current[actionName](...args);
-  const states = useWatcher(getHandlerMethod, [...watchingStates, page.e, pageSize.e] as any, {
+  const states = useWatcher<AG>(getHandlerMethod, [...watchingStates, page.e, pageSize.e] as any, {
     __referingObj: referingObject,
     immediate,
     initialData,

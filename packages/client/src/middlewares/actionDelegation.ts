@@ -5,13 +5,10 @@ import { AlovaGenerics, promiseStatesHook } from 'alova';
 import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext } from '~/typings';
 import { Actions } from '~/typings/general';
 
-type AnyAlovaFrontMiddlewareContext = AlovaFrontMiddlewareContext<AlovaGenerics>;
-type AnyAlovaFetcherMiddlewareContext = AlovaFetcherMiddlewareContext<AlovaGenerics>;
-
 const actionsMap: Record<string | number | symbol, Actions[]> = {};
-const isFrontMiddlewareContext = (
-  context: AnyAlovaFrontMiddlewareContext | AnyAlovaFetcherMiddlewareContext
-): context is AnyAlovaFrontMiddlewareContext => !!(context as AnyAlovaFrontMiddlewareContext).send;
+const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics>(
+  context: AlovaFrontMiddlewareContext<AG> | AlovaFetcherMiddlewareContext<AG>
+): context is AlovaFrontMiddlewareContext<AG> => !!(context as AlovaFrontMiddlewareContext<AG>).send;
 
 const assert = createAssert('subscriber');
 
@@ -23,13 +20,13 @@ const assert = createAssert('subscriber');
  * @param id 委托者id
  * @returns alova中间件函数
  */
-export const actionDelegationMiddleware = (id: string | number | symbol) => {
+export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGenerics>(id: string | number | symbol) => {
   const { ref } = statesHookHelper(promiseStatesHook());
 
   const delegated = ref(falseValue);
   return (
-    context: (AnyAlovaFrontMiddlewareContext | AnyAlovaFetcherMiddlewareContext) & { delegatingActions?: Actions },
-    next: AlovaGuardNext<AlovaGenerics>
+    context: (AlovaFrontMiddlewareContext<AG> | AlovaFetcherMiddlewareContext<AG>) & { delegatingActions?: Actions },
+    next: AlovaGuardNext<AG>
   ) => {
     // 中间件会重复调用，已经订阅过了就无需再订阅了
     if (!delegated.current) {

@@ -26,6 +26,7 @@ export const server = http.createServer((req, res) => {
   if (path === './not-exist-path') {
     res.statusCode = 404;
     res.end();
+    return;
   }
 
   if (path === `./${TriggerEventName}`) {

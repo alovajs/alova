@@ -318,10 +318,10 @@ importers:
         specifier: workspace:*
         version: link:../adapter-mock
       '@alova/scripts':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../scripts
       '@alova/shared':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../shared
       '@testing-library/vue3':
         specifier: npm:@testing-library/vue@^7.0.0
@@ -8637,11 +8637,11 @@ snapshots:
       '@vue/shared': 3.4.21
       vue: 3.4.27(typescript@5.4.5)
 
-  '@vue/server-renderer@3.4.27(vue@2.7.16)':
+  '@vue/server-renderer@3.4.27(vue@3.4.27(typescript@5.4.5))':
     dependencies:
       '@vue/compiler-ssr': 3.4.27
       '@vue/shared': 3.4.27
-      vue: 2.7.16
+      vue: 3.4.27(typescript@5.4.5)
 
   '@vue/shared@3.4.21': {}
 
@@ -12787,7 +12787,7 @@ snapshots:
       '@vue/compiler-dom': 3.4.27
       '@vue/compiler-sfc': 3.4.27
       '@vue/runtime-dom': 3.4.27
-      '@vue/server-renderer': 3.4.27(vue@2.7.16)
+      '@vue/server-renderer': 3.4.27(vue@3.4.27(typescript@5.4.5))
       '@vue/shared': 3.4.27
     optionalDependencies:
       typescript: 5.4.5
