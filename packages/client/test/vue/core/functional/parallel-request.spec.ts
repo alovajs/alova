@@ -12,14 +12,14 @@ describe('parallel request', () => {
     const Getter = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });
-    const firstState = useRequest(Getter, { immediate: false });
-    const secondState = useRequest(Getter, { immediate: false });
-    const [firstResponse, secondResponse] = await Promise.all([firstState.send(), secondState.send()]);
+    const { data: data1, send: send1 } = useRequest(Getter, { immediate: false });
+    const { data: data2, send: send2 } = useRequest(Getter, { immediate: false });
+    const [firstResponse, secondResponse] = await Promise.all([send1(), send2()]);
 
     expect(firstResponse.path).toBe('/unit-test');
-    expect(firstState.data.value.path).toBe('/unit-test');
+    expect(data1.value.path).toBe('/unit-test');
     expect(secondResponse.path).toBe('/unit-test');
-    expect(secondState.data.value.path).toBe('/unit-test');
+    expect(data2.value.path).toBe('/unit-test');
   });
 
   test('[request fail]parallel request with `send` returned promise', async () => {
@@ -53,6 +53,9 @@ describe('parallel request', () => {
     const firstState = useRequest(Getter);
     const secondState = useRequest(Getter);
 
+    const data1 = firstState.data;
+    const data2 = secondState.data;
+
     const firstPromise = new Promise<AlovaSuccessEvent<any>>((resolve, reject) => {
       firstState.onSuccess(resolve);
       firstState.onError(reject);
@@ -69,9 +72,9 @@ describe('parallel request', () => {
     const firstResponse = firstEvent.data;
     const secondResponse = secondEvent.data;
     expect(firstResponse.path).toBe('/unit-test');
-    expect(firstState.data.value.path).toBe('/unit-test');
+    expect(data1.value.path).toBe('/unit-test');
     expect(secondResponse.path).toBe('/unit-test');
-    expect(secondState.data.value.path).toBe('/unit-test');
+    expect(data2.value.path).toBe('/unit-test');
   });
 
   test('[request fail]parallel request with `onSuccess` and `onError` hook', async () => {

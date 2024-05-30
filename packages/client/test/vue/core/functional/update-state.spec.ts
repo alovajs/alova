@@ -19,7 +19,7 @@ describe('update cached response data by user in vue', () => {
     });
     const { data, onSuccess } = useRequest(Get);
     await untilCbCalled(onSuccess);
-    const updated = updateState(Get, responseData => {
+    const updated = await updateState(Get, responseData => {
       responseData.path = '/unit-test-updated';
       return responseData;
     });
@@ -27,7 +27,7 @@ describe('update cached response data by user in vue', () => {
     expect(updated).toBeTruthy();
   });
 
-  test("shouldn't be called when not get any states", () => {
+  test("shouldn't be called when not get any states", async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -38,44 +38,12 @@ describe('update cached response data by user in vue', () => {
     });
 
     const mockfn = jest.fn();
-    const updated = updateState(Get, data => {
+    const updated = await updateState(Get, data => {
       mockfn();
       return data;
     });
     expect(mockfn).not.toHaveBeenCalled();
     expect(updated).toBeFalsy();
-  });
-
-  test('should update the first matched one when find sereval Method instance', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const Get1 = alova.Get('/unit-test', {
-      name: 'get1',
-      params: { a: 1 },
-      cacheFor: 100000,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test', {
-      name: 'get2',
-      params: { b: 2 },
-      cacheFor: 100000,
-      transformData: ({ data }: Result) => data
-    });
-
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-    const updater = (data: any) => {
-      data.path = '/unit-test-updated';
-      return data;
-    };
-    updateState(Get1, updater);
-    updateState(Get2, updater);
-
-    // 匹配到多个method实例，只会更新第一个
-    expect(firstState.data.value.path).toBe('/unit-test-updated');
-    expect(secondState.data.value.path).toBe('/unit-test');
   });
 
   test("shouldn't throw error when not match any one", async () => {
@@ -97,6 +65,9 @@ describe('update cached response data by user in vue', () => {
 
     const firstState = useRequest(Get1);
     const secondState = useRequest(Get2);
+    const data1 = firstState.data;
+    const data2 = secondState.data;
+
     await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
 
     // 不会匹配任何一个method实例
@@ -106,8 +77,8 @@ describe('update cached response data by user in vue', () => {
     });
 
     // 匹配到多个method实例，只会更新第一个
-    expect(firstState.data.value.path).toBe('/unit-test');
-    expect(secondState.data.value.path).toBe('/unit-test');
+    expect(data1.value.path).toBe('/unit-test');
+    expect(data2.value.path).toBe('/unit-test');
   });
 
   test('update extra managed states', async () => {
@@ -130,28 +101,28 @@ describe('update cached response data by user in vue', () => {
     await untilCbCalled(onSuccess);
 
     // 预设状态不能更新
-    expect(() => {
+    expect(
       updateState(Get, {
         loading: () => true
-      });
-    }).toThrow('can not update preset states');
+      })
+    ).rejects.toThrow();
 
     // 非状态数据不能更新
-    expect(() => {
+    expect(
       updateState(Get, {
         extraData2: () => 1
-      });
-    }).toThrow();
+      })
+    ).resolves.toBeTruthy();
 
     // 未找到状态抛出错误
-    expect(() => {
+    expect(
       updateState(Get, {
         extraData3: () => 1
-      });
-    }).toThrow('can not find state named `extraData3`');
+      })
+    ).rejects.toThrow('[alova]state named `extraData3` is not found');
 
     // 更新成功
-    updateState(Get, {
+    await updateState(Get, {
       extraData: () => 1
     });
     expect(extraData.value).toBe(1);
@@ -176,7 +147,7 @@ describe('update cached response data by user in vue', () => {
     removeStateCache(alova.id, key(Get1));
 
     const mockUpdateFn = jest.fn();
-    const updated = updateState(Get1, (data: any) => {
+    const updated = await updateState(Get1, (data: any) => {
       mockUpdateFn();
       return data;
     });

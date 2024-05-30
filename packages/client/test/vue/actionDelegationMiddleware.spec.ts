@@ -1,9 +1,10 @@
-import { createAlova, FetcherType, useFetcher, useRequest, useWatcher } from 'alova';
+import { accessAction, actionDelegationMiddleware } from '@/index';
+import { createAlova } from 'alova';
+import { FetcherType, useFetcher, useRequest, useWatcher } from 'alova/client';
 import VueHook from 'alova/vue';
+import { untilCbCalled } from 'root/testUtils';
 import { ref } from 'vue';
 import { mockRequestAdapter } from '~/test/mockData';
-import { untilCbCalled } from '~/test/utils';
-import { accessAction, actionDelegationMiddleware } from '../';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
@@ -23,6 +24,7 @@ describe('vue => subscriber middleware', () => {
     });
     const successFn = jest.fn();
     const completeFn = jest.fn();
+    await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
     onComplete(completeFn);
@@ -57,6 +59,7 @@ describe('vue => subscriber middleware', () => {
     });
     const successFn = jest.fn();
     const completeFn = jest.fn();
+    await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
     onComplete(completeFn);
@@ -89,6 +92,7 @@ describe('vue => subscriber middleware', () => {
     });
     const successFn = jest.fn();
     const completeFn = jest.fn();
+    await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
     onComplete(completeFn);
@@ -122,6 +126,8 @@ describe('vue => subscriber middleware', () => {
     const state2 = useRequest(methodInstance, {
       middleware: actionDelegationMiddleware(str)
     });
+    const data1 = state1.data;
+    const data2 = state2.data;
     const successFn = jest.fn();
     const completeFn = jest.fn();
     state1.onSuccess(successFn);
@@ -138,8 +144,8 @@ describe('vue => subscriber middleware', () => {
       senders.push(send({ name: 'aa' + index }));
     });
     await Promise.all(senders);
-    expect(state1.data.value).toStrictEqual({ id: 10, name: 'aa0' });
-    expect(state2.data.value).toStrictEqual({ id: 10, name: 'aa1' });
+    expect(data1.value).toStrictEqual({ id: 10, name: 'aa0' });
+    expect(data2.value).toStrictEqual({ id: 10, name: 'aa1' });
     expect(successFn).toHaveBeenCalledTimes(4);
     expect(completeFn).toHaveBeenCalledTimes(4);
   });
@@ -156,6 +162,8 @@ describe('vue => subscriber middleware', () => {
     const state2 = useRequest(methodInstance, {
       middleware: actionDelegationMiddleware('aaa-2')
     });
+    const data1 = state1.data;
+    const data2 = state2.data;
     const successFn = jest.fn();
     const completeFn = jest.fn();
     state1.onSuccess(successFn);
@@ -172,8 +180,8 @@ describe('vue => subscriber middleware', () => {
       senders.push(send({ name: 'aa' + index }));
     });
     await Promise.all(senders);
-    expect(state1.data.value).toStrictEqual({ id: 10, name: 'aa0' });
-    expect(state2.data.value).toStrictEqual({ id: 10, name: 'aa1' });
+    expect(data1.value).toStrictEqual({ id: 10, name: 'aa0' });
+    expect(data2.value).toStrictEqual({ id: 10, name: 'aa1' });
     expect(successFn).toHaveBeenCalledTimes(4);
     expect(completeFn).toHaveBeenCalledTimes(4);
   });
@@ -212,6 +220,7 @@ describe('vue => subscriber middleware', () => {
     });
     const successFn = jest.fn();
     const completeFn = jest.fn();
+    await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
     onComplete(completeFn);
@@ -253,7 +262,7 @@ describe('vue => subscriber middleware', () => {
     expect(completeFn).toHaveBeenCalledTimes(1);
 
     accessAction('fetcher-aaa', async ({ fetch }) => {
-      fetch({ fetch: 'fetcher-aaa' });
+      fetch(methodInstance({ fetch: 'fetcher-aaa' }));
     });
 
     await untilCbCalled(onSuccess);

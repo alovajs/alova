@@ -327,9 +327,11 @@ describe('useWatcher hook with react', () => {
           path: '',
           params: { id1: '', id2: '' }
         },
-        sendable: () => {
+        middleware(context, next) {
           sendableFn();
-          return stateId1 === 1 && stateId2 === 11;
+          if (stateId1 === 1 && stateId2 === 11) {
+            next();
+          }
         }
       });
       onSuccess(mockfn);
@@ -397,9 +399,8 @@ describe('useWatcher hook with react', () => {
           path: '',
           params: { id1: '', id2: '' }
         },
-        sendable: () => {
+        middleware() {
           sendableFn();
-          throw Error('');
         }
       });
       onSuccess(mockfn);
@@ -468,9 +469,8 @@ describe('useWatcher hook with react', () => {
           params: { id1: '', id2: '' }
         },
         immediate: true,
-        sendable: () => {
+        middleware() {
           sendableFn();
-          throw Error('');
         }
       });
       onSuccess(mockfn);
@@ -492,6 +492,7 @@ describe('useWatcher hook with react', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 100);
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
   });
@@ -554,12 +555,14 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('id2')).toHaveTextContent('10');
 
     fireEvent.click(screen.getByRole('button'));
+    await screen.findByText('loading');
     await screen.findByText('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
 
     fireEvent.click(screen.getByRole('button'));
+    await screen.findByText('loading');
     await screen.findByText('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('2');

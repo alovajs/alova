@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { FetcherType } from 'alova';
+import { FetcherType } from 'alova/client';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
 
 describe('useFetcher middleware', () => {
@@ -21,6 +21,7 @@ describe('useFetcher middleware', () => {
     fetch(getGetterObj);
     const mockFn = jest.fn();
     onSuccess(mockFn);
+    await untilCbCalled(setTimeout, 10);
     expect(loading.value).toBeTruthy();
     await untilCbCalled(onSuccess);
     expect(mockFn).toHaveBeenCalledTimes(1);
@@ -90,11 +91,13 @@ describe('useFetcher middleware', () => {
 
     expect(fetchInMiddleware).toBeUndefined(); // 未发起请求时不会调用middleware
     fetch(getGetterObj);
+    await untilCbCalled(setTimeout, 10);
     expect(loading.value).toBeTruthy();
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
 
     fetchInMiddleware(getGetterObj);
+    await untilCbCalled(setTimeout, 10);
     expect(loading.value).toBeTruthy();
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();

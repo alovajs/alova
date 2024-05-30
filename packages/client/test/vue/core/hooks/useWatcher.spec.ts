@@ -224,9 +224,11 @@ describe('use useWatcher hook to send GET with vue', () => {
         }),
       [mutateNum, mutateStr],
       {
-        sendable: () => {
+        middleware(context, next) {
           sendableFn();
-          return mutateNum.value === 1 && mutateStr.value === 'b';
+          if (mutateNum.value === 1 && mutateStr.value === 'b') {
+            return next();
+          }
         }
       }
     );
@@ -283,7 +285,7 @@ describe('use useWatcher hook to send GET with vue', () => {
         }),
       [mutateNum, mutateStr],
       {
-        sendable: () => {
+        middleware() {
           sendableFn();
           throw Error('');
         }
@@ -339,9 +341,8 @@ describe('use useWatcher hook to send GET with vue', () => {
       [mutateNum, mutateStr],
       {
         immediate: true,
-        sendable: () => {
+        middleware() {
           sendableFn();
-          return false;
         }
       }
     );
@@ -864,7 +865,8 @@ describe('use useWatcher hook to send GET with vue', () => {
       transformData: ({ data }: Result<true>) => data,
       params: {
         val: '1'
-      }
+      },
+      cacheFor: 100 * 1000
     });
 
     const ctrlVal = ref(0);
