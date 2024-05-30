@@ -45,4 +45,8 @@ export class FrameworkState<Data, Key extends string> extends FrameworkReadableS
   set v(newValue: Data) {
     this.$upd(this.s, newValue);
   }
+
+  get v() {
+    return super.v;
+  }
 }
