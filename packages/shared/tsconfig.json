@@ -5,7 +5,6 @@
     "declarationDir": "./dist",
     "outDir": "./dist",
     "baseUrl": ".",
-    "allowJs": false,
     "paths": {
       "@/*": ["src/*"],
       "root/*": ["../../internal/*"]

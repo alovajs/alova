@@ -1,5 +1,13 @@
 import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@alova/shared/event';
-import { getContext, getHandlerMethod, getMethodInternalKey, noop, omit, sloughConfig } from '@alova/shared/function';
+import {
+  getContext,
+  getHandlerMethod,
+  getMethodInternalKey,
+  newInstance,
+  noop,
+  omit,
+  sloughConfig
+} from '@alova/shared/function';
 import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, FrontRequestState, Method, Progress, queryCache } from 'alova';
 import {
@@ -71,7 +79,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
         guardNextConfig || {};
       const forceRequestFinally = sloughConfig(guardNextForceRequest, [
-        new AlovaEventBase(methodInstance, sendCallingArgs)
+        newInstance(AlovaEventBase<AG>, methodInstance, sendCallingArgs)
       ]);
       const progressUpdater =
         (stage: 'downloading' | 'uploading') =>
@@ -171,10 +179,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
           // loading状态受控时将不再更改为false
           !controlledLoading && (newStates.loading = falseValue);
           update(newStates);
-          eventManager.emit(KEY_SUCCESS, new AlovaSuccessEvent(baseEvent, data, fromCache()));
+          eventManager.emit(KEY_SUCCESS, newInstance(AlovaSuccessEvent<AG>, baseEvent, data, fromCache()));
           eventManager.emit(
             KEY_COMPLETE,
-            new AlovaCompleteEvent(baseEvent, KEY_SUCCESS, data, fromCache(), undefinedValue)
+            newInstance(AlovaCompleteEvent<AG>, baseEvent, KEY_SUCCESS, data, fromCache(), undefinedValue)
           );
         }
         return data;
@@ -202,10 +210,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
         // loading状态受控时将不再更改为false
         !controlledLoading && (newStates.loading = falseValue);
         update(newStates);
-        eventManager.emit(KEY_ERROR, new AlovaErrorEvent(baseEvent, error));
+        eventManager.emit(KEY_ERROR, newInstance(AlovaErrorEvent<AG>, baseEvent, error));
         eventManager.emit(
           KEY_COMPLETE,
-          new AlovaCompleteEvent(baseEvent, KEY_ERROR, undefinedValue, fromCache(), error)
+          newInstance(AlovaCompleteEvent<AG>, baseEvent, KEY_ERROR, undefinedValue, fromCache(), error)
         );
       }
 

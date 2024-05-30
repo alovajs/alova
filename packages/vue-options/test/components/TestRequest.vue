@@ -20,8 +20,8 @@
 </template>
 
 <script>
-import { useRequest } from 'alova';
-import { mapAlovaHook } from '../../src';
+import { mapAlovaHook } from '@/index';
+import { useRequest } from 'alova/client';
 
 export default {
   props: {
@@ -73,8 +73,8 @@ export default {
     });
   },
   watch: {
-    'alovaHook$.testRequest.data'(newVal) {
-      this.$emit('watchState', newVal);
+    'testRequest.data'(newVal) {
+      this.$emit('watchState', newVal, this);
     }
   },
   methods: {

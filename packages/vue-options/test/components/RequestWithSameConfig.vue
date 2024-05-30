@@ -8,8 +8,8 @@
 </template>
 
 <script>
-import { useRequest } from 'alova';
-import { mapAlovaHook } from '../../src';
+import { mapAlovaHook } from '@/index';
+import { useRequest } from 'alova/client';
 
 export default {
   props: {

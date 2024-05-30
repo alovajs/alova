@@ -2,14 +2,14 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { delay } from 'root/testUtils';
 import TestFetcher from './components/TestFetcher.vue';
-import { alovaInst } from './mockData';
-import { eventObj } from './utils';
+import { createTestAlova, eventObj } from './utils';
 
+const alovaInst = createTestAlova();
 describe('vue options fetcher hook', () => {
   test('should request when watching states are changed', async () => {
     const successFn = jest.fn();
     const completeFn = jest.fn();
-    render(TestFetcher as any, {
+    render(TestFetcher, {
       props: {
         method: alovaInst.Get('/unit-test', {
           params: { a: 1, b: 'b' }
@@ -17,12 +17,10 @@ describe('vue options fetcher hook', () => {
       },
       ...eventObj({
         success(event: any) {
-          successFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaSuccessEvent');
+          successFn(event);
         },
         complete(event: any) {
-          completeFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaCompleteEvent');
+          completeFn(event);
         }
       })
     });
@@ -45,6 +43,8 @@ describe('vue options fetcher hook', () => {
       );
       expect(successFn).toHaveBeenCalledTimes(1);
       expect(completeFn).toHaveBeenCalledTimes(1);
+      expect(successFn.mock.calls[0][0].constructor.name).toBe('AlovaSuccessEvent');
+      expect(completeFn.mock.calls[0][0].constructor.name).toBe('AlovaCompleteEvent');
     });
   });
 });

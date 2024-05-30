@@ -368,7 +368,7 @@ export declare function useRequest<AG extends AlovaGenerics>(
  */
 export declare function useWatcher<AG extends AlovaGenerics>(
   methodHandler: Method<AG> | AlovaMethodHandler<AG>,
-  watchingStates: AG['Watched'],
+  watchingStates: AG['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG>;
 

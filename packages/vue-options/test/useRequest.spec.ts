@@ -1,11 +1,12 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
+import { delay } from 'root/testUtils';
 import { mapAlovaHook } from '../src';
 import RequestWithSameConfig from './components/RequestWithSameConfig.vue';
 import TestRequest from './components/TestRequest.vue';
-import { alovaInst } from './mockData';
-import { eventObj, untilCbCalled } from './utils';
+import { createTestAlova, eventObj } from './utils';
 
+const alovaInst = createTestAlova();
 describe('vue options request hook', () => {
   test('must return object which contains use hook function and params', async () => {
     const mixins = mapAlovaHook(function () {
@@ -13,7 +14,7 @@ describe('vue options request hook', () => {
     } as any);
     expect(() => {
       mixins[0].created.call({});
-    }).toThrow('expect receive an object which contains use hook return values');
+    }).toThrow('expect receive an object which contains use hook exposures');
   });
 
   test('the callback of mapAlovaHook can access context in both this and the first param', async () => {
@@ -38,12 +39,10 @@ describe('vue options request hook', () => {
       },
       ...eventObj({
         success(event: any) {
-          successFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaSuccessEvent');
+          successFn(event);
         },
         complete(event: any) {
-          completeFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaCompleteEvent');
+          completeFn(event);
         }
       })
     });
@@ -64,6 +63,8 @@ describe('vue options request hook', () => {
       );
       expect(successFn).toHaveBeenCalledTimes(1);
       expect(completeFn).toHaveBeenCalledTimes(1);
+      expect(successFn.mock.calls[0][0].constructor.name).toBe('AlovaSuccessEvent');
+      expect(completeFn.mock.calls[0][0].constructor.name).toBe('AlovaCompleteEvent');
     });
   });
 
@@ -76,12 +77,10 @@ describe('vue options request hook', () => {
       },
       ...eventObj({
         error(event: any) {
-          errorFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaErrorEvent');
+          errorFn(event);
         },
         complete(event: any) {
-          completeFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaCompleteEvent');
+          completeFn(event);
         }
       })
     });
@@ -91,10 +90,12 @@ describe('vue options request hook', () => {
     expect(screen.getByRole('data')).toHaveTextContent('{}');
     await waitFor(() => {
       expect(screen.getByRole('loading')).toHaveTextContent('loaded');
-      expect(screen.getByRole('error')).toHaveTextContent('api error');
+      expect(screen.getByRole('error')).toHaveTextContent('Failed to fetch');
       expect(screen.getByRole('data')).toHaveTextContent('{}');
       expect(errorFn).toHaveBeenCalledTimes(1);
       expect(completeFn).toHaveBeenCalledTimes(1);
+      expect(errorFn.mock.calls[0][0].constructor.name).toBe('AlovaErrorEvent');
+      expect(completeFn.mock.calls[0][0].constructor.name).toBe('AlovaCompleteEvent');
     });
   });
 
@@ -108,17 +109,15 @@ describe('vue options request hook', () => {
       },
       ...eventObj({
         success(event: any) {
-          successFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaSuccessEvent');
+          successFn(event);
         },
         complete(event: any) {
-          completeFn();
-          expect(event[Symbol.toStringTag]).toBe('AlovaCompleteEvent');
+          completeFn(event);
         }
       })
     });
 
-    await untilCbCalled(setTimeout, 100); // 100毫秒后仍然还是初始化状态
+    await delay(100); // 100毫秒后仍然还是初始化状态
     expect(screen.getByRole('loading')).toHaveTextContent('loaded');
     expect(screen.getByRole('error')).toHaveTextContent('');
     expect(screen.getByRole('data')).toHaveTextContent('{}');
@@ -138,6 +137,8 @@ describe('vue options request hook', () => {
       );
       expect(successFn).toHaveBeenCalledTimes(1);
       expect(completeFn).toHaveBeenCalledTimes(1);
+      expect(successFn.mock.calls[0][0].constructor.name).toBe('AlovaSuccessEvent');
+      expect(completeFn.mock.calls[0][0].constructor.name).toBe('AlovaCompleteEvent');
     });
   });
 
@@ -174,7 +175,7 @@ describe('vue options request hook', () => {
 
   test('watch the hook state', async () => {
     const watchFn = jest.fn();
-    render(TestRequest as any, {
+    render(TestRequest, {
       props: {
         method: alovaInst.Get('/unit-test', {
           params: {
@@ -183,19 +184,24 @@ describe('vue options request hook', () => {
         })
       },
       ...eventObj({
-        watchState(data: any) {
-          watchFn(data);
+        watchState(data: any, vm: any) {
+          watchFn(data, vm);
         }
       })
     });
 
     await waitFor(() => {
-      expect(watchFn).toHaveBeenCalledTimes(2);
-      expect(watchFn).toHaveBeenCalledWith({
-        path: '/unit-test',
-        method: 'GET',
-        params: { e: 'ee' }
+      expect(watchFn).toHaveBeenCalledTimes(1);
+      expect(watchFn.mock.calls[0][0]).toStrictEqual({
+        code: 200,
+        data: {
+          path: '/unit-test',
+          method: 'GET',
+          params: { e: 'ee' }
+        },
+        msg: ''
       });
+      expect(watchFn.mock.calls[0][1]).toBeInstanceOf(Object);
     });
   });
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span role="loading">{{ testFetcher.fetching ? 'fetching' : 'fetched' }}</span>
+    <span role="loading">{{ testFetcher.loading ? 'fetching' : 'fetched' }}</span>
     <span role="error">{{ testFetcher.error ? testFetcher.error.message : '' }}</span>
     <div role="data">{{ JSON.stringify(fetchedData) }}</div>
     <button
@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import { useFetcher } from 'alova';
-import { mapAlovaHook } from '../../src';
+import { mapAlovaHook } from '@/index';
+import { useFetcher } from 'alova/client';
 
 export default {
   props: {

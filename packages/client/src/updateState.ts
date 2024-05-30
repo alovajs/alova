@@ -41,14 +41,7 @@ export default async function updateState<AG extends AlovaGenerics>(
         if (stateName === 'data') {
           updatedDataColumnData = updatedData;
         }
-        update(
-          {
-            [stateName]: updatedData
-          },
-          frontStates as any,
-          stateName,
-          hookInstance.ro
-        );
+        update(updatedData, frontStates[stateName as keyof typeof frontStates], stateName, hookInstance.ro);
       });
       updated = trueValue;
     }

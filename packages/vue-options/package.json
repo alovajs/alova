@@ -11,8 +11,9 @@
   "unpkg": "dist/alova-vue-options.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
-    "test:vue3": "jest --config=jest.config.vue3.ts",
+    "test": "pnpm run test:vue3 && pnpm run test:vue2",
+    "test:vue3": "jest",
+    "test:vue2": "jest --config=jest.config.vue2.ts --runInBand",
     "build": "npm run clean && alova-scripts build"
   },
   "publishConfig": {
@@ -38,11 +39,9 @@
     "@alova/mock": "workspace:*",
     "@alova/scripts": "workspace:*",
     "@alova/shared": "workspace:*",
-    "@testing-library/vue3": "npm:@testing-library/vue@^7.0.0",
+    "@testing-library/vue2": "npm:@testing-library/vue@^5.9.0",
     "@vue/vue2-jest": "^29.2.6",
-    "@vue/vue3-jest": "^29.2.6",
     "alova": "workspace:*",
-    "vue": "^2.7.14",
-    "vue3": "npm:vue@^3.3.4"
+    "vue2": "npm:vue@^2.7.16"
   }
 }

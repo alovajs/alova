@@ -263,14 +263,28 @@ describe('shared functions', () => {
     const mockMethodInstance = alovaInst.Get('/unit-test');
     const result = getLocalCacheConfigParam(mockMethodInstance);
     // request GET has 5 min cache default.
-    expect(result).toStrictEqual({ e: baseTs + 300000, m: MEMORY, s: false, t: undefined });
+    expect(result).toStrictEqual({
+      c: false,
+      e: baseTs + 300000,
+      f: 300000,
+      m: MEMORY,
+      s: false,
+      t: undefined
+    });
 
     // should return cache parameters with custom expire time (number)
     const mockMethodInstance2 = alovaInst.Get('/unit-test', {
       cacheFor: 60000
     });
     const result2 = getLocalCacheConfigParam(mockMethodInstance2);
-    expect(result2).toStrictEqual({ e: baseTs + 60000, m: MEMORY, s: false, t: undefined });
+    expect(result2).toStrictEqual({
+      c: false,
+      e: baseTs + 60000,
+      f: 60000,
+      m: MEMORY,
+      s: false,
+      t: undefined
+    });
 
     // 'should return cache parameters with custom expire time (Date)'
     const futureDate = new Date(baseTs + 50000); // 1 minute in the future
@@ -278,7 +292,14 @@ describe('shared functions', () => {
       cacheFor: futureDate
     });
     const result3 = getLocalCacheConfigParam(mockMethodInstance3);
-    expect(result3).toStrictEqual({ e: futureDate.getTime(), m: MEMORY, s: false, t: undefined });
+    expect(result3).toStrictEqual({
+      c: false,
+      e: futureDate.getTime(),
+      f: futureDate,
+      m: MEMORY,
+      s: false,
+      t: undefined
+    });
 
     // should return cache parameters with custom mode, expire time, and tag
     const mockMethodInstance4 = alovaInst.Get('/unit-test', {
@@ -289,7 +310,35 @@ describe('shared functions', () => {
       }
     });
     const result4 = getLocalCacheConfigParam(mockMethodInstance4);
-    expect(result4).toEqual({ e: 1600000030000, m: STORAGE_RESTORE, s: true, t: 'my-tag' });
+    expect(result4).toStrictEqual({
+      c: false,
+      e: 1600000030000,
+      f: {
+        mode: STORAGE_RESTORE,
+        expire: 30000, // 30 seconds
+        tag: 'my-tag'
+      },
+      m: STORAGE_RESTORE,
+      s: true,
+      t: 'my-tag'
+    });
+
+    // parse controlled cache data
+    const controlledCacheFor = () => ({
+      data: 'controlled cache data'
+    });
+    const mockMethodInstance5 = alovaInst.Get('/unit-test', {
+      cacheFor: controlledCacheFor
+    });
+    const result5 = getLocalCacheConfigParam(mockMethodInstance5);
+    expect(result5).toStrictEqual({
+      c: true,
+      e: 0,
+      f: controlledCacheFor,
+      m: MEMORY,
+      s: false,
+      t: undefined
+    });
 
     Date.now = nowFn;
   });

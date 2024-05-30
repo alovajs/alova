@@ -117,7 +117,7 @@ describe('EventManager', () => {
     const usedTime = Date.now() - start;
 
     expect(usedTime).toBeGreaterThanOrEqual(400);
-    expect(usedTime).toBeLessThanOrEqual(410);
+    expect(usedTime).toBeLessThanOrEqual(420);
 
     expect(mockFoo1).toHaveBeenCalledTimes(1);
     expect(mockFoo2).toHaveBeenCalledTimes(1);

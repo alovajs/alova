@@ -1,5 +1,5 @@
 import { isFn } from './function';
-import { filterItem, len, mapItem, pushItem, undefinedValue } from './vars';
+import { PromiseCls, filterItem, len, mapItem, pushItem, undefinedValue } from './vars';
 
 export interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
@@ -50,15 +50,9 @@ const createEventManager = <E extends object>() => {
     emit(type, event, sync = false) {
       const decorator = decoratorMap[type];
       const handlers = eventMap[type] || [];
-      const executor: DecoratorMap<E>[any] = isFn(decorator)
-        ? decorator
-        : handler => {
-            return handler(event);
-          };
-
+      const executor: DecoratorMap<E>[any] = isFn(decorator) ? decorator : handler => handler(event);
       const res = mapItem(handlers, (handler, index) => executor(handler, event, index, len(handlers)));
-
-      return sync ? Promise.all(res) : undefinedValue;
+      return sync ? PromiseCls.all(res) : undefinedValue;
     },
     setDecorator(type, decorator) {
       decoratorMap[type] = decorator;

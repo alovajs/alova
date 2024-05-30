@@ -3,6 +3,7 @@
     <span role="loading">{{ testWatcher.loading ? 'loading' : 'loaded' }}</span>
     <span role="error">{{ testWatcher.error ? testWatcher.error.message : '' }}</span>
     <div role="data">{{ JSON.stringify(testWatcher.data) }}</div>
+    <div role="data2">{{ JSON.stringify(testWatcher2.data) }}</div>
     <button
       role="btn1"
       @click="state1++"></button>
@@ -18,8 +19,8 @@
 </template>
 
 <script>
-import { useWatcher } from 'alova';
-import { mapAlovaHook } from '../../src';
+import { mapAlovaHook } from '@/index';
+import { useWatcher } from 'alova/client';
 
 export default {
   props: {
@@ -36,6 +37,9 @@ export default {
     return {
       testWatcher: useWatcher(() => this.methodHandler(this.state1, this.state2.v), ['state1', 'state2.v'], {
         immediate: this.immediate,
+        initialData: {}
+      }),
+      testWatcher2: useWatcher(() => this.methodHandler(this.testWatcher.data, 'a'), ['testWatcher.data'], {
         initialData: {}
       })
     };

@@ -1,8 +1,17 @@
+import { GeneralFn } from '@alova/shared/types';
 import { StatesHook } from 'alova';
-import { WatchHandler, WatchOptionsWithHandler } from 'vue';
 
-type UseHookCallers = Record<string, Record<string, any>>;
-type UseHookMapGetter<GR extends UseHookCallers> = (this: Vue, context: Vue) => GR;
+export interface OptionsState<T> {
+  value: T;
+  type: 's';
+}
+export interface OptionsComputed<T extends GeneralFn> {
+  value: T;
+  type: 'c';
+}
+
+export type UseHookCallers = Record<string, Record<string, any>>;
+export type UseHookMapGetter<UHC extends UseHookCallers> = (this: any, context: any) => UHC;
 
 type PickFunction<T extends Record<string, any>, U = true> = Pick<
   T,
@@ -10,22 +19,20 @@ type PickFunction<T extends Record<string, any>, U = true> = Pick<
     [K in keyof T]: T[K] extends (...args: any) => any ? (U extends true ? K : never) : U extends false ? K : never;
   }[keyof T]
 >;
-type FlattenObjectKeys<T extends Record<string, unknown>, K = keyof T> = K extends string
-  ? T[K] extends Record<string, unknown>
+export type FlattenObjectKeys<T extends Record<string, unknown>, K = keyof T> = K extends string
+  ? T[K] extends { update: GeneralFn }
     ? `${K}$${FlattenObjectKeys<T[K]>}`
     : K
   : never;
 
-/** vue mixin类型 */
-interface VueHookMapperMixin<GR extends UseHookCallers> {
+/** vue mixin */
+export interface VueHookMapperMixin<UHC extends UseHookCallers> {
   created(): void;
   data(): {
-    [K in keyof GR]: PickFunction<GR[K], false>;
-  } & {
-    alovaHook$: Record<string, any>;
+    [K in keyof UHC]: PickFunction<UHC[K], false>;
   };
   methods: PickFunction<{
-    [K in FlattenObjectKeys<GR>]: K extends `${infer P}$${infer S}` ? GR[P][S] : never;
+    [K in FlattenObjectKeys<UHC>]: K extends `${infer P}$${infer S}` ? UHC[P][S] : never;
   }>;
 }
 
@@ -34,50 +41,16 @@ interface VueHookMapperMixin<GR extends UseHookCallers> {
  * @param mapGetter usehook映射函数，它将返回映射的集合
  * @returns vue mixins数组
  */
-declare function mapAlovaHook<GR extends UseHookCallers>(mapGetter: UseHookMapGetter<GR>): VueHookMapperMixin<GR>[];
-
-type VueWatchHandler =
-  | WatchOptionsWithHandler<any>
-  | WatchHandler<any>
-  | Array<WatchOptionsWithHandler<any> | WatchHandler<any>>;
-type AlovaWatcherHandlers = Record<string, VueWatchHandler | Record<string, VueWatchHandler>>;
-
-/**
- * 映射状态到watch对象上，使用方法如下
- * @example
- * ```js
- * import { mapWatcher } from '@alova/vue-options';
- *
- * export default {
- *   watch: {
- *     ...mapWatcher({
- *       // 映射单个watcher
- *       'hookState1.loading'(newVal, oldVal) {},
- *       hookState1: {
- *         loading(newVal, oldVal) {},
- *         data(newVal, oldVal) {},
- *       },
- *
- *       // 映射多个watcher
- *       'hookState1.data, hookState2.data'(newVal, oldVal) {},
- *       'hookState1, hookState2': {
- *         data(newVal, oldVal) {},
- *       },
- *       hookState2: {
- *         'loading, data'(newVal, oldVal) {},
- *       },
- *       'hookState1, hookState2': {
- *         'loading, data'(newVal, oldVal) {},
- *       },
- *     })
- *   }
- * }
- * ```
- * @param watcherHandlers watcher函数对象
- */
-declare function mapWatcher(watcherHandlers: AlovaWatcherHandlers): Record<string, WatchOptionsWithHandler<any>>;
+export declare function mapAlovaHook<UHM extends UseHookCallers>(
+  mapGetter: UseHookMapGetter<UHM>
+): VueHookMapperMixin<UHM>[];
 
 /**
  * vue options statesHook
  */
-declare const VueOptionsHook: StatesHook<unknown, unknown>;
+export declare const VueOptionsHook: StatesHook<
+  OptionsState<any>,
+  OptionsComputed<any>,
+  string,
+  OptionsState<any> | OptionsComputed<any>
+>;

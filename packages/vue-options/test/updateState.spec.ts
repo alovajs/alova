@@ -1,16 +1,17 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/vue';
 import { updateState } from 'alova/client';
-import { delay } from 'root/testUtils';
+import { Result, delay } from 'root/testUtils';
 import TestRequest from './components/TestRequest.vue';
-import { alovaInst } from './mockData';
+import { createTestAlova } from './utils';
 
+const alovaInst = createTestAlova();
 describe('vue options updateState outside component', () => {
   test('should update state when change data by updateState', async () => {
-    const Get = alovaInst.Get('/unit-test', {
+    const Get = alovaInst.Get<Result>('/unit-test', {
       params: { a: 'a', b: 'str' }
     });
-    const { unmount } = render(TestRequest as any, {
+    const { unmount } = render(TestRequest, {
       props: {
         method: Get
       }
@@ -29,18 +30,18 @@ describe('vue options updateState outside component', () => {
     });
 
     const updateFn = jest.fn();
-    updateState(Get, (oldVal: any) => {
-      oldVal.path = '/unit-test-updated';
-      oldVal.params = {};
+    updateState(Get, oldVal => {
+      oldVal.data.path = '/unit-test-updated';
+      oldVal.data.params = {};
       updateFn();
       return oldVal;
     });
     await waitFor(() => {
       expect(screen.getByRole('data')).toHaveTextContent(
         JSON.stringify({
-          path: '/unit-test-updated',
-          method: 'GET',
-          params: {}
+          code: 200,
+          msg: '',
+          data: { path: '/unit-test-updated', method: 'GET', params: {} }
         })
       );
       expect(updateFn).toHaveBeenCalledTimes(1);
@@ -49,7 +50,7 @@ describe('vue options updateState outside component', () => {
     // 卸载后将不会匹配到对应状态了
     unmount();
     await delay(500);
-    updateState(Get, (oldVal: any) => {
+    updateState(Get, oldVal => {
       updateFn();
       return oldVal;
     });
