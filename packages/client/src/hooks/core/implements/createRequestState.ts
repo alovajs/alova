@@ -184,9 +184,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
      */
     send: (sendCallingArgs?: any[], methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs),
     onSuccess(handler: SuccessHandler<AG>) {
-      eventManager.on(KEY_SUCCESS, event => {
-        handler(event);
-      });
+      eventManager.on(KEY_SUCCESS, handler);
     },
     onError(handler: ErrorHandler<AG>) {
       eventManager.on(KEY_ERROR, handler);
