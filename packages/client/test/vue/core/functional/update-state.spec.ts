@@ -27,7 +27,7 @@ describe('update cached response data by user in vue', () => {
     expect(updated).toBeTruthy();
   });
 
-  test("shouldn't be called when not get any states", () => {
+  test("shouldn't be called when not get any states", async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -38,7 +38,7 @@ describe('update cached response data by user in vue', () => {
     });
 
     const mockfn = jest.fn();
-    const updated = updateState(Get, data => {
+    const updated = await updateState(Get, data => {
       mockfn();
       return data;
     });
@@ -46,7 +46,7 @@ describe('update cached response data by user in vue', () => {
     expect(updated).toBeFalsy();
   });
 
-  test('should update the first matched one when find sereval Method instance', async () => {
+  test("shouldn't throw any error when not match any one", async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -63,51 +63,19 @@ describe('update cached response data by user in vue', () => {
       transformData: ({ data }: Result) => data
     });
 
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
-    const updater = (data: any) => {
-      data.path = '/unit-test-updated';
-      return data;
-    };
-    updateState(Get1, updater);
-    updateState(Get2, updater);
-
-    // 匹配到多个method实例，只会更新第一个
-    expect(firstState.data.value.path).toBe('/unit-test-updated');
-    expect(secondState.data.value.path).toBe('/unit-test');
-  });
-
-  test("shouldn't throw error when not match any one", async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const Get1 = alova.Get('/unit-test', {
-      name: 'get1',
-      params: { a: 1 },
-      cacheFor: 100000,
-      transformData: ({ data }: Result) => data
-    });
-    const Get2 = alova.Get('/unit-test', {
-      name: 'get2',
-      params: { b: 2 },
-      cacheFor: 100000,
-      transformData: ({ data }: Result) => data
-    });
-
-    const firstState = useRequest(Get1);
-    const secondState = useRequest(Get2);
-    await Promise.all([untilCbCalled(firstState.onSuccess), untilCbCalled(secondState.onSuccess)]);
+    const { onSuccess: get1OnSuccess, data: get1Data } = useRequest(Get1);
+    const { onSuccess: get2OnSuccess, data: get2Data } = useRequest(Get2);
+    await Promise.all([untilCbCalled(get1OnSuccess), untilCbCalled(get2OnSuccess)]);
 
     // 不会匹配任何一个method实例
-    updateState(alova.Get(''), (data: any) => {
+    await updateState(alova.Get(''), (data: any) => {
       data.path = '/unit-test-updated';
       return data;
     });
 
     // 匹配到多个method实例，只会更新第一个
-    expect(firstState.data.value.path).toBe('/unit-test');
-    expect(secondState.data.value.path).toBe('/unit-test');
+    expect(get1Data.value.path).toBe('/unit-test');
+    expect(get2Data.value.path).toBe('/unit-test');
   });
 
   test('update extra managed states', async () => {
@@ -130,28 +98,28 @@ describe('update cached response data by user in vue', () => {
     await untilCbCalled(onSuccess);
 
     // 预设状态不能更新
-    expect(() => {
+    await expect(
       updateState(Get, {
         loading: () => true
-      });
-    }).toThrow('can not update preset states');
+      })
+    ).rejects.toThrow('can not update preset states');
 
     // 非状态数据不能更新
-    expect(() => {
+    await expect(
       updateState(Get, {
         extraData2: () => 1
-      });
-    }).toThrow();
+      })
+    ).rejects.toThrow();
 
     // 未找到状态抛出错误
-    expect(() => {
+    await expect(
       updateState(Get, {
         extraData3: () => 1
-      });
-    }).toThrow('can not find state named `extraData3`');
+      })
+    ).rejects.toThrow('[alova]state named `extraData3` is not found');
 
     // 更新成功
-    updateState(Get, {
+    await updateState(Get, {
       extraData: () => 1
     });
     expect(extraData.value).toBe(1);
@@ -176,7 +144,7 @@ describe('update cached response data by user in vue', () => {
     removeStateCache(alova.id, key(Get1));
 
     const mockUpdateFn = jest.fn();
-    const updated = updateState(Get1, (data: any) => {
+    const updated = await updateState(Get1, (data: any) => {
       mockUpdateFn();
       return data;
     });
