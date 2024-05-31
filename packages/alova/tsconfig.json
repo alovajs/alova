@@ -7,8 +7,7 @@
       "~/*": ["./*"],
       "#/*": ["test/*"],
       "root/*": ["../../internal/*"]
-    },
-    "removeComments": true
+    }
   },
   "include": ["src/**/*.ts", "typings/*.d.ts", "test/**/*.ts", "test/**/*.tsx"]
 }

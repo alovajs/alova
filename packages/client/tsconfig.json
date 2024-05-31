@@ -9,5 +9,13 @@
       "root/*": ["../../internal/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "typings/*.d.ts", "test/**/*.ts", "test/**/*.tsx", "test/**/*.vue"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js",
+    "typings/*.d.ts",
+    "test/**/*.ts",
+    "test/**/*.tsx",
+    "test/**/*.vue",
+    "test/**/*.svelte"
+  ]
 }

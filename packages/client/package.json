@@ -1,7 +1,7 @@
 {
   "name": "alova-client",
   "version": "2.0.0",
-  "description": "client request strategy for alova.js",
+  "description": "client request strategies for alova.js",
   "homepage": "https://alova.js.org",
   "private": true,
   "type": "module",
