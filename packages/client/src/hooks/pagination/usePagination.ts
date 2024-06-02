@@ -1,7 +1,7 @@
 import { useFetcher, useWatcher } from '@/index';
 import { createAssert } from '@alova/shared/assert';
 import {
-  createSyncOnceRunner,
+  createAsyncQueue,
   getLocalCacheConfigParam,
   getTime,
   isFn,
@@ -10,6 +10,7 @@ import {
   statesHookHelper
 } from '@alova/shared/function';
 import {
+  PromiseCls,
   falseValue,
   filterItem,
   forEach,
@@ -23,7 +24,6 @@ import {
   promiseResolve,
   pushItem,
   setTimeoutFn,
-  shift,
   splice,
   trueValue,
   undefinedValue
@@ -46,9 +46,9 @@ const paginationAssert = createAssert('usePagination');
 const indexAssert = (index: number, rawData: any[]) =>
   paginationAssert(isNumber(index) && index < len(rawData), 'index must be a number that less than list length');
 
-export default <AG extends AlovaGenerics>(
+export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   handler: (page: number, pageSize: number) => Method<AG>,
-  config: PaginationHookConfig<AG, unknown[]> = {}
+  config: PaginationHookConfig<AG, ListData> = {}
 ) => {
   const {
     create,
@@ -82,7 +82,7 @@ export default <AG extends AlovaGenerics>(
   const requestCountInReseting = ref(0);
   const page = create(initialPage, 'page', trueValue);
   const pageSize = create(initialPageSize, 'pageSize', trueValue);
-  const data = create(initialData ? dataGetter(initialData) || [] : [], 'data', trueValue);
+  const data = create((initialData ? dataGetter(initialData) || [] : []) as ListData[number][], 'data', trueValue);
   const total = create(initialData ? totalGetter(initialData) : undefinedValue, 'total', trueValue);
   // 保存当前hook所使用到的所有method实例快照
   const {
@@ -184,8 +184,7 @@ export default <AG extends AlovaGenerics>(
     ...others
   });
   const { send } = states;
-
-  const requestDataRef = ref(states.data);
+  const requestDataRef = states.data;
 
   // 判断是否可预加载数据
   const canPreload = async (payload: {
@@ -276,10 +275,10 @@ export default <AG extends AlovaGenerics>(
   );
 
   // 更新当前页缓存
-  const updateCurrentPageCache = () => {
+  const updateCurrentPageCache = async () => {
     const snapshotItem = getSnapshotMethods(page.v);
-    snapshotItem &&
-      setCache(snapshotItem.entity, (rawData: any[]) => {
+    if (snapshotItem) {
+      await setCache(snapshotItem.entity, (rawData: any[]) => {
         // 当关闭缓存时，rawData为undefined
         if (rawData) {
           const cachedListData = listDataGetter(rawData) || [];
@@ -287,6 +286,7 @@ export default <AG extends AlovaGenerics>(
           return rawData;
         }
       });
+    }
   };
 
   onFetchSuccess(({ method, data: rawData }) => {
@@ -353,11 +353,13 @@ export default <AG extends AlovaGenerics>(
   });
 
   // 获取列表项所在位置
-  const getItemIndex = (item: any) => {
+  const getItemIndex = (item: ListData[number]) => {
     const index = data.v.indexOf(item);
     paginationAssert(index >= 0, 'item is not found in list');
     return index;
   };
+
+  const add2AsyncQueue = createAsyncQueue();
 
   /**
    * 刷新指定页码数据，此函数将忽略缓存强制发送请求
@@ -365,8 +367,8 @@ export default <AG extends AlovaGenerics>(
    * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
    * @param pageOrItemPage 刷新的页码或列表项
    */
-  const refresh = (pageOrItemPage = page.v) => {
-    let refreshPage = pageOrItemPage;
+  const refresh = (pageOrItemPage: number | ListData[number] = page.v) => {
+    let refreshPage = pageOrItemPage as number;
     if (append) {
       if (!isNumber(pageOrItemPage)) {
         const itemIndex = getItemIndex(pageOrItemPage);
@@ -385,9 +387,9 @@ export default <AG extends AlovaGenerics>(
     }
   };
 
-  const removeSyncRunner = ref(createSyncOnceRunner()).current;
+  // const removeSyncRunner = ref(createSyncOnceRunner()).current;
   // 删除除此usehook当前页和下一页的所有相关缓存
-  const invalidatePaginationCache = (all = falseValue) => {
+  const invalidatePaginationCache = async (all = falseValue) => {
     const pageVal = page.v;
     const snapshotObj = methodSnapshots();
     let snapshots = objectValues(snapshotObj);
@@ -411,30 +413,32 @@ export default <AG extends AlovaGenerics>(
         }
       );
     }
-    invalidateCache(mapItem(snapshots, ({ entity }) => entity));
+    await invalidateCache(mapItem(snapshots, ({ entity }) => entity));
   };
 
   // 单独拿出来的原因是
   // 无论同步调用几次insert、remove，或它们组合调用，reset操作只需要异步执行一次
-  const resetSyncRunner = ref(createSyncOnceRunner()).current;
-  const resetCache = () =>
-    resetSyncRunner(() => {
-      fetchingRef.current && abortFetch();
-      // 缓存失效
-      invalidatePaginationCache();
+  // const resetSyncRunner = ref(createSyncOnceRunner()).current;
+  const resetCache = async () => {
+    fetchingRef.current && abortFetch();
+    // 缓存失效
+    await invalidatePaginationCache();
 
-      // 当下一页的数据量不超过pageSize时，强制请求下一页，因为有请求共享，需要在中断请求后异步执行拉取操作
-      setTimeoutFn(async () => {
-        const snapshotItem = getSnapshotMethods(page.v + 1);
-        if (snapshotItem) {
-          const cachedListData = listDataGetter((await queryCache(snapshotItem.entity)) || {}) || [];
-          fetchNextPage(undefinedValue, len(cachedListData) < pageSize.v);
-        }
-      });
+    // 当下一页的数据量不超过pageSize时，强制请求下一页，因为有请求共享，需要在中断请求后异步执行拉取操作
+    setTimeoutFn(async () => {
+      const snapshotItem = getSnapshotMethods(page.v + 1);
+      if (snapshotItem) {
+        const cachedListData = listDataGetter((await queryCache(snapshotItem.entity)) || {}) || [];
+        fetchNextPage(undefinedValue, len(cachedListData) < pageSize.v);
+      }
     });
+  };
 
   // 统一更新总条数
   const updateTotal = (offset: number) => {
+    if (offset === 0) {
+      return;
+    }
     // 更新当前页
     const totalVal = total.v;
     if (isNumber(totalVal)) {
@@ -456,127 +460,124 @@ export default <AG extends AlovaGenerics>(
    * @param item 插入项
    * @param position 插入位置（索引）或列表项
    */
-  const insert = (item: any, position = 0) => {
-    const index = isNumber(position) ? position : getItemIndex(position) + 1;
-    let popItem = undefinedValue;
-    const rawData = data.v;
-    // 当前展示的项数量刚好是pageSize的倍数时，才需要去掉一项数据，保证操作页的数量为pageSize
-    if (len(rawData) % pageSize.v === 0) {
-      popItem = rawData.pop();
-    }
-    // 插入位置为空默认插到最前面
-    splice(rawData, index, 0, item);
-    data.v = rawData;
+  const insert = (item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number] = 0) =>
+    add2AsyncQueue(async () => {
+      const index = isNumber(position) ? position : getItemIndex(position) + 1;
+      let popItem: ListData[number] | undefined = undefinedValue;
+      const rawData = data.v;
+      // 当前展示的项数量刚好是pageSize的倍数时，才需要去掉一项数据，保证操作页的数量为pageSize
+      if (len(rawData) % pageSize.v === 0) {
+        popItem = rawData.pop();
+      }
+      // 插入位置为空默认插到最前面
+      splice(rawData, index, 0, item);
+      data.v = rawData;
 
-    updateTotal(1);
+      updateTotal(1);
 
-    // 当前页的缓存同步更新
-    updateCurrentPageCache();
+      // 当前页的缓存同步更新
+      await updateCurrentPageCache();
 
-    // 如果有pop项，将它放到下一页缓存的头部，与remove的操作保持一致
-    // 这样在同步调用insert和remove时表现才一致
-    if (popItem) {
-      const snapshotItem = getSnapshotMethods(page.v + 1);
-      snapshotItem &&
-        setCache(snapshotItem.entity, (rawData: any[]) => {
-          if (rawData) {
-            const cachedListData = listDataGetter(rawData) || [];
-            cachedListData.unshift(popItem);
-            cachedListData.pop();
-            return rawData;
-          }
-        });
-    }
+      // 如果有pop项，将它放到下一页缓存的头部，与remove的操作保持一致
+      // 这样在同步调用insert和remove时表现才一致
+      if (popItem) {
+        const snapshotItem = getSnapshotMethods(page.v + 1);
+        if (snapshotItem) {
+          await setCache(snapshotItem.entity, (rawData: any[]) => {
+            if (rawData) {
+              const cachedListData = listDataGetter(rawData) || [];
+              cachedListData.unshift(popItem);
+              cachedListData.pop();
+              return rawData;
+            }
+          });
+        }
+      }
 
-    // 插入项后也需要让缓存失效，以免不同条件下缓存未更新
-    resetCache();
-  };
+      // 插入项后也需要让缓存失效，以免不同条件下缓存未更新
+      resetCache();
+    });
 
   /**
    * 移除一条数据
    * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
    * @param position 移除的索引或列表项
    */
-  let tempData: any[] | undefined; // 临时保存的数据，以便当需要重新加载时用于数据恢复
-  const remove = (position: number) => {
-    const index = isNumber(position) ? position : getItemIndex(position);
-    indexAssert(index, data.v);
-    const pageVal = page.v;
-    const nextPage = pageVal + 1;
-    const snapshotItem = getSnapshotMethods(nextPage);
-    let fillingItem = undefinedValue; // 补位数据项
-    snapshotItem &&
-      setCache(snapshotItem.entity, (rawData: any[]) => {
-        if (rawData) {
-          const cachedListData = listDataGetter(rawData);
-          // 从下一页列表的头部开始取补位数据
-          fillingItem = shift(cachedListData || []);
-          fillingItem = shift(cachedListData || []);
-          return rawData;
-        }
+  const remove = (...positions: (number | ListData[number])[]) =>
+    add2AsyncQueue(async () => {
+      const indexes = mapItem(positions, position => {
+        const index = isNumber(position) ? position : getItemIndex(position);
+        indexAssert(index, data.v);
+        return index;
       });
-
-    const isLastPageVal = isLastPage.v;
-    if (fillingItem || isLastPageVal) {
-      // 如果有下一页数据则通过缓存数据补位
-      if (!tempData) {
-        tempData = [...data.v];
+      const pageVal = page.v;
+      const nextPage = pageVal + 1;
+      const snapshotItem = getSnapshotMethods(nextPage);
+      const fillingItems: ListData[number][] = []; // 补位数据项
+      if (snapshotItem) {
+        await setCache(snapshotItem.entity, (rawData: any) => {
+          if (rawData) {
+            const cachedListData = listDataGetter(rawData);
+            // 从下一页列表的头部开始取补位数据
+            if (isArray(cachedListData)) {
+              pushItem(fillingItems, ...splice(cachedListData, 0, len(indexes)));
+            }
+            return rawData;
+          }
+        });
       }
-      if (index >= 0) {
-        const rawData = data.v;
-        splice(rawData, index, 1);
-        // 如果有下一页的补位数据才去补位，因为有可能是最后一页才进入删除的
-        fillingItem && pushItem(rawData, fillingItem);
-        data.v = rawData;
-      }
-    } else if (tempData) {
-      data.v = tempData; // 当移除项数都用完时还原数据，减少不必要的视图渲染
-    }
 
-    updateTotal(-1);
-    // 当前页的缓存同步更新
-    updateCurrentPageCache();
+      const isLastPageVal = isLastPage.v;
+      const fillingItemsLen = len(fillingItems);
+      if (fillingItemsLen > 0 || isLastPageVal) {
+        // 删除指定索引的数据
+        const newListData = filterItem(data.v, (_, index) => !includes(indexes, index));
 
-    // 如果没有下一页数据，或同步删除的数量超过了pageSize，则恢复数据并重新加载本页
-    // 需异步操作，因为可能超过pageSize后还有remove函数被同步执行
-    resetCache();
-    removeSyncRunner(() => {
-      // 移除最后一页数据时，就不需要再刷新了
-      if (!fillingItem && !isLastPageVal) {
+        // 翻页模式下，如果是最后一页且全部项被删除了，则往前翻一页
+        if (!append && isLastPageVal && len(newListData) <= 0) {
+          page.v = pageVal - 1;
+        } else if (fillingItemsLen > 0) {
+          pushItem(newListData, ...fillingItems);
+        }
+        data.v = newListData;
+      } else if (fillingItemsLen <= 0 && !isLastPageVal) {
+        // 移除最后一页数据时，就不需要再刷新了
         refresh(pageVal);
       }
-      if (!append && isLastPageVal && len(data.v) <= 0) {
-        page.v = pageVal - 1; // 翻页模式下，如果是最后一页且全部项被删除了，则往前翻一页
-      }
-      tempData = undefinedValue;
-    });
-  };
 
+      updateTotal(-len(indexes));
+      // 当前页的缓存同步更新
+      await PromiseCls.all([updateCurrentPageCache(), resetCache()]);
+    });
   /**
    * 替换一条数据
    * 如果position传入的是列表项，将替换此列表项，如果列表项未在列表数据中将会抛出错误
    * @param item 替换项
    * @param position 替换位置（索引）或列表项
    */
-  const replace = (item: any, position: number) => {
-    paginationAssert(position !== undefinedValue, 'must specify replace position');
-    const index = isNumber(position) ? position : getItemIndex(position);
-    indexAssert(index, data.v);
-    const rawData = data.v;
-    splice(rawData, index, 1, item);
-    data.v = rawData;
-    // 当前页的缓存同步更新
-    updateCurrentPageCache();
-  };
+  const replace = (item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number]) =>
+    add2AsyncQueue(async () => {
+      paginationAssert(position !== undefinedValue, 'expect specify the replace position');
+      const index = isNumber(position) ? position : getItemIndex(position);
+      indexAssert(index, data.v);
+      add2AsyncQueue(async () => {
+        const rawData = data.v;
+        splice(rawData, index, 1, item);
+        data.v = rawData;
+        // 当前页的缓存同步更新
+        await updateCurrentPageCache();
+      });
+    });
 
   /**
    * 从第${initialPage}页开始重新加载列表，并清空缓存
    */
-  const reload = () => {
-    invalidatePaginationCache(trueValue);
-    isReset.current = trueValue;
-    page.v === initialPage ? promiseCatch(send(), noop) : (page.v = initialPage);
-  };
+  const reload = () =>
+    add2AsyncQueue(async () => {
+      await invalidatePaginationCache(trueValue);
+      isReset.current = trueValue;
+      page.v === initialPage ? promiseCatch(send(), noop) : (page.v = initialPage);
+    });
 
   // 兼容react，每次缓存最新的操作函数，避免闭包陷阱
   delegationActions.current = {
@@ -589,6 +590,7 @@ export default <AG extends AlovaGenerics>(
   /** @Returns */
   return exposeProvider({
     ...states,
+    ...objectify([data, page, pageCount, pageSize, total, isLastPage]),
 
     fetching: fetchStates.loading,
     onFetchSuccess: fetchStates.onSuccess,
@@ -598,7 +600,6 @@ export default <AG extends AlovaGenerics>(
     insert,
     remove,
     replace,
-    reload,
-    ...objectify([data, page, pageCount, pageSize, total, isLastPage])
+    reload
   });
 };

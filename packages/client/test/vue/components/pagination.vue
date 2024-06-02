@@ -45,6 +45,19 @@
       btn3
     </button>
     <button
+      role="refreshError"
+      @click="
+        () => {
+          try {
+            refresh(100);
+          } catch (error: any) {
+            replacedError = error;
+          }
+        }
+      ">
+      btn3
+    </button>
+    <button
       role="pageToLast"
       @click="update({ page: 31 })">
       btn1
@@ -88,57 +101,32 @@
 
     <button
       role="replaceError1"
-      @click="
-        () => {
-          try {
-            replace(100, undefined as any);
-          } catch (err: any) {
-            replacedError = err;
-          }
-        }
-      ">
+      @click="runWithErrorHandling(() => replace(100, undefined as any))">
       btn3
     </button>
     <button
       role="replaceError2"
-      @click="
-        () => {
-          try {
-            replace(100, 1000);
-          } catch (err: any) {
-            err.message += '___2';
-            replacedError = err;
-          }
-        }
-      ">
+      @click="runWithErrorHandling(() => replace(100, 1000))">
       btn3
     </button>
     <button
       role="replace1"
-      @click="
-        () => {
-          replace(300, 0);
-        }
-      ">
+      @click="replace(300, 0)">
       btn3
     </button>
     <button
       role="replace2"
       @click="
-        () => {
-          // 正向顺序替换
-          replace(400, 8);
-        }
+        // 正向顺序替换
+        replace(400, 8)
       ">
       btn3
     </button>
     <button
       role="replace3"
       @click="
-        () => {
-          // 逆向顺序替换
-          replace(500, -4);
-        }
+        // 逆向顺序替换
+        replace(500, -4)
       ">
       btn3
     </button>
@@ -150,58 +138,31 @@
 
     <button
       role="replaceError1__search"
-      @click="
-        () => {
-          try {
-            replace({ id: 100, word: 'zzz' }, { id: 2, word: 'ccc' });
-          } catch (err: any) {
-            replacedError = err;
-          }
-        }
-      ">
+      @click="runWithErrorHandling(() => replace({ id: 100, word: 'zzz' }, { id: 2, word: 'ccc' }))">
       btn3
     </button>
     <button
       role="replaceByItem__search"
-      @click="
-        () => {
-          replace({ id: 100, word: 'zzz' }, data[2]);
-        }
-      ">
+      @click="replace({ id: 100, word: 'zzz' }, data[2])">
       btn3
     </button>
 
     <button
       role="insertError1__search"
-      @click="
-        () => {
-          try {
-            insert({ id: 100, word: 'zzz' }, { id: 2, word: 'ccc' });
-          } catch (err: any) {
-            replacedError = err;
-          }
-        }
-      ">
+      @click="runWithErrorHandling(() => insert({ id: 100, word: 'zzz' }, { id: 2, word: 'ccc' }))">
       btn3
     </button>
     <button
       role="insertByItem__search"
-      @click="
-        () => {
-          insert({ id: 100, word: 'zzz' }, data[2]);
-        }
-      ">
+      @click="insert({ id: 100, word: 'zzz' }, data[2])">
       btn3
     </button>
 
     <button
       role="batchRemove1"
       @click="
-        () => {
-          // 删除第二项，将会用下一页的数据补位，并重新拉取上下一页的数据
-          remove(1);
-          remove(1);
-        }
+        // 删除第二项，将会用下一页的数据补位，并重新拉取上下一页的数据
+        remove(1, 2)
       ">
       btn3
     </button>
@@ -223,38 +184,66 @@
     <button
       role="batchRemove2"
       @click="
-        () => {
-          // 同步操作的项数超过pageSize时，移除的数据将被恢复，并重新请求当前页数据
-          remove(0);
-          remove(0);
-          remove(0);
-          remove(0);
-          remove(0);
-        }
+        // 同步操作的项数超过pageSize时，移除的数据将被恢复，并重新请求当前页数据
+        remove(0, 1, 2, 3, 4)
       ">
       btn3
     </button>
     <button
       role="removeError1__search"
+      @click="runWithErrorHandling(() => remove({ id: 2, word: 'ccc' }))">
+      btn3
+    </button>
+    <button
+      role="removeByItem__search"
+      @click="remove(data[2])">
+      btn3
+    </button>
+
+    <button
+      role="toNoDataPage"
+      @click="update({ page: 31 })">
+      btn3
+    </button>
+    <button
+      role="refreshByItem__search"
+      @click="refresh(data[12])">
+      btn3
+    </button>
+    <button
+      role="mixedOperate"
       @click="
         () => {
-          try {
-            remove({ id: 2, word: 'ccc' });
-          } catch (err: any) {
-            replacedError = err;
-          }
+          remove(1);
+          remove(1);
+          insert(100, 0);
+          replace(200, 2);
         }
       ">
       btn3
     </button>
     <button
-      role="removeByItem__search"
+      role="reload1"
+      @click="reload()">
+      btn1
+    </button>
+    <button
+      role="setLoading"
       @click="
-        () => {
-          remove(data[2]);
-        }
+        update({
+          loading: true
+        })
       ">
-      btn3
+      btn1
+    </button>
+    <button
+      role="clearData"
+      @click="
+        update({
+          data: []
+        })
+      ">
+      btn1
     </button>
   </div>
 </template>
@@ -278,8 +267,28 @@ const props = defineProps<{
 
 const replacedError = ref(undefined as Error | undefined);
 
+const runWithErrorHandling = <T extends (...args: any[]) => any>(fn: T) => {
+  fn().catch((err: any) => {
+    replacedError.value = err;
+  });
+};
+
 const exposure = usePagination(props.getter, props.paginationConfig);
 props.handleExposure?.(exposure);
-const { loading, data, pageCount, total, error, page, pageSize, isLastPage, update, refresh, insert, replace, remove } =
-  exposure;
+const {
+  loading,
+  data,
+  pageCount,
+  total,
+  error,
+  page,
+  pageSize,
+  isLastPage,
+  update,
+  refresh,
+  insert,
+  replace,
+  remove,
+  reload
+} = exposure;
 </script>

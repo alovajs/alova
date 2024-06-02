@@ -21,7 +21,7 @@ type IsUnknown<T, P, N> = IsAny<T, P, N> extends P ? N : unknown extends T ? P :
 
 /** @description usePagination相关 */
 type ArgGetter<R, LD> = (data: R) => LD | undefined;
-interface PaginationHookConfig<AG extends AlovaGenerics, LD> extends WatcherHookConfig<AG> {
+interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends WatcherHookConfig<AG> {
   /**
    * 是否预加载上一页
    * @default true
@@ -41,7 +41,7 @@ interface PaginationHookConfig<AG extends AlovaGenerics, LD> extends WatcherHook
    * 指定分页的数组数据
    * @default response => response.data
    */
-  data?: ArgGetter<AG['Responded'], LD>;
+  data?: ArgGetter<AG['Responded'], ListData>;
   /**
    * 是否开启追加模式
    * @default false

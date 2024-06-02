@@ -1,5 +1,6 @@
 import { createAssert } from '@/assert';
 import {
+  createAsyncQueue,
   createSyncOnceRunner,
   getConfig,
   getContext,
@@ -360,6 +361,100 @@ describe('shared functions', () => {
 
     await untilCbCalled(setTimeout, delay + 3);
     expect(testFn).toHaveBeenCalledTimes(1);
+  });
+
+  test('function createAsyncQueue', async () => {
+    // should execute async functions in order and resolve the promise
+    const results: string[] = [];
+    const addToQueue = createAsyncQueue();
+
+    const asyncFunction1 = (): Promise<string> =>
+      new Promise(resolve => {
+        setTimeout(() => {
+          results.push('Result 1');
+          resolve('Result 1');
+        }, 100);
+      });
+
+    const asyncFunction2 = (): Promise<string> =>
+      new Promise(resolve => {
+        setTimeout(() => {
+          results.push('Result 2');
+          resolve('Result 2');
+        }, 50);
+      });
+
+    const asyncFunction3 = (): Promise<string> =>
+      new Promise(resolve => {
+        setTimeout(() => {
+          results.push('Result 3');
+          resolve('Result 3');
+        }, 150);
+      });
+
+    const result1 = await addToQueue(asyncFunction1);
+    const result2 = await addToQueue(asyncFunction2);
+    const result3 = await addToQueue(asyncFunction3);
+
+    expect(results).toStrictEqual(['Result 1', 'Result 2', 'Result 3']);
+    expect(result1).toBe('Result 1');
+    expect(result2).toBe('Result 2');
+    expect(result3).toBe('Result 3');
+
+    // should handle an empty queue gracefully
+    const addToQueue2 = createAsyncQueue();
+
+    // 添加空操作
+    const results2 = await addToQueue2(async () => Promise.resolve('Empty'));
+
+    // 不应该抛出任何错误
+    expect(results2).toBe('Empty');
+
+    // should reject the promise when async function fails and catchError is false
+    const addToQueue3 = createAsyncQueue();
+
+    const asyncFunctionReject2 = (): Promise<string> =>
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Error'));
+        }, 100);
+      });
+
+    let errorCaught = false;
+    try {
+      await addToQueue3(asyncFunctionReject2);
+    } catch (error: any) {
+      errorCaught = true;
+      expect(error.message).toBe('Error');
+    }
+
+    expect(errorCaught).toBeTruthy();
+
+    // should catch errors and resolve the promise when catchError is true
+    const addToQueue4 = createAsyncQueue(true);
+    const results4: string[] = [];
+
+    const asyncFunctionReject = (): Promise<void> =>
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Error'));
+        }, 100);
+      });
+
+    const asyncFunction5 = (): Promise<string> =>
+      new Promise(resolve => {
+        setTimeout(() => {
+          results4.push('Result 5');
+          resolve('Result 5');
+        }, 50);
+      });
+
+    const result5 = await addToQueue4(asyncFunctionReject);
+    const result6 = await addToQueue4(asyncFunction5);
+
+    expect(results4).toStrictEqual(['Result 5']);
+    expect(result5).toBeUndefined();
+    expect(result6).toBe('Result 5');
   });
 
   test('function walkObject', () => {

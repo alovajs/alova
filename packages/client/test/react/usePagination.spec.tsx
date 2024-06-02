@@ -1230,7 +1230,7 @@ describe('react => usePagination', () => {
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
-      expect(fetchMockFn).toBeCalled();
+      expect(fetchMockFn).toHaveBeenCalled();
     });
 
     fireEvent.click(screen.getByRole('removeError1'));
@@ -1760,7 +1760,7 @@ describe('react => usePagination', () => {
   });
 
   // // 下拉加载更多相关
-  test('load more mode paginated data. and change page/pageSize', async () => {
+  test('load more mode paginated data and change page/pageSize', async () => {
     const alovaInst = createMockAlova();
     const getter = (page: number, pageSize: number) =>
       alovaInst.Get<ListResponse>('/list', {
@@ -2311,11 +2311,11 @@ describe('react => usePagination', () => {
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([2, 3, 4, 5]));
       expect(successMockFn).toHaveBeenCalledTimes(2);
-      expect(fetchMockFn).not.toBeCalled();
+      expect(fetchMockFn).not.toHaveBeenCalled();
     });
 
     await untilCbCalled(setTimeout, 100);
-    expect(fetchMockFn).not.toBeCalled();
+    expect(fetchMockFn).not.toHaveBeenCalled();
   });
 
   test('load more mode reload paginated data', async () => {

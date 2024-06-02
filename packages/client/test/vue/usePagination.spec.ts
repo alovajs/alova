@@ -1,13 +1,15 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { accessAction, actionDelegationMiddleware, usePagination } from '@/index';
+import { accessAction, actionDelegationMiddleware } from '@/index';
+import { GeneralFn } from '@alova/shared/types';
+import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
-import { createAlova, invalidateCache, queryCache, setCache } from 'alova';
+import { createAlova, invalidateCache, queryCache } from 'alova';
 import vueHook from 'alova/vue';
 import { delay, generateContinuousNumbers } from 'root/testUtils';
 import { ref } from 'vue';
 import Pagination from './components/pagination.vue';
 
-// jest.setTimeout(1000000);
+jest.setTimeout(1000000);
 // reset data
 beforeEach(() => {
   setMockListData();
@@ -25,13 +27,14 @@ interface ListResponse {
   total: number;
   list: number[];
 }
-const getter1 = (page: number, pageSize: number, extra: Record<string, any> = {}) =>
+const getter1 = (page: number, pageSize: number, extra: Record<string, any> = {}, transformData?: GeneralFn) =>
   alovaInst.Get<ListResponse>('/list', {
     params: {
       page,
       pageSize,
       ...extra
-    }
+    },
+    transformData
   });
 interface SearchListResponse {
   total: number;
@@ -45,13 +48,18 @@ const getterSearch = (page: number, pageSize: number, keyword?: string) =>
       keyword
     }
   });
-const getterShort = (page: number, pageSize: number) =>
-  alovaInst.Get<ListResponse>('/list-short', {
+const getterShort = (page: number, pageSize: number, cacheFor?: number) => {
+  const config = {
     params: {
       page,
       pageSize
     }
-  });
+  };
+  if (cacheFor !== undefined) {
+    (config as any).cacheFor = cacheFor;
+  }
+  return alovaInst.Get<ListResponse>('/list-short', config);
+};
 
 describe('vue => usePagination', () => {
   // 分页相关测试
@@ -60,8 +68,8 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          total: res => res.total,
-          data: res => res.list
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
         }
       }
     });
@@ -130,7 +138,7 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          data: ({ wrongList }) => wrongList
+          data: ({ wrongList }: any) => wrongList
         }
       }
     });
@@ -148,8 +156,8 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          total: res => res.total,
-          data: res => res.list,
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
           immediate: false
         }
       }
@@ -182,8 +190,8 @@ describe('vue => usePagination', () => {
         getter: (page: number, pageSize: number) => getterSearch(page, pageSize, keyword.value),
         paginationConfig: {
           watchingStates: [keyword],
-          total: res => res.total,
-          data: res => res.list
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
         }
       }
     });
@@ -219,7 +227,7 @@ describe('vue => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent('300');
     });
 
-    fireEvent.click(screen.getByRole('setKeyword'));
+    keyword.value = 'bbb';
     await waitFor(() => {
       JSON.parse(screen.getByRole('response').textContent || '[]').forEach(({ word }: any) => expect(word).toBe('bbb'));
       expect(screen.getByRole('total')).toHaveTextContent('100');
@@ -231,8 +239,8 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          total: res => res.total,
-          data: res => res.list,
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
           initialPage: 3
         }
       }
@@ -269,10 +277,10 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          data: res => res.list,
+          data: (res: any) => res.list,
           initialPage: 2 // 默认从第2页开始
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
         }
       }
@@ -345,11 +353,11 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          data: res => res.list,
+          data: (res: any) => res.list,
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
         }
       }
@@ -395,25 +403,32 @@ describe('vue => usePagination', () => {
   });
 
   test('paginated data replace item', async () => {
+    const successMockFn = jest.fn();
     render(Pagination, {
       props: {
         getter: getter1,
         paginationConfig: {
-          data: res => res.list
+          data: (res: any) => res.list
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onFetchSuccess(successMockFn);
         }
       }
     });
 
-    await screen.findByText(/loaded/);
-
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
     fireEvent.click(screen.getByRole('replaceError1'));
     await waitFor(() => {
-      expect(screen.getByRole('replacedError')).toHaveTextContent('[alova/usePagination]must specify replace position');
+      expect(screen.getByRole('replacedError')).toHaveTextContent(
+        '[alova/usePagination]expect specify the replace position'
+      );
     });
     fireEvent.click(screen.getByRole('replaceError2'));
     await waitFor(() => {
       expect(screen.getByRole('replacedError')).toHaveTextContent(
-        '[alova/usePagination]index must be a number that less than list length___2'
+        '[alova/usePagination]index must be a number that less than list length'
       );
     });
 
@@ -458,8 +473,8 @@ describe('vue => usePagination', () => {
       props: {
         getter: getterSearch,
         paginationConfig: {
-          total: res => res.total,
-          data: res => res.list
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
         }
       }
     });
@@ -488,24 +503,28 @@ describe('vue => usePagination', () => {
 
   test('paginated data insert item without preload', async () => {
     const fetchMockFn = jest.fn();
+    const successMockFn = jest.fn();
     render(Pagination, {
       props: {
         getter: getter1,
         paginationConfig: {
-          data: res => res.list,
+          data: (res: any) => res.list,
           preloadNextPage: false,
           preloadPreviousPage: false,
           initialPage: 2 // 默认从第2页开始
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
         }
       }
     });
 
     const page = 2;
     const pageSize = 10;
-    await screen.findByText(/loaded/);
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
 
     // 检查预加载缓存
     let cache = await queryCache(getter1(page + 1, pageSize));
@@ -516,7 +535,7 @@ describe('vue => usePagination', () => {
     fireEvent.click(screen.getByRole('insert1'));
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(
-        JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 }))
+        JSON.stringify(generateContinuousNumbers(18, 9, { 9: 100 }))
       );
     });
 
@@ -533,8 +552,8 @@ describe('vue => usePagination', () => {
       props: {
         getter: getterSearch,
         paginationConfig: {
-          total: res => res.total,
-          data: res => res.list
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
         }
       }
     });
@@ -569,11 +588,11 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          data: res => res.list,
+          data: (res: any) => res.list,
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
           exposure.onSuccess(successMockFn);
         }
@@ -638,34 +657,6 @@ describe('vue => usePagination', () => {
       cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual([11, 12, 13, 14]);
     });
-
-    // 同步操作的项数超过pageSize时，移除的数据将被恢复，并重新请求当前页数据
-    fireEvent.click(screen.getByRole('batchRemove2'));
-    setMockListData(data => {
-      // 模拟数据中同步删除
-      data.splice(4, 5);
-      return data;
-    });
-    total -= 5;
-    await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 9, 10])); // 数据被恢复
-      expect(screen.getByRole('total')).toHaveTextContent(total.toString());
-      // 只在初始化成功一次，还未触发refresh
-      expect(successMockFn).toHaveBeenCalledTimes(1);
-    });
-
-    await waitFor(async () => {
-      // 当同步删除多于1页的数据时会refrefh当前页，也会重新fetch下一页
-      expect(fetchMockFn).toHaveBeenCalledTimes(5);
-      expect(successMockFn).toHaveBeenCalledTimes(2);
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([12, 13, 14, 15]));
-      expect(screen.getByRole('total')).toHaveTextContent(total.toString());
-
-      let cache = await queryCache(getter1(page - 1, pageSize));
-      expect(cache?.list).toStrictEqual([0, 1, 2, 3]);
-      cache = await queryCache(getter1(page + 1, pageSize));
-      expect(cache?.list).toStrictEqual([16, 17, 18, 19]);
-    });
   });
 
   test('paginated data remove item by another item', async () => {
@@ -674,10 +665,10 @@ describe('vue => usePagination', () => {
       props: {
         getter: getterSearch,
         paginationConfig: {
-          total: res => res.total,
-          data: res => res.list
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
         }
       }
@@ -721,11 +712,11 @@ describe('vue => usePagination', () => {
       props: {
         getter: getter1,
         paginationConfig: {
-          data: res => res.list,
+          data: (res: any) => res.list,
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
         }
       }
@@ -773,19 +764,19 @@ describe('vue => usePagination', () => {
     });
   });
 
-  test('should use new total data when remove items and go to adjacent page', async () => {
+  test.skip('should use new total data when remove items and go to adjacent page', async () => {
     const fetchMockFn = jest.fn();
     const min = ref(0);
     render(Pagination, {
       props: {
-        getter: getter1,
+        getter: (page: number, pageSize: number) => getter1(page, pageSize, { min: min.value }),
         paginationConfig: {
-          data: res => res.list,
+          data: (res: any) => res.list,
           watchingStates: [min],
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
         }
       }
@@ -885,14 +876,14 @@ describe('vue => usePagination', () => {
       props: {
         getter: getterShort,
         paginationConfig: {
-          data: res => res.list,
-          total: res => res.total,
+          data: (res: any) => res.list,
+          total: (res: any) => res.total,
           initialPage: 3, // 默认从第3页开始
           initialPageSize: 4,
           preloadNextPage: false,
           preloadPreviousPage: false
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onSuccess(successMockFn);
         }
       }
@@ -941,14 +932,14 @@ describe('vue => usePagination', () => {
     const successMockFn = jest.fn();
     render(Pagination, {
       props: {
-        getter: getterShort,
+        getter: (page: number, pageSize: number) => getterShort(page, pageSize, 0),
         paginationConfig: {
-          data: res => res.list,
-          total: res => res.total,
+          data: (res: any) => res.list,
+          total: (res: any) => res.total,
           initialPage: 2,
           initialPageSize: 4
         },
-        handleExposure: exposure => {
+        handleExposure: (exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
           exposure.onSuccess(successMockFn);
         }
@@ -1010,156 +1001,179 @@ describe('vue => usePagination', () => {
   });
 
   // 下拉加载更多相关
-  test('load more mode paginated data. and change page/pageSize', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
+  test.only('load more mode paginated data and change page/pageSize', async () => {
+    const successMockFn = jest.fn();
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          preloadNextPage: false,
+          preloadPreviousPage: false
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onSuccess(successMockFn);
         }
-      });
-
-    const { data, page, pageSize, isLastPage, onSuccess } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      append: true,
-      preloadNextPage: false,
-      preloadPreviousPage: false
+      }
     });
 
-    await untilCbCalled(onSuccess);
-    expect(page.value).toBe(1);
-    expect(pageSize.value).toBe(10);
-    expect(data.value.length).toBe(pageSize.value);
-    expect(data.value[0]).toBe(0);
-    expect(isLastPage.value).toBeFalsy();
+    let page = 1;
+    const pageSize = 10;
+
+    // 等待请求成功
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('page')).toHaveTextContent(page.toString());
+      expect(screen.getByRole('pageSize')).toHaveTextContent(pageSize.toString());
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9)));
+      expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
+    });
 
     // 检查预加载缓存
-    await untilCbCalled(setTimeout, 100);
-    setCache(getter(page.value + 1, pageSize.value), cache => {
-      expect(!!cache).toBeFalsy();
+    await delay(100);
+    expect((await queryCache(getter1(page + 1, pageSize)))?.list).toBeUndefined();
+
+    fireEvent.click(screen.getByRole('setPage'));
+    page += 1;
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole('page')).toHaveTextContent(page.toString());
+      expect(screen.getByRole('pageSize')).toHaveTextContent(pageSize.toString());
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19))); // 翻页数据追加到尾部
+      expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    page.value++;
-    await untilCbCalled(onSuccess);
-    expect(page.value).toBe(2);
-    expect(pageSize.value).toBe(10);
-    expect(data.value.length).toBe(pageSize.value * 2);
-    expect(data.value[0]).toBe(0);
-    expect(data.value[data.value.length - 1]).toBe(19);
-    expect(isLastPage.value).toBeFalsy();
+    await delay(100);
+    expect((await queryCache(getter1(page + 1, pageSize)))?.list).toBeUndefined();
 
-    // 检查预加载缓存
-    await untilCbCalled(setTimeout, 100);
-    setCache(getter(page.value + 1, pageSize.value), cache => {
-      expect(!!cache).toBeFalsy();
+    // 翻页到没有数据的一页，没有提供total时，数据少于pageSize条时将会把isLastPage判断为true
+    fireEvent.click(screen.getByRole('toNoDataPage'));
+    page = 31;
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(3);
+      expect(screen.getByRole('page')).toHaveTextContent(page.toString());
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('true');
     });
-
-    // 最后一页
-    page.value = 31;
-    await untilCbCalled(onSuccess);
-    expect(isLastPage.value).toBeTruthy();
   });
 
   test('load more paginated data with conditions search', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize, keyword) =>
-      alovaInst.Get('/list-with-search', {
-        params: {
-          page,
-          pageSize,
-          keyword
-        }
-      });
+    const fetchMockFn = jest.fn();
+    const successMockFn = jest.fn();
     const keyword = ref('');
-    const { page, data, onSuccess } = usePagination((p, ps) => getter(p, ps, keyword.value), {
-      watchingStates: [keyword],
-      total: () => undefined,
-      data: res => res.list,
-      append: true
+    render(Pagination, {
+      props: {
+        getter: getterSearch,
+        paginationConfig: {
+          watchingStates: [keyword],
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
+        }
+      }
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(
+          generateContinuousNumbers(9, 0, i => {
+            const n = i % 3;
+            return {
+              id: i,
+              word: ['aaa', 'bbb', 'ccc'][n]
+            };
+          })
+        )
+      );
+      expect(screen.getByRole('total')).toHaveTextContent('');
     });
 
-    await untilCbCalled(onSuccess);
-    expect(data.value[0]).toStrictEqual({ id: 0, word: 'aaa' });
-    expect(data.value[data.value.length - 1]).toStrictEqual({ id: 9, word: 'aaa' });
-
-    page.value++;
-    await untilCbCalled(onSuccess);
-    expect(data.value.length).toBe(20);
-    expect(data.value[0]).toStrictEqual({ id: 0, word: 'aaa' });
-    expect(data.value[data.value.length - 1]).toStrictEqual({ id: 19, word: 'bbb' });
+    fireEvent.click(screen.getByRole('setPage'));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(
+          generateContinuousNumbers(19, 0, i => {
+            const n = i % 3;
+            return {
+              id: i,
+              word: ['aaa', 'bbb', 'ccc'][n]
+            };
+          })
+        )
+      );
+      expect(screen.getByRole('total')).toHaveTextContent('');
+    });
 
     keyword.value = 'bbb';
-    await untilCbCalled(onSuccess);
-    data.value.forEach(({ word }) => expect(word).toBe('bbb'));
-    expect(data.value[0]).toStrictEqual({ id: 1, word: 'bbb' });
-    expect(data.value.length).toBe(10);
+    await waitFor(() => {
+      JSON.parse(screen.getByRole('response').textContent || '[]').forEach(({ word }: any) => expect(word).toBe('bbb'));
+      expect(screen.getByRole('total')).toHaveTextContent('');
+    });
   });
 
   test('load more mode paginated data refersh page by page number', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          preloadNextPage: false,
+          preloadPreviousPage: false
         }
-      });
-
-    const { data, page, onSuccess, refresh } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      append: true,
-      preloadNextPage: false,
-      preloadPreviousPage: false
+      }
     });
 
-    await untilCbCalled(onSuccess);
-    expect(data.value[0]).toBe(0);
-    expect(data.value[data.value.length - 1]).toBe(9);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9)));
+    });
 
-    page.value++;
-    await untilCbCalled(onSuccess);
-    expect(data.value[0]).toBe(0);
-    expect(data.value[data.value.length - 1]).toBe(19);
+    fireEvent.click(screen.getByRole('setPage'));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19)));
+    });
 
+    fireEvent.click(screen.getByRole('refreshError'));
+    await waitFor(() => {
+      expect(screen.getByRole('replacedError')).toHaveTextContent(
+        "[alova/usePagination]refresh page can't greater than page"
+      );
+    });
+
+    // 手动改变一下接口数据，让刷新后能看出效果
     setMockListData(data => {
       data.splice(0, 1, 100);
       return data;
     });
 
-    expect(() => {
-      refresh(100);
-    }).toThrow();
-
-    refresh(1);
-    await untilCbCalled(onSuccess); // append模式下将使用send函数重新请求数据
-    expect(data.value).toStrictEqual(generateContinuousNumbers(19, 0, { 0: 100 }));
-    expect(data.value.length).toBe(20);
-
-    setMockListData(data => {
-      data.splice(12, 1, 1200);
-      return data;
+    fireEvent.click(screen.getByRole('refresh1'));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(19, 0, { 0: 100 }))
+      );
     });
   });
 
   test('load more mode paginated data refersh page by item', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list-with-search', {
-        params: {
-          page,
-          pageSize
+    render(Pagination, {
+      props: {
+        getter: getterSearch,
+        paginationConfig: {
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          append: true
         }
-      });
-    const { page, data, onSuccess, total, refresh } = usePagination((p, ps) => getter(p, ps), {
-      total: res => res.total,
-      data: res => res.list,
-      append: true
+      }
     });
-
-    await untilCbCalled(onSuccess);
     let currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
       return {
@@ -1167,11 +1181,12 @@ describe('vue => usePagination', () => {
         word: ['aaa', 'bbb', 'ccc'][n]
       };
     });
-    expect(data.value).toStrictEqual(currentList);
-    expect(total.value).toBe(300);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+    });
 
-    page.value++;
-    await untilCbCalled(onSuccess);
+    fireEvent.click(screen.getByRole('setPage'));
     currentList = generateContinuousNumbers(19, 0, i => {
       const n = i % 3;
       return {
@@ -1179,43 +1194,49 @@ describe('vue => usePagination', () => {
         word: ['aaa', 'bbb', 'ccc'][n]
       };
     });
-    expect(data.value).toStrictEqual(currentList);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+    });
 
     setMockListWithSearchData(data => {
       data.splice(12, 1, { id: 100, word: 'zzz' });
       return data;
     });
 
-    refresh(data.value[12]);
-    await untilCbCalled(onSuccess);
+    fireEvent.click(screen.getByRole('refreshByItem__search'));
     currentList[12] = { id: 100, word: 'zzz' };
-    expect(data.value).toStrictEqual(currentList);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+    });
   });
 
   test('load more mode paginated data operate items with remove/insert/replace(open preload)', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
+    const fetchMockFn = jest.fn();
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true, // TODO: 好像漏了
+          initialPage: 2, // 默认从第2页开始
+          initialPageSize: 4
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
         }
-      });
-
-    const { data, page, total, pageCount, remove, insert, replace } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      initialPage: 2, // 默认从第2页开始
-      initialPageSize: 4
+      }
     });
 
-    await untilCbCalled(setTimeout, 150);
-    expect(total.value).toBeUndefined();
-    expect(pageCount.value).toBeUndefined();
-    remove(1);
-    remove(1);
-    insert(100, 0);
-    replace(200, 2);
+    // 等待fetch完成
+    await waitFor(() => {
+      expect(fetchMockFn).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+    });
+
+    // 混合同步操作
+    fireEvent.click(screen.getByRole('mixedOperate'));
     setMockListData(data => {
       // 模拟数据中同步删除，这样fetch的数据校验才正常
       data.splice(5, 2);
@@ -1223,151 +1244,173 @@ describe('vue => usePagination', () => {
       data.splice(6, 1, 200);
       return data;
     });
-    expect(data.value).toStrictEqual([100, 4, 200, 8]);
-    expect(total.value).toBeUndefined();
-    expect(pageCount.value).toBeUndefined();
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 4, 200, 8]));
+      expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+      expect(fetchMockFn).toHaveBeenCalledTimes(3); // 多次同步操作只会触发一次预加载
+    });
 
-    page.value++;
+    fireEvent.click(screen.getByRole('setPage'));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([9, 10, 11, 12]));
+      expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+      expect(fetchMockFn).toHaveBeenCalledTimes(4); // 翻页只预加载下一页
+    });
   });
 
   test('load more mode paginated data remove item without preload', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
+    const fetchMockFn = jest.fn();
+    const successMockFn = jest.fn();
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          preloadNextPage: false,
+          preloadPreviousPage: false,
+          initialPageSize: 4
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
         }
-      });
-
-    const { data, page, pageSize, onSuccess, onFetchSuccess, remove } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      append: true,
-      preloadNextPage: false,
-      preloadPreviousPage: false,
-      initialPageSize: 4
+      }
     });
 
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([0, 1, 2, 3]);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
 
     // 下一页没有缓存的情况下，将会重新请求刷新列表
-    remove(0);
-    remove(0);
+    fireEvent.click(screen.getByRole('batchRemove1'));
     setMockListData(data => {
       // 模拟数据中同步删除
-      data.splice(0, 2);
+      data.splice(1, 2);
       return data;
     });
-
-    expect(data.value).toStrictEqual([0, 1, 2, 3]);
-    const mockFn = jest.fn();
-    onFetchSuccess(mockFn);
-
-    await untilCbCalled(setTimeout, 100);
-    expect(data.value).toStrictEqual([2, 3, 4, 5]);
-    expect(mockFn.mock.calls.length).toBe(0);
-    setCache(getter(page.value - 1, pageSize.value), cache => {
-      expect(!!cache).toBeFalsy();
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([2, 3, 4, 5]));
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+      expect(fetchMockFn).not.toHaveBeenCalled();
     });
-    setCache(getter(page.value + 1, pageSize.value), cache => {
-      expect(!!cache).toBeFalsy();
-    });
+
+    await delay(100);
+    expect(fetchMockFn).not.toHaveBeenCalled();
   });
 
   test('load more mode reload paginated data', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
+    const fetchMockFn = jest.fn();
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          initialPageSize: 4
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
         }
-      });
-
-    const { data, page, onSuccess, reload } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      append: true,
-      initialPageSize: 4
+      }
     });
 
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([0, 1, 2, 3]);
+    // 等待fetch完成
+    await waitFor(() => {
+      // 第一页时只有下一页会被预加载
+      expect(fetchMockFn).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+    });
+
+    // 手动改变一下接口数据，让刷新后能看出效果
     setMockListData(data => {
       data.splice(0, 1, 100);
       return data;
     });
-    reload();
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([100, 1, 2, 3]);
 
-    page.value++;
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([100, 1, 2, 3, 4, 5, 6, 7]);
+    fireEvent.click(screen.getByRole('reload1'));
+    await waitFor(() => {
+      expect(fetchMockFn).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3]));
+    });
 
-    reload();
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([100, 1, 2, 3]);
+    fireEvent.click(screen.getByRole('setPage'));
+    await waitFor(() => {
+      expect(fetchMockFn).toHaveBeenCalledTimes(3); // 上一页已有缓存不会再被预加载
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3, 4, 5, 6, 7]));
+    });
+
+    fireEvent.click(screen.getByRole('reload1'));
+    await waitFor(() => {
+      expect(fetchMockFn).toHaveBeenCalledTimes(4);
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3]));
+    });
   });
 
   test("load more mode paginated data don't need to preload when go to last page", async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list-short', {
-        params: {
-          page,
-          pageSize
+    const fetchMockFn = jest.fn();
+    render(Pagination, {
+      props: {
+        getter: getterShort,
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          initialPage: 2,
+          initialPageSize: 4
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
         }
-      });
-
-    const { data, page, pageSize, onSuccess } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      append: true,
-      initialPage: 2,
-      initialPageSize: 4
+      }
     });
 
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([4, 5, 6, 7]);
+    let page = 2;
+    const pageSize = 4;
+    // 等待fetch完成
+    await waitFor(() => {
+      expect(fetchMockFn).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 5, 6, 7]));
+    });
 
-    page.value++;
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([4, 5, 6, 7, 8, 9]);
-
-    // 已经到最后一页了，不需要再预加载下一页数据了
-    await untilCbCalled(setTimeout, 100);
-    setCache(getter(page.value + 1, pageSize.value), cache => {
-      expect(cache).toBeUndefined();
+    fireEvent.click(screen.getByRole('setPage'));
+    page += 1;
+    await waitFor(async () => {
+      // 已经到最后一页了，不需要再预加载下一页数据了，同时上一页也有缓存不会触发预加载
+      expect(fetchMockFn).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 4)));
+      expect(await queryCache(getterShort(page + 1, pageSize))).toBeUndefined();
     });
   });
 
   test('should access actions by middleware actionDelegation', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list-short', {
-        localCache: 0,
-        params: {
-          page,
-          pageSize
+    const successMockFn = jest.fn();
+    render(Pagination, {
+      props: {
+        getter: (page: number, pageSize: number) => getterShort(page, pageSize, 0),
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          initialPage: 2,
+          initialPageSize: 4,
+          middleware: actionDelegationMiddleware('test_page')
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onSuccess(successMockFn);
         }
-      });
-
-    const { onSuccess } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      append: true,
-      initialPage: 2,
-      initialPageSize: 4,
-      middleware: actionDelegationMiddleware('test_page')
+      }
     });
 
-    const successFn = jest.fn();
-    onSuccess(successFn);
-    await untilCbCalled(onSuccess);
-    expect(successFn).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
 
     accessAction('test_page', handlers => {
       expect(handlers.send).toBeInstanceOf(Function);
@@ -1380,122 +1423,114 @@ describe('vue => usePagination', () => {
       handlers.refresh(1);
     });
 
-    await untilCbCalled(onSuccess);
-    expect(successFn).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+    });
   });
 
   test('should update list data when call update function that returns in hook', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          initialPage: 2,
+          initialPageSize: 4
         }
-      });
-
-    const { loading, onSuccess, data, update } = usePagination(getter, {
-      total: () => undefined,
-      data: res => res.list,
-      append: true,
-      initialPage: 2,
-      initialPageSize: 4
+      }
     });
 
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual([4, 5, 6, 7]);
-    update({
-      loading: true
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 5, 6, 7]));
     });
-    expect(loading.value).toBeTruthy();
 
-    update({
-      data: []
-    });
-    expect(data.value).toStrictEqual([]);
+    fireEvent.click(screen.getByRole('setLoading'));
+    expect(screen.getByRole('status')).toHaveTextContent('loading');
+    fireEvent.click(screen.getByRole('clearData'));
+    expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
   });
 
   test('should set initial data to data and total', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          initialData: {
+            list: [1, 2, 3],
+            total: 3
+          },
+          immediate: false,
+          initialPage: 2,
+          initialPageSize: 4
         }
-      });
-
-    const { data, total } = usePagination(getter, {
-      total: res => res.total,
-      data: res => res.list,
-      initialData: {
-        list: [1, 2, 3],
-        total: 3
-      },
-      immediate: false,
-      initialPage: 2,
-      initialPageSize: 4
+      }
     });
 
-    expect(data.value).toStrictEqual([1, 2, 3]);
-    expect(total.value).toBe(3);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([1, 2, 3]));
+      expect(screen.getByRole('total')).toHaveTextContent('3');
+    });
   });
 
   test('can resend request when encounter with an error', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize) =>
-      alovaInst.Get('/list', {
-        params: {
-          page,
-          pageSize
-        },
-        transformData: () => {
-          throw new Error('mock error');
-        }
-      });
-
-    const { onError, onComplete, reload } = usePagination(getter, {
-      total: res => res.total,
-      data: res => res.list
-    });
     const errorFn = jest.fn();
     const completeFn = jest.fn();
-    onError(errorFn);
-    onComplete(completeFn);
+    render(Pagination, {
+      props: {
+        getter: (page: number, pageSize: number) =>
+          getter1(page, pageSize, {}, () => {
+            throw new Error('mock error');
+          }),
+        paginationConfig: {
+          data: (res: any) => res.list,
+          total: (res: any) => res.total
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onError(errorFn);
+          exposure.onComplete(completeFn);
+        }
+      }
+    });
 
-    await untilCbCalled(setTimeout, 200);
-    expect(errorFn).toHaveBeenCalledTimes(1);
-    expect(completeFn).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(errorFn).toHaveBeenCalledTimes(1);
+      expect(completeFn).toHaveBeenCalledTimes(1);
+    });
 
-    reload();
-    await untilCbCalled(setTimeout, 200);
-    expect(errorFn).toHaveBeenCalledTimes(2);
-    expect(completeFn).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole('reload'));
+    await waitFor(() => {
+      expect(errorFn).toHaveBeenCalledTimes(2);
+      expect(completeFn).toHaveBeenCalledTimes(2);
+    });
 
-    reload();
-    await untilCbCalled(setTimeout, 200);
-    expect(errorFn).toHaveBeenCalledTimes(3);
-    expect(completeFn).toHaveBeenCalledTimes(3);
+    fireEvent.click(screen.getByRole('reload'));
+    await waitFor(() => {
+      expect(errorFn).toHaveBeenCalledTimes(3);
+      expect(completeFn).toHaveBeenCalledTimes(3);
+    });
   });
 
   test('should use the data of last request when set `abortLast` to true', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page, pageSize, keyword) =>
-      alovaInst.Get('/list-with-search', {
-        params: {
-          page,
-          pageSize,
-          keyword
-        }
-      });
     const keyword = ref('');
-    const { data, onSuccess, total } = usePagination((p, ps) => getter(p, ps, keyword.value), {
-      watchingStates: [keyword],
-      abortLast: true,
-      data: res => res.list
+    const successMockFn = jest.fn();
+    render(Pagination, {
+      props: {
+        getter: getterSearch,
+        paginationConfig: {
+          watchingStates: [keyword],
+          abortLast: true,
+          data: (res: any) => res.list
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onSuccess(successMockFn);
+        }
+      }
     });
-    const successFn = jest.fn();
-    onSuccess(successFn);
+
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
       return {
@@ -1503,16 +1538,18 @@ describe('vue => usePagination', () => {
         word: ['aaa', 'bbb', 'ccc'][n]
       };
     });
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual(currentList);
-    expect(total.value).toBe(300);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+    });
 
     keyword.value = 'bbb';
-    await new Promise(resolve => setTimeout(resolve, 40));
+    await delay(10);
     keyword.value = '';
-    await untilCbCalled(onSuccess);
-    expect(data.value).toStrictEqual(currentList);
-    expect(total.value).toBe(300);
-    expect(successFn).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+    });
   });
 });

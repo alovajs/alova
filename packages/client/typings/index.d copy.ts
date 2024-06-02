@@ -16,14 +16,14 @@ import {
   FormExposure,
   FormHookConfig,
   FormHookHandler,
+  IsUnknown,
   NotifyHandler,
   OffEventCallback,
+  PaginationHookConfig,
   RetriableExposure,
   RetriableHookConfig,
   SQHookExposure,
   SQRequestHookConfig,
-  SSEExposure,
-  SSEHookConfig,
   ServerTokenAuthenticationOptions,
   SilentFactoryBootOptions,
   SilentMethod,
@@ -417,6 +417,89 @@ export declare function updateState<Responded>(
 // ===================================================
 // ===================================================
 
+type UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]> = Omit<
+  UseHookExposure<AG>,
+  'data' | 'update'
+> & {
+  page: ExportedState<number, AG['State']>;
+  pageSize: ExportedState<number, AG['State']>;
+  data: ExportedState<
+    IsUnknown<
+      ListData[number],
+      AG['Responded'] extends {
+        data: any;
+      }
+        ? AG['Responded']['data']
+        : ListData,
+      ListData
+    >,
+    AG['State']
+  >;
+  pageCount: ExportedComputed<number | undefined, AG['Computed']>;
+  total: ExportedComputed<number | undefined, AG['Computed']>;
+  isLastPage: ExportedComputed<boolean, AG['Computed']>;
+  fetching: ExportedState<boolean, AG['State']>;
+  onFetchSuccess: (handler: SuccessHandler<AG>) => void;
+  onFetchError: (handler: ErrorHandler<AG>) => void;
+  onFetchComplete: (handler: CompleteHandler<AG>) => void;
+  update: (
+    newFrontStates: Partial<FrontRequestState<boolean, ListData, Error | undefined, Progress, Progress>>
+  ) => void;
+
+  /**
+   * 刷新指定页码数据，此函数将忽略缓存强制发送请求
+   * 如果未传入页码则会刷新当前页
+   * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
+   * @param pageOrItemPage 刷新的页码或列表项
+   */
+  refresh: (pageOrItemPage?: number | ListData[number]) => void;
+
+  /**
+   * 插入一条数据
+   * 如果未传入index，将默认插入到最前面
+   * 如果传入一个列表项，将插入到这个列表项的后面，如果列表项未在列表数据中将会抛出错误
+   * @param item 插入项
+   * @param position 插入位置（索引）或列表项
+   */
+  insert: (
+    item: ListData extends any[] ? ListData[number] : any,
+    position?: number | ListData[number]
+  ) => Promise<void>;
+
+  /**
+   * 移除一条数据
+   * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
+   * @param position 移除的索引或列表项
+   */
+  remove: (...positions: (number | ListData[number])[]) => Promise<void>;
+
+  /**
+   * 替换一条数据
+   * 如果position传入的是列表项，将替换此列表项，如果列表项未在列表数据中将会抛出错误
+   * @param item 替换项
+   * @param position 替换位置（索引）或列表项
+   */
+  replace: (item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number]) => void;
+
+  /**
+   * 从第一页开始重新加载列表，并清空缓存
+   */
+  reload: () => void;
+};
+
+// /**
+//  * alova分页hook
+//  * 分页相关状态自动管理、前后一页预加载、自动维护数据的新增/编辑/移除
+//  *
+//  * @param handler method创建函数
+//  * @param config pagination hook配置
+//  * @returns {UsePaginationExposure}
+//  */
+export declare function usePagination<AG extends AlovaGenerics, ListData extends unknown[]>(
+  handler: (page: number, pageSize: number) => Method<AG>,
+  config?: PaginationHookConfig<AG, ListData>
+): UsePaginationExposure<AG, ListData>;
+
 /**
  * 带silentQueue的request hook
  * silentQueue是实现静默提交的核心部件，其中将用于存储silentMethod实例，它们将按顺序串行发送提交
@@ -494,10 +577,10 @@ declare function useForm<
  * @param config 配置参数
  * @return useSSE相关数据和操作函数
  */
-declare function useSSE<Data = any, S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any>(
-  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: SSEHookConfig
-): SSEExposure<S, Data>;
+// declare function useSSE<Data = any, AG extends AlovaGenerics>(
+//   handler: Method<AG> | AlovaMethodHandler<AG>,
+//   config?: SSEHookConfig
+// ): SSEExposure<AG['State'], Data>;
 
 /**
  * useRetriableRequest

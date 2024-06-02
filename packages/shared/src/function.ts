@@ -15,14 +15,18 @@ import {
   JSONStringify,
   MEMORY,
   ObjectCls,
+  PromiseCls,
   STORAGE_RESTORE,
   falseValue,
   includes,
+  len,
   mapItem,
   nullValue,
   objectKeys,
+  promiseThen,
   pushItem,
   setTimeoutFn,
+  shift,
   trueValue,
   typeOf,
   undefinedValue
@@ -246,6 +250,39 @@ export const createSyncOnceRunner = (delay = 0) => {
     }
     timer = setTimeoutFn(fn, delay);
   };
+};
+
+/**
+ * 创建异步函数队列，异步函数将串行执行
+ * @returns 队列添加函数
+ */
+export const createAsyncQueue = (catchError = falseValue) => {
+  type AsyncFunction<T = any> = (...args: any[]) => Promise<T>;
+  const queue: AsyncFunction[] = [];
+  let executing = false;
+
+  const executeQueue = async () => {
+    executing = true;
+    while (len(queue) > 0) {
+      const asyncFunc = shift(queue);
+      if (asyncFunc) {
+        await asyncFunc();
+      }
+    }
+    executing = false;
+  };
+
+  return <T>(asyncFunc: AsyncFunction<T>): Promise<T> =>
+    newInstance(PromiseCls<T>, (resolve, reject) => {
+      const wrappedFunc = () =>
+        promiseThen(asyncFunc(), resolve, err => {
+          catchError ? resolve(undefinedValue as T) : reject(err);
+        });
+      pushItem(queue, wrappedFunc);
+      if (!executing) {
+        executeQueue();
+      }
+    });
 };
 
 /**

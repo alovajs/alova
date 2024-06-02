@@ -19,6 +19,7 @@ import {
   IsUnknown,
   NotifyHandler,
   OffEventCallback,
+  PaginationHookConfig,
   RetriableExposure,
   RetriableHookConfig,
   SQHookExposure,
@@ -416,31 +417,34 @@ export declare function updateState<Responded>(
 // ===================================================
 // ===================================================
 
-type UsePaginationExposure<AG extends AlovaGenerics, LD extends unknown[]> = Omit<
+type UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]> = Omit<
   UseHookExposure<AG>,
   'data' | 'update'
 > & {
   page: ExportedState<number, AG['State']>;
-  pageSize: Ref<number>;
-  data: Ref<
+  pageSize: ExportedState<number, AG['State']>;
+  data: ExportedState<
     IsUnknown<
-      LD[number],
-      R extends {
+      ListData[number],
+      AG['Responded'] extends {
         data: any;
       }
-        ? R['data']
-        : LD,
-      LD
-    >
+        ? AG['Responded']['data']
+        : ListData,
+      ListData
+    >,
+    AG['State']
   >;
-  pageCount: ComputedRef<number | undefined>;
-  total: ComputedRef<number | undefined>;
-  isLastPage: ComputedRef<boolean>;
-  fetching: Ref<boolean>;
-  onFetchSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH>) => void;
-  onFetchError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
-  onFetchComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
-  update: (newFrontStates: Partial<FrontRequestState<boolean, LD, Error | undefined, Progress, Progress>>) => void;
+  pageCount: ExportedComputed<number | undefined, AG['Computed']>;
+  total: ExportedComputed<number | undefined, AG['Computed']>;
+  isLastPage: ExportedComputed<boolean, AG['Computed']>;
+  fetching: ExportedState<boolean, AG['State']>;
+  onFetchSuccess: (handler: SuccessHandler<AG>) => void;
+  onFetchError: (handler: ErrorHandler<AG>) => void;
+  onFetchComplete: (handler: CompleteHandler<AG>) => void;
+  update: (
+    newFrontStates: Partial<FrontRequestState<boolean, ListData, Error | undefined, Progress, Progress>>
+  ) => void;
 
   /**
    * 刷新指定页码数据，此函数将忽略缓存强制发送请求
@@ -448,7 +452,7 @@ type UsePaginationExposure<AG extends AlovaGenerics, LD extends unknown[]> = Omi
    * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
    * @param pageOrItemPage 刷新的页码或列表项
    */
-  refresh: (pageOrItemPage?: number | LD[number]) => void;
+  refresh: (pageOrItemPage?: number | ListData[number]) => void;
 
   /**
    * 插入一条数据
@@ -457,14 +461,17 @@ type UsePaginationExposure<AG extends AlovaGenerics, LD extends unknown[]> = Omi
    * @param item 插入项
    * @param position 插入位置（索引）或列表项
    */
-  insert: (item: LD extends any[] ? LD[number] : any, position?: number | LD[number]) => void;
+  insert: (
+    item: ListData extends any[] ? ListData[number] : any,
+    position?: number | ListData[number]
+  ) => Promise<void>;
 
   /**
    * 移除一条数据
    * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
    * @param position 移除的索引或列表项
    */
-  remove: (position: number | LD[number]) => void;
+  remove: (...positions: (number | ListData[number])[]) => Promise<void>;
 
   /**
    * 替换一条数据
@@ -472,7 +479,7 @@ type UsePaginationExposure<AG extends AlovaGenerics, LD extends unknown[]> = Omi
    * @param item 替换项
    * @param position 替换位置（索引）或列表项
    */
-  replace: (item: LD extends any[] ? LD[number] : any, position: number | LD[number]) => void;
+  replace: (item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number]) => void;
 
   /**
    * 从第一页开始重新加载列表，并清空缓存
@@ -481,21 +488,17 @@ type UsePaginationExposure<AG extends AlovaGenerics, LD extends unknown[]> = Omi
 };
 
 // /**
-//  * 基于alova.js的vue分页hook
+//  * alova分页hook
 //  * 分页相关状态自动管理、前后一页预加载、自动维护数据的新增/编辑/移除
 //  *
 //  * @param handler method创建函数
 //  * @param config pagination hook配置
 //  * @returns {UsePaginationExposure}
 //  */
-// declare function usePagination<
-//   AG extends AlovaGenerics,
-//   LD extends unknown[] = any,
-//   WS extends (WatchSource | object)[] = any
-// >(
-//   handler: (page: number, pageSize: number) => Method<AG>,
-//   config?: PaginationHookConfig<AG, LD, WS>
-// ): UsePaginationExposure<AG, LD>;
+export declare function usePagination<AG extends AlovaGenerics, ListData extends unknown[]>(
+  handler: (page: number, pageSize: number) => Method<AG>,
+  config?: PaginationHookConfig<AG, ListData>
+): UsePaginationExposure<AG, ListData>;
 
 /**
  * 带silentQueue的request hook

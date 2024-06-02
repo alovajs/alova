@@ -7,27 +7,20 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "browser unit test",
-      "runtimeExecutable": "npm",
+      "name": "debug unit test",
+      "runtimeExecutable": "pnpm",
       "windows": {
-        "runtimeExecutable": "npm.cmd"
+        "runtimeExecutable": "pnpm.cmd"
       },
-      "runtimeArgs": ["run", "test:browser"],
-      "console": "integratedTerminal",
-      "cwd": "${workspaceRoot}",
-      "env": {
-        "NODE_ENV": "test"
-      }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "server unit test",
-      "runtimeExecutable": "npm",
-      "windows": {
-        "runtimeExecutable": "npm.cmd"
-      },
-      "runtimeArgs": ["run", "test:node"],
+      "runtimeArgs": ["pnpm", "jest"],
+      "args": [
+        "--runInBand",
+        "--watchAll=false",
+        "--testNamePattern",
+        "vue => usePagination",
+        "--runTestsByPath",
+        "packages/client/test/vue/usePagination.spec.ts"
+      ],
       "console": "integratedTerminal",
       "cwd": "${workspaceRoot}",
       "env": {
