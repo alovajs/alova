@@ -204,7 +204,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(mockCallback).toHaveBeenCalledTimes(2); // 请求已发出，但数据只更新最新的
   });
 
-  test('should not send request when change value but returns false in sendable', async () => {
+  test('should not send request when change value but intercepted by middleware', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -265,7 +265,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
-  test('should not send request when change value but throws error in sendable', async () => {
+  test('should not send request when change value but throws error in middleware', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
@@ -287,7 +287,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       {
         middleware() {
           sendableFn();
-          throw Error('');
+          throw new Error('');
         }
       }
     );

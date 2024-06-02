@@ -304,7 +304,7 @@ describe('useWatcher hook with react', () => {
     });
   });
 
-  test('should not send request when change value but returns false in sendable', async () => {
+  test('should not send request when change value but intercepted by middleware', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
     });
@@ -376,7 +376,7 @@ describe('useWatcher hook with react', () => {
     });
   });
 
-  test('should not send request when change value but throws error in sendable', async () => {
+  test('should not send request when change value but throws error in middleware', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
     });
@@ -389,20 +389,24 @@ describe('useWatcher hook with react', () => {
         transformData: ({ data }: Result<true>) => data
       });
     const mockfn = jest.fn();
+    const mockErrorFn = jest.fn();
     const sendableFn = jest.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
 
-      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+      const { loading, data, onSuccess, onError } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
         initialData: {
           path: '',
           params: { id1: '', id2: '' }
         },
         middleware() {
           sendableFn();
+          throw new Error();
         }
       });
+
+      onError(mockErrorFn);
       onSuccess(mockfn);
       return (
         <div role="wrap">
