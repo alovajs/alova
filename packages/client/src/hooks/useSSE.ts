@@ -83,9 +83,9 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
     eventManager.on(SSEErrorEventKey, handler);
   };
 
-  let responseSuccessHandler = ref<RespondedHandler<AG>>($self);
-  let responseErrorHandler = ref<ResponseErrorHandler<AG>>(throwFn);
-  let responseCompleteHandler = ref<ResponseCompleteHandler<AG>>(noop);
+  const responseSuccessHandler = ref<RespondedHandler<AG>>($self);
+  const responseErrorHandler = ref<ResponseErrorHandler<AG>>(throwFn);
+  const responseCompleteHandler = ref<ResponseCompleteHandler<AG>>(noop);
 
   /**
    * 设置响应拦截器，在每次 send 之后都需要调用

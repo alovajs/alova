@@ -445,6 +445,7 @@ describe('useRequest middleware', () => {
 
     // 使用sendInMiddleware发送请求，效果应该与send相同
     const resPromise = sendInMiddleware({ a: 'a', b: 'b' });
+    await untilCbCalled(setTimeout, 10);
     expect(loading.value).toBeTruthy();
     const res = await resPromise;
     expect(res).toStrictEqual({ path: '/unit-test', method: 'GET', params: { a: 'a', b: 'b' } });

@@ -11,6 +11,49 @@ import { Result, delay, untilCbCalled } from 'root/testUtils';
 const StrictModeReact = StrictMode as any;
 
 describe('useRequest hook with react', () => {
+  test('should not have initial data', async () => {
+    const alova = getAlovaInstance(ReactHook);
+    function Page() {
+      const { data } = useRequest(alova.Get(''), { immediate: false });
+      expect(data).toBeUndefined();
+
+      return (
+        <div role="wrap">
+          <span role="data">{data as string}</span>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('data')).toBeEmptyDOMElement();
+  });
+
+  test('should apply initialData with object and function', async () => {
+    const alova = getAlovaInstance(ReactHook);
+    const mockFn = jest.fn();
+    function Page() {
+      const { data: data1 } = useRequest(alova.Get(''), { initialData: 'test', immediate: false });
+      const { data: data2 } = useRequest(alova.Get(''), {
+        initialData: () => {
+          mockFn();
+          return 'test';
+        },
+        immediate: false
+      });
+      return (
+        <div role="wrap">
+          <span role="data-1">{data1 as string}</span>
+          <span role="data-2">{data2 as string}</span>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('data-1')).toHaveTextContent('test');
+    expect(screen.getByRole('data-2')).toHaveTextContent('test');
+    expect(mockFn).toHaveBeenCalledTimes(1);
+  });
+
   test('send GET', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

@@ -304,7 +304,7 @@ describe('useWatcher hook with react', () => {
     });
   });
 
-  test('should not send request when change value but returns false in sendable', async () => {
+  test('should not send request when change value but intercepted by middleware', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
     });
@@ -327,9 +327,11 @@ describe('useWatcher hook with react', () => {
           path: '',
           params: { id1: '', id2: '' }
         },
-        sendable: () => {
+        middleware(context, next) {
           sendableFn();
-          return stateId1 === 1 && stateId2 === 11;
+          if (stateId1 === 1 && stateId2 === 11) {
+            next();
+          }
         }
       });
       onSuccess(mockfn);
@@ -374,7 +376,7 @@ describe('useWatcher hook with react', () => {
     });
   });
 
-  test('should not send request when change value but throws error in sendable', async () => {
+  test('should not send request when change value but throws error in middleware', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
     });
@@ -387,21 +389,24 @@ describe('useWatcher hook with react', () => {
         transformData: ({ data }: Result<true>) => data
       });
     const mockfn = jest.fn();
+    const mockErrorFn = jest.fn();
     const sendableFn = jest.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
 
-      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+      const { loading, data, onSuccess, onError } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
         initialData: {
           path: '',
           params: { id1: '', id2: '' }
         },
-        sendable: () => {
+        middleware() {
           sendableFn();
-          throw Error('');
+          throw new Error();
         }
       });
+
+      onError(mockErrorFn);
       onSuccess(mockfn);
       return (
         <div role="wrap">
@@ -468,9 +473,8 @@ describe('useWatcher hook with react', () => {
           params: { id1: '', id2: '' }
         },
         immediate: true,
-        sendable: () => {
+        middleware() {
           sendableFn();
-          throw Error('');
         }
       });
       onSuccess(mockfn);
@@ -492,6 +496,7 @@ describe('useWatcher hook with react', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
+    await untilCbCalled(setTimeout, 100);
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
   });
@@ -554,12 +559,14 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('id2')).toHaveTextContent('10');
 
     fireEvent.click(screen.getByRole('button'));
+    await screen.findByText('loading');
     await screen.findByText('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
 
     fireEvent.click(screen.getByRole('button'));
+    await screen.findByText('loading');
     await screen.findByText('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('2');

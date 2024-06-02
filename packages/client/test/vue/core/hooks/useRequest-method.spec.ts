@@ -6,7 +6,7 @@ import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 // 其他请求方式测试
 describe('Test other methods without GET', () => {
-  test('send POST', async () => {
+  test('send POST with cache', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
@@ -66,10 +66,10 @@ describe('Test other methods without GET', () => {
 
     // 缓存有值
     const cacheData = await queryCache(Post);
-    expect(cacheData).toBeUndefined();
+    expect(cacheData).not.toBeUndefined();
   });
 
-  test('send DELETE', async () => {
+  test('send DELETE with cache', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         const { config } = method;
@@ -124,10 +124,10 @@ describe('Test other methods without GET', () => {
 
     // 缓存有值
     const cacheData = await queryCache(Delete);
-    expect(cacheData).toBeUndefined();
+    expect(cacheData).not.toBeUndefined();
   });
 
-  test('send PUT', async () => {
+  test('send PUT with cache', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         const { config } = method;
@@ -182,7 +182,7 @@ describe('Test other methods without GET', () => {
 
     // 缓存有值
     const cacheData = await queryCache(Put);
-    expect(cacheData).toBeUndefined();
+    expect(cacheData).not.toBeUndefined();
   });
 
   test('send HEAD', async () => {
@@ -288,7 +288,7 @@ describe('Test other methods without GET', () => {
     expect(cacheData).toBeUndefined();
   });
 
-  test('should download file and pass the right args', async () => {
+  test('should download file and pass the right args with cache', async () => {
     const alovaInst = getAlovaInstance(VueHook);
     const Get = alovaInst.Get('/unit-test-download', {
       transformData: (resp: Response) => resp.blob(),

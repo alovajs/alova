@@ -39,6 +39,7 @@ describe('vue => useCaptcha', () => {
     const setTimeoutFn = setTimeout;
     jest.useFakeTimers();
     const promise = send();
+    await untilCbCalled(setTimeoutFn, 10);
     expect(loading.value).toBeTruthy();
     expect(countdown.value).toBe(0);
 

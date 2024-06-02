@@ -48,7 +48,7 @@ export default async function updateState<AG extends AlovaGenerics>(
 
     // 如果更新了data，则需要同时更新缓存和持久化数据
     if (updatedDataColumnData !== undefinedValue) {
-      return setCache(matcher, updatedDataColumnData);
+      setCache(matcher, updatedDataColumnData);
     }
   }
   return updated;

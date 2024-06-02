@@ -1,10 +1,34 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
+import { AlovaEventBase } from '@alova/shared/event';
 import { queryCache, setCache } from 'alova';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('use useRequest hook to send GET with vue', () => {
+  test('should not have initial data', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const { data } = useRequest(alova.Get(''), { immediate: false });
+    expect(data.value).toBeUndefined();
+  });
+
+  test('should apply initialData with object and function', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const mockFn = jest.fn();
+    const { data: data1 } = useRequest(alova.Get(''), { initialData: 'test', immediate: false });
+    const { data: data2 } = useRequest(alova.Get(''), {
+      initialData: () => {
+        mockFn();
+        return 'test';
+      },
+      immediate: false
+    });
+
+    expect(data1.value).toStrictEqual('test');
+    expect(data2.value).toStrictEqual('test');
+    expect(mockFn).toHaveBeenCalledTimes(1);
+  });
+
   test('init and send get request', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -196,7 +220,7 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(error.value).toBe(err.error);
   });
 
-  test('abort request manually with abort function returns in useRequeset', async () => {
+  test('abort request manually with abort function returns in useRequest', async () => {
     const alova = getAlovaInstance(VueHook, {
       resErrorExpect: error => {
         expect(error.message).toMatch(/user aborted a request/);
@@ -295,7 +319,8 @@ describe('use useRequest hook to send GET with vue', () => {
         params: {
           a: d.a,
           b: d.b
-        }
+        },
+        cacheFor: 10 * 1000
       });
 
     const { data, send, onSuccess, onComplete } = useRequest(params => getGetter(params), {
@@ -375,6 +400,27 @@ describe('use useRequest hook to send GET with vue', () => {
     }
   });
 
+  test('should force event be a AlovaEvent instance', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mockFn = jest.fn();
+    const getGetterObj = alova.Get('/unit-test');
+
+    const { send } = useRequest(getGetterObj, {
+      immediate: false,
+      force: event => {
+        mockFn();
+        expect(event).toBeInstanceOf(AlovaEventBase);
+        expect(event.sendArgs).toStrictEqual([1, 2, 3]);
+        return true;
+      }
+    });
+
+    await send(1, 2, 3);
+    expect(mockFn).toHaveBeenCalledTimes(1);
+  });
+
   test('It would return the useHookConfig object when second param is function in `useRequest`', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -385,7 +431,8 @@ describe('use useRequest hook to send GET with vue', () => {
       params: {
         a: '~',
         b: '~~'
-      }
+      },
+      cacheFor: 100 * 1000
     });
 
     const { data, send } = useRequest(getGetterObj, {

@@ -1,7 +1,8 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { queryCache, type FetcherType } from 'alova';
+import { queryCache } from 'alova';
+import { FetcherType } from 'alova/client';
 import { Result, untilCbCalled } from 'root/testUtils';
 
 describe('use useFetcher hook to fetch data', () => {
@@ -82,6 +83,7 @@ describe('use useFetcher hook to fetch data', () => {
     expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'b', count: 0 });
 
     fetch(Get1);
+    await untilCbCalled(setTimeout, 10);
     // 因强制请求，请求会被发出并且缓存重新被更新
     expect(loading.value).toBeTruthy();
     expect(error.value).toBeUndefined();
@@ -132,6 +134,7 @@ describe('use useFetcher hook to fetch data', () => {
     expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 0 });
 
     fetch(Get1, true, false);
+    await untilCbCalled(setTimeout, 10);
     // 因强制请求，请求会被发出并且缓存重新被更新
     expect(loading.value).toBeTruthy();
 
