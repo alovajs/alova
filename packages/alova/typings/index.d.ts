@@ -849,9 +849,9 @@ export interface CacheSetOptions {
  * ```
  * @param matcher method instance(s)
  */
-export declare function setCache<Responded>(
-  matcher: Method | Method[],
-  dataOrUpdater: Responded | ((oldCache: Responded) => Responded | undefined | void),
+export declare function setCache<AG extends AlovaGenerics>(
+  matcher: Method<AG> | Method<AG>[],
+  dataOrUpdater: AG['Responded'] | ((oldCache: AG['Responded']) => AG['Responded'] | undefined | void),
   options?: CacheSetOptions
 ): Promise<void>;
 

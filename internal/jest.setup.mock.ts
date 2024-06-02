@@ -9,7 +9,10 @@ Object.defineProperties(globalThis, {
   ReadableStream: { value: ReadableStream },
   setImmediate: { value: setTimeout },
   clearImmediate: { value: clearTimeout },
-  performance: { value: performance }
+  performance: {
+    value: performance,
+    writable: true
+  }
 });
 
 // if the environment is jsdom, set process.browser to true

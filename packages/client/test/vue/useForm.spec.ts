@@ -1,8 +1,8 @@
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
-import VueHook from '@/statesHook/vue';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { AlovaGenerics, Method, createAlova, getMethodKey } from 'alova';
+import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 import { FormHookConfig } from '~/typings/general';
@@ -103,12 +103,12 @@ describe('vue => useForm', () => {
 
     // storageKey会在useForm被调用时同步生成
     const methodStorageKey = getStoragedKey(poster(initialForm));
-    const getStoragedForm = () => alovaInst.l1Cache.get(methodStorageKey);
+    const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
 
     // 更新表单数据，并验证持久化数据
     form.value.name = 'Ming';
     await untilCbCalled(setTimeout, 100);
-    expect(getStoragedForm()).toStrictEqual({
+    expect(await getStoragedForm()).toStrictEqual({
       name: 'Ming',
       age: ''
     });
@@ -137,7 +137,7 @@ describe('vue => useForm', () => {
     };
     // 预先存储数据，模拟刷新恢复持久化数据
     const methodStorageKey = getStoragedKey(poster(initialForm));
-    alovaInst.l1Cache.set(methodStorageKey, storagedForm);
+    alovaInst.l2Cache.set(methodStorageKey, storagedForm);
 
     render(CompRestorePersistentData);
 
@@ -201,7 +201,7 @@ describe('vue => useForm', () => {
       reg: regObj
     });
     // 序列化自动转换date和regexp对象
-    expect(alovaInst.l1Cache.get(methodStorageKey)).toStrictEqual({
+    expect(alovaInst.l2Cache.get(methodStorageKey)).toStrictEqual({
       date: ['date', dateTimestamp],
       reg: ['regexp', regObj.source]
     });
@@ -209,7 +209,7 @@ describe('vue => useForm', () => {
     reset();
     expect(form.value).toStrictEqual(initialForm);
     await untilCbCalled(setTimeout, 20);
-    expect(alovaInst.l1Cache.get(methodStorageKey)).toBeNull();
+    expect(alovaInst.l2Cache.get(methodStorageKey)).toBeNull();
   });
 
   test('should remove storage form data when call function reset', async () => {
@@ -225,8 +225,8 @@ describe('vue => useForm', () => {
 
     // 预先存储数据，模拟刷新恢复持久化数据
     const methodStorageKey = getStoragedKey(poster(initialForm));
-    alovaInst.l1Cache.set(methodStorageKey, storagedForm);
-    const getStoragedForm = () => alovaInst.l1Cache.get(methodStorageKey);
+    alovaInst.l2Cache.set(methodStorageKey, storagedForm);
+    const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
     expect(getStoragedForm()).toStrictEqual(storagedForm);
 
     render(CompPersistentDataReset); // 渲染组件
@@ -236,53 +236,6 @@ describe('vue => useForm', () => {
 
     fireEvent.click(screen.getByRole('btnReset'));
     expect(getStoragedForm()).toBeNull();
-  });
-
-  test('should throw error when try to get uninitial id', () => {
-    expect(() => {
-      useForm('personInfo');
-    }).toThrow('[alova/useForm]the form data of id `personInfo` is not initial');
-  });
-
-  test('should get cached hook returns when valid id is given', async () => {
-    const initialForm = {
-      name: '',
-      age: ''
-    };
-    const poster = (data: any) => alovaInst.Post('/saveData', data);
-    const formRet1 = useForm(poster, {
-      initialForm,
-      id: 'personInfo',
-      resetAfterSubmiting: true
-    });
-    const newForm = {
-      name: 'Ming',
-      age: '18'
-    };
-
-    // 直接传入id获取
-    const formRet2 = useForm('personInfo');
-    expect(formRet1).toBe(formRet2);
-
-    // 传入完整参数时，有匹配到id也将使用匹配值
-    const formRet3 = useForm(poster, {
-      id: 'personInfo',
-      initialForm: {
-        tt1: '',
-        tt2: ''
-      },
-      store: true
-    });
-    expect(formRet1).toBe(formRet3);
-
-    formRet1.updateForm(newForm);
-    expect(formRet2.form.value).toStrictEqual(newForm);
-    expect(formRet3.form.value).toStrictEqual(newForm);
-
-    await formRet1.send();
-    // 提交后表单数据重置
-    expect(formRet2.form.value).toStrictEqual(initialForm);
-    expect(formRet3.form.value).toStrictEqual(initialForm);
   });
 
   test('should access actions by middleware actionDelegation', async () => {

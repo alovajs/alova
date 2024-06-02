@@ -1,13 +1,11 @@
 import { useRequest } from '@/index';
 import createSerializerPerformer from '@/util/serializer';
-import { createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import {
+  $self,
   getContext,
   getMethodInternalKey,
-  isNumber,
   isPlainObject,
-  isString,
   sloughConfig,
   statesHookHelper,
   walkObject
@@ -26,10 +24,9 @@ const cloneFormData = <T>(form: T): T => {
   const shallowClone = (value: any) => (isArray(value) ? [...value] : isPlainObject(value) ? { ...value } : value);
   return walkObject(shallowClone(form), shallowClone);
 };
-const assert = createAssert('useForm');
 
 export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
-  handler: FormHookHandler<AG, FormData | undefined> | ID,
+  handler: FormHookHandler<AG, FormData | undefined>,
   config: FormHookConfig<AG, FormData> = {}
 ) => {
   const typedSharedStates = sharedStates as Record<
@@ -39,15 +36,10 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
       config: FormHookConfig<AG, any>;
     }
   >;
-  // 如果第一个参数传入的是id，则获取它的初始化数据并返回
-  if (isNumber(handler) || isString(handler)) {
-    const id = handler as ID;
-    const sharedState = typedSharedStates[id];
-    assert(!!sharedState, `the form data of id \`${id}\` is not initial`);
-    return sharedState.hookProvider;
-  }
 
   const { id, initialForm, store, resetAfterSubmiting, immediate = falseValue, middleware } = config;
+  let { memorize } = promiseStatesHook();
+  memorize ??= $self;
   const {
     create: $,
     ref: useFlag$,
@@ -102,23 +94,23 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   /**
    * 重置form数据
    */
-  const reset = () => {
+  const reset = memorize(() => {
     reseting.current = trueValue;
     const clonedFormData = cloneFormData(initialForm);
     clonedFormData && (form.v = clonedFormData);
     enableStore && storageContext.remove(storagedKey);
-  };
+  });
 
   /**
    * 更新form数据
    * @param newForm 新表单数据
    */
-  const updateForm = (newForm: Partial<FormData> | ((oldForm: FormData) => FormData)) => {
+  const updateForm = memorize((newForm: Partial<FormData> | ((oldForm: FormData) => FormData)) => {
     form.v = {
       ...form.v,
       ...newForm
     } as FormData;
-  };
+  });
 
   const hookProvider = exposeProvider({
     // 第一个参数固定为form数据

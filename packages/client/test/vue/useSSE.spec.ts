@@ -141,6 +141,7 @@ describe('vue => useSSE', () => {
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
     await screen.findByText(/opened/);
+    await untilCbCalled(setTimeout, 100);
 
     expect(screen.getByRole('onopen').innerHTML).toStrictEqual('1');
 
@@ -287,6 +288,7 @@ describe('vue => useSSE', () => {
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
     await screen.findByText(/opened/);
+    await untilCbCalled(setTimeout, 100);
 
     expect(screen.getByRole('onopen').innerHTML).toStrictEqual('1');
     expect(screen.getByRole('on-response').innerHTML).toStrictEqual('0');
@@ -371,6 +373,7 @@ describe('vue => useSSE', () => {
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
     await screen.findByText(/opened/);
+    await untilCbCalled(setTimeout, 100);
 
     expect(screen.getByRole('onopen').innerHTML).toStrictEqual('1');
     expect(screen.getByRole('on-response').innerHTML).toStrictEqual('0');

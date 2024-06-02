@@ -19,7 +19,7 @@ describe('update cached response data by user in vue', () => {
     });
     const { data, onSuccess } = useRequest(Get);
     await untilCbCalled(onSuccess);
-    const updated = updateState(Get, responseData => {
+    const updated = await updateState(Get, responseData => {
       responseData.path = '/unit-test-updated';
       return responseData;
     });

@@ -295,7 +295,8 @@ describe('use useRequest hook to send GET with vue', () => {
         params: {
           a: d.a,
           b: d.b
-        }
+        },
+        cacheFor: 10 * 1000
       });
 
     const { data, send, onSuccess, onComplete } = useRequest(params => getGetter(params), {
@@ -385,7 +386,8 @@ describe('use useRequest hook to send GET with vue', () => {
       params: {
         a: '~',
         b: '~~'
-      }
+      },
+      cacheFor: 100 * 1000
     });
 
     const { data, send } = useRequest(getGetterObj, {
