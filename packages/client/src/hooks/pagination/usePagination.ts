@@ -10,7 +10,6 @@ import {
   statesHookHelper
 } from '@alova/shared/function';
 import {
-  PromiseCls,
   falseValue,
   filterItem,
   forEach,
@@ -22,8 +21,8 @@ import {
   objectValues,
   promiseCatch,
   promiseResolve,
+  promiseThen,
   pushItem,
-  setTimeoutFn,
   splice,
   trueValue,
   undefinedValue
@@ -80,10 +79,10 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   const isReset = ref(falseValue); // 用于控制是否重置
   // 重置期间请求的次数，为了防止重置时重复请求，使用此参数限制请求
   const requestCountInReseting = ref(0);
-  const page = create(initialPage, 'page', trueValue);
-  const pageSize = create(initialPageSize, 'pageSize', trueValue);
-  const data = create((initialData ? dataGetter(initialData) || [] : []) as ListData[number][], 'data', trueValue);
-  const total = create(initialData ? totalGetter(initialData) : undefinedValue, 'total', trueValue);
+  const page = create(initialPage, 'page');
+  const pageSize = create(initialPageSize, 'pageSize');
+  const data = create((initialData ? dataGetter(initialData) || [] : []) as ListData[number][], 'data');
+  const total = create(initialData ? totalGetter(initialData) : undefinedValue, 'total');
   // 保存当前hook所使用到的所有method实例快照
   const {
     snapshots: methodSnapshots,
@@ -124,9 +123,8 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       const totalVal = total.v;
       return totalVal !== undefinedValue ? Math.ceil(totalVal / pageSize.v) : undefinedValue;
     },
-    [pageSize.e, total.e],
-    'pageCount',
-    trueValue
+    [pageSize, total],
+    'pageCount'
   );
   const createDelegationAction =
     (actionName: string) =>
@@ -173,18 +171,11 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       }
       return requestPromise;
     },
-    force: event => {
-      if (isFn(force)) {
-        return force(event as any);
-      }
-
-      return force === undefinedValue ? event.sendArgs[1] : force;
-    },
-    abortLast: false,
+    force: event => event.sendArgs[1] || (isFn(force) ? force(event) : force),
     ...others
   });
   const { send } = states;
-  const requestDataRef = states.data;
+  const nestedData = states.__proxyState('data');
 
   // 判断是否可预加载数据
   const canPreload = async (payload: {
@@ -195,7 +186,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     forceRequest?: boolean;
   }) => {
     const {
-      rawData = requestDataRef.current,
+      rawData = nestedData.v,
       preloadPage,
       fetchMethod,
       forceRequest = falseValue,
@@ -238,7 +229,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         forceRequest: force
       }))
     ) {
-      promiseCatch(fetch(fetchMethod, force), noop);
+      promiseCatch(fetch(fetchMethod as Method, force), noop);
     }
   };
   // 预加载上一页数据
@@ -253,13 +244,13 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         fetchMethod
       }))
     ) {
-      promiseCatch(fetch(fetchMethod), noop);
+      promiseCatch(fetch(fetchMethod as Method), noop);
     }
   };
   // 如果返回的数据小于pageSize了，则认定为最后一页了
   const isLastPage = computed(
     () => {
-      const dataRaw = requestDataRef.current;
+      const dataRaw = nestedData.v;
       if (!dataRaw) {
         return trueValue;
       }
@@ -269,9 +260,8 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       const dataLen = isArray(statesDataVal) ? len(statesDataVal) : 0;
       return pageCountVal ? pageVal >= pageCountVal : dataLen < pageSize.v;
     },
-    [page.e, pageCount.e, states.data, pageSize.e],
-    'isLastPage',
-    trueValue
+    [page, pageCount, nestedData, pageSize],
+    'isLastPage'
   );
 
   // 更新当前页缓存
@@ -359,7 +349,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     return index;
   };
 
-  const add2AsyncQueue = createAsyncQueue();
+  const { addQueue: add2AsyncQueue, onComplete: onAsyncQueueRunComplete } = ref(createAsyncQueue()).current;
 
   /**
    * 刷新指定页码数据，此函数将忽略缓存强制发送请求
@@ -381,13 +371,14 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       paginationAssert(isNumber(refreshPage), 'unable to calculate refresh page by item in pagination mode');
       // 页数相等，则刷新当前页，否则fetch数据
       promiseCatch(
-        refreshPage === page.v ? send(undefinedValue, trueValue) : fetch(handler(refreshPage, pageSize.v), trueValue),
+        refreshPage === page.v
+          ? send(undefinedValue, trueValue)
+          : fetch(handler(refreshPage, pageSize.v) as Method, trueValue),
         noop
       );
     }
   };
 
-  // const removeSyncRunner = ref(createSyncOnceRunner()).current;
   // 删除除此usehook当前页和下一页的所有相关缓存
   const invalidatePaginationCache = async (all = falseValue) => {
     const pageVal = page.v;
@@ -418,20 +409,17 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
 
   // 单独拿出来的原因是
   // 无论同步调用几次insert、remove，或它们组合调用，reset操作只需要异步执行一次
-  // const resetSyncRunner = ref(createSyncOnceRunner()).current;
   const resetCache = async () => {
     fetchingRef.current && abortFetch();
     // 缓存失效
     await invalidatePaginationCache();
 
     // 当下一页的数据量不超过pageSize时，强制请求下一页，因为有请求共享，需要在中断请求后异步执行拉取操作
-    setTimeoutFn(async () => {
-      const snapshotItem = getSnapshotMethods(page.v + 1);
-      if (snapshotItem) {
-        const cachedListData = listDataGetter((await queryCache(snapshotItem.entity)) || {}) || [];
-        fetchNextPage(undefinedValue, len(cachedListData) < pageSize.v);
-      }
-    });
+    const snapshotItem = getSnapshotMethods(page.v + 1);
+    if (snapshotItem) {
+      const cachedListData = listDataGetter((await queryCache(snapshotItem.entity)) || {}) || [];
+      fetchNextPage(undefinedValue, len(cachedListData) < pageSize.v);
+    }
   };
 
   // 统一更新总条数
@@ -460,8 +448,9 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
    * @param item 插入项
    * @param position 插入位置（索引）或列表项
    */
-  const insert = (item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number] = 0) =>
-    add2AsyncQueue(async () => {
+  const insert = (item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number] = 0) => {
+    onAsyncQueueRunComplete(resetCache); // 执行结束需要重置缓存
+    return add2AsyncQueue(async () => {
       const index = isNumber(position) ? position : getItemIndex(position) + 1;
       let popItem: ListData[number] | undefined = undefinedValue;
       const rawData = data.v;
@@ -493,18 +482,17 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
           });
         }
       }
-
-      // 插入项后也需要让缓存失效，以免不同条件下缓存未更新
-      resetCache();
     });
+  };
 
   /**
    * 移除一条数据
    * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
    * @param position 移除的索引或列表项
    */
-  const remove = (...positions: (number | ListData[number])[]) =>
-    add2AsyncQueue(async () => {
+  const remove = (...positions: (number | ListData[number])[]) => {
+    onAsyncQueueRunComplete(resetCache); // 执行结束需要重置缓存
+    return add2AsyncQueue(async () => {
       const indexes = mapItem(positions, position => {
         const index = isNumber(position) ? position : getItemIndex(position);
         indexAssert(index, data.v);
@@ -547,8 +535,9 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
 
       updateTotal(-len(indexes));
       // 当前页的缓存同步更新
-      await PromiseCls.all([updateCurrentPageCache(), resetCache()]);
+      return updateCurrentPageCache();
     });
+  };
   /**
    * 替换一条数据
    * 如果position传入的是列表项，将替换此列表项，如果列表项未在列表数据中将会抛出错误
@@ -560,24 +549,22 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       paginationAssert(position !== undefinedValue, 'expect specify the replace position');
       const index = isNumber(position) ? position : getItemIndex(position);
       indexAssert(index, data.v);
-      add2AsyncQueue(async () => {
-        const rawData = data.v;
-        splice(rawData, index, 1, item);
-        data.v = rawData;
-        // 当前页的缓存同步更新
-        await updateCurrentPageCache();
-      });
+      const rawData = data.v;
+      splice(rawData, index, 1, item);
+      data.v = rawData;
+      // 当前页的缓存同步更新
+      await updateCurrentPageCache();
     });
 
   /**
    * 从第${initialPage}页开始重新加载列表，并清空缓存
    */
-  const reload = () =>
-    add2AsyncQueue(async () => {
-      await invalidatePaginationCache(trueValue);
+  const reload = () => {
+    promiseThen(invalidatePaginationCache(trueValue), () => {
       isReset.current = trueValue;
       page.v === initialPage ? promiseCatch(send(), noop) : (page.v = initialPage);
     });
+  };
 
   // 兼容react，每次缓存最新的操作函数，避免闭包陷阱
   delegationActions.current = {

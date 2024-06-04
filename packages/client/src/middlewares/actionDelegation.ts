@@ -30,7 +30,13 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
   ) => {
     // 中间件会重复调用，已经订阅过了就无需再订阅了
     if (!delegated.current) {
-      const { abort, update, delegatingActions = {} } = context;
+      const { abort, proxyStates, delegatingActions = {} } = context;
+      const update = (newStates: Record<string, any>) => {
+        type ProxyStateKeys = keyof typeof proxyStates;
+        for (const key in newStates) {
+          proxyStates[key as ProxyStateKeys] && (proxyStates[key as ProxyStateKeys].v = newStates[key]);
+        }
+      };
       // 相同id的将以数组形式保存在一起
       const handlersItems = (actionsMap[id] = actionsMap[id] || []);
       handlersItems.push(

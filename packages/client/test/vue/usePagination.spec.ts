@@ -9,7 +9,7 @@ import { delay, generateContinuousNumbers } from 'root/testUtils';
 import { ref } from 'vue';
 import Pagination from './components/pagination.vue';
 
-jest.setTimeout(1000000);
+// jest.setTimeout(1000000);
 // reset data
 beforeEach(() => {
   setMockListData();
@@ -764,7 +764,7 @@ describe('vue => usePagination', () => {
     });
   });
 
-  test.skip('should use new total data when remove items and go to adjacent page', async () => {
+  test('should use new total data when remove items and go to adjacent page', async () => {
     const fetchMockFn = jest.fn();
     const min = ref(0);
     render(Pagination, {
@@ -864,7 +864,7 @@ describe('vue => usePagination', () => {
     min.value = 0;
     total = totalBackup;
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(8); // 条件重置了，预加载了前一页数（当前第initialPage页）+1
+      expect(fetchMockFn).toHaveBeenCalledTimes(9); // 条件重置了，预加载了前后一页数+2（当前第initialPage页）
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
@@ -1001,7 +1001,7 @@ describe('vue => usePagination', () => {
   });
 
   // 下拉加载更多相关
-  test.only('load more mode paginated data and change page/pageSize', async () => {
+  test('load more mode paginated data and change page/pageSize', async () => {
     const successMockFn = jest.fn();
     render(Pagination, {
       props: {
@@ -1068,7 +1068,7 @@ describe('vue => usePagination', () => {
     const keyword = ref('');
     render(Pagination, {
       props: {
-        getter: getterSearch,
+        getter: (page: number, pageSize: number) => getterSearch(page, pageSize, keyword.value),
         paginationConfig: {
           watchingStates: [keyword],
           total: () => undefined,
@@ -1218,7 +1218,7 @@ describe('vue => usePagination', () => {
         paginationConfig: {
           total: () => undefined,
           data: (res: any) => res.list,
-          append: true, // TODO: 好像漏了
+          append: true,
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
         },
@@ -1253,7 +1253,7 @@ describe('vue => usePagination', () => {
 
     fireEvent.click(screen.getByRole('setPage'));
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([9, 10, 11, 12]));
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 4, 200, 8, 9, 10, 11, 12]));
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(screen.getByRole('pageCount')).toHaveTextContent('');
       expect(fetchMockFn).toHaveBeenCalledTimes(4); // 翻页只预加载下一页
@@ -1294,7 +1294,7 @@ describe('vue => usePagination', () => {
       return data;
     });
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([2, 3, 4, 5]));
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 3, 4, 5]));
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(fetchMockFn).not.toHaveBeenCalled();
     });
@@ -1447,9 +1447,13 @@ describe('vue => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('setLoading'));
-    expect(screen.getByRole('status')).toHaveTextContent('loading');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loading');
+    });
     fireEvent.click(screen.getByRole('clearData'));
-    expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+    });
   });
 
   test('should set initial data to data and total', async () => {
@@ -1476,7 +1480,7 @@ describe('vue => usePagination', () => {
     });
   });
 
-  test('can resend request when encounter with an error', async () => {
+  test('can resend request when encounter an error', async () => {
     const errorFn = jest.fn();
     const completeFn = jest.fn();
     render(Pagination, {
@@ -1501,13 +1505,13 @@ describe('vue => usePagination', () => {
       expect(completeFn).toHaveBeenCalledTimes(1);
     });
 
-    fireEvent.click(screen.getByRole('reload'));
+    fireEvent.click(screen.getByRole('reload1'));
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(2);
       expect(completeFn).toHaveBeenCalledTimes(2);
     });
 
-    fireEvent.click(screen.getByRole('reload'));
+    fireEvent.click(screen.getByRole('reload1'));
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(3);
       expect(completeFn).toHaveBeenCalledTimes(3);

@@ -19,7 +19,7 @@ export default async function updateState<AG extends AlovaGenerics>(
 
   // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
   if (matcher) {
-    const { dehydrate, update } = promiseStatesHook();
+    const { update } = promiseStatesHook();
     const methodKey = getMethodInternalKey(matcher);
     const { id } = getContext(matcher);
     const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
@@ -33,15 +33,16 @@ export default async function updateState<AG extends AlovaGenerics>(
       forEach(objectKeys(updateStateCollection), stateName => {
         coreAssert(stateName in frontStates, `state named \`${stateName}\` is not found`);
         coreAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
-        const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](
-          dehydrate((frontStates as Record<string, any>)[stateName], stateName, hookInstance.ro)
-        );
+        const targetStateProxy = frontStates[stateName as keyof typeof frontStates];
+        const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](targetStateProxy.v);
 
         // 记录data字段的更新值，用于更新缓存数据
         if (stateName === 'data') {
           updatedDataColumnData = updatedData;
         }
-        update(updatedData, frontStates[stateName as keyof typeof frontStates], stateName, hookInstance.ro);
+
+        // 直接使用update更新，不检查referingObject.trackedKeys
+        update(updatedData, frontStates[stateName as keyof typeof frontStates].s, stateName, hookInstance.ro);
       });
       updated = trueValue;
     }

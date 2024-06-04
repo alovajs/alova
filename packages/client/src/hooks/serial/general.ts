@@ -44,12 +44,13 @@ export const serialMiddleware = <AG extends AlovaGenerics>(
     hookMiddleware?.(ctx, () => promiseResolve(undefinedValue as any));
 
     ctx.controlLoading();
-    ctx.update({ loading: trueValue });
+    const loadingState = ctx.proxyStates.loading;
+    loadingState.v = trueValue;
     const methods: Method<AG>[] = [];
     let serialPromise = next();
     for (const handler of serialHandlers) {
       serialPromise = promiseThen(serialPromise, value => {
-        const methodItem = (handler as AlovaMethodHandler<AG>)(value, ...ctx.sendArgs);
+        const methodItem = (handler as AlovaMethodHandler<AG>)(value, ...ctx.args);
         pushItem(methods, methodItem);
         return methodItem.send();
       });
@@ -61,7 +62,7 @@ export const serialMiddleware = <AG extends AlovaGenerics>(
       handler(event);
     });
     return serialPromise.finally(() => {
-      ctx.update({ loading: falseValue });
+      loadingState.v = falseValue;
     });
   }) as AlovaFrontMiddleware<AG>;
 };

@@ -40,7 +40,8 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
   let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);
-  const { fs: frontStates, ht: hookType, c: useHookConfig, upd: update, em: eventManager } = hookInstance;
+  const { fs: frontStates, ht: hookType, c: useHookConfig, em: eventManager } = hookInstance;
+  const { loading: loadingState, data: dataState, error: errorState } = frontStates;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
     | FrontRequestHookConfig<AG>
@@ -83,10 +84,12 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
       ]);
       const progressUpdater =
         (stage: 'downloading' | 'uploading') =>
-        ({ loaded, total }: Progress) =>
-          update({
-            [stage]: { loaded, total }
-          });
+        ({ loaded, total }: Progress) => {
+          frontStates[stage].v = {
+            loaded,
+            total
+          };
+        };
 
       methodInstance = guardNextReplacingMethod;
       // 每次发送请求都需要保存最新的控制器
@@ -95,7 +98,9 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
 
       // loading状态受控时将不更改loading
       // 未命中缓存，或强制请求时需要设置loading为true
-      !controlledLoading && update({ loading: !!forceRequestFinally || !cachedResponse });
+      if (!controlledLoading) {
+        loadingState.v = !!forceRequestFinally || !cachedResponse;
+      }
 
       // 根据downloading、uploading的追踪状态来判断是否触发进度更新
       const { downloading: enableDownload, uploading: enableUpload } = hookInstance.ro.trackedKeys;
@@ -131,13 +136,12 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
       ? (middleware as AlovaFetcherMiddleware<AG>)(
           {
             ...commonContext,
-            fetchArgs: sendCallingArgs,
+            args: sendCallingArgs,
             fetch: (methodInstance, ...args) => {
               assertMethod(currentHookAssert, methodInstance);
               return useHookToSendRequest(hookInstance, methodInstance as Method<AG>, args);
             },
-            fetchStates: omit(frontStates, 'data'),
-            update,
+            proxyStates: omit(frontStates, 'data'),
             controlFetching(control = trueValue) {
               controlledLoading = control;
             }
@@ -147,10 +151,9 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
       : (middleware as AlovaFrontMiddleware<AG>)(
           {
             ...commonContext,
-            sendArgs: sendCallingArgs,
+            args: sendCallingArgs,
             send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args),
-            frontStates,
-            update,
+            proxyStates: frontStates,
             controlLoading(control = trueValue) {
               controlledLoading = control;
             }
@@ -166,19 +169,18 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
       const afterSuccess = (data: any) => {
         // 更新缓存响应数据
         if (!isFetcher) {
-          toUpdateResponse() && update({ data });
+          toUpdateResponse() && (dataState.v = data);
         } else if (hookInstance.c.updateState !== falseValue) {
           // 更新缓存内的状态，一般为useFetcher中进入
           const cachedState = getStateCache(id, methodKey).s;
-          cachedState && update({ data }, cachedState);
+          cachedState && (cachedState.data.v = data);
         }
 
         // 如果需要更新响应数据，则在请求后触发对应回调函数
         if (toUpdateResponse()) {
-          const newStates = { error: undefinedValue } as Partial<FrontRequestState<any, any, any, any, any>>;
+          errorState.v = undefinedValue;
           // loading状态受控时将不再更改为false
-          !controlledLoading && (newStates.loading = falseValue);
-          update(newStates);
+          !controlledLoading && (loadingState.v = falseValue);
           eventManager.emit(KEY_SUCCESS, newInstance(AlovaSuccessEvent<AG>, baseEvent, data, fromCache()));
           eventManager.emit(
             KEY_COMPLETE,
@@ -202,14 +204,13 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
               undefinedValue;
 
       // 未调用next函数时，更新loading为false
-      !isNextCalled && !controlledLoading && update({ loading: falseValue });
+      !isNextCalled && !controlledLoading && (loadingState.v = falseValue);
     } catch (error: any) {
       if (toUpdateResponse()) {
         // 控制在输出错误消息
-        const newStates = { error } as Partial<FrontRequestState<any, any, any, any, any>>;
+        errorState.v = error;
         // loading状态受控时将不再更改为false
-        !controlledLoading && (newStates.loading = falseValue);
-        update(newStates);
+        !controlledLoading && (loadingState.v = falseValue);
         eventManager.emit(KEY_ERROR, newInstance(AlovaErrorEvent<AG>, baseEvent, error));
         eventManager.emit(
           KEY_COMPLETE,

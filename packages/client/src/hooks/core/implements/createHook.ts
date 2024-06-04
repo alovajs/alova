@@ -1,5 +1,6 @@
+import { FrameworkState } from '@alova/shared/FrameworkState';
 import { undefinedValue } from '@alova/shared/vars';
-import type { AlovaGenerics, FrontRequestState, ReferingObject } from 'alova';
+import type { AlovaGenerics, FrontRequestState, Progress, ReferingObject } from 'alova';
 import { Method } from 'alova';
 import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
 
@@ -7,8 +8,7 @@ export default <AG extends AlovaGenerics>(
   ht: TEnumHookType,
   c: UseHookConfig<AG>,
   eventManager: Hook['em'],
-  ro: ReferingObject,
-  upd: Hook['upd']
+  ro: ReferingObject
 ) =>
   ({
     /** 最后一次请求的method实例 */
@@ -21,7 +21,13 @@ export default <AG extends AlovaGenerics>(
     rf: [],
 
     /** frontStates */
-    fs: {} as FrontRequestState,
+    fs: {} as FrontRequestState<
+      FrameworkState<boolean, 'loading'>,
+      FrameworkState<AG['Responded'], 'data'>,
+      FrameworkState<Error | undefined, 'error'>,
+      FrameworkState<Progress, 'downloading'>,
+      FrameworkState<Progress, 'uploading'>
+    >,
 
     /** eventManager */
     em: eventManager,
@@ -31,9 +37,6 @@ export default <AG extends AlovaGenerics>(
 
     /** hook config */
     c,
-
-    /** update states */
-    upd,
 
     /** referingObject */
     ro

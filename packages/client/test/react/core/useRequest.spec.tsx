@@ -199,7 +199,7 @@ describe('useRequest hook with react', () => {
     // useRequest内会缓存状态
     await waitFor(() => {
       const { s: { data } = { data: null } } = getStateCache(alova.id, key(Get));
-      expect(data[0].path).toBe('/unit-test');
+      expect(data?.v.path).toBe('/unit-test');
     });
     unmount();
     await waitFor(() => {

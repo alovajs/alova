@@ -1,10 +1,17 @@
+import { FrameworkState } from '@alova/shared/FrameworkState';
 import { deleteAttr } from '@alova/shared/vars';
-import type { FrontRequestState } from 'alova';
+import type { FrontRequestState, Progress } from 'alova';
 import { Hook } from '~/typings';
 
 // 状态数据缓存
 interface CacheItem {
-  s: FrontRequestState;
+  s: FrontRequestState<
+    FrameworkState<boolean, 'loading'>,
+    FrameworkState<any, 'data'>,
+    FrameworkState<Error | undefined, 'error'>,
+    FrameworkState<Progress, 'downloading'>,
+    FrameworkState<Progress, 'uploading'>
+  >;
   h: Hook;
 }
 const stateCache: Record<string, Record<string, CacheItem>> = {};

@@ -26,7 +26,7 @@ export const uuid = () => {
 const referenceList = [] as { id: string; ref: any }[];
 /**
  * 获取唯一的引用类型id，如果是非引用类型则返回自身
- * @param {reference} 引用类型数据
+ * @param 引用类型数据
  * @returns uniqueId
  */
 export const getUniqueReferenceId = (reference: any) => {
@@ -172,4 +172,21 @@ export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler, arg
     'hook handler must be a method instance or a function that returns method instance'
   );
   return methodInstance;
+};
+
+/**
+ * 转换对象的每一项值，并返回新的对象
+ * @param obj 对象
+ * @param callback 回调函数
+ * @returns 转换后的对象
+ */
+export const mapObject = <T extends Record<string, any>, U>(
+  obj: T,
+  callback: (value: T[keyof T], key: string, parent: T) => U
+) => {
+  const ret: Record<string, U> = {};
+  for (const key in obj) {
+    ret[key] = callback(obj[key], key, obj);
+  }
+  return ret as Record<keyof T, U>;
 };

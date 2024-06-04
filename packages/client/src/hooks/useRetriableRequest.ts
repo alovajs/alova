@@ -92,17 +92,17 @@ export default <AG extends AlovaGenerics>(
         } as any,
         () => promiseResolve(undefinedValue as any)
       );
-      const { update, sendArgs, send, method, controlLoading } = ctx;
+      const { proxyStates, args, send, method, controlLoading } = ctx;
       const setLoading = (loading = falseValue) => {
         if (loading !== currentLoadingState.current) {
-          update({ loading });
+          proxyStates.loading.v = loading;
           currentLoadingState.current = loading;
         }
       };
       controlLoading();
       setLoading(trueValue);
       methodInstanceLastest.current = method;
-      sendArgsLatest.current = sendArgs;
+      sendArgsLatest.current = args;
       requesting.current = trueValue;
 
       // init the resolved flag as `false` before first request.
@@ -129,17 +129,14 @@ export default <AG extends AlovaGenerics>(
         // 请求失败时触发重试机制
         error => {
           // 没有手动触发停止，以及重试次数未到达最大时触发重试
-          if (
-            !stopManuallyError.current &&
-            (isNumber(retry) ? retryTimes.current < retry : retry(error, ...sendArgs))
-          ) {
+          if (!stopManuallyError.current && (isNumber(retry) ? retryTimes.current < retry : retry(error, ...args))) {
             retryTimes.current += 1;
             // 计算重试延迟时间
             const retryDelay = delayWithBackoff(backoff, retryTimes.current);
             // 延迟对应时间重试
             retryTimer.current = setTimeoutFn(() => {
               // 如果手动停止了则不再触发重试
-              promiseCatch(send(...sendArgs), noop); // 捕获错误不再往外抛，否则重试时也会抛出错误
+              promiseCatch(send(...args), noop); // 捕获错误不再往外抛，否则重试时也会抛出错误
               // 触发重试事件
               eventManager.emit(
                 RetryEventKey,
@@ -151,14 +148,14 @@ export default <AG extends AlovaGenerics>(
                   undefinedValue,
                   retryTimes.current,
                   retryDelay,
-                  sendArgs
+                  args
                 ) as any
               );
             }, retryDelay);
           } else {
             setLoading();
             error = stopManuallyError.current || error; // 如果stopManuallyError有值表示是通过stop函数触发停止的
-            emitOnFail(method, sendArgs, error);
+            emitOnFail(method, args, error);
           }
 
           requesting.current = falseValue;

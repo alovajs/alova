@@ -109,7 +109,7 @@ describe('update cached response data by user in vue', () => {
       updateState(Get, {
         extraData2: () => 1
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow("Cannot create property 'value' on number '1'");
 
     // 未找到状态抛出错误
     await expect(

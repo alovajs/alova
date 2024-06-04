@@ -85,15 +85,15 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
    * @returns {Promise}
    */
   const middleware: AlovaFrontMiddleware<AG> = (
-    { method, sendArgs, cachedResponse, update, decorateSuccess, decorateError, decorateComplete, config },
+    { method, args, cachedResponse, proxyStates, decorateSuccess, decorateError, decorateComplete, config },
     next
   ) => {
     const { silentDefaultResponse, vDataCaptured, force = falseValue } = config;
 
     // 因为behavior返回值可能会变化，因此每次请求都应该调用它重新获取返回值
-    const behaviorFinally = sloughConfig(behavior, sendArgs);
-    const queueFinally = sloughConfig(queue, sendArgs);
-    const forceRequest = sloughConfig(force, sendArgs);
+    const behaviorFinally = sloughConfig(behavior, args);
+    const queueFinally = sloughConfig(queue, args);
+    const forceRequest = sloughConfig(force, args);
     let silentMethodInstance: any;
 
     // 设置事件回调装饰器
@@ -220,7 +220,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
               undefinedValue,
               undefinedValue,
               undefinedValue,
-              sendArgs
+              args
             );
 
           // 将silentMethod放入队列并持久化
@@ -242,14 +242,12 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
       };
 
       if (behaviorFinally === BEHAVIOR_QUEUE) {
-        const forceRequest = sloughConfig(force, sendArgs);
+        const forceRequest = sloughConfig(force, args);
         // 强制请求，或命中缓存时需要更新loading状态
         const needSendRequest = forceRequest || !cachedResponse;
         if (needSendRequest) {
-          update({
-            // 手动设置为true
-            loading: trueValue
-          });
+          // 手动设置为true
+          proxyStates.loading.v = trueValue;
         }
 
         // 当使用缓存时，直接使用缓存，否则再进入请求队列
@@ -263,9 +261,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
       ));
       promiseThen<any>(silentMethodPromise, realResponse => {
         // 获取到真实数据后更新过去
-        update({
-          data: realResponse
-        });
+        proxyStates.data.v = realResponse;
       });
 
       // silent模式下，先立即返回虚拟响应值，然后当真实数据返回时再更新

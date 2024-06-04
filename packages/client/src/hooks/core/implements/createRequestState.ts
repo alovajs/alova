@@ -1,4 +1,4 @@
-import { debounce } from '@/util/helper';
+import { debounce, mapObject } from '@/util/helper';
 import createEventManager from '@alova/shared/createEventManager';
 import {
   buildNamespacedCacheKey,
@@ -101,7 +101,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     } catch (error) {}
   }
 
-  const { create, effectRequest, ref, objectify, exposeProvider } = statesHookHelper<AG>(
+  const { create, effectRequest, ref, objectify, exposeProvider, transformState2Proxy } = statesHookHelper<AG>(
     promiseStatesHook(),
     referingObject
   );
@@ -116,9 +116,10 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   const error = create(undefinedValue as Error | undefined, 'error');
   const downloading = create({ ...progress }, 'downloading');
   const uploading = create({ ...progress }, 'uploading');
+
   const frontStates = {
-    ...managedStates,
-    ...objectify([data, loading, error, downloading, uploading], 's')
+    ...mapObject(managedStates, (state, key) => transformState2Proxy(state, key)),
+    ...objectify([data, loading, error, downloading, uploading])
   };
   const eventManager = createEventManager<{
     success: AlovaSuccessEvent<AG>;
@@ -127,9 +128,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   }>();
 
   const hookProvider = exposeProvider(objectify([data, loading, error, downloading, uploading]));
-  const hookInstance = refCurrent(
-    ref(createHook(hookType, useHookConfig, eventManager, referingObject, hookProvider.update))
-  );
+  const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
 
   /**
    * ## react ##每次执行函数都需要重置以下项

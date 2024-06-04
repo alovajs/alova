@@ -259,6 +259,7 @@ export const createSyncOnceRunner = (delay = 0) => {
 export const createAsyncQueue = (catchError = falseValue) => {
   type AsyncFunction<T = any> = (...args: any[]) => Promise<T>;
   const queue: AsyncFunction[] = [];
+  let completedHandler: GeneralFn | undefined = undefinedValue;
   let executing = false;
 
   const executeQueue = async () => {
@@ -269,10 +270,10 @@ export const createAsyncQueue = (catchError = falseValue) => {
         await asyncFunc();
       }
     }
+    completedHandler && completedHandler();
     executing = false;
   };
-
-  return <T>(asyncFunc: AsyncFunction<T>): Promise<T> =>
+  const addQueue = <T>(asyncFunc: AsyncFunction<T>): Promise<T> =>
     newInstance(PromiseCls<T>, (resolve, reject) => {
       const wrappedFunc = () =>
         promiseThen(asyncFunc(), resolve, err => {
@@ -283,6 +284,15 @@ export const createAsyncQueue = (catchError = falseValue) => {
         executeQueue();
       }
     });
+
+  const onComplete = (fn: GeneralFn) => {
+    completedHandler = fn;
+  };
+
+  return {
+    addQueue,
+    onComplete
+  };
 };
 
 /**
@@ -433,8 +443,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
         }
       }
 
-      const nestedHookUpdate = provider.update;
-
+      const { update: nestedHookUpdate, __proxyState: nestedProxyState } = provider;
       type ActualStateTranslator<StateProxy extends FrameworkReadableState<any, string>> =
         StateProxy extends FrameworkState<any, string>
           ? ExportedState<StateProxy['v'], AG['State']>
@@ -447,17 +456,28 @@ export function statesHookHelper<AG extends AlovaGenerics>(
         __referingObj: referingObject,
 
         // the new updating function that can update the new states and nested hook states.
-        update: memorize((newStates: Record<string, any>, updatingStates?: Record<string, GeneralState>) => {
-          updatingStates = updatingStates || originalStatesMap;
-          objectKeys(newStates).forEach(key => {
-            if (includes(createdStateList, key)) {
-              update(newStates[key], updatingStates[key], key);
-            } else if (provider[key] && isFn(nestedHookUpdate)) {
-              nestedHookUpdate({
-                [key]: newStates[key]
-              });
-            }
-          });
+        update: memorize(
+          (newStates: {
+            [K in keyof O]?: O[K] extends FrameworkReadableState<infer R, string> ? R : never;
+          }) => {
+            objectKeys(newStates).forEach(key => {
+              if (includes(createdStateList, key)) {
+                update(newStates[key], originalStatesMap[key], key);
+              } else if (provider[key] && isFn(nestedHookUpdate)) {
+                nestedHookUpdate({
+                  [key]: newStates[key]
+                });
+              }
+            });
+          }
+        ),
+        __proxyState: memorize(<K extends keyof O>(key: K) => {
+          if (includes(createdStateList, key as string) && instanceOf(object[key], FrameworkReadableState)) {
+            // need to tag the key that is being tracked so that it can be updated with `state.v = xxx`.
+            referingObject.trackedKeys[key as string] = trueValue;
+            return object[key];
+          }
+          return nestedProxyState(key);
         })
       };
       return objAssign(provider, extraProvider) as {
@@ -485,6 +505,16 @@ export function statesHookHelper<AG extends AlovaGenerics>(
             ? Extract<S[number], { k: K }>
             : Extract<S[number], { k: K }>[NonNullable<Key>];
         }
+      ),
+
+    transformState2Proxy: <Key extends string>(state: GeneralState<any>, key: Key) =>
+      newInstance(
+        FrameworkState<any, Key>,
+        state,
+        key,
+        state => dehydrate(state, key, referingObject),
+        exportState,
+        (state, newValue) => update(newValue, state, key)
       )
   };
 }

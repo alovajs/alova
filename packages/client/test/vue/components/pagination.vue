@@ -46,15 +46,7 @@
     </button>
     <button
       role="refreshError"
-      @click="
-        () => {
-          try {
-            refresh(100);
-          } catch (error: any) {
-            replacedError = error;
-          }
-        }
-      ">
+      @click="runWithErrorHandling(() => refresh(100))">
       btn3
     </button>
     <button
@@ -268,9 +260,14 @@ const props = defineProps<{
 const replacedError = ref(undefined as Error | undefined);
 
 const runWithErrorHandling = <T extends (...args: any[]) => any>(fn: T) => {
-  fn().catch((err: any) => {
-    replacedError.value = err;
-  });
+  try {
+    const res = fn();
+    res?.catch((err: any) => {
+      replacedError.value = err;
+    });
+  } catch (error: any) {
+    replacedError.value = error;
+  }
 };
 
 const exposure = usePagination(props.getter, props.paginationConfig);

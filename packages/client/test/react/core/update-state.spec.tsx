@@ -209,8 +209,8 @@ describe('update cached response data by user in react', () => {
     expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');
 
     // 两处缓存的状态应该都是最新值
-    expect(getStateCache(alova.id, key(getter('a'))).s.data[0].path).toBe('/path-str-b');
-    expect(getStateCache(alova.id, key(getter('b'))).s.data[0].path).toBe('/path-str-b');
+    expect(getStateCache(alova.id, key(getter('a'))).s.data.v.path).toBe('/path-str-b');
+    expect(getStateCache(alova.id, key(getter('b'))).s.data.v.path).toBe('/path-str-b');
   });
 
   test('all saved states in unmounted component will be removed', async () => {

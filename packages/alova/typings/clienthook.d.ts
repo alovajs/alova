@@ -1,3 +1,4 @@
+import { FrameworkState } from '@alova/shared/FrameworkState';
 import { EventManager } from '@alova/shared/createEventManager';
 import { IsAny } from '@alova/shared/types';
 import { Alova, AlovaGenerics, FetchRequestState, FrontRequestState, Method, Progress, ReferingObject } from 'alova';
@@ -61,12 +62,13 @@ export interface Hook {
   rf: (() => void)[];
 
   /** frontStates */
-  fs: FrontRequestState;
-
-  /**
-   * update states.
-   */
-  upd: (newStates: Record<string, any>, targetStates?: Record<string, any>) => void;
+  fs: FrontRequestState<
+    FrameworkState<boolean, 'loading'>,
+    FrameworkState<any, 'data'>,
+    FrameworkState<Error | undefined, 'error'>,
+    FrameworkState<Progress, 'downloading'>,
+    FrameworkState<Progress, 'uploading'>
+  >;
 
   /** event manager */
   em: EventManager<{
@@ -102,42 +104,55 @@ export type ExportedComputed<Responded, Computed> =
       ? Readable<Responded>
       : Responded;
 
+export type StateUpdater<ExportedStates extends Record<string, any>> = (newStates: {
+  [K in keyof ExportedStates]: ExportedStates[K] extends ExportedState<infer R, any> | ExportedComputed<infer R, any>
+    ? R
+    : never;
+}) => void;
+
+export type ProxyStateGetter<HookExportedStates extends Record<string, any>> = <K extends keyof HookExportedStates>(
+  key: K
+) => HookExportedStates[K] extends ExportedState<infer Data, any>
+  ? FrameworkState<Data, K & string>
+  : HookExportedStates[K] extends ExportedComputed<infer Data, any>
+    ? FrameworkReadableState<Data, K & string>
+    : never;
+
 export type SendHandler<R> = (...args: any[]) => Promise<R>;
-export type UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> = FrontRequestState<
-  ExportedState<boolean, AG['State']>,
-  ExportedState<AG['Responded'], AG['State']>,
-  ExportedState<Error | undefined, AG['State']>,
-  ExportedState<Progress, AG['State']>,
-  ExportedState<Progress, AG['State']>
-> & {
+export interface UseHookExportedState<AG extends AlovaGenerics>
+  extends FrontRequestState<
+    ExportedState<boolean, AG['State']>,
+    ExportedState<AG['Responded'], AG['State']>,
+    ExportedState<Error | undefined, AG['State']>,
+    ExportedState<Progress, AG['State']>,
+    ExportedState<Progress, AG['State']>
+  > {}
+export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> extends UseHookExportedState<AG> {
   abort: () => void;
-  update: FrontExportedUpdate<AG['Responded']>;
+  update: StateUpdater<UseHookExportedState<AG>>;
   send: SendHandler<AG['Responded']>;
   onSuccess: (handler: SuccessHandler<AG>) => void;
   onError: (handler: ErrorHandler<AG>) => void;
   onComplete: (handler: CompleteHandler<AG>) => void;
+  __proxyState: ProxyStateGetter<UseHookExportedState<AG>>;
   __referingObj: ReferingObject;
-};
-export type UseFetchHookExposure<State> = FetchRequestState<
-  ExportedState<boolean, State>,
-  ExportedState<Error | undefined, State>,
-  ExportedState<Progress, State>,
-  ExportedState<Progress, State>
-> & {
-  fetch<R>(matcher: Method, ...args: any[]): Promise<R>;
-  update: FetcherExportedUpdate;
+}
+export interface UseFetchExportedState<State>
+  extends FetchRequestState<
+    ExportedState<boolean, State>,
+    ExportedState<Error | undefined, State>,
+    ExportedState<Progress, State>,
+    ExportedState<Progress, State>
+  > {}
+export interface UseFetchHookExposure<State> extends UseFetchExportedState<State> {
+  fetch<R>(matcher: Method<AlovaGenerics<any, any, any, any, R>>, ...args: any[]): Promise<R>;
+  update: StateUpdater<UseFetchExportedState<State>>;
   abort: UseHookExposure['abort'];
   onSuccess: UseHookExposure['onSuccess'];
   onError: UseHookExposure['onError'];
   onComplete: UseHookExposure['onComplete'];
-};
+}
 
-export type FrontExportedUpdate<R> = (
-  newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
-) => void;
-export type FetcherExportedUpdate = (
-  newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
-) => void;
 export interface AlovaMiddlewareContext<AG extends AlovaGenerics> {
   /** 当前的method对象 */
   method: Method<AG>;
@@ -174,20 +189,17 @@ export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics> extends A
   /** 发送请求函数 */
   send: SendHandler<AG['Responded']>;
 
-  /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
-  sendArgs: any[];
+  /** args 响应处理回调的参数，该参数由use hooks的send传入 */
+  args: any[];
 
   /** 前端状态集合 */
-  frontStates: FrontRequestState<
-    ExportedState<boolean, AG['State']>,
-    ExportedState<AG['Responded'], AG['State']>,
-    ExportedState<Error | undefined, AG['State']>,
-    ExportedState<Progress, AG['State']>,
-    ExportedState<Progress, AG['State']>
+  proxyStates: FrontRequestState<
+    FrameworkState<boolean, 'loading'>,
+    FrameworkState<AG['Responded'], 'data'>,
+    FrameworkState<Error | undefined, 'error'>,
+    FrameworkState<Progress, 'downloading'>,
+    FrameworkState<Progress, 'uploading'>
   >;
-
-  /** 状态更新函数 */
-  update: FrontExportedUpdate<AG['Responded']>;
 
   /**
    * 调用后将自定义控制loading的状态，内部不再触发loading状态的变更
@@ -205,19 +217,16 @@ export interface AlovaFetcherMiddlewareContext<AG extends AlovaGenerics> extends
   /** 数据预加载函数 */
   fetch<Transformed>(method: Method<AG>, ...args: any[]): Promise<Transformed>;
 
-  /** fetchArgs 响应处理回调的参数，该参数由useFetcher的fetch传入 */
-  fetchArgs: any[];
+  /** args 响应处理回调的参数，该参数由useFetcher的fetch传入 */
+  args: any[];
 
-  /** fetch状态集合 */
-  fetchStates: FetchRequestState<
-    ExportedState<boolean, AG['State']>,
-    ExportedState<Error | undefined, AG['State']>,
-    ExportedState<Progress, AG['State']>,
-    ExportedState<Progress, AG['State']>
+  /** fetch状态的代理集合 */
+  proxyStates: FetchRequestState<
+    FrameworkState<boolean, 'loading'>,
+    FrameworkState<Error | undefined, 'error'>,
+    FrameworkState<Progress, 'downloading'>,
+    FrameworkState<Progress, 'uploading'>
   >;
-
-  /** 状态更新函数 */
-  update: FetcherExportedUpdate;
 
   /**
    * 调用后将自定义控制fetching的状态，内部不再触发fetching状态的变更
@@ -380,7 +389,3 @@ export declare function updateState<Responded>(
   matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
   handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>
 ): Promise<boolean>;
-// TODO: 以上类型是从alova迁移过来
-// ===================================================
-// ===================================================
-// ===================================================

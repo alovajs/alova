@@ -2309,7 +2309,7 @@ describe('react => usePagination', () => {
       return data;
     });
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([2, 3, 4, 5]));
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 3, 4, 5]));
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(fetchMockFn).not.toHaveBeenCalled();
     });
@@ -2529,9 +2529,13 @@ describe('react => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('setLoading'));
-    expect(screen.getByRole('status')).toHaveTextContent('loading');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loading');
+    });
     fireEvent.click(screen.getByRole('clearData'));
-    expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+    });
   });
 
   test('should set initial data to data and total', async () => {
@@ -2571,7 +2575,7 @@ describe('react => usePagination', () => {
     });
   });
 
-  test('can resend request when encounter with an error', async () => {
+  test('can resend request when encounter an error', async () => {
     const alovaInst = createMockAlova();
     const getter = (page: number, pageSize: number) =>
       alovaInst.Get<ListResponse>('/list', {
