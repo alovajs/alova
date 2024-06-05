@@ -1,4 +1,4 @@
-import { useRequest } from '@/index';
+import useRequest from '@/hooks/core/useRequest';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';

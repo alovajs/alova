@@ -23,7 +23,6 @@
     "test": "jest",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build:sh-vue": "alova-scripts build vue",
     "build": "npm run clean && alova-scripts build",
     "commit": "git-cz && git push"
   },

@@ -1,4 +1,4 @@
-import { useRequest } from '@/index';
+import useRequest from '@/hooks/core/useRequest';
 import createSerializerPerformer from '@/util/serializer';
 import createEventManager from '@alova/shared/createEventManager';
 import {

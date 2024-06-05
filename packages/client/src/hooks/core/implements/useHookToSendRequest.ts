@@ -40,7 +40,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
   let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);
-  const { fs: frontStates, ht: hookType, c: useHookConfig, em: eventManager } = hookInstance;
+  const { fs: frontStates, ht: hookType, c: useHookConfig } = hookInstance;
   const { loading: loadingState, data: dataState, error: errorState } = frontStates;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
@@ -112,20 +112,20 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
     };
 
     // 调用中间件函数
-    type EventHandlerDecorator = Parameters<(typeof eventManager)['setDecorator']>[1];
+    type EventHandlerDecorator = Parameters<(typeof hookInstance.em)['setDecorator']>[1];
     const commonContext = {
       method: methodInstance,
       cachedResponse,
       config: useHookConfig,
       abort: () => methodInstance.abort(),
       decorateSuccess(decorator: EventHandlerDecorator) {
-        eventManager.setDecorator(KEY_SUCCESS, decorator);
+        hookInstance.em.setDecorator(KEY_SUCCESS, decorator);
       },
       decorateError(decorator: EventHandlerDecorator) {
-        eventManager.setDecorator(KEY_ERROR, decorator);
+        hookInstance.em.setDecorator(KEY_ERROR, decorator);
       },
       decorateComplete(decorator: EventHandlerDecorator) {
-        eventManager.setDecorator(KEY_COMPLETE, decorator);
+        hookInstance.em.setDecorator(KEY_COMPLETE, decorator);
       }
     };
     // 是否需要更新响应数据，以及调用响应回调
@@ -181,8 +181,8 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
           errorState.v = undefinedValue;
           // loading状态受控时将不再更改为false
           !controlledLoading && (loadingState.v = falseValue);
-          eventManager.emit(KEY_SUCCESS, newInstance(AlovaSuccessEvent<AG>, baseEvent, data, fromCache()));
-          eventManager.emit(
+          hookInstance.em.emit(KEY_SUCCESS, newInstance(AlovaSuccessEvent<AG>, baseEvent, data, fromCache()));
+          hookInstance.em.emit(
             KEY_COMPLETE,
             newInstance(AlovaCompleteEvent<AG>, baseEvent, KEY_SUCCESS, data, fromCache(), undefinedValue)
           );
@@ -211,8 +211,8 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
         errorState.v = error;
         // loading状态受控时将不再更改为false
         !controlledLoading && (loadingState.v = falseValue);
-        eventManager.emit(KEY_ERROR, newInstance(AlovaErrorEvent<AG>, baseEvent, error));
-        eventManager.emit(
+        hookInstance.em.emit(KEY_ERROR, newInstance(AlovaErrorEvent<AG>, baseEvent, error));
+        hookInstance.em.emit(
           KEY_COMPLETE,
           newInstance(AlovaCompleteEvent<AG>, baseEvent, KEY_ERROR, undefinedValue, fromCache(), error)
         );

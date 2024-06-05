@@ -366,7 +366,7 @@ describe('shared functions', () => {
   test('function createAsyncQueue', async () => {
     // should execute async functions in order and resolve the promise
     const results: string[] = [];
-    const addToQueue = createAsyncQueue();
+    const { addQueue: addToQueue } = createAsyncQueue();
 
     const asyncFunction1 = (): Promise<string> =>
       new Promise(resolve => {
@@ -402,7 +402,7 @@ describe('shared functions', () => {
     expect(result3).toBe('Result 3');
 
     // should handle an empty queue gracefully
-    const addToQueue2 = createAsyncQueue();
+    const { addQueue: addToQueue2 } = createAsyncQueue();
 
     // 添加空操作
     const results2 = await addToQueue2(async () => Promise.resolve('Empty'));
@@ -411,7 +411,7 @@ describe('shared functions', () => {
     expect(results2).toBe('Empty');
 
     // should reject the promise when async function fails and catchError is false
-    const addToQueue3 = createAsyncQueue();
+    const { addQueue: addToQueue3 } = createAsyncQueue();
 
     const asyncFunctionReject2 = (): Promise<string> =>
       new Promise((_, reject) => {
@@ -431,7 +431,7 @@ describe('shared functions', () => {
     expect(errorCaught).toBeTruthy();
 
     // should catch errors and resolve the promise when catchError is true
-    const addToQueue4 = createAsyncQueue(true);
+    const { addQueue: addToQueue4 } = createAsyncQueue(true);
     const results4: string[] = [];
 
     const asyncFunctionReject = (): Promise<void> =>

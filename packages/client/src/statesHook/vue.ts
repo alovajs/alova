@@ -1,4 +1,4 @@
-import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { setTimeoutFn, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { ComputedRef, Ref, WatchSource, computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 
@@ -22,20 +22,19 @@ export default {
       });
     }
 
-    let timer: any;
-    forEach(watchingStates || [], (state, i) => {
-      watch(
-        state,
-        () => {
-          timer && clearTimeoutTimer(timer);
-          timer = setTimeoutFn(() => {
-            handler(i);
-            timer = undefinedValue;
-          });
-        },
-        { deep: trueValue }
-      );
-    });
+    watch(
+      watchingStates || [],
+      (newValues, oldValues) => {
+        // 找出发生变化的索引
+        for (const index in newValues) {
+          if (newValues[index] !== oldValues[index]) {
+            handler(index);
+            break;
+          }
+        }
+      },
+      { deep: trueValue, flush: 'post' }
+    );
   },
   computed: getter => computed(getter),
   watch: (states, callback) => {

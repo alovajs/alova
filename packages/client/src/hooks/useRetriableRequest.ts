@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { useRequest } from '@/index';
+import useRequest from '@/hooks/core/useRequest';
 import createHookEvent from '@/util/createHookEvent';
 import { delayWithBackoff, usePromise } from '@/util/helper';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';

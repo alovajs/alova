@@ -1,5 +1,5 @@
 import { createSyncOnceRunner } from '@alova/shared/function';
-import { clearTimeoutTimer, falseValue, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, forEach, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { onDestroy, onMount } from 'svelte';
 import { Readable, Writable, derived, writable } from 'svelte/store';
@@ -23,16 +23,14 @@ export default {
     onDestroy(removeStates);
     onMount(() => immediate && handler());
 
-    let timer: any;
     let needEmit = falseValue;
+    const syncRunner = createSyncOnceRunner(10);
     forEach(watchingStates || [], (state, i) => {
       state.subscribe(() => {
-        timer && clearTimeoutTimer(timer);
-        timer = setTimeoutFn(() => {
+        syncRunner(() => {
           // svelte的writable默认会触发一次，因此当immediate为false时需要过滤掉第一次触发调用
           needEmit ? handler(i) : (needEmit = trueValue);
-          timer = undefinedValue;
-        }, 10);
+        });
       });
     });
   },

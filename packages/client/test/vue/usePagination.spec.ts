@@ -411,7 +411,7 @@ describe('vue => usePagination', () => {
           data: (res: any) => res.list
         },
         handleExposure: (exposure: any) => {
-          exposure.onFetchSuccess(successMockFn);
+          exposure.onSuccess(successMockFn);
         }
       }
     });
@@ -1094,6 +1094,8 @@ describe('vue => usePagination', () => {
         )
       );
       expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(fetchMockFn).toHaveBeenCalledTimes(1); // 只预加载下一页
     });
 
     fireEvent.click(screen.getByRole('setPage'));
@@ -1110,12 +1112,17 @@ describe('vue => usePagination', () => {
         )
       );
       expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+      expect(fetchMockFn).toHaveBeenCalledTimes(2); // 预加载下一页+1
     });
 
     keyword.value = 'bbb';
     await waitFor(() => {
-      JSON.parse(screen.getByRole('response').textContent || '[]').forEach(({ word }: any) => expect(word).toBe('bbb'));
+      const responseWords = JSON.parse(screen.getByRole('response').textContent || '[]').map(({ word }: any) => word);
+      expect(responseWords.join('')).toMatch(/^b+$/);
       expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(successMockFn).toHaveBeenCalledTimes(3);
+      expect(fetchMockFn).toHaveBeenCalledTimes(3); // 预加载下一页+1
     });
   });
 

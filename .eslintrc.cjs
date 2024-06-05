@@ -40,6 +40,7 @@ module.exports = {
     // jsx-a11y
     'jsx-a11y/aria-role': 'off',
     'react/button-has-type': 'off',
+    'react/require-default-props': 'off',
 
     // @typescript-eslint
     '@typescript-eslint/no-explicit-any': 'off',

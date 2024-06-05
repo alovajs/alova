@@ -1,11 +1,13 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { usePagination } from '@/index';
+import { accessAction, actionDelegationMiddleware } from '@/index';
+import { GeneralFn } from '@alova/shared/types';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React, { Dispatch, SetStateAction, act, useState } from 'React';
 import { createAlova, invalidateCache, queryCache } from 'alova';
-import ReactHook from 'alova/react';
-import React, { ReactElement, useState } from 'react';
-import { generateContinuousNumbers, untilCbCalled } from 'root/testUtils';
+import reactHook from 'alova/react';
+import { delay, generateContinuousNumbers } from 'root/testUtils';
+import Pagination from './components/Pagination';
 
 interface ListResponse {
   total: number;
@@ -16,71 +18,71 @@ interface SearchListResponse {
   list: { id: number; word: string }[];
 }
 
+type ReactPossibleState<D> = [D, Dispatch<SetStateAction<D>>] | undefined;
 jest.setTimeout(1000000);
 // reset data
-beforeEach(() => {
+beforeEach(async () => {
   setMockListData();
   setMockListWithSearchData();
   setMockShortListData();
-  invalidateCache();
+  await invalidateCache();
 });
-const createMockAlova = () =>
-  createAlova({
-    baseURL: 'http://localhost:8080',
-    statesHook: ReactHook,
-    requestAdapter: mockRequestAdapter,
-    cacheLogger: false
+const alovaInst = createAlova({
+  baseURL: process.env.NODE_BASE_URL,
+  statesHook: reactHook,
+  requestAdapter: mockRequestAdapter,
+  cacheLogger: false
+});
+interface ListResponse {
+  total: number;
+  list: number[];
+}
+const getter1 = (page: number, pageSize: number, extra: Record<string, any> = {}, transformData?: GeneralFn) =>
+  alovaInst.Get<ListResponse>('/list', {
+    params: {
+      page,
+      pageSize,
+      ...extra
+    },
+    transformData
   });
+interface SearchListResponse {
+  total: number;
+  list: { id: number; word: string }[];
+}
+const getterSearch = (page: number, pageSize: number, keyword?: string) =>
+  alovaInst.Get<SearchListResponse>('/list-with-search', {
+    params: {
+      page,
+      pageSize,
+      keyword
+    }
+  });
+const getterShort = (page: number, pageSize: number, cacheFor?: number) => {
+  const config = {
+    params: {
+      page,
+      pageSize
+    }
+  };
+  if (cacheFor !== undefined) {
+    (config as any).cacheFor = cacheFor;
+  }
+  return alovaInst.Get<ListResponse>('/list-short', config);
+};
 describe('react => usePagination', () => {
   // 分页相关测试
   test('load paginated data and change page/pageSize', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
+        }}
+      />
+    );
 
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, update } = usePagination(getter, {
-        total: res => res.total,
-        data: res => res.list,
-        initialData: {
-          list: [],
-          total: 0
-        }
-      });
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="setPageSize"
-            onClick={() => update({ pageSize: 20 })}>
-            btn2
-          </button>
-          <button
-            role="setLastPage"
-            onClick={() => update({ page: pageCount || 1 })}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const page = 1;
     const pageSize = 10;
     await waitFor(() => {
@@ -94,9 +96,9 @@ describe('react => usePagination', () => {
 
     // 检查预加载缓存
     await waitFor(async () => {
-      let cache = await queryCache(getter(page + 1, pageSize));
+      let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
-      cache = await queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter1(page - 1, pageSize));
       expect(cache).toBeUndefined();
     });
 
@@ -122,9 +124,9 @@ describe('react => usePagination', () => {
 
     // 检查预加载缓存
     await waitFor(async () => {
-      let cache = await queryCache(getter(3, 20));
+      let cache = await queryCache(getter1(3, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(59, 40));
-      cache = await queryCache(getter(1, 20));
+      cache = await queryCache(getter1(1, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19));
     });
 
@@ -133,31 +135,23 @@ describe('react => usePagination', () => {
     await waitFor(async () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('true');
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(299, 280)));
-      let cache = await queryCache(getter(16, 20));
+      let cache = await queryCache(getter1(16, 20));
       expect(cache).toBeUndefined();
-      cache = await queryCache(getter(14, 20));
+      cache = await queryCache(getter1(14, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(279, 260));
     });
   });
 
-  test('should throw error when got wrong array', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
+  test('should throws an error when got wrong array', async () => {
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: ({ wrongList }: any) => wrongList
+        }}
+      />
+    );
 
-    function Page() {
-      const { error } = usePagination(getter, {
-        data: ({ wrongList }: any) => wrongList
-      });
-      return <span role="error">{error?.message}</span>;
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('error')).toHaveTextContent(
         '[alova/usePagination]Got wrong array, did you return the correct array of list in `data` function'
@@ -167,50 +161,17 @@ describe('react => usePagination', () => {
 
   // 不立即发送请求
   test('should not load paginated data when set `immediate` to false', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          immediate: false
+        }}
+      />
+    );
 
-    function Page() {
-      const { loading, pageSize, page, data, total, pageCount, isLastPage, update } = usePagination(getter, {
-        total: res => res.total,
-        data: res => res.list,
-        immediate: false
-      });
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="setPageSize"
-            onClick={() => update({ pageSize: 20 })}>
-            btn2
-          </button>
-          <button
-            role="setLastPage"
-            onClick={() => update({ page: pageCount || 1 })}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('page')).toHaveTextContent('1');
       expect(screen.getByRole('pageSize')).toHaveTextContent('10');
@@ -232,55 +193,21 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data with conditions search', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number, keyword: string) =>
-      alovaInst.Get<SearchListResponse>('/list-with-search', {
-        params: {
-          page,
-          pageSize,
-          keyword
-        }
-      });
+    let keyword: ReactPossibleState<string>;
+    render(
+      <Pagination
+        getter={(page: number, pageSize: number) => getterSearch(page, pageSize, keyword?.[0])}
+        paginationConfig={() => {
+          keyword = useState('');
+          return {
+            watchingStates: [keyword[0]],
+            total: (res: any) => res.total,
+            data: (res: any) => res.list
+          };
+        }}
+      />
+    );
 
-    function Page() {
-      const [keyword, setKeyword] = useState('');
-      const { loading, pageSize, pageCount, isLastPage, page, data, total, update } = usePagination(
-        (p, ps) => getter(p, ps, keyword),
-        {
-          watchingStates: [keyword],
-          total: res => res.total,
-          data: res => res.list
-        }
-      );
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="setPageSize"
-            onClick={() => update({ pageSize: 20 })}>
-            btn2
-          </button>
-          <button
-            role="setKeyword"
-            onClick={() => setKeyword('bbb')}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(
@@ -312,7 +239,9 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent('300');
     });
 
-    fireEvent.click(screen.getByRole('setKeyword'));
+    act(() => {
+      keyword?.[1]('bbb');
+    });
     await waitFor(() => {
       JSON.parse(screen.getByRole('response').textContent || '[]').forEach(({ word }: any) => expect(word).toBe('bbb'));
       expect(screen.getByRole('total')).toHaveTextContent('100');
@@ -320,58 +249,17 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data refersh page', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          initialPage: 3
+        }}
+      />
+    );
 
-    function Page() {
-      const { loading, data, pageCount, total, page, pageSize, isLastPage, refresh, update } = usePagination(getter, {
-        total: res => res.total,
-        data: res => res.list,
-        initialPage: 3
-      });
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="setPageSize"
-            onClick={() => update({ pageSize: 20 })}>
-            btn2
-          </button>
-          <button
-            role="refresh1"
-            onClick={() => refresh(1)}>
-            btn3
-          </button>
-          <button
-            role="refreshCurPage"
-            onClick={() => {
-              // 未传入参数时将默认刷新当前页，当前页为3
-              refresh();
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     setMockListData(data => {
       // 修改第3页第1条数据
       data.splice(20, 1, 200);
@@ -392,81 +280,34 @@ describe('react => usePagination', () => {
     });
     fireEvent.click(screen.getByRole('refresh1')); // 在翻页模式下，不是当前页会使用fetch
     await waitFor(async () => {
-      const cache = await queryCache(getter(1, 10));
+      const cache = await queryCache(getter1(1, 10));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(9, 0, i => (i === 0 ? 100 : i)));
     });
   });
 
   test('paginated data insert item with preload', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, insert, onFetchSuccess, update } =
-        usePagination(getter, {
-          data: res => res.list,
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list,
           initialPage: 2 // 默认从第2页开始
-        });
-      onFetchSuccess(fetchMockFn);
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="pageToLast"
-            onClick={() => update({ page: 31 })}>
-            btn1
-          </button>
-          <button
-            role="setPageSize"
-            onClick={() => update({ pageSize: 20 })}>
-            btn2
-          </button>
-          <button
-            role="insert300"
-            onClick={() => insert(300, 0)}>
-            btn3
-          </button>
-          <button
-            role="batchInsert"
-            onClick={() => {
-              insert(400);
-              insert(500, 2);
-              insert(600, pageSize - 1);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
     const page = 2;
     const pageSize = 10;
     let total = 300;
     // 检查预加载缓存
     await waitFor(async () => {
-      let cache = await queryCache(getter(page + 1, pageSize));
+      let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(29, 20));
-      cache = await queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter1(page - 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(9));
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
@@ -484,12 +325,12 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
       // 检查当前页缓存
-      let cache = await queryCache(getter(page, pageSize));
+      let cache = await queryCache(getter1(page, pageSize));
       expect(cache?.list).toStrictEqual([300, ...generateContinuousNumbers(18, 10)]);
 
       // insert时不会重新fetch后一页的数据
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
-      cache = await queryCache(getter(page + 1, pageSize));
+      cache = await queryCache(getter1(page + 1, pageSize));
       // insert时会将缓存末尾去掉，因此还是剩下10项
       expect(cache?.list).toEqual(generateContinuousNumbers(28, 19));
     });
@@ -502,7 +343,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(curData));
 
       // 当前页缓存要保持一致
-      const cache = await queryCache(getter(page, pageSize));
+      const cache = await queryCache(getter1(page, pageSize));
       expect(cache?.list).toStrictEqual(curData);
 
       expect(fetchMockFn).toHaveBeenCalledTimes(2); // insert不会触发下一页预加载
@@ -521,68 +362,34 @@ describe('react => usePagination', () => {
 
   // 当操作了数据重新fetch但还未响应时，翻页到了fetch的页，此时也需要更新界面
   test('should update data when insert and fetch current page', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, insert, onFetchSuccess, update } =
-        usePagination(getter, {
-          data: res => res.list,
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list,
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
-        });
-      onFetchSuccess(fetchMockFn);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="batchInsert1"
-            onClick={() => {
-              insert(1000, 1);
-              insert(1001, 2);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 300;
 
     // 通过检查缓存数据表示预加载数据成功
     await waitFor(async () => {
-      let cache = await queryCache(getter(page - 1, pageSize));
+      let cache = await queryCache(getter1(page - 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(3));
-      cache = await queryCache(getter(page + 1, pageSize));
+      cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toEqual(generateContinuousNumbers(11, 8));
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
+    total;
 
     fireEvent.click(screen.getByRole('batchInsert1'));
     total += 2;
@@ -593,8 +400,8 @@ describe('react => usePagination', () => {
     });
 
     // 正在重新fetch下一页数据，但还没响应，此时翻页到下一页
-    await untilCbCalled(setTimeout, 20);
-    fireEvent.click(screen.getByRole('addPage'));
+    await delay(20);
+    fireEvent.click(screen.getByRole('setPage'));
     // 等待fetch
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 6))); // 有两项被挤到后面一页了
@@ -611,102 +418,32 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data replace item', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
+    const successMockFn = jest.fn();
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, replace, update } = usePagination(getter, {
-        data: res => res.list
-      });
-      const [error, setError] = useState(undefined as Error | undefined);
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <span role="error">{error?.message || ''}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="replaceError1"
-            onClick={() => {
-              try {
-                replace(100, undefined as any);
-              } catch (err: any) {
-                setError(err);
-              }
-            }}>
-            btn3
-          </button>
-          <button
-            role="replaceError2"
-            onClick={() => {
-              try {
-                replace(100, 1000);
-              } catch (err: any) {
-                err.message += '___2';
-                setError(err);
-              }
-            }}>
-            btn3
-          </button>
-          <button
-            role="replace1"
-            onClick={() => {
-              replace(300, 0);
-            }}>
-            btn3
-          </button>
-          <button
-            role="replace2"
-            onClick={() => {
-              // 正向顺序替换
-              replace(400, 8);
-            }}>
-            btn3
-          </button>
-          <button
-            role="replace3"
-            onClick={() => {
-              // 逆向顺序替换
-              replace(500, -4);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
-    await screen.findByText(/loaded/);
-
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
     fireEvent.click(screen.getByRole('replaceError1'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova/usePagination]must specify replace position');
+      expect(screen.getByRole('replacedError')).toHaveTextContent(
+        '[alova/usePagination]expect specify the replace position'
+      );
     });
     fireEvent.click(screen.getByRole('replaceError2'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent(
-        '[alova/usePagination]index must be a number that less than list length___2'
+      expect(screen.getByRole('replacedError')).toHaveTextContent(
+        '[alova/usePagination]index must be a number that less than list length'
       );
     });
 
@@ -718,7 +455,7 @@ describe('react => usePagination', () => {
       );
 
       // 检查当前页缓存
-      expect((await queryCache(getter(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300 }));
+      expect((await queryCache(getter1(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300 }));
     });
 
     // 正向顺序替换
@@ -729,7 +466,7 @@ describe('react => usePagination', () => {
       );
 
       // 检查当前页缓存
-      expect((await queryCache(getter(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }));
+      expect((await queryCache(getter1(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }));
     });
 
     // 逆向顺序替换
@@ -740,73 +477,22 @@ describe('react => usePagination', () => {
       );
 
       // 检查当前页缓存
-      expect((await queryCache(getter(1, 10)))?.list).toEqual(
+      expect((await queryCache(getter1(1, 10)))?.list).toEqual(
         generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 })
       );
     });
   });
 
   test('paginated data replace item by another item', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<SearchListResponse>('/list-with-search', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, replace, update } = usePagination(
-        (p, ps) => getter(p, ps),
-        {
-          total: res => res.total,
-          data: res => res.list
-        }
-      );
-      const [error, setError] = useState(undefined as Error | undefined);
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="error">{error?.message}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="replaceError1"
-            onClick={() => {
-              try {
-                replace({ id: 100, word: 'zzz' }, { id: 2, word: 'ccc' });
-              } catch (err: any) {
-                setError(err);
-              }
-            }}>
-            btn3
-          </button>
-          <button
-            role="replaceByItem"
-            onClick={() => {
-              replace({ id: 100, word: 'zzz' }, data[2]);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
+    render(
+      <Pagination
+        getter={getterSearch}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
+        }}
+      />
+    );
 
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -815,16 +501,15 @@ describe('react => usePagination', () => {
         word: ['aaa', 'bbb', 'ccc'][n]
       };
     });
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
     });
 
-    fireEvent.click(screen.getByRole('replaceError1'));
+    fireEvent.click(screen.getByRole('replaceError1__search'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova/usePagination]item is not found in list');
+      expect(screen.getByRole('replacedError')).toHaveTextContent('[alova/usePagination]item is not found in list');
     });
-    fireEvent.click(screen.getByRole('replaceByItem'));
+    fireEvent.click(screen.getByRole('replaceByItem__search'));
     currentList[2] = { id: 100, word: 'zzz' };
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
@@ -832,145 +517,61 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data insert item without preload', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, pageCount, total, page, pageSize, isLastPage, insert, onFetchSuccess, onSuccess, update } =
-        usePagination(getter, {
-          data: res => res.list,
+    const successMockFn = jest.fn();
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list,
           preloadNextPage: false,
           preloadPreviousPage: false,
           initialPage: 2 // 默认从第2页开始
-        });
-      const [loaded, setLoaded] = useState(false);
-      onSuccess(() => setLoaded(true));
-      onFetchSuccess(fetchMockFn);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loaded ? 'loaded' : ''}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="insert1"
-            onClick={() => {
-              insert(300);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 10;
-    await screen.findByText(/loaded/);
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
 
     // 检查预加载缓存
-    let cache = await queryCache(getter(page + 1, pageSize));
+    let cache = await queryCache(getter1(page + 1, pageSize));
     expect(cache).toBeUndefined();
-    cache = await queryCache(getter(page - 1, pageSize));
+    cache = await queryCache(getter1(page - 1, pageSize));
     expect(cache).toBeUndefined();
 
     fireEvent.click(screen.getByRole('insert1'));
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(
-        JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 }))
+        JSON.stringify(generateContinuousNumbers(18, 9, { 9: 100 }))
       );
     });
 
     // 预加载设置为false了，因此不会fetch前后一页的数据
-    await untilCbCalled(setTimeout, 100);
-    cache = await queryCache(getter(page + 1, pageSize));
+    await delay(100);
+    cache = await queryCache(getter1(page + 1, pageSize));
     expect(cache).toBeUndefined();
-    cache = await queryCache(getter(page - 1, pageSize));
+    cache = await queryCache(getter1(page - 1, pageSize));
     expect(cache).toBeUndefined();
   });
 
   test('paginated data insert item by another item', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<SearchListResponse>('/list-with-search', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, insert, update } = usePagination(
-        (p, ps) => getter(p, ps),
-        {
-          total: res => res.total,
-          data: res => res.list
-        }
-      );
-      const [error, setError] = useState(undefined as Error | undefined);
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="error">{error?.message}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="insertError1"
-            onClick={() => {
-              try {
-                insert({ id: 100, word: 'zzz' }, { id: 2, word: 'ccc' });
-              } catch (err: any) {
-                setError(err);
-              }
-            }}>
-            btn3
-          </button>
-          <button
-            role="insertByItem"
-            onClick={() => {
-              insert({ id: 100, word: 'zzz' }, data[2]);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
+    render(
+      <Pagination
+        getter={getterSearch}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
+        }}
+      />
+    );
 
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -979,16 +580,15 @@ describe('react => usePagination', () => {
         word: ['aaa', 'bbb', 'ccc'][n]
       };
     });
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
     });
 
-    fireEvent.click(screen.getByRole('insertError1'));
+    fireEvent.click(screen.getByRole('insertError1__search'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova/usePagination]item is not found in list');
+      expect(screen.getByRole('replacedError')).toHaveTextContent('[alova/usePagination]item is not found in list');
     });
-    fireEvent.click(screen.getByRole('insertByItem'));
+    fireEvent.click(screen.getByRole('insertByItem__search'));
     currentList.splice(3, 0, { id: 100, word: 'zzz' });
     currentList.pop();
     await waitFor(() => {
@@ -997,87 +597,31 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data remove item in preload mode', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
     const successMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, onSuccess, update } =
-        usePagination(getter, {
-          data: res => res.list,
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list,
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
-        });
-      onFetchSuccess(fetchMockFn);
-      onSuccess(successMockFn);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="batchRemove1"
-            onClick={() => {
-              // 删除第二项，将会用下一页的数据补位，并重新拉取上下一页的数据
-              remove(1);
-              remove(1);
-            }}>
-            btn3
-          </button>
-          <button
-            role="remove2"
-            onClick={() => {
-              remove(2);
-            }}>
-            btn3
-          </button>
-          <button
-            role="batchRemove2"
-            onClick={() => {
-              // 同步操作的项数超过pageSize时，移除的数据将被恢复，并重新请求当前页数据
-              remove(0);
-              remove(0);
-              remove(0);
-              remove(0);
-              remove(0);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 300;
     await waitFor(async () => {
       // 检查预加载缓存
-      let cache = await queryCache(getter(page + 1, pageSize));
+      let cache = await queryCache(getter1(page + 1, pageSize));
       expect(!!cache).toBeTruthy();
-      cache = await queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter1(page - 1, pageSize));
       expect(!!cache).toBeTruthy();
     });
     expect(fetchMockFn).toHaveBeenCalledTimes(2); // 初始化时2次
@@ -1091,13 +635,13 @@ describe('react => usePagination', () => {
     });
     total -= 2;
     // 下一页缓存已经被使用了2项
-    expect((await queryCache(getter(page + 1, pageSize)))?.list).toStrictEqual([10, 11]);
+    expect((await queryCache(getter1(page + 1, pageSize)))?.list).toStrictEqual([10, 11]);
     await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
       // 当前页缓存要保持一致
-      expect((await queryCache(getter(page, pageSize)))?.list).toStrictEqual([4, 7, 8, 9]);
+      expect((await queryCache(getter1(page, pageSize)))?.list).toStrictEqual([4, 7, 8, 9]);
     });
 
     // 等待删除后重新fetch下一页完成再继续
@@ -1113,7 +657,7 @@ describe('react => usePagination', () => {
     });
     total -= 1;
     // 下一页缓存又被使用了1项
-    expect((await queryCache(getter(page + 1, pageSize)))?.list).toStrictEqual([11, 12, 13]);
+    expect((await queryCache(getter1(page + 1, pageSize)))?.list).toStrictEqual([11, 12, 13]);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 9, 10]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
@@ -1123,102 +667,27 @@ describe('react => usePagination', () => {
     // 检查是否重新fetch了前后一页的数据
     await waitFor(async () => {
       expect(fetchMockFn).toHaveBeenCalledTimes(4);
-      let cache = await queryCache(getter(page - 1, pageSize));
+      let cache = await queryCache(getter1(page - 1, pageSize));
       expect(cache?.list).toStrictEqual([0, 1, 2, 3]);
-      cache = await queryCache(getter(page + 1, pageSize));
+      cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual([11, 12, 13, 14]);
-    });
-
-    // 同步操作的项数超过pageSize时，移除的数据将被恢复，并重新请求当前页数据
-    fireEvent.click(screen.getByRole('batchRemove2'));
-    setMockListData(data => {
-      // 模拟数据中同步删除
-      data.splice(4, 5);
-      return data;
-    });
-    total -= 5;
-    await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 9, 10])); // 数据被恢复
-      expect(screen.getByRole('total')).toHaveTextContent(total.toString());
-      // 只在初始化成功一次，还未触发refresh
-      expect(successMockFn).toHaveBeenCalledTimes(1);
-    });
-
-    await waitFor(async () => {
-      // 当同步删除多于1页的数据时会refrefh当前页，也会重新fetch下一页
-      expect(fetchMockFn).toHaveBeenCalledTimes(5);
-      expect(successMockFn).toHaveBeenCalledTimes(2);
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([12, 13, 14, 15]));
-      expect(screen.getByRole('total')).toHaveTextContent(total.toString());
-
-      let cache = await queryCache(getter(page - 1, pageSize));
-      expect(cache?.list).toStrictEqual([0, 1, 2, 3]);
-      cache = await queryCache(getter(page + 1, pageSize));
-      expect(cache?.list).toStrictEqual([16, 17, 18, 19]);
     });
   });
 
   test('paginated data remove item by another item', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<SearchListResponse>('/list-with-search', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, onFetchSuccess, remove, update } =
-        usePagination((p, ps) => getter(p, ps), {
-          total: res => res.total,
-          data: res => res.list
-        });
-      onFetchSuccess(fetchMockFn);
-      const [error, setError] = useState(undefined as Error | undefined);
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="error">{error?.message}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="removeError1"
-            onClick={() => {
-              try {
-                remove({ id: 2, word: 'ccc' });
-              } catch (err: any) {
-                setError(err);
-              }
-            }}>
-            btn3
-          </button>
-          <button
-            role="removeByItem"
-            onClick={() => {
-              remove(data[2]);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
+    render(
+      <Pagination
+        getter={getterSearch}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
     let currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
@@ -1227,17 +696,16 @@ describe('react => usePagination', () => {
         word: ['aaa', 'bbb', 'ccc'][n]
       };
     });
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
       expect(fetchMockFn).toHaveBeenCalled();
     });
 
-    fireEvent.click(screen.getByRole('removeError1'));
+    fireEvent.click(screen.getByRole('removeError1__search'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('[alova/usePagination]item is not found in list');
+      expect(screen.getByRole('replacedError')).toHaveTextContent('[alova/usePagination]item is not found in list');
     });
-    fireEvent.click(screen.getByRole('removeByItem'));
+    fireEvent.click(screen.getByRole('removeByItem__search'));
 
     currentList = generateContinuousNumbers(10, 0, i => {
       const n = i % 3;
@@ -1254,66 +722,29 @@ describe('react => usePagination', () => {
 
   // 当操作了数据重新fetch但还未响应时，翻页到了正在fetch的页，此时也需要更新界面
   test('should update data when fetch current page', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, update } =
-        usePagination(getter, {
-          data: res => res.list,
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list,
           initialPage: 2, // 默认从第2页开始
           initialPageSize: 4
-        });
-      onFetchSuccess(fetchMockFn);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="batchRemove1"
-            onClick={() => {
-              // 删除第二项，将会用下一页的数据补位，并重新拉取上下一页的数据
-              remove(1);
-              remove(1);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 300;
     await waitFor(async () => {
       // 检查预加载缓存
-      let cache = await queryCache(getter(page + 1, pageSize));
+      let cache = await queryCache(getter1(page + 1, pageSize));
       expect(!!cache).toBeTruthy();
-      cache = await queryCache(getter(page - 1, pageSize));
+      cache = await queryCache(getter1(page - 1, pageSize));
       expect(!!cache).toBeTruthy();
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
@@ -1326,8 +757,8 @@ describe('react => usePagination', () => {
     );
 
     // 正在重新fetch下一页数据，但还没响应（响应有50ms延迟），此时翻页到下一页
-    await untilCbCalled(setTimeout, 10);
-    fireEvent.click(screen.getByRole('addPage'));
+    await delay(10);
+    fireEvent.click(screen.getByRole('setPage'));
     await waitFor(() => {
       // 有两项用于填补前一页数据了
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([10, 11]));
@@ -1349,96 +780,42 @@ describe('react => usePagination', () => {
   });
 
   test('should use new total data when remove items and go to adjacent page', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number, min: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize,
-          min
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const [min, setMin] = useState(0);
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, update } =
-        usePagination((p, ps) => getter(p, ps, min), {
-          data: res => res.list,
-          watchingStates: [min],
-          initialPage: 2, // 默认从第2页开始
-          initialPageSize: 4
-        });
-      onFetchSuccess(fetchMockFn);
+    let min: ReactPossibleState<number>;
+    render(
+      <Pagination
+        getter={(page: number, pageSize: number) => getter1(page, pageSize, { min: min?.[0] })}
+        paginationConfig={() => {
+          min = useState(0);
+          return {
+            data: (res: any) => res.list,
+            watchingStates: [min[0]],
+            initialPage: 2, // 默认从第2页开始
+            initialPageSize: 4
+          };
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="addPage2"
-            onClick={() => update({ page: page + 2 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="batchRemove1"
-            onClick={() => {
-              // 删除第二项，将会用下一页的数据补位，并重新拉取上下一页的数据
-              remove(1);
-              remove(1);
-            }}>
-            btn3
-          </button>
-          <button
-            role="remove2"
-            onClick={() => {
-              remove(1);
-            }}>
-            btn3
-          </button>
-          <button
-            role="changeMin1"
-            onClick={() => {
-              setMin(100);
-            }}>
-            btn3
-          </button>
-          <button
-            role="resetMin"
-            onClick={() => {
-              setMin(0);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 300;
-    const min = 0;
     // 等待预加载数据完成
     await waitFor(async () => {
-      let cache = await queryCache(getter(page + 1, pageSize, min));
+      let cache = await queryCache(
+        getter1(page + 1, pageSize, {
+          min: min?.[0]
+        })
+      );
       expect(!!cache).toBeTruthy();
-      cache = await queryCache(getter(page - 1, pageSize, min));
+      cache = await queryCache(
+        getter1(page - 1, pageSize, {
+          min: min?.[0]
+        })
+      );
       expect(!!cache).toBeTruthy();
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
@@ -1457,7 +834,7 @@ describe('react => usePagination', () => {
       expect(fetchMockFn).toHaveBeenCalledTimes(2); // 还未触发预加载下一页
     });
 
-    await untilCbCalled(setTimeout, 10); // 发起了预加载后再继续
+    await delay(10); // 发起了预加载后再继续
     fireEvent.click(screen.getByRole('subtractPage'));
     // 等待fetch完成后检查total是否正确
     await waitFor(() => {
@@ -1466,7 +843,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
-    fireEvent.click(screen.getByRole('addPage2'));
+    fireEvent.click(screen.getByRole('setPage2'));
     // 等待fetch完成后检查total是否正确
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(4); // 再次翻页+1次下一页fetch
@@ -1476,7 +853,9 @@ describe('react => usePagination', () => {
 
     // 改变筛选条件将使用最新的total
     // 注意：改变监听条件后会自动重置为page=initialPage(2)
-    fireEvent.click(screen.getByRole('changeMin1'));
+    act(() => {
+      min?.[1](100);
+    });
     let totalBackup = total;
     total = 200;
     await waitFor(() => {
@@ -1491,94 +870,47 @@ describe('react => usePagination', () => {
     totalBackup -= 1;
     setMockListData(data =>
       // 模拟数据中同步删除，这样fetch的数据校验才正常
-      data.filter((i: number) => ![105].includes(i))
+      data.filter((i: number) => ![106].includes(i))
     );
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(7); // 预加载下一页+1
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([104, 106, 107, 108]));
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([104, 105, 107, 108]));
       // 再次看total是否正确
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
     // 条件改回去，需要延迟一会儿再继续操作
-    await untilCbCalled(setTimeout, 10);
-    fireEvent.click(screen.getByRole('resetMin'));
+    await delay(10);
+    act(() => {
+      min?.[1](0);
+    });
     total = totalBackup;
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(8); // 条件重置了，预加载了前一页数（当前第initialPage页）+1
+      expect(fetchMockFn).toHaveBeenCalledTimes(9); // 条件重置了，预加载了前后一页数+2（当前第initialPage页）
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
   });
 
   test('paginated data remove short list item without preload', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list-short', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const successMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onSuccess, update } = usePagination(
-        getter,
-        {
-          data: res => res.list,
-          total: res => res.total,
+    render(
+      <Pagination
+        getter={getterShort}
+        paginationConfig={{
+          data: (res: any) => res.list,
+          total: (res: any) => res.total,
           initialPage: 3, // 默认从第3页开始
           initialPageSize: 4,
           preloadNextPage: false,
           preloadPreviousPage: false
-        }
-      );
-      onSuccess(successMockFn);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="addPage2"
-            onClick={() => update({ page: page + 2 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="remove1"
-            onClick={() => {
-              remove(1);
-            }}>
-            btn3
-          </button>
-          <button
-            role="remove2"
-            onClick={() => {
-              remove(0);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const page = 3;
     const pageSize = 4;
     let total = 10;
@@ -1600,11 +932,11 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
       // 当前页缓存要保持一致
-      const cache = await queryCache(getter(page, pageSize));
+      const cache = await queryCache(getterShort(page, pageSize));
       expect(cache?.list).toStrictEqual([8]);
     });
 
-    fireEvent.click(screen.getByRole('remove2'));
+    fireEvent.click(screen.getByRole('remove0'));
     total -= 1;
     setMockShortListData(data => data.filter((i: number) => ![8].includes(i)));
 
@@ -1618,93 +950,24 @@ describe('react => usePagination', () => {
   });
 
   test('should refresh current page and will not prefetch when close cache', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list-short', {
-        cacheFor: 0,
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
     const successMockFn = jest.fn();
-    function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page,
-        pageSize,
-        isLastPage,
-        remove,
-        insert,
-        replace,
-        onSuccess,
-        onFetchSuccess,
-        update
-      } = usePagination(getter, {
-        data: res => res.list,
-        total: res => res.total,
-        initialPage: 2,
-        initialPageSize: 4
-      });
-      onFetchSuccess(fetchMockFn);
-      onSuccess(successMockFn);
+    render(
+      <Pagination
+        getter={(page: number, pageSize: number) => getterShort(page, pageSize, 0)}
+        paginationConfig={{
+          data: (res: any) => res.list,
+          total: (res: any) => res.total,
+          initialPage: 2,
+          initialPageSize: 4
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="addPage2"
-            onClick={() => update({ page: page + 2 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="remove1"
-            onClick={() => {
-              remove(1);
-            }}>
-            btn3
-          </button>
-          <button
-            role="insert1"
-            onClick={() => {
-              // 插入数据，插入时不会刷新数据
-              insert(100, 0);
-            }}>
-            btn3
-          </button>
-          <button
-            role="replace1"
-            onClick={() => {
-              replace(200, 1);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const page = 2;
     const pageSize = 4;
     let total = 10;
@@ -1727,7 +990,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 6, 7, 8]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
       // 当前缓存已关闭
-      expect(await queryCache(getter(page, pageSize))).toBeUndefined();
+      expect(await queryCache(getterShort(page, pageSize))).toBeUndefined();
     });
 
     // 插入数据，插入时不会刷新数据
@@ -1745,7 +1008,7 @@ describe('react => usePagination', () => {
     });
 
     // 替换数据
-    fireEvent.click(screen.getByRole('replace1'));
+    fireEvent.click(screen.getByRole('replace4'));
     setMockShortListData(data => {
       data.splice(5, 1, 200);
       return data;
@@ -1759,64 +1022,25 @@ describe('react => usePagination', () => {
     expect(fetchMockFn).not.toHaveBeenCalled();
   });
 
-  // // 下拉加载更多相关
+  // 下拉加载更多相关
   test('load more mode paginated data and change page/pageSize', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const successMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, onSuccess, update } = usePagination(getter, {
-        total: () => undefined,
-        data: res => res.list,
-        append: true,
-        preloadNextPage: false,
-        preloadPreviousPage: false
-      });
-      onSuccess(successMockFn);
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          preloadNextPage: false,
+          preloadPreviousPage: false
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="addPage2"
-            onClick={() => update({ page: page + 2 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="toNoDataPage"
-            onClick={() => {
-              update({ page: 31 });
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     let page = 1;
     const pageSize = 10;
 
@@ -1832,10 +1056,10 @@ describe('react => usePagination', () => {
     });
 
     // 检查预加载缓存
-    await untilCbCalled(setTimeout, 100);
-    expect((await queryCache(getter(page + 1, pageSize)))?.list).toBeUndefined();
+    await delay(100);
+    expect((await queryCache(getter1(page + 1, pageSize)))?.list).toBeUndefined();
 
-    fireEvent.click(screen.getByRole('addPage'));
+    fireEvent.click(screen.getByRole('setPage'));
     page += 1;
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
@@ -1847,8 +1071,8 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    await untilCbCalled(setTimeout, 100);
-    expect((await queryCache(getter(page + 1, pageSize)))?.list).toBeUndefined();
+    await delay(100);
+    expect((await queryCache(getter1(page + 1, pageSize)))?.list).toBeUndefined();
 
     // 翻页到没有数据的一页，没有提供total时，数据少于pageSize条时将会把isLastPage判断为true
     fireEvent.click(screen.getByRole('toNoDataPage'));
@@ -1861,56 +1085,28 @@ describe('react => usePagination', () => {
   });
 
   test('load more paginated data with conditions search', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number, keyword: string) =>
-      alovaInst.Get<SearchListResponse>('/list-with-search', {
-        params: {
-          page,
-          pageSize,
-          keyword
-        }
-      });
+    const fetchMockFn = jest.fn();
+    const successMockFn = jest.fn();
+    let keyword: ReactPossibleState<string>;
+    render(
+      <Pagination
+        getter={(page: number, pageSize: number) => getterSearch(page, pageSize, keyword?.[0])}
+        paginationConfig={() => {
+          keyword = useState('');
+          return {
+            watchingStates: [keyword[0]],
+            total: () => undefined,
+            data: (res: any) => res.list,
+            append: true
+          };
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-    function Page() {
-      const [keyword, setKeyword] = useState('');
-      const { loading, pageSize, pageCount, isLastPage, page, data, total, update } = usePagination(
-        (p, ps) => getter(p, ps, keyword),
-        {
-          watchingStates: [keyword],
-          total: () => undefined,
-          data: res => res.list,
-          append: true
-        }
-      );
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="setPageSize"
-            onClick={() => update({ pageSize: 20 })}>
-            btn2
-          </button>
-          <button
-            role="setKeyword"
-            onClick={() => setKeyword('bbb')}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(
@@ -1924,6 +1120,8 @@ describe('react => usePagination', () => {
         )
       );
       expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(fetchMockFn).toHaveBeenCalledTimes(1); // 只预加载下一页
     });
 
     fireEvent.click(screen.getByRole('setPage'));
@@ -1940,90 +1138,55 @@ describe('react => usePagination', () => {
         )
       );
       expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+      expect(fetchMockFn).toHaveBeenCalledTimes(2); // 预加载下一页+1
     });
 
-    fireEvent.click(screen.getByRole('setKeyword'));
-    await waitFor(() => {
-      JSON.parse(screen.getByRole('response').textContent || '[]').forEach(({ word }: any) => expect(word).toBe('bbb'));
-      expect(screen.getByRole('total')).toHaveTextContent('');
+    act(() => {
+      keyword?.[1]('bbb');
     });
+    await waitFor(
+      () => {
+        const responseWords = JSON.parse(screen.getByRole('response').textContent || '[]').map(({ word }: any) => word);
+        expect(responseWords.join('')).toMatch(/^b+$/);
+        expect(screen.getByRole('total')).toHaveTextContent('');
+        expect(successMockFn).toHaveBeenCalledTimes(3); // 返回第一页
+        expect(fetchMockFn).toHaveBeenCalledTimes(3); // 预加载下一页+1
+      },
+      {
+        timeout: 500
+      }
+    );
   });
 
   test('load more mode paginated data refersh page by page number', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          preloadNextPage: false,
+          preloadPreviousPage: false
+        }}
+      />
+    );
 
-    function Page() {
-      const [error, setError] = useState(undefined as Error | undefined);
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, refresh, update } = usePagination(getter, {
-        total: () => undefined,
-        data: res => res.list,
-        append: true,
-        preloadNextPage: false,
-        preloadPreviousPage: false
-      });
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="error">{error?.message || ''}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="refreshError"
-            onClick={() => {
-              try {
-                refresh(100);
-              } catch (error: any) {
-                setError(error);
-              }
-            }}>
-            btn3
-          </button>
-          <button
-            role="refresh1"
-            onClick={() => {
-              refresh(1);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9)));
     });
 
-    fireEvent.click(screen.getByRole('addPage'));
+    fireEvent.click(screen.getByRole('setPage'));
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19)));
     });
 
     fireEvent.click(screen.getByRole('refreshError'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent("[alova/usePagination]refresh page can't greater than page");
+      expect(screen.getByRole('replacedError')).toHaveTextContent(
+        "[alova/usePagination]refresh page can't greater than page"
+      );
     });
 
     // 手动改变一下接口数据，让刷新后能看出效果
@@ -2041,56 +1204,17 @@ describe('react => usePagination', () => {
   });
 
   test('load more mode paginated data refersh page by item', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<SearchListResponse>('/list-with-search', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, refresh, update } = usePagination(
-        (p, ps) => getter(p, ps),
-        {
-          total: res => res.total,
-          data: res => res.list,
+    render(
+      <Pagination
+        getter={getterSearch}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
           append: true
-        }
-      );
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="refreshByItem"
-            onClick={() => {
-              refresh(data[12]);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     let currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
       return {
@@ -2103,7 +1227,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent('300');
     });
 
-    fireEvent.click(screen.getByRole('addPage'));
+    fireEvent.click(screen.getByRole('setPage'));
     currentList = generateContinuousNumbers(19, 0, i => {
       const n = i % 3;
       return {
@@ -2120,7 +1244,7 @@ describe('react => usePagination', () => {
       return data;
     });
 
-    fireEvent.click(screen.getByRole('refreshByItem'));
+    fireEvent.click(screen.getByRole('refreshByItem__search'));
     currentList[12] = { id: 100, word: 'zzz' };
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
@@ -2128,83 +1252,22 @@ describe('react => usePagination', () => {
   });
 
   test('load more mode paginated data operate items with remove/insert/replace(open preload)', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const {
-        data,
-        loading,
-        pageCount,
-        total,
-        page,
-        pageSize,
-        isLastPage,
-        remove,
-        insert,
-        replace,
-        onFetchSuccess,
-        update
-      } = usePagination(getter, {
-        total: () => undefined,
-        data: res => res.list,
-        initialPage: 2, // 默认从第2页开始
-        initialPageSize: 4
-      });
-      onFetchSuccess(fetchMockFn);
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="addPage2"
-            onClick={() => update({ page: page + 2 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="mixedOperate"
-            onClick={() => {
-              remove(1);
-              remove(1);
-              insert(100, 0);
-              replace(200, 2);
-            }}>
-            btn3
-          </button>
-          <button
-            role="remove2"
-            onClick={() => {
-              remove(1);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          initialPage: 2, // 默认从第2页开始
+          initialPageSize: 4
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
     // 等待fetch完成
     await waitFor(() => {
@@ -2229,9 +1292,9 @@ describe('react => usePagination', () => {
       expect(fetchMockFn).toHaveBeenCalledTimes(3); // 多次同步操作只会触发一次预加载
     });
 
-    fireEvent.click(screen.getByRole('addPage'));
+    fireEvent.click(screen.getByRole('setPage'));
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([9, 10, 11, 12]));
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 4, 200, 8, 9, 10, 11, 12]));
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(screen.getByRole('pageCount')).toHaveTextContent('');
       expect(fetchMockFn).toHaveBeenCalledTimes(4); // 翻页只预加载下一页
@@ -2239,63 +1302,26 @@ describe('react => usePagination', () => {
   });
 
   test('load more mode paginated data remove item without preload', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
-    const successMockFn = jest.fn();
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, remove, onFetchSuccess, onSuccess, update } =
-        usePagination(getter, {
+    const successMockFn = jest.fn();
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
           total: () => undefined,
-          data: res => res.list,
+          data: (res: any) => res.list,
           append: true,
           preloadNextPage: false,
           preloadPreviousPage: false,
           initialPageSize: 4
-        });
-      onFetchSuccess(fetchMockFn);
-      onSuccess(successMockFn);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="batchRemove1"
-            onClick={() => {
-              // 下一页没有缓存的情况下，将会重新请求刷新列表
-              remove(0);
-              remove(0);
-            }}>
-            btn3
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
       expect(successMockFn).toHaveBeenCalledTimes(1);
@@ -2305,7 +1331,7 @@ describe('react => usePagination', () => {
     fireEvent.click(screen.getByRole('batchRemove1'));
     setMockListData(data => {
       // 模拟数据中同步删除
-      data.splice(0, 2);
+      data.splice(1, 2);
       return data;
     });
     await waitFor(() => {
@@ -2314,61 +1340,26 @@ describe('react => usePagination', () => {
       expect(fetchMockFn).not.toHaveBeenCalled();
     });
 
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(fetchMockFn).not.toHaveBeenCalled();
   });
 
   test('load more mode reload paginated data', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, reload, onFetchSuccess, update } =
-        usePagination(getter, {
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
           total: () => undefined,
-          data: res => res.list,
+          data: (res: any) => res.list,
           append: true,
           initialPageSize: 4
-        });
-      onFetchSuccess(fetchMockFn);
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="reload1"
-            onClick={() => {
-              reload();
-            }}>
-            btn1
-          </button>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
     // 等待fetch完成
     await waitFor(() => {
@@ -2390,7 +1381,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3]));
     });
 
-    fireEvent.click(screen.getByRole('addPage'));
+    fireEvent.click(screen.getByRole('setPage'));
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(3); // 上一页已有缓存不会再被预加载
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3, 4, 5, 6, 7]));
@@ -2404,57 +1395,23 @@ describe('react => usePagination', () => {
   });
 
   test("load more mode paginated data don't need to preload when go to last page", async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list-short', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
     const fetchMockFn = jest.fn();
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, onFetchSuccess, update } = usePagination(
-        getter,
-        {
+    render(
+      <Pagination
+        getter={getterShort}
+        paginationConfig={{
           total: () => undefined,
-          data: res => res.list,
+          data: (res: any) => res.list,
           append: true,
           initialPage: 2,
           initialPageSize: 4
-        }
-      );
-      onFetchSuccess(fetchMockFn);
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+        }}
+      />
+    );
 
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="addPage"
-            onClick={() => update({ page: page + 1 })}>
-            btn1
-          </button>
-          <button
-            role="subtractPage"
-            onClick={() => update({ page: page - 1 })}>
-            btn2
-          </button>
-          <button
-            role="toLastPage"
-            onClick={() => update({ page: page + 2 })}>
-            btn1
-          </button>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
     let page = 2;
     const pageSize = 4;
     // 等待fetch完成
@@ -2463,66 +1420,68 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 5, 6, 7]));
     });
 
-    fireEvent.click(screen.getByRole('addPage'));
+    fireEvent.click(screen.getByRole('setPage'));
     page += 1;
     await waitFor(async () => {
       // 已经到最后一页了，不需要再预加载下一页数据了，同时上一页也有缓存不会触发预加载
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 4)));
-      expect(await queryCache(getter(page + 1, pageSize))).toBeUndefined();
+      expect(await queryCache(getterShort(page + 1, pageSize))).toBeUndefined();
+    });
+  });
+
+  test('should access actions by middleware actionDelegation', async () => {
+    const successMockFn = jest.fn();
+    render(
+      <Pagination
+        getter={(page: number, pageSize: number) => getterShort(page, pageSize, 0)}
+        paginationConfig={() => ({
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          initialPage: 2,
+          initialPageSize: 4,
+          middleware: actionDelegationMiddleware('test_page')
+        })}
+        handleExposure={(exposure: any) => {
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
+
+    accessAction('test_page', handlers => {
+      expect(handlers.send).toBeInstanceOf(Function);
+      expect(handlers.refresh).toBeInstanceOf(Function);
+      expect(handlers.insert).toBeInstanceOf(Function);
+      expect(handlers.remove).toBeInstanceOf(Function);
+      expect(handlers.replace).toBeInstanceOf(Function);
+      expect(handlers.reload).toBeInstanceOf(Function);
+      expect(handlers.abort).toBeInstanceOf(Function);
+      handlers.refresh(1);
+    });
+
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(2);
     });
   });
 
   test('should update list data when call update function that returns in hook', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
-
-    function Page() {
-      const { data, loading, pageCount, total, page, pageSize, isLastPage, update } = usePagination(getter, {
-        total: () => undefined,
-        data: res => res.list,
-        append: true,
-        initialPage: 2,
-        initialPageSize: 4
-      });
-
-      return (
-        <div>
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="page">{page}</span>
-          <span role="pageSize">{pageSize}</span>
-          <span role="pageCount">{pageCount}</span>
-          <span role="total">{total}</span>
-          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setLoading"
-            onClick={() =>
-              update({
-                loading: true
-              })
-            }>
-            btn1
-          </button>
-          <button
-            role="clearData"
-            onClick={() =>
-              update({
-                data: []
-              })
-            }>
-            btn1
-          </button>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: () => undefined,
+          data: (res: any) => res.list,
+          append: true,
+          initialPage: 2,
+          initialPageSize: 4
+        }}
+      />
+    );
 
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 5, 6, 7]));
@@ -2539,36 +1498,23 @@ describe('react => usePagination', () => {
   });
 
   test('should set initial data to data and total', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        }
-      });
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          initialData: {
+            list: [1, 2, 3],
+            total: 3
+          },
+          immediate: false,
+          initialPage: 2,
+          initialPageSize: 4
+        }}
+      />
+    );
 
-    function Page() {
-      const { data, total } = usePagination(getter, {
-        total: res => res.total,
-        data: res => res.list,
-        initialData: {
-          list: [1, 2, 3],
-          total: 3
-        },
-        immediate: false,
-        initialPage: 2,
-        initialPageSize: 4
-      });
-
-      return (
-        <div>
-          <span role="total">{total}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-        </div>
-      );
-    }
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([1, 2, 3]));
       expect(screen.getByRole('total')).toHaveTextContent('3');
@@ -2576,53 +1522,38 @@ describe('react => usePagination', () => {
   });
 
   test('can resend request when encounter an error', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number) =>
-      alovaInst.Get<ListResponse>('/list', {
-        params: {
-          page,
-          pageSize
-        },
-        transformData: () => {
-          throw new Error('mock error');
-        }
-      });
-
     const errorFn = jest.fn();
     const completeFn = jest.fn();
-    function Page() {
-      const { data, total, reload, onError, onComplete } = usePagination(getter, {
-        total: res => res.total,
-        data: res => res.list
-      });
-      onError(errorFn);
-      onComplete(completeFn);
-      return (
-        <div>
-          <span role="total">{total}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="reload"
-            onClick={reload}>
-            Reload
-          </button>
-        </div>
-      );
-    }
+    render(
+      <Pagination
+        getter={(page: number, pageSize: number) =>
+          getter1(page, pageSize, {}, () => {
+            throw new Error('mock error');
+          })
+        }
+        paginationConfig={{
+          data: (res: any) => res.list,
+          total: (res: any) => res.total
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onError(errorFn);
+          exposure.onComplete(completeFn);
+        }}
+      />
+    );
 
-    render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(1);
       expect(completeFn).toHaveBeenCalledTimes(1);
     });
 
-    fireEvent.click(screen.getByRole('reload'));
+    fireEvent.click(screen.getByRole('reload1'));
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(2);
       expect(completeFn).toHaveBeenCalledTimes(2);
     });
 
-    fireEvent.click(screen.getByRole('reload'));
+    fireEvent.click(screen.getByRole('reload1'));
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(3);
       expect(completeFn).toHaveBeenCalledTimes(3);
@@ -2630,44 +1561,25 @@ describe('react => usePagination', () => {
   });
 
   test('should use the data of last request when set `abortLast` to true', async () => {
-    const alovaInst = createMockAlova();
-    const getter = (page: number, pageSize: number, keyword: string) =>
-      alovaInst.Get<SearchListResponse>('/list-with-search', {
-        params: {
-          page,
-          pageSize,
-          keyword
-        }
-      });
+    let keyword: ReactPossibleState<string>;
+    const successMockFn = jest.fn();
+    render(
+      <Pagination
+        getter={getterSearch}
+        paginationConfig={() => {
+          keyword = useState('');
+          return {
+            watchingStates: [keyword[0]],
+            abortLast: true,
+            data: (res: any) => res.list
+          };
+        }}
+        handleExposure={(exposure: any) => {
+          exposure.onSuccess(successMockFn);
+        }}
+      />
+    );
 
-    const successFn = jest.fn();
-    function Page() {
-      const [keyword, setKeyword] = useState('');
-      const { data, onSuccess, total } = usePagination((p, ps) => getter(p, ps, keyword), {
-        watchingStates: [keyword],
-        abortLast: true,
-        data: res => res.list
-      });
-      onSuccess(successFn);
-      return (
-        <div>
-          <span role="total">{total}</span>
-          <span role="response">{JSON.stringify(data)}</span>
-          <button
-            role="setKeyword-bbb"
-            onClick={() => setKeyword('bbb')}>
-            SetKeyword
-          </button>
-          <button
-            role="resetKeyword"
-            onClick={() => setKeyword('')}>
-            ResetKeyword
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
     const currentList = generateContinuousNumbers(9, 0, i => {
       const n = i % 3;
       return {
@@ -2680,13 +1592,17 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent('300');
     });
 
-    fireEvent.click(screen.getByRole('setKeyword-bbb'));
-    await untilCbCalled(setTimeout, 10);
-    fireEvent.click(screen.getByRole('resetKeyword'));
+    act(() => {
+      keyword?.[1]('bbb');
+    });
+    await delay(10);
+    act(() => {
+      keyword?.[1]('');
+    });
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
       expect(screen.getByRole('total')).toHaveTextContent('300');
-      expect(successFn).toHaveBeenCalledTimes(2);
+      expect(successMockFn).toHaveBeenCalledTimes(2);
     });
   });
 });

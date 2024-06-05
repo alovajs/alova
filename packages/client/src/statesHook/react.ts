@@ -1,5 +1,5 @@
-import { isNumber, noop } from '@alova/shared/function';
-import { falseValue, forEach, mapItem, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
+import { falseValue, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -16,6 +16,8 @@ export default {
   export: stateToData,
   dehydrate: stateToData,
   update: (newVal, state) => {
+    // update value synchronously so that we can access the new value synchronously.
+    state[0] = newVal;
     state[1](newVal);
   },
   memorize: fn => {
@@ -31,22 +33,29 @@ export default {
   },
   effectRequest({ handler, removeStates, saveStates, immediate, frontStates, watchingStates = [] }) {
     // 当有监听状态时，状态变化再触发
-    const oldStates = mapItem(watchingStates, s => useRef(s)); // 用于对比新旧值
-    useEffect(() => {
-      // 对比新旧状态，获取变化的状态索引
-      let changedIndex: number | undefined = undefinedValue;
-      forEach(watchingStates, (newState, i) => {
-        if (!Object.is(refCurrent(oldStates[i]), newState)) {
-          changedIndex = i;
-          setRef(oldStates[i], newState);
-        }
-      });
+    const oldStates = useRef(watchingStates);
 
-      if (immediate || isNumber(changedIndex)) {
-        handler(changedIndex);
-      }
-      // 组件卸载时移除对应状态
-      return removeStates;
+    // 多个值同时改变只触发一次
+    const onceRunner = refCurrent(useRef(createSyncOnceRunner()));
+    useEffect(() => {
+      onceRunner(() => {
+        const oldStatesValue = refCurrent(oldStates);
+        // 对比新旧状态，获取变化的状态索引
+        let changedIndex: number | undefined = undefinedValue;
+        for (const index in watchingStates) {
+          if (!Object.is(oldStatesValue[index], watchingStates[index])) {
+            changedIndex = Number(index);
+            break;
+          }
+        }
+        setRef(oldStates, watchingStates);
+
+        if (immediate || isNumber(changedIndex)) {
+          handler(changedIndex);
+        }
+        // 组件卸载时移除对应状态
+        return removeStates;
+      });
     }, watchingStates);
 
     // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
@@ -79,4 +88,4 @@ export default {
   onUnmounted: callback => {
     useEffect(() => callback, []);
   }
-} as StatesHook<ReactState<unknown>, unknown, unknown, unknown>;
+} as StatesHook<ReactState<unknown>, any[], unknown, unknown>;

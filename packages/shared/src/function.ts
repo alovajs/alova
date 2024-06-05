@@ -458,12 +458,12 @@ export function statesHookHelper<AG extends AlovaGenerics>(
         // the new updating function that can update the new states and nested hook states.
         update: memorize(
           (newStates: {
-            [K in keyof O]?: O[K] extends FrameworkReadableState<infer R, string> ? R : never;
+            [K in keyof O]?: any;
           }) => {
             objectKeys(newStates).forEach(key => {
               if (includes(createdStateList, key)) {
                 update(newStates[key], originalStatesMap[key], key);
-              } else if (provider[key] && isFn(nestedHookUpdate)) {
+              } else if (key in provider && isFn(nestedHookUpdate)) {
                 nestedHookUpdate({
                   [key]: newStates[key]
                 });

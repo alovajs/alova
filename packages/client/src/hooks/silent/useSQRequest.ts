@@ -1,4 +1,4 @@
-import { useRequest } from '@/index';
+import useRequest from '@/hooks/core/useRequest';
 import { noop } from '@alova/shared/function';
 import { promiseResolve, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics } from 'alova';

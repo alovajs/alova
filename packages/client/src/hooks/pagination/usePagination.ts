@@ -1,8 +1,10 @@
-import { useFetcher, useWatcher } from '@/index';
+import useFetcher from '@/hooks/core/useFetcher';
+import useWatcher from '@/hooks/core/useWatcher';
 import { createAssert } from '@alova/shared/assert';
 import {
   createAsyncQueue,
   getLocalCacheConfigParam,
+  getMethodInternalKey,
   getTime,
   isFn,
   isNumber,
@@ -27,16 +29,7 @@ import {
   trueValue,
   undefinedValue
 } from '@alova/shared/vars';
-import {
-  Alova,
-  AlovaGenerics,
-  Method,
-  getMethodKey,
-  invalidateCache,
-  promiseStatesHook,
-  queryCache,
-  setCache
-} from 'alova';
+import { Alova, AlovaGenerics, Method, invalidateCache, promiseStatesHook, queryCache, setCache } from 'alova';
 import { FetcherType } from 'alova/client';
 import { AnyFn, PaginationHookConfig } from '~/typings/general';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';
@@ -78,7 +71,6 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   const handlerRef = ref<typeof handler>(handler);
   const isReset = ref(falseValue); // 用于控制是否重置
   // 重置期间请求的次数，为了防止重置时重复请求，使用此参数限制请求
-  const requestCountInReseting = ref(0);
   const page = create(initialPage, 'page');
   const pageSize = create(initialPageSize, 'pageSize');
   const data = create((initialData ? dataGetter(initialData) || [] : []) as ListData[number][], 'data');
@@ -110,7 +102,6 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   // 监听状态变化时，重置page为1
   watch(watchingStates, () => {
     page.v = initialPage;
-    requestCountInReseting.current = 0;
     isReset.current = trueValue;
   });
 
@@ -161,15 +152,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         promiseResolve
       );
 
-      // 监听值改变时将会重置为第一页，此时会触发两次请求，在这边过滤掉一次请求
-      let requestPromise: Promise<any> = promiseResolve(undefinedValue);
-      if (!isReset.current) {
-        requestPromise = next();
-      } else if (requestCountInReseting.current === 0) {
-        requestCountInReseting.current += 1;
-        requestPromise = next();
-      }
-      return requestPromise;
+      return next();
     },
     force: event => event.sendArgs[1] || (isFn(force) ? force(event) : force),
     ...others
@@ -282,7 +265,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   onFetchSuccess(({ method, data: rawData }) => {
     // 处理当fetch还没响应时就翻页到fetch对应的页码时，需要手动更新列表数据
     const snapshotItem = getSnapshotMethods(page.v);
-    if (snapshotItem && getMethodKey(snapshotItem.entity) === getMethodKey(method)) {
+    if (snapshotItem && getMethodInternalKey(snapshotItem.entity) === getMethodInternalKey(method)) {
       // 如果追加数据，才更新data
       const listData = listDataGetter(rawData); // 更新data参数
       if (append) {
@@ -295,7 +278,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         const replaceNumber = len(dataRaw) % pageSizeVal;
 
         if (replaceNumber > 0) {
-          const rawData = data.v;
+          const rawData = [...data.v];
           splice(rawData, (page.v - 1) * pageSizeVal, replaceNumber, ...listData);
           data.v = rawData;
         }
@@ -326,7 +309,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       if (refreshPage === undefinedValue) {
         data.v = [...data.v, ...listData];
       } else if (refreshPage) {
-        const rawData = data.v;
+        const rawData = [...data.v];
         // 如果是刷新页面，则是替换那一页的数据
         splice(rawData, (refreshPage - 1) * pageSizeVal, pageSizeVal, ...listData);
         data.v = rawData;
@@ -336,10 +319,9 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     }
   });
 
-  // 请求成功与否，都要重置它们
+  // 请求成功与否，都要重置isReset
   states.onComplete(() => {
     isReset.current = falseValue;
-    requestCountInReseting.current = 0;
   });
 
   // 获取列表项所在位置
@@ -393,7 +375,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
           [getSnapshotMethods(pageVal - 1), getSnapshotMethods(pageVal), getSnapshotMethods(pageVal + 1)],
           Boolean
         ),
-        ({ entity }) => getMethodKey(entity)
+        ({ entity }) => getMethodInternalKey(entity)
       );
       snapshots = mapItem(
         filterItem(objectKeys(snapshotObj), key => !includes(excludeSnapshotKeys, key)),
@@ -453,7 +435,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     return add2AsyncQueue(async () => {
       const index = isNumber(position) ? position : getItemIndex(position) + 1;
       let popItem: ListData[number] | undefined = undefinedValue;
-      const rawData = data.v;
+      const rawData = [...data.v];
       // 当前展示的项数量刚好是pageSize的倍数时，才需要去掉一项数据，保证操作页的数量为pageSize
       if (len(rawData) % pageSize.v === 0) {
         popItem = rawData.pop();
@@ -549,7 +531,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       paginationAssert(position !== undefinedValue, 'expect specify the replace position');
       const index = isNumber(position) ? position : getItemIndex(position);
       indexAssert(index, data.v);
-      const rawData = data.v;
+      const rawData = [...data.v];
       splice(rawData, index, 1, item);
       data.v = rawData;
       // 当前页的缓存同步更新
