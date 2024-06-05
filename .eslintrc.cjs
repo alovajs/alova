@@ -16,6 +16,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'prettier'],
   rules: {
     'prettier/prettier': 'error',
+    'react/function-component-definition': [2, { namedComponents: ['arrow-function', 'function-declaration'] }],
 
     // eslint-airbnb
     'import/extensions': 'off',
