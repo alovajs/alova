@@ -1,6 +1,7 @@
+import { DEFAUT_QUEUE_NAME } from '@/hooks/silent/globalVariables';
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
-import { DEFAUT_QUEUE_NAME } from '../../src/helper/variables';
+import { untilCbCalled } from 'root/testUtils';
 import {
   bootSilentFactory,
   onBeforeSilentSubmit,
@@ -13,7 +14,6 @@ import { push2PersistentSilentQueue } from '../../src/hooks/silent/storage/silen
 import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
 import stringifyVData from '../../src/hooks/silent/virtualResponse/stringifyVData';
 import { mockRequestAdapter } from '../mockData';
-import { untilCbCalled } from '../utils';
 
 describe('boot silent queue', () => {
   test('replace virtual data to real data', () => {
@@ -223,7 +223,7 @@ describe('boot silent queue', () => {
           expect(event.method).toBe(methodInstance2);
           expect(event.silentMethod).toBe(silentMethodInstance2);
         }
-        beforeHookCallIndex++;
+        beforeHookCallIndex += 1;
       });
 
       pushNewSilentMethod2Queue(silentMethodInstance, false);
@@ -252,7 +252,7 @@ describe('boot silent queue', () => {
           expect(event.silentMethod).toBe(silentMethodInstance2);
           expect(event.vDataResponse).toStrictEqual({});
         }
-        successCallIndex++;
+        successCallIndex += 1;
       });
 
       // 启动silentFactory

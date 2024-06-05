@@ -191,7 +191,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
       const createSilentMethodPromise = () => {
         const queueResolvePromise = newInstance(PromiseCls, (resolveHandler, rejectHandler) => {
           silentMethodInstance = newInstance(
-            SilentMethod,
+            SilentMethod<AG>,
             method as Method,
             behaviorFinally,
             undefinedValue,

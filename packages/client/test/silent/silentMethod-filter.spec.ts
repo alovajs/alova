@@ -6,7 +6,7 @@ import { pushNewSilentMethod2Queue } from '../../src/hooks/silent/silentQueue';
 import { push2PersistentSilentQueue } from '../../src/hooks/silent/storage/silentMethodStorage';
 import { filterSilentMethods, getSilentMethod } from '../../src/hooks/silent/virtualResponse/filterSilentMethods';
 import { mockRequestAdapter } from '../mockData';
-import { untilCbCalled } from '../utils';
+import { untilCbCalled } from 'root/testUtils';
 
 const alovaInst = createAlova({
   baseURL: 'http://xxx',

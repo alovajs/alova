@@ -297,7 +297,7 @@ describe('silent method request in queue with silent behavior', () => {
       baseURL: 'http://xxx',
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
-      responsed: () => {
+      responded: () => {
         throw new Error('custom error');
       },
       cacheLogger: false

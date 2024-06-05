@@ -1,7 +1,6 @@
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
-import { DEFAUT_QUEUE_NAME } from '../../src/helper/variables';
-import { setDependentAlova } from '../../src/hooks/silent/globalVariables';
+import { DEFAUT_QUEUE_NAME, setDependentAlova } from '../../src/hooks/silent/globalVariables';
 import { SilentMethod } from '../../src/hooks/silent/SilentMethod';
 import { clearSilentQueueMap, pushNewSilentMethod2Queue, silentQueueMap } from '../../src/hooks/silent/silentQueue';
 import loadSilentQueueMapFromStorage from '../../src/hooks/silent/storage/loadSilentQueueMapFromStorage';
@@ -15,13 +14,16 @@ import { mockRequestAdapter } from '../mockData';
 beforeEach(clearSilentQueueMap); // 每次清除队列，保证测试数据正确
 describe('manipulate silent method storage', () => {
   test('should persist when cache is true', async () => {
-    const storageMock = {} as Record<string, any>;
+    let storageMock = {} as Record<string, any>;
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheLogger: false,
-      storageAdapter: {
+      l2Cache: {
+        clear() {
+          storageMock = {};
+        },
         set(key, value) {
           storageMock[key] = value;
         },
@@ -47,13 +49,16 @@ describe('manipulate silent method storage', () => {
   });
 
   test('should restore all persistent silentMethod instances', async () => {
-    const storageMock = {} as Record<string, any>;
+    let storageMock = {} as Record<string, any>;
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheLogger: false,
-      storageAdapter: {
+      l2Cache: {
+        clear() {
+          storageMock = {};
+        },
         set(key, value) {
           storageMock[key] = value;
         },
@@ -85,13 +90,16 @@ describe('manipulate silent method storage', () => {
   });
 
   test('should remove silentMethod item in storage', async () => {
-    const storageMock = {} as Record<string, any>;
+    let storageMock = {} as Record<string, any>;
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheLogger: false,
-      storageAdapter: {
+      l2Cache: {
+        clear() {
+          storageMock = {};
+        },
         set(key, value) {
           storageMock[key] = value;
         },

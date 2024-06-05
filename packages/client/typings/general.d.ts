@@ -81,16 +81,16 @@ interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends Watch
 //  [ScopedSQEvent]入队列前：behavior、silentMethod实例、method实例、send参数
 //  [ScopedSQEvent]入队列后：behavior、silentMethod实例、method实例、send参数
 /** 顶层事件 */
-interface SQEvent<S, E, R, T, RC, RE, RH> {
+interface SQEvent<AG extends AlovaGenerics> {
   /** 事件对应的请求行为 */
   behavior: SQHookBehavior;
   /** 当前的method实例 */
-  method: Method<S, E, R, T, RC, RE, RH>;
+  method: Method<AG>;
   /** 当前的silentMethod实例，当behavior为static时没有值 */
-  silentMethod?: SilentMethod<S, E, R, T, RC, RE, RH>;
+  silentMethod?: SilentMethod<AG>;
 }
 /** 全局事件 */
-interface GlobalSQEvent extends SQEvent<any, any, any, any, any, any, any> {
+interface GlobalSQEvent extends SQEvent<AlovaGenerics> {
   /** 重试次数，在beforePush和pushed事件中没有值 */
   retryTimes: number;
 
@@ -779,10 +779,7 @@ type AlovaResponded<
     Parameters<RA>[1] extends Method<any, any, any, any, any, any, infer RH> ? RH : never
   >['responded']
 >;
-interface TokenAuthenticationResult<
-  SH extends StatesHook<any, any>,
-  RA extends AlovaRequestAdapter<any, any, any, any, any>
-> {
+interface TokenAuthenticationResult<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> {
   onAuthRequired(originalBeforeRequest?: AlovaBeforeRequest<SH, RA>): AlovaBeforeRequest<SH, RA>;
   onResponseRefreshToken(originalResponded?: AlovaResponded<SH, RA>): AlovaResponded<SH, RA>;
   waitingList: {

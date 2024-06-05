@@ -32,7 +32,13 @@ describe('virtual response', () => {
 
     const vBool = createVirtualResponse(true);
     expect(vBool.toString()).toBe('true');
-    expect(`${vBool}aa`).toMatch(/^\[vd:.+\]aa$/);
+    /**
+     * There is a inconsistent behavior between Template Literals and string concatenation
+     * Use string concatenation to make sure `valueOf` to be called.
+     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive
+     */
+    // eslint-disable-next-line prefer-template, prettier/prettier
+    expect(vBool + 'aa').toMatch(/^\[vd:.+\]aa$/);
   });
 
   test('create virtual response with object', () => {

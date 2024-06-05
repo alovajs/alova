@@ -1,5 +1,5 @@
 import { createAlova, Method } from 'alova';
-import GlobalFetch from 'alova/GlobalFetch';
+import GlobalFetch from 'alova/fetch';
 import VueHook from 'alova/vue';
 import { customSerializers, setCustomSerializers, setDependentAlova } from '../../src/hooks/silent/globalVariables';
 import { SerializedSilentMethod, SilentMethod } from '../../src/hooks/silent/SilentMethod';
@@ -26,13 +26,16 @@ describe('serialized storage with virtual response', () => {
   });
 
   test('serialized data must be the same as original data', () => {
-    const mockStorage = {} as Record<string, any>;
+    let mockStorage = {} as Record<string, any>;
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       cacheLogger: false,
-      storageAdapter: {
+      l2Cache: {
+        clear() {
+          mockStorage = {};
+        },
         set(key, value) {
           mockStorage[key] = value;
         },
@@ -68,7 +71,7 @@ describe('serialized storage with virtual response', () => {
           id: virtualResponse.id,
           createDate: new Date('2022-10-01 00:00:00')
         },
-        localCache: {
+        cacheFor: {
           expire: 500000
         }
       },
@@ -89,7 +92,7 @@ describe('serialized storage with virtual response', () => {
     // 序列化的内容需要和原始数据一致，包括虚拟数据id
     expect(serializedObj.behavior).toBe('silent');
     expect(serializedObj.entity.config).toEqual({
-      localCache: {
+      cacheFor: {
         expire: 500000
       },
       headers: {},
@@ -120,13 +123,16 @@ describe('serialized storage with virtual response', () => {
   });
 
   test('deserialized data must be the same as original data', () => {
-    const mockStorage = {} as Record<string, any>;
+    let mockStorage = {} as Record<string, any>;
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       cacheLogger: false,
-      storageAdapter: {
+      l2Cache: {
+        clear() {
+          mockStorage = {};
+        },
         set(key, value) {
           mockStorage[key] = value;
         },
@@ -158,7 +164,7 @@ describe('serialized storage with virtual response', () => {
           content: 'I am a content',
           other1: virtualResponse.extra.other1
         },
-        localCache: {
+        cacheFor: {
           expire: new Date('2022-12-31 00:00:00'),
           mode: 'memory'
         },

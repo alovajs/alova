@@ -1,6 +1,6 @@
 import { AlovaRequestAdapter } from '.';
 
-type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
+export type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 
 /**
  * GlobalFetch请求适配器

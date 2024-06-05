@@ -1,3 +1,4 @@
+/* eslint-disable no-new-object */
 import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
 import isVData from '../../src/hooks/silent/virtualResponse/isVData';
 import stringifyVData from '../../src/hooks/silent/virtualResponse/stringifyVData';

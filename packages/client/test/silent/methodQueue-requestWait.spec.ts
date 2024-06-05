@@ -1,12 +1,12 @@
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
+import { untilCbCalled } from 'root/testUtils';
 import { setSilentFactoryStatus } from '../../src/hooks/silent/globalVariables';
 import { bootSilentFactory } from '../../src/hooks/silent/silentFactory';
 import { SilentMethod } from '../../src/hooks/silent/SilentMethod';
 import { pushNewSilentMethod2Queue } from '../../src/hooks/silent/silentQueue';
 import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
 import { mockRequestAdapter } from '../mockData';
-import { untilCbCalled } from '../utils';
 
 // 每次需重置状态，因为上一个用例可能因为失败而被设置为2，导致下面的用例不运行
 beforeEach(() => setSilentFactoryStatus(0));

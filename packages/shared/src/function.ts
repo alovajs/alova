@@ -321,7 +321,7 @@ export const walkObject = (
 
   // 前序遍历
   preorder && callCallback();
-  if (isPlainObject(target)) {
+  if (isObject(target)) {
     for (const i in target) {
       if (!instanceOf(target, String)) {
         walkObject(target[i], callback, preorder, i, target);
