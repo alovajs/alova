@@ -1,18 +1,22 @@
 import { createAlova } from '@/index';
 import GlobalFetch from '@/predefine/adapterFetch';
-import { AlovaGenerics, GlobalCacheConfig, Method } from '~/typings';
+import { AlovaGenerics, AlovaGlobalCacheAdapter, GlobalCacheConfig, Method } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 type FetchMethod = Method<AlovaGenerics<any, any, any, any, any, any, FetchRequestInit, Response, Headers>>;
 export const getAlovaInstance = ({
+  id,
   endWithSlash = false,
   cacheFor,
   beforeRequestExpect,
   responseExpect,
   resErrorExpect,
   resCompleteExpect,
-  limitSnapshots
+  limitSnapshots,
+  l1Cache,
+  l2Cache
 }: {
+  id?: number | string;
   endWithSlash?: boolean;
   cacheFor?: GlobalCacheConfig<any>;
   beforeRequestExpect?: (methodInstance: FetchMethod) => void;
@@ -20,8 +24,11 @@ export const getAlovaInstance = ({
   resErrorExpect?: (err: Error, method: FetchMethod) => void;
   resCompleteExpect?: (method: FetchMethod) => void;
   limitSnapshots?: number;
+  l1Cache?: AlovaGlobalCacheAdapter;
+  l2Cache?: AlovaGlobalCacheAdapter;
 } = {}) => {
   const alovaInst = createAlova({
+    id,
     baseURL: process.env.NODE_BASE_URL + (endWithSlash ? '/' : ''),
     timeout: 3000,
     requestAdapter: GlobalFetch(),
@@ -37,7 +44,9 @@ export const getAlovaInstance = ({
             onError: resErrorExpect,
             onComplete: resCompleteExpect
           },
-    cacheLogger: false
+    cacheLogger: false,
+    l1Cache,
+    l2Cache
   });
   if (cacheFor !== undefined) {
     alovaInst.options.cacheFor = cacheFor;
