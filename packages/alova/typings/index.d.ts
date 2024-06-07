@@ -109,14 +109,18 @@ export interface AlovaDefaultCacheAdpater extends AlovaGlobalCacheAdapter {
  */
 export type CacheExpire = number | Date | null;
 export type CacheMode = 'memory' | 'restore';
-export type DetailCacheConfig = {
-  expire: CacheExpire;
+export type CacheExpireGetter<AG extends AlovaGenerics> = (event: {
+  method: Method<AG>;
+  mode: CacheMode;
+}) => CacheExpire;
+export type DetailCacheConfig<AG extends AlovaGenerics> = {
+  expire: CacheExpire | CacheExpireGetter<AG>;
   mode?: CacheMode;
 
   /** 持久化缓存标签，标签改变后原有持久化数据将会失效 */
   tag?: string | number;
 };
-export type CacheConfig = CacheExpire | DetailCacheConfig;
+export type CacheConfig<AG extends AlovaGenerics> = CacheExpire | DetailCacheConfig<AG>;
 export type CacheController<Responded> = () => Responded | undefined | Promise<Responded | undefined>;
 export interface MethodRequestConfig {
   /**
@@ -313,7 +317,7 @@ export type CacheLoggerHandler<AG extends AlovaGenerics> = (
   response: any,
   methodInstance: Method<AG>,
   cacheMode: CacheMode,
-  tag: DetailCacheConfig['tag']
+  tag: DetailCacheConfig<AG>['tag']
 ) => void | Promise<void>;
 /**
  * 泛型类型解释：

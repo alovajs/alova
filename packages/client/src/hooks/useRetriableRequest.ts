@@ -1,9 +1,10 @@
+import { RetriableFailEvent, RetriableRetryEvent } from '@/event';
 import useRequest from '@/hooks/core/useRequest';
-import createHookEvent from '@/util/createHookEvent';
 import { delayWithBackoff, usePromise } from '@/util/helper';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
-import { isNumber, noop, statesHookHelper } from '@alova/shared/function';
+import { AlovaEventBase } from '@alova/shared/event';
+import { isNumber, newInstance, noop, statesHookHelper } from '@alova/shared/function';
 import {
   falseValue,
   promiseCatch,
@@ -16,7 +17,7 @@ import {
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
-import { RetriableFailEvent, RetriableHookConfig, RetriableRetryEvent } from '~/typings/general';
+import { RetriableHookConfig } from '~/typings/general';
 
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');
@@ -58,19 +59,7 @@ export default <AG extends AlovaGenerics>(
     setTimeoutFn(() => {
       eventManager.emit(
         FailEventKey,
-        createHookEvent(
-          10,
-          method,
-          undefinedValue,
-          undefinedValue,
-          undefinedValue,
-          retryTimes.current,
-          undefinedValue,
-          sendArgs,
-          undefinedValue,
-          undefinedValue,
-          error
-        ) as any
+        newInstance(RetriableFailEvent<AG>, AlovaEventBase.spawn(method, sendArgs), error, retryTimes.current)
       );
       stopManuallyError.current = undefinedValue;
       retryTimes.current = 0; // 重置已重试次数
@@ -139,16 +128,7 @@ export default <AG extends AlovaGenerics>(
               // 触发重试事件
               eventManager.emit(
                 RetryEventKey,
-                createHookEvent(
-                  9,
-                  method,
-                  undefinedValue,
-                  undefinedValue,
-                  undefinedValue,
-                  retryTimes.current,
-                  retryDelay,
-                  args
-                ) as any
+                newInstance(RetriableRetryEvent<AG>, AlovaEventBase.spawn(method, args), retryTimes.current, retryDelay)
               );
             }, retryDelay);
           } else {

@@ -1,15 +1,16 @@
-import { createAlova, Method } from 'alova';
-import GlobalFetch from 'alova/GlobalFetch';
+import { customSerializers, setCustomSerializers, setDependentAlova } from '@/hooks/silent/globalVariables';
+import { SerializedSilentMethod, SilentMethod } from '@/hooks/silent/SilentMethod';
+import convertPayload2SilentMethod from '@/hooks/silent/storage/convertPayload2SilentMethod';
+import { storageGetItem, storageSetItem } from '@/hooks/silent/storage/performers';
+import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import dehydrateVData from '@/hooks/silent/virtualResponse/dehydrateVData';
+import Null from '@/hooks/silent/virtualResponse/Null';
+import Undefined from '@/hooks/silent/virtualResponse/Undefined';
+import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
+import createEventManager from '@alova/shared/createEventManager';
+import { AlovaGlobalCacheAdapter, createAlova, Method } from 'alova';
+import GlobalFetch from 'alova/fetch';
 import VueHook from 'alova/vue';
-import { customSerializers, setCustomSerializers, setDependentAlova } from '../../src/hooks/silent/globalVariables';
-import { SerializedSilentMethod, SilentMethod } from '../../src/hooks/silent/SilentMethod';
-import convertPayload2SilentMethod from '../../src/hooks/silent/storage/convertPayload2SilentMethod';
-import { storageGetItem, storageSetItem } from '../../src/hooks/silent/storage/performers';
-import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
-import dehydrateVData from '../../src/hooks/silent/virtualResponse/dehydrateVData';
-import Null from '../../src/hooks/silent/virtualResponse/Null';
-import Undefined from '../../src/hooks/silent/virtualResponse/Undefined';
-import { symbolVDataId } from '../../src/hooks/silent/virtualResponse/variables';
 
 // 虚拟响应测试
 describe('serialized storage with virtual response', () => {
@@ -32,7 +33,7 @@ describe('serialized storage with virtual response', () => {
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       cacheLogger: false,
-      storageAdapter: {
+      l2Cache: {
         set(key, value) {
           mockStorage[key] = value;
         },
@@ -42,7 +43,7 @@ describe('serialized storage with virtual response', () => {
         remove(key) {
           delete mockStorage[key];
         }
-      }
+      } as AlovaGlobalCacheAdapter
     });
     setDependentAlova(alovaInst);
     setCustomSerializers({
@@ -68,16 +69,25 @@ describe('serialized storage with virtual response', () => {
           id: virtualResponse.id,
           createDate: new Date('2022-10-01 00:00:00')
         },
-        localCache: {
+        cacheFor: {
           expire: 500000
         }
       },
       { text: virtualResponse.text, time: virtualResponse.time }
     );
-    const silentMethodInstance = new SilentMethod(methodInstance, 'silent', undefined, undefined, /.*/, 2, {
-      delay: 2000,
-      multiplier: 1.5
-    });
+    const silentMethodInstance = new SilentMethod(
+      methodInstance,
+      'silent',
+      createEventManager(),
+      undefined,
+      undefined,
+      /.*/,
+      2,
+      {
+        delay: 2000,
+        multiplier: 1.5
+      }
+    );
     silentMethodInstance.cache = true;
     silentMethodInstance.virtualResponse = virtualResponse;
 
@@ -88,15 +98,15 @@ describe('serialized storage with virtual response', () => {
 
     // 序列化的内容需要和原始数据一致，包括虚拟数据id
     expect(serializedObj.behavior).toBe('silent');
-    expect(serializedObj.entity.config).toEqual({
-      localCache: {
+    expect(serializedObj.entity.config).toStrictEqual({
+      cacheFor: {
         expire: 500000
       },
       headers: {},
       params: { id: { __$k: virtualResponse.id[symbolVDataId], __$v: 1 }, createDate: ['date', dateTimestamp] },
       shareRequest: true
     });
-    expect(serializedObj.entity.data).toEqual({
+    expect(serializedObj.entity.data).toStrictEqual({
       text: { __$k: virtualResponse.text[symbolVDataId], __$v: ['custom', '2a'] },
       time: { __$k: virtualResponse.time[symbolVDataId], __$v: ['date', dateTimestamp] }
     });
@@ -110,7 +120,7 @@ describe('serialized storage with virtual response', () => {
       delay: 2000,
       multiplier: 1.5
     });
-    expect(serializedObj.virtualResponse).toEqual({
+    expect(serializedObj.virtualResponse).toStrictEqual({
       __$k: virtualResponse[symbolVDataId],
       __$v: {},
       id: { __$k: virtualResponse.id[symbolVDataId], __$v: 1 },
@@ -119,14 +129,14 @@ describe('serialized storage with virtual response', () => {
     });
   });
 
-  test('deserialized data must be the same as original data', () => {
+  test('deserialized data must be the same as original data', async () => {
     const mockStorage = {} as Record<string, any>;
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,
       requestAdapter: GlobalFetch(),
       cacheLogger: false,
-      storageAdapter: {
+      l2Cache: {
         set(key, value) {
           mockStorage[key] = value;
         },
@@ -136,7 +146,7 @@ describe('serialized storage with virtual response', () => {
         remove(key) {
           delete mockStorage[key];
         }
-      }
+      } as AlovaGlobalCacheAdapter
     });
     setDependentAlova(alovaInst);
     const virtualResponse = createVirtualResponse({
@@ -158,7 +168,7 @@ describe('serialized storage with virtual response', () => {
           content: 'I am a content',
           other1: virtualResponse.extra.other1
         },
-        localCache: {
+        cacheFor: {
           expire: new Date('2022-12-31 00:00:00'),
           mode: 'memory'
         },
@@ -175,6 +185,7 @@ describe('serialized storage with virtual response', () => {
     const silentMethodInstance = new SilentMethod(
       methodInstance,
       'silent',
+      createEventManager(),
       'abcdef',
       undefined,
       /.*/,
@@ -183,7 +194,6 @@ describe('serialized storage with virtual response', () => {
         delay: 2000,
         multiplier: 1.5
       },
-      undefined,
       undefined,
       undefined,
       [virtualResponse.extra.other2]
@@ -195,7 +205,7 @@ describe('serialized storage with virtual response', () => {
 
     const storageKey = 'sm.test.2';
     storageSetItem(storageKey, silentMethodInstance);
-    const serializedObj = storageGetItem(storageKey);
+    const serializedObj = await storageGetItem(storageKey);
     const deserizlizedSilentMethodInstance = convertPayload2SilentMethod(serializedObj);
 
     expect(deserizlizedSilentMethodInstance.id).toBe(silentMethodInstance.id);

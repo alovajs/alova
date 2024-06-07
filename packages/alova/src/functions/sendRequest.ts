@@ -16,6 +16,7 @@ import {
   sloughFunction
 } from '@alova/shared/function';
 import {
+  MEMORY,
   PromiseCls,
   STORAGE_RESTORE,
   deleteAttr,
@@ -91,7 +92,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
     // 使用克隆的methodKey，防止用户使用克隆的method实例再次发起请求，导致key重复
     const clonedMethod = cloneMethod(methodInstance);
     const methodKey = getMethodInternalKey(clonedMethod);
-    const { e: expireMilliseconds, s: toStorage, t: tag, m: cacheMode } = getLocalCacheConfigParam(methodInstance);
+    const { s: toStorage, t: tag, m: cacheMode, e: expireMilliseconds } = getLocalCacheConfigParam(methodInstance);
     const { id, l1Cache, l2Cache, snapshots } = getContext(methodInstance);
     // 获取受控缓存或非受控缓存
     const { cacheFor } = getConfig(methodInstance);
@@ -186,12 +187,22 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       // 原因2：特殊数据不便于生成缓存key
       const requestBody = clonedMethod.data;
       const toCache = !requestBody || !isSpecialRequestBody(requestBody);
+
+      // 使用响应后最新的过期时间来缓存数据，避免因响应时间过长导致过期时间流失的问题
       if (toCache && callInSuccess) {
         try {
           await PromiseCls.all([
-            setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l1Cache, methodHitSource),
+            setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds(MEMORY), l1Cache, methodHitSource),
             toStorage &&
-              setWithCacheAdapter(id, methodKey, transformedData, expireMilliseconds, l2Cache, methodHitSource, tag)
+              setWithCacheAdapter(
+                id,
+                methodKey,
+                transformedData,
+                expireMilliseconds(STORAGE_RESTORE),
+                l2Cache,
+                methodHitSource,
+                tag
+              )
           ]);
         } catch (error) {}
       }

@@ -1,12 +1,14 @@
+import { setSilentFactoryStatus } from '@/hooks/silent/globalVariables';
+import { bootSilentFactory } from '@/hooks/silent/silentFactory';
+import { SilentMethod } from '@/hooks/silent/SilentMethod';
+import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
+import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import createEventManager from '@alova/shared/createEventManager';
+import { promiseWithResolvers } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
-import { setSilentFactoryStatus } from '../../src/hooks/silent/globalVariables';
-import { bootSilentFactory } from '../../src/hooks/silent/silentFactory';
-import { SilentMethod } from '../../src/hooks/silent/SilentMethod';
-import { pushNewSilentMethod2Queue } from '../../src/hooks/silent/silentQueue';
-import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
+import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '../mockData';
-import { untilCbCalled } from '../utils';
 
 // 每次需重置状态，因为上一个用例可能因为失败而被设置为2，导致下面的用例不运行
 beforeEach(() => setSilentFactoryStatus(0));
@@ -22,50 +24,49 @@ describe('silent method request in queue with silent behavior', () => {
 
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const delayRequestTs = [] as number[];
-    const pms = new Promise(resolve => {
-      const virtualResponse = createVirtualResponse({
-        id: ''
-      });
-      let startTs = Date.now();
-      const silentMethodInstance = new SilentMethod(
-        methodInstance,
-        'silent',
-        undefined,
-        undefined,
-        /.*/,
-        0,
-        undefined,
-        undefined,
-        () => {
-          const curTs = Date.now();
-          delayRequestTs.push(curTs - startTs);
-          startTs = curTs;
-        }
-      );
-      const silentMethodInstance2 = new SilentMethod(
-        methodInstance,
-        'silent',
-        undefined,
-        undefined,
-        /.*/,
-        0,
-        undefined,
-        undefined,
-        value => {
-          delayRequestTs.push(Date.now() - startTs);
-          resolve(value);
-        }
-      );
-      silentMethodInstance.virtualResponse = virtualResponse;
-      pushNewSilentMethod2Queue(silentMethodInstance, false);
-      pushNewSilentMethod2Queue(silentMethodInstance2, false);
+    const { promise: pms, resolve } = promiseWithResolvers();
+    const virtualResponse = createVirtualResponse({
+      id: ''
+    });
+    let startTs = Date.now();
+    const silentMethodInstance = new SilentMethod(
+      methodInstance,
+      'silent',
+      createEventManager(),
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      () => {
+        const curTs = Date.now();
+        delayRequestTs.push(curTs - startTs);
+        startTs = curTs;
+      }
+    );
+    const silentMethodInstance2 = new SilentMethod(
+      methodInstance,
+      'silent',
+      createEventManager(),
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      value => {
+        delayRequestTs.push(Date.now() - startTs);
+        resolve(value);
+      }
+    );
+    silentMethodInstance.virtualResponse = virtualResponse;
+    await pushNewSilentMethod2Queue(silentMethodInstance, false);
+    await pushNewSilentMethod2Queue(silentMethodInstance2, false);
 
-      // 启动silentFactory
-      bootSilentFactory({
-        alova: alovaInst,
-        delay: 0,
-        requestWait: 1000
-      });
+    // 启动silentFactory
+    bootSilentFactory({
+      alova: alovaInst,
+      delay: 0,
+      requestWait: 1000
     });
 
     await pms;
@@ -85,55 +86,54 @@ describe('silent method request in queue with silent behavior', () => {
     const queueName = 'ttt1';
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const delayRequestTs = [] as number[];
-    const pms = new Promise(resolve => {
-      const virtualResponse = createVirtualResponse({
-        id: ''
-      });
-      let startTs = Date.now();
-      const silentMethodInstance = new SilentMethod(
-        methodInstance,
-        'silent',
-        undefined,
-        undefined,
-        /.*/,
-        0,
-        undefined,
-        undefined,
-        () => {
-          const curTs = Date.now();
-          delayRequestTs.push(curTs - startTs);
-          startTs = curTs;
-        }
-      );
-      const silentMethodInstance2 = new SilentMethod(
-        methodInstance,
-        'silent',
-        undefined,
-        undefined,
-        /.*/,
-        0,
-        undefined,
-        undefined,
-        value => {
-          delayRequestTs.push(Date.now() - startTs);
-          resolve(value);
-        }
-      );
-      silentMethodInstance.virtualResponse = virtualResponse;
-      pushNewSilentMethod2Queue(silentMethodInstance, false, queueName);
-      pushNewSilentMethod2Queue(silentMethodInstance2, false, queueName);
+    const { promise: pms, resolve } = promiseWithResolvers();
+    const virtualResponse = createVirtualResponse({
+      id: ''
+    });
+    let startTs = Date.now();
+    const silentMethodInstance = new SilentMethod(
+      methodInstance,
+      'silent',
+      createEventManager(),
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      () => {
+        const curTs = Date.now();
+        delayRequestTs.push(curTs - startTs);
+        startTs = curTs;
+      }
+    );
+    const silentMethodInstance2 = new SilentMethod(
+      methodInstance,
+      'silent',
+      createEventManager(),
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      value => {
+        delayRequestTs.push(Date.now() - startTs);
+        resolve(value);
+      }
+    );
+    silentMethodInstance.virtualResponse = virtualResponse;
+    await pushNewSilentMethod2Queue(silentMethodInstance, false, queueName);
+    await pushNewSilentMethod2Queue(silentMethodInstance2, false, queueName);
 
-      // 启动silentFactory
-      bootSilentFactory({
-        alova: alovaInst,
-        delay: 0,
-        requestWait: [
-          {
-            queue: queueName,
-            wait: 1000
-          }
-        ]
-      });
+    // 启动silentFactory
+    bootSilentFactory({
+      alova: alovaInst,
+      delay: 0,
+      requestWait: [
+        {
+          queue: queueName,
+          wait: 1000
+        }
+      ]
     });
 
     await pms;
@@ -156,11 +156,11 @@ describe('silent method request in queue with silent behavior', () => {
     const silentMethodInstance = new SilentMethod(
       methodInstance,
       'silent',
+      createEventManager(),
       undefined,
       undefined,
       /.*/,
       0,
-      undefined,
       undefined,
       () => {
         delayRequestTs.push(Date.now() - startTs);
@@ -169,11 +169,11 @@ describe('silent method request in queue with silent behavior', () => {
     const silentMethodInstance2 = new SilentMethod(
       methodInstance,
       'silent',
+      createEventManager(),
       undefined,
       undefined,
       /.*/,
       0,
-      undefined,
       undefined,
       () => {
         delayRequestTs.push(Date.now() - startTs);
@@ -182,19 +182,19 @@ describe('silent method request in queue with silent behavior', () => {
     const silentMethodInstance3 = new SilentMethod(
       methodInstance,
       'silent',
+      createEventManager(),
       undefined,
       undefined,
       /.*/,
       0,
       undefined,
-      undefined,
       () => {
         delayRequestTs.push(Date.now() - startTs);
       }
     );
-    pushNewSilentMethod2Queue(silentMethodInstance, false, 'ttt3');
-    pushNewSilentMethod2Queue(silentMethodInstance2, false, 'ttt4');
-    pushNewSilentMethod2Queue(silentMethodInstance3, false, 'ttt5');
+    await pushNewSilentMethod2Queue(silentMethodInstance, false, 'ttt3');
+    await pushNewSilentMethod2Queue(silentMethodInstance2, false, 'ttt4');
+    await pushNewSilentMethod2Queue(silentMethodInstance3, false, 'ttt5');
 
     // 启动silentFactory
     bootSilentFactory({
@@ -221,7 +221,7 @@ describe('silent method request in queue with silent behavior', () => {
       ]
     });
 
-    await untilCbCalled(setTimeout, 1500);
+    await delay(1500);
     // 模拟请求需要50毫秒，需要加上
     expect(delayRequestTs[0]).toBeGreaterThanOrEqual(50);
     expect(delayRequestTs[1]).toBeGreaterThanOrEqual(550);
@@ -239,52 +239,51 @@ describe('silent method request in queue with silent behavior', () => {
     const queueName = 'ttt2';
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const delayRequestTs = [] as number[];
-    const pms = new Promise(resolve => {
-      const virtualResponse = createVirtualResponse({
-        id: ''
-      });
-      let startTs = Date.now();
-      const silentMethodInstance = new SilentMethod(
-        methodInstance,
-        'silent',
-        undefined,
-        undefined,
-        /.*/,
-        0,
-        undefined,
-        undefined,
-        () => {
-          const curTs = Date.now();
-          delayRequestTs.push(curTs - startTs);
-          startTs = curTs;
-        }
-      );
-      const silentMethodInstance2 = new SilentMethod(
-        methodInstance,
-        'silent',
-        undefined,
-        undefined,
-        /.*/,
-        0,
-        undefined,
-        undefined,
-        value => {
-          delayRequestTs.push(Date.now() - startTs);
-          resolve(value);
-        }
-      );
-      silentMethodInstance.virtualResponse = virtualResponse;
-      pushNewSilentMethod2Queue(silentMethodInstance, false, queueName);
-      pushNewSilentMethod2Queue(silentMethodInstance2, false, queueName);
+    const { promise: pms, resolve } = promiseWithResolvers();
+    const virtualResponse = createVirtualResponse({
+      id: ''
+    });
+    let startTs = Date.now();
+    const silentMethodInstance = new SilentMethod(
+      methodInstance,
+      'silent',
+      createEventManager(),
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      () => {
+        const curTs = Date.now();
+        delayRequestTs.push(curTs - startTs);
+        startTs = curTs;
+      }
+    );
+    const silentMethodInstance2 = new SilentMethod(
+      methodInstance,
+      'silent',
+      createEventManager(),
+      undefined,
+      undefined,
+      /.*/,
+      0,
+      undefined,
+      value => {
+        delayRequestTs.push(Date.now() - startTs);
+        resolve(value);
+      }
+    );
+    silentMethodInstance.virtualResponse = virtualResponse;
+    await pushNewSilentMethod2Queue(silentMethodInstance, false, queueName);
+    await pushNewSilentMethod2Queue(silentMethodInstance2, false, queueName);
 
-      // 启动silentFactory
-      bootSilentFactory({
-        alova: alovaInst,
-        delay: 0,
+    // 启动silentFactory
+    bootSilentFactory({
+      alova: alovaInst,
+      delay: 0,
 
-        // 注意：这边未指定queue名为ttt2的请求延迟，因此会立即请求
-        requestWait: 1000
-      });
+      // 注意：这边未指定queue名为ttt2的请求延迟，因此会立即请求
+      requestWait: 1000
     });
 
     await pms;

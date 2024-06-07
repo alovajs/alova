@@ -1,4 +1,5 @@
 import { mockRequestAdapter } from '#/mockData';
+import { ScopedSQCompleteEvent, ScopedSQErrorEvent, ScopedSQEvent, ScopedSQSuccessEvent } from '@/event';
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { setSilentFactoryStatus } from '@/hooks/silent/globalVariables';
 import { bootSilentFactory, onSilentSubmitSuccess } from '@/hooks/silent/silentFactory';
@@ -12,13 +13,14 @@ import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
 import updateStateEffect from '@/hooks/silent/virtualResponse/updateStateEffect';
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 import { accessAction, actionDelegationMiddleware } from '@/index';
-import { createAlova } from 'alova';
+import { AlovaEventBase } from '@alova/shared/event';
+import { AlovaGenerics, createAlova } from 'alova';
 import VueHook from 'alova/vue';
-import { untilCbCalled } from 'root/testUtils';
-import { SQHookBehavior, ScopedSQErrorEvent, ScopedSQSuccessEvent } from '~/typings/general';
+import { delay, untilCbCalled } from 'root/testUtils';
+import { SQHookBehavior } from '~/typings/general';
 
 const alovaInst = createAlova({
-  baseURL: 'http://xxx',
+  baseURL: process.env.NODE_BASE_URL,
   statesHook: VueHook,
   requestAdapter: mockRequestAdapter,
   cacheFor: {
@@ -50,49 +52,32 @@ describe('vue => useSQRequest', () => {
       });
     const beforePushMockFn = jest.fn();
     onBeforePushQueue(event => {
-      beforePushMockFn();
-      expect((event as any)[Symbol.toStringTag]).toBe('ScopedSQEvent');
-      expect(event.behavior).toBe('queue');
-      expect(event.method).toBe(Get);
-      expect(event.silentMethod).toBeInstanceOf(SilentMethod);
-      expect(event.sendArgs).toStrictEqual([]);
-      expect(Object.keys(silentQueueMap[queue])).toHaveLength(0);
+      beforePushMockFn(event, [...silentQueueMap[queue]]);
     });
     const pushedMockFn = jest.fn();
     onPushedQueue(event => {
-      pushedMockFn();
-      expect((event as any)[Symbol.toStringTag]).toBe('ScopedSQEvent');
-      expect(event.behavior).toBe('queue');
-      expect(event.method).toBe(Get);
-      expect(event.silentMethod).toBeInstanceOf(SilentMethod);
-      expect(event.sendArgs).toStrictEqual([]);
-      expect(Object.keys(silentQueueMap[queue])).toHaveLength(1);
-      expect(silentQueueMap[queue][0]).toBe(event.silentMethod);
+      pushedMockFn(event, [...silentQueueMap[queue]]);
+    });
+    const completeMockFn = jest.fn();
+    onComplete(event => {
+      completeMockFn(event);
     });
 
-    expect(loading.value).toBeTruthy();
+    expect(loading.value).toBeFalsy(); // 有middleware则默认为false
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
+    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
+    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(loading.value).toBeFalsy();
     expect(data.value.total).toBe(300);
     expect(data.value.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
+    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
-    expect((scopedSQSuccessEvent as any)[Symbol.toStringTag]).toBe('ScopedSQSuccessEvent');
+    expect(scopedSQSuccessEvent).toBeInstanceOf(ScopedSQSuccessEvent);
     expect(scopedSQSuccessEvent.behavior).toBe('queue');
     expect(scopedSQSuccessEvent.method).toBe(Get);
     expect(scopedSQSuccessEvent.data.total).toBe(300);
@@ -100,14 +85,34 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([]);
     expect(!!scopedSQSuccessEvent.silentMethod).toBeTruthy();
 
-    onComplete((event: any) => {
-      expect(event.behavior).toBe('queue');
-      expect(event.method).toBe(Get);
-      expect(event.data.total).toBe(300);
-      expect(event.data.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-      expect(event.sendArgs).toStrictEqual([]);
-      expect(!!event.silentMethod).toBeTruthy();
-    });
+    expect(beforePushMockFn).toHaveBeenCalledTimes(1);
+    const [beforePushEvent, currentQueueStageBeforePush] = beforePushMockFn.mock.calls[0];
+    expect(beforePushEvent).toBeInstanceOf(ScopedSQEvent);
+    expect(beforePushEvent.behavior).toBe('queue');
+    expect(beforePushEvent.method).toBe(Get);
+    expect(beforePushEvent.silentMethod).toBeInstanceOf(SilentMethod);
+    expect(beforePushEvent.sendArgs).toStrictEqual([]);
+    expect(currentQueueStageBeforePush).toHaveLength(0);
+
+    expect(pushedMockFn).toHaveBeenCalledTimes(1);
+    const [pushedEvent, currentQueueStagePushed] = pushedMockFn.mock.calls[0];
+    expect(pushedEvent).toBeInstanceOf(ScopedSQEvent);
+    expect(pushedEvent.behavior).toBe('queue');
+    expect(pushedEvent.method).toBe(Get);
+    expect(pushedEvent.silentMethod).toBeInstanceOf(SilentMethod);
+    expect(pushedEvent.sendArgs).toStrictEqual([]);
+    expect(currentQueueStagePushed).toHaveLength(1);
+    expect(currentQueueStagePushed[0]).toBe(pushedEvent.silentMethod);
+
+    expect(completeMockFn).toHaveBeenCalledTimes(1);
+    const completedEvent = completeMockFn.mock.calls[0][0];
+    expect(completedEvent).toBeInstanceOf(ScopedSQCompleteEvent);
+    expect(completedEvent.behavior).toBe('queue');
+    expect(completedEvent.method).toBe(Get);
+    expect(completedEvent.data.total).toBe(300);
+    expect(completedEvent.data.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(completedEvent.sendArgs).toStrictEqual([]);
+    expect(!!completedEvent.silentMethod).toBeTruthy();
 
     expect(Object.keys(silentQueueMap[queue])).toHaveLength(0);
   });
@@ -115,23 +120,23 @@ describe('vue => useSQRequest', () => {
   test('should receive params when call send function by behavior `queue`', async () => {
     const queue = 'tb21';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
+    const methodHandlerMockFn = jest.fn();
+    const behaviorMockFn = jest.fn();
+    const forceMockFn = jest.fn();
     const { send } = useSQRequest(
       (arg1, arg2) => {
-        expect(arg1).toBe(1);
-        expect(arg2).toBe(2);
+        methodHandlerMockFn(arg1, arg2);
         return Get;
       },
       {
         queue,
         immediate: false,
-        behavior(arg1, arg2) {
-          expect(arg1).toBe(1);
-          expect(arg2).toBe(2);
+        behavior(event) {
+          behaviorMockFn(event);
           return 'queue';
         },
-        force({ sendArgs: [arg1, arg2] }) {
-          expect(arg1).toBe(1);
-          expect(arg2).toBe(2);
+        force(event) {
+          forceMockFn(event);
           return false;
         }
       }
@@ -142,12 +147,16 @@ describe('vue => useSQRequest', () => {
       total: 300,
       list: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     });
+    expect(methodHandlerMockFn.mock.calls[0][0]).toBe(1);
+    expect(methodHandlerMockFn.mock.calls[0][1]).toBe(2);
+    expect(behaviorMockFn.mock.calls[0][0]).toStrictEqual(AlovaEventBase.spawn(Get, [1, 2]));
+    expect(forceMockFn.mock.calls[0][0]).toStrictEqual(AlovaEventBase.spawn(Get, [1, 2]));
   });
 
   test('should force request when set force to true in silent queue', async () => {
     const queue = 'tb31';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
-    const { loading, send, onSuccess } = useSQRequest(() => Get, {
+    const { send, onSuccess } = useSQRequest(() => Get, {
       queue,
       force() {
         return true;
@@ -155,11 +164,8 @@ describe('vue => useSQRequest', () => {
     });
 
     await untilCbCalled(onSuccess);
-    const promiseSend = send();
-    expect(loading.value).toBeTruthy();
-    const startTs = Date.now();
-    await promiseSend;
-    expect(Date.now() - startTs).toBeGreaterThan(40);
+    await send();
+    expect(Get.fromCache).toBeFalsy();
   });
 
   test('use send function to request with queue behavior', async () => {
@@ -171,53 +177,34 @@ describe('vue => useSQRequest', () => {
           pageSize
         }
       });
-    const { loading, data, error, downloading, uploading, send, onSuccess, onBeforePushQueue, onPushedQueue } =
-      useSQRequest((page, pageSize) => Get(page, pageSize), {
+    const { data, error, downloading, uploading, send, onSuccess, onBeforePushQueue, onPushedQueue } = useSQRequest(
+      (page, pageSize) => Get(page, pageSize),
+      {
         immediate: false,
         queue
-      });
+      }
+    );
 
     const beforePushMockFn = jest.fn();
     onBeforePushQueue(event => {
-      beforePushMockFn();
-      expect(event.behavior).toBe('queue');
-      expect(event.method.url).toBe('/list');
-      expect(event.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
-      expect(event.silentMethod).toBeInstanceOf(SilentMethod);
-      expect(event.sendArgs).toStrictEqual([2, 8]);
+      beforePushMockFn(event);
     });
     const pushedMockFn = jest.fn();
     onPushedQueue(event => {
-      pushedMockFn();
-      expect(event.behavior).toBe('queue');
-      expect(event.method.url).toBe('/list');
-      expect(event.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
-      expect(event.silentMethod).toBeInstanceOf(SilentMethod);
-      expect(event.sendArgs).toStrictEqual([2, 8]);
+      pushedMockFn(event);
     });
 
-    expect(loading.value).toBeFalsy();
     send(2, 8); // 发送请求
-    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
+    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
-    expect(loading.value).toBeFalsy();
+    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(data.value.total).toBe(300);
     expect(data.value.list).toStrictEqual([8, 9, 10, 11, 12, 13, 14, 15]);
-    expect(downloading.value).toEqual({ total: 0, loaded: 0 });
-    expect(uploading.value).toEqual({ total: 0, loaded: 0 });
+    expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
+    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
     expect(scopedSQSuccessEvent.behavior).toBe('queue');
@@ -225,47 +212,57 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQSuccessEvent.data.list).toStrictEqual([8, 9, 10, 11, 12, 13, 14, 15]);
     expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([2, 8]);
     expect(!!scopedSQSuccessEvent.silentMethod).toBeTruthy();
+
+    expect(beforePushMockFn).toHaveBeenCalledTimes(1);
+    const [beforePushEvent] = pushedMockFn.mock.calls[0];
+    expect(beforePushEvent.behavior).toBe('queue');
+    expect(beforePushEvent.method.url).toBe('/list');
+    expect(beforePushEvent.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
+    expect(beforePushEvent.silentMethod).toBeInstanceOf(SilentMethod);
+    expect(beforePushEvent.sendArgs).toStrictEqual([2, 8]);
+
+    expect(pushedMockFn).toHaveBeenCalledTimes(1);
+    const [pushedEvent] = pushedMockFn.mock.calls[0];
+    expect(pushedEvent.behavior).toBe('queue');
+    expect(pushedEvent.method.url).toBe('/list');
+    expect(pushedEvent.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
+    expect(pushedEvent.silentMethod).toBeInstanceOf(SilentMethod);
+    expect(pushedEvent.sendArgs).toStrictEqual([2, 8]);
   });
 
   test('should emit onError immediately while request error and never retry', async () => {
     const queue = 'tb3';
     const Get = () => alovaInst.Get<never>('/list-error');
-    const { loading, data, error, onError, onComplete } = useSQRequest(Get, {
+    const { data, error, onError, onComplete } = useSQRequest(Get, {
       behavior: 'queue',
       queue
     });
 
+    const completeMockFn = jest.fn();
+    onComplete(event => {
+      completeMockFn(event);
+    });
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQErrorEvent = (await untilCbCalled(onError)) as unknown as ScopedSQErrorEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
-    expect(loading.value).toBeFalsy();
+    const scopedSQErrorEvent = (await untilCbCalled(onError)) as unknown as ScopedSQErrorEvent<AlovaGenerics>;
     expect(data.value).toBeUndefined();
     expect(error.value?.message).toBe('server error');
 
-    expect((scopedSQErrorEvent as any)[Symbol.toStringTag]).toBe('ScopedSQErrorEvent');
+    expect(scopedSQErrorEvent).toBeInstanceOf(ScopedSQErrorEvent);
     expect(scopedSQErrorEvent.behavior).toBe('queue');
     expect(scopedSQErrorEvent.error.message).toBe('server error');
     expect(scopedSQErrorEvent.sendArgs).toStrictEqual([]);
     expect(scopedSQErrorEvent.silentMethod).not.toBeUndefined();
     expect(silentQueueMap[queue]).toHaveLength(0); // 在队列中移除了
 
-    onComplete((event: any) => {
-      expect((event as any)[Symbol.toStringTag]).toBe('ScopedSQCompleteEvent');
-      expect(event.behavior).toBe('queue');
-      expect(event.error.message).toBe('server error');
-      expect(event.sendArgs).toStrictEqual([]);
-      expect(event.silentMethod).not.toBeUndefined();
-    });
+    const [completedEvent] = completeMockFn.mock.calls[0];
+    expect(completedEvent).toBeInstanceOf(ScopedSQCompleteEvent);
+    expect(completedEvent.behavior).toBe('queue');
+    expect(completedEvent.error.message).toBe('server error');
+    expect(completedEvent.sendArgs).toStrictEqual([]);
+    expect(completedEvent.silentMethod).not.toBeUndefined();
   });
 
-  test('should prevent to push silentMethod when return false in onBeforePushQueue', async () => {
+  test('should prevent to push silentMethod when return false in certain callback of onBeforePushQueue', async () => {
     const queue = 'tb4';
     const Get = () => alovaInst.Get<any>('/list');
     const { onBeforePushQueue, onSuccess } = useSQRequest(Get, {
@@ -276,21 +273,21 @@ describe('vue => useSQRequest', () => {
 
     const successMockFn = jest.fn();
     onSuccess(successMockFn);
-    await untilCbCalled(setTimeout, 0);
+    await delay(0);
     expect(silentQueueMap[queue]).toStrictEqual([]);
-    await untilCbCalled(setTimeout, 500);
-    expect(successMockFn).not.toBeCalled();
+    await delay(500);
+    expect(successMockFn).not.toHaveBeenCalled();
 
     const { onBeforePushQueue: onBeforePushQueue2, onSuccess: onSuccess2 } = useSQRequest(Get, {
       behavior: 'queue',
       queue
     });
-    onBeforePushQueue2(() => false);
+    onBeforePushQueue2(() => {});
     onBeforePushQueue2(() => true);
     onSuccess2(successMockFn);
-    await untilCbCalled(setTimeout, 0);
+    await delay(0);
     expect(silentQueueMap[queue]?.[0]?.active).toBeTruthy();
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(successMockFn).toHaveBeenCalledTimes(1);
   });
 
@@ -306,22 +303,14 @@ describe('vue => useSQRequest', () => {
     onBeforePushQueue(pushMockFn);
     onPushedQueue(pushMockFn);
 
-    await untilCbCalled(setTimeout, 0);
+    await delay(0);
     // static行为模式下不会进入队列，需异步检查
     expect(silentQueueMap.a10).toBeUndefined();
 
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
-    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
+    const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(pushMockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({
@@ -349,7 +338,7 @@ describe('vue => useSQRequest', () => {
 
     await untilCbCalled(setTimeout, 0);
     expect(silentQueueMap[queue]).toHaveLength(1);
-    let persistentSilentQueueMap = loadSilentQueueMapFromStorage();
+    let persistentSilentQueueMap = await loadSilentQueueMapFromStorage();
     expect(persistentSilentQueueMap[queue]).toHaveLength(1);
 
     // 第二个请求
@@ -359,18 +348,22 @@ describe('vue => useSQRequest', () => {
       retryError: /.*/,
       maxRetryTimes: 2
     });
+    const fallbackMockFn = jest.fn();
     onFallback(event => {
-      expect(event.behavior).toBe('silent');
-      expect(event.method).not.toBeUndefined();
-      expect(event.silentMethod).toBeInstanceOf(SilentMethod);
-      expect(event.sendArgs).toStrictEqual([]);
+      fallbackMockFn(event);
     });
 
-    await untilCbCalled(setTimeout, 0);
+    await delay(0);
     expect(silentQueueMap[queue].length).toBe(2);
-    persistentSilentQueueMap = loadSilentQueueMapFromStorage();
+    persistentSilentQueueMap = await loadSilentQueueMapFromStorage();
     expect(persistentSilentQueueMap[queue].length).toBe(1); // 绑定了onFallback时不会持久化
     await untilCbCalled(onFallback);
+
+    const [fallbackEvent] = fallbackMockFn.mock.calls[0];
+    expect(fallbackEvent.behavior).toBe('silent');
+    expect(fallbackEvent.method).not.toBeUndefined();
+    expect(fallbackEvent.silentMethod).toBeInstanceOf(SilentMethod);
+    expect(fallbackEvent.sendArgs).toStrictEqual([]);
   });
 
   test('should be change behavior when param behavior set to a function that return different value', async () => {
@@ -381,7 +374,7 @@ describe('vue => useSQRequest', () => {
       behavior: () => behaviorStr,
       queue
     });
-    let event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    let event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(data.value).toBeInstanceOf(Undefined);
     expect(data.value[symbolVDataId]).not.toBeUndefined();
     expect(event.data).toBeInstanceOf(Undefined);
@@ -391,7 +384,7 @@ describe('vue => useSQRequest', () => {
 
     behaviorStr = 'static';
     send(1, 2, 3);
-    event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(data.value).toStrictEqual({ id: 1 });
     expect(event.data).toStrictEqual({ id: 1 });
     expect(event.behavior).toBe('static');
@@ -415,7 +408,7 @@ describe('vue => useSQRequest', () => {
       }
     });
 
-    let event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    let event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(event.data).toStrictEqual({ localData: 'abc' });
     expect(data.value).toStrictEqual({ localData: 'abc' });
 
@@ -424,7 +417,7 @@ describe('vue => useSQRequest', () => {
       behavior: 'queue',
       queue
     });
-    event = (await untilCbCalled(onSuccess2)) as unknown as ScopedSQSuccessEvent<any, any, any, any, any, any, any>;
+    event = (await untilCbCalled(onSuccess2)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(event.data).toStrictEqual({ id: 1 });
     expect(data2.value).toStrictEqual({ id: 1 });
   });
@@ -446,15 +439,7 @@ describe('vue => useSQRequest', () => {
       }
     });
 
-    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
+    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(event.data).toStrictEqual({ localData: 'abc' });
     expect(data.value).toStrictEqual({ localData: 'abc' });
   });
@@ -478,15 +463,7 @@ describe('vue => useSQRequest', () => {
       }
     });
 
-    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
+    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(event.data).toStrictEqual({ localData: 'abc' });
     expect(data.value).toStrictEqual({ localData: 'abc' });
   });
@@ -499,15 +476,7 @@ describe('vue => useSQRequest', () => {
       queue
     });
 
-    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
+    const event = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(event.behavior).toBe('silent');
     expect(event.method).not.toBeUndefined();
     expect(event.silentMethod).not.toBeUndefined();
@@ -524,15 +493,7 @@ describe('vue => useSQRequest', () => {
         b: 'bb'
       })
     });
-    const event2 = (await untilCbCalled(onSuccess2)) as unknown as ScopedSQSuccessEvent<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >;
+    const event2 = (await untilCbCalled(onSuccess2)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(data2.value[symbolVDataId]).not.toBeUndefined();
     expect(data2.value.a.toFixed(2)).toBe('1.00');
     expect(data2.value.b.replace('b', 'a')).toBe('ab');
@@ -741,14 +702,18 @@ describe('vue => useSQRequest', () => {
     expect(successFn).toHaveBeenCalledTimes(1);
     expect(completeFn).toHaveBeenCalledTimes(1);
 
+    const accessActionMockFn = jest.fn();
     accessAction('test_page', handlers => {
-      expect(handlers.send).toBeInstanceOf(Function);
-      expect(handlers.abort).toBeInstanceOf(Function);
+      accessActionMockFn(handlers);
       handlers.send();
     });
 
     await untilCbCalled(onSuccess);
     expect(successFn).toHaveBeenCalledTimes(2);
     expect(completeFn).toHaveBeenCalledTimes(2);
+
+    const handlers = accessActionMockFn.mock.calls[0][0];
+    expect(handlers.send).toBeInstanceOf(Function);
+    expect(handlers.abort).toBeInstanceOf(Function);
   });
 });

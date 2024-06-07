@@ -1,6 +1,6 @@
-import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
-import isVData from '../../src/hooks/silent/virtualResponse/isVData';
-import stringifyVData from '../../src/hooks/silent/virtualResponse/stringifyVData';
+import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import isVData from '@/hooks/silent/virtualResponse/isVData';
+import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
 
 describe('isVData', () => {
   test('primitive value', () => {
@@ -9,9 +9,11 @@ describe('isVData', () => {
     expect(isVData(true)).toBeFalsy();
   });
   test('primitive wrap value', () => {
+    /* eslint-disable */
     const num = new Object(1);
     const str = new Object('abc');
     const bool = new Object(true);
+    /* eslint-enable */
     expect(isVData(num)).toBeFalsy();
     expect(isVData(str)).toBeFalsy();
     expect(isVData(bool)).toBeFalsy();

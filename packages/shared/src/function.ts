@@ -78,7 +78,8 @@ export const globalToString = (arg: any) => ObjectCls.prototype.toString.call(ar
  * @param arg 任意参数
  * @returns 判断结果
  */
-export const isPlainObject = (arg: any): arg is Record<any, any> => globalToString(arg) === '[object Object]';
+export const isPlainObject = (arg: any): arg is Record<string | number | symbol, any> =>
+  globalToString(arg) === '[object Object]';
 /**
  * 判断是否为某个类的实例
  * @param arg 任意参数
@@ -179,12 +180,14 @@ export const omit = <T extends Record<string, any>, K extends keyof T>(obj: T, .
 };
 
 /**
- * 获取缓存的配置参数，固定返回{ e: number, m: number, s: boolean, t: string }格式的对象
- * e为expire缩写，表示缓存失效时间点（时间戳），单位为毫秒
+ * 获取缓存的配置参数，固定返回{ e: function, c: any, f: any, m: number, s: boolean, t: string }格式的对象
+ * e为expire缩写，它返回缓存失效时间点（时间戳），单位为毫秒
+ * c为controlled，表示是否为受控缓存
+ * f为cacheFor原始值，用于在c为true时调用获取缓存数据
  * m为mode缩写，存储模式
  * s为storage缩写，是否存储到本地
  * t为tag缩写，持久化存储标签
- * @param localCache 本地缓存参数
+ * @param methodInstance method实例
  * @returns 统一的缓存参数对象
  */
 export const getLocalCacheConfigParam = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => {
@@ -192,20 +195,21 @@ export const getLocalCacheConfigParam = <AG extends AlovaGenerics>(methodInstanc
   const getCacheExpireTs = (cacheExpire: CacheExpire) =>
     isNumber(cacheExpire) ? getTime() + cacheExpire : getTime(cacheExpire || undefinedValue);
   let cacheMode: CacheMode = MEMORY;
-  let expire = 0;
+  let expire: (mode: CacheMode) => ReturnType<typeof getCacheExpireTs> = () => 0;
   let store = falseValue;
   let tag: undefined | string = undefinedValue;
   const controlled = isFn(cacheFor);
   if (!controlled) {
-    if (isNumber(cacheFor) || instanceOf(cacheFor, Date)) {
-      expire = getCacheExpireTs(cacheFor);
-    } else {
-      const { mode = MEMORY, expire: configExpire = 0, tag: configTag } = cacheFor || {};
+    let expireColumn = cacheFor;
+    if (isPlainObject(cacheFor)) {
+      const { mode = MEMORY, expire, tag: configTag } = cacheFor || {};
       cacheMode = mode;
-      expire = getCacheExpireTs(configExpire);
       store = mode === STORAGE_RESTORE;
       tag = configTag ? configTag.toString() : undefinedValue;
+      expireColumn = expire;
     }
+    expire = (mode: CacheMode) =>
+      getCacheExpireTs(isFn(expireColumn) ? expireColumn({ method: methodInstance, mode }) : expireColumn);
   }
   return {
     f: cacheFor,
@@ -321,7 +325,7 @@ export const walkObject = (
 
   // 前序遍历
   preorder && callCallback();
-  if (isPlainObject(target)) {
+  if (isObject(target)) {
     for (const i in target) {
       if (!instanceOf(target, String)) {
         walkObject(target[i], callback, preorder, i, target);
@@ -524,3 +528,17 @@ const cacheKeyPrefix = '$a.';
  * build common cache key.
  */
 export const buildNamespacedCacheKey = (namespace: string, key: string) => cacheKeyPrefix + namespace + key;
+
+/**
+ * the same as `Promise.withResolvers`
+ * @returns promise with resolvers.
+ */
+export const promiseWithResolvers = <T>() => {
+  let resolve: (value: T | PromiseLike<T>) => void = noop;
+  let reject: (reason?: any) => void = noop;
+  const promise = newInstance(Promise<T>, (res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};

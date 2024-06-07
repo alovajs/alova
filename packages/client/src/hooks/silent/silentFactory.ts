@@ -28,8 +28,7 @@ import loadSilentQueueMapFromStorage from './storage/loadSilentQueueMapFromStora
  * @param {SilentSubmitBootHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) =>
-  globalSQEventManager.on(BootEventKey, () => handler());
+export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) => globalSQEventManager.on(BootEventKey, handler);
 
 /**
  * 绑定silentSubmit成功事件
@@ -37,7 +36,7 @@ export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) =>
  * @returns 解绑函数
  */
 export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) =>
-  globalSQEventManager.on(SuccessEventKey, event => handler(event));
+  globalSQEventManager.on(SuccessEventKey, handler);
 
 /**
  * 绑定silentSubmit错误事件
@@ -46,7 +45,7 @@ export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) =>
  * @returns 解绑函数
  */
 export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) =>
-  globalSQEventManager.on(ErrorEventKey, event => handler(event));
+  globalSQEventManager.on(ErrorEventKey, handler);
 
 /**
  * 绑定silentSubmit失败事件
@@ -54,8 +53,7 @@ export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) =>
  * @param {SilentSubmitFailHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) =>
-  globalSQEventManager.on(FailEventKey, event => handler(event));
+export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) => globalSQEventManager.on(FailEventKey, handler);
 
 /**
  * 绑定silentSubmit发起请求前事件
@@ -63,7 +61,7 @@ export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) =>
  * @returns 解绑函数
  */
 export const onBeforeSilentSubmit = (handler: BeforeSilentSubmitHandler) =>
-  globalSQEventManager.on(BeforeEventKey, event => handler(event));
+  globalSQEventManager.on(BeforeEventKey, handler);
 
 /**
  * 启动静默提交，它将载入缓存中的静默方法，并开始静默提交
@@ -72,13 +70,13 @@ export const onBeforeSilentSubmit = (handler: BeforeSilentSubmitHandler) =>
  */
 export const bootSilentFactory = (options: SilentFactoryBootOptions) => {
   if (silentFactoryStatus === 0) {
-    const { alova } = options;
+    const { alova, delay = 500 } = options;
     setDependentAlova(alova);
     setCustomSerializers(options.serializers);
     setQueueRequestWaitSetting(options.requestWait);
-    setTimeoutFn(() => {
+    setTimeoutFn(async () => {
       // 延时加载，让页面的queue放在最前面
-      merge2SilentQueueMap(loadSilentQueueMapFromStorage());
+      merge2SilentQueueMap(await loadSilentQueueMapFromStorage());
       // 循环启动队列静默提交
       // 多条队列是并行执行的
       forEach(objectKeys(silentQueueMap), queueName => {
@@ -86,6 +84,6 @@ export const bootSilentFactory = (options: SilentFactoryBootOptions) => {
       });
       setSilentFactoryStatus(1); // 设置状态为已启动
       globalSQEventManager.emit(BootEventKey, undefinedValue);
-    }, options.delay ?? 500);
+    }, delay);
   }
 };

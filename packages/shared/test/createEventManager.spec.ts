@@ -113,7 +113,7 @@ describe('EventManager', () => {
     manager.on('foo', mockFoo4);
 
     const start = Date.now();
-    const result = await manager.emit('foo', 'tom', true);
+    const result = await Promise.all(manager.emit('foo', 'tom'));
     const usedTime = Date.now() - start;
 
     expect(usedTime).toBeGreaterThanOrEqual(400);

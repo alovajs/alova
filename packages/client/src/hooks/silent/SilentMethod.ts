@@ -1,13 +1,12 @@
-/* eslint-disable import/no-cycle */
 import { uuid } from '@/util/helper';
+import { EventManager } from '@alova/shared/createEventManager';
 import { getContext, instanceOf } from '@alova/shared/function';
 import { falseValue, isArray, splice, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
 import type {
   BackoffPolicy,
-  FallbackHandler,
-  RetryHandler,
   SQHookBehavior,
+  ScopedSQEvents,
   SilentMethod as SilentMethodInterface,
   SilentQueueMap
 } from '~/typings/general';
@@ -25,7 +24,7 @@ export type RetryError = NonNullable<SilentMethodInterface['retryError']>;
  * @param silentMethodInstance silentMethod实例
  */
 const getBelongQueuePosition = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>) => {
-  let queue: SilentQueueMap<AG>[string] | undefined = undefinedValue;
+  let queue: SilentQueueMap[string] | undefined = undefinedValue;
   let queueName = '';
   let position = 0;
   for (const queueNameLoop in silentQueueMap) {
@@ -64,9 +63,6 @@ export class SilentMethod<AG extends AlovaGenerics> {
   /** 避让策略 */
   public backoff?: BackoffPolicy;
 
-  /** 回退事件回调，当重试次数达到上限但仍然失败时，此回调将被调用 */
-  public fallbackHandlers?: FallbackHandler<AG>[];
-
   /** Promise的resolve函数，调用将通过对应的promise对象 */
   public resolveHandler?: PromiseExecuteParameter['0'];
 
@@ -95,8 +91,8 @@ export class SilentMethod<AG extends AlovaGenerics> {
   /** 调用updateStateEffect更新了哪些状态 */
   public updateStates?: string[];
 
-  /** 重试回调函数 */
-  public retryHandlers?: RetryHandler<AG>[];
+  /** 事件管理器 */
+  public emitter: EventManager<ScopedSQEvents<AG>>;
 
   /** 当前是否正在请求中 */
   public active?: boolean;
@@ -107,39 +103,37 @@ export class SilentMethod<AG extends AlovaGenerics> {
   constructor(
     entity: Method<AG>,
     behavior: SQHookBehavior,
+    emitter: EventManager<ScopedSQEvents<AG>>,
     id = uuid(),
     force?: boolean,
     retryError?: RetryError,
     maxRetryTimes?: MaxRetryTimes,
     backoff?: BackoffPolicy,
-    fallbackHandlers?: FallbackHandler<AG>[],
     resolveHandler?: PromiseExecuteParameter['0'],
     rejectHandler?: PromiseExecuteParameter['1'],
     handlerArgs?: any[],
-    vDatas?: string[],
-    retryHandlers?: RetryHandler<AG>[]
+    vDatas?: string[]
   ) {
     const thisObj = this;
     thisObj.entity = entity;
     thisObj.behavior = behavior;
     thisObj.id = id;
+    thisObj.emitter = emitter;
     thisObj.force = !!force;
     thisObj.retryError = retryError;
     thisObj.maxRetryTimes = maxRetryTimes;
     thisObj.backoff = backoff;
-    thisObj.fallbackHandlers = fallbackHandlers;
     thisObj.resolveHandler = resolveHandler;
     thisObj.rejectHandler = rejectHandler;
     thisObj.handlerArgs = handlerArgs;
     thisObj.vDatas = vDatas;
-    thisObj.retryHandlers = retryHandlers;
   }
 
   /**
    * 允许缓存时持久化更新当前实例
    */
-  public save() {
-    this.cache && persistSilentMethod(this);
+  public async save() {
+    this.cache && (await persistSilentMethod(this));
   }
 
   /**
@@ -147,7 +141,7 @@ export class SilentMethod<AG extends AlovaGenerics> {
    * 如果有持久化缓存也将会更新缓存
    * @param newSilentMethod 新的silentMethod实例
    */
-  public replace(newSilentMethod: SilentMethod<AG>) {
+  public async replace(newSilentMethod: SilentMethod<AG>) {
     const targetSilentMethod = this;
     silentAssert(
       newSilentMethod.cache === targetSilentMethod.cache,
@@ -156,23 +150,24 @@ export class SilentMethod<AG extends AlovaGenerics> {
     const [queue, queueName, position] = getBelongQueuePosition(targetSilentMethod);
     if (queue) {
       splice(queue, position, 1, newSilentMethod);
-      targetSilentMethod.cache && spliceStorageSilentMethod(queueName, targetSilentMethod.id, newSilentMethod);
+      targetSilentMethod.cache && (await spliceStorageSilentMethod(queueName, targetSilentMethod.id, newSilentMethod));
     }
   }
 
   /**
    * 移除当前实例，如果有持久化数据，也会同步移除
    */
-  public remove() {
+  public async remove() {
     const targetSilentMethod = this;
     const [queue, queueName, position] = getBelongQueuePosition(targetSilentMethod);
     if (queue) {
       splice(queue, position, 1);
-      targetSilentMethod.cache && spliceStorageSilentMethod(queueName, targetSilentMethod.id);
+      targetSilentMethod.cache && (await spliceStorageSilentMethod(queueName, targetSilentMethod.id));
     }
   }
 
   /**
+   * // TODO: 检查matcher参数
    * 设置延迟更新状态对应的method实例以及对应的状态名
    * 它将在此silentMethod响应后，找到对应的状态数据并将vData更新为实际数据
    *

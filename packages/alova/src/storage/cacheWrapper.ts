@@ -7,7 +7,6 @@ import {
   forEach,
   len,
   mapItem,
-  nullValue,
   objectKeys,
   pushItem,
   undefinedValue
@@ -47,7 +46,7 @@ export const setWithCacheAdapter = async (
     const methodCacheKey = buildNamespacedCacheKey(namespace, key);
     await cacheAdapter.set(
       methodCacheKey,
-      filterItem([data, expireTimestamp === Infinity ? nullValue : expireTimestamp, tag], Boolean)
+      filterItem([data, expireTimestamp === Infinity ? undefinedValue : expireTimestamp, tag], Boolean)
     );
 
     // save the relationship between this method and its hitSources.

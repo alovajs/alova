@@ -1,8 +1,10 @@
-import { Method } from 'alova';
-import { dependentAlovaInstance } from '../globalVariables';
-import { SerializedSilentMethod, SilentMethod } from '../SilentMethod';
+import createEventManager from '@alova/shared/createEventManager';
 import { newInstance } from '@alova/shared/function';
-import { trueValue, objectKeys, forEach, includes } from '@alova/shared/vars';
+import { forEach, includes, objectKeys, trueValue } from '@alova/shared/vars';
+import { Method } from 'alova';
+import { ScopedSQEvents } from '~/typings/general';
+import { SerializedSilentMethod, SilentMethod } from '../SilentMethod';
+import { dependentAlovaInstance } from '../globalVariables';
 
 /**
  * 反序列化silentMethod实例，根据序列化器的名称进行反序列化
@@ -17,7 +19,6 @@ export default (payload: SerializedSilentMethod) => {
     retryError,
     maxRetryTimes,
     backoff,
-    fallbackHandlers,
     resolveHandler,
     rejectHandler,
     handlerArgs,
@@ -30,16 +31,17 @@ export default (payload: SerializedSilentMethod) => {
     const { type, url, config, data } = methodPayload;
     return newInstance(Method, type, dependentAlovaInstance, url, config, data);
   };
+
   const silentMethodInstance = newInstance(
     SilentMethod,
     deserializeMethod(entity),
     behavior,
+    createEventManager<ScopedSQEvents<any>>(),
     id,
     force,
     retryError,
     maxRetryTimes,
     backoff,
-    fallbackHandlers,
     resolveHandler,
     rejectHandler,
     handlerArgs
@@ -58,11 +60,11 @@ export default (payload: SerializedSilentMethod) => {
         [
           'id',
           'behavior',
+          'emitter',
           'entity',
           'retryError',
           'maxRetryTimes',
           'backoff',
-          'fallbackHandlers',
           'resolveHandler',
           'rejectHandler',
           'handlerArgs',
@@ -75,6 +77,5 @@ export default (payload: SerializedSilentMethod) => {
       (silentMethodInstance as any)[key] = payload[key as keyof typeof payload];
     }
   });
-
   return silentMethodInstance;
 };

@@ -1,3 +1,4 @@
+import { buildErrorMsg } from '@alova/shared/assert';
 import { isSpecialRequestBody, isString, newInstance } from '@alova/shared/function';
 import {
   JSONStringify,
@@ -96,6 +97,15 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
       abort: () => {
         ctrl.abort();
         clearTimeoutTimer(abortTimer);
+      },
+      onUpload: () => {
+        throw newInstance(
+          Error,
+          buildErrorMsg(
+            '',
+            'fetch api does not support uploading. we recommend to use `@alova/adapter-xhr` or `@alova/adapter-axios`'
+          )
+        );
       }
     };
   };

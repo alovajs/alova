@@ -264,7 +264,7 @@ describe('shared functions', () => {
     const mockMethodInstance = alovaInst.Get('/unit-test');
     const result = getLocalCacheConfigParam(mockMethodInstance);
     // request GET has 5 min cache default.
-    expect(result).toStrictEqual({
+    expect({ ...result, e: result.e('memory') }).toStrictEqual({
       c: false,
       e: baseTs + 300000,
       f: 300000,
@@ -278,7 +278,7 @@ describe('shared functions', () => {
       cacheFor: 60000
     });
     const result2 = getLocalCacheConfigParam(mockMethodInstance2);
-    expect(result2).toStrictEqual({
+    expect({ ...result2, e: result2.e('memory') }).toStrictEqual({
       c: false,
       e: baseTs + 60000,
       f: 60000,
@@ -293,7 +293,7 @@ describe('shared functions', () => {
       cacheFor: futureDate
     });
     const result3 = getLocalCacheConfigParam(mockMethodInstance3);
-    expect(result3).toStrictEqual({
+    expect({ ...result3, e: result3.e('memory') }).toStrictEqual({
       c: false,
       e: futureDate.getTime(),
       f: futureDate,
@@ -311,9 +311,10 @@ describe('shared functions', () => {
       }
     });
     const result4 = getLocalCacheConfigParam(mockMethodInstance4);
-    expect(result4).toStrictEqual({
+    expect({ ...result4, e: result4.e('restore'), e_m: result4.e('memory') }).toStrictEqual({
       c: false,
       e: 1600000030000,
+      e_m: 1600000030000,
       f: {
         mode: STORAGE_RESTORE,
         expire: 30000, // 30 seconds
@@ -332,12 +333,31 @@ describe('shared functions', () => {
       cacheFor: controlledCacheFor
     });
     const result5 = getLocalCacheConfigParam(mockMethodInstance5);
-    expect(result5).toStrictEqual({
+    expect({ ...result5, e: result5.e('memory') }).toStrictEqual({
       c: true,
       e: 0,
       f: controlledCacheFor,
       m: MEMORY,
       s: false,
+      t: undefined
+    });
+
+    // should expire return different values when set expire to an function.
+    const mockMethodInstance6 = alovaInst.Get('/unit-test', {
+      cacheFor: {
+        mode: 'restore',
+        expire: ({ mode }: any) => (mode === 'memory' ? 1000 : 5000)
+      }
+    });
+    const result6 = getLocalCacheConfigParam(mockMethodInstance6);
+    // request GET has 5 min cache default.
+    expect({ ...result6, e: result6.e('restore'), e_m: result6.e('memory') }).toStrictEqual({
+      c: false,
+      e: 1600000005000,
+      e_m: 1600000001000,
+      f: mockMethodInstance6.config.cacheFor,
+      m: STORAGE_RESTORE,
+      s: true,
       t: undefined
     });
 

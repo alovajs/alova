@@ -1,7 +1,7 @@
-import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
-import Null from '../../src/hooks/silent/virtualResponse/Null';
-import Undefined from '../../src/hooks/silent/virtualResponse/Undefined';
-import { symbolVDataId } from '../../src/hooks/silent/virtualResponse/variables';
+import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import Null from '@/hooks/silent/virtualResponse/Null';
+import Undefined from '@/hooks/silent/virtualResponse/Undefined';
+import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 
 // 虚拟响应测试
 describe('virtual response', () => {
@@ -32,7 +32,8 @@ describe('virtual response', () => {
 
     const vBool = createVirtualResponse(true);
     expect(vBool.toString()).toBe('true');
-    expect(`${vBool}aa`).toMatch(/^\[vd:.+\]aa$/);
+    // eslint-disable-next-line
+    expect(vBool + 'aa').toMatch(/^\[vd:.+\]aa$/);
   });
 
   test('create virtual response with object', () => {
@@ -41,6 +42,7 @@ describe('virtual response', () => {
       b: 'bb',
       c: [1, 2, 3]
     });
+
     const { a } = vObject;
     const { b } = vObject;
     const { b1 } = vObject.b;

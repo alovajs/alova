@@ -1,5 +1,8 @@
 import { AlovaGenerics, AlovaRequestAdapter, Method } from 'alova';
-import { FetchRequestInit } from 'alova/GlobalFetch';
+import adapterFetch from 'alova/fetch';
+
+type FetchRequestInit =
+  ReturnType<typeof adapterFetch> extends AlovaRequestAdapter<infer RequestConfig, any, any> ? RequestConfig : never;
 
 export interface MockServerRequest {
   headers: Record<string, any>;

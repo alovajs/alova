@@ -1,8 +1,11 @@
-import { createAlova, Method } from 'alova';
+import { SilentMethod } from '@/hooks/silent/SilentMethod';
+import { bootSilentFactory, onSilentSubmitError, onSilentSubmitSuccess } from '@/hooks/silent/silentFactory';
+import { pushNewSilentMethod2Queue, silentQueueMap } from '@/hooks/silent/silentQueue';
+import createEventManager from '@alova/shared/createEventManager';
+import { promiseWithResolvers } from '@alova/shared/function';
+import { Method, createAlova } from 'alova';
 import VueHook from 'alova/vue';
-import { bootSilentFactory, onSilentSubmitError, onSilentSubmitSuccess } from '../../src/hooks/silent/silentFactory';
-import { SilentMethod } from '../../src/hooks/silent/SilentMethod';
-import { pushNewSilentMethod2Queue, silentQueueMap } from '../../src/hooks/silent/silentQueue';
+import { ScopedSQEvents } from '~/typings/general';
 import { mockRequestAdapter } from '../mockData';
 
 describe('silent method request in queue with queue behavior', () => {
@@ -15,25 +18,24 @@ describe('silent method request in queue with queue behavior', () => {
     });
 
     const methodInstance = new Method('POST', alovaInst, '/detail');
-    const pms = new Promise(resolve => {
-      const silentMethodInstance = new SilentMethod(
-        methodInstance,
-        'queue',
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        value => resolve(value)
-      );
-      pushNewSilentMethod2Queue(silentMethodInstance, false);
+    const { promise: pms, resolve } = promiseWithResolvers();
+    const silentMethodInstance = new SilentMethod(
+      methodInstance,
+      'queue',
+      createEventManager(),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      value => resolve(value)
+    );
+    await pushNewSilentMethod2Queue(silentMethodInstance, false);
 
-      // 启动silentFactory
-      bootSilentFactory({
-        alova: alovaInst,
-        delay: 0
-      });
+    // 启动silentFactory
+    bootSilentFactory({
+      alova: alovaInst,
+      delay: 0
     });
 
     const successMockFn = jest.fn();
@@ -62,39 +64,30 @@ describe('silent method request in queue with queue behavior', () => {
     const methodInstance = new Method('POST', alovaInst, '/detail-error', undefined, {
       id: 'aa'
     });
-    const pms = new Promise(resolve => {
-      const silentMethodInstance = new SilentMethod(
-        methodInstance,
-        'queue',
-        undefined,
-        undefined,
-        /.*/,
-        2,
-        {
-          delay: 50
-        },
-        [
-          () => {
-            fallbackMockFn();
-          }
-        ],
-        value => resolve(value),
-        reason => resolve(reason),
-        undefined,
-        undefined,
-        [
-          () => {
-            retryMockFn();
-          }
-        ]
-      );
-      pushNewSilentMethod2Queue(silentMethodInstance, false, queueName); // 多个用例需要分别放到不同队列，否则会造成冲突
+    const { promise: pms, resolve } = promiseWithResolvers();
+    const emitter = createEventManager<ScopedSQEvents<any>>();
+    emitter.on('fallback', fallbackMockFn);
+    emitter.on('retry', retryMockFn);
+    const silentMethodInstance = new SilentMethod(
+      methodInstance,
+      'queue',
+      emitter,
+      undefined,
+      undefined,
+      /.*/,
+      2,
+      {
+        delay: 50
+      },
+      value => resolve(value),
+      reason => resolve(reason)
+    );
+    await pushNewSilentMethod2Queue(silentMethodInstance, false, queueName); // 多个用例需要分别放到不同队列，否则会造成冲突
 
-      // 启动silentFactory
-      bootSilentFactory({
-        alova: alovaInst,
-        delay: 0
-      });
+    // 启动silentFactory
+    bootSilentFactory({
+      alova: alovaInst,
+      delay: 0
     });
 
     const errorMockFn = jest.fn();

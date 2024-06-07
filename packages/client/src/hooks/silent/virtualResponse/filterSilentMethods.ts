@@ -13,7 +13,7 @@ import loadSilentQueueMapFromStorage from '../storage/loadSilentQueueMapFromStor
  * @param filterActive 是否过滤掉激活状态的实例
  * @returns silentMethod实例数组
  */
-export const filterSilentMethods = (
+export const filterSilentMethods = async (
   methodNameMatcher?: string | number | RegExp,
   queueName = DEFAUT_QUEUE_NAME,
   filterActive = falseValue
@@ -34,7 +34,7 @@ export const filterSilentMethods = (
     ...matchSilentMethods(silentQueueMap[queueName]),
 
     // 如果当前未启动silentFactory，则还需要去持久化存储中匹配silentMethods
-    ...(silentFactoryStatus === 0 ? matchSilentMethods(loadSilentQueueMapFromStorage()[queueName]) : [])
+    ...(silentFactoryStatus === 0 ? matchSilentMethods((await loadSilentQueueMapFromStorage())[queueName]) : [])
   ];
 };
 
@@ -45,8 +45,8 @@ export const filterSilentMethods = (
  * @param filterActive 是否过滤掉激活状态的实例
  * @returns silentMethod实例，未找到时为undefined
  */
-export const getSilentMethod = (
+export const getSilentMethod = async (
   methodNameMatcher?: string | number | RegExp,
   queueName = DEFAUT_QUEUE_NAME,
   filterActive = falseValue
-): SilentMethod<any> | undefined => filterSilentMethods(methodNameMatcher, queueName, filterActive)[0];
+): Promise<SilentMethod<any> | undefined> => (await filterSilentMethods(methodNameMatcher, queueName, filterActive))[0];

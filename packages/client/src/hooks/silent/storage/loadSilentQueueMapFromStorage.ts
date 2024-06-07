@@ -1,3 +1,4 @@
+import { PromiseCls, forEach, mapItem, objectKeys, pushItem } from '@alova/shared/vars';
 import { SilentQueueMap } from '~/typings/general';
 import convertPayload2SilentMethod from './convertPayload2SilentMethod';
 import {
@@ -6,23 +7,28 @@ import {
   silentMethodStorageKeyPrefix,
   storageGetItem
 } from './performers';
-import { forEach, objectKeys, pushItem } from '@alova/shared/vars';
 
 /**
  * 从storage中载入静默队列数据
  * @returns 所有队列数据
  */
-export default () => {
-  const silentMethodIdQueueMap = (storageGetItem(silentMethodIdQueueMapStorageKey) ||
+export default async () => {
+  const silentMethodIdQueueMap = ((await storageGetItem(silentMethodIdQueueMapStorageKey)) ||
     {}) as SerializedSilentMethodIdQueueMap;
   const silentQueueMap = {} as SilentQueueMap;
+
+  const readingPromises: Promise<void>[] = [];
   forEach(objectKeys(silentMethodIdQueueMap), queueName => {
     const currentQueue = (silentQueueMap[queueName] = silentQueueMap[queueName] || []);
-    forEach(silentMethodIdQueueMap[queueName], silentMethodId => {
-      const serializedSilentMethodPayload = storageGetItem(silentMethodStorageKeyPrefix + silentMethodId);
-      serializedSilentMethodPayload &&
-        pushItem(currentQueue, convertPayload2SilentMethod(serializedSilentMethodPayload));
-    });
+    pushItem(
+      readingPromises,
+      ...mapItem(silentMethodIdQueueMap[queueName], async silentMethodId => {
+        const serializedSilentMethodPayload = await storageGetItem(silentMethodStorageKeyPrefix + silentMethodId);
+        serializedSilentMethodPayload &&
+          pushItem(currentQueue, convertPayload2SilentMethod(serializedSilentMethodPayload));
+      })
+    );
   });
+  await PromiseCls.all(readingPromises);
   return silentQueueMap;
 };

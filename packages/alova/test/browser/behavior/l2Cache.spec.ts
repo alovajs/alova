@@ -1,9 +1,12 @@
 import { getAlovaInstance } from '#/utils';
-import { queryCache } from '@/index';
+import { invalidateCache, queryCache } from '@/index';
 import { removeWithCacheAdapter } from '@/storage/cacheWrapper';
 import { Result, delay } from 'root/testUtils';
 import { DetailCacheConfig } from '~/typings';
 
+beforeEach(() => {
+  invalidateCache();
+});
 describe('l2cache cache data', () => {
   test('l2cache data will restore to l1cache even if the l1cache of the same key is invalid', async () => {
     const alova = getAlovaInstance({
@@ -70,6 +73,28 @@ describe('l2cache cache data', () => {
     // After setting to restore, even if the local cache fails, the persistent data will be automatically restored to the cache in the macro, so the cache will be hit.
     await Get;
     expect(Get.fromCache).toBeTruthy();
+  });
+
+  test('expire param can also be set a Date instance', async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      cacheFor: {
+        expire: Infinity,
+        mode: 'restore'
+      },
+      transformData: ({ data }: Result) => data
+    });
+    await Get;
+
+    // Simulated for a long time later.
+    const nowFn = Date.now;
+    Date.now = () => nowFn() + 10000000000;
+    await Get;
+    expect(Get.fromCache).toBeTruthy();
+
+    Date.now = nowFn;
   });
 
   test('l2cache data will invalid when param `tag` of alova instance is changed', async () => {

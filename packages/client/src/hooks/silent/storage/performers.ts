@@ -1,6 +1,7 @@
 import createSerializerPerformer from '@/util/serializer';
-import { walkObject, instanceOf, isObject } from '@alova/shared/function';
-import { undefinedValue, falseValue, ObjectCls, len, objectKeys, isArray, forEach, includes } from '@alova/shared/vars';
+import { globalToString, instanceOf, isObject, walkObject } from '@alova/shared/function';
+import { falseValue, forEach, includes, isArray, len, objectKeys, undefinedValue } from '@alova/shared/vars';
+import { AlovaGlobalCacheAdapter } from 'alova';
 import { customSerializers, dependentAlovaInstance, silentAssert } from '../globalVariables';
 import createVirtualResponse from '../virtualResponse/createVirtualResponse';
 import { dehydrateVDataUnified } from '../virtualResponse/dehydrateVData';
@@ -15,7 +16,7 @@ const getAlovaStorage = () => {
     !!dependentAlovaInstance,
     'alova instance is not found, Do you forget to set `alova` or call `bootSilentFactory`?'
   );
-  return dependentAlovaInstance.l2Cache;
+  return dependentAlovaInstance.l2Cache as AlovaGlobalCacheAdapter;
 };
 
 let serializerPerformer: ReturnType<typeof createSerializerPerformer> | undefined = undefinedValue;
@@ -26,7 +27,7 @@ export const silentMethodStorageKeyPrefix = 'alova.SM.'; // silentMethod实例�
  * @param key 持久化key
  * @param payload 持久化数据
  */
-export const storageSetItem = (key: string, payload: any) => {
+export const storageSetItem = async (key: string, payload: any) => {
   const storage = getAlovaStorage();
   if (isObject(payload)) {
     payload = walkObject(isArray(payload) ? [...payload] : { ...payload }, (value, key, parent) => {
@@ -42,7 +43,7 @@ export const storageSetItem = (key: string, payload: any) => {
       let primitiveValue = dehydrateVDataUnified(value, falseValue);
 
       // 需要用原始值判断，否则像new Number(1)等包装类也会是[object Object]
-      const toStringTag = ObjectCls.prototype.toString.call(primitiveValue);
+      const toStringTag = globalToString(primitiveValue);
       if (toStringTag === '[object Object]') {
         value = { ...value };
         primitiveValue = {};
@@ -73,14 +74,14 @@ export const storageSetItem = (key: string, payload: any) => {
     });
   }
   serializerPerformer = serializerPerformer || createSerializerPerformer(customSerializers);
-  storage.set(key, serializerPerformer.serialize(payload));
+  await storage.set(key, serializerPerformer.serialize(payload));
 };
 /**
- * 取出持久化数据，并数据转换虚拟数据和已序列化数据
+ * 取出持久化数据，并将数据转换为虚拟数据和已序列化数据
  * @param key 持久化数据的key
  */
-export const storageGetItem = (key: string) => {
-  const storagedResponse = getAlovaStorage().get(key);
+export const storageGetItem = async (key: string) => {
+  const storagedResponse = await getAlovaStorage().get(key);
   serializerPerformer = serializerPerformer || createSerializerPerformer(customSerializers);
   return isObject(storagedResponse)
     ? walkObject(
@@ -107,6 +108,6 @@ export const storageGetItem = (key: string) => {
  * 移除持久化数据
  * @param key 持久化数据的key
  */
-export const storageRemoveItem = (key: string) => {
-  getAlovaStorage().remove(key);
+export const storageRemoveItem = async (key: string) => {
+  await getAlovaStorage().remove(key);
 };

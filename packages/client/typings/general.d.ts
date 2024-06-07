@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { EventManager } from '@alova/shared/createEventManager';
 import { Alova, AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
 import {
   AlovaCompleteEvent,
@@ -80,26 +81,38 @@ interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends Watch
 //  [ScopedSQSuccessEvent | ScopedSQErrorEvent]完成事件：behavior、silentMethod实例、method实例、retryTimes、send参数、[?]错误对象
 //  [ScopedSQEvent]入队列前：behavior、silentMethod实例、method实例、send参数
 //  [ScopedSQEvent]入队列后：behavior、silentMethod实例、method实例、send参数
-/** 顶层事件 */
-interface SQEvent<S, E, R, T, RC, RE, RH> {
-  /** 事件对应的请求行为 */
+/** SQ顶层事件 */
+interface SQEvent<AG extends AlovaGenerics> {
+  /**
+   * 事件对应的请求行为
+   */
   behavior: SQHookBehavior;
-  /** 当前的method实例 */
-  method: Method<S, E, R, T, RC, RE, RH>;
-  /** 当前的silentMethod实例，当behavior为static时没有值 */
-  silentMethod?: SilentMethod<S, E, R, T, RC, RE, RH>;
+  /**
+   * 当前的method实例
+   */
+  method: Method<AG>;
+  /**
+   * 当前的silentMethod实例，当behavior为static时没有值
+   */
+  silentMethod?: SilentMethod<AG>;
 }
-/** 全局事件 */
-interface GlobalSQEvent extends SQEvent<any, any, any, any, any, any, any> {
-  /** 重试次数，在beforePush和pushed事件中没有值 */
+/** SQ全局事件 */
+interface GlobalSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> {
+  /**
+   * 重试次数，在beforePush和pushed事件中没有值
+   */
   retryTimes: number;
 
-  /** silentMethod所在的队列名 */
+  /**
+   * silentMethod所在的队列名
+   */
   queueName: string;
 }
-/** 全局成功事件 */
-interface GlobalSQSuccessEvent extends GlobalSQEvent {
-  /** 响应数据 */
+/** SQ全局成功事件 */
+interface GlobalSQSuccessEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> {
+  /**
+   * 响应数据
+   */
   data: any;
   /**
    * 虚拟数据和实际值的集合
@@ -107,47 +120,69 @@ interface GlobalSQSuccessEvent extends GlobalSQEvent {
    */
   vDataResponse: Record<string, any>;
 }
-/** 全局失败事件 */
-interface GlobalSQErrorEvent extends GlobalSQEvent {
-  /** 失败时抛出的错误 */
+/** SQ全局失败事件 */
+interface GlobalSQErrorEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> {
+  /**
+   * 失败时抛出的错误
+   */
   error: any;
 
-  /** 下次重试间隔时间（毫秒） */
+  /**
+   * 下次重试间隔时间（毫秒）
+   */
   retryDelay?: number;
 }
-/** 全局失败事件 */
-interface GlobalSQFailEvent extends GlobalSQEvent {
+/** SQ全局失败事件 */
+interface GlobalSQFailEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> {
   /** 失败时抛出的错误 */
   error: any;
 }
 
-/** 局部事件 */
+/** SQ局部事件 */
 interface ScopedSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> {
-  /** 通过send触发请求时传入的参数 */
+  /**
+   * 通过send触发请求时传入的参数
+   */
   sendArgs: any[];
 }
 /** 局部成功事件 */
 interface ScopedSQSuccessEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
-  /** 响应数据 */
-  data: R;
+  /**
+   * 响应数据
+   */
+  data: AG['Responded'];
 }
 /** 局部失败事件 */
 interface ScopedSQErrorEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
-  /** 失败时抛出的错误 */
+  /**
+   * 失败时抛出的错误
+   */
   error: any;
 }
 /** 局部失败事件 */
 interface ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
+  /**
+   * 重试次数
+   */
   retryTimes: number;
+  /**
+   * 重试间隔时间（毫秒）
+   */
   retryDelay: number;
 }
 /** 局部完成事件 */
 interface ScopedSQCompleteEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
-  /** 响应状态 */
+  /**
+   * 响应状态
+   */
   status: AlovaCompleteEvent<AG>['status'];
-  /** 响应数据 */
-  data?: R;
-  /** 失败时抛出的错误 */
+  /**
+   * 响应数据
+   */
+  data?: AG['Responded'];
+  /**
+   * 失败时抛出的错误
+   */
   error?: any;
 }
 
@@ -185,21 +220,38 @@ interface BackoffPolicy {
   endQuiver?: number;
 }
 
+export type ScopedSQEvents<AG extends AlovaGenerics> = {
+  fallback: ScopedSQEvent<AG>;
+  retry: ScopedSQRetryEvent<AG>;
+  beforePushQueue: ScopedSQEvent<AG>;
+  pushedQueue: ScopedSQEvent<AG>;
+};
+
 /**
  * silentMethod实例
  * 需要进入silentQueue的请求都将被包装成silentMethod实例，它将带有请求策略的各项参数
  */
 interface SilentMethod<AG extends AlovaGenerics = AlovaGenerics> {
-  /** silentMethod实例id */
+  /**
+   * silentMethod实例id
+   */
   readonly id: string;
-  /** 是否为持久化实例 */
-  readonly cache: boolean;
-  /** 实例的行为，queue或silent */
+  /**
+   * 实例的行为，queue或silent
+   */
   readonly behavior: SQHookBehavior;
-  /** method实例 */
+  /**
+   * method实例
+   */
   readonly entity: Method<AG>;
 
-  /** 重试错误规则
+  /**
+   * 是否为持久化实例
+   */
+  cache: boolean;
+
+  /**
+   * 重试错误规则
    * 当错误符合以下表达式时才进行重试
    * 当值为正则表达式时，它将匹配错误对象的message
    * 当值为对象时，可设定匹配的是错误对象的name、或者message，如果两者都有设定，将以或的形式匹配
@@ -207,15 +259,19 @@ interface SilentMethod<AG extends AlovaGenerics = AlovaGenerics> {
    * 未设置时，默认所有错误都进行重试
    */
   readonly retryError?: RegExp | RetryErrorDetailed;
-  /** 重试次数 */
+  /**
+   * 重试次数
+   */
   readonly maxRetryTimes?: number;
-  /** 避让策略 */
+  /**
+   * 避让策略
+   */
   readonly backoff?: BackoffPolicy;
 
   /**
    * 回退事件回调，当重试次数达到上限但仍然失败时，此回调将被调用
    */
-  readonly fallbackHandlers?: FallbackHandler<AG>[];
+  readonly emitter: EventManager<ScopedSQEvents<AG>>;
 
   /**
    * Promise的resolve函数，调用将通过对应的promise对象
@@ -274,9 +330,6 @@ interface SilentMethod<AG extends AlovaGenerics = AlovaGenerics> {
    */
   targetRefMethod?: Method<AG>;
 
-  /** 重试回调函数 */
-  retryHandlers?: RetryHandler<S, E, R, T, RC, RE, RH>[];
-
   /** 当前是否正在请求中 */
   active?: boolean;
 
@@ -286,19 +339,19 @@ interface SilentMethod<AG extends AlovaGenerics = AlovaGenerics> {
   /**
    * 允许缓存时持久化更新当前实例
    */
-  save(): void;
+  save(): Promise<void>;
 
   /**
    * 在队列中使用一个新的silentMethod实例替换当前实例
    * 如果有持久化缓存也将会更新缓存
    * @param newSilentMethod 新的silentMethod实例
    */
-  replace(newSilentMethod: SilentMethod<AG>): void;
+  replace(newSilentMethod: SilentMethod<AG>): Promise<void>;
 
   /**
    * 移除当前实例，它将在持久化存储中同步移除
    */
-  remove(): void;
+  remove(): Promise<void>;
 
   /**
    * 设置延迟更新状态对应的method实例以及对应的状态名
@@ -323,7 +376,7 @@ interface SQHookConfig<AG extends AlovaGenerics> {
    * 场景1. 手动开关
    * 场景2. 网络状态不好时回退到static，网络状态自行判断
    */
-  behavior?: SQHookBehavior | ((...args: any[]) => SQHookBehavior);
+  behavior?: SQHookBehavior | ((event: AlovaEvent<AG>) => SQHookBehavior);
 
   /** 重试错误规则
    * 当错误符合以下表达式时才进行重试
@@ -342,7 +395,7 @@ interface SQHookConfig<AG extends AlovaGenerics> {
    * 队列名，不传时选择默认队列
    * 如需每次请求动态分配队列，可设为函数并返回队列名称
    */
-  queue?: string | ((...args: any[]) => string);
+  queue?: string | ((event: AlovaEvent<AG>) => string);
 
   /** 静默提交时默认的响应数据 */
   silentDefaultResponse?: () => any;
@@ -460,7 +513,7 @@ type SilentSubmitSuccessHandler = (event: GlobalSQSuccessEvent) => void;
 type SilentSubmitErrorHandler = (event: GlobalSQErrorEvent) => void;
 type SilentSubmitFailHandler = (event: GlobalSQFailEvent) => void;
 type OffEventCallback = () => void;
-type SilentQueueMap<AG extends AlovaGenerics = AlovaGenerics> = Record<string, SilentMethod<AG>[]>;
+type SilentQueueMap = Record<string, SilentMethod<any>[]>;
 
 /**
  * useCaptcha配置

@@ -3,17 +3,12 @@ import createEventManager from '@alova/shared/createEventManager';
 import { isArray } from '@alova/shared/vars';
 import { Alova, AlovaGenerics } from 'alova';
 import {
-  BeforeSilentSubmitHandler,
   DataSerializer,
   GlobalSQErrorEvent,
   GlobalSQEvent,
   GlobalSQFailEvent,
   GlobalSQSuccessEvent,
-  QueueRequestWaitSetting,
-  SilentSubmitBootHandler,
-  SilentSubmitErrorHandler,
-  SilentSubmitFailHandler,
-  SilentSubmitSuccessHandler
+  QueueRequestWaitSetting
 } from '~/typings/general';
 
 export const STR_VALUE_OF = 'valueOf';
@@ -112,27 +107,21 @@ export const setQueueRequestWaitSetting = (
       ];
 };
 
-export const BootEventKey = Symbol('GSQBoot');
-export const BeforeEventKey = Symbol('GSQBefore');
-export const SuccessEventKey = Symbol('GSQSuccess');
-export const ErrorEventKey = Symbol('GSQError');
-export const FailEventKey = Symbol('GSQFail');
-
-/** 全局的silent事件回调函数 */
-export const bootHandlers = [] as SilentSubmitBootHandler[];
-export const beforeHandlers = [] as BeforeSilentSubmitHandler[];
-export const successHandlers = [] as SilentSubmitSuccessHandler[];
-export const errorHandlers = [] as SilentSubmitErrorHandler[];
-export const failHandlers = [] as SilentSubmitFailHandler[];
+export const BootEventKey = Symbol('GlobalSQBoot');
+export const BeforeEventKey = Symbol('GlobalSQBefore');
+export const SuccessEventKey = Symbol('GlobalSQSuccess');
+export const ErrorEventKey = Symbol('GlobalSQError');
+export const FailEventKey = Symbol('GlobalSQFail');
 
 export type GlobalSQEvents = {
   [BootEventKey]: void;
-  [BeforeEventKey]: GlobalSQEvent;
-  [SuccessEventKey]: GlobalSQSuccessEvent;
-  [ErrorEventKey]: GlobalSQErrorEvent;
-  [FailEventKey]: GlobalSQFailEvent;
+  [BeforeEventKey]: GlobalSQEvent<any>;
+  [SuccessEventKey]: GlobalSQSuccessEvent<any>;
+  [ErrorEventKey]: GlobalSQErrorEvent<any>;
+  [FailEventKey]: GlobalSQFailEvent<any>;
 };
 
+/** 全局的silent事件管理对象 */
 export const globalSQEventManager = createEventManager<GlobalSQEvents>();
 
 /** silentAssert */

@@ -531,12 +531,12 @@ declare function filterSilentMethods(
   methodNameMatcher?: string | number | RegExp,
   queueName?: string,
   filterActive?: boolean
-): SilentMethod[];
+): Promise<SilentMethod[]>;
 declare function getSilentMethod(
   methodNameMatcher?: string | number | RegExp,
   queueName?: string,
   filterActive?: boolean
-): SilentMethod | undefined;
+): Promise<SilentMethod | undefined>;
 declare const updateStateEffect: typeof updateState;
 declare const silentQueueMap: SilentQueueMap;
 

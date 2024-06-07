@@ -15,7 +15,7 @@ import {
   getTime,
   isFn
 } from '@alova/shared/function';
-import { PromiseCls, isArray, len, mapItem, undefinedValue } from '@alova/shared/vars';
+import { MEMORY, PromiseCls, STORAGE_RESTORE, isArray, len, mapItem, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
 /*
@@ -49,7 +49,7 @@ export const queryCache = async <Responded>(
     if (policy === 'l2') {
       cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
     } else if (policy === 'all' && !cachedData) {
-      if (store && expireMilliseconds > getTime()) {
+      if (store && expireMilliseconds(STORAGE_RESTORE) > getTime()) {
         cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
       }
     }
@@ -82,7 +82,10 @@ export const setCache = async <Responded>(
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
       let cachedData = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
-      if (policy === 'l2' || (policy === 'all' && !cachedData && toStore && expireMilliseconds > getTime())) {
+      if (
+        policy === 'l2' ||
+        (policy === 'all' && !cachedData && toStore && expireMilliseconds(STORAGE_RESTORE) > getTime())
+      ) {
         cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
       }
       data = dataOrUpdater(cachedData);
@@ -91,9 +94,9 @@ export const setCache = async <Responded>(
       }
     }
     return PromiseCls.all([
-      policy !== 'l2' && setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l1Cache, hitSource),
+      policy !== 'l2' && setWithCacheAdapter(id, methodKey, data, expireMilliseconds(MEMORY), l1Cache, hitSource),
       policy === 'l2' || (policy === 'all' && toStore)
-        ? setWithCacheAdapter(id, methodKey, data, expireMilliseconds, l2Cache, hitSource, tag)
+        ? setWithCacheAdapter(id, methodKey, data, expireMilliseconds(STORAGE_RESTORE), l2Cache, hitSource, tag)
         : undefinedValue
     ]);
   });

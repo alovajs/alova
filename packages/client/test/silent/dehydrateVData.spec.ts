@@ -1,5 +1,5 @@
-import createVirtualResponse from '../../src/hooks/silent/virtualResponse/createVirtualResponse';
-import dehydrateVData from '../../src/hooks/silent/virtualResponse/dehydrateVData';
+import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import dehydrateVData from '@/hooks/silent/virtualResponse/dehydrateVData';
 
 describe('dehydrateVData', () => {
   test('primitive value', () => {
@@ -8,9 +8,11 @@ describe('dehydrateVData', () => {
     expect(dehydrateVData(true)).toBe(true);
   });
   test('primitive wrap value', () => {
+    /* eslint-disable */
     const num = new Object(1);
     const str = new Object('abc');
     const bool = new Object(true);
+    /* eslint-enable */
     expect(dehydrateVData(num)).toBe(num);
     expect(dehydrateVData(str)).toBe(str);
     expect(dehydrateVData(bool)).toBe(bool);

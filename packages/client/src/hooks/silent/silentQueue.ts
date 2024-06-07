@@ -1,6 +1,32 @@
-/* eslint-disable import/no-cycle */
+import {
+  GlobalSQErrorEvent,
+  GlobalSQEvent,
+  GlobalSQFailEvent,
+  GlobalSQSuccessEvent,
+  ScopedSQErrorEvent,
+  ScopedSQRetryEvent
+} from '@/event';
+import updateState from '@/updateState';
+import { delayWithBackoff } from '@/util/helper';
+import { instanceOf, isObject, isString, newInstance, noop, sloughConfig, walkObject } from '@alova/shared/function';
+import {
+  PromiseCls,
+  RegExpCls,
+  falseValue,
+  forEach,
+  len,
+  mapItem,
+  objectKeys,
+  promiseThen,
+  pushItem,
+  regexpTest,
+  setTimeoutFn,
+  shift,
+  trueValue
+} from '@alova/shared/vars';
 import { AlovaGenerics, Method, setCache } from 'alova';
-import { RetryErrorDetailed, SilentQueueMap } from '~/typings/general';
+import { UpdateStateCollection } from '~/typings';
+import { RetryErrorDetailed, SilentMethod, SilentQueueMap } from '~/typings/general';
 import {
   BEHAVIOR_SILENT,
   BeforeEventKey,
@@ -13,27 +39,6 @@ import {
   setSilentFactoryStatus,
   silentFactoryStatus
 } from './globalVariables';
-// eslint-disable-next-line import/no-cycle
-import updateState from '@/updateState';
-import createHookEvent from '@/util/createHookEvent';
-import { delayWithBackoff, runArgsHandler } from '@/util/helper';
-import { instanceOf, isObject, isString, newInstance, noop, sloughConfig, walkObject } from '@alova/shared/function';
-import {
-  RegExpCls,
-  falseValue,
-  forEach,
-  len,
-  objectKeys,
-  promiseThen,
-  pushItem,
-  regexpTest,
-  setTimeoutFn,
-  shift,
-  trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
-import { UpdateStateCollection } from '~/typings';
-import { SilentMethod } from './SilentMethod';
 import {
   persistSilentMethod,
   push2PersistentSilentQueue,
@@ -43,13 +48,13 @@ import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
 
 /** 静默方法队列集合 */
-export let silentQueueMap = {} as SilentQueueMap<any>;
+export let silentQueueMap = {} as SilentQueueMap;
 
 /**
  * 合并queueMap到silentMethod队列集合
  * @param queueMap silentMethod队列集合
  */
-export const merge2SilentQueueMap = (queueMap: SilentQueueMap<AlovaGenerics>) => {
+export const merge2SilentQueueMap = (queueMap: SilentQueueMap) => {
   forEach(objectKeys(queueMap), targetQueueName => {
     const currentQueue = (silentQueueMap[targetQueueName] = silentQueueMap[targetQueueName] || []);
     pushItem(currentQueue, ...queueMap[targetQueueName]);
@@ -99,17 +104,15 @@ export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>
  * @param vDataResponse 虚拟id和对应真实数据的集合
  * @param targetQueue 目标队列
  */
-const updateQueueMethodEntities = <AG extends AlovaGenerics>(
-  vDataResponse: Record<string, any>,
-  targetQueue: SilentQueueMap<AG>[string]
-) => {
-  forEach(targetQueue, silentMethodItem => {
-    // 深层遍历entity对象，如果发现有虚拟数据或虚拟数据id，则替换为实际数据
-    deepReplaceVData(silentMethodItem.entity, vDataResponse);
-    // 如果method实例有更新，则重新持久化此silentMethod实例
-    silentMethodItem.cache && persistSilentMethod(silentMethodItem);
-  });
-};
+const updateQueueMethodEntities = (vDataResponse: Record<string, any>, targetQueue: SilentQueueMap[string]) =>
+  PromiseCls.all(
+    mapItem(targetQueue, async silentMethodItem => {
+      // 深层遍历entity对象，如果发现有虚拟数据或虚拟数据id，则替换为实际数据
+      deepReplaceVData(silentMethodItem.entity, vDataResponse);
+      // 如果method实例有更新，则重新持久化此silentMethod实例
+      silentMethodItem.cache && (await persistSilentMethod(silentMethodItem));
+    })
+  );
 
 /**
  * 使用响应数据替换虚拟数据
@@ -151,7 +154,7 @@ const setSilentMethodActive = <AG extends AlovaGenerics>(silentMethodInstance: S
 };
 
 const defaultBackoffDelay = 1000;
-export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<AG>[string], queueName: string) => {
+export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string) => {
   /**
    * 根据请求等待参数控制回调函数的调用，如果未设置或小于等于0则立即触发
    * @param queueName 队列名称
@@ -188,8 +191,7 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
       backoff = { delay: defaultBackoffDelay },
       resolveHandler = noop,
       rejectHandler = noop,
-      fallbackHandlers = [],
-      retryHandlers = [],
+      emitter: methodEmitter,
       handlerArgs = [],
       virtualResponse,
       force
@@ -198,15 +200,15 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
     // 触发请求前事件
     globalSQEventManager.emit(
       BeforeEventKey,
-      createHookEvent(0, entity, behavior, silentMethodInstance, queueName, retryTimes) as any
+      newInstance(GlobalSQEvent<AG>, behavior, entity, silentMethodInstance, queueName, retryTimes)
     );
     promiseThen(
       entity.send(force),
-      data => {
+      async data => {
         // 请求成功，移除成功的silentMethod实力，并继续下一个请求
         shift(queue);
         // 请求成功，把成功的silentMethod实例在storage中移除，并继续下一个请求
-        cache && spliceStorageSilentMethod(queueName, id);
+        cache && (await spliceStorageSilentMethod(queueName, id));
         // 如果有resolveHandler则调用它通知外部
         resolveHandler(data);
 
@@ -229,28 +231,26 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
 
             // 修改状态不成功，则去修改缓存数据
             if (!updated) {
-              setCache(targetRefMethod, (dataRaw: any) => deepReplaceVData(dataRaw, vDataResponse));
+              await setCache(targetRefMethod, (dataRaw: any) => deepReplaceVData(dataRaw, vDataResponse));
             }
           }
 
           // 对当前队列的后续silentMethod实例进行虚拟数据替换
-          updateQueueMethodEntities(vDataResponse, queue);
+          await updateQueueMethodEntities(vDataResponse, queue);
 
           // 触发全局的成功事件
           globalSQEventManager.emit(
             SuccessEventKey,
-            createHookEvent<AG>(
-              1,
-              entity,
+            newInstance(
+              GlobalSQSuccessEvent<AG>,
               behavior,
+              entity,
               silentMethodInstance,
               queueName,
               retryTimes,
-              undefinedValue,
-              undefinedValue,
               data,
               vDataResponse
-            ) as any
+            )
           );
         }
 
@@ -271,19 +271,16 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
           const runGlobalErrorEvent = (retryDelay?: number) =>
             globalSQEventManager.emit(
               ErrorEventKey,
-              createHookEvent(
-                2,
-                entity,
+              newInstance(
+                GlobalSQErrorEvent<AG>,
                 behavior,
+                entity,
                 silentMethodInstance,
                 queueName,
                 retryTimes,
-                retryDelay,
-                undefinedValue,
-                undefinedValue,
-                undefinedValue,
-                reason
-              ) as any
+                reason,
+                retryDelay
+              )
             );
 
           // 在silent行为模式下，判断是否需要重试
@@ -310,17 +307,17 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
               () => {
                 retryTimes += 1;
                 silentMethodRequest(silentMethodInstance, retryTimes);
-                runArgsHandler(
-                  retryHandlers,
-                  createHookEvent(
-                    8,
-                    entity,
+
+                methodEmitter.emit(
+                  'retry',
+                  newInstance(
+                    ScopedSQRetryEvent<AG>,
                     behavior,
+                    entity,
                     silentMethodInstance,
-                    undefinedValue,
+                    handlerArgs,
                     retryTimes,
-                    retryDelay,
-                    handlerArgs
+                    retryDelay
                   )
                 );
               },
@@ -331,37 +328,13 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
             setSilentFactoryStatus(2);
             runGlobalErrorEvent();
             // 达到失败次数，或不匹配重试的错误信息时，触发失败回调
-            runArgsHandler(
-              fallbackHandlers,
-              createHookEvent(
-                6,
-                entity,
-                behavior,
-                silentMethodInstance,
-                undefinedValue,
-                undefinedValue,
-                undefinedValue,
-                handlerArgs,
-                undefinedValue,
-                undefinedValue,
-                reason
-              )
+            methodEmitter.emit(
+              'fallback',
+              newInstance(ScopedSQErrorEvent<AG>, behavior, entity, silentMethodInstance, handlerArgs, reason)
             );
             globalSQEventManager.emit(
               FailEventKey,
-              createHookEvent(
-                3,
-                entity,
-                behavior,
-                silentMethodInstance,
-                queueName,
-                retryTimes,
-                undefinedValue,
-                undefinedValue,
-                undefinedValue,
-                undefinedValue,
-                reason
-              ) as any
+              newInstance(GlobalSQFailEvent<AG>, behavior, entity, silentMethodInstance, queueName, retryTimes, reason)
             );
           }
         }
@@ -380,22 +353,22 @@ export const bootSilentQueue = <AG extends AlovaGenerics>(queue: SilentQueueMap<
  * @param targetQueueName 目标队列名
  * @param onBeforePush silentMethod实例push前的事件
  */
-export const pushNewSilentMethod2Queue = <AG extends AlovaGenerics>(
+export const pushNewSilentMethod2Queue = async <AG extends AlovaGenerics>(
   silentMethodInstance: SilentMethod<AG>,
   cache: boolean,
   targetQueueName = DEFAUT_QUEUE_NAME,
-  onBeforePush = noop
+  onBeforePush: () => any[] = () => []
 ) => {
   silentMethodInstance.cache = cache;
   const currentQueue = (silentQueueMap[targetQueueName] =
     silentQueueMap[targetQueueName] || []) as unknown as SilentMethod<AG>[];
   const isNewQueue = len(currentQueue) <= 0;
-  const isPush2Queue = (onBeforePush() as any) !== falseValue;
+  const isPush2Queue = !onBeforePush().some(returns => returns === falseValue);
 
   // silent行为下，如果没有绑定fallback事件回调，则持久化
   // 如果在onBeforePushQueue返回false，也不再放入队列中
   if (isPush2Queue) {
-    cache && push2PersistentSilentQueue(silentMethodInstance, targetQueueName);
+    cache && (await push2PersistentSilentQueue(silentMethodInstance, targetQueueName));
     pushItem(currentQueue, silentMethodInstance);
     // 如果是新的队列且状态为已启动，则执行它
     isNewQueue && silentFactoryStatus === 1 && bootSilentQueue(currentQueue, targetQueueName);

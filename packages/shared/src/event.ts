@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { AlovaGenerics, Method } from '../../alova/typings';
 import { AlovaEvent } from '../../client/typings';
 

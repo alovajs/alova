@@ -12,6 +12,7 @@ import {
   statesHookHelper
 } from '@alova/shared/function';
 import {
+  MEMORY,
   falseValue,
   filterItem,
   forEach,
@@ -179,7 +180,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     const { e: expireMilliseconds } = getLocalCacheConfigParam(fetchMethod);
     // 如果缓存时间小于等于当前时间，表示没有设置缓存，此时不再预拉取数据
     // 或者已经有缓存了也不预拉取
-    if (expireMilliseconds <= getTime()) {
+    if (expireMilliseconds(MEMORY) <= getTime()) {
       return falseValue;
     }
     if (forceRequest) {
