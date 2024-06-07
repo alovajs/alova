@@ -832,10 +832,7 @@ type AlovaResponded<
     Parameters<RA>[1] extends Method<any, any, any, any, any, any, infer RH> ? RH : never
   >['responded']
 >;
-interface TokenAuthenticationResult<
-  SH extends StatesHook<any, any>,
-  RA extends AlovaRequestAdapter<any, any, any, any, any>
-> {
+interface TokenAuthenticationResult<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> {
   onAuthRequired(originalBeforeRequest?: AlovaBeforeRequest<SH, RA>): AlovaBeforeRequest<SH, RA>;
   onResponseRefreshToken(originalResponded?: AlovaResponded<SH, RA>): AlovaResponded<SH, RA>;
   waitingList: {

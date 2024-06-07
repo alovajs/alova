@@ -788,8 +788,8 @@ export declare function createAlova<
   RequestConfig,
   Response,
   ResponseHeader,
-  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater,
-  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater
+  L1Cache extends AlovaGlobalCacheAdapter = AlovaGlobalCacheAdapter,
+  L2Cache extends AlovaGlobalCacheAdapter = AlovaGlobalCacheAdapter
 >(
   options: AlovaOptions<
     AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
