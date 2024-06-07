@@ -1,7 +1,5 @@
 import { getAlovaInstance } from '#/utils';
-import { readFileSync } from 'fs';
-import path from 'path';
-import { Result, delay } from 'root/testUtils';
+import { Result } from 'root/testUtils';
 
 describe('request adapter GlobalFetch', () => {
   test('the cache response data should be saved', async () => {
@@ -78,38 +76,5 @@ describe('request adapter GlobalFetch', () => {
     });
     res = await method;
     expect(res.data.requestHeaders['content-type']).toBe('application/x-www-form-urlencoded');
-  });
-
-  test.skip('should throw error when upload files with fetch api', async () => {
-    const alova = getAlovaInstance({
-      responseExpect: r => r.json()
-    });
-    const { requestAdapter } = alova.options;
-    alova.options.requestAdapter = ((...args: any) => {
-      // eslint-disable-next-line
-      const ctrls = requestAdapter.apply(null, args);
-      ctrls.onUpload = () => {
-        throw new Error('upload files with fetch api is not supported');
-      };
-    }) as typeof requestAdapter;
-
-    // 使用formData上传文件
-    const formData = new FormData();
-    formData.append('f1', 'f1');
-    formData.append('f2', 'f2');
-    const imageFile = new File([readFileSync(path.resolve(__dirname, '../../../../../assets/img-test.jpg'))], 'file', {
-      type: 'image/jpeg'
-    });
-    formData.append('file', imageFile);
-
-    const Post = alova.Post('/unit-test-upload', formData, {
-      transformData: async (data: Result<string>) => {
-        await delay(500);
-        return data;
-      }
-    });
-    Post.onUpload(() => {});
-    await Post.send();
-    await delay(1000);
   });
 });

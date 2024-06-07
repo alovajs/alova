@@ -1,4 +1,5 @@
-import { setTimeoutFn, trueValue } from '@alova/shared/vars';
+import { createSyncOnceRunner } from '@alova/shared/function';
+import { forEach, setTimeoutFn, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { ComputedRef, Ref, WatchSource, computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 
@@ -35,6 +36,19 @@ export default {
       },
       { deep: trueValue, flush: 'post' }
     );
+
+    const syncRunner = createSyncOnceRunner();
+    forEach(watchingStates || [], (state, i) => {
+      watch(
+        state,
+        () => {
+          syncRunner(() => {
+            handler(i);
+          });
+        },
+        { deep: trueValue }
+      );
+    });
   },
   computed: getter => computed(getter),
   watch: (states, callback) => {
