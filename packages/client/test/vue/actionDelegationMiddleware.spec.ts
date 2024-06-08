@@ -16,7 +16,7 @@ describe('vue => subscriber middleware', () => {
   test('should send by notification with keyword string', async () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     const { loading, data, onSuccess, onComplete } = useRequest(methodInstance, {
@@ -50,7 +50,7 @@ describe('vue => subscriber middleware', () => {
   test('should send by notification with keyword symbol', async () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     const sym = Symbol('test');
@@ -83,7 +83,7 @@ describe('vue => subscriber middleware', () => {
   test('should send by notification with keyword number', async () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     const num = 123;
@@ -116,7 +116,7 @@ describe('vue => subscriber middleware', () => {
   test('should send multiple request by notification', async () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     const str = 'zzz';
@@ -153,7 +153,7 @@ describe('vue => subscriber middleware', () => {
   test('should send multiple request by notification', async () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     const state1 = useRequest(methodInstance, {
@@ -195,7 +195,7 @@ describe('vue => subscriber middleware', () => {
   test("should throws a error when hasn't send request", () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     useRequest(methodInstance, {
@@ -210,7 +210,7 @@ describe('vue => subscriber middleware', () => {
   test('should send by notification when use useWatcher', async () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     const num = ref(1);
@@ -244,7 +244,7 @@ describe('vue => subscriber middleware', () => {
   test('should fetch data by notification when use useFetcher', async () => {
     const methodInstance = (data: any) =>
       alovaInst.Post('/detail2', data, {
-        localCache: 0
+        cacheFor: 0
       });
 
     const { fetch, onSuccess, onComplete } = useFetcher<FetcherType<typeof alovaInst>>({

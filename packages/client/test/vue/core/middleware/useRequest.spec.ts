@@ -362,8 +362,8 @@ describe('useRequest middleware', () => {
       data: failData,
       error
     } = useRequest(getGetterObj, {
-      middleware: ({ update }) => {
-        update({ loading: true });
+      middleware: ({ proxyStates }) => {
+        proxyStates.loading.v = true;
         expect(loadingFail.value).toBeTruthy();
         return new Promise((_, reject) => {
           setTimeout(() => {
@@ -400,9 +400,9 @@ describe('useRequest middleware', () => {
     expect(state1.loading.value).toBeFalsy();
 
     const state2 = useRequest(getGetterObj, {
-      middleware: ({ controlLoading, update }, next) => {
+      middleware: ({ proxyStates, controlLoading }, next) => {
         controlLoading();
-        update({ loading: true });
+        proxyStates.loading.v = true;
         expect(state2.loading.value).toBeTruthy();
         return next();
       }

@@ -119,25 +119,25 @@ describe('update cached response data by user in react', () => {
     await screen.findByText(/unit-test/);
 
     // 预设状态不能更新
-    expect(() => {
+    expect(() =>
       updateState(Get, {
         loading: () => true
-      });
-    }).toThrow();
+      })
+    ).rejects.toThrow();
 
     // 非状态数据不能更新
-    expect(() => {
+    expect(() =>
       updateState(Get, {
         extraData2: () => 1
-      });
-    }).toThrow();
+      })
+    ).rejects.toThrow();
 
     // 未找到状态抛出错误
-    expect(() => {
+    expect(() =>
       updateState(Get, {
         extraData3: () => 1
-      });
-    }).toThrow();
+      })
+    ).rejects.toThrow();
 
     act(() => {
       // 更新成功
