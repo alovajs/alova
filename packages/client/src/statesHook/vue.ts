@@ -23,20 +23,6 @@ export default {
       });
     }
 
-    watch(
-      watchingStates || [],
-      (newValues, oldValues) => {
-        // 找出发生变化的索引
-        for (const index in newValues) {
-          if (newValues[index] !== oldValues[index]) {
-            handler(index);
-            break;
-          }
-        }
-      },
-      { deep: trueValue, flush: 'post' }
-    );
-
     const syncRunner = createSyncOnceRunner();
     forEach(watchingStates || [], (state, i) => {
       watch(

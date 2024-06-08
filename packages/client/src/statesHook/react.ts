@@ -54,8 +54,9 @@ export default {
           handler(changedIndex);
         }
         // 组件卸载时移除对应状态
-        return removeStates;
       });
+
+      return removeStates;
     }, watchingStates);
 
     // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
