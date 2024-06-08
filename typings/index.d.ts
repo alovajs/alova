@@ -543,22 +543,22 @@ export interface Alova<S, E, RC, RE, RH> {
 }
 
 /** 根事件对象 */
-export interface AlovaEvent<S, E, R, T, RC, RE, RH> {
-  sendArgs: any[];
+export interface AlovaEvent<S, E, R, T, RC, RE, RH, F> {
+  sendArgs: [...F, ...any]; // F保存methodHandler的args元组类型
   method: Method<S, E, R, T, RC, RE, RH>;
 }
 /** 成功事件对象 */
-export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH, F> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
   /** data数据是否来自缓存 */
   fromCache: boolean;
   data: R;
 }
 /** 错误事件对象 */
-export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH, F> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
   error: any;
 }
 /** 完成事件对象 */
-export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH, F> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
   /** 响应状态 */
   status: 'success' | 'error';
   /** data数据是否来自缓存，当status为error时，fromCache始终为false */
@@ -567,9 +567,9 @@ export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S
   error?: any;
 }
 
-export type SuccessHandler<S, E, R, T, RC, RE, RH> = (event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>) => void;
-export type ErrorHandler<S, E, R, T, RC, RE, RH> = (event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>) => void;
-export type CompleteHandler<S, E, R, T, RC, RE, RH> = (event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>) => void;
+export type SuccessHandler<S, E, R, T, RC, RE, RH, F> = (event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, F>) => void;
+export type ErrorHandler<S, E, R, T, RC, RE, RH, F> = (event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, F>) => void;
+export type CompleteHandler<S, E, R, T, RC, RE, RH, F> = (event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, F>) => void;
 
 export type FrontExportedUpdate<R> = (
   newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
@@ -813,8 +813,12 @@ export type UpdateStateCollection<R> = {
 } & {
   data?: (data: R) => any;
 };
+/**
+ * MethodHandler类型用于约束methodhandler为回调函数
+ */
+export type MethodHandler = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 
-export type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
+export type AlovaMethodHandler<S, E, R, T, RC, RE, RH, F extends MethodHandler> = F;
 
 /**
  * alova全局配置

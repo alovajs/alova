@@ -1,5 +1,5 @@
 import { boundStatesHook } from '@/alova';
-import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } from '~/typings';
+import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState, MethodHandler } from '~/typings';
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
@@ -123,7 +123,10 @@ export const noop = () => {},
     const { params, headers } = getConfig(methodInstance);
     return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
   },
-  objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
+  objAssign = <T extends Record<string, any>, U extends Record<string, any>[]>(
+    target: T,
+    ...sources: U
+  ): Merge<T, U> => {
     return ObjectCls.assign(target, ...sources);
   },
   /**
@@ -187,8 +190,8 @@ export const noop = () => {},
    * @param args 方法调用参数
    * @returns 请求方法对象
    */
-  getHandlerMethod = <S, E, R, T, RC, RE, RH>(
-    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  getHandlerMethod = <S, E, R, T, RC, RE, RH, F extends MethodHandler>(
+    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
     args: any[] = []
   ) => {
     const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;

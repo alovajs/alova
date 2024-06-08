@@ -1,7 +1,8 @@
-import { createHook } from '@/createHook';
 import Method from '@/Method';
+import { createHook } from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
 import {
+  _self,
   debounce,
   getContext,
   getHandlerMethod,
@@ -9,8 +10,7 @@ import {
   isNumber,
   noop,
   promiseStatesHook,
-  sloughConfig,
-  _self
+  sloughConfig
 } from '@/utils/helper';
 import {
   deleteAttr,
@@ -29,10 +29,11 @@ import {
   EnumHookType,
   ErrorHandler,
   ExportedType,
-  FetcherHookConfig,
   FetchRequestState,
+  FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
+  MethodHandler,
   Progress,
   SuccessHandler,
   UseHookConfig,
@@ -53,15 +54,17 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig>(
+export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig, F extends MethodHandler>(
   hookType: EnumHookType,
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
   useHookConfig: UC,
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
   debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
 ) {
+  // 动态获取methoHanlder参数
+  type MethodHandlerArgs = Parameters<Exclude<typeof methodHandler, Method<S, E, R, T, RC, RE, RH>>>;
   // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
   useHookConfig = { ...useHookConfig };
   const statesHook = promiseStatesHook('useHooks'),
@@ -112,7 +115,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     // 初始化请求事件
     // 统一的发送请求函数
     handleRequest = (
-      handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
+      handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F> = methodHandler,
       sendCallingArgs?: any[]
     ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs),
     // 以捕获异常的方式调用handleRequest
@@ -164,13 +167,13 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       hookInstance.eu = trueValue;
       return stateExport(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>;
     },
-    onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
+    onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>) {
       pushItem(hookInstance.sh, handler);
     },
-    onError(handler: ErrorHandler<S, E, R, T, RC, RE, RH>) {
+    onError(handler: ErrorHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>) {
       pushItem(hookInstance.eh, handler);
     },
-    onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
+    onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>) {
       pushItem(hookInstance.ch, handler);
     },
     update: memorize((newStates: PartialFrontRequestState | PartialFetchRequestState) => {
@@ -193,7 +196,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      */
     send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>) =>
       handleRequest(methodInstance, sendCallingArgs)
-    ),
+    ) as (args: [...MethodHandlerArgs, ...any]) => any,
 
     /** 为兼容options框架，如vue2、原生小程序等，将config对象原样导出 */
     _$c: useHookConfig
