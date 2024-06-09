@@ -38,24 +38,23 @@ export default {
     // 多个值同时改变只触发一次
     const onceRunner = refCurrent(useRef(createSyncOnceRunner()));
     useEffect(() => {
-      onceRunner(() => {
-        const oldStatesValue = refCurrent(oldStates);
-        // 对比新旧状态，获取变化的状态索引
-        let changedIndex: number | undefined = undefinedValue;
-        for (const index in watchingStates) {
-          if (!Object.is(oldStatesValue[index], watchingStates[index])) {
-            changedIndex = Number(index);
-            break;
-          }
+      const oldStatesValue = refCurrent(oldStates);
+      // 对比新旧状态，获取变化的状态索引
+      let changedIndex: number | undefined = undefinedValue;
+      for (const index in watchingStates) {
+        if (!Object.is(oldStatesValue[index], watchingStates[index])) {
+          changedIndex = Number(index);
+          break;
         }
-        setRef(oldStates, watchingStates);
-
+      }
+      setRef(oldStates, watchingStates);
+      onceRunner(() => {
         if (immediate || isNumber(changedIndex)) {
           handler(changedIndex);
         }
-        // 组件卸载时移除对应状态
       });
 
+      // 组件卸载时移除对应状态
       return removeStates;
     }, watchingStates);
 
