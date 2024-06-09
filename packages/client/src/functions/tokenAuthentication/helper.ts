@@ -37,7 +37,7 @@ export const defaultRefreshTokenMeta = {
 export const checkMethodRole = ({ meta }: Method, metaMatches: MetaMatches) => {
   if (isPlainObject(meta)) {
     for (const key in meta) {
-      if (meta.hasOwn(key)) {
+      if (Object.prototype.hasOwnProperty.call(meta, key)) {
         const matchedMetaItem = metaMatches[key];
         if (instanceOf(matchedMetaItem, RegExp) ? matchedMetaItem.test(meta[key]) : meta[key] === matchedMetaItem) {
           return trueValue;
@@ -120,12 +120,12 @@ export const refreshTokenIfExpired = async (
     }
   }
 };
-export const onResponded2Record = (
+export const onResponded2Record = <AG extends AlovaGenerics = AlovaGenerics>(
   onRespondedHandlers?: AlovaResponded<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>
 ) => {
-  let successHandler: RespondedHandler<AlovaGenerics> | undefined = undefinedValue;
-  let errorHandler: ResponseErrorHandler<AlovaGenerics> | undefined = undefinedValue;
-  let onCompleteHandler: ResponseCompleteHandler<AlovaGenerics> | undefined = undefinedValue;
+  let successHandler: RespondedHandler<AG> | undefined = undefinedValue;
+  let errorHandler: ResponseErrorHandler<AG> | undefined = undefinedValue;
+  let onCompleteHandler: ResponseCompleteHandler<AG> | undefined = undefinedValue;
   if (isFn(onRespondedHandlers)) {
     successHandler = onRespondedHandlers;
   } else if (isPlainObject(onRespondedHandlers)) {

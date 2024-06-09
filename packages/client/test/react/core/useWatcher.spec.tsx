@@ -821,6 +821,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('10');
+      expect(endTs - startTs).toBeGreaterThanOrEqual(300);
       expect(endTs - startTs).toBeLessThan(450);
       expect(successMockFn).toHaveBeenCalledTimes(1);
     });

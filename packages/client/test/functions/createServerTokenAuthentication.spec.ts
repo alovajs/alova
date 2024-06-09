@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { createServerTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
-import { Alova, createAlova, Method, useRequest } from 'alova';
+import { createAlova, Method } from 'alova';
+import { useRequest } from 'alova/client';
 import VueHook from 'alova/vue';
 import { generateContinuousNumbers, untilCbCalled } from 'root/testUtils';
-import { WatchSource } from 'vue';
 import { mockRequestAdapter } from '../mockData';
 
 interface ListResponse {
@@ -232,7 +233,6 @@ describe('createServerTokenAuthentication', () => {
 
   test('should refresh token first on error event when it is expired', async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const expireFn = jest.fn();
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
@@ -259,7 +259,7 @@ describe('createServerTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -278,7 +278,6 @@ describe('createServerTokenAuthentication', () => {
   });
   test('should refresh token first on success event when it is expired', async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const expireFn = jest.fn();
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
@@ -305,7 +304,7 @@ describe('createServerTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -328,7 +327,6 @@ describe('createServerTokenAuthentication', () => {
   });
   test('the requests should wait until token refreshed when token is refreshing', async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const expireFn = jest.fn();
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
@@ -363,7 +361,7 @@ describe('createServerTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -384,7 +382,6 @@ describe('createServerTokenAuthentication', () => {
   });
   test("shouldn't resend refresh request when multiple requests emit at the same time", async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication({
@@ -403,7 +400,7 @@ describe('createServerTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -429,7 +426,6 @@ describe('createServerTokenAuthentication', () => {
   });
   test("shouldn't continue run when throw error in refreshToken", async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const refreshTokenFn = jest.fn();
     const redirectLoginFn = jest.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication({
@@ -454,7 +450,7 @@ describe('createServerTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -472,7 +468,6 @@ describe('createServerTokenAuthentication', () => {
   });
   test('should emit bypass the token validation when set authRole to null', async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const expireFn = jest.fn();
     const refreshTokenFn = jest.fn();
     const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({
@@ -494,7 +489,7 @@ describe('createServerTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,

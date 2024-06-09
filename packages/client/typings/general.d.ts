@@ -754,10 +754,11 @@ interface TokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, an
    * 赋值token回调函数，登录标识和访客标识的请求不会触发此函数
    * @param method method实例
    */
-  assignToken?: (method: Parameters<RA>[1]) => void | Promise<void>;
+  assignToken?: <AG extends AlovaGenerics>(method: Method<AG>) => void | Promise<void>;
 }
-interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>>
-  extends TokenAuthenticationOptions<RA> {
+interface ClientTokenAuthenticationOptions<
+  RA extends AlovaRequestAdapter<AG['RequestConfig'], AG['Response'], AG['ResponseHeader'], any, any>
+> extends TokenAuthenticationOptions<RA> {
   /**
    * 在请求前的拦截器中判断token是否过期，并刷新token
    */
@@ -815,11 +816,6 @@ interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, a
   };
 }
 
-type AlovaBeforeRequest<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any, any, any>> = (
-  method: Parameters<RA>[1] extends Method<any, any, any, any, infer RC, infer RT, infer RH>
-    ? Method<ReturnType<SH['create']>, ReturnType<SH['export']>, any, any, RC, RT, RH>
-    : never
-) => void | Promise<void>;
 type AlovaResponded<
   SH extends StatesHook<any, any>,
   RA extends AlovaRequestAdapter<any, any, any, any, any>
@@ -832,14 +828,6 @@ type AlovaResponded<
     Parameters<RA>[1] extends Method<any, any, any, any, any, any, infer RH> ? RH : never
   >['responded']
 >;
-interface TokenAuthenticationResult<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> {
-  onAuthRequired(originalBeforeRequest?: AlovaBeforeRequest<SH, RA>): AlovaBeforeRequest<SH, RA>;
-  onResponseRefreshToken(originalResponded?: AlovaResponded<SH, RA>): AlovaResponded<SH, RA>;
-  waitingList: {
-    method: Parameters<RA>[1];
-    resolve: () => void;
-  }[];
-}
 
 /**
  * 统一获取AlovaRequestAdapter的类型

@@ -1,8 +1,8 @@
 <script>
   import { useRequest } from '@/index';
-  import GlobalFetch from '@/predefine/GlobalFetch';
-  import SvelteHook from '@/statesHook/svelte';
+  import SvelteHook from 'alova/svelte';
   import { createAlova } from 'alova';
+  import GlobalFetch from 'alova/fetch';
 
   const alova = createAlova({
     baseURL: 'http://localhost:3000',

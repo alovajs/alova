@@ -32,3 +32,19 @@ Object.defineProperties(global, {
   File: { value: File },
   isSSR: { value: typeof window === 'undefined' }
 });
+
+/**
+ * fix: fix: https://github.com/testing-library/svelte-testing-library/issues/222
+ *
+ * `onMount` will not be called on node environment.
+ */
+jest.mock('svelte', () => {
+  const originalModule = jest.requireActual('svelte');
+  const { onMount } = jest.requireActual('svelte/internal');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    onMount
+  };
+});

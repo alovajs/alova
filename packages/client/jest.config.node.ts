@@ -8,7 +8,7 @@ import baseConfig from '../../jest.config.base';
 
 const config: Config = {
   ...baseConfig,
-  displayName: 'alova',
+  displayName: '[SSR]alova/client',
   testEnvironment: 'node',
   testMatch: ['**/test/ssr/**/*.[jt]s?(x)']
 };

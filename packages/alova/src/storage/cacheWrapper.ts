@@ -11,7 +11,7 @@ import {
   pushItem,
   undefinedValue
 } from '@alova/shared/vars';
-import { AlovaGlobalCacheAdapter, AlovaMethodConfig, DetailCacheConfig, Method } from '~/typings';
+import { AlovaGenerics, AlovaGlobalCacheAdapter, AlovaMethodConfig, DetailCacheConfig, Method } from '~/typings';
 
 type UniqueKeyPromised = Record<string, 0>;
 const hitSourceStringCacheKey = (key: string) => `hss.${key}`;
@@ -32,14 +32,14 @@ const addItem = (obj: UniqueKeyPromised, item: string) => {
  * @param storage 存储对象
  * @param tag 存储标签，用于区分不同的存储标记
  */
-export const setWithCacheAdapter = async (
+export const setWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGenerics>(
   namespace: string,
   key: string,
   data: any,
   expireTimestamp: number,
   cacheAdapter: AlovaGlobalCacheAdapter,
   hitSource: Method['hitSource'],
-  tag?: DetailCacheConfig<any>['tag']
+  tag?: DetailCacheConfig<AG>['tag']
 ) => {
   // not to cache if expireTimestamp is less than current timestamp
   if (expireTimestamp > getTime() && data) {
@@ -136,13 +136,13 @@ export const removeWithCacheAdapter = async (namespace: string, key: string, cac
  * @param storage 存储对象
  * @param tag 存储标签，标记改变了数据将会失效
  */
-export const getRawWithCacheAdapter = async (
+export const getRawWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGenerics>(
   namespace: string,
   key: string,
   cacheAdapter: AlovaGlobalCacheAdapter,
-  tag?: DetailCacheConfig<any>['tag']
+  tag?: DetailCacheConfig<AG>['tag']
 ) => {
-  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig<any>['tag']]>(
+  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig<AG>['tag']]>(
     buildNamespacedCacheKey(namespace, key)
   );
   if (storagedData) {
@@ -164,11 +164,11 @@ export const getRawWithCacheAdapter = async (
  * @param storage 存储对象
  * @param tag 存储标签，标记改变了数据将会失效
  */
-export const getWithCacheAdapter = async (
+export const getWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGenerics>(
   namespace: string,
   key: string,
   cacheAdapter: AlovaGlobalCacheAdapter,
-  tag?: DetailCacheConfig<any>['tag']
+  tag?: DetailCacheConfig<AG>['tag']
 ) => {
   const rawData = await getRawWithCacheAdapter(namespace, key, cacheAdapter, tag);
   return rawData ? rawData[0] : undefinedValue;

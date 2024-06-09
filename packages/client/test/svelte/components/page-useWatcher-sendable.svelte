@@ -4,7 +4,7 @@
   export let errorInSendable = false;
 
   import { useWatcher } from '@/index';
-  import SvelteHook from '@/statesHook/svelte';
+  import SvelteHook from 'alova/svelte';
   import { createAlova } from 'alova';
   import GlobalFetch from 'alova/fetch';
   import { writable } from 'svelte/store';
@@ -41,18 +41,20 @@
     $stateObj.id++;
   };
 
-  const { loading, data, onSuccess } = useWatcher(() => getter($stateId1, $stateObj.id), [stateId1, stateObj], {
+  const { loading, data, onSuccess, error } = useWatcher(() => getter($stateId1, $stateObj.id), [stateId1, stateObj], {
     initialData: {
       path: '',
       params: { id1: '', id2: '' }
     },
     immediate,
-    sendable: () => {
+    middleware(_, next) {
       sendableFn();
       if (errorInSendable) {
-        throw new Error('');
+        throw new Error('have error!');
       }
-      return $stateId1 === 1;
+      if ($stateId1 === 1) {
+        next();
+      }
     }
   });
 </script>

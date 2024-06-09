@@ -6,26 +6,21 @@
   "configurations": [
     {
       "type": "node",
+      "name": "vscode-jest-tests.v2.alova3.0",
       "request": "launch",
-      "name": "debug unit test",
-      "runtimeExecutable": "pnpm",
-      "windows": {
-        "runtimeExecutable": "pnpm.cmd"
-      },
-      "runtimeArgs": ["pnpm", "jest"],
       "args": [
         "--runInBand",
         "--watchAll=false",
         "--testNamePattern",
-        "vue => usePagination",
+        "${jest.testNamePattern}",
         "--runTestsByPath",
-        "packages/client/test/vue/usePagination.spec.ts"
+        "${jest.testFile}"
       ],
-      "console": "integratedTerminal",
+      "runtimeExecutable": "pnpm",
       "cwd": "${workspaceRoot}",
-      "env": {
-        "NODE_ENV": "test"
-      }
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "program": "./node_modules/.bin/jest"
     }
   ]
 }

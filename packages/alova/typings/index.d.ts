@@ -39,9 +39,15 @@ export interface RequestElements {
   readonly data?: RequestBody;
 }
 export type ProgressUpdater = (loaded: number, total: number) => void;
-export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader> = (
+export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader, AG extends AlovaGenerics = AlovaGenerics> = (
   elements: RequestElements,
-  method: Method<AlovaGenerics<any, any, any, any, any, any, RequestConfig, Response, ResponseHeader>>
+  method: Method<
+    AG & {
+      RequestConfig: RequestConfig;
+      Response: Response;
+      ResponseHeader: ResponseHeader;
+    }
+  >
 ) => {
   response: () => Promise<Response>;
   headers: () => Promise<ResponseHeader>;

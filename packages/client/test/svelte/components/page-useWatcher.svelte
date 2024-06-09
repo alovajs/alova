@@ -1,6 +1,6 @@
 <script>
   import { useWatcher } from '@/index';
-  import SvelteHook from '@/statesHook/svelte';
+  import SvelteHook from 'alova/svelte';
   import { createAlova } from 'alova';
   import GlobalFetch from 'alova/fetch';
   import { writable } from 'svelte/store';
