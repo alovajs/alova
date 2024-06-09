@@ -1,6 +1,6 @@
-import page from '#/components/svelte/page-updateState.svelte';
-import pageUserWatcherImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
-import { getStateCache } from '@/storage/stateCache';
+import page from '../components/page-updateState.svelte';
+import pageUserWatcherImmediate from '../components/page-useWatcher-immediate.svelte';
+import { getStateCache } from '@/hooks/core/implements/stateCache';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { delay } from 'root/testUtils';

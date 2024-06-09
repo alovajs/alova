@@ -20,7 +20,8 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
+    "test": "jest && npm run test:node",
+    "test:node": "jest --config jest.config.node.ts",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build",

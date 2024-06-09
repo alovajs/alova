@@ -1,12 +1,12 @@
-import pageAbortLast from '#/components/svelte/page-useWatcher-abortLast.svelte';
-import pageDebounceImmediate from '#/components/svelte/page-useWatcher-debounce-immediate.svelte';
-import pageDifferentDebounce from '#/components/svelte/page-useWatcher-different-debounce.svelte';
-import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
+import pageAbortLast from '../components/page-useWatcher-abortLast.svelte';
+import pageDebounceImmediate from '../components/page-useWatcher-debounce-immediate.svelte';
+import pageDifferentDebounce from '../components/page-useWatcher-different-debounce.svelte';
+import pageImmediate from '../components/page-useWatcher-immediate.svelte';
 import page from '#/svelte/components/page-useWatcher.svelte';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { delay } from 'root/testUtils';
-import pageSendable from '~/test/components/svelte/page-useWatcher-sendable.svelte';
+import pageSendable from '../components/page-useWatcher-sendable.svelte';
 
 describe('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {
@@ -98,7 +98,7 @@ describe('useWatcher hook with svelte', () => {
     expect(sendableFn).toHaveBeenCalledTimes(2);
   });
 
-  test('should not send request when change value but throws error in sentable', async () => {
+  test('should not send request when change value but throws error in sendable', async () => {
     const sendableFn = jest.fn();
     render(pageSendable, {
       sendableFn,
@@ -129,6 +129,7 @@ describe('useWatcher hook with svelte', () => {
       immediate: true
     } as any);
 
+    await delay(100);
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('id2')).toHaveTextContent('');

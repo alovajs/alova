@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/svelte';
-import page from '#/components/svelte/page-useRequest.svelte';
+import page from '../components/page-useRequest.svelte';
 import '@testing-library/jest-dom';
 
 describe('useRequet hook with svelte', () => {

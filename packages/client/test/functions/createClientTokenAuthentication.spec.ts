@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
-import { Alova, createAlova, Method, useRequest } from 'alova';
+import { useRequest } from '@/index';
+import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
 import { generateContinuousNumbers, untilCbCalled } from 'root/testUtils';
-import { WatchSource } from 'vue';
 import { mockRequestAdapter } from '../mockData';
 
 interface ListResponse {
@@ -232,7 +233,6 @@ describe('createClientTokenAuthentication', () => {
 
   test('should refresh token first when it is expired', async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication({
@@ -253,7 +253,7 @@ describe('createClientTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -267,7 +267,7 @@ describe('createClientTokenAuthentication', () => {
   });
   test('the requests should wait until token refreshed when token is refreshing', async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
+
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createClientTokenAuthentication({
@@ -292,7 +292,8 @@ describe('createClientTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -316,7 +317,6 @@ describe('createClientTokenAuthentication', () => {
   });
   test("shouldn't continue run when throw error in refreshToken", async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const refreshTokenFn = jest.fn();
     const redirectLoginFn = jest.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createClientTokenAuthentication({
@@ -343,7 +343,7 @@ describe('createClientTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
@@ -361,7 +361,6 @@ describe('createClientTokenAuthentication', () => {
   });
   test('should emit bypass the token validation when set authRole to null', async () => {
     let token = '';
-    let alovaInst: Alova<any, any, object | WatchSource<any>, any, any, any, any>;
     const expireFn = jest.fn();
     const refreshTokenFn = jest.fn();
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication({
@@ -384,7 +383,7 @@ describe('createClientTokenAuthentication', () => {
         method.config.headers.Authorization = token;
       }
     });
-    alovaInst = createAlova({
+    const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,

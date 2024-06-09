@@ -1,6 +1,6 @@
 <script>
   import { useWatcher } from '@/index';
-  import SvelteHook from '@/statesHook/svelte';
+  import SvelteHook from 'alova/svelte';
   import { createAlova } from 'alova';
   import GlobalFetch from 'alova/fetch';
   import { writable } from 'svelte/store';
@@ -42,13 +42,17 @@
     $stateObj.id = n2;
   };
 
-  const { loading, data, error, onSuccess, onError } = useWatcher(() => getter($stateId1, $stateObj.id), [stateId1, stateObj], {
-    initialData: {
-      path: '',
-      params: { id1: '', id2: '' }
-    },
-    abortLast
-  });
+  const { loading, data, error, onSuccess, onError } = useWatcher(
+    () => getter($stateId1, $stateObj.id),
+    [stateId1, stateObj],
+    {
+      initialData: {
+        path: '',
+        params: { id1: '', id2: '' }
+      },
+      abortLast
+    }
+  );
   onSuccess(successFn);
   onError(errorFn);
 </script>
