@@ -7,8 +7,8 @@ import { getPersistentResponse } from '@/storage/responseStorage';
 import { getStateCache, removeStateCache, setStateCache } from '@/storage/stateCache';
 import createAlovaEvent, { AlovaEventType } from '@/utils/createAlovaEvent';
 import {
-  exportFetchStates,
   GeneralFn,
+  exportFetchStates,
   getContext,
   getHandlerMethod,
   getLocalCacheConfigParam,
@@ -21,15 +21,15 @@ import {
 } from '@/utils/helper';
 import { assertMethodMatcher } from '@/utils/myAssert';
 import {
+  MEMORY,
+  STORAGE_PLACEHOLDER,
+  STORAGE_RESTORE,
   falseValue,
   forEach,
   len,
-  MEMORY,
   promiseResolve,
   promiseThen,
   pushItem,
-  STORAGE_PLACEHOLDER,
-  STORAGE_RESTORE,
   trueValue,
   undefinedValue
 } from '@/utils/variables';
@@ -49,6 +49,7 @@ import {
   FrontRequestHookConfig,
   FrontRequestState,
   Hook,
+  MethodHandler,
   Progress,
   SuccessHandler,
   WatcherHookConfig
@@ -61,11 +62,12 @@ import {
  * @param sendCallingArgs send函数参数
  * @returns 请求状态
  */
-export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
+export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, F extends MethodHandler = MethodHandler>(
   hookInstance: Hook,
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
   sendCallingArgs: any[] = []
 ) {
+  type MethodHandlerArgs = Parameters<Exclude<typeof methodHandler, Method<S, E, R, T, RC, RE, RH>>>;
   let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
   const {
       fs: frontStates,
@@ -182,24 +184,24 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
     // 调用中间件函数
     let successHandlerDecorator:
         | ((
-            handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
-            event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
+            handler: SuccessHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
+            event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
             index: number,
             length: number
           ) => void)
         | undefined,
       errorHandlerDecorator:
         | ((
-            handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
-            event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
+            handler: ErrorHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
+            event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
             index: number,
             length: number
           ) => void)
         | undefined,
       completeHandlerDecorator:
         | ((
-            handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
-            event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
+            handler: CompleteHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
+            event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
             index: number,
             length: number
           ) => void)
@@ -223,7 +225,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH>(
       runArgsHandler = (
         handlers: GeneralFn[],
         decorator: ((...args: any[]) => void) | undefined,
-        event: AlovaEvent<S, E, R, T, RC, RE, RH>
+        event: AlovaEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>
       ) => {
         forEach(handlers, (handler, index) =>
           isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)

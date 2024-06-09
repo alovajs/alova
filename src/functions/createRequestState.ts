@@ -54,7 +54,17 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig, F extends MethodHandler>(
+export default function createRequestState<
+  S,
+  E,
+  R,
+  T,
+  RC,
+  RE,
+  RH,
+  UC extends UseHookConfig,
+  F extends MethodHandler = MethodHandler
+>(
   hookType: EnumHookType,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
   useHookConfig: UC,
@@ -194,9 +204,10 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>) =>
-      handleRequest(methodInstance, sendCallingArgs)
-    ) as (args: [...MethodHandlerArgs, ...any]) => any,
+    send: memorize(
+      (sendCallingArgs?: [...MethodHandlerArgs, ...any], methodInstance?: Method<S, E, R, T, RC, RE, RH>) =>
+        handleRequest(methodInstance, sendCallingArgs)
+    ),
 
     /** 为兼容options框架，如vue2、原生小程序等，将config对象原样导出 */
     _$c: useHookConfig

@@ -3,15 +3,15 @@ import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState, M
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
-  clearTimeoutTimer,
-  falseValue,
   JSONStringify,
   MEMORY,
-  nullValue,
   ObjectCls,
-  setTimeoutFn,
   STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
+  clearTimeoutTimer,
+  falseValue,
+  nullValue,
+  setTimeoutFn,
   typeOf,
   undefinedValue
 } from './variables';
@@ -190,7 +190,7 @@ export const noop = () => {},
    * @param args 方法调用参数
    * @returns 请求方法对象
    */
-  getHandlerMethod = <S, E, R, T, RC, RE, RH, F extends MethodHandler>(
+  getHandlerMethod = <S, E, R, T, RC, RE, RH, F extends MethodHandler = MethodHandler>(
     methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
     args: any[] = []
   ) => {

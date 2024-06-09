@@ -277,7 +277,7 @@ export interface StatesHook<S, E> {
    * @param fn use hook操作函数
    * @returns 包装后的操作函数
    */
-  memorize?: (fn: (...args: any[]) => any) => (...args: any[]) => any;
+  memorize?: <T extends (...args: any[]) => any>(fn: T) => T;
 
   /**
    * 创建引用对象
@@ -543,22 +543,22 @@ export interface Alova<S, E, RC, RE, RH> {
 }
 
 /** 根事件对象 */
-export interface AlovaEvent<S, E, R, T, RC, RE, RH, F> {
+export interface AlovaEvent<S, E, R, T, RC, RE, RH, F = any> {
   sendArgs: [...F, ...any]; // F保存methodHandler的args元组类型
   method: Method<S, E, R, T, RC, RE, RH>;
 }
 /** 成功事件对象 */
-export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH, F> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
+export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH, F = any> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
   /** data数据是否来自缓存 */
   fromCache: boolean;
   data: R;
 }
 /** 错误事件对象 */
-export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH, F> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
+export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH, F = any> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
   error: any;
 }
 /** 完成事件对象 */
-export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH, F> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
+export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH, F = any> extends AlovaEvent<S, E, R, T, RC, RE, RH, F> {
   /** 响应状态 */
   status: 'success' | 'error';
   /** data数据是否来自缓存，当status为error时，fromCache始终为false */
@@ -624,10 +624,10 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
 /**
  * useRequest和useWatcher中间件的context参数
  */
-export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>
+export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, F = any>
   extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 发送请求函数 */
-  send: SendHandler<R>;
+  send: SendHandler<R, F>;
 
   /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
   sendArgs: any[];
@@ -696,8 +696,8 @@ export interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH> {
-  (context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
+export interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH, F = any> {
+  (context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, F>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
 }
 /**
  * alova useRequest/useWatcher中间件
@@ -707,15 +707,15 @@ export interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH> {
 }
 
 /** hook通用配置 */
-export interface UseHookConfig {
+export interface UseHookConfig<F = any> {
   /** 是否强制请求 */
-  force?: boolean | ((...args: any[]) => boolean);
+  force?: boolean | ((...args: [...F, ...any]) => boolean);
 
   [attr: string]: any;
 }
 
 /** useRequest和useWatcher都有的类型 */
-export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
+export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH, F = any> extends UseHookConfig<F> {
   /** 是否立即发起一次请求 */
   immediate?: boolean;
 
@@ -726,11 +726,11 @@ export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookC
   managedStates?: Record<string | symbol, S>;
 
   /** 中间件 */
-  middleware?: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>;
+  middleware?: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH, F>;
 }
 
 /** useRequest config export type */
-export type RequestHookConfig<S, E, R, T, RC, RE, RH> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
+export type RequestHookConfig<S, E, R, T, RC, RE, RH, F> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH, F>;
 
 export type SendableConfig<S, E, R, T, RC, RE, RH> = (alovaEvent: AlovaEvent<S, E, R, T, RC, RE, RH>) => boolean;
 
@@ -767,8 +767,17 @@ export interface VueRef {
   value: any;
 }
 export type ExportedType<R, S> = S extends VueRef ? Ref<R> : S extends SvelteWritable ? Writable<R> : R;
-export type SendHandler<R> = (...args: any[]) => Promise<R>;
-export type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> = FrontRequestState<
+export type SendHandler<R, F = any> = (...args: [...F, ...any]) => Promise<R>;
+export type UseHookReturnType<
+  S = any,
+  E = any,
+  R = any,
+  T = any,
+  RC = any,
+  RE = any,
+  RH = any,
+  F = any
+> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,
   ExportedType<Error | undefined, S>,
@@ -777,7 +786,7 @@ export type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE =
 > & {
   abort: () => void;
   update: FrontExportedUpdate<R>;
-  send: SendHandler<R>;
+  send: SendHandler<R, F>;
   onSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH>) => void;
   onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
   onComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
@@ -818,7 +827,7 @@ export type UpdateStateCollection<R> = {
  */
 export type MethodHandler = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
 
-export type AlovaMethodHandler<S, E, R, T, RC, RE, RH, F extends MethodHandler> = F;
+export type AlovaMethodHandler<S, E, R, T, RC, RE, RH, F extends MethodHandler = MethodHandler> = F;
 
 /**
  * alova全局配置
@@ -850,10 +859,19 @@ export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useRequest<S, E, R, T, RC, RE, RH>(
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R, T, RC, RE, RH>;
+export declare function useRequest<S, E, R, T, RC, RE, RH, F extends MethodHandle = MethodHandler>(
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
+  config?: RequestHookConfig<
+    S,
+    E,
+    R,
+    T,
+    RC,
+    RE,
+    RH,
+    Parameters<Exclude<typeof methodHandler, Method<S, E, R, T, RC, RE, RH>>>
+  >
+): UseHookReturnType<S, E, R, T, RC, RE, RH, Parameters<Exclude<typeof methodHandler, Method<S, E, R, T, RC, RE, RH>>>>;
 
 /**
  * 监听特定状态值变化后请求
