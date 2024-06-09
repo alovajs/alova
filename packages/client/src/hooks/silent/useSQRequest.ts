@@ -11,7 +11,12 @@ export default function useSQRequest<AG extends AlovaGenerics>(
   config: SQRequestHookConfig<AG> = {}
 ) {
   const { middleware = noop } = config;
-  const { c: methodCreateHandler, m: silentMiddleware, b: binders } = createSilentQueueMiddlewares(handler, config);
+  const {
+    c: methodCreateHandler,
+    m: silentMiddleware,
+    b: binders,
+    d: decorateEvent
+  } = createSilentQueueMiddlewares(handler, config);
   const states = useRequest(methodCreateHandler, {
     ...config,
     middleware: (ctx, next) => {
@@ -19,6 +24,8 @@ export default function useSQRequest<AG extends AlovaGenerics>(
       return silentMiddleware(ctx, next);
     }
   });
+  decorateEvent(states);
+
   return {
     ...states,
     ...binders

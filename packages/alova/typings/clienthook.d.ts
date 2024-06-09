@@ -165,21 +165,6 @@ export interface AlovaMiddlewareContext<AG extends AlovaGenerics> {
 
   /** 中断函数 */
   abort: UseHookExposure['abort'];
-
-  /** 成功回调装饰 */
-  decorateSuccess: (
-    decorator: (handler: SuccessHandler<AG>, event: AlovaSuccessEvent<AG>, index: number, length: number) => void
-  ) => void;
-
-  /** 失败回调装饰 */
-  decorateError: (
-    decorator: (handler: ErrorHandler<AG>, event: AlovaErrorEvent<AG>, index: number, length: number) => void
-  ) => void;
-
-  /** 完成回调装饰 */
-  decorateComplete: (
-    decorator: (handler: CompleteHandler<AG>, event: AlovaCompleteEvent<AG>, index: number, length: number) => void
-  ) => void;
 }
 
 /**

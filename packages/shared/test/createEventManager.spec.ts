@@ -1,4 +1,4 @@
-import createEventManager from '@/createEventManager';
+import createEventManager, { decorateEvent } from '@/createEventManager';
 import { untilCbCalled } from 'root/testUtils';
 
 const getManager = () =>
@@ -12,12 +12,10 @@ const getManager = () =>
 describe('EventManager', () => {
   it('should export with correct types', () => {
     expect(typeof createEventManager).toBe('function');
-
     const manager = getManager();
     expect(typeof manager.emit).toBe('function');
     expect(typeof manager.on).toBe('function');
     expect(typeof manager.off).toBe('function');
-    expect(typeof manager.setDecorator).toBe('function');
     expect(manager.eventMap).toStrictEqual({});
   });
 
@@ -125,5 +123,33 @@ describe('EventManager', () => {
     expect(mockFoo4).toHaveBeenCalledTimes(1);
 
     expect(result).toStrictEqual(['foo1', 'foo2', 'foo3', 'foo4']);
+  });
+
+  it('should decorate event handler with `decorateEvent`', async () => {
+    const handlers: ((event: any) => void)[] = [];
+    const handlerResFn = jest.fn();
+    let onEvent = (handler: (event: any) => void) => {
+      handlers.push(handler);
+    };
+    onEvent = decorateEvent(onEvent, (handler, event) => {
+      event.decorated = true;
+      const ret = handler(event);
+      handlerResFn(ret);
+    });
+
+    onEvent(event => {
+      expect(event.decorated).toBeTruthy();
+      return 1;
+    });
+    onEvent(event => {
+      expect(event.decorated).toBeTruthy();
+      return 2;
+    });
+
+    // emit event
+    handlers.forEach(handler => handler({}));
+    expect(handlerResFn).toHaveBeenCalledTimes(2);
+    expect(handlerResFn).toHaveBeenNthCalledWith(1, 1);
+    expect(handlerResFn).toHaveBeenNthCalledWith(2, 2);
   });
 });

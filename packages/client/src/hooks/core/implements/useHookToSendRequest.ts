@@ -112,21 +112,11 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
     };
 
     // 调用中间件函数
-    type EventHandlerDecorator = Parameters<(typeof hookInstance.em)['setDecorator']>[1];
     const commonContext = {
       method: methodInstance,
       cachedResponse,
       config: useHookConfig,
-      abort: () => methodInstance.abort(),
-      decorateSuccess(decorator: EventHandlerDecorator) {
-        hookInstance.em.setDecorator(KEY_SUCCESS, decorator);
-      },
-      decorateError(decorator: EventHandlerDecorator) {
-        hookInstance.em.setDecorator(KEY_ERROR, decorator);
-      },
-      decorateComplete(decorator: EventHandlerDecorator) {
-        hookInstance.em.setDecorator(KEY_COMPLETE, decorator);
-      }
+      abort: () => methodInstance.abort()
     };
     // 是否需要更新响应数据，以及调用响应回调
     const toUpdateResponse = () =>

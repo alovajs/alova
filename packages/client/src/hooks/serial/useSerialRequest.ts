@@ -1,5 +1,8 @@
 import useRequest from '@/hooks/core/useRequest';
-import { AlovaGenerics, Method } from 'alova';
+import { decorateEvent } from '@alova/shared/createEventManager';
+import { statesHookHelper } from '@alova/shared/function';
+import { len } from '@alova/shared/vars';
+import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
 import { assertSerialHandlers, serialMiddleware } from './general';
 
@@ -15,8 +18,20 @@ export default <AG extends AlovaGenerics>(
   config: RequestHookConfig<AG> = {} as any
 ) => {
   assertSerialHandlers('useSerialRequest', serialHandlers);
-  return useRequest<AG>(serialHandlers[0], {
+  // eslint-disable-next-line
+  const { ref, __referingObj } = statesHookHelper(promiseStatesHook());
+  const methods = ref<Method<AG>[]>([]).current;
+  const exposures = useRequest<AG>(serialHandlers[0], {
     ...config,
-    middleware: serialMiddleware(serialHandlers, config.middleware)
+    __referingObj,
+    middleware: serialMiddleware(serialHandlers, config.middleware, methods)
   });
+
+  // 装饰错误回调函数，将event.method设置为出错的实例
+  exposures.onError = decorateEvent(exposures.onError, (handler, event) => {
+    event.method = methods[len(methods) - 1];
+    handler(event);
+  });
+
+  return exposures;
 };

@@ -15,10 +15,11 @@ import {
   isString,
   key,
   omit,
+  uuid,
   walkObject
 } from '@/function';
 import { MEMORY, STORAGE_RESTORE } from '@/vars';
-import { untilCbCalled } from 'root/testUtils';
+import { delay, untilCbCalled } from 'root/testUtils';
 import { createAlova } from '../../alova';
 
 const simulatedRequestAdapter = () => ({
@@ -582,5 +583,31 @@ describe('shared functions', () => {
     expect(callbackSpy3.mock.calls[2][0]).toBe(2); // params is original value
     expect(callbackSpy3.mock.calls[2][1]).toBe('c'); // The new value for 'c'
     expect(callbackSpy3.mock.calls[2][2]).toBe(target3.b);
+  });
+
+  test('uuid', async () => {
+    // generate 10000 uuids, 100 per times and interval 10 ms
+    const total = 10000;
+    const perTimes = 100;
+    const uuidMap = {} as Record<string, any>;
+    for (let i = 0; i < total / perTimes; i += 1) {
+      for (let j = 0; j < perTimes; j += 1) {
+        uuidMap[uuid()] = 1;
+      }
+      await delay(10);
+    }
+    expect(Object.keys(uuidMap)).toHaveLength(total);
+
+    // generate 10000 uuids, 1000 per times and interval 50 ms
+    const total2 = 10000;
+    const perTimes2 = 1000;
+    const uuidMap2 = {} as Record<string, any>;
+    for (let i = 0; i < total2 / perTimes2; i += 1) {
+      for (let j = 0; j < perTimes2; j += 1) {
+        uuidMap2[uuid()] = 1;
+      }
+      await delay(50);
+    }
+    expect(Object.keys(uuidMap2)).toHaveLength(total2);
   });
 });

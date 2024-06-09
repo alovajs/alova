@@ -68,7 +68,7 @@ describe('vue => useSQRequest', () => {
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
+    // 通过decorateEvent将成功回调参数改为事件对象了，因此强转为此对象
     const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(loading.value).toBeFalsy();
     expect(data.value.total).toBe(300);
@@ -199,7 +199,7 @@ describe('vue => useSQRequest', () => {
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
+    // decorateEvent
     const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(data.value.total).toBe(300);
     expect(data.value.list).toStrictEqual([8, 9, 10, 11, 12, 13, 14, 15]);
@@ -242,7 +242,7 @@ describe('vue => useSQRequest', () => {
     onComplete(event => {
       completeMockFn(event);
     });
-    // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
+    // decorateEvent
     const scopedSQErrorEvent = (await untilCbCalled(onError)) as unknown as ScopedSQErrorEvent<AlovaGenerics>;
     expect(data.value).toBeUndefined();
     expect(error.value?.message).toBe('server error');
@@ -309,7 +309,7 @@ describe('vue => useSQRequest', () => {
 
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    // 通过decorateSuccess将成功回调参数改为事件对象了，因此强转为此对象
+    // decorateEvent
     const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(pushMockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();

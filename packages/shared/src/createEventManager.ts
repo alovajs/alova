@@ -1,5 +1,5 @@
-import { isFn } from './function';
-import { filterItem, len, mapItem, pushItem } from './vars';
+import { uuid } from './function';
+import { filterItem, mapItem, pushItem } from './vars';
 
 export interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
@@ -10,21 +10,13 @@ export interface EventManager<E extends object> {
    * @param sync Whether to synchronize emit events, if set to `true`, this will wait for all listeners to return results using Promise.all
    */
   emit<K extends keyof E>(type: K, event: E[K]): any[];
-  setDecorator<K extends keyof E>(
-    type: K,
-    decorator: (handler: (event: any) => void, event: any, index: number, length: number) => void
-  ): void;
   eventMap: EventMap<E>;
 }
 type EventMap<E extends object> = {
   [K in keyof E]?: ((event: E[K]) => void)[];
 };
-type DecoratorMap<E extends object> = {
-  [K in keyof E]?: (handler: (event: E[K]) => void, event: any, index: number, length: number) => void;
-};
 const createEventManager = <E extends object>() => {
   const eventMap: EventMap<E> = {};
-  const decoratorMap: DecoratorMap<E> = {};
   return {
     eventMap,
     on(type, handler) {
@@ -48,15 +40,26 @@ const createEventManager = <E extends object>() => {
       }
     },
     emit(type, event) {
-      const decorator = decoratorMap[type];
       const handlers = eventMap[type] || [];
-      const executor: DecoratorMap<E>[any] = isFn(decorator) ? decorator : handler => handler(event);
-      return mapItem(handlers, (handler, index) => executor(handler, event, index, len(handlers)));
-    },
-    setDecorator(type, decorator) {
-      decoratorMap[type] = decorator;
+      return mapItem(handlers, handler => handler(event));
     }
   } as EventManager<E>;
 };
 
 export default createEventManager;
+
+export const decorateEvent = <OnEvent extends (handler: (event: any) => void) => void>(
+  onEvent: OnEvent,
+  decoratedHandler: (handler: Parameters<OnEvent>[0], event: Parameters<Parameters<OnEvent>[0]>[0]) => void
+) => {
+  const emitter = createEventManager<{
+    [x: string]: any;
+  }>();
+  const eventType = uuid();
+  onEvent(event => emitter.emit(eventType, event));
+  return (handler: Parameters<OnEvent>[0]) => {
+    emitter.on(eventType, event => {
+      decoratedHandler(handler, event);
+    });
+  };
+};

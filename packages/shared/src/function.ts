@@ -121,6 +121,16 @@ export const key = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => {
   const { params, headers } = getConfig(methodInstance);
   return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
 };
+
+/**
+ * 创建uuid简易版
+ * @returns uuid
+ */
+export const uuid = () => {
+  const timestamp = new Date().getTime();
+  return Math.floor(Math.random() * timestamp).toString(36);
+};
+
 /**
  * 获取method实例的key值
  * @param methodInstance method实例

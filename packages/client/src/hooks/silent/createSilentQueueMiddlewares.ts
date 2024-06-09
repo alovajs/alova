@@ -1,5 +1,5 @@
 import { ScopedSQCompleteEvent, ScopedSQErrorEvent, ScopedSQEvent, ScopedSQSuccessEvent } from '@/event';
-import createEventManager from '@alova/shared/createEventManager';
+import createEventManager, { decorateEvent } from '@alova/shared/createEventManager';
 import { AlovaEventBase } from '@alova/shared/event';
 import { getConfig, isFn, newInstance, sloughConfig, walkObject } from '@alova/shared/function';
 import {
@@ -14,12 +14,13 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
-import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings';
+import { AlovaFrontMiddleware, AlovaMethodHandler, UseHookExposure } from '~/typings';
 import {
   BeforePushQueueHandler,
   FallbackHandler,
   PushedQueueHandler,
   RetryHandler,
+  SQHookBehavior,
   SQHookConfig,
   ScopedSQEvents
 } from '~/typings/general';
@@ -28,6 +29,7 @@ import {
   BEHAVIOR_QUEUE,
   BEHAVIOR_SILENT,
   BEHAVIOR_STATIC,
+  DEFAUT_QUEUE_NAME,
   setVDataIdCollectBasket,
   silentAssert,
   vDataIdCollectBasket
@@ -49,9 +51,13 @@ export let currentSilentMethod: SilentMethod<any> | undefined = undefinedValue;
  * @returns 中间件函数
  */
 export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandler<AG>, config?: SQHookConfig<AG>) => {
-  const { behavior = 'queue', queue, retryError, maxRetryTimes, backoff } = config || {};
+  const { behavior = 'queue', queue = DEFAUT_QUEUE_NAME, retryError, maxRetryTimes, backoff } = config || {};
   const eventEmitter = createEventManager<ScopedSQEvents<AG>>();
   let handlerArgs: any[] | undefined;
+  let behaviorFinally: SQHookBehavior;
+  let queueFinally = DEFAUT_QUEUE_NAME;
+  let forceRequest = falseValue;
+  let silentMethodInstance: SilentMethod<AG>;
 
   /**
    * method实例创建函数
@@ -65,58 +71,41 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
     return (handler as MethodHandler<AG>)(...args);
   };
 
-  /**
-   * 中间件函数
-   * @param context 请求上下文，包含请求相关的值
-   * @param next 继续执行函数
-   * @returns {Promise}
-   */
-  const middleware: AlovaFrontMiddleware<AG> = (
-    { method, args, cachedResponse, proxyStates, decorateSuccess, decorateError, decorateComplete, config },
-    next
-  ) => {
-    const { silentDefaultResponse, vDataCaptured, force = falseValue } = config;
-
-    // 因为behavior返回值可能会变化，因此每次请求都应该调用它重新获取返回值
-    const baseEvent = AlovaEventBase.spawn(method, args);
-    const behaviorFinally = sloughConfig(behavior, [baseEvent]);
-    const queueFinally = sloughConfig(queue, [baseEvent]);
-    const forceRequest = sloughConfig(force, [baseEvent]);
-    let silentMethodInstance: any;
-
+  // 装饰success/error/complete事件
+  const decorateRequestEvent = (requestExposure: UseHookExposure<AG>) => {
     // 设置事件回调装饰器
-    decorateSuccess((handler, event, index, length) => {
-      if (index === 0) {
-        currentSilentMethod = silentMethodInstance;
-      }
+    requestExposure.onSuccess = decorateEvent(requestExposure.onSuccess, (handler, event) => {
+      currentSilentMethod = silentMethodInstance;
       handler(
         newInstance(
           ScopedSQSuccessEvent<AG>,
           behaviorFinally,
-          method,
+          event.method,
           silentMethodInstance,
           event.sendArgs,
           event.data
         ) as any
       );
-
-      // 所有成功回调执行完后再锁定虚拟数据，锁定后虚拟响应数据内不能再访问任意层级
-      // 锁定操作只在silent模式下，用于锁定虚拟数据的生成操作
-      if (index === length - 1) {
-        currentSilentMethod = undefinedValue;
-      }
     });
-    decorateError((handler, event) => {
+
+    requestExposure.onError = decorateEvent(requestExposure.onError, (handler, event) => {
       handler(
-        newInstance(ScopedSQErrorEvent<AG>, behaviorFinally, method, silentMethodInstance, event.sendArgs, event.error)
+        newInstance(
+          ScopedSQErrorEvent<AG>,
+          behaviorFinally,
+          event.method,
+          silentMethodInstance,
+          event.sendArgs,
+          event.error
+        )
       );
     });
-    decorateComplete((handler, event) => {
+    requestExposure.onComplete = decorateEvent(requestExposure.onComplete, (handler, event) => {
       handler(
         newInstance(
           ScopedSQCompleteEvent<AG>,
           behaviorFinally,
-          method,
+          event.method,
           silentMethodInstance,
           event.sendArgs,
           event.status,
@@ -125,6 +114,22 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
         ) as any
       );
     });
+  };
+
+  /**
+   * 中间件函数
+   * @param context 请求上下文，包含请求相关的值
+   * @param next 继续执行函数
+   * @returns Promise对象
+   */
+  const middleware: AlovaFrontMiddleware<AG> = ({ method, args, cachedResponse, proxyStates, config }, next) => {
+    const { silentDefaultResponse, vDataCaptured, force = falseValue } = config;
+
+    // 因为behavior返回值可能会变化，因此每次请求都应该调用它重新获取返回值
+    const baseEvent = AlovaEventBase.spawn(method, args);
+    behaviorFinally = sloughConfig(behavior, [baseEvent]);
+    queueFinally = sloughConfig(queue, [baseEvent]);
+    forceRequest = sloughConfig(force, [baseEvent]);
 
     // 置空临时收集变量
     // 返回前都需要置空它们
@@ -160,7 +165,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
         const queueResolvePromise = newInstance(PromiseCls, (resolveHandler, rejectHandler) => {
           silentMethodInstance = newInstance(
             SilentMethod<AG>,
-            method as Method,
+            method,
             behaviorFinally,
             eventEmitter,
             undefinedValue,
@@ -231,6 +236,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
   return {
     c: createMethod,
     m: middleware,
+    d: decorateRequestEvent,
 
     // 事件绑定函数
     b: {

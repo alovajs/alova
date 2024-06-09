@@ -1,5 +1,5 @@
 import { createAssert } from '@alova/shared/assert';
-import { instanceOf, isFn, isNumber, noop } from '@alova/shared/function';
+import { instanceOf, isFn, isNumber, noop, uuid } from '@alova/shared/function';
 import { GeneralFn } from '@alova/shared/types';
 import {
   clearTimeoutTimer,
@@ -13,15 +13,6 @@ import {
 import { Method } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
 import { AnyFn, BackoffPolicy, UsePromiseExposure } from '~/typings/general';
-
-/**
- * 创建uuid简易版
- * @returns uuid
- */
-export const uuid = () => {
-  const timestamp = new Date().getTime();
-  return Math.floor(Math.random() * timestamp).toString(36);
-};
 
 const referenceList = [] as { id: string; ref: any }[];
 /**

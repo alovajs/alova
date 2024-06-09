@@ -1,6 +1,5 @@
-import { uuid } from '@/util/helper';
 import { EventManager } from '@alova/shared/createEventManager';
-import { getContext, instanceOf } from '@alova/shared/function';
+import { getContext, instanceOf, uuid } from '@alova/shared/function';
 import { falseValue, isArray, splice, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
 import type {

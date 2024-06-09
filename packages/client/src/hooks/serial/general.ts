@@ -36,7 +36,8 @@ export type SerialHandlers<AG extends AlovaGenerics> = [
  */
 export const serialMiddleware = <AG extends AlovaGenerics>(
   serialHandlers: SerialHandlers<AG>,
-  hookMiddleware?: AlovaFrontMiddleware<AG>
+  hookMiddleware?: AlovaFrontMiddleware<AG>,
+  serialRequestMethods: Method<AG>[] = []
 ) => {
   // 第一个handler在外部传递给了use hook，不需要再次请求
   serialHandlers.shift();
@@ -46,21 +47,15 @@ export const serialMiddleware = <AG extends AlovaGenerics>(
     ctx.controlLoading();
     const loadingState = ctx.proxyStates.loading;
     loadingState.v = trueValue;
-    const methods: Method<AG>[] = [];
     let serialPromise = next();
     for (const handler of serialHandlers) {
       serialPromise = promiseThen(serialPromise, value => {
         const methodItem = (handler as AlovaMethodHandler<AG>)(value, ...ctx.args);
-        pushItem(methods, methodItem);
+        pushItem(serialRequestMethods, methodItem);
         return methodItem.send();
       });
     }
 
-    // 装饰错误回调函数，将event.method设置为出错的实例
-    ctx.decorateError((handler, event) => {
-      event.method = methods[len(methods) - 1];
-      handler(event);
-    });
     return serialPromise.finally(() => {
       loadingState.v = falseValue;
     });
