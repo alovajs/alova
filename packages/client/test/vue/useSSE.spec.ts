@@ -11,11 +11,16 @@ import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as s
 import { AlovaSSEMessageEvent, AnyFn, SSEHookReadyState } from '~/typings/general';
 import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
 import CompUseSSE from './components/use-sse.vue';
+import { usePromise } from '@/util/helper';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
 
 afterEach(() => {
-  server.close();
+  const { promise, resolve } = usePromise();
+  if (server.listening) {
+    server.close(resolve);
+    return promise;
+  }
 });
 
 type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
@@ -39,7 +44,7 @@ describe('vue => useSSE', () => {
   test('should default NOT request immediately', async () => {
     const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
-    const { on, onOpen, data, readyState, send } = useSSE(poster);
+    const { on, onOpen, data, readyState, send, close } = useSSE(poster);
     const cb = jest.fn();
     const openCb = jest.fn();
     on(IntervalEventName, cb);
@@ -70,6 +75,7 @@ describe('vue => useSSE', () => {
 
     expect(recvData).toEqual(IntervalMessage);
     expect(data.value).toStrictEqual(IntervalMessage);
+    close();
   }, 3000);
 
   // ! 有初始数据，不立即发送请求
@@ -81,7 +87,7 @@ describe('vue => useSSE', () => {
       name: 'Tom',
       age: 18
     };
-    const { onMessage, onOpen, data, readyState, send } = useSSE(poster, { initialData });
+    const { onMessage, onOpen, data, readyState, send, close } = useSSE(poster, { initialData });
 
     const testDataA = 'test-data-1';
     const testDataB = 'test-data-2';
@@ -120,6 +126,7 @@ describe('vue => useSSE', () => {
 
     expect(recvData).toEqual(testDataB);
     expect(data.value).toStrictEqual(testDataB);
+    close();
   });
 
   // ! 有初始数据，立即发送请求

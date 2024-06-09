@@ -12,12 +12,18 @@ import React, { ReactElement } from 'react';
 import { untilCbCalled } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
 import { SSEHookReadyState } from '~/typings/general';
+// eslint-disable-next-line import/no-named-as-default
 import getAlovaInstance from '../utils';
+import { usePromise } from '@/util/helper';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
 
 afterEach(() => {
-  server.close();
+  const { promise, resolve } = usePromise();
+  if (server.listening) {
+    server.close(resolve);
+    return promise;
+  }
 });
 
 type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
@@ -47,7 +53,6 @@ describe('react => useSSE', () => {
     const mockOnFn = jest.fn((event: AnyMessageType) => {
       recv = event.data;
     });
-    // const mockOpenFn = jest.fn();
 
     const Page = () => {
       const { on, onOpen, data, readyState, send, close } = useSSE(poster);
