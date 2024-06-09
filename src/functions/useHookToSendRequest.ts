@@ -49,7 +49,6 @@ import {
   FrontRequestHookConfig,
   FrontRequestState,
   Hook,
-  MethodHandler,
   Progress,
   SuccessHandler,
   WatcherHookConfig
@@ -62,12 +61,11 @@ import {
  * @param sendCallingArgs send函数参数
  * @returns 请求状态
  */
-export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, F extends MethodHandler = MethodHandler>(
+export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, ARG extends any[]>(
   hookInstance: Hook,
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
-  sendCallingArgs: any[] = []
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
+  sendCallingArgs: [...ARG, ...any] = [] as unknown as any
 ) {
-  type MethodHandlerArgs = Parameters<Exclude<typeof methodHandler, Method<S, E, R, T, RC, RE, RH>>>;
   let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
   const {
       fs: frontStates,
@@ -184,24 +182,24 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, F extends M
     // 调用中间件函数
     let successHandlerDecorator:
         | ((
-            handler: SuccessHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
-            event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
+            handler: SuccessHandler<S, E, R, T, RC, RE, RH, ARG>,
+            event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG>,
             index: number,
             length: number
           ) => void)
         | undefined,
       errorHandlerDecorator:
         | ((
-            handler: ErrorHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
-            event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
+            handler: ErrorHandler<S, E, R, T, RC, RE, RH, ARG>,
+            event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG>,
             index: number,
             length: number
           ) => void)
         | undefined,
       completeHandlerDecorator:
         | ((
-            handler: CompleteHandler<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
-            event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>,
+            handler: CompleteHandler<S, E, R, T, RC, RE, RH, ARG>,
+            event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG>,
             index: number,
             length: number
           ) => void)
@@ -225,7 +223,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, F extends M
       runArgsHandler = (
         handlers: GeneralFn[],
         decorator: ((...args: any[]) => void) | undefined,
-        event: AlovaEvent<S, E, R, T, RC, RE, RH, MethodHandlerArgs>
+        event: AlovaEvent<S, E, R, T, RC, RE, RH, ARG>
       ) => {
         forEach(handlers, (handler, index) =>
           isFn(decorator) ? decorator(handler, event, index, len(handlers)) : handler(event)
@@ -236,7 +234,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, F extends M
       fetchStates = exportFetchStates(frontStates),
       // 调用中间件函数
       middlewareCompletePromise = isFetcher
-        ? (middleware as AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH>)(
+        ? (middleware as AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH, ARG>)(
             {
               ...commonContext,
               fetchArgs: sendCallingArgs,
@@ -253,11 +251,11 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, F extends M
             },
             guardNext
           )
-        : (middleware as AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>)(
+        : (middleware as AlovaFrontMiddleware<S, E, R, T, RC, RE, RH, ARG>)(
             {
               ...commonContext,
               sendArgs: sendCallingArgs,
-              send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args),
+              send: (...args: [...ARG, ...any]) => useHookToSendRequest(hookInstance, methodHandler, args),
               frontStates,
               update: newFrontStates => update(newFrontStates, frontStates, hookInstance),
               controlLoading(control = trueValue) {

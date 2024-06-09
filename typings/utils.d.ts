@@ -1,7 +1,12 @@
 /**
  * Merge工具类型将T对象,U元组对象合并
  */
-declare type Merge<T extends Record<string, any>, U extends Record<string, any>[]> = T & UnionToIntersection<U[number]>;
+declare type Merge<T extends Record<string, any>, U extends Record<string, any>[]> = U extends [
+  infer First,
+  ...infer Rest
+]
+  ? Merge<First & Omit<T, keyof First>, Rest>
+  : T;
 /**
  * UnionToIntersection工具类将联合类型转为交叉类型
  */

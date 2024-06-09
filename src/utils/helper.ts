@@ -1,5 +1,5 @@
 import { boundStatesHook } from '@/alova';
-import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState, MethodHandler } from '~/typings';
+import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } from '~/typings';
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
@@ -190,11 +190,11 @@ export const noop = () => {},
    * @param args 方法调用参数
    * @returns 请求方法对象
    */
-  getHandlerMethod = <S, E, R, T, RC, RE, RH, F extends MethodHandler = MethodHandler>(
-    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, F>,
-    args: any[] = []
+  getHandlerMethod = <S, E, R, T, RC, RE, RH, ARG extends any[]>(
+    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
+    args: [...ARG, ...any] = [] as unknown as any
   ) => {
-    const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
+    const methodInstance = isFn(methodHandler) ? methodHandler(...(args as [...ARG])) : methodHandler;
     myAssert(
       instanceOf(methodInstance, Method),
       'hook handler must be a method instance or a function that returns method instance'
