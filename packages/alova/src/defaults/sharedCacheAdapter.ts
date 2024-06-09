@@ -3,6 +3,7 @@ import { QueueCallback } from '@/utils/queueCallback';
 import { isPlainObject, uuid } from '@alova/shared/function';
 import { deleteAttr, objectKeys } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter } from '~/typings';
+import { createDefaultL1CacheAdapter } from './cacheAdapter';
 
 export type SharedCacheEvent = {
   scope?: string;
@@ -21,7 +22,7 @@ export type SharedEventHandler = (
   replyFn?: (event: SharedCacheEvent) => void | Promise<void>
 ) => void | Promise<void>;
 
-interface SyncAdapter {
+export interface SyncAdapter {
   send(event: SharedCacheEvent): void | Promise<void>;
   receive(handler: SharedEventHandler): void;
 }
@@ -152,9 +153,9 @@ export class ExplictCacheAdapter implements AlovaGlobalCacheAdapter {
  * ```
  */
 export function createDefaultSharedCacheAdapter(
-  cacheAdapter: AlovaGlobalCacheAdapter,
   syncAdapter: SyncAdapter,
-  options: AlovaSharedCacheAdapterOptions
+  cacheAdapter: AlovaGlobalCacheAdapter = createDefaultL1CacheAdapter(),
+  options: AlovaSharedCacheAdapterOptions = {}
 ) {
   return new AlovaDefaultSharedCacheAdapter(cacheAdapter, syncAdapter, options);
 }

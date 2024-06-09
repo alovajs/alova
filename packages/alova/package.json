@@ -123,6 +123,7 @@
   },
   "devDependencies": {
     "@alova/scripts": "workspace:*",
+    "electron": "^30.1.0",
     "vue-demi": "^0.14.7"
   },
   "config": {
