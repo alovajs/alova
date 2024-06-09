@@ -46,6 +46,130 @@ describe('l1cache cache data', () => {
       params: {},
       data: {}
     });
+
+    // the `cacheFor` also set to an object
+    const alova2 = getAlovaInstance({
+      cacheFor: {
+        POST: {
+          mode: 'memory',
+          expire: 300000
+        }
+      },
+      responseExpect: r => r.json()
+    });
+
+    // GET requests no longer have default cache settings
+    const Get2 = alova2.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    await Get2;
+    expect(await queryCache(Get2)).toBeUndefined();
+
+    // POST is cached
+    const Post2 = alova2.Post('/unit-test', undefined, {
+      transformData: ({ data }: Result) => data
+    });
+    await Post2;
+    expect(await queryCache(Post2)).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+  });
+
+  test('should the `cacheFor` also can set to be a Date object', async () => {
+    const alova = getAlovaInstance({
+      cacheFor: {
+        POST: new Date(Date.now() + 300000)
+      },
+      responseExpect: r => r.json()
+    });
+
+    // GET requests no longer have default cache settings
+    const Get = alova.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    await Get;
+    expect(await queryCache(Get)).toBeUndefined();
+
+    // POST is cached
+    const Post = alova.Post('/unit-test', undefined, {
+      transformData: ({ data }: Result) => data
+    });
+    await Post;
+    expect(await queryCache(Post)).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+
+    // the `cacheFor` also set to an object
+    const alova2 = getAlovaInstance({
+      cacheFor: {
+        POST: {
+          mode: 'memory',
+          expire: new Date(Date.now() + 300000)
+        }
+      },
+      responseExpect: r => r.json()
+    });
+
+    // GET requests no longer have default cache settings
+    const Get2 = alova2.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    await Get2;
+    expect(await queryCache(Get2)).toBeUndefined();
+
+    // POST is cached
+    const Post2 = alova2.Post('/unit-test', undefined, {
+      transformData: ({ data }: Result) => data
+    });
+    await Post2;
+    expect(await queryCache(Post2)).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+  });
+
+  test('should use the return value to be expired time when set method type to a function', async () => {
+    const expireFn = jest.fn();
+    const alova = getAlovaInstance({
+      cacheFor: {
+        POST: {
+          mode: 'memory',
+          expire: ({ method, mode }) => {
+            expireFn(method, mode);
+            return Date.now() + 300000;
+          }
+        }
+      },
+      responseExpect: r => r.json()
+    });
+
+    // GET requests no longer have default cache settings
+    const Get = alova.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    await Get;
+    expect(await queryCache(Get)).toBeUndefined();
+
+    // POST is cached
+    const Post = alova.Post('/unit-test', undefined, {
+      transformData: ({ data }: Result) => data
+    });
+    await Post;
+    expect(await queryCache(Post)).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+    expect(expireFn).toHaveBeenCalledWith(Post, 'memory');
   });
 
   test('should hit the cache data when re-request the same url with the same parameters', async () => {

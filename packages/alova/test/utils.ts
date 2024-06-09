@@ -14,7 +14,7 @@ export const getAlovaInstance = ({
   limitSnapshots
 }: {
   endWithSlash?: boolean;
-  cacheFor?: GlobalCacheConfig;
+  cacheFor?: GlobalCacheConfig<any>;
   beforeRequestExpect?: (methodInstance: FetchMethod) => void;
   responseExpect?: (response: Response, method: FetchMethod) => void;
   resErrorExpect?: (err: Error, method: FetchMethod) => void;

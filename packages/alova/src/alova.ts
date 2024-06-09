@@ -7,20 +7,13 @@ import {
   AlovaMethodCreateConfig,
   AlovaOptions,
   RequestBody,
+  RespondedAlovaGenerics,
   StatesHook
 } from '~/typings';
 import Method from './Method';
 import { createDefaultL1CacheAdapter, createDefaultL2CacheAdapter } from './defaults/cacheAdapter';
 import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
-
-type RespondedAlovaGenerics<AG extends AlovaGenerics, Responded, Transformed> = Omit<
-  AG,
-  'Responded' | 'Transformed'
-> & {
-  Responded: Responded;
-  Transformed: Transformed;
-};
 
 const typeGet = 'GET';
 const typeHead = 'HEAD';
@@ -81,7 +74,7 @@ export class Alova<AG extends AlovaGenerics> {
 
   Get<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
   ) {
     return newInstance(Method<RespondedAlovaGenerics<AG, Responded, Transformed>>, typeGet, this as any, url, config);
   }
@@ -89,7 +82,7 @@ export class Alova<AG extends AlovaGenerics> {
   Post<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
   ) {
     return newInstance(
       Method<RespondedAlovaGenerics<AG, Responded, Transformed>>,
@@ -104,7 +97,7 @@ export class Alova<AG extends AlovaGenerics> {
   Delete<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
   ) {
     return newInstance(
       Method<RespondedAlovaGenerics<AG, Responded, Transformed>>,
@@ -119,7 +112,7 @@ export class Alova<AG extends AlovaGenerics> {
   Put<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
   ) {
     return newInstance(
       Method<RespondedAlovaGenerics<AG, Responded, Transformed>>,
@@ -133,7 +126,7 @@ export class Alova<AG extends AlovaGenerics> {
 
   Head<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
   ) {
     return newInstance(Method<RespondedAlovaGenerics<AG, Responded, Transformed>>, typeHead, this as any, url, config);
   }
@@ -141,7 +134,7 @@ export class Alova<AG extends AlovaGenerics> {
   Patch<Responded = unknown, Transformed = unknown>(
     url: string,
     data: RequestBody = {},
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
   ) {
     return newInstance(
       Method<RespondedAlovaGenerics<AG, Responded, Transformed>>,
@@ -155,7 +148,7 @@ export class Alova<AG extends AlovaGenerics> {
 
   Options<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
   ) {
     return newInstance(
       Method<RespondedAlovaGenerics<AG, Responded, Transformed>>,

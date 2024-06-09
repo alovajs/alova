@@ -39,7 +39,7 @@ export const setWithCacheAdapter = async (
   expireTimestamp: number,
   cacheAdapter: AlovaGlobalCacheAdapter,
   hitSource: Method['hitSource'],
-  tag?: DetailCacheConfig['tag']
+  tag?: DetailCacheConfig<any>['tag']
 ) => {
   // not to cache if expireTimestamp is less than current timestamp
   if (expireTimestamp > getTime() && data) {
@@ -140,9 +140,9 @@ export const getRawWithCacheAdapter = async (
   namespace: string,
   key: string,
   cacheAdapter: AlovaGlobalCacheAdapter,
-  tag?: DetailCacheConfig['tag']
+  tag?: DetailCacheConfig<any>['tag']
 ) => {
-  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig['tag']]>(
+  const storagedData = await cacheAdapter.get<[any, number, DetailCacheConfig<any>['tag']]>(
     buildNamespacedCacheKey(namespace, key)
   );
   if (storagedData) {
@@ -168,7 +168,7 @@ export const getWithCacheAdapter = async (
   namespace: string,
   key: string,
   cacheAdapter: AlovaGlobalCacheAdapter,
-  tag?: DetailCacheConfig['tag']
+  tag?: DetailCacheConfig<any>['tag']
 ) => {
   const rawData = await getRawWithCacheAdapter(namespace, key, cacheAdapter, tag);
   return rawData ? rawData[0] : undefinedValue;
@@ -188,7 +188,7 @@ export const clearWithCacheAdapter = async (cacheAdapters: AlovaGlobalCacheAdapt
  */
 export const hitTargetCacheWithCacheAdapter = async (
   sourceKey: string,
-  sourceName: AlovaMethodConfig<any, any, {}, any>['name'],
+  sourceName: AlovaMethodConfig<any>['name'],
   cacheAdapter: AlovaGlobalCacheAdapter
 ) => {
   const sourceNameStr = `${sourceName}`;

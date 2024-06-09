@@ -8,6 +8,123 @@ beforeEach(() => {
   invalidateCache();
 });
 describe('l2cache cache data', () => {
+  test('should all POST request will be cached when set `cacheFor` globally', async () => {
+    const alova = getAlovaInstance({
+      cacheFor: {
+        POST: {
+          mode: 'restore',
+          expire: 300000
+        }
+      },
+      responseExpect: r => r.json()
+    });
+
+    // GET requests no longer have default cache settings
+    const Get = alova.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+    await Get;
+    expect(await queryCache(Get)).toBeUndefined();
+
+    // POST is cached
+    const Post1 = alova.Post('/unit-test', undefined, {
+      transformData: ({ data }: Result) => data
+    });
+    await Post1;
+    expect(await queryCache(Post1, { policy: 'l1' })).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+    expect(await queryCache(Post1, { policy: 'l2' })).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+
+    // POST is cached
+    const Post2 = alova.Post(
+      '/unit-test',
+      { p1: 's1' },
+      {
+        transformData: ({ data }: Result) => data
+      }
+    );
+    await Post2;
+    expect(await queryCache(Post2, { policy: 'l1' })).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: { p1: 's1' }
+    });
+    expect(await queryCache(Post2, { policy: 'l2' })).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: { p1: 's1' }
+    });
+  });
+
+  test('should set the memory and restore cache to the different cached time globally', async () => {
+    const expireFn = jest.fn();
+    const alova = getAlovaInstance({
+      cacheFor: {
+        POST: {
+          mode: 'restore',
+          expire: ({ mode }) => {
+            expireFn();
+            return mode === 'memory' ? 10 : 600;
+          }
+        }
+      },
+      responseExpect: r => r.json()
+    });
+
+    const Post1 = alova.Post('/unit-test', undefined, {
+      transformData: ({ data }: Result) => data
+    });
+    await Post1;
+    await delay(50); // let the l1 cache expired
+    expect(await queryCache(Post1, { policy: 'l1' })).toBeUndefined();
+    expect(await queryCache(Post1, { policy: 'l2' })).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+    expect(expireFn).toHaveBeenCalledTimes(2);
+  });
+
+  test('should set the memory and restore cache to the different cached time requestly', async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+
+    const expireFn = jest.fn();
+    const Post1 = alova.Post('/unit-test', undefined, {
+      cacheFor: {
+        mode: 'restore',
+        expire: ({ mode }) => {
+          expireFn();
+          return mode === 'memory' ? 10 : 600;
+        }
+      },
+      transformData: ({ data }: Result) => data
+    });
+    await Post1;
+    await delay(50); // let the l1 cache expired
+    expect(await queryCache(Post1, { policy: 'l1' })).toBeUndefined();
+    expect(await queryCache(Post1, { policy: 'l2' })).toStrictEqual({
+      path: '/unit-test',
+      method: 'POST',
+      params: {},
+      data: {}
+    });
+    expect(expireFn).toHaveBeenCalledTimes(2);
+  });
+
   test('l2cache data will restore to l1cache even if the l1cache of the same key is invalid', async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
@@ -114,7 +231,7 @@ describe('l2cache cache data', () => {
 
     // Clear the cache first to simulate the scenario after the browser is refreshed. At this time, the persistent data will be assigned to the data state first and a request will be initiated.
     removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
-    (alova.options.cacheFor?.GET as DetailCacheConfig).tag = 'v3'; // Modify tag
+    (alova.options.cacheFor?.GET as DetailCacheConfig<any>).tag = 'v3'; // Modify tag
     const Get2 = alova.Get('/unit-test', {
       transformData: ({ data }: Result) => data
     });

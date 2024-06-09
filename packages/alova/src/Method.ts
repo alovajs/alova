@@ -44,8 +44,7 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   public url: string;
 
-  public config: MethodRequestConfig &
-    AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>;
+  public config: MethodRequestConfig & AlovaMethodConfig<AG>;
 
   public data?: RequestBody;
 
@@ -68,13 +67,7 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   public fromCache: boolean | undefined = undefinedValue;
 
-  constructor(
-    type: MethodType,
-    context: Alova<AG>,
-    url: string,
-    config?: AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>,
-    data?: RequestBody
-  ) {
+  constructor(type: MethodType, context: Alova<AG>, url: string, config?: AlovaMethodConfig<AG>, data?: RequestBody) {
     const abortRequest: AbortFunction = () => {
       abortRequest.a();
     };

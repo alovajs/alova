@@ -133,7 +133,7 @@ export interface MethodRequestConfig {
    */
   headers: Arg;
 }
-export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader> = {
+export type AlovaMethodConfig<AG extends AlovaGenerics> = {
   /**
    * method对象名称，在updateState、invalidateCache、setCache、以及fetch函数中可以通过名称或通配符获取对应method对象
    */
@@ -147,7 +147,7 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
   /**
    * 响应数据在缓存时间内则不再次请求。get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    */
-  cacheFor?: CacheConfig | CacheController<Responded>;
+  cacheFor?: CacheConfig<AG> | CacheController<AG['Responded']>;
 
   /**
    * 打击源方法实例，当源方法实例请求成功时，当前方法实例的缓存将被失效
@@ -160,7 +160,10 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
   /**
    * 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
    */
-  transformData?: (data: Transformed, headers: ResponseHeader) => Responded | Promise<Responded>;
+  transformData?: (
+    data: AG['Transformed'],
+    headers: AG['ResponseHeader']
+  ) => AG['Responded'] | Promise<AG['Responded']>;
 
   /**
    * 请求级共享请求开关
@@ -173,9 +176,8 @@ export type AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHea
    * method元数据
    */
   meta?: AlovaCustomTypes['meta'];
-} & RequestConfig;
-export type AlovaMethodCreateConfig<Responded, Transformed, RequestConfig, ResponseHeader> =
-  Partial<MethodRequestConfig> & AlovaMethodConfig<Responded, Transformed, RequestConfig, ResponseHeader>;
+} & AG['RequestConfig'];
+export type AlovaMethodCreateConfig<AG extends AlovaGenerics> = Partial<MethodRequestConfig> & AlovaMethodConfig<AG>;
 
 export type RespondedHandler<AG extends AlovaGenerics> = (response: AG['Response'], methodInstance: Method<AG>) => any;
 export type ResponseErrorHandler<AG extends AlovaGenerics> = (
@@ -312,7 +314,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
   onUnmounted: (callback: () => void, referingObject: ReferingObject) => void;
 }
 
-export type GlobalCacheConfig = Partial<Record<MethodType, CacheConfig>> | null;
+export type GlobalCacheConfig<AG extends AlovaGenerics> = Partial<Record<MethodType, CacheConfig<AG>>> | null;
 export type CacheLoggerHandler<AG extends AlovaGenerics> = (
   response: any,
   methodInstance: Method<AG>,
@@ -366,7 +368,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
    * get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    * @default { GET: 300000 }
    */
-  cacheFor?: GlobalCacheConfig;
+  cacheFor?: GlobalCacheConfig<AG>;
 
   /**
    * memory mode cache adapter. it will be used when caching data with memory mode.
@@ -454,8 +456,7 @@ export interface Method<AG extends AlovaGenerics = any> {
   /**
    * method配置
    */
-  config: MethodRequestConfig &
-    AlovaMethodConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>;
+  config: MethodRequestConfig & AlovaMethodConfig<AG>;
   /**
    * 请求体
    */
@@ -564,7 +565,7 @@ export interface MethodConstructor {
     type: MethodType,
     context: Alova<AG>,
     url: string,
-    config?: AlovaMethodCreateConfig<AG['Responded'], AG['Transformed'], AG['RequestConfig'], AG['ResponseHeader']>,
+    config?: AlovaMethodCreateConfig<AG>,
     data?: RequestBody
   ): Method<AG>;
   readonly prototype: Method;
@@ -592,6 +593,14 @@ export interface MethodSnapshotContainer<AG extends AlovaGenerics> {
   ): M extends true ? Method<AG>[] : Method<AG> | undefined;
 }
 
+export type RespondedAlovaGenerics<AG extends AlovaGenerics, Responded, Transformed> = Omit<
+  AG,
+  'Responded' | 'Transformed'
+> & {
+  Responded: Responded;
+  Transformed: Transformed;
+};
+
 export interface Alova<AG extends AlovaGenerics> {
   id: string;
   options: AlovaOptions<AG>;
@@ -600,153 +609,41 @@ export interface Alova<AG extends AlovaGenerics> {
   snapshots: MethodSnapshotContainer<AG>;
   Get<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Post<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Put<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Delete<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Put<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Head<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Options<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Patch<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<Responded, Transformed, AG['RequestConfig'], AG['ResponseHeader']>
-  ): Method<
-    AlovaGenerics<
-      AG['State'],
-      AG['Computed'],
-      AG['Watched'],
-      AG['Export'],
-      Responded,
-      Transformed,
-      AG['RequestConfig'],
-      AG['Response'],
-      AG['ResponseHeader'],
-      AG['L1Cache'],
-      AG['L2Cache']
-    >
-  >;
+    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
 }
 
 export interface MethodFilterHandler<AG extends AlovaGenerics> {
@@ -788,8 +685,8 @@ export declare function createAlova<
   RequestConfig,
   Response,
   ResponseHeader,
-  L1Cache extends AlovaGlobalCacheAdapter = AlovaGlobalCacheAdapter,
-  L2Cache extends AlovaGlobalCacheAdapter = AlovaGlobalCacheAdapter
+  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater,
+  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater
 >(
   options: AlovaOptions<
     AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
