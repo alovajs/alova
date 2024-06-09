@@ -143,14 +143,14 @@ describe('createAlova', function () {
 
     // beforeRequest异步函数测试
     const { onError } = useRequest(Get);
-    let errEvent = await untilCbCalled(onError);
+    const errEvent = await untilCbCalled(onError);
     expect(errEvent.error.message).toBe('reject in beforeRequest');
     await expect(Get().send()).rejects.toThrow('reject in beforeRequest');
 
     // beforeRequest同步函数测试
     const { onError: onError2 } = useRequest(Get(false));
-    errEvent = await untilCbCalled(onError2);
-    expect(errEvent.error.message).toBe('error in beforeRequest');
+    const errEvent2 = await untilCbCalled(onError2);
+    expect(errEvent2.error.message).toBe('error in beforeRequest');
     await expect(Get(false).send()).rejects.toThrow('error in beforeRequest');
   });
 
@@ -407,14 +407,14 @@ describe('createAlova', function () {
 
     // beforeRequest异步函数测试
     const { onComplete } = useRequest(Get);
-    let completeEvent = await untilCbCalled(onComplete);
+    const completeEvent = await untilCbCalled(onComplete);
     expect(completeEvent.error.message).toBe('reject in beforeRequest');
     await expect(Get().send()).rejects.toThrow('reject in beforeRequest');
 
     // beforeRequest同步函数测试
     const { onComplete: onComplete2 } = useRequest(Get(false));
-    completeEvent = await untilCbCalled(onComplete2);
-    expect(completeEvent.error.message).toBe('error in beforeRequest');
+    const completeEvent2 = await untilCbCalled(onComplete2);
+    expect(completeEvent2.error.message).toBe('error in beforeRequest');
     await expect(Get(false).send()).rejects.toThrow('error in beforeRequest');
   });
 

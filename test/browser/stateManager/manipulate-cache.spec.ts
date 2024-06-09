@@ -411,13 +411,13 @@ describe('manipulate cache', function () {
         transformData: ({ data }: Result) => data
       });
     const { onError } = useRequest(Get1);
-    let event = await untilCbCalled(onError);
+    const event = await untilCbCalled(onError);
     expect(event.error.message).toBe('reject in localCache');
     await expect(Get1().send()).rejects.toThrow('reject in localCache');
 
     const { onError: onError2 } = useRequest(Get1(false));
-    event = await untilCbCalled(onError2);
-    expect(event.error.message).toBe('error in localCache');
+    const event1 = await untilCbCalled(onError2);
+    expect(event1.error.message).toBe('error in localCache');
     await expect(Get1(false).send()).rejects.toThrow('error in localCache');
   });
 });

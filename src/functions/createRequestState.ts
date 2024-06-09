@@ -53,7 +53,7 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig, ARG extends any[]>(
+export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig<ARG>, ARG extends any[]>(
   hookType: EnumHookType,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
   useHookConfig: UC,
