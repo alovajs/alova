@@ -12,7 +12,7 @@ import {
 } from '@alova/shared/vars';
 import { Method } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
-import { AnyFn, BackoffPolicy, UsePromiseExposure } from '~/typings/general';
+import { AnyFn, BackoffPolicy } from '~/typings/general';
 
 const referenceList = [] as { id: string; ref: any }[];
 /**
@@ -100,19 +100,6 @@ export function useCallback<Fn extends AnyFn = AnyFn>(onCallbackChange: (callbac
   };
 
   return [setCallback, triggerCallback as Fn, removeAllCallback] as const;
-}
-
-export function usePromise<T = any>(): UsePromiseExposure<T> {
-  let retResolve: UsePromiseExposure<T>['resolve'];
-  let retReject: UsePromiseExposure<T>['reject'];
-
-  const promise = new Promise<T>((resolve, reject) => {
-    retResolve = resolve;
-    retReject = reject;
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return { promise, resolve: retResolve!, reject: retReject! };
 }
 
 /**

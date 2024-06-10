@@ -5,7 +5,18 @@ export class QueueCallback {
 
   private isProcessing = false;
 
-  constructor(protected limit?: number) {}
+  private interrupt = false;
+
+  /**
+   * @param [limit=null] no limit if set undefined or null
+   * @param [initialProcessing=false]
+   */
+  constructor(
+    protected limit?: number | null,
+    initialProcessing = false
+  ) {
+    this.isProcessing = initialProcessing;
+  }
 
   /**
    * Adds a callback function to the callback queue.
@@ -30,7 +41,8 @@ export class QueueCallback {
    */
   async tryRunQueueCallback() {
     this.isProcessing = true;
-    while (this.callbackQueue.length > 0) {
+    this.interrupt = false;
+    while (this.callbackQueue.length > 0 && !this.interrupt) {
       const cb = this.callbackQueue.shift();
       try {
         await cb?.();
@@ -40,5 +52,18 @@ export class QueueCallback {
       }
     }
     this.isProcessing = false;
+  }
+
+  /**
+   * If set the param `state` to true, it will interrupt the current job (whether or not the current processing state is true)
+   * If set the param `state` to false, then get on with the rest of the work
+   */
+  setProcessingState(state: boolean) {
+    this.isProcessing = state;
+    if (!state) {
+      this.tryRunQueueCallback();
+    } else {
+      this.interrupt = true;
+    }
   }
 }

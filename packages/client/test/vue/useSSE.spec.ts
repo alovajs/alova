@@ -1,4 +1,5 @@
 import { useSSE } from '@/index';
+import { usePromise } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { AlovaGenerics, createAlova } from 'alova';
@@ -11,7 +12,6 @@ import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as s
 import { AlovaSSEMessageEvent, AnyFn, SSEHookReadyState } from '~/typings/general';
 import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
 import CompUseSSE from './components/use-sse.vue';
-import { usePromise } from '@/util/helper';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
 

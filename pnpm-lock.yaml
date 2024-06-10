@@ -276,10 +276,16 @@ importers:
       '@alova/shared':
         specifier: workspace:*
         version: link:../shared
+      '@node-ipc/node-ipc':
+        specifier: ^11.0.3
+        version: 11.0.3
     devDependencies:
       '@alova/scripts':
         specifier: workspace:*
         version: link:../../scripts
+      '@types/node-ipc':
+        specifier: ^9.2.3
+        version: 9.2.3
       electron:
         specifier: ^30.1.0
         version: 30.1.0
@@ -1648,6 +1654,18 @@ packages:
     resolution: {integrity: sha512-3rDakgJZ77+RiQUuSK69t1F0m8BQKA8Vh5DCS5V0DWvNY67zob2JhhQrhCO0AKLGINTRSFd1tBaHcJTkhefoSw==}
     engines: {node: '>=18'}
 
+  '@node-ipc/event-pubsub@6.0.2':
+    resolution: {integrity: sha512-vdpnkrcBOHj/yQlSi78HiaPLWZFI/PdBRN34T64Th6Z4G600A7IDdb47/EFwKJh1trcR6q0ednyR8d8vJFsTcw==}
+    engines: {node: '>=13.0.0'}
+
+  '@node-ipc/js-queue@2.0.3':
+    resolution: {integrity: sha512-fL1wpr8hhD5gT2dA1qifeVaoDFlQR5es8tFuKqjHX+kdOtdNHnxkVZbtIrR2rxnMFvehkjaZRNV2H/gPXlb0hw==}
+    engines: {node: '>=1.0.0'}
+
+  '@node-ipc/node-ipc@11.0.3':
+    resolution: {integrity: sha512-7u4ViA2IdkdX1nlorjouR1x6rIoeEGTOaWyvvvKZhmWyifv7Q5gUby54tSyG1ydHmNrS+4BnZqPf7x8rV9Zklw==}
+    engines: {node: '>=14'}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -2120,6 +2138,9 @@ packages:
 
   '@types/mute-stream@0.0.4':
     resolution: {integrity: sha512-CPM9nzrCPPJHQNA9keH9CVkVI+WR5kMa+7XEs5jcGQ0VoAGnLv242w8lIVgwAEfmE4oufJRaTc9PNLQl0ioAow==}
+
+  '@types/node-ipc@9.2.3':
+    resolution: {integrity: sha512-/MvSiF71fYf3+zwqkh/zkVkZj1hl1Uobre9EMFy08mqfJNAmpR0vmPgOUdEIDVgifxHj6G1vYMPLSBLLxoDACQ==}
 
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
@@ -3333,6 +3354,10 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
+  easy-stack@1.0.1:
+    resolution: {integrity: sha512-wK2sCs4feiiJeFXn3zvY0p41mdU5VUgbgs1rNsc/y5ngFUijdWd+iIN8eoyuZHKB8xN6BL4PdWmzqFmxNg6V2w==}
+    engines: {node: '>=6.0.0'}
+
   ecc-jsbn@0.1.2:
     resolution: {integrity: sha512-eh9O+hwRHNbG4BLTjEl3nw044CkGm5X6LoaCf7LPp7UU8Qrt47JYNi6nPX8xjW97TKGKm1ouctg0QSpZe9qrnw==}
 
@@ -4501,6 +4526,10 @@ packages:
   js-cookie@3.0.5:
     resolution: {integrity: sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==}
     engines: {node: '>=14'}
+
+  js-message@1.0.7:
+    resolution: {integrity: sha512-efJLHhLjIyKRewNS9EGZ4UpI8NguuL6fKkhRxVuMmrGV2xN/0APGdQYwLFky5w9naebSZ0OwAGp0G6/2Cg90rA==}
+    engines: {node: '>=0.6.0'}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -5802,6 +5831,10 @@ packages:
 
   strip-literal@2.1.0:
     resolution: {integrity: sha512-Op+UycaUt/8FbN/Z2TWPBLge3jWrP3xj10f3fnYxf052bKuS3EKs1ZQcVGjnEMdsNVAM+plXRdmjrZ/KgG3Skw==}
+
+  strong-type@1.1.0:
+    resolution: {integrity: sha512-X5Z6riticuH5GnhUyzijfDi1SoXas8ODDyN7K8lJeQK+Jfi4dKdoJGL4CXTskY/ATBcN+rz5lROGn1tAUkOX7g==}
+    engines: {node: '>=12.21.0'}
 
   sumchecker@3.0.1:
     resolution: {integrity: sha512-MvjXzkz/BOfyVDkG0oFOtBxHX2u3gKbMHIF/dXblZsgD3BWOFLmHovIpZY7BykJdAjcqRCBi1WYBNdEC9yI7vg==}
@@ -8157,6 +8190,21 @@ snapshots:
       outvariant: 1.4.2
       strict-event-emitter: 0.5.1
 
+  '@node-ipc/event-pubsub@6.0.2':
+    dependencies:
+      strong-type: 1.1.0
+
+  '@node-ipc/js-queue@2.0.3':
+    dependencies:
+      easy-stack: 1.0.1
+
+  '@node-ipc/node-ipc@11.0.3':
+    dependencies:
+      '@node-ipc/event-pubsub': 6.0.2
+      '@node-ipc/js-queue': 2.0.3
+      js-message: 1.0.7
+      strong-type: 1.1.0
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -8590,6 +8638,10 @@ snapshots:
   '@types/minimist@1.2.5': {}
 
   '@types/mute-stream@0.0.4':
+    dependencies:
+      '@types/node': 20.13.0
+
+  '@types/node-ipc@9.2.3':
     dependencies:
       '@types/node': 20.13.0
 
@@ -9906,6 +9958,8 @@ snapshots:
   dotenv@8.6.0: {}
 
   eastasianwidth@0.2.0: {}
+
+  easy-stack@1.0.1: {}
 
   ecc-jsbn@0.1.2:
     dependencies:
@@ -11471,6 +11525,8 @@ snapshots:
 
   js-cookie@3.0.5: {}
 
+  js-message@1.0.7: {}
+
   js-tokens@4.0.0: {}
 
   js-tokens@9.0.0: {}
@@ -12811,6 +12867,8 @@ snapshots:
   strip-literal@2.1.0:
     dependencies:
       js-tokens: 9.0.0
+
+  strong-type@1.1.0: {}
 
   sumchecker@3.0.1:
     dependencies:

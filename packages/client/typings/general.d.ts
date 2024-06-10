@@ -975,9 +975,3 @@ type SSEExposure<S, Data> = {
 };
 
 type AnyFn<T = Any> = (...args: any[]) => T;
-
-type UsePromiseExposure<T> = {
-  promise: Promise<T>;
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: any) => void;
-};

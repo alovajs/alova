@@ -1,10 +1,20 @@
 import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
 import { buildCompletedURL } from '@/functions/sendRequest';
-import { getHandlerMethod, throwFn, useCallback, usePromise } from '@/util/helper';
+import { getHandlerMethod, throwFn, useCallback } from '@/util/helper';
 import { createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import { AlovaEventBase } from '@alova/shared/event';
-import { $self, getConfig, getOptions, isFn, isPlainObject, noop, statesHookHelper } from '@alova/shared/function';
+import {
+  $self,
+  getConfig,
+  getOptions,
+  isFn,
+  isPlainObject,
+  noop,
+  statesHookHelper,
+  usePromise
+} from '@alova/shared/function';
+import { UsePromiseExposure } from '@alova/shared/types';
 import { falseValue, promiseFinally, promiseThen, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
   AlovaGenerics,
@@ -17,7 +27,7 @@ import {
   promiseStatesHook
 } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
-import { SSEHookConfig, SSEHookReadyState, SSEOn, UsePromiseExposure } from '~/typings/general';
+import { SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/general';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');

@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import myAssert from '@/utils/myAssert';
 import { QueueCallback } from '@/utils/queueCallback';
 import { isPlainObject, uuid } from '@alova/shared/function';
 import { deleteAttr, objectKeys } from '@alova/shared/vars';
@@ -27,8 +28,15 @@ export interface SyncAdapter {
   receive(handler: SharedEventHandler): void;
 }
 
+// just a helper for providing type
 export const createSyncAdapter = (syncAdapter: SyncAdapter) => syncAdapter;
 
+/**
+ * This class re-implements the cacheAdapter. It will:
+ * 1. Pull the latest cache from synchronizer at the beginning.
+ * 2. Emit an event when the status changes.
+ * 3. Proxy the behavior of the incoming cacheAdapter.
+ */
 export class AlovaDefaultSharedCacheAdapter implements AlovaGlobalCacheAdapter {
   protected id = uuid();
 
@@ -62,6 +70,7 @@ export class AlovaDefaultSharedCacheAdapter implements AlovaGlobalCacheAdapter {
       cacheEventHandlers[type](key, value);
     });
 
+    // request cache sync from the server.
     this.syncCache('init');
   }
 
@@ -85,14 +94,16 @@ export class AlovaDefaultSharedCacheAdapter implements AlovaGlobalCacheAdapter {
     });
   }
 
+  /**
+   * Triggered when received a sync response from the server is received
+   */
   protected init(value: any) {
-    if (!value) {
-      console.error('value should be an object');
-      return;
-    }
+    myAssert(!!value, 'Value should be an object in init event');
 
     const data: Record<string, any> = isPlainObject(value) ? value : JSON.parse(value);
 
+    // It's no way to set up the entire cache of AlovaCache
+    // We have to add it one by one manually...
     objectKeys(data).forEach(key => {
       this.cacheAdapter.set(key, data[key]);
     });
@@ -118,6 +129,9 @@ export class AlovaDefaultSharedCacheAdapter implements AlovaGlobalCacheAdapter {
   }
 }
 
+/**
+ * Same as AlovaGlobalCacheAdapter but expose cache object.
+ */
 export class ExplictCacheAdapter implements AlovaGlobalCacheAdapter {
   protected cache: Record<string, any> = {};
 
@@ -144,11 +158,19 @@ export class ExplictCacheAdapter implements AlovaGlobalCacheAdapter {
 }
 
 /**
+ * Create shared cache adapter using default L1CacheAdapter
  * @example
  * ```typescript
+ * // in Electron
  * createDefaultSharedCacheAdapter(
- *   createDefaultL1CacheAdapter(),
- *   ElectronSyncAdapter()
+ *   ElectronSyncAdapter(),
+ *   // ...
+ * )
+ *
+ * // in Node.js
+ * createDefaultSharedCacheAdapter(
+ *   NodeSyncAdapter(),
+ *   // ...
  * )
  * ```
  */
@@ -184,8 +206,14 @@ export function createSharedCacheSynchronizer(syncAdapter: SyncAdapter) {
         key: '',
         value: JSON.stringify(cache.getCache())
       };
+
+      // Transferring the entire cache is expensive
+      // If a function is provided that responds to the client, use it
+      // otherwise we fall back to broadcast
+      (replyFn ?? syncAdapter.send)(newEvent);
+      return;
     }
 
-    (replyFn ?? syncAdapter.send)(newEvent);
+    syncAdapter.send(newEvent);
   });
 }

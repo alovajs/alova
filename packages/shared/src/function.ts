@@ -10,7 +10,7 @@ import type {
 } from '../../alova/typings';
 import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings';
 import { FrameworkReadableState, FrameworkState } from './model/FrameworkState';
-import { GeneralFn, GeneralState } from './types';
+import { GeneralFn, GeneralState, UsePromiseExposure } from './types';
 import {
   JSONStringify,
   MEMORY,
@@ -188,6 +188,19 @@ export const omit = <T extends Record<string, any>, K extends keyof T>(obj: T, .
   }
   return result;
 };
+
+export function usePromise<T = any>(): UsePromiseExposure<T> {
+  let retResolve: UsePromiseExposure<T>['resolve'];
+  let retReject: UsePromiseExposure<T>['reject'];
+
+  const promise = new Promise<T>((resolve, reject) => {
+    retResolve = resolve;
+    retReject = reject;
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return { promise, resolve: retResolve!, reject: retReject! };
+}
 
 /**
  * 获取缓存的配置参数，固定返回{ e: function, c: any, f: any, m: number, s: boolean, t: string }格式的对象

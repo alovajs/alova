@@ -16,3 +16,9 @@ export type IsAny<T, P, N> = 0 extends 1 & T ? P : N;
  * is unknown type
  */
 export type IsUnknown<T, P, N> = IsAny<T, P, N> extends P ? N : unknown extends T ? P : N;
+
+export type UsePromiseExposure<T> = {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: any) => void;
+};
