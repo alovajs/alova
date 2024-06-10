@@ -1,6 +1,6 @@
-import { createSharedCacheSynchronizer, createSyncAdapter } from '@/defaults/sharedCacheAdapter';
-import { QueueCallback } from '@/utils/queueCallback';
+import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { usePromise, uuid } from '@alova/shared/function';
+import { QueueCallback } from '@alova/shared/queueCallback';
 import { IPCModule as IPCModule_ } from '@node-ipc/node-ipc';
 import type { IPC } from 'node-ipc';
 
@@ -69,7 +69,7 @@ export async function createNodeSharedCacheSynchronizer(id = AlovaIPCID) {
 
   const { promise, resolve } = usePromise<() => void>();
   ipc.serve(() => {
-    createSharedCacheSynchronizer(
+    createPSCSynchronizer(
       createSyncAdapter({
         send(event) {
           ipc.server.broadcast(EventName.TO_CLIENT, event);

@@ -10,7 +10,8 @@ const config: Config = {
     '<rootDir>/packages/adapter-taro',
     '<rootDir>/packages/shared',
     '<rootDir>/packages/client',
-    '<rootDir>/packages/vue-options'
+    '<rootDir>/packages/vue-options',
+    '<rootDir>/packages/psc'
   ]
 };
 

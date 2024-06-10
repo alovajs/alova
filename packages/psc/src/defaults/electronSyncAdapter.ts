@@ -1,4 +1,4 @@
-import { createSharedCacheSynchronizer, createSyncAdapter } from '@/defaults/sharedCacheAdapter';
+import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import type { IpcMain, IpcRenderer } from 'electron';
 
 const EventName = {
@@ -35,7 +35,7 @@ export function createElectronSharedCacheSynchronizer(ipcMain: IpcMain) {
   }
   hasSynchronizer = true;
 
-  createSharedCacheSynchronizer(
+  createPSCSynchronizer(
     createSyncAdapter({
       send(event) {
         ipcMain.emit(EventName.TO_CLIENT, event);

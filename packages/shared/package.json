@@ -27,6 +27,7 @@
     "./types": "./dist/types.js",
     "./event": "./dist/event.js",
     "./createEventManager": "./dist/createEventManager.js",
+    "./queueCallback": "./dist/queueCallback.js",
     "./FrameworkState": "./dist/model/FrameworkState.js"
   },
   "files": [

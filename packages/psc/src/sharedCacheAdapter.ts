@@ -1,10 +1,9 @@
 /* eslint-disable prettier/prettier */
-import myAssert from '@/utils/myAssert';
-import { QueueCallback } from '@/utils/queueCallback';
+import { createAssert } from '@alova/shared/assert';
 import { isPlainObject, uuid } from '@alova/shared/function';
+import { QueueCallback } from '@alova/shared/queueCallback';
 import { deleteAttr, objectKeys } from '@alova/shared/vars';
-import { AlovaGlobalCacheAdapter } from '~/typings';
-import { createDefaultL1CacheAdapter } from './cacheAdapter';
+import { AlovaGlobalCacheAdapter } from 'alova';
 
 export type SharedCacheEvent = {
   scope?: string;
@@ -14,7 +13,7 @@ export type SharedCacheEvent = {
   value?: any;
 };
 
-export interface AlovaSharedCacheAdapterOptions {
+export interface ProcessSharedCacheAdapterOptions {
   scope?: string;
 }
 
@@ -28,6 +27,8 @@ export interface SyncAdapter {
   receive(handler: SharedEventHandler): void;
 }
 
+const myAssert = createAssert('Shared Cache');
+
 // just a helper for providing type
 export const createSyncAdapter = (syncAdapter: SyncAdapter) => syncAdapter;
 
@@ -37,7 +38,7 @@ export const createSyncAdapter = (syncAdapter: SyncAdapter) => syncAdapter;
  * 2. Emit an event when the status changes.
  * 3. Proxy the behavior of the incoming cacheAdapter.
  */
-export class AlovaDefaultSharedCacheAdapter implements AlovaGlobalCacheAdapter {
+export class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
   protected id = uuid();
 
   protected queue = new QueueCallback();
@@ -45,7 +46,7 @@ export class AlovaDefaultSharedCacheAdapter implements AlovaGlobalCacheAdapter {
   constructor(
     protected cacheAdapter: AlovaGlobalCacheAdapter,
     protected syncAdapter: SyncAdapter,
-    protected options: AlovaSharedCacheAdapterOptions
+    protected options: ProcessSharedCacheAdapterOptions
   ) {
     const cacheEventHandlers = {
       set: (key: string, value?: any) => this.cacheAdapter.set(key, value),
@@ -162,27 +163,27 @@ export class ExplictCacheAdapter implements AlovaGlobalCacheAdapter {
  * @example
  * ```typescript
  * // in Electron
- * createDefaultSharedCacheAdapter(
+ * createPSCAdapter(
  *   ElectronSyncAdapter(),
  *   // ...
  * )
  *
  * // in Node.js
- * createDefaultSharedCacheAdapter(
+ * createPSCAdapter(
  *   NodeSyncAdapter(),
  *   // ...
  * )
  * ```
  */
-export function createDefaultSharedCacheAdapter(
+export function createProcessSharedCacheAdapter(
   syncAdapter: SyncAdapter,
-  cacheAdapter: AlovaGlobalCacheAdapter = createDefaultL1CacheAdapter(),
-  options: AlovaSharedCacheAdapterOptions = {}
+  cacheAdapter: AlovaGlobalCacheAdapter = new ExplictCacheAdapter(),
+  options: ProcessSharedCacheAdapterOptions = {}
 ) {
-  return new AlovaDefaultSharedCacheAdapter(cacheAdapter, syncAdapter, options);
+  return new ProcessSharedCacheAdapter(cacheAdapter, syncAdapter, options);
 }
 
-export function createSharedCacheSynchronizer(syncAdapter: SyncAdapter) {
+export function createProcessSharedCacheSynchronizer(syncAdapter: SyncAdapter) {
   const cache = new ExplictCacheAdapter();
   const cacheEventHandlers = {
     set: (key: string, value?: any) => cache.set(key, value),
@@ -217,3 +218,17 @@ export function createSharedCacheSynchronizer(syncAdapter: SyncAdapter) {
     syncAdapter.send(newEvent);
   });
 }
+
+// shorter alias
+/**
+ * Alias of `ProcessSharedCacheAdapter`
+ */
+export const PSCAdapter = ProcessSharedCacheAdapter;
+/**
+ * Alias of `createProcessSharedCacheAdapter`
+ */
+export const createPSCAdapter = createProcessSharedCacheAdapter;
+/**
+ * Alias of `createProcessSharedCacheSynchronizer`
+ */
+export const createPSCSynchronizer = createProcessSharedCacheSynchronizer;

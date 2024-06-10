@@ -1,25 +1,23 @@
-import { createDefaultL1CacheAdapter } from '@/defaults/cacheAdapter';
 import {
-  createDefaultSharedCacheAdapter,
-  createSharedCacheSynchronizer,
-  createSyncAdapter
-} from '@/defaults/sharedCacheAdapter';
-import { Result, delay } from 'root/testUtils';
-
-import { queryCache } from '@/index';
-import { ElectronSyncAdapter, createElectronSharedCacheSynchronizer } from '@/predefine/electronSyncAdapter';
-import { NodeSyncAdapter, createNodeSharedCacheSynchronizer } from '@/predefine/nodeSyncAdapter';
+  ElectronSyncAdapter,
+  NodeSyncAdapter,
+  createElectronSharedCacheSynchronizer,
+  createNodeSharedCacheSynchronizer
+} from '@/index';
+import { ExplictCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { forEach } from '@alova/shared/vars';
+import { AlovaGlobalCacheAdapter, createAlova, queryCache } from 'alova';
+import GlobalFetch from 'alova/fetch';
 import { IpcMain, IpcRenderer } from 'electron';
 import EventEmitter from 'events';
-import { getAlovaInstance } from '~/test/utils';
+import { Result, delay } from 'root/testUtils';
 
 let eventEmitter: EventEmitter;
 
 // mock IPC behaviour
 beforeEach(() => {
   eventEmitter = new EventEmitter();
-  createSharedCacheSynchronizer(
+  createPSCSynchronizer(
     createSyncAdapter({
       send(event) {
         eventEmitter.emit('to-client', event);
@@ -30,6 +28,7 @@ beforeEach(() => {
     })
   );
 });
+
 afterEach(() => eventEmitter.removeAllListeners());
 
 const createSharedL1CacheAdapter = (scope?: string) => {
@@ -41,22 +40,29 @@ const createSharedL1CacheAdapter = (scope?: string) => {
       eventEmitter.on('to-client', event => handler(event));
     }
   });
-  return createDefaultSharedCacheAdapter(syncAdapter, createDefaultL1CacheAdapter(), {
+  return createPSCAdapter(syncAdapter, new ExplictCacheAdapter(), {
     scope
   });
 };
 
+const getAlovaInstance = ({ id, l1Cache }: { id?: number; l1Cache?: AlovaGlobalCacheAdapter }) =>
+  createAlova({
+    baseURL: process.env.NODE_BASE_URL,
+    id,
+    l1Cache,
+    requestAdapter: GlobalFetch(),
+    responded: r => r.json()
+  });
+
 const createSharedCacheAlova = () =>
   getAlovaInstance({
     id: 1,
-    l1Cache: createSharedL1CacheAdapter(),
-    responseExpect: r => r.json()
+    l1Cache: createSharedL1CacheAdapter()
   });
 
 const createNonSharedCacheAlova = () =>
   getAlovaInstance({
-    id: 1,
-    responseExpect: r => r.json()
+    id: 1
   });
 
 const createFakeElectronExports = () => {
@@ -130,18 +136,15 @@ describe('shared cache', () => {
 
     const alovaA = getAlovaInstance({
       id: 1,
-      l1Cache: createDefaultSharedCacheAdapter(ElectronSyncAdapter(ipcRenderer)),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(ElectronSyncAdapter(ipcRenderer))
     });
     const alovaB = getAlovaInstance({
       id: 1,
-      l1Cache: createDefaultSharedCacheAdapter(ElectronSyncAdapter(ipcRenderer)),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(ElectronSyncAdapter(ipcRenderer))
     });
     const alovaC = getAlovaInstance({
       id: 2,
-      l1Cache: createDefaultSharedCacheAdapter(ElectronSyncAdapter(ipcRenderer)),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(ElectronSyncAdapter(ipcRenderer))
     });
 
     const GetA = alovaA.Get('/unit-test', {
@@ -164,18 +167,15 @@ describe('shared cache', () => {
 
     const alovaA = getAlovaInstance({
       id: 1,
-      l1Cache: createDefaultSharedCacheAdapter(NodeSyncAdapter(stop => stopHandler.push(stop))),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
     });
     const alovaB = getAlovaInstance({
       id: 1,
-      l1Cache: createDefaultSharedCacheAdapter(NodeSyncAdapter(stop => stopHandler.push(stop))),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
     });
     const alovaC = getAlovaInstance({
       id: 2,
-      l1Cache: createDefaultSharedCacheAdapter(NodeSyncAdapter(stop => stopHandler.push(stop))),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
     });
 
     const GetA = alovaA.Get('/unit-test', {
@@ -221,18 +221,15 @@ describe('shared cache', () => {
 
     const alovaA = getAlovaInstance({
       id: 1,
-      l1Cache: createDefaultSharedCacheAdapter(createMockNodeSyncAdapter()),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(createMockNodeSyncAdapter())
     });
     const alovaB = getAlovaInstance({
       id: 1,
-      l1Cache: createDefaultSharedCacheAdapter(createMockNodeSyncAdapter()),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(createMockNodeSyncAdapter())
     });
     const alovaC = getAlovaInstance({
       id: 2,
-      l1Cache: createDefaultSharedCacheAdapter(createMockNodeSyncAdapter()),
-      responseExpect: r => r.json()
+      l1Cache: createPSCAdapter(createMockNodeSyncAdapter())
     });
 
     // waiting for cache sync.
