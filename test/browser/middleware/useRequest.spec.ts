@@ -165,8 +165,8 @@ describe('useRequet middleware', function () {
     await delay();
     expect(loading.value).toBeTruthy(); // 开始请求
     await untilCbCalled(onSuccess);
-    expect(data.value.params?.a).toBe('a');
-    expect(data.value.params?.b).toBe('b');
+    expect(data.value.params.a).toBe('a');
+    expect(data.value.params.b).toBe('b');
 
     const rawData = await send();
     expect(rawData.params.a).toBe('a');
