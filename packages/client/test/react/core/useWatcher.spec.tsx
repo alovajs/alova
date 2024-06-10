@@ -18,7 +18,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         timeout: 10000,
-        transformData: ({ data }: Result<true>) => data,
+        transformData: ({ data }: Result) => data,
         cacheFor: 100 * 1000
       });
     const mockfn = jest.fn();

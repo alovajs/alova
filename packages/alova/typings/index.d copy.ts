@@ -133,7 +133,7 @@ export interface MethodRequestConfig {
    */
   headers: Arg;
 }
-export type AlovaMethodConfig<AG extends AlovaGenerics> = {
+export type AlovaMethodConfig<AG extends AlovaGenerics, Responded, Transformed> = {
   /**
    * method对象名称，在updateState、invalidateCache、setCache、以及fetch函数中可以通过名称或通配符获取对应method对象
    */
@@ -147,7 +147,7 @@ export type AlovaMethodConfig<AG extends AlovaGenerics> = {
   /**
    * 响应数据在缓存时间内则不再次请求。get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
    */
-  cacheFor?: CacheConfig<AG> | CacheController<AG['Responded']>;
+  cacheFor?: CacheConfig<RespondedAlovaGenerics<AG, Responded, Transformed>> | CacheController<Responded>;
 
   /**
    * 打击源方法实例，当源方法实例请求成功时，当前方法实例的缓存将被失效
@@ -160,10 +160,7 @@ export type AlovaMethodConfig<AG extends AlovaGenerics> = {
   /**
    * 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
    */
-  transformData?: (
-    data: AG['Transformed'],
-    headers: AG['ResponseHeader']
-  ) => AG['Responded'] | Promise<AG['Responded']>;
+  transformData?: (data: Transformed, headers: AG['ResponseHeader']) => Responded | Promise<Responded>;
 
   /**
    * 请求级共享请求开关
@@ -177,7 +174,8 @@ export type AlovaMethodConfig<AG extends AlovaGenerics> = {
    */
   meta?: AlovaCustomTypes['meta'];
 } & AG['RequestConfig'];
-export type AlovaMethodCreateConfig<AG extends AlovaGenerics> = Partial<MethodRequestConfig> & AlovaMethodConfig<AG>;
+export type AlovaMethodCreateConfig<AG extends AlovaGenerics, Responded, Transformed> = Partial<MethodRequestConfig> &
+  AlovaMethodConfig<AG, Responded, Transformed>;
 
 export type RespondedHandler<AG extends AlovaGenerics> = (response: AG['Response'], methodInstance: Method<AG>) => any;
 export type ResponseErrorHandler<AG extends AlovaGenerics> = (
@@ -456,7 +454,7 @@ export interface Method<AG extends AlovaGenerics = any> {
   /**
    * method配置
    */
-  config: MethodRequestConfig & AlovaMethodConfig<AG>;
+  config: MethodRequestConfig & AlovaMethodConfig<AG, AG['Responded'], AG['Transformed']>;
   /**
    * 请求体
    */
@@ -565,7 +563,7 @@ export interface MethodConstructor {
     type: MethodType,
     context: Alova<AG>,
     url: string,
-    config?: AlovaMethodCreateConfig<AG>,
+    config?: AlovaMethodCreateConfig<AG, AG['Responded'], AG['Transformed']>,
     data?: RequestBody
   ): Method<AG>;
   readonly prototype: Method;
@@ -609,40 +607,40 @@ export interface Alova<AG extends AlovaGenerics> {
   snapshots: MethodSnapshotContainer<AG>;
   Get<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Post<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Put<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Delete<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Put<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Head<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Options<Responded = unknown, Transformed = unknown>(
     url: string,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Patch<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
-    config?: AlovaMethodCreateConfig<RespondedAlovaGenerics<AG, Responded, Transformed>>
+    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
 }
 

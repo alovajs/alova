@@ -1,8 +1,8 @@
-import { delay, Result, untilCbCalled } from 'root/testUtils';
-import { ref } from 'vue';
 import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
 import VueHook from '@/statesHook/vue';
+import { delay, Result, untilCbCalled } from 'root/testUtils';
+import { ref } from 'vue';
 
 describe('useWatcher middleware', () => {
   test('should send request synchronously when set a sync middleware function', async () => {
@@ -10,7 +10,7 @@ describe('useWatcher middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transformData: ({ data }: Result) => data
     });
     const stateA = ref(0);
     const { loading, error, onSuccess, data, send } = useWatcher(() => getGetterObj, [stateA], {

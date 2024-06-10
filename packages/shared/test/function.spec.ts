@@ -20,7 +20,7 @@ import {
 } from '@/function';
 import { MEMORY, STORAGE_RESTORE } from '@/vars';
 import { delay, untilCbCalled } from 'root/testUtils';
-import { createAlova } from '../../alova';
+import { createAlova } from '../../alova/dist/alova.umd';
 
 const simulatedRequestAdapter = () => ({
   response: () => Promise.resolve(),

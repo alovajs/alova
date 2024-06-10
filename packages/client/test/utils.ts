@@ -16,7 +16,7 @@ export const getAlovaInstance = <State, Computed, Watched, Export>(
     resCompleteExpect
   }: {
     baseURL?: string;
-    cacheFor?: GlobalCacheConfig;
+    cacheFor?: GlobalCacheConfig<AlovaGenerics<State, Computed, Watched, Export>>;
     l1Cache?: AlovaGlobalCacheAdapter;
     l2Cache?: AlovaGlobalCacheAdapter;
     beforeRequestExpect?: (methodInstance: FetchMethod) => void;
