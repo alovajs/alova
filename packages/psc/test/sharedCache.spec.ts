@@ -31,7 +31,7 @@ beforeEach(() => {
 
 afterEach(() => eventEmitter.removeAllListeners());
 
-const createSharedL1CacheAdapter = (scope?: string) => {
+const createSharedL1CacheAdapter = (scope?: string, cacheAdpater?: AlovaGlobalCacheAdapter) => {
   const syncAdapter = createSyncAdapter({
     send(event) {
       eventEmitter.emit('to-main', event);
@@ -40,7 +40,7 @@ const createSharedL1CacheAdapter = (scope?: string) => {
       eventEmitter.on('to-client', event => handler(event));
     }
   });
-  return createPSCAdapter(syncAdapter, new ExplictCacheAdapter(), {
+  return createPSCAdapter(syncAdapter, cacheAdpater ?? new ExplictCacheAdapter(), {
     scope
   });
 };
@@ -82,6 +82,29 @@ const createFakeElectronExports = () => {
 };
 
 describe('shared cache', () => {
+  test('should clear the cache when init', async () => {
+    const cache1 = createSharedL1CacheAdapter('scoped');
+    const cacheInst = new ExplictCacheAdapter();
+    cacheInst.set('name', 'Tom');
+    cacheInst.set('id', 9527);
+
+    // waiting for cache sync.
+    await delay(1);
+    expect(cache1.get('name')).toBeUndefined();
+    expect(cache1.get('id')).toBeUndefined();
+    expect(cacheInst.get('name')).toStrictEqual('Tom');
+    expect(cacheInst.get('id')).toStrictEqual(9527);
+
+    // will be overrided with empty cache after init.
+    const cache2 = createSharedL1CacheAdapter('scoped', cacheInst);
+
+    // waiting for cache sync.
+    await delay(1);
+    expect(cacheInst.get('name')).toBeUndefined();
+    expect(cacheInst.get('id')).toBeUndefined();
+    expect(cache2.get('name')).toBeUndefined();
+    expect(cache2.get('id')).toBeUndefined();
+  });
   test('should share data between same scope', async () => {
     const cache1 = createSharedL1CacheAdapter();
     const cache2 = createSharedL1CacheAdapter();
@@ -107,6 +130,14 @@ describe('shared cache', () => {
     await delay(1);
     expect(cache1.get('name')).toBeUndefined();
     expect(cache2.get('name')).toBeUndefined();
+
+    cache1.clear();
+    // waiting for cache sync.
+    await delay(1);
+    expect(cache1.get('id')).toBeUndefined();
+    expect(cache1.get('info')).toBeUndefined();
+    expect(cache2.get('id')).toBeUndefined();
+    expect(cache2.get('info')).toBeUndefined();
   });
 
   test('should share cache between alova instances with shared cache enabled', async () => {
@@ -128,7 +159,7 @@ describe('shared cache', () => {
     expect(await queryCache(alovaD.Get('/unit-test'))).toBeUndefined();
   });
 
-  test('should share cache between same scope in electron', async () => {
+  test('should share cache between same scope in Electron', async () => {
     const { ipcMain, ipcRenderer } = createFakeElectronExports();
 
     // simulate init operation in the main procress
@@ -156,6 +187,15 @@ describe('shared cache', () => {
     expect(cache).not.toBeUndefined();
     expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
 
+    expect(await queryCache(alovaC.Get('/unit-test'))).toBeUndefined();
+
+    // should be only one synchronizer in electron
+    // so it takes no effect
+    createElectronSharedCacheSynchronizer(ipcMain);
+    await delay(10);
+
+    expect(cache).not.toBeUndefined();
+    expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
     expect(await queryCache(alovaC.Get('/unit-test'))).toBeUndefined();
   });
 

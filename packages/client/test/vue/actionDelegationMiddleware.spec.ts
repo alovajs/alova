@@ -39,6 +39,8 @@ describe('vue => subscriber middleware', () => {
       accessAction('abc', async ({ send, update, abort }) => {
         expect(update).toBeInstanceOf(Function);
         expect(abort).toBeInstanceOf(Function);
+        update({ loading: true });
+        expect(loading.value).toBeTruthy();
         resolve(send({ name: 'aa' }));
       });
     });

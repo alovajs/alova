@@ -8,7 +8,7 @@ import { AlovaGlobalCacheAdapter } from 'alova';
 export type SharedCacheEvent = {
   scope?: string;
   senderID: string;
-  type: 'set' | 'get' | 'remove' | 'clear' | 'init';
+  type: 'set' | 'remove' | 'clear' | 'init';
   key: string;
   value?: any;
 };
@@ -50,7 +50,6 @@ export class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
   ) {
     const cacheEventHandlers = {
       set: (key: string, value?: any) => this.cacheAdapter.set(key, value),
-      get: (key: string) => this.cacheAdapter.get(key),
       remove: (key: string) => this.cacheAdapter.remove(key),
       clear: () => this.cacheAdapter.clear(),
       init: (key: string, value: any) => this.init(value)
@@ -101,6 +100,8 @@ export class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
   protected init(value: any) {
     myAssert(!!value, 'Value should be an object in init event');
 
+    // clear the cache before init
+    this.cacheAdapter.clear();
     const data: Record<string, any> = isPlainObject(value) ? value : JSON.parse(value);
 
     // It's no way to set up the entire cache of AlovaCache
@@ -187,7 +188,6 @@ export function createProcessSharedCacheSynchronizer(syncAdapter: SyncAdapter) {
   const cache = new ExplictCacheAdapter();
   const cacheEventHandlers = {
     set: (key: string, value?: any) => cache.set(key, value),
-    get: () => {},
     remove: (key: string) => cache.remove(key),
     clear: () => cache.clear(),
     init: () => {}

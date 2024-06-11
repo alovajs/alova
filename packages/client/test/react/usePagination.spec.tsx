@@ -142,6 +142,46 @@ describe('react => usePagination', () => {
     });
   });
 
+  test('should clear the cache when reload', async () => {
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
+        }}
+      />
+    );
+
+    const page = 1;
+    const pageSize = 10;
+    await waitFor(() => {
+      expect(screen.getByRole('page')).toHaveTextContent('1');
+      expect(screen.getByRole('pageSize')).toHaveTextContent('10');
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9)));
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('30');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
+    });
+
+    // 检查预加载缓存
+    await waitFor(async () => {
+      let cache = await queryCache(getter1(page + 1, pageSize));
+      expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
+      cache = await queryCache(getter1(page - 1, pageSize));
+      expect(cache).toBeUndefined();
+    });
+
+    fireEvent.click(screen.getByRole('reload1'));
+    await delay(0);
+    await waitFor(async () => {
+      let cache = await queryCache(getter1(page + 1, pageSize));
+      expect(cache?.list).toBeUndefined();
+      cache = await queryCache(getter1(page - 1, pageSize));
+      expect(cache).toBeUndefined();
+    });
+  });
+
   test('should throws an error when got wrong array', async () => {
     render(
       <Pagination
