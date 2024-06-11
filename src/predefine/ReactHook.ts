@@ -18,11 +18,11 @@ export default {
     forEach(objectKeys(newVal), key => {
       states[key][1](newVal[key] as any);
     }),
-  memorize: (fn: (...args: any[]) => any) => {
+  memorize: <T extends (...args: any[]) => any>(fn: T): T => {
     // 使用useCallback使用同一个引用，同事通过useRef来引用最新函数
     const fnRef = useRef(noop as typeof fn);
     setRef(fnRef, fn);
-    return useCallback((...args: any[]) => refCurrent(fnRef)(...args), []);
+    return useCallback((...args: any[]) => refCurrent(fnRef)(...args), []) as T;
   },
   ref: (initialValue: any) => {
     const refObj = useRef(initialValue);

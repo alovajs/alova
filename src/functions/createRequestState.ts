@@ -1,7 +1,8 @@
-import { createHook } from '@/createHook';
 import Method from '@/Method';
+import { createHook } from '@/createHook';
 import { getResponseCache } from '@/storage/responseCache';
 import {
+  _self,
   debounce,
   getContext,
   getHandlerMethod,
@@ -9,8 +10,7 @@ import {
   isNumber,
   noop,
   promiseStatesHook,
-  sloughConfig,
-  _self
+  sloughConfig
 } from '@/utils/helper';
 import {
   deleteAttr,
@@ -29,8 +29,8 @@ import {
   EnumHookType,
   ErrorHandler,
   ExportedType,
-  FetcherHookConfig,
   FetchRequestState,
+  FetcherHookConfig,
   FrontRequestHookConfig,
   FrontRequestState,
   Progress,
@@ -53,15 +53,16 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig>(
+export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends UseHookConfig<ARG>, ARG extends any[]>(
   hookType: EnumHookType,
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
   useHookConfig: UC,
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
-  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
+  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH, ARG>['debounce'] = 0
 ) {
+  // 动态获取methoHanlder参数
   // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
   useHookConfig = { ...useHookConfig };
   const statesHook = promiseStatesHook('useHooks'),
@@ -87,7 +88,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         alovaInstance = getContext(methodInstance),
         cachedResponse: R | undefined = getResponseCache(alovaInstance.id, getMethodInternalKey(methodInstance)),
         forceRequestFinally = sloughConfig(
-          (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
+          (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG> | FetcherHookConfig<ARG>).force ??
+            falseValue
         );
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
@@ -99,7 +101,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       loaded: 0
     },
     // 将外部传入的受监管的状态一同放到frontStates集合中
-    { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>,
+    { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG>,
     frontStates = {
       ...managedStates,
       data: create(initialData, hookInstance),
@@ -112,8 +114,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
     // 初始化请求事件
     // 统一的发送请求函数
     handleRequest = (
-      handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH> = methodHandler,
-      sendCallingArgs?: any[]
+      handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG> = methodHandler,
+      sendCallingArgs?: [...ARG, ...any]
     ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs),
     // 以捕获异常的方式调用handleRequest
     // 捕获异常避免异常继续向外抛出
@@ -164,13 +166,13 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       hookInstance.eu = trueValue;
       return stateExport(frontStates.uploading, hookInstance) as unknown as ExportedType<Progress, S>;
     },
-    onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH>) {
+    onSuccess(handler: SuccessHandler<S, E, R, T, RC, RE, RH, ARG>) {
       pushItem(hookInstance.sh, handler);
     },
-    onError(handler: ErrorHandler<S, E, R, T, RC, RE, RH>) {
+    onError(handler: ErrorHandler<S, E, R, T, RC, RE, RH, ARG>) {
       pushItem(hookInstance.eh, handler);
     },
-    onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH>) {
+    onComplete(handler: CompleteHandler<S, E, R, T, RC, RE, RH, ARG>) {
       pushItem(hookInstance.ch, handler);
     },
     update: memorize((newStates: PartialFrontRequestState | PartialFetchRequestState) => {
@@ -191,7 +193,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: memorize((sendCallingArgs?: any[], methodInstance?: Method<S, E, R, T, RC, RE, RH>) =>
+    send: memorize((sendCallingArgs?: [...ARG, ...any], methodInstance?: Method<S, E, R, T, RC, RE, RH>) =>
       handleRequest(methodInstance, sendCallingArgs)
     ),
 

@@ -285,7 +285,9 @@ describe('useRequet hook with react', () => {
               update({
                 data: {
                   path: '/abc' + i++,
-                  method: 'GET'
+                  method: 'GET',
+                  params: {},
+                  data: {}
                 },
                 error: undefined
               });

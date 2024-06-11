@@ -202,19 +202,19 @@ export interface Hook {
   fs: FrontRequestState;
 
   /** successHandlers */
-  sh: SuccessHandler<any, any, any, any, any, any, any>[];
+  sh: SuccessHandler<any, any, any, any, any, any, any, any>[];
 
   /** errorHandlers */
-  eh: ErrorHandler<any, any, any, any, any, any, any>[];
+  eh: ErrorHandler<any, any, any, any, any, any, any, any>[];
 
   /** completeHandlers */
-  ch: CompleteHandler<any, any, any, any, any, any, any>[];
+  ch: CompleteHandler<any, any, any, any, any, any, any, any>[];
 
   /** hookType, useRequest=1, useWatcher=2, useFetcher=3 */
   ht: EnumHookType;
 
   /** hook config */
-  c: UseHookConfig;
+  c: UseHookConfig<any>;
 
   /** enableDownload */
   ed: boolean;
@@ -277,7 +277,7 @@ export interface StatesHook<S, E> {
    * @param fn use hook操作函数
    * @returns 包装后的操作函数
    */
-  memorize?: (fn: (...args: any[]) => any) => (...args: any[]) => any;
+  memorize?: <T extends (...args: any[]) => any>(fn: T) => T;
 
   /**
    * 创建引用对象
@@ -543,22 +543,25 @@ export interface Alova<S, E, RC, RE, RH> {
 }
 
 /** 根事件对象 */
-export interface AlovaEvent<S, E, R, T, RC, RE, RH> {
-  sendArgs: any[];
+export interface AlovaEvent<S, E, R, T, RC, RE, RH, ARG extends any[]> {
+  sendArgs: [...ARG, ...any]; // F保存methodHandler的args元组类型
   method: Method<S, E, R, T, RC, RE, RH>;
 }
 /** 成功事件对象 */
-export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
   /** data数据是否来自缓存 */
   fromCache: boolean;
   data: R;
 }
 /** 错误事件对象 */
-export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
   error: any;
 }
 /** 完成事件对象 */
-export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S, E, R, T, RC, RE, RH> {
+export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
   /** 响应状态 */
   status: 'success' | 'error';
   /** data数据是否来自缓存，当status为error时，fromCache始终为false */
@@ -567,9 +570,15 @@ export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH> extends AlovaEvent<S
   error?: any;
 }
 
-export type SuccessHandler<S, E, R, T, RC, RE, RH> = (event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>) => void;
-export type ErrorHandler<S, E, R, T, RC, RE, RH> = (event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>) => void;
-export type CompleteHandler<S, E, R, T, RC, RE, RH> = (event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>) => void;
+export type SuccessHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
+  event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG>
+) => void;
+export type ErrorHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
+  event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG>
+) => void;
+export type CompleteHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
+  event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG>
+) => void;
 
 export type FrontExportedUpdate<R> = (
   newFrontStates: Partial<FrontRequestState<boolean, R, Error | undefined, Progress, Progress>>
@@ -577,7 +586,7 @@ export type FrontExportedUpdate<R> = (
 export type FetcherExportedUpdate = (
   newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
 ) => void;
-export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[]> {
   /** 当前的method对象 */
   method: Method<S, E, R, T, RC, RE, RH>;
 
@@ -593,8 +602,8 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 成功回调装饰 */
   decorateSuccess: (
     decorator: (
-      handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
-      event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
+      handler: SuccessHandler<S, E, R, T, RC, RE, RH, ARG>,
+      event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG>,
       index: number,
       length: number
     ) => void
@@ -603,8 +612,8 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 失败回调装饰 */
   decorateError: (
     decorator: (
-      handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
-      event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
+      handler: ErrorHandler<S, E, R, T, RC, RE, RH, ARG>,
+      event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG>,
       index: number,
       length: number
     ) => void
@@ -613,8 +622,8 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 完成回调装饰 */
   decorateComplete: (
     decorator: (
-      handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
-      event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
+      handler: CompleteHandler<S, E, R, T, RC, RE, RH, ARG>,
+      event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG>,
       index: number,
       length: number
     ) => void
@@ -624,10 +633,10 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
 /**
  * useRequest和useWatcher中间件的context参数
  */
-export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>
-  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH, ARG> {
   /** 发送请求函数 */
-  send: SendHandler<R>;
+  send: SendHandler<R, ARG>;
 
   /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
   sendArgs: any[];
@@ -656,10 +665,10 @@ export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>
 /**
  * useFetcher中间件的context参数
  */
-export interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>
-  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+export interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH, ARG> {
   /** 数据预加载函数 */
-  fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: any[]): Promise<R>;
+  fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: [...ARG, ...any]): Promise<R>;
 
   /** fetchArgs 响应处理回调的参数，该参数由useFetcher的fetch传入 */
   fetchArgs: any[];
@@ -685,37 +694,43 @@ export interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>
 }
 
 /** 中间件next函数 */
-export interface MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH> {
-  force?: UseHookConfig['force'];
+export interface MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> {
+  force?: UseHookConfig<ARG>['force'];
   method?: Method<S, E, R, T, RC, RE, RH>;
 }
-export interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
-  (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH>): Promise<R>;
+export interface AlovaGuardNext<S, E, R, T, RC, RE, RH, ARG extends any[]> {
+  (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH, ARG>): Promise<R>;
 }
 
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH> {
-  (context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
+export interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH, ARG extends any[]> {
+  (
+    context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, ARG>,
+    next: AlovaGuardNext<S, E, R, T, RC, RE, RH, ARG>
+  ): any;
 }
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH> {
-  (context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>, next: AlovaGuardNext<S, E, R, T, RC, RE, RH>): any;
+export interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH, ARG extends any[]> {
+  (
+    context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH, ARG>,
+    next: AlovaGuardNext<S, E, R, T, RC, RE, RH, ARG>
+  ): any;
 }
 
 /** hook通用配置 */
-export interface UseHookConfig {
+export interface UseHookConfig<ARG extends any[]> {
   /** 是否强制请求 */
-  force?: boolean | ((...args: any[]) => boolean);
+  force?: boolean | ((...args: [...ARG, ...any]) => boolean);
 
   [attr: string]: any;
 }
 
 /** useRequest和useWatcher都有的类型 */
-export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookConfig {
+export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> extends UseHookConfig<ARG> {
   /** 是否立即发起一次请求 */
   immediate?: boolean;
 
@@ -726,26 +741,38 @@ export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH> extends UseHookC
   managedStates?: Record<string | symbol, S>;
 
   /** 中间件 */
-  middleware?: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH>;
+  middleware?: AlovaFrontMiddleware<S, E, R, T, RC, RE, RH, ARG>;
 }
 
 /** useRequest config export type */
-export type RequestHookConfig<S, E, R, T, RC, RE, RH> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH>;
+export type RequestHookConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> = FrontRequestHookConfig<
+  S,
+  E,
+  R,
+  T,
+  RC,
+  RE,
+  RH,
+  ARG
+>;
 
-export type SendableConfig<S, E, R, T, RC, RE, RH> = (alovaEvent: AlovaEvent<S, E, R, T, RC, RE, RH>) => boolean;
+export type SendableConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
+  alovaEvent: AlovaEvent<S, E, R, T, RC, RE, RH, ARG>
+) => boolean;
 
 /** useWatcher config export type */
-export interface WatcherHookConfig<S, E, R, T, RC, RE, RH> extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH> {
+export interface WatcherHookConfig<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG> {
   /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
   debounce?: number | number[];
-  sendable?: SendableConfig<S, E, R, T, RC, RE, RH>;
+  sendable?: SendableConfig<S, E, R, T, RC, RE, RH, ARG>;
   abortLast?: boolean;
 }
 
 /** useFetcher config export type */
-export interface FetcherHookConfig extends UseHookConfig {
+export interface FetcherHookConfig<ARG extends any[]> extends UseHookConfig<ARG> {
   /** 中间件 */
-  middleware?: AlovaFetcherMiddleware<any, any, any, any, any, any, any>;
+  middleware?: AlovaFetcherMiddleware<any, any, any, any, any, any, any, ARG>;
   /** fetch是否同步更新data状态 */
   updateState?: boolean;
 }
@@ -767,8 +794,17 @@ export interface VueRef {
   value: any;
 }
 export type ExportedType<R, S> = S extends VueRef ? Ref<R> : S extends SvelteWritable ? Writable<R> : R;
-export type SendHandler<R> = (...args: any[]) => Promise<R>;
-export type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> = FrontRequestState<
+export type SendHandler<R, ARG extends any[]> = (...args: [...ARG, ...any]) => Promise<R>;
+export type UseHookReturnType<
+  S = any,
+  E = any,
+  R = any,
+  T = any,
+  RC = any,
+  RE = any,
+  RH = any,
+  ARG extends any[] = any[]
+> = FrontRequestState<
   ExportedType<boolean, S>,
   ExportedType<R, S>,
   ExportedType<Error | undefined, S>,
@@ -777,23 +813,23 @@ export type UseHookReturnType<S = any, E = any, R = any, T = any, RC = any, RE =
 > & {
   abort: () => void;
   update: FrontExportedUpdate<R>;
-  send: SendHandler<R>;
-  onSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH>) => void;
-  onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH>) => void;
-  onComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH>) => void;
+  send: SendHandler<R, ARG>;
+  onSuccess: (handler: SuccessHandler<S, E, R, T, RC, RE, RH, ARG>) => void;
+  onError: (handler: ErrorHandler<S, E, R, T, RC, RE, RH, ARG>) => void;
+  onComplete: (handler: CompleteHandler<S, E, R, T, RC, RE, RH, ARG>) => void;
 };
-export type UseFetchHookReturnType<S> = FetchRequestState<
+export type UseFetchHookReturnType<S, ARG extends any[] = any[]> = FetchRequestState<
   ExportedType<boolean, S>,
   ExportedType<Error | undefined, S>,
   ExportedType<Progress, S>,
   ExportedType<Progress, S>
 > & {
-  fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: any[]): Promise<R>;
+  fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: [...ARG, ...any]): Promise<R>;
   update: FetcherExportedUpdate;
-  abort: UseHookReturnType<any, S>['abort'];
-  onSuccess: UseHookReturnType<any, S>['onSuccess'];
-  onError: UseHookReturnType<any, S>['onError'];
-  onComplete: UseHookReturnType<any, S>['onComplete'];
+  abort: UseHookReturnType<any, S, any, any, any, any, any, ARG>['abort'];
+  onSuccess: UseHookReturnType<any, S, any, any, any, any, any, ARG>['onSuccess'];
+  onError: UseHookReturnType<any, S, any, any, any, any, any, ARG>['onError'];
+  onComplete: UseHookReturnType<any, S, any, any, any, any, any, ARG>['onComplete'];
 };
 
 export interface MethodFilterHandler {
@@ -813,8 +849,14 @@ export type UpdateStateCollection<R> = {
 } & {
   data?: (data: R) => any;
 };
+/**
+ * MethodHandler类型用于约束methodhandler为回调函数
+ */
+export type MethodHandler<S, E, R, T, RC, RE, RH, ARG extends any[] = any[]> = (
+  ...args: ARG
+) => Method<S, E, R, T, RC, RE, RH>;
 
-export type AlovaMethodHandler<S, E, R, T, RC, RE, RH> = (...args: any[]) => Method<S, E, R, T, RC, RE, RH>;
+export type AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = MethodHandler<S, E, R, T, RC, RE, RH, ARG>;
 
 /**
  * alova全局配置
@@ -846,10 +888,10 @@ export declare function createAlova<S, E, RC, RE, RH>(options: AlovaOptions<S, E
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useRequest<S, E, R, T, RC, RE, RH>(
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R, T, RC, RE, RH>;
+export declare function useRequest<S, E, R, T, RC, RE, RH, ARG extends any[]>(
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
+  config?: RequestHookConfig<S, E, R, T, RC, RE, RH, ARG>
+): UseHookReturnType<S, E, R, T, RC, RE, RH, ARG>;
 
 /**
  * 监听特定状态值变化后请求
@@ -862,11 +904,11 @@ export declare function useRequest<S, E, R, T, RC, RE, RH>(
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useWatcher<S, E, R, T, RC, RE, RH>(
-  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
+export declare function useWatcher<S, E, R, T, RC, RE, RH, ARG extends any[]>(
+  methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
   watchingStates: S extends VueRef ? (WatchSource<any> | object)[] : S extends SvelteWritable ? Writable<any>[] : any[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookReturnType<S, E, R, T, RC, RE, RH>;
+  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH, ARG>
+): UseHookReturnType<S, E, R, T, RC, RE, RH, ARG>;
 
 /**
  * 数据预拉取
@@ -880,9 +922,9 @@ export declare function useWatcher<S, E, R, T, RC, RE, RH>(
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useFetcher<SE extends FetcherType<any>>(
-  config?: FetcherHookConfig
-): UseFetchHookReturnType<SE['state']>;
+export declare function useFetcher<SE extends FetcherType<any>, ARG extends any[]>(
+  config?: FetcherHookConfig<ARG>
+): UseFetchHookReturnType<SE['state'], ARG>;
 
 /**
  * 失效缓存数据

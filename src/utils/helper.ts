@@ -3,20 +3,32 @@ import { Alova, AlovaMethodHandler, CacheExpire, CacheMode, FrontRequestState } 
 import Method from '../Method';
 import myAssert from './myAssert';
 import {
-  clearTimeoutTimer,
-  falseValue,
   JSONStringify,
   MEMORY,
-  nullValue,
   ObjectCls,
-  setTimeoutFn,
   STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
+  clearTimeoutTimer,
+  falseValue,
+  nullValue,
+  setTimeoutFn,
   typeOf,
   undefinedValue
 } from './variables';
 
 export type GeneralFn = (...args: any[]) => any;
+
+/**
+ * Merge工具类型将T对象,U元组对象合并
+ */
+export type Merge<T extends Record<string, any>, U extends Record<string, any>[]> = U extends [
+  infer First,
+  ...infer Rest
+]
+  ? Rest extends Record<string, any>[]
+    ? Merge<First & Omit<T, keyof First>, Rest>
+    : T
+  : T;
 
 /**
  * 空函数，做兼容处理
@@ -123,7 +135,10 @@ export const noop = () => {},
     const { params, headers } = getConfig(methodInstance);
     return JSONStringify([methodInstance.type, methodInstance.url, params, methodInstance.data, headers]);
   },
-  objAssign = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
+  objAssign = <T extends Record<string, any>, U extends Record<string, any>[]>(
+    target: T,
+    ...sources: U
+  ): Merge<T, U> => {
     return ObjectCls.assign(target, ...sources);
   },
   /**
@@ -187,9 +202,9 @@ export const noop = () => {},
    * @param args 方法调用参数
    * @returns 请求方法对象
    */
-  getHandlerMethod = <S, E, R, T, RC, RE, RH>(
-    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    args: any[] = []
+  getHandlerMethod = <S, E, R, T, RC, RE, RH, ARG extends any[]>(
+    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, any>,
+    args: [...ARG, ...any] = [] as any
   ) => {
     const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
     myAssert(
@@ -203,8 +218,7 @@ export const noop = () => {},
    * @param 数据
    * @returns 统一的配置
    */
-  sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) =>
-    isFn(config) ? config(...args) : config,
+  sloughConfig = <T>(config: T | ((...args: any) => T), args: any[] = []) => (isFn(config) ? config(...args) : config),
   sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
     isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop,
   /**

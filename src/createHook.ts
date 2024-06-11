@@ -1,8 +1,8 @@
-import { EnumHookType as TEnumHookType, FrontRequestState, Hook, UseHookConfig } from '~/typings';
+import { FrontRequestState, Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
 import { Method } from '.';
 import { falseValue, undefinedValue } from './utils/variables';
 
-export const createHook = (ht: TEnumHookType, c: UseHookConfig) =>
+export const createHook = (ht: TEnumHookType, c: UseHookConfig<any>) =>
   ({
     /** 最后一次请求的method实例 */
     m: undefinedValue as unknown as Method,

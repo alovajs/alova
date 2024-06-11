@@ -1,5 +1,5 @@
 import { AlovaCompleteEvent, Method } from '~/typings';
-import { forEach, ObjectCls, objectKeys, undefinedValue } from './variables';
+import { ObjectCls, forEach, objectKeys, undefinedValue } from './variables';
 
 /**
  * 事件类型枚举
@@ -14,14 +14,14 @@ export const enum AlovaEventType {
 /**
  * 创建统一的事件对象
  */
-export default <S, E, R, T, RC, RE, RH>(
+export default <S, E, R, T, RC, RE, RH, ARG extends any[]>(
   eventType: AlovaEventType,
   method: Method<S, E, R, T, RC, RE, RH>,
-  sendArgs: any[],
+  sendArgs: [...ARG, ...any],
   fromCache?: boolean,
   data?: R,
   error?: any,
-  status?: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>['status']
+  status?: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG>['status']
 ) => {
   const allPropsEvent = {
     /** 事件对应的请求行为 */
