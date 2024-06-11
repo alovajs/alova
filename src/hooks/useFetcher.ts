@@ -12,7 +12,7 @@ import { EnumHookType, FetcherHookConfig, FetcherType, MethodMatcher } from '~/t
 export default function useFetcher<SE extends FetcherType<any>, ARG extends any[] = any[]>(
   config: FetcherHookConfig<ARG> = {}
 ) {
-  const props = createRequestState<SE['state'], SE['export'], any, any, any, any, any, FetcherHookConfig, ARG>(
+  const props = createRequestState<SE['state'], SE['export'], any, any, any, any, any, FetcherHookConfig<ARG>, ARG>(
     EnumHookType.USE_FETCHER,
     noop as any,
     config

@@ -60,7 +60,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
   initialData?: any,
   immediate = falseValue,
   watchingStates?: E[],
-  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH>['debounce'] = 0
+  debounceDelay: WatcherHookConfig<S, E, R, T, RC, RE, RH, ARG>['debounce'] = 0
 ) {
   // 动态获取methoHanlder参数
   // 复制一份config，防止外部传入相同useHookConfig导致vue2情况下的状态更新错乱问题
@@ -88,7 +88,8 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
         alovaInstance = getContext(methodInstance),
         cachedResponse: R | undefined = getResponseCache(alovaInstance.id, getMethodInternalKey(methodInstance)),
         forceRequestFinally = sloughConfig(
-          (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH> | FetcherHookConfig).force ?? falseValue
+          (useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG> | FetcherHookConfig<ARG>).force ??
+            falseValue
         );
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
@@ -100,7 +101,7 @@ export default function createRequestState<S, E, R, T, RC, RE, RH, UC extends Us
       loaded: 0
     },
     // 将外部传入的受监管的状态一同放到frontStates集合中
-    { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH>,
+    { managedStates = {} } = useHookConfig as FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG>,
     frontStates = {
       ...managedStates,
       data: create(initialData, hookInstance),

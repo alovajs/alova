@@ -202,19 +202,19 @@ export interface Hook {
   fs: FrontRequestState;
 
   /** successHandlers */
-  sh: SuccessHandler<any, any, any, any, any, any, any>[];
+  sh: SuccessHandler<any, any, any, any, any, any, any, any>[];
 
   /** errorHandlers */
-  eh: ErrorHandler<any, any, any, any, any, any, any>[];
+  eh: ErrorHandler<any, any, any, any, any, any, any, any>[];
 
   /** completeHandlers */
-  ch: CompleteHandler<any, any, any, any, any, any, any>[];
+  ch: CompleteHandler<any, any, any, any, any, any, any, any>[];
 
   /** hookType, useRequest=1, useWatcher=2, useFetcher=3 */
   ht: EnumHookType;
 
   /** hook config */
-  c: UseHookConfig;
+  c: UseHookConfig<any>;
 
   /** enableDownload */
   ed: boolean;
@@ -543,22 +543,25 @@ export interface Alova<S, E, RC, RE, RH> {
 }
 
 /** 根事件对象 */
-export interface AlovaEvent<S, E, R, T, RC, RE, RH, ARG = any> {
+export interface AlovaEvent<S, E, R, T, RC, RE, RH, ARG extends any[]> {
   sendArgs: [...ARG, ...any]; // F保存methodHandler的args元组类型
   method: Method<S, E, R, T, RC, RE, RH>;
 }
 /** 成功事件对象 */
-export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG = any> extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
+export interface AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
   /** data数据是否来自缓存 */
   fromCache: boolean;
   data: R;
 }
 /** 错误事件对象 */
-export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG = any> extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
+export interface AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
   error: any;
 }
 /** 完成事件对象 */
-export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG = any> extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
+export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaEvent<S, E, R, T, RC, RE, RH, ARG> {
   /** 响应状态 */
   status: 'success' | 'error';
   /** data数据是否来自缓存，当status为error时，fromCache始终为false */
@@ -567,13 +570,13 @@ export interface AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG = any> extends A
   error?: any;
 }
 
-export type SuccessHandler<S, E, R, T, RC, RE, RH, ARG = any> = (
+export type SuccessHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
   event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG>
 ) => void;
-export type ErrorHandler<S, E, R, T, RC, RE, RH, ARG = any> = (
+export type ErrorHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
   event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG>
 ) => void;
-export type CompleteHandler<S, E, R, T, RC, RE, RH, ARG = any> = (
+export type CompleteHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
   event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG>
 ) => void;
 
@@ -583,7 +586,7 @@ export type FrontExportedUpdate<R> = (
 export type FetcherExportedUpdate = (
   newFetcherStates: Partial<FetchRequestState<boolean, Error | undefined, Progress, Progress>>
 ) => void;
-export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[]> {
   /** 当前的method对象 */
   method: Method<S, E, R, T, RC, RE, RH>;
 
@@ -599,8 +602,8 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 成功回调装饰 */
   decorateSuccess: (
     decorator: (
-      handler: SuccessHandler<S, E, R, T, RC, RE, RH>,
-      event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH>,
+      handler: SuccessHandler<S, E, R, T, RC, RE, RH, ARG>,
+      event: AlovaSuccessEvent<S, E, R, T, RC, RE, RH, ARG>,
       index: number,
       length: number
     ) => void
@@ -609,8 +612,8 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 失败回调装饰 */
   decorateError: (
     decorator: (
-      handler: ErrorHandler<S, E, R, T, RC, RE, RH>,
-      event: AlovaErrorEvent<S, E, R, T, RC, RE, RH>,
+      handler: ErrorHandler<S, E, R, T, RC, RE, RH, ARG>,
+      event: AlovaErrorEvent<S, E, R, T, RC, RE, RH, ARG>,
       index: number,
       length: number
     ) => void
@@ -619,8 +622,8 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
   /** 完成回调装饰 */
   decorateComplete: (
     decorator: (
-      handler: CompleteHandler<S, E, R, T, RC, RE, RH>,
-      event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH>,
+      handler: CompleteHandler<S, E, R, T, RC, RE, RH, ARG>,
+      event: AlovaCompleteEvent<S, E, R, T, RC, RE, RH, ARG>,
       index: number,
       length: number
     ) => void
@@ -630,8 +633,8 @@ export interface AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
 /**
  * useRequest和useWatcher中间件的context参数
  */
-export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[] = any[]>
-  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH, ARG> {
   /** 发送请求函数 */
   send: SendHandler<R, ARG>;
 
@@ -662,8 +665,8 @@ export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends
 /**
  * useFetcher中间件的context参数
  */
-export interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[] = any[]>
-  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH> {
+export interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends any[]>
+  extends AlovaMiddlewareContext<S, E, R, T, RC, RE, RH, ARG> {
   /** 数据预加载函数 */
   fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: [...ARG, ...any]): Promise<R>;
 
@@ -691,35 +694,35 @@ export interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH, ARG exten
 }
 
 /** 中间件next函数 */
-export interface MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH> {
-  force?: UseHookConfig['force'];
+export interface MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> {
+  force?: UseHookConfig<ARG>['force'];
   method?: Method<S, E, R, T, RC, RE, RH>;
 }
-export interface AlovaGuardNext<S, E, R, T, RC, RE, RH> {
-  (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH>): Promise<R>;
+export interface AlovaGuardNext<S, E, R, T, RC, RE, RH, ARG extends any[]> {
+  (guardNextConfig?: MiddlewareNextGuardConfig<S, E, R, T, RC, RE, RH, ARG>): Promise<R>;
 }
 
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH, ARG = any> {
+export interface AlovaFrontMiddleware<S, E, R, T, RC, RE, RH, ARG extends any[]> {
   (
     context: AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, ARG>,
-    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
+    next: AlovaGuardNext<S, E, R, T, RC, RE, RH, ARG>
   ): any;
 }
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH, ARG = any> {
+export interface AlovaFetcherMiddleware<S, E, R, T, RC, RE, RH, ARG extends any[]> {
   (
     context: AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH, ARG>,
-    next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
+    next: AlovaGuardNext<S, E, R, T, RC, RE, RH, ARG>
   ): any;
 }
 
 /** hook通用配置 */
-export interface UseHookConfig<ARG = any> {
+export interface UseHookConfig<ARG extends any[]> {
   /** 是否强制请求 */
   force?: boolean | ((...args: [...ARG, ...any]) => boolean);
 
@@ -727,7 +730,7 @@ export interface UseHookConfig<ARG = any> {
 }
 
 /** useRequest和useWatcher都有的类型 */
-export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG = any> extends UseHookConfig<ARG> {
+export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> extends UseHookConfig<ARG> {
   /** 是否立即发起一次请求 */
   immediate?: boolean;
 
@@ -742,21 +745,32 @@ export interface FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG = any> exten
 }
 
 /** useRequest config export type */
-export type RequestHookConfig<S, E, R, T, RC, RE, RH, ARG> = FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG>;
+export type RequestHookConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> = FrontRequestHookConfig<
+  S,
+  E,
+  R,
+  T,
+  RC,
+  RE,
+  RH,
+  ARG
+>;
 
-export type SendableConfig<S, E, R, T, RC, RE, RH> = (alovaEvent: AlovaEvent<S, E, R, T, RC, RE, RH>) => boolean;
+export type SendableConfig<S, E, R, T, RC, RE, RH, ARG extends any[]> = (
+  alovaEvent: AlovaEvent<S, E, R, T, RC, RE, RH, ARG>
+) => boolean;
 
 /** useWatcher config export type */
-export interface WatcherHookConfig<S, E, R, T, RC, RE, RH, ARG = any>
+export interface WatcherHookConfig<S, E, R, T, RC, RE, RH, ARG extends any[]>
   extends FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG> {
   /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
   debounce?: number | number[];
-  sendable?: SendableConfig<S, E, R, T, RC, RE, RH>;
+  sendable?: SendableConfig<S, E, R, T, RC, RE, RH, ARG>;
   abortLast?: boolean;
 }
 
 /** useFetcher config export type */
-export interface FetcherHookConfig<ARG = any> extends UseHookConfig<ARG> {
+export interface FetcherHookConfig<ARG extends any[]> extends UseHookConfig<ARG> {
   /** 中间件 */
   middleware?: AlovaFetcherMiddleware<any, any, any, any, any, any, any, ARG>;
   /** fetch是否同步更新data状态 */
@@ -780,7 +794,7 @@ export interface VueRef {
   value: any;
 }
 export type ExportedType<R, S> = S extends VueRef ? Ref<R> : S extends SvelteWritable ? Writable<R> : R;
-export type SendHandler<R, ARG extends any[] = any[]> = (...args: [...ARG, ...any]) => Promise<R>;
+export type SendHandler<R, ARG extends any[]> = (...args: [...ARG, ...any]) => Promise<R>;
 export type UseHookReturnType<
   S = any,
   E = any,
@@ -842,7 +856,7 @@ export type MethodHandler<S, E, R, T, RC, RE, RH, ARG extends any[] = any[]> = (
   ...args: ARG
 ) => Method<S, E, R, T, RC, RE, RH>;
 
-export type AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG> = MethodHandler<S, E, R, T, RC, RE, RH, ARG>;
+export type AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG extends any[]> = MethodHandler<S, E, R, T, RC, RE, RH, ARG>;
 
 /**
  * alova全局配置

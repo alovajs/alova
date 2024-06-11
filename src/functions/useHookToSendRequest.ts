@@ -64,7 +64,7 @@ import {
 export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, ARG extends any[]>(
   hookInstance: Hook,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
-  sendCallingArgs: [...ARG, ...any] = [] as unknown as any
+  sendCallingArgs: [...ARG, ...any] = [] as any
 ) {
   let methodInstance = getHandlerMethod(methodHandler, sendCallingArgs);
   const {
@@ -77,8 +77,8 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, ARG extends
     } = hookInstance,
     isFetcher = ht === EnumHookType.USE_FETCHER,
     { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-      | FrontRequestHookConfig<S, E, R, T, RC, RE, RH>
-      | FetcherHookConfig,
+      | FrontRequestHookConfig<S, E, R, T, RC, RE, RH, ARG>
+      | FetcherHookConfig<ARG>,
     alovaInstance = getContext(methodInstance),
     {
       id,
@@ -89,7 +89,16 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, ARG extends
     // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
     methodKey = getMethodInternalKey(methodInstance),
     { m: cacheMode, t: tag } = getLocalCacheConfigParam(methodInstance),
-    { sendable = () => trueValue, abortLast = trueValue } = useHookConfig as WatcherHookConfig<S, E, R, T, RC, RE, RH>;
+    { sendable = () => trueValue, abortLast = trueValue } = useHookConfig as WatcherHookConfig<
+      S,
+      E,
+      R,
+      T,
+      RC,
+      RE,
+      RH,
+      ARG
+    >;
   hookInstance.m = methodInstance;
 
   return (async () => {
@@ -143,7 +152,7 @@ export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, ARG extends
     }
 
     // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
-    const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH> = guardNextConfig => {
+    const guardNext: AlovaGuardNext<S, E, R, T, RC, RE, RH, ARG> = guardNextConfig => {
       isNextCalled = trueValue;
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
           guardNextConfig || {},

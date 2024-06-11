@@ -19,6 +19,18 @@ import {
 export type GeneralFn = (...args: any[]) => any;
 
 /**
+ * Merge工具类型将T对象,U元组对象合并
+ */
+export type Merge<T extends Record<string, any>, U extends Record<string, any>[]> = U extends [
+  infer First,
+  ...infer Rest
+]
+  ? Rest extends Record<string, any>[]
+    ? Merge<First & Omit<T, keyof First>, Rest>
+    : T
+  : T;
+
+/**
  * 空函数，做兼容处理
  */
 export const noop = () => {},
@@ -191,10 +203,10 @@ export const noop = () => {},
    * @returns 请求方法对象
    */
   getHandlerMethod = <S, E, R, T, RC, RE, RH, ARG extends any[]>(
-    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
-    args: [...ARG, ...any] = [] as unknown as any
+    methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, any>,
+    args: [...ARG, ...any] = [] as any
   ) => {
-    const methodInstance = isFn(methodHandler) ? methodHandler(...(args as [...ARG])) : methodHandler;
+    const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
     myAssert(
       instanceOf(methodInstance, Method),
       'hook handler must be a method instance or a function that returns method instance'
@@ -206,8 +218,7 @@ export const noop = () => {},
    * @param 数据
    * @returns 统一的配置
    */
-  sloughConfig = <T>(config: T | ((...args: any[]) => T), args: any[] = []) =>
-    isFn(config) ? config(...args) : config,
+  sloughConfig = <T>(config: T | ((...args: any) => T), args: any[] = []) => (isFn(config) ? config(...args) : config),
   sloughFunction = <T, U>(arg: T | undefined, defaultFn: U) =>
     isFn(arg) ? arg : ![falseValue, nullValue].includes(arg as any) ? defaultFn : noop,
   /**
