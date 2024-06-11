@@ -1,6 +1,21 @@
 import type { Config } from 'jest';
 
 const config: Config = {
+  // The directory where Jest should output its coverage files
+  coverageDirectory: 'coverage',
+
+  clearMocks: true,
+
+  coveragePathIgnorePatterns: ['\\\\node_modules\\\\', '/node_modules/', 'internal/'],
+  // Indicates which provider should be used to instrument code for coverage
+  // coverageProvider: 'v8',
+
+  // A list of reporter names that Jest uses when writing coverage reports
+  // coverageReporters: ['json', 'text', 'lcov', 'clover'],
+
+  // An object that configures minimum threshold enforcement for coverage results
+  // coverageThreshold: undefined,
+
   projects: [
     '<rootDir>/packages/alova',
     '<rootDir>/packages/adapter-axios',
