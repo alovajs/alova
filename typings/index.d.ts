@@ -639,7 +639,7 @@ export interface AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH, ARG extends
   send: SendHandler<R, ARG>;
 
   /** sendArgs 响应处理回调的参数，该参数由use hooks的send传入 */
-  sendArgs: any[];
+  sendArgs: [...ARG, ...any];
 
   /** 前端状态集合 */
   frontStates: FrontRequestState<
@@ -671,7 +671,7 @@ export interface AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH, ARG exten
   fetch<R>(matcher: MethodMatcher<any, any, R, any, any, any, any>, ...args: [...ARG, ...any]): Promise<R>;
 
   /** fetchArgs 响应处理回调的参数，该参数由useFetcher的fetch传入 */
-  fetchArgs: any[];
+  fetchArgs: [...ARG, ...any];
 
   /** fetch状态集合 */
   fetchStates: FetchRequestState<
