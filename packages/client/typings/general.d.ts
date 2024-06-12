@@ -696,14 +696,11 @@ interface Actions {
  * @param id 委托者id
  * @returns alova中间件函数
  */
-type ActionDelegationMiddleware = (id: string | number | symbol) => <S, E, R, T, RC, RE, RH>(
-  context: (
-    | AlovaFrontMiddlewareContext<S, E, R, T, RC, RE, RH>
-    | AlovaFetcherMiddlewareContext<S, E, R, T, RC, RE, RH>
-  ) & {
+type ActionDelegationMiddleware = (id: string | number | symbol) => <AG extends AlovaGenerics = AlovaGenerics>(
+  context: (AlovaFrontMiddlewareContext<AG> | AlovaFetcherMiddlewareContext<AG>) & {
     delegatingActions?: Actions;
   },
-  next: AlovaGuardNext<S, E, R, T, RC, RE, RH>
+  next: AlovaGuardNext<AG>
 ) => Promise<any>;
 
 /**
@@ -717,26 +714,26 @@ type AccessAction = (
 ) => void;
 
 type MetaMatches = Record<string, any>;
-type ResponseInterceptHandler<RA extends AlovaRequestAdapter<any, any, any, any, any>, RESULT = Promise<void>> = (
+type ResponseInterceptHandler<RA extends AlovaRequestAdapter<any, any, any>, RESULT = Promise<void>> = (
   response: ReturnType<ReturnType<RA>['response']> extends Promise<infer RE> ? RE : never,
   method: Parameters<RA>[1]
 ) => RESULT;
-type ResponseErrorInterceptHandler<RA extends AlovaRequestAdapter<any, any, any, any, any>, RESULT = Promise<void>> = (
+type ResponseErrorInterceptHandler<RA extends AlovaRequestAdapter<any, any, any>, RESULT = Promise<void>> = (
   error: any,
   method: Parameters<RA>[1]
 ) => RESULT;
-type ResponseAuthorizationInterceptor<RA extends AlovaRequestAdapter<any, any, any, any, any>> =
+type ResponseAuthorizationInterceptor<RA extends AlovaRequestAdapter<any, any, any>> =
   | ResponseInterceptHandler<RA, void | Promise<void>>
   | {
       metaMatches?: MetaMatches;
       handler: ResponseInterceptHandler<RA, void | Promise<void>>;
     };
 
-type RequestHandler<RA extends AlovaRequestAdapter<any, any, any, any, any>, RESULT = Promise<void>> = (
+type RequestHandler<RA extends AlovaRequestAdapter<any, any, any>, RESULT = Promise<void>> = (
   method: Parameters<RA>[1]
 ) => RESULT;
 
-interface TokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>> {
+interface TokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any>> {
   /**
    * 忽略拦截的method
    */
@@ -777,7 +774,24 @@ interface ClientTokenAuthenticationOptions<
     metaMatches?: MetaMatches;
   };
 }
-interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any, any, any>>
+
+type BeforeRequestType<AG extends AlovaGenerics> = (
+  originalBeforeRequest?: AlovaOptions<AG>['beforeRequest']
+) => AlovaOptions<AG>['beforeRequest'];
+type ResponseType<AG extends AlovaGenerics> = (
+  originalResponded?: AlovaOptions<AG>['responded']
+) => AlovaOptions<AG>['responded'];
+
+export interface TokenAuthenticationResult<AG extends AlovaGenerics> {
+  onAuthRequired: BeforeRequestType<AG>;
+  onResponseRefreshToken: ResponseType<AG>;
+  waitingList: {
+    method: Method;
+    resolve: () => void;
+  }[];
+}
+
+interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any>>
   extends TokenAuthenticationOptions<RA> {
   /**
    * 在请求成功拦截器中判断token是否过期，并刷新token
@@ -816,10 +830,7 @@ interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, a
   };
 }
 
-type AlovaResponded<
-  SH extends StatesHook<any, any>,
-  RA extends AlovaRequestAdapter<any, any, any, any, any>
-> = NonNullable<
+type AlovaResponded<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> = NonNullable<
   AlovaOptions<
     ReturnType<SH['create']>,
     ReturnType<SH['export']>,
@@ -834,9 +845,9 @@ type AlovaResponded<
  */
 type AlovaRequestAdapterUnified<
   RA extends
-    | AlovaRequestAdapter<any, any, any, any, any>
-    | ((...args: any[]) => AlovaRequestAdapter<any, any, any, any, any>) = AlovaRequestAdapter<any, any, any, any, any>
-> = RA extends AlovaRequestAdapter<any, any, any, any, any> ? RA : ReturnType<RA>;
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = AlovaRequestAdapter<any, any, any>
+> = RA extends AlovaRequestAdapter<any, any, any> ? RA : ReturnType<RA>;
 
 /**
  * useAutoRequest配置
@@ -933,10 +944,10 @@ type SSEHookConfig = {
 /**
  * useSSE() 返回类型
  */
-type SSEExposure<S, Data> = {
-  readyState: ExportedType<SSEHookReadyState, S>;
-  data: ExportedType<Data | undefined, S>;
-  eventSource: ExportedType<EventSource | undefined, S>;
+type SSEExposure<AG extends AlovaGenerics, Data> = {
+  readyState: ExportedType<SSEHookReadyState, AG['State']>;
+  data: ExportedType<Data | undefined, AG['State']>;
+  eventSource: ExportedType<EventSource | undefined, AG['State']>;
   /**
    * 手动发起请求。在使用 `immediate: true` 时该方法会自动触发
    * @param sendArgs 请求参数，会传递给 method
@@ -951,27 +962,27 @@ type SSEExposure<S, Data> = {
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onOpen(callback: SSEOnOpenTrigger): () => void;
+  onOpen(callback: SSEOnOpenTrigger<AG>): () => void;
 
   /**
    * 注册 EventSource message 的回调函数
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onMessage<T = Data>(callback: SSEOnMessageTrigger<T>): () => void;
+  onMessage<T = Data>(callback: SSEOnMessageTrigger<T, AG>): () => void;
 
   /**
    * 注册 EventSource error 的回调函数
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onError(callback: SSEOnErrorTrigger): () => void;
+  onError(callback: SSEOnErrorTrigger<AG>): () => void;
 
   /**
    * @param eventName 事件名称，默认存在 `open` | `error` | `message`
    * @param handler 事件处理器
    */
-  on: SSEOn;
+  on: SSEOn<AG>;
 };
 
 type AnyFn<T = Any> = (...args: any[]) => T;

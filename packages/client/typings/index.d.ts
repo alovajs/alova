@@ -1,14 +1,21 @@
 import { FrameworkState } from '@alova/shared/FrameworkState';
 import { EventManager } from '@alova/shared/createEventManager';
 import { IsAny } from '@alova/shared/types';
-import { Alova, AlovaGenerics, FetchRequestState, FrontRequestState, Method, Progress, ReferingObject } from 'alova';
-import GlobalFetch from 'alova/fetch';
+import {
+  Alova,
+  AlovaGenerics,
+  AlovaRequestAdapter,
+  FetchRequestState,
+  FrontRequestState,
+  Method,
+  Progress,
+  ReferingObject
+} from 'alova';
 import { Readable, Writable } from 'svelte/store';
-import { ComputedRef, Ref, WatchSource } from 'vue';
+import { ComputedRef, Ref } from 'vue';
 import {
   AccessAction,
   ActionDelegationMiddleware,
-  AlovaRequestAdapterUnified,
   AutoRequestHookConfig,
   BeforeSilentSubmitHandler,
   CaptchaExposure,
@@ -25,6 +32,8 @@ import {
   RetriableHookConfig,
   SQHookExposure,
   SQRequestHookConfig,
+  SSEExposure,
+  SSEHookConfig,
   ServerTokenAuthenticationOptions,
   SilentFactoryBootOptions,
   SilentMethod,
@@ -498,10 +507,10 @@ export declare function usePagination<AG extends AlovaGenerics, ListData extends
  * 带silentQueue的request hook
  * silentQueue是实现静默提交的核心部件，其中将用于存储silentMethod实例，它们将按顺序串行发送提交
  */
-declare function useSQRequest<S, E, R, T, RC, RE, RH>(
-  handler: AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: SQRequestHookConfig<S, E, R, T, RC, RE, RH>
-): SQHookExposure<S, E, R, T, RC, RE, RH>;
+declare function useSQRequest<AG extends AlovaGenerics>(
+  handler: AlovaMethodHandler<AG>,
+  config?: SQRequestHookConfig<AG>
+): SQHookExposure<AG>;
 declare function bootSilentFactory(options: SilentFactoryBootOptions): void;
 declare function onSilentSubmitBoot(handler: SilentSubmitBootHandler): OffEventCallback;
 declare function onSilentSubmitSuccess(handler: SilentSubmitSuccessHandler): OffEventCallback;
@@ -531,10 +540,10 @@ declare const silentQueueMap: SilentQueueMap;
  * @param 配置参数
  * @return useCaptcha相关数据和操作函数
  */
-declare function useCaptcha<S, E, R, T, RC, RE, RH>(
-  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: CaptchaHookConfig<S, E, R, T, RC, RE, RH>
-): CaptchaExposure<S, E, R, T, RC, RE, RH>;
+declare function useCaptcha<AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  config?: CaptchaHookConfig<AG>
+): CaptchaExposure<AG>;
 
 /**
  * useForm
@@ -548,19 +557,10 @@ declare function useCaptcha<S, E, R, T, RC, RE, RH>(
  * @param config 配置参数
  * @return useForm相关数据和操作函数
  */
-declare function useForm<
-  F extends Record<string | symbol, any> = any,
-  S = any,
-  E = any,
-  R = any,
-  T = any,
-  RC = any,
-  RE = any,
-  RH = any
->(
-  handler: FormHookHandler<S, E, R, T, RC, RE, RH, F> | NonNullable<FormHookConfig<S, E, R, T, RC, RE, RH, F>['id']>,
-  config?: FormHookConfig<S, E, R, T, RC, RE, RH, F>
-): FormExposure<S, E, R, T, RC, RE, RH, F>;
+declare function useForm<AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
+  handler: FormHookHandler<AG, FormData | undefined>,
+  config?: FormHookConfig<AG, FormData>
+): FormExposure<AG, FormData>;
 
 /**
  * useSSE
@@ -571,10 +571,10 @@ declare function useForm<
  * @param config 配置参数
  * @return useSSE相关数据和操作函数
  */
-// declare function useSSE<Data = any, AG extends AlovaGenerics>(
-//   handler: Method<AG> | AlovaMethodHandler<AG>,
-//   config?: SSEHookConfig
-// ): SSEExposure<AG['State'], Data>;
+declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  config?: SSEHookConfig
+): SSEExposure<AG, Data>;
 
 /**
  * useRetriableRequest
@@ -587,10 +587,10 @@ declare function useForm<
  * @param config 配置参数
  * @return useRetriableRequest相关数据和操作函数
  */
-declare function useRetriableRequest<S, E, R, T, RC, RE, RH>(
-  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: RetriableHookConfig<S, E, R, T, RC, RE, RH>
-): RetriableExposure<S, E, R, T, RC, RE, RH>;
+declare function useRetriableRequest<AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  config?: RetriableHookConfig<AG>
+): RetriableExposure<AG>;
 
 /**
  * useSerialRequest
@@ -600,13 +600,10 @@ declare function useRetriableRequest<S, E, R, T, RC, RE, RH>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2>(
-  serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>
-  ],
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R2, T, RC, RE, RH>;
+declare function useSerialRequest<AG extends AlovaGenerics>(
+  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
+  config?: RequestHookConfig<AG>
+): UseHookExposure<AG>;
 
 /**
  * useSerialRequest(重载)
@@ -616,14 +613,10 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3>(
-  serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>
-  ],
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R3, T, RC, RE, RH>;
+declare function useSerialRequest<AG extends AlovaGenerics, AG2 extends AlovaGenerics>(
+  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, AlovaMethodHandler<AG2>, ...AlovaMethodHandler<any>[]],
+  config?: RequestHookConfig<AG>
+): UseHookExposure<AG2>;
 
 /**
  * useSerialRequest(重载)
@@ -633,15 +626,15 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4>(
+declare function useSerialRequest<AG extends AlovaGenerics, AG2 extends AlovaGenerics, AG3 extends AlovaGenerics>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R4, T, RC, RE, RH>;
+  config?: RequestHookConfig<AG>
+): UseHookExposure<AG3>;
 
 /**
  * useSerialRequest(重载)
@@ -651,16 +644,21 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5>(
+declare function useSerialRequest<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R5, T, RC, RE, RH>;
+  config?: RequestHookConfig<AG>
+): UseHookExposure<AG4>;
 
 /**
  * useSerialRequest(重载)
@@ -670,17 +668,23 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6>(
+declare function useSerialRequest<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics,
+  AG5 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>,
-    (value: R5, ...args: any[]) => Method<S, E, R6, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    AlovaMethodHandler<AG5>,
+    ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R6, T, RC, RE, RH>;
+  config?: RequestHookConfig<AG>
+): UseHookExposure<AG5>;
 
 /**
  * useSerialRequest(重载)
@@ -690,18 +694,25 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7>(
+declare function useSerialRequest<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics,
+  AG5 extends AlovaGenerics,
+  AG6 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>,
-    (value: R5, ...args: any[]) => Method<S, E, R6, T, RC, RE, RH>,
-    (value: R6, ...args: any[]) => Method<S, E, R7, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    AlovaMethodHandler<AG5>,
+    AlovaMethodHandler<AG6>,
+    ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R7, T, RC, RE, RH>;
+  config?: RequestHookConfig<AG>
+): UseHookExposure<AG6>;
 
 /**
  * useSerialRequest(重载)
@@ -711,19 +722,27 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7, R8>(
+declare function useSerialRequest<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics,
+  AG5 extends AlovaGenerics,
+  AG6 extends AlovaGenerics,
+  AG7 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>,
-    (value: R5, ...args: any[]) => Method<S, E, R6, T, RC, RE, RH>,
-    (value: R6, ...args: any[]) => Method<S, E, R7, T, RC, RE, RH>,
-    (value: R7, ...args: any[]) => Method<S, E, R8, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    AlovaMethodHandler<AG5>,
+    AlovaMethodHandler<AG6>,
+    AlovaMethodHandler<AG7>,
+    ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R8, T, RC, RE, RH>;
+  config?: RequestHookConfig<AG>
+): UseHookExposure<AG7>;
 
 /**
  * useSerialWatcher
@@ -733,14 +752,11 @@ declare function useSerialRequest<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2>(
-  serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>
-  ],
-  watchingStates: (WatchSource<any> | object)[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R2, T, RC, RE, RH>;
+declare function useSerialWatcher<AG extends AlovaGenerics>(
+  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
+  watchingStates: AG['Watched'][],
+  config?: WatcherHookConfig<AG>
+): UseHookExposure<AG>;
 
 /**
  * useSerialWatcher(重载)
@@ -750,15 +766,11 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2>(
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3>(
-  serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>
-  ],
-  watchingStates: (WatchSource<any> | object)[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R3, T, RC, RE, RH>;
+declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGenerics>(
+  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, AlovaMethodHandler<AG2>, ...AlovaMethodHandler<any>[]],
+  watchingStates: AG['Watched'][],
+  config?: WatcherHookConfig<AG>
+): UseHookExposure<AG2>;
 
 /**
  * useSerialWatcher(重载)
@@ -768,16 +780,16 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3>(
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4>(
+declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGenerics, AG3 extends AlovaGenerics>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: (WatchSource<any> | object)[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R4, T, RC, RE, RH>;
+  watchingStates: AG['Watched'][],
+  config?: WatcherHookConfig<AG>
+): UseHookExposure<AG3>;
 
 /**
  * useSerialWatcher(重载)
@@ -787,17 +799,22 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4>(
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5>(
+declare function useSerialWatcher<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: (WatchSource<any> | object)[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R5, T, RC, RE, RH>;
+  watchingStates: AG['Watched'][],
+  config?: WatcherHookConfig<AG>
+): UseHookExposure<AG4>;
 
 /**
  * useSerialWatcher(重载)
@@ -807,18 +824,24 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5>(
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6>(
+declare function useSerialWatcher<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics,
+  AG5 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>,
-    (value: R5, ...args: any[]) => Method<S, E, R6, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    AlovaMethodHandler<AG5>,
+    ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: (WatchSource<any> | object)[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R6, T, RC, RE, RH>;
+  watchingStates: AG['Watched'][],
+  config?: WatcherHookConfig<AG>
+): UseHookExposure<AG5>;
 
 /**
  * useSerialWatcher(重载)
@@ -828,19 +851,26 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6>(
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7>(
+declare function useSerialWatcher<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics,
+  AG5 extends AlovaGenerics,
+  AG6 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>,
-    (value: R5, ...args: any[]) => Method<S, E, R6, T, RC, RE, RH>,
-    (value: R6, ...args: any[]) => Method<S, E, R7, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    AlovaMethodHandler<AG5>,
+    AlovaMethodHandler<AG6>,
+    ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: (WatchSource<any> | object)[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R7, T, RC, RE, RH>;
+  watchingStates: AG['Watched'][],
+  config?: WatcherHookConfig<AG>
+): UseHookExposure<AG6>;
 
 /**
  * useSerialWatcher(重载)
@@ -850,20 +880,28 @@ declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<S, E, R, T, RC, RE, RH, R2, R3, R4, R5, R6, R7, R8>(
+declare function useSerialWatcher<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics,
+  AG4 extends AlovaGenerics,
+  AG5 extends AlovaGenerics,
+  AG6 extends AlovaGenerics,
+  AG7 extends AlovaGenerics
+>(
   serialHandlers: [
-    Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-    (value: R, ...args: any[]) => Method<S, E, R2, T, RC, RE, RH>,
-    (value: R2, ...args: any[]) => Method<S, E, R3, T, RC, RE, RH>,
-    (value: R3, ...args: any[]) => Method<S, E, R4, T, RC, RE, RH>,
-    (value: R4, ...args: any[]) => Method<S, E, R5, T, RC, RE, RH>,
-    (value: R5, ...args: any[]) => Method<S, E, R6, T, RC, RE, RH>,
-    (value: R6, ...args: any[]) => Method<S, E, R7, T, RC, RE, RH>,
-    (value: R7, ...args: any[]) => Method<S, E, R8, T, RC, RE, RH>
+    Method<AG> | AlovaMethodHandler<AG>,
+    AlovaMethodHandler<AG2>,
+    AlovaMethodHandler<AG3>,
+    AlovaMethodHandler<AG4>,
+    AlovaMethodHandler<AG5>,
+    AlovaMethodHandler<AG6>,
+    AlovaMethodHandler<AG7>,
+    ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: (WatchSource<any> | object)[],
-  config?: WatcherHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R8, T, RC, RE, RH>;
+  watchingStates: AG['Watched'][],
+  config?: WatcherHookConfig<AG>
+): UseHookExposure<AG7>;
 
 /**
  * 操作函数委托中间件
@@ -905,14 +943,11 @@ declare const accessAction: AccessAction;
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export function createClientTokenAuthentication<
-  SH extends StatesHook<any, any>,
-  RA extends
-    | AlovaRequestAdapter<any, any, any, any, any>
-    | ((...args: any[]) => AlovaRequestAdapter<any, any, any, any, any>) = typeof GlobalFetch
->(
-  options: ClientTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>
-): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
+export function createClientTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
+  options: ClientTokenAuthenticationOptions<
+    AlovaRequestAdapter<AG['RequestConfig'], AG['Response'], AG['ResponseHeader']>
+  >
+): TokenAuthenticationResult<AG>;
 
 /**
  * 创建服务端的token认证拦截器
@@ -937,14 +972,9 @@ export function createClientTokenAuthentication<
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export function createServerTokenAuthentication<
-  SH extends StatesHook<any, any>,
-  RA extends
-    | AlovaRequestAdapter<any, any, any, any, any>
-    | ((...args: any[]) => AlovaRequestAdapter<any, any, any, any, any>) = typeof GlobalFetch
->(
-  options: ServerTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>
-): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
+export function createServerTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
+  options: ServerTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any>>
+): TokenAuthenticationResult<AG>;
 
 /**
  * 在一定条件下可以自动重新拉取数据，从而刷新页面，使用场景有：
@@ -957,25 +987,13 @@ export function createServerTokenAuthentication<
  * @param config 配置参数
  * @return useAutoRequest相关数据和操作函数
  */
-declare function useAutoRequest<S, E, R, T, RC, RE, RH>(
-  handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH>,
-  config?: AutoRequestHookConfig<S, E, R, T, RC, RE, RH>
-): UseHookExposure<S, E, R, T, RC, RE, RH>;
+declare function useAutoRequest<AG extends AlovaGenerics>(
+  handler: Method<AG> | AlovaMethodHandler<AG>,
+  config?: AutoRequestHookConfig<AG>
+): UseHookExposure<AG>;
 declare namespace useAutoRequest {
-  function onNetwork(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
-  ): UnbindHandler;
-  function onPolling(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
-  ): UnbindHandler;
-  function onVisibility(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
-  ): UnbindHandler;
-  function onFocus(
-    notify: NotifyHandler,
-    config: AutoRequestHookConfig<any, any, any, any, any, any, any>
-  ): UnbindHandler;
+  function onNetwork(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+  function onPolling(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+  function onVisibility(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+  function onFocus(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
 }
