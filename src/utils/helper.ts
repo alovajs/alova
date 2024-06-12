@@ -202,7 +202,7 @@ export const noop = () => {},
    * @param args 方法调用参数
    * @returns 请求方法对象
    */
-  getHandlerMethod = <S, E, R, T, RC, RE, RH, ARG extends any[]>(
+  getHandlerMethod = <S, E, R, T, RC, RE, RH, ARG extends any[] = any[]>(
     methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, any>,
     args: [...ARG, ...any] = [] as any
   ) => {

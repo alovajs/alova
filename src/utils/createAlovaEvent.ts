@@ -14,7 +14,7 @@ export const enum AlovaEventType {
 /**
  * 创建统一的事件对象
  */
-export default <S, E, R, T, RC, RE, RH, ARG extends any[]>(
+export default <S, E, R, T, RC, RE, RH, ARG extends any[] = any[]>(
   eventType: AlovaEventType,
   method: Method<S, E, R, T, RC, RE, RH>,
   sendArgs: [...ARG, ...any],
