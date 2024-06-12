@@ -61,7 +61,7 @@ import {
  * @param sendCallingArgs send函数参数
  * @returns 请求状态
  */
-export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, ARG extends any[]>(
+export default function useHookToSendRequest<S, E, R, T, RC, RE, RH, ARG extends any[] = any[]>(
   hookInstance: Hook,
   methodHandler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
   sendCallingArgs: [...ARG, ...any] = [] as any

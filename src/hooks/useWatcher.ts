@@ -7,7 +7,7 @@ import { Writable } from 'svelte/store';
 import { WatchSource } from 'vue';
 import { AlovaMethodHandler, EnumHookType, SvelteWritable, VueRef, WatcherHookConfig } from '~/typings';
 
-export default function useWatcher<S, E, R, T, RC, RE, RH, ARG extends any[]>(
+export default function useWatcher<S, E, R, T, RC, RE, RH, ARG extends any[] = any[]>(
   handler: Method<S, E, R, T, RC, RE, RH> | AlovaMethodHandler<S, E, R, T, RC, RE, RH, ARG>,
   watchingStates: S extends VueRef ? (WatchSource<any> | object)[] : S extends SvelteWritable ? Writable<any>[] : any[],
   config: WatcherHookConfig<S, E, R, T, RC, RE, RH, ARG> = {}
