@@ -58,8 +58,13 @@ const adapterReturnMap: Record<string, Record<string, RequestAdapterReturnType>>
 const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
   // baseURL如果以/结尾，则去掉/
   baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
-  // 如果不是/或http协议开头的，则需要添加/
-  url = url.match(/^(\/|https?:\/\/)/) ? url : `/${url}`;
+
+  // Compatible with some RESTful usage
+  // fix: https://github.com/alovajs/alova/issues/382
+  if (url !== '') {
+    // 如果不是/或http协议开头的，则需要添加/
+    url = url.match(/^(\/|https?:\/\/)/) ? url : `/${url}`;
+  }
 
   const completeURL = baseURL + url;
 
