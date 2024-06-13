@@ -12,7 +12,7 @@ import {
 } from '@alova/shared/vars';
 import { Method } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
-import { AnyFn, BackoffPolicy } from '~/typings/general';
+import { AnyFn } from '~/typings/general';
 
 const referenceList = [] as { id: string; ref: any }[];
 /**
@@ -51,27 +51,6 @@ export const valueObject = <T>(value: T, writable = falseValue) => ({
   value,
   writable
 });
-
-/**
- * 根据避让策略和重试次数计算重试延迟时间
- * @param backoff 避让参数
- * @param retryTimes 重试次数
- * @returns 重试延迟时间
- */
-export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => {
-  let { startQuiver, endQuiver } = backoff;
-  const { delay, multiplier = 1 } = backoff;
-  let retryDelayFinally = (delay || 0) * multiplier ** (retryTimes - 1);
-  // 如果startQuiver或endQuiver有值，则需要增加指定范围的随机抖动值
-  if (startQuiver || endQuiver) {
-    startQuiver = startQuiver || 0;
-    endQuiver = endQuiver || 1;
-    retryDelayFinally +=
-      retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
-    retryDelayFinally = Math.floor(retryDelayFinally); // 取整数延迟
-  }
-  return retryDelayFinally;
-};
 
 export function useCallback<Fn extends AnyFn = AnyFn>(onCallbackChange: (callbacks: Fn[]) => void = noop) {
   let callbacks: Fn[] = [];

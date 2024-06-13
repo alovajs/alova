@@ -495,7 +495,7 @@ export interface Method<AG extends AlovaGenerics = any> {
    * 用于在全局的request和response钩子函数中传递额外信息所用
    * js项目中可使用任意字段
    */
-  meta?: any;
+  meta?: AlovaCustomTypes['meta'];
 
   /**
    * 使用此method实例直接发送请求

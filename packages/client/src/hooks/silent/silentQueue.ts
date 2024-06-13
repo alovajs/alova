@@ -7,8 +7,16 @@ import {
   ScopedSQRetryEvent
 } from '@/event';
 import updateState from '@/updateState';
-import { delayWithBackoff } from '@/util/helper';
-import { instanceOf, isObject, isString, newInstance, noop, sloughConfig, walkObject } from '@alova/shared/function';
+import {
+  delayWithBackoff,
+  instanceOf,
+  isObject,
+  isString,
+  newInstance,
+  noop,
+  sloughConfig,
+  walkObject
+} from '@alova/shared/function';
 import {
   PromiseCls,
   RegExpCls,

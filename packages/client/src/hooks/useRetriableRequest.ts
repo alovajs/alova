@@ -1,10 +1,9 @@
 import { RetriableFailEvent, RetriableRetryEvent } from '@/event';
 import useRequest from '@/hooks/core/useRequest';
-import { delayWithBackoff } from '@/util/helper';
 import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import { AlovaEventBase } from '@alova/shared/event';
-import { isNumber, newInstance, noop, statesHookHelper, usePromise } from '@alova/shared/function';
+import { delayWithBackoff, isNumber, newInstance, noop, statesHookHelper, usePromise } from '@alova/shared/function';
 import {
   falseValue,
   promiseCatch,

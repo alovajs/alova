@@ -1,0 +1,12 @@
+{
+  "input": "src/index.ts",
+  "output": "../alova/dist/serverhook/index.{suffix}.{ext}",
+  "packageName": "AlovaServerHook",
+  "formats": ["esm", "cjs"],
+  "external": {
+    "alova": "alova",
+    "@alova/shared/function": null,
+    "@alova/shared/vars": null,
+    "@alova/shared/assert": null
+  }
+}

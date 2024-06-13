@@ -10,7 +10,7 @@ import type {
 } from '../../alova/typings';
 import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings';
 import { FrameworkReadableState, FrameworkState } from './model/FrameworkState';
-import { GeneralFn, GeneralState, UsePromiseExposure } from './types';
+import { BackoffPolicy, GeneralFn, GeneralState, UsePromiseExposure } from './types';
 import {
   JSONStringify,
   MEMORY,
@@ -564,4 +564,25 @@ export const promiseWithResolvers = <T>() => {
     reject = rej;
   });
   return { promise, resolve, reject };
+};
+
+/**
+ * 根据避让策略和重试次数计算重试延迟时间
+ * @param backoff 避让参数
+ * @param retryTimes 重试次数
+ * @returns 重试延迟时间
+ */
+export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => {
+  let { startQuiver, endQuiver } = backoff;
+  const { delay, multiplier = 1 } = backoff;
+  let retryDelayFinally = (delay || 0) * multiplier ** (retryTimes - 1);
+  // 如果startQuiver或endQuiver有值，则需要增加指定范围的随机抖动值
+  if (startQuiver || endQuiver) {
+    startQuiver = startQuiver || 0;
+    endQuiver = endQuiver || 1;
+    retryDelayFinally +=
+      retryDelayFinally * startQuiver + Math.random() * retryDelayFinally * (endQuiver - startQuiver);
+    retryDelayFinally = Math.floor(retryDelayFinally); // 取整数延迟
+  }
+  return retryDelayFinally;
 };
