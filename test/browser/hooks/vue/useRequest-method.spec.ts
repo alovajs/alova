@@ -1,6 +1,7 @@
 import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
 import xhrRequestAdapter from '#/xhrRequestAdapter';
 import { createAlova, Method, useRequest } from '@/index';
+import GlobalFetch from '@/predefine/GlobalFetch';
 import VueHook from '@/predefine/VueHook';
 import { getResponseCache } from '@/storage/responseCache';
 import { key } from '@/utils/helper';
@@ -352,5 +353,39 @@ describe('Test other methods without GET', function () {
     delay(3).then(abort);
     const e = await untilCbCalled(onError);
     expect(error.value).toStrictEqual(e.error);
+  });
+
+  test('should not add slash at the end when sending with empty url', async () => {
+    const alova = createAlova({
+      baseURL: baseURL + '/unit-test',
+      requestAdapter: GlobalFetch(),
+      statesHook: VueHook,
+      async responded(r, method) {
+        expect(method).toBeInstanceOf(Method);
+        const res = await r.json();
+        const { data } = res;
+        expect(data.path).toBe('/unit-test');
+        return res;
+      },
+      cacheLogger: null
+    });
+
+    const Getter = alova.Get('', {
+      params: { a: 'a', b: 'str' },
+      transformData({ code, data }: Result<'/unit-test'>) {
+        expect(code).toBe(200);
+        return data;
+      }
+    });
+    const { loading, data, error, onSuccess } = useRequest(Getter);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
+    expect(error.value).toBeUndefined();
   });
 });
