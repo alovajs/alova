@@ -6,6 +6,9 @@ const terser = require('@rollup/plugin-terser');
 const typescript = require('@rollup/plugin-typescript');
 const { readFileSync } = require('node:fs');
 const { resolve } = require('node:path');
+const { dts } = require('rollup-plugin-dts');
+const alias = require('@rollup/plugin-alias').default;
+const { entries } = require('./alias');
 
 const basePath = process.cwd();
 const pkgPath = resolve(basePath, './package.json');
@@ -13,75 +16,154 @@ const pkg = JSON.parse(readFileSync(pkgPath, { encoding: 'utf-8' }).toString());
 const { author } = pkg;
 const repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
 
+/** @typedef {'cjs' | 'esm' | 'umd'} BuildFormat 目标格式 */
 /**
- * format默认与format相同
- * suffix默认与format相同
- * ext默认为js
+ * @typedef {Object} BuildOptions
+ * @property {import('rollup').ModuleFormat} format
+ * @property {string} file
+ * @property {boolean} [prod]
  */
-const formatMap = {
-  cjs: {
-    suffix: 'common',
-    ext: 'cjs'
-  },
-  esm: 'es',
-  umd: 'umd',
-  'umd.min': {
-    format: 'umd'
-  }
-};
 
-const defaultFormat = Object.keys(formatMap);
-module.exports = function rollupConfig(bundleConfig, version) {
-  version = version || pkg.version;
-  const banner = `/**
+/** @type {BuildFormat[]} */
+const defaultBuildFormats = ['cjs', 'esm', 'umd'];
+
+/**
+ * 输入 build 配置，生成对应的 rollup 配置
+ * @param {import('./index').BuildOptions} bundleConfig build.json 中的编译字段
+ * @param {string} version
+ * @returns {import('.').MergedRollupBuildOptions[]}
+ */
+module.exports = function createRollupConfig(bundleConfig, version) {
+  const buildName = bundleConfig.packageName;
+  const entryFile = bundleConfig.input;
+  const outputPattern = bundleConfig.output;
+  const globalPackages = bundleConfig.external;
+
+  /**
+   * @param {object} options
+   * @param {string} options.suffix
+   * @param {string} options.ext
+   */
+  function resolveOutput({ suffix, ext }) {
+    const newOutputPattern = `${outputPattern}`;
+    return newOutputPattern.replace('{suffix}', suffix).replace('{ext}', ext);
+  }
+
+  /** @type {Record<BuildFormat, BuildOptions[]>} */
+  const outputConfigs = {
+    cjs: [
+      {
+        format: 'cjs',
+        file: resolveOutput({ suffix: 'common', ext: 'cjs' })
+      }
+    ],
+    esm: [
+      {
+        format: 'es',
+        file: resolveOutput({ suffix: 'esm', ext: 'js' })
+      }
+    ],
+    umd: [
+      {
+        format: 'umd',
+        file: resolveOutput({ suffix: 'umd', ext: 'js' })
+      },
+      {
+        format: 'umd',
+        file: resolveOutput({ suffix: 'umd.min', ext: 'js' }),
+        prod: true
+      }
+    ]
+  };
+
+  /**
+   *
+   * @param {BuildOptions} buildOptions
+   * @param {import('rollup').Plugin[]} [plugins]
+   * @returns {import('.').MergedRollupBuildOptions}
+   */
+  function createConfig(buildOptions, plugins = []) {
+    const { format } = buildOptions;
+    const isBrowser = format.includes('umd');
+    const isProdBuild = format.includes('min');
+    const env = isProdBuild ? 'production' : isBrowser ? 'development' : undefined;
+
+    const banner = `/**
   * ${pkg.name} ${version} (${pkg.homepage})
   * Document ${pkg.homepage}
   * Copyright ${new Date().getFullYear()} ${author}. All Rights Reserved
   * Licensed under MIT (${repository}/blob/main/LICENSE)
-  */
+*/
 `;
 
-  if (!bundleConfig) {
-    throw new Error(`bundle config is undefined`);
-  }
+    /**
+     * @param {string[]} [treeShakenDeps]
+     * @returns {string[]}
+     */
+    function resolveExternal(treeShakenDeps = []) {
+      const externalPackages = [];
+      // 当 external 的属性值设为 null 或 undefined 时，在 umd 中不会作为外部依赖
 
-  const formats = bundleConfig.formats || defaultFormat;
-  const moduleGroup = ['cjs', 'esm'];
-  const groupTemp = [];
-  // 将moduleGroup分到同一个数组里
-  const groupedFormats = formats.reduce((group, fmt) => {
-    if (moduleGroup.includes(fmt)) {
-      groupTemp.push(fmt);
-    } else {
-      group.push([fmt]);
-    }
-    return group;
-  }, []);
-  groupTemp.length > 0 && groupedFormats.push(groupTemp);
-
-  return groupedFormats.map(formatGroup => {
-    // 计算环境变量
-    const env = formatGroup.includes('umd.min')
-      ? 'production'
-      : formatGroup.includes('umd')
-        ? 'development'
-        : undefined;
-    // 计算external、globals，当external的属性值设为null或undefined时，在umd中不会作为外部依赖。
-    const external = [];
-    const globals = bundleConfig.external;
-    for (const key in bundleConfig.external || {}) {
-      const globalVal = bundleConfig.external[key];
-      globals[key] = globalVal;
-      if (![undefined, null].includes(globalVal) || !env) {
-        external.push(key);
+      if (!env) {
+        // 如果 env 为空，则在 build.json中设置的 external 全部都添加到 externals 中
+        externalPackages.push(...Object.keys(globalPackages));
+      } else {
+        // 否则，仅添加值不为 null 的包到 external 中
+        Object.keys(globalPackages).forEach(key => {
+          const value = globalPackages[key];
+          if (value) {
+            externalPackages.push(key);
+          }
+        });
       }
+
+      return [
+        ...Object.keys(pkg.dependencies || {}),
+        ...Object.keys(pkg.peerDependencies || {}),
+        ...['path', 'url', 'stream'],
+        ...externalPackages,
+        ...treeShakenDeps
+      ];
+    }
+
+    function resolveReplacePlugin() {
+      if (!env) {
+        return [];
+      }
+      // only replace NODE_ENV when env be setted
+      return [
+        replace({
+          preventAssignment: true,
+          'process.env.NODE_ENV': env ? JSON.stringify(env) : undefined
+        })
+      ];
+    }
+
+    /**
+     * @returns {import('rollup').OutputOptions[]}
+     */
+    function resolveOutput() {
+      const { file, format } = buildOptions;
+      /** @type{import('rollup').OutputOptions} */
+      const outputForRollup = {
+        name: buildName,
+        file,
+        format,
+        banner,
+        plugins,
+        globals: globalPackages
+      };
+
+      return [outputForRollup];
     }
 
     return {
+      name: buildOptions.format,
       inputOptions: {
-        input: bundleConfig.input,
-        external,
+        input: entryFile,
+        external: resolveExternal(),
         plugins: [
+          json(),
           nodeResolve({
             browser: true,
             extensions: ['.ts', '.js', 'tsx', 'jsx']
@@ -91,27 +173,72 @@ module.exports = function rollupConfig(bundleConfig, version) {
             include: ['src/**/*.ts'], // 不设置将默认会编译整个项目，导致报错
             compilerOptions: { module: 'es2015' }
           }),
-          env &&
-            replace({
-              preventAssignment: true,
-              'process.env.NODE_ENV': env ? JSON.stringify(env) : undefined
-            }),
-          json() // 可允许import json文件
+          ...resolveReplacePlugin()
         ]
       },
-      outputOptionsList: formatGroup.map(fmt => {
-        const { format = fmt, suffix = fmt, ext = 'js' } = formatMap[fmt];
-        return {
-          name: bundleConfig.packageName,
-          file: bundleConfig.output.replace('{suffix}', suffix).replace('{ext}', ext),
-          format,
-          // When export and export default are not used at the same time, set legacy to true.
-          // legacy: true,
-          banner,
-          globals,
-          plugins: [env === 'production' ? terser() : undefined].filter(Boolean)
-        };
-      })
+      outputOptionsList: resolveOutput()
     };
+  }
+
+  /**
+   * create rollup config for dev bundle
+   * @param {BuildOptions} output
+   * @returns {import('.').MergedRollupBuildOptions}
+   */
+  function createDevConfig(output) {
+    return createConfig(output);
+  }
+
+  /**
+   * create rollup config for prod bundle
+   * @param {BuildOptions} output
+   * @returns {import('.').MergedRollupBuildOptions}
+   */
+  function createProdConfig(output) {
+    return createConfig(output, [terser({ module: output.format === 'esm' })]);
+  }
+
+  /**
+   * create rollup config for d.ts file
+   * @param {BuildOptions} output
+   * @returns {import('.').MergedRollupBuildOptions}
+   */
+  function createDTSConfig(output) {
+    const configForDTSGenerate = createConfig(output);
+
+    configForDTSGenerate.inputOptions.plugins = [
+      alias({
+        entries
+      }),
+      dts({
+        tsconfig: resolve('./tsconfig.json'),
+        compilerOptions: {
+          // fix: https://github.com/Swatinem/rollup-plugin-dts/issues/143
+          preserveSymlinks: false
+        }
+      })
+    ];
+    const outputPath = bundleConfig.dtsOutput ?? resolveOutput({ suffix: 'd', ext: 'ts' });
+
+    configForDTSGenerate.name = 'dts';
+    configForDTSGenerate.outputOptionsList[0].file = outputPath;
+
+    return configForDTSGenerate;
+  }
+
+  const buildFormats = bundleConfig.formats ?? defaultBuildFormats;
+  const outputOptionsArray = buildFormats.map(format => outputConfigs[format]).flat();
+
+  const rollupConfigs = outputOptionsArray.map(config => {
+    if (config.prod) {
+      return createProdConfig(config);
+    }
+    return createDevConfig(config);
   });
+
+  if (rollupConfigs.length && bundleConfig.withDTS) {
+    rollupConfigs.push(createDTSConfig(outputConfigs.esm[0]));
+  }
+
+  return rollupConfigs;
 };

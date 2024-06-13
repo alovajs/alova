@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "resolveJsonModule": true,
     "target": "es2018",
     "module": "esnext",
@@ -21,6 +22,10 @@
     "importHelpers": true,
     "removeComments": false,
     "esModuleInterop": true,
-    "jsx": "react"
+    "jsx": "react",
+    "paths": {
+      "@alova/*": ["packages/*/src"],
+      "root/*": ["./internal/*"]
+    }
   }
 }

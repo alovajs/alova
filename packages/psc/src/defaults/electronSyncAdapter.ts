@@ -1,5 +1,5 @@
+import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import type { IpcMain, IpcRenderer } from 'electron';
-import { createPSCSynchronizer, createSyncAdapter } from '../sharedCacheAdapter';
 
 const EventName = {
   TO_MAIN: 'alova-ipc-to-main',

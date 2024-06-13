@@ -1,8 +1,8 @@
+import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { usePromise, uuid } from '@alova/shared/function';
 import { QueueCallback } from '@alova/shared/queueCallback';
 import { IPCModule as IPCModule_ } from '@node-ipc/node-ipc';
 import type { IPC } from 'node-ipc';
-import { createPSCSynchronizer, createSyncAdapter } from '../sharedCacheAdapter';
 
 // fix(type-issue): https://github.com/node-ipc/node-ipc/issues/4
 const IPCModule = IPCModule_ as unknown as typeof IPC;
