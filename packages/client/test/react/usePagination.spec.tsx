@@ -3,9 +3,9 @@ import { accessAction, actionDelegationMiddleware } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { Dispatch, SetStateAction, act, useState } from 'React';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import reactHook from 'alova/react';
+import React, { Dispatch, SetStateAction, act, useState } from 'react';
 import { delay, generateContinuousNumbers } from 'root/testUtils';
 import Pagination from './components/Pagination';
 
@@ -139,6 +139,46 @@ describe('react => usePagination', () => {
       expect(cache).toBeUndefined();
       cache = await queryCache(getter1(14, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(279, 260));
+    });
+  });
+
+  test('should clear the cache when reload', async () => {
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list
+        }}
+      />
+    );
+
+    const page = 1;
+    const pageSize = 10;
+    await waitFor(() => {
+      expect(screen.getByRole('page')).toHaveTextContent('1');
+      expect(screen.getByRole('pageSize')).toHaveTextContent('10');
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9)));
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('30');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
+    });
+
+    // 检查预加载缓存
+    await waitFor(async () => {
+      let cache = await queryCache(getter1(page + 1, pageSize));
+      expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
+      cache = await queryCache(getter1(page - 1, pageSize));
+      expect(cache).toBeUndefined();
+    });
+
+    fireEvent.click(screen.getByRole('reload1'));
+    await delay(0);
+    await waitFor(async () => {
+      let cache = await queryCache(getter1(page + 1, pageSize));
+      expect(cache?.list).toBeUndefined();
+      cache = await queryCache(getter1(page - 1, pageSize));
+      expect(cache).toBeUndefined();
     });
   });
 

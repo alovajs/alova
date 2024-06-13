@@ -6,6 +6,9 @@ const config: Config = {
 
   clearMocks: true,
 
+  maxWorkers: 2,
+  maxConcurrency: 2,
+
   coveragePathIgnorePatterns: ['\\\\node_modules\\\\', '/node_modules/', 'internal/'],
   // Indicates which provider should be used to instrument code for coverage
   // coverageProvider: 'v8',

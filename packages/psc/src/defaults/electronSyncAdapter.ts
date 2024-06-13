@@ -1,5 +1,5 @@
-import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import type { IpcMain, IpcRenderer } from 'electron';
+import { createPSCSynchronizer, createSyncAdapter } from '../sharedCacheAdapter';
 
 const EventName = {
   TO_MAIN: 'alova-ipc-to-main',
@@ -15,11 +15,7 @@ export function ElectronSyncAdapter(ipcRenderer: IpcRenderer) {
       ipcRenderer.emit(EventName.TO_MAIN, event);
     },
     receive(handler) {
-      ipcRenderer.on(EventName.TO_CLIENT, ({ sender }, payload) => {
-        handler(payload, event => {
-          sender.emit(EventName.TO_MAIN, event);
-        });
-      });
+      ipcRenderer.on(EventName.TO_CLIENT, (_, payload) => handler(payload));
     }
   });
 }
