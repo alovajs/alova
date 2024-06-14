@@ -38,6 +38,7 @@ import {
   promiseFinally,
   promiseReject,
   promiseThen,
+  STORAGE_PLACEHOLDER,
   STORAGE_RESTORE,
   trueValue,
   undefinedValue
@@ -199,7 +200,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         const requestBody = clonedMethod.data,
           toCache = !requestBody || !isSpecialRequestBody(requestBody);
         if (toCache && callInSuccess) {
-          setResponseCache(id, methodKey, transformedData, expireMilliseconds);
+          cacheMode !== STORAGE_PLACEHOLDER && setResponseCache(id, methodKey, transformedData, expireMilliseconds);
           toStorage && persistResponse(id, methodKey, transformedData, expireMilliseconds, storage, tag);
         }
 
