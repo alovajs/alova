@@ -12,8 +12,8 @@ import {
 } from '@alova/shared/function';
 import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { RequestHookConfig, UseHookExposure } from '~/typings';
-import { DataSerializer, ExportedType, RestoreHandler } from '~/typings/general';
+import { ExportedState, RequestHookConfig, UseHookExposure } from '~/typings';
+import { DataSerializer, RestoreHandler } from '~/typings/general';
 
 export interface StoreDetailConfig {
   /**
@@ -66,7 +66,7 @@ export type FormExposure<AG extends AlovaGenerics, F> = UseHookExposure<AG> & {
   /**
    * 表单数据
    */
-  form: ExportedType<F, AG['State']>;
+  form: ExportedState<F, AG['State']>;
 
   /**
    * 持久化数据恢复事件绑定，数据恢复后触发
@@ -221,7 +221,7 @@ const useForm = <AG extends AlovaGenerics, FormData extends Record<string | symb
     // 只保存创建hook的共享状态
     if (isCreateShardState.current) {
       typedSharedStates[id] = {
-        hookProvider: hookProvider as FormExposure<AG, any>,
+        hookProvider: hookProvider as unknown as FormExposure<AG, any>,
         config
       };
     }
@@ -259,10 +259,7 @@ const useForm = <AG extends AlovaGenerics, FormData extends Record<string | symb
 
   // 有已保存的sharedState，则返回它
   // 如果是当前hook创建的共享状态，则返回最新的而非缓存的
-  return (sharedState && !isCreateShardState.current ? sharedState.hookProvider : hookProvider) as FormExposure<
-    AG,
-    FormData
-  >;
+  return sharedState && !isCreateShardState.current ? sharedState.hookProvider : hookProvider;
 };
 
 export default useForm;

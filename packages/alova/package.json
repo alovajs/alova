@@ -99,7 +99,7 @@
   "typesVersions": {
     "*": {
       "client": [
-        "typings/clienthook.d.ts"
+        "dist/clienthook/index.d.ts"
       ],
       "server": [
         "typings/serverhook.d.ts"

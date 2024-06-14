@@ -24,7 +24,7 @@
     "test:node": "jest --config jest.config.node.ts",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build": "npm run clean && alova-scripts build && cp ./typings/index.d.ts ../alova/typings/clienthook.d.ts",
+    "build": "npm run clean && alova-scripts build",
     "commit": "git-cz && git push"
   },
   "author": "Scott hu",

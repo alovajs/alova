@@ -11,8 +11,8 @@ import { AddressInfo } from 'net';
 import React, { ReactElement } from 'react';
 import { untilCbCalled } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
-import { SSEHookReadyState } from '~/typings/general';
 // eslint-disable-next-line import/no-named-as-default
+import { SSEHookReadyState } from '@/hooks/useSSE';
 import { usePromise } from '@alova/shared/function';
 import { getAlovaInstance } from '../utils';
 

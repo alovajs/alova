@@ -1,3 +1,5 @@
+import { AlovaSSEMessageEvent } from '@/event';
+import { SSEHookReadyState } from '@/hooks/useSSE';
 import { useSSE } from '@/index';
 import { usePromise } from '@alova/shared/function';
 import '@testing-library/jest-dom';
@@ -9,7 +11,7 @@ import ES from 'eventsource';
 import { AddressInfo } from 'net';
 import { untilCbCalled } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
-import { AlovaSSEMessageEvent, AnyFn, SSEHookReadyState } from '~/typings/general';
+import { AnyFn } from '~/typings/general';
 import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
 import CompUseSSE from './components/use-sse.vue';
 

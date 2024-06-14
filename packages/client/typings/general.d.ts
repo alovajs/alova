@@ -408,8 +408,6 @@ export interface QueueRequestWaitSetting {
 export type OffEventCallback = () => void;
 export type SilentQueueMap = Record<string, SilentMethod<any>[]>;
 
-export type ExportedType<T, S> = {};
-
 export type RestoreHandler = () => void;
 
 // middlewares

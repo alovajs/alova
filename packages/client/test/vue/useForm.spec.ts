@@ -1,3 +1,4 @@
+import { FormHookConfig } from '@/hooks/useForm';
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/vue';
@@ -5,7 +6,6 @@ import { AlovaGenerics, Method, createAlova, getMethodKey } from 'alova';
 import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
-import { FormHookConfig } from '~/typings/general';
 import CompPersistentDataReset from './components/persistent-data-reset.vue';
 import CompRestorePersistentData from './components/restore-persistent-data.vue';
 
