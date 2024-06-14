@@ -29,22 +29,17 @@ describe('persist data', function () {
       method: 'GET',
       params: { count: 0, countKey: 'g' }
     });
+    const cachedResponse = getResponseCache(alova.id, key(Get));
+    expect(cachedResponse).toBeUndefined();
 
-    // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
-    removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);
-
-    await untilCbCalled(setTimeout);
+    await untilCbCalled(secondState.onSuccess);
     expect(secondState.data.value).toStrictEqual({
       path: '/unit-test-count',
       method: 'GET',
-      params: { count: 0, countKey: 'g' }
-    }); // 因为有持久化数据，因此直接带出了持久化的数据
-    expect(secondState.loading.value).toBeTruthy(); // 即使有持久化数据，loading的状态也照样会是true
-
-    await delay(600);
-    const thirdState = useRequest(Get);
-    expect(thirdState.data.value).toBeUndefined(); // 持久化数据过期，所以data没有值
+      params: { count: 1, countKey: 'g' }
+    });
+    expect(Get.fromCache).toBeFalsy();
   });
 
   test("persistent data wouldn't be invalid when set persistTime to `Infinity`", async () => {
@@ -61,8 +56,6 @@ describe('persist data', function () {
     const firstState = useRequest(Get);
     await untilCbCalled(firstState.onSuccess);
 
-    // 先清除缓存，模拟浏览器刷新后的场景，此时将会把持久化数据先赋值给data状态，并发起请求
-    removeResponseCache(alova.id, key(Get));
     const secondState = useRequest(Get);
     await untilCbCalled(setTimeout);
     expect(secondState.data.value).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} }); // 因为有持久化数据，因此直接带出了持久化的数据
