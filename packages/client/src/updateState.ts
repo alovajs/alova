@@ -6,10 +6,18 @@ import { coreAssert } from './hooks/core/implements/assert';
 import { getStateCache } from './hooks/core/implements/stateCache';
 
 /**
- * 更新对应method的状态
- * @param method 请求方法对象
- * @param handleUpdate 更新回调
- * @returns 是否更新成功，未找到对应的状态时不会更新成功
+ * cross components to update states by specifing method instance.
+ * @example
+ * ```js
+ * updateState(methodInstance, newData);
+ * updateState(methodInstance, oldData => {
+ *   oldData.name = 'new name';
+ *   return oldData;
+ * });
+ * ```
+ * @param matcher method instance
+ * @param handleUpdate new data or update function that returns new data
+ * @returns is updated
  */
 export default async function updateState<AG extends AlovaGenerics>(
   matcher: Method<AG>,

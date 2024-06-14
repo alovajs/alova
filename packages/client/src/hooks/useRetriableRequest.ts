@@ -15,8 +15,24 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { RetriableHookConfig } from '~/typings/general';
+import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
+import { BackoffPolicy } from '~/typings/general';
+
+/**
+ * useRetriableRequest配置
+ */
+export type RetriableHookConfig<AG extends AlovaGenerics> = {
+  /**
+   * 最大重试次数，也可以设置为返回 boolean 值的函数，来动态判断是否继续重试。
+   * @default 3
+   */
+  retry?: number | ((error: Error, ...args: any[]) => boolean);
+
+  /**
+   * 避让策略
+   */
+  backoff?: BackoffPolicy;
+} & RequestHookConfig<AG>;
 
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');

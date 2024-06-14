@@ -45,8 +45,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
    * @param {string} options.ext
    */
   function resolveOutput({ suffix, ext }) {
-    const newOutputPattern = `${outputPattern}`;
-    return newOutputPattern.replace('{suffix}', suffix).replace('{ext}', ext);
+    return outputPattern.replace('{suffix}', suffix).replace('{ext}', ext);
   }
 
   /** @type {Record<BuildFormat, BuildOptions[]>} */
@@ -237,7 +236,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
   });
 
   if (rollupConfigs.length && bundleConfig.withDTS) {
-    rollupConfigs.push(createDTSConfig(outputConfigs.esm[0]));
+    rollupConfigs.unshift(createDTSConfig(outputConfigs.esm[0]));
   }
 
   return rollupConfigs;

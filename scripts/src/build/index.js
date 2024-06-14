@@ -6,6 +6,7 @@ const { resolve } = require('path');
 
 /**
  * @typedef {Object} BuildOptions
+ * @property {number} order - The order of the build, the smallest is the first
  * @property {string} packageName - The name of the package.
  * @property {string} input - The input file path.
  * @property {string} output - The output file path.
@@ -69,6 +70,11 @@ module.exports = async function build(bundleKey, version) {
   } else {
     bundleConfigList.push(bundles[bundleKey]);
   }
+
+  bundleConfigList.forEach(e => {
+    e.order = e.order ?? 1;
+  });
+  bundleConfigList.sort((a, b) => a.order - b.order);
 
   let buildFailed = false;
   try {

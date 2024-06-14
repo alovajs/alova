@@ -1,10 +1,23 @@
-import { AlovaGenerics, Method } from '../../alova/typings';
-import { AlovaEvent } from '../../client/typings';
+import type { AlovaGenerics, Method } from 'alova';
+
+/**
+ * alova base event
+ */
+export interface AlovaEvent<AG extends AlovaGenerics> {
+  /**
+   * params from send function
+   */
+  sendArgs: any[];
+  /**
+   * current method instance
+   */
+  method: Method<AG>;
+}
 
 export class AlovaEventBase<AG extends AlovaGenerics> implements AlovaEvent<AG> {
   readonly sendArgs: any[];
 
-  readonly method: Method<AG>;
+  method: Method<AG>;
 
   constructor(method: Method<AG>, sendArgs: any[]) {
     this.method = method;

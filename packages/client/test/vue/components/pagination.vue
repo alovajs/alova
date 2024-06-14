@@ -241,10 +241,10 @@
 </template>
 
 <script setup lang="ts">
+import type { PaginationHookConfig } from '@/hooks/pagination/usePagination';
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
 import { ComputedRef, Ref, WatchSource, ref } from 'vue';
-import { PaginationHookConfig } from '~/typings/general';
 
 const props = defineProps<{
   getter: (

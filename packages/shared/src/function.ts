@@ -1,3 +1,4 @@
+import type { AlovaMethodHandler, ExportedComputed, ExportedState } from '@alova/client/typings';
 import type {
   Alova,
   AlovaGenerics,
@@ -7,8 +8,7 @@ import type {
   Method,
   ReferingObject,
   StatesHook
-} from '../../alova/typings';
-import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings';
+} from 'alova';
 import { FrameworkReadableState, FrameworkState } from './model/FrameworkState';
 import { BackoffPolicy, GeneralFn, GeneralState, UsePromiseExposure } from './types';
 import {
@@ -111,7 +111,7 @@ export const getContextOptions = <AG extends AlovaGenerics>(alovaInstance: Alova
  * @returns alova配置对象
  */
 export const getOptions = <AG extends AlovaGenerics>(methodInstance: Method<AG>) =>
-  getContextOptions(getContext(methodInstance));
+  getContextOptions<AG>(getContext(methodInstance));
 
 /**
  * 获取请求方式的key值

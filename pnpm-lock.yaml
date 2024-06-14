@@ -364,9 +364,15 @@ importers:
 
   packages/shared:
     devDependencies:
+      '@alova/client':
+        specifier: workspace:*
+        version: link:../client
       '@alova/scripts':
         specifier: workspace:*
         version: link:../../scripts
+      alova:
+        specifier: workspace:*
+        version: link:../alova
 
   packages/vue-options:
     devDependencies:

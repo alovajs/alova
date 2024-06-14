@@ -27,7 +27,6 @@ import {
   promiseStatesHook
 } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
-import { SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/general';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
@@ -42,6 +41,51 @@ export type SSEEvents<Data, AG extends AlovaGenerics> = {
 type AnySSEEventType<Data, AG extends AlovaGenerics> = AlovaSSEMessageEvent<AG, Data> &
   AlovaSSEErrorEvent<AG> &
   AlovaSSEEvent<AG>;
+
+export type SSEOnOpenTrigger<AG extends AlovaGenerics> = (event: AlovaSSEEvent<AG>) => void;
+export type SSEOnMessageTrigger<Data, AG extends AlovaGenerics> = (event: AlovaSSEMessageEvent<AG, Data>) => void;
+export type SSEOnErrorTrigger<AG extends AlovaGenerics> = (event: AlovaSSEErrorEvent<AG>) => void;
+export type SSEOn<AG extends AlovaGenerics> = (
+  eventName: string,
+  handler: (event: AlovaSSEMessageEvent<any, AG>) => void
+) => () => void;
+
+export const enum SSEHookReadyState {
+  CONNECTING = 0,
+  OPEN = 1,
+  CLOSED = 2
+}
+
+export type SSEHookConfig = {
+  /**
+   * 会传给new EventSource
+   */
+  withCredentials?: boolean;
+
+  /**
+   * 是否经过alova实例的responded拦截
+   * @default true
+   */
+  interceptByGlobalResponded?: boolean;
+
+  /**
+   * 初始数据
+   */
+  initialData?: any;
+
+  /**
+   * 是否立即发起请求
+   * @default false
+   */
+  immediate?: boolean;
+
+  /**
+   * 是否中断上一个请求并触发本次的请求
+   * @default true
+   * TODO 暂不支持指定
+   */
+  abortLast?: true;
+};
 
 const assert = createAssert('useSSE');
 const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSourceEventMap> = {

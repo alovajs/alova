@@ -5,8 +5,6 @@ import {
   GlobalSQEvent as IGlobalSQEvent,
   GlobalSQFailEvent as IGlobalSQFailEvent,
   GlobalSQSuccessEvent as IGlobalSQSuccessEvent,
-  RetriableFailEvent as IRetriableFailEvent,
-  RetriableRetryEvent as IRetriableRetryEvent,
   SQEvent as ISQEvent,
   ScopedSQCompleteEvent as IScopedSQCompleteEvent,
   ScopedSQErrorEvent as IScopedSQErrorEvent,
@@ -281,10 +279,7 @@ export class ScopedSQCompleteEvent<AG extends AlovaGenerics>
   }
 }
 
-export class RetriableRetryEvent<AG extends AlovaGenerics>
-  extends AlovaEventBase<AG>
-  implements IRetriableRetryEvent<AG>
-{
+export class RetriableRetryEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
   /**
    * 当前的重试次数
    */
@@ -302,10 +297,7 @@ export class RetriableRetryEvent<AG extends AlovaGenerics>
   }
 }
 
-export class RetriableFailEvent<AG extends AlovaGenerics>
-  extends AlovaErrorEvent<AG>
-  implements IRetriableFailEvent<AG>
-{
+export class RetriableFailEvent<AG extends AlovaGenerics> extends AlovaErrorEvent<AG> {
   /**
    * 失败时的重试次数
    */

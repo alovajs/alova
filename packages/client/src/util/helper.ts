@@ -10,7 +10,7 @@ import {
   setTimeoutFn,
   undefinedValue
 } from '@alova/shared/vars';
-import { Method } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
 import { AnyFn } from '~/typings/general';
 
@@ -122,7 +122,10 @@ export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
  * @param args 方法调用参数
  * @returns 请求方法对象
  */
-export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler, args: any[] = []) => {
+export const getHandlerMethod = <AG extends AlovaGenerics = AlovaGenerics>(
+  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
+  args: any[] = []
+) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
   createAssert('scene')(
     instanceOf(methodInstance, Method),

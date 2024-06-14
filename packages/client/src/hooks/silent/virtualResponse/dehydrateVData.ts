@@ -38,4 +38,4 @@ export const dehydrateVDataUnified = <T>(target: T, deepDehydrate = trueValue): 
 /**
  * 上面函数deepDehydrate为true的版本
  */
-export default <T>(target: T): T => dehydrateVDataUnified(target);
+export default dehydrateVDataUnified;

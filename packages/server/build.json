@@ -8,5 +8,6 @@
     "@alova/shared/function": null,
     "@alova/shared/vars": null,
     "@alova/shared/assert": null
-  }
+  },
+  "withDTS": true
 }

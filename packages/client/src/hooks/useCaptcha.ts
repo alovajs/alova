@@ -3,8 +3,18 @@ import { buildErrorMsg, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { CaptchaHookConfig } from '~/typings/general';
+import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
+
+/**
+ * useCaptcha配置
+ */
+export type CaptchaHookConfig<AG extends AlovaGenerics> = {
+  /**
+   * 初始倒计时，当验证码发送成功时将会以此数据来开始倒计时
+   * @default 60
+   */
+  initialCountdown?: number;
+} & RequestHookConfig<AG>;
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);

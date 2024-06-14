@@ -97,7 +97,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
           silentMethodInstance,
           event.sendArgs,
           event.error
-        )
+        ) as any
       );
     });
     requestExposure.onComplete = decorateEvent(requestExposure.onComplete, (handler, event) => {

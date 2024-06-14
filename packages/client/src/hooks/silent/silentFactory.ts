@@ -1,11 +1,12 @@
 import { forEach, objectKeys, setTimeoutFn, undefinedValue } from '@alova/shared/vars';
+import { Alova, AlovaGenerics } from 'alova';
 import {
-  BeforeSilentSubmitHandler,
-  SilentFactoryBootOptions,
-  SilentSubmitBootHandler,
-  SilentSubmitErrorHandler,
-  SilentSubmitFailHandler,
-  SilentSubmitSuccessHandler
+  DataSerializer,
+  GlobalSQErrorEvent,
+  GlobalSQEvent,
+  GlobalSQFailEvent,
+  GlobalSQSuccessEvent,
+  QueueRequestWaitSetting
 } from '~/typings/general';
 import {
   BeforeEventKey,
@@ -23,6 +24,57 @@ import {
 import { bootSilentQueue, merge2SilentQueueMap, silentQueueMap } from './silentQueue';
 import loadSilentQueueMapFromStorage from './storage/loadSilentQueueMapFromStorage';
 
+export type SilentSubmitBootHandler = () => void;
+export type BeforeSilentSubmitHandler<AG extends AlovaGenerics> = (event: GlobalSQEvent<AG>) => void;
+export type SilentSubmitSuccessHandler<AG extends AlovaGenerics> = (event: GlobalSQSuccessEvent<AG>) => void;
+export type SilentSubmitErrorHandler<AG extends AlovaGenerics> = (event: GlobalSQErrorEvent<AG>) => void;
+export type SilentSubmitFailHandler<AG extends AlovaGenerics> = (event: GlobalSQFailEvent<AG>) => void;
+
+/** SilentFactory启动选项 */
+export interface SilentFactoryBootOptions<AG extends AlovaGenerics> {
+  /**
+   * silentMethod依赖的alova实例
+   * alova实例的存储适配器、请求适配器等将用于存取SilentMethod实例，以及发送静默提交
+   */
+  alova: Alova<AG>;
+
+  /** 延迟毫秒数，不传时默认延迟2000ms */
+  delay?: number;
+
+  /**
+   * 序列化器集合，用于自定义转换为序列化时某些不能直接转换的数据
+   * 集合的key作为它的名字进行序列化，当反序列化时会将对应名字的值传入backward函数中
+   * 因此，在forward中序列化时需判断是否为指定的数据，并返回转换后的数据，否则返回undefined或不返回
+   * 而在backward中可通过名字来识别，因此只需直接反序列化即可
+   * 内置的序列化器：
+   * 1. date序列化器用于转换日期
+   * 2. regexp序列化器用于转化正则表达式
+   *
+   * >>> 可以通过设置同名序列化器来覆盖内置序列化器
+   */
+  serializers?: Record<string | number, DataSerializer>;
+
+  /**
+   * silentQueue内的请求等待时间，单位为毫秒（ms）
+   * 它表示即将发送请求的silentMethod的等待时间
+   * 如果未设置，或设置为0表示立即触发silentMethod请求
+   *
+   * Tips:
+   * 1. 直接设置时默认对default queue有效
+   * 2. 如果需要对其他queue设置可指定为对象，如：
+   * [
+   *   表示对名为customName的队列设置请求等待5000ms
+   *   { queue: 'customName', wait: 5000 },
+   *
+   *   // 表示前缀为prefix的所有队列中，method实例名为xxx的请求设置等待5000ms
+   *   { queue: /^prefix/, wait: silentMethod => silentMethod.entity.config.name === 'xxx' ? 5000 : 0 },
+   * ]
+   *
+   * >>> 它只在请求成功时起作用，如果失败则会使用重试策略参数
+   */
+  requestWait?: QueueRequestWaitSetting[] | QueueRequestWaitSetting['wait'];
+}
+
 /**
  * 绑定silentSubmit启动事件
  * @param {SilentSubmitBootHandler} handler 事件回调函数
@@ -35,7 +87,7 @@ export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) => globalSQ
  * @param {SilentSubmitSuccessHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) =>
+export const onSilentSubmitSuccess = <AG extends AlovaGenerics>(handler: SilentSubmitSuccessHandler<AG>) =>
   globalSQEventManager.on(SuccessEventKey, handler);
 
 /**
@@ -44,7 +96,7 @@ export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) =>
  * @param {SilentSubmitErrorHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) =>
+export const onSilentSubmitError = <AG extends AlovaGenerics>(handler: SilentSubmitErrorHandler<AG>) =>
   globalSQEventManager.on(ErrorEventKey, handler);
 
 /**
@@ -53,14 +105,15 @@ export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) =>
  * @param {SilentSubmitFailHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) => globalSQEventManager.on(FailEventKey, handler);
+export const onSilentSubmitFail = <AG extends AlovaGenerics>(handler: SilentSubmitFailHandler<AG>) =>
+  globalSQEventManager.on(FailEventKey, handler);
 
 /**
  * 绑定silentSubmit发起请求前事件
  * @param {BeforeSilentSubmitHandler} handler 事件回调函数
  * @returns 解绑函数
  */
-export const onBeforeSilentSubmit = (handler: BeforeSilentSubmitHandler) =>
+export const onBeforeSilentSubmit = <AG extends AlovaGenerics>(handler: BeforeSilentSubmitHandler<AG>) =>
   globalSQEventManager.on(BeforeEventKey, handler);
 
 /**
@@ -68,10 +121,10 @@ export const onBeforeSilentSubmit = (handler: BeforeSilentSubmitHandler) =>
  * 如果未传入延迟时间，则立即同步启动
  * @param {SilentFactoryBootOptions} options 延迟毫秒数
  */
-export const bootSilentFactory = (options: SilentFactoryBootOptions) => {
+export const bootSilentFactory = <AG extends AlovaGenerics>(options: SilentFactoryBootOptions<AG>) => {
   if (silentFactoryStatus === 0) {
     const { alova, delay = 500 } = options;
-    setDependentAlova(alova);
+    setDependentAlova<AG>(alova);
     setCustomSerializers(options.serializers);
     setQueueRequestWaitSetting(options.requestWait);
     setTimeoutFn(async () => {

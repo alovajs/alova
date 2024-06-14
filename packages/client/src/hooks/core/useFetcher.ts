@@ -1,12 +1,20 @@
 import { noop, omit } from '@alova/shared/function';
 import { AlovaGenerics, Method } from 'alova';
-import { EnumHookType, FetcherHookConfig, FetcherType, type UseFetchHookExposure } from '~/typings';
+import { EnumHookType, FetcherHookConfig, FetcherType, UseFetchHookExposure } from '~/typings';
 import { assertMethod, fetcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 
 /**
- * Fetch request data and cache
- * @param method request method object
+ * 数据预拉取
+ * @example
+ * ```js
+ * const { fetching, error, fetch } = useFetcher();
+ * const handleFetch = () => {
+ *   fetch(alova.Get('/api/profile'));
+ * };
+ * ```
+ * @param config 配置项
+ * @returns 响应式请求数据、操作函数及事件绑定函数
  */
 export default function useFetcher<SE extends FetcherType<any>>(config: FetcherHookConfig = {}) {
   const props = createRequestState<AlovaGenerics<SE['state'], SE['export']>, FetcherHookConfig>(

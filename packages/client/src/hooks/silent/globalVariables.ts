@@ -52,8 +52,8 @@ export const setVDataIdCollectBasket = (value: typeof vDataIdCollectBasket) => {
  * 依赖的alova实例，它的存储适配器、请求适配器等将用于存取SilentMethod实例，以及发送静默提交
  */
 export let dependentAlovaInstance: Alova<AlovaGenerics>;
-export const setDependentAlova = (alovaInst: Alova<AlovaGenerics>) => {
-  dependentAlovaInstance = alovaInst;
+export const setDependentAlova = <AG extends AlovaGenerics>(alovaInst: Alova<AG>) => {
+  dependentAlovaInstance = alovaInst as any;
 };
 
 /**

@@ -31,9 +31,54 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { Alova, AlovaGenerics, Method, invalidateCache, promiseStatesHook, queryCache, setCache } from 'alova';
-import { FetcherType } from 'alova/client';
-import { AnyFn, PaginationHookConfig } from '~/typings/general';
+import { FetcherType, WatcherHookConfig } from '~/typings';
+import { AnyFn } from '~/typings/general';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';
+
+/** @description usePagination相关 */
+export type ArgGetter<R, LD> = (data: R) => LD | undefined;
+export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends WatcherHookConfig<AG> {
+  /**
+   * 是否预加载上一页
+   * @default true
+   */
+  preloadPreviousPage?: boolean;
+  /**
+   * 是否预加载下一页
+   * @default true
+   */
+  preloadNextPage?: boolean;
+  /**
+   * 指定数据总数量值
+   * @default response => response.total
+   */
+  total?: ArgGetter<AG['Responded'], number>;
+  /**
+   * 指定分页的数组数据
+   * @default response => response.data
+   */
+  data?: ArgGetter<AG['Responded'], ListData>;
+  /**
+   * 是否开启追加模式
+   * @default false
+   */
+  append?: boolean;
+  /**
+   * 初始页码
+   * @default 1
+   */
+  initialPage?: number;
+  /**
+   * 初始每页数据条数
+   * @default 10
+   */
+  initialPageSize?: number;
+  /**
+   * 状态监听触发请求，使用 useWatcher 实现
+   * @default [page, pageSize]
+   */
+  watchingStates?: AG['Watched'][];
+}
 
 const paginationAssert = createAssert('usePagination');
 const indexAssert = (index: number, rawData: any[]) =>

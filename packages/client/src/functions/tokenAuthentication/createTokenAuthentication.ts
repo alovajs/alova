@@ -25,6 +25,24 @@ type ResponseType<AG extends AlovaGenerics> = (
 
 /**
  * 创建客户端的token认证拦截器
+ * @example
+ * ```js
+ * const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication(\/* ... *\/);
+ * const alova = createAlova({
+ *   // ...
+ *   beforeRequest: onAuthRequired(method => {
+ *     // ...
+ *   }),
+ *   responded: onResponseRefreshToken({
+ *     onSuccess(response, method) {
+ *       // ...
+ *     },
+ *     onError(error, method) {
+ *       // ...
+ *     },
+ *   })
+ * });
+ * ```
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
@@ -92,6 +110,24 @@ export const createClientTokenAuthentication = <AG extends AlovaGenerics = Alova
 
 /**
  * 创建服务端的token认证拦截器
+ * @example
+ * ```js
+ * const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication(\/* ... *\/);
+ * const alova = createAlova({
+ *   // ...
+ *   beforeRequest: onAuthRequired(method => {
+ *     // ...
+ *   }),
+ *   responded: onResponseRefreshToken({
+ *     onSuccess(response, method) {
+ *       // ...
+ *     },
+ *     onError(error, method) {
+ *       // ...
+ *     },
+ *   })
+ * });
+ * ```
  * @param options 配置参数
  * @returns token认证拦截器函数
  */

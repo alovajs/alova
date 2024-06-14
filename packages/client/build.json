@@ -8,7 +8,8 @@
       "@alova/shared/function": null,
       "@alova/shared/vars": null,
       "@alova/shared/assert": null
-    }
+    },
+    "withDTS": true
   },
   "vue": {
     "packageName": "vueHook",
@@ -19,7 +20,8 @@
       "@alova/shared/vars": null,
       "@alova/shared/assert": null
     },
-    "output": "../alova/dist/stateshook/vue.{suffix}.{ext}"
+    "output": "../alova/dist/stateshook/vue.{suffix}.{ext}",
+    "withDTS": true
   },
   "vue-demi": {
     "packageName": "vueHook",
@@ -30,7 +32,8 @@
       "@alova/shared/vars": null,
       "@alova/shared/assert": null
     },
-    "output": "../alova/dist/stateshook/vue-demi.{suffix}.{ext}"
+    "output": "../alova/dist/stateshook/vue-demi.{suffix}.{ext}",
+    "withDTS": true
   },
   "react": {
     "packageName": "reactHook",
@@ -41,7 +44,8 @@
       "@alova/shared/vars": null,
       "@alova/shared/assert": null
     },
-    "output": "../alova/dist/stateshook/react.{suffix}.{ext}"
+    "output": "../alova/dist/stateshook/react.{suffix}.{ext}",
+    "withDTS": true
   },
   "svelte": {
     "packageName": "svelteHook",
@@ -54,6 +58,7 @@
       "@alova/shared/assert": null
     },
     "formats": ["cjs", "esm"],
-    "output": "../alova/dist/stateshook/svelte.{suffix}.{ext}"
+    "output": "../alova/dist/stateshook/svelte.{suffix}.{ext}",
+    "withDTS": true
   }
 }

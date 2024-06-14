@@ -1,5 +1,6 @@
 import { debounce, mapObject } from '@/util/helper';
 import createEventManager from '@alova/shared/createEventManager';
+import type { AlovaCompleteEvent, AlovaErrorEvent, AlovaSuccessEvent } from '@alova/shared/event';
 import {
   buildNamespacedCacheKey,
   getContext,
@@ -27,10 +28,7 @@ import {
 import type { AlovaGlobalCacheAdapter, FrontRequestState, Method, Progress } from 'alova';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
 import {
-  AlovaCompleteEvent,
-  AlovaErrorEvent,
   AlovaMethodHandler,
-  AlovaSuccessEvent,
   CompleteHandler,
   EnumHookType,
   ErrorHandler,
