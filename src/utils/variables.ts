@@ -1,5 +1,7 @@
 import { GeneralFn } from './helper';
 
+declare let Deno: any;
+
 const undefStr = 'undefined';
 // 以下为减少编译代码量而添加的统一处理函数或变量
 export const PromiseCls = Promise as typeof Promise<any>,
@@ -43,5 +45,5 @@ export const PromiseCls = Promise as typeof Promise<any>,
   // 缓存会持久化，且每次刷新会读取持久化缓存到内存中，这意味着内存一直会有缓存
   STORAGE_RESTORE = 'restore',
   noBrowserWin = typeof window === undefStr || !window.location,
-  // 是否为服务端运行，为了兼容浏览器以及非web客户端环境（如小程序），需要再判断一下process
-  isSSR = noBrowserWin && typeof process !== undefStr;
+  // 是否为服务端运行，node和bun通过process判断，deno通过Deno判断，但是支付宝小程序有process需要再判断下process.browser
+  isSSR = typeof process !== undefStr ? !(process as any).browser : typeof Deno !== undefStr;
