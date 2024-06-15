@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { createAssert } from '@alova/shared/assert';
-import { isPlainObject, uuid } from '@alova/shared/function';
+import { isPlainObject, usePromise, uuid } from '@alova/shared/function';
 import { QueueCallback } from '@alova/shared/queueCallback';
 import { deleteAttr, objectKeys } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter } from 'alova';
@@ -82,16 +82,22 @@ export class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
    * @param value The cache value.
    */
   protected syncCache(type: SharedCacheEvent['type'], key?: string, value?: any) {
+    const { promise, resolve } = usePromise();
+
     // use callback to ensure the sequence of operation
     this.queue.queueCallback(() => {
-      this.syncAdapter.send({
-        scope: this.options.scope,
-        senderID: this.id,
-        type,
-        key: key ?? '',
-        value
-      });
+      resolve(
+        this.syncAdapter.send({
+          scope: this.options.scope,
+          senderID: this.id,
+          type,
+          key: key ?? '',
+          value
+        })
+      );
     });
+
+    return promise;
   }
 
   /**
@@ -111,23 +117,23 @@ export class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
     });
   }
 
-  set(key: string, value: any) {
-    this.syncCache('set', key, value);
-    return this.cacheAdapter.set(key, value);
+  async set(key: string, value: any) {
+    await this.cacheAdapter.set(key, value);
+    return this.syncCache('set', key, value);
   }
 
   get<T>(key: string) {
     return this.cacheAdapter.get<T>(key);
   }
 
-  remove(key: string) {
-    this.syncCache('remove', key);
-    return this.cacheAdapter.remove(key);
+  async remove(key: string) {
+    await this.cacheAdapter.remove(key);
+    return this.syncCache('remove', key);
   }
 
-  clear() {
-    this.syncCache('clear');
-    this.cacheAdapter.clear();
+  async clear() {
+    await this.cacheAdapter.clear();
+    return this.syncCache('clear');
   }
 }
 

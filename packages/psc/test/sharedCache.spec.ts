@@ -1,10 +1,6 @@
-import {
-  ElectronSyncAdapter,
-  NodeSyncAdapter,
-  createElectronSharedCacheSynchronizer,
-  createNodeSharedCacheSynchronizer
-} from '@/index';
+import { ElectronSyncAdapter, NodeSyncAdapter, createNodeSharedCacheSynchronizer } from '@/index';
 import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
+import { key } from '@alova/shared/function';
 import { forEach } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter, createAlova, queryCache } from 'alova';
 import GlobalFetch from 'alova/fetch';
@@ -12,38 +8,9 @@ import { IpcMain, IpcRenderer } from 'electron';
 import EventEmitter from 'events';
 import { Result, delay } from 'root/testUtils';
 
-let eventEmitter: EventEmitter;
-
-// mock IPC behavior
 beforeEach(() => {
-  eventEmitter = new EventEmitter();
-  createPSCSynchronizer(
-    createSyncAdapter({
-      send(event) {
-        eventEmitter.emit('to-client', event);
-      },
-      receive(handler) {
-        eventEmitter.on('to-main', event => handler(event));
-      }
-    })
-  );
+  jest.resetModules();
 });
-
-afterEach(() => eventEmitter.removeAllListeners());
-
-const createSharedL1CacheAdapter = (scope?: string, cacheAdapter?: AlovaGlobalCacheAdapter) => {
-  const syncAdapter = createSyncAdapter({
-    send(event) {
-      eventEmitter.emit('to-main', event);
-    },
-    receive(handler) {
-      eventEmitter.on('to-client', event => handler(event));
-    }
-  });
-  return createPSCAdapter(syncAdapter, cacheAdapter ?? new ExplicitCacheAdapter(), {
-    scope
-  });
-};
 
 const getAlovaInstance = ({ id, l1Cache }: { id?: number; l1Cache?: AlovaGlobalCacheAdapter }) =>
   createAlova({
@@ -54,35 +21,89 @@ const getAlovaInstance = ({ id, l1Cache }: { id?: number; l1Cache?: AlovaGlobalC
     responded: r => r.json()
   });
 
-const createSharedCacheAlova = () =>
-  getAlovaInstance({
-    id: 1,
-    l1Cache: createSharedL1CacheAdapter()
-  });
+const prepareEnv = async () => {
+  // mock IPC behavior
+  const eventEmitter = new EventEmitter();
+  createPSCSynchronizer(
+    createSyncAdapter({
+      send(event) {
+        eventEmitter.emit('to-client', event);
+      },
+      receive(handler) {
+        eventEmitter.on('to-main', event => handler(event));
+      }
+    })
+  );
 
-const createNonSharedCacheAlova = () =>
-  getAlovaInstance({
-    id: 1
-  });
+  const createSharedL1CacheAdapter = (scope?: string, cacheAdapter?: AlovaGlobalCacheAdapter) => {
+    const syncAdapter = createSyncAdapter({
+      send(event) {
+        eventEmitter.emit('to-main', event);
+      },
+      receive(handler) {
+        eventEmitter.on('to-client', event => handler(event));
+      }
+    });
+    return createPSCAdapter(syncAdapter, cacheAdapter ?? new ExplicitCacheAdapter(), {
+      scope
+    });
+  };
 
-const createFakeElectronExports = () => {
+  const createSharedCacheAlova = () =>
+    getAlovaInstance({
+      id: 1,
+      l1Cache: createSharedL1CacheAdapter()
+    });
+
+  const createNonSharedCacheAlova = () =>
+    getAlovaInstance({
+      id: 1
+    });
+
+  const { createElectronSharedCacheSynchronizer } = await import('@/defaults/electronSyncAdapter');
+
+  return {
+    eventEmitter,
+    createSharedL1CacheAdapter,
+    createSharedCacheAlova,
+    createNonSharedCacheAlova,
+    createElectronSharedCacheSynchronizer
+  };
+};
+
+const createFakeElectronExports = (eventEmitter: EventEmitter) => {
+  const mainMockOn = jest.fn();
+  const clientMockOn = jest.fn();
   const ipcMain = {
-    on: jest.fn((name, handler) => eventEmitter.on(name, handler)),
+    on: (name: string, handler: any) =>
+      eventEmitter.on(name, (...args) => {
+        handler(...args);
+        mainMockOn();
+      }),
     emit: jest.fn((name, payload) => eventEmitter.emit(name, { sender: ipcMain }, payload))
   } as unknown as IpcMain;
   const ipcRenderer = {
-    on: jest.fn((name, handler) => eventEmitter.on(name, handler)),
-    emit: jest.fn((name, payload) => eventEmitter.emit(name, { sender: ipcRenderer }, payload))
+    on: (name: string, handler: any) =>
+      eventEmitter.on(name, (...args) => {
+        handler(...args);
+        clientMockOn();
+      }),
+    emit: jest.fn((name, payload) => eventEmitter.emit(name, { sender: ipcRenderer }, payload)),
+    invoke: jest.fn(async (name, payload) => eventEmitter.emit(name, { sender: ipcMain }, payload))
   } as unknown as IpcRenderer;
 
   return {
     ipcMain,
-    ipcRenderer
+    ipcRenderer,
+    mainMockOn,
+    clientMockOn
   };
 };
 
 describe('shared cache', () => {
   test('should clear the cache when init', async () => {
+    const { createSharedL1CacheAdapter } = await prepareEnv();
+
     const cache1 = createSharedL1CacheAdapter('scoped');
     const cacheInst = new ExplicitCacheAdapter();
     cacheInst.set('name', 'Tom');
@@ -106,6 +127,8 @@ describe('shared cache', () => {
     expect(cache2.get('id')).toBeUndefined();
   });
   test('should share data between same scope', async () => {
+    const { createSharedL1CacheAdapter } = await prepareEnv();
+
     const cache1 = createSharedL1CacheAdapter();
     const cache2 = createSharedL1CacheAdapter();
     const otherScopeCache = createSharedL1CacheAdapter('other');
@@ -141,6 +164,8 @@ describe('shared cache', () => {
   });
 
   test('should share cache between alova instances with shared cache enabled', async () => {
+    const { createSharedCacheAlova, createNonSharedCacheAlova } = await prepareEnv();
+
     const alovaA = createSharedCacheAlova();
     const alovaB = createSharedCacheAlova();
     const GetA = alovaA.Get('/unit-test', {
@@ -160,7 +185,8 @@ describe('shared cache', () => {
   });
 
   test('should share cache between same scope in Electron', async () => {
-    const { ipcMain, ipcRenderer } = createFakeElectronExports();
+    const { eventEmitter, createElectronSharedCacheSynchronizer } = await prepareEnv();
+    const { ipcMain, ipcRenderer } = createFakeElectronExports(eventEmitter);
 
     // simulate init operation in the main procress
     createElectronSharedCacheSynchronizer(ipcMain);
@@ -185,6 +211,7 @@ describe('shared cache', () => {
 
     const cache = await queryCache(GetA);
     expect(cache).not.toBeUndefined();
+
     expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
 
     expect(await queryCache(alovaC.Get('/unit-test'))).toBeUndefined();
@@ -197,6 +224,33 @@ describe('shared cache', () => {
     expect(cache).not.toBeUndefined();
     expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
     expect(await queryCache(alovaC.Get('/unit-test'))).toBeUndefined();
+  });
+
+  test('should set operation be a async function in electron', async () => {
+    const { eventEmitter, createElectronSharedCacheSynchronizer } = await prepareEnv();
+    const { ipcMain, ipcRenderer, mainMockOn } = createFakeElectronExports(eventEmitter);
+
+    // simulate init operation in the main procress
+    createElectronSharedCacheSynchronizer(ipcMain);
+
+    const l1Cache = createPSCAdapter(ElectronSyncAdapter(ipcRenderer));
+
+    const alovaA = getAlovaInstance({
+      id: 1,
+      l1Cache
+    });
+
+    const GetA = alovaA.Get('/unit-test', {
+      transformData: ({ data }: Result) => data
+    });
+
+    // expect(mainMockOn).toHaveBeenCalledTimes(1);
+
+    const setReturn = l1Cache.set(key(GetA), 123);
+    expect(setReturn).toBeInstanceOf(Promise);
+    await setReturn;
+
+    expect(mainMockOn).toHaveBeenCalledTimes(2);
   });
 
   test('should share cache between same scope in node', async () => {
