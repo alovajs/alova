@@ -391,7 +391,7 @@ describe('vue => useSQRequest', () => {
     expect(event.sendArgs).toStrictEqual([1, 2, 3]);
   });
 
-  test('should be intercpeted when has virtual data in method instance', async () => {
+  test('should be intercepted when has virtual data in method instance', async () => {
     const queue = 'tb8';
     const vDataId = createVirtualResponse(undefined);
     const poster = (id: number) => alovaInst.Post<any>('/detail', { id });
@@ -422,7 +422,7 @@ describe('vue => useSQRequest', () => {
     expect(data2.value).toStrictEqual({ id: 1 });
   });
 
-  test('should be intercpeted when has virtual data id string in method instance', async () => {
+  test('should be intercepted when has virtual data id string in method instance', async () => {
     const queue = 'tb9';
     const vDataId = createVirtualResponse(undefined);
     const poster = (id: number) =>
@@ -444,7 +444,7 @@ describe('vue => useSQRequest', () => {
     expect(data.value).toStrictEqual({ localData: 'abc' });
   });
 
-  test('should be intercpeted when use virtual data to calculate in method instance', async () => {
+  test('should be intercepted when use virtual data to calculate in method instance', async () => {
     const queue = 'tb10';
     const vDataId = createVirtualResponse(undefined);
     const obj = { vDataId };

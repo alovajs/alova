@@ -29,7 +29,7 @@ import {
   BEHAVIOR_QUEUE,
   BEHAVIOR_SILENT,
   BEHAVIOR_STATIC,
-  DEFAUT_QUEUE_NAME,
+  DEFAULT_QUEUE_NAME,
   setVDataIdCollectBasket,
   silentAssert,
   vDataIdCollectBasket
@@ -51,11 +51,11 @@ export let currentSilentMethod: SilentMethod<any> | undefined = undefinedValue;
  * @returns 中间件函数
  */
 export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandler<AG>, config?: SQHookConfig<AG>) => {
-  const { behavior = 'queue', queue = DEFAUT_QUEUE_NAME, retryError, maxRetryTimes, backoff } = config || {};
+  const { behavior = 'queue', queue = DEFAULT_QUEUE_NAME, retryError, maxRetryTimes, backoff } = config || {};
   const eventEmitter = createEventManager<ScopedSQEvents<AG>>();
   let handlerArgs: any[] | undefined;
   let behaviorFinally: SQHookBehavior;
-  let queueFinally = DEFAUT_QUEUE_NAME;
+  let queueFinally = DEFAULT_QUEUE_NAME;
   let forceRequest = falseValue;
   let silentMethodInstance: SilentMethod<AG>;
 

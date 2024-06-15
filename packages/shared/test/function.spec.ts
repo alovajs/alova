@@ -90,7 +90,7 @@ describe('shared functions', () => {
     expect(result).toBe(alovaInst);
   });
 
-  test('function getCofig', () => {
+  test('function getConfig', () => {
     const mockMethodInstance = alovaInst.Get('/unit-test');
 
     // Call the getConfig function

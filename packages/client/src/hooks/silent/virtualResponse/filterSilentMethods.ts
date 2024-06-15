@@ -2,7 +2,7 @@ import { getConfig, instanceOf } from '@alova/shared/function';
 import { falseValue, regexpTest, trueValue, undefinedValue } from '@alova/shared/vars';
 import { SilentQueueMap } from '~/typings/general';
 import { SilentMethod } from '../SilentMethod';
-import { DEFAUT_QUEUE_NAME, silentFactoryStatus } from '../globalVariables';
+import { DEFAULT_QUEUE_NAME, silentFactoryStatus } from '../globalVariables';
 import { silentQueueMap } from '../silentQueue';
 import loadSilentQueueMapFromStorage from '../storage/loadSilentQueueMapFromStorage';
 
@@ -15,7 +15,7 @@ import loadSilentQueueMapFromStorage from '../storage/loadSilentQueueMapFromStor
  */
 export const filterSilentMethods = async (
   methodNameMatcher?: string | number | RegExp,
-  queueName = DEFAUT_QUEUE_NAME,
+  queueName = DEFAULT_QUEUE_NAME,
   filterActive = falseValue
 ) => {
   const matchSilentMethods = (targetQueue: SilentQueueMap[string] = []) =>
@@ -47,6 +47,6 @@ export const filterSilentMethods = async (
  */
 export const getSilentMethod = async (
   methodNameMatcher?: string | number | RegExp,
-  queueName = DEFAUT_QUEUE_NAME,
+  queueName = DEFAULT_QUEUE_NAME,
   filterActive = falseValue
 ): Promise<SilentMethod<any> | undefined> => (await filterSilentMethods(methodNameMatcher, queueName, filterActive))[0];

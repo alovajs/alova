@@ -38,7 +38,7 @@ import { RetryErrorDetailed, SilentMethod, SilentQueueMap } from '~/typings/gene
 import {
   BEHAVIOR_SILENT,
   BeforeEventKey,
-  DEFAUT_QUEUE_NAME,
+  DEFAULT_QUEUE_NAME,
   ErrorEventKey,
   FailEventKey,
   SuccessEventKey,
@@ -364,7 +364,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
 export const pushNewSilentMethod2Queue = async <AG extends AlovaGenerics>(
   silentMethodInstance: SilentMethod<AG>,
   cache: boolean,
-  targetQueueName = DEFAUT_QUEUE_NAME,
+  targetQueueName = DEFAULT_QUEUE_NAME,
   onBeforePush: () => any[] = () => []
 ) => {
   silentMethodInstance.cache = cache;

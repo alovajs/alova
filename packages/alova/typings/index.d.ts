@@ -93,7 +93,7 @@ interface CacheEvent {
   value?: any;
   container: Record<string, any>;
 }
-export interface AlovaDefaultCacheAdpater extends AlovaGlobalCacheAdapter {
+export interface AlovaDefaultCacheAdapter extends AlovaGlobalCacheAdapter {
   /**
    * the events related to cache operating emitter.
    */
@@ -334,7 +334,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
    * custom alova id
    *
    * **Recommend to custom it in multiple server scenarios**
-   * @default increme from 0 in creating order
+   * @default increase from 0 in creating order
    */
   id?: number | string;
 
@@ -517,7 +517,7 @@ export interface Method<AG extends AlovaGenerics = any> {
 
   /**
    * 绑定resolve和/或reject Promise的callback
-   * @param onfullified resolve Promise时要执行的回调
+   * @param onfulfilled resolve Promise时要执行的回调
    * @param onrejected 当Promise被reject时要执行的回调
    * @returns 返回一个Promise，用于执行任何回调
    */
@@ -683,8 +683,8 @@ export declare function createAlova<
   RequestConfig,
   Response,
   ResponseHeader,
-  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater,
-  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater
+  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter,
+  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter
 >(
   options: AlovaOptions<
     AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
@@ -701,7 +701,7 @@ export declare function createAlova<
  * invalidateCache(alova.Get('/api/profile'));
  *
  * // match method snapshots then invalidate them.
- * const methods = alova.matchSnaptshot('method-name');
+ * const methods = alova.matchSnapshot('method-name');
  * invalidateCache(methods);
  *
  * // invalidate all cache.

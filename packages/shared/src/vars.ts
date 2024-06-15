@@ -58,5 +58,5 @@ export const isSSR = typeof process !== undefStr ? !(process as any).browser : t
 // only cache in memory, it's default option
 export const MEMORY = 'memory';
 
-// persistent cahce, and will be read to memory when page is refreshed, it means that the memory cache always exist until cache is expired.
+// persistent cache, and will be read to memory when page is refreshed, it means that the memory cache always exist until cache is expired.
 export const STORAGE_RESTORE = 'restore';

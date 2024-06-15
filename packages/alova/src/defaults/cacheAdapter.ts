@@ -1,7 +1,7 @@
 import myAssert from '@/utils/myAssert';
 import createEventManager from '@alova/shared/createEventManager';
 import { JSONParse, JSONStringify, deleteAttr } from '@alova/shared/vars';
-import { AlovaDefaultCacheAdpater, CacheEvent } from '~/typings';
+import { AlovaDefaultCacheAdapter, CacheEvent } from '~/typings';
 
 // local storage will not fail the operation.
 const EVENT_SUCCESS_KEY = 'success';
@@ -12,7 +12,7 @@ type CacheEventRecord = {
 export const createDefaultL1CacheAdapter = () => {
   let l1Cache = {} as Record<string, any>;
   const l1CacheEmitter = createEventManager<CacheEventRecord>();
-  const adapter: AlovaDefaultCacheAdpater = {
+  const adapter: AlovaDefaultCacheAdapter = {
     set(key, value) {
       l1Cache[key] = value;
       l1CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'set', key, value, container: l1Cache });
@@ -42,7 +42,7 @@ const // delay get localStorage by function, and avoid erroring at initializatio
   };
 export const createDefaultL2CacheAdapter = () => {
   const l2CacheEmitter = createEventManager<CacheEventRecord>();
-  const adapter: AlovaDefaultCacheAdpater = {
+  const adapter: AlovaDefaultCacheAdapter = {
     set: (key, value) => {
       storage().setItem(key, JSONStringify(value));
       l2CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'set', key, value, container: storage() });

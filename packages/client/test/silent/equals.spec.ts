@@ -2,7 +2,7 @@ import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualR
 import equals from '@/hooks/silent/virtualResponse/equals';
 
 describe('equals', () => {
-  test('primitive comparation', () => {
+  test('primitive compartion', () => {
     expect(equals(1, 1)).toBeTruthy();
     expect(equals(1, '1')).toBeFalsy();
     expect(equals('a', 'a')).toBeTruthy();
@@ -11,7 +11,7 @@ describe('equals', () => {
     expect(equals(obj, obj)).toBeTruthy();
   });
 
-  test('vdata comparation', () => {
+  test('vdata compartion', () => {
     const num1 = createVirtualResponse(1);
     const num2 = createVirtualResponse(1);
     expect(equals(num1, num1)).toBeTruthy();

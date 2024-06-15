@@ -1,6 +1,6 @@
 import { mockRequestAdapter } from '#/mockData';
 import { GlobalSQEvent, GlobalSQSuccessEvent } from '@/event';
-import { DEFAUT_QUEUE_NAME } from '@/hooks/silent/globalVariables';
+import { DEFAULT_QUEUE_NAME } from '@/hooks/silent/globalVariables';
 import {
   bootSilentFactory,
   onBeforeSilentSubmit,
@@ -74,7 +74,7 @@ describe('boot silent queue', () => {
 
   // });
 
-  test('silentMethods in storage will be appened to the end of queue, when merge by bootSilentFactory', async () => {
+  test('silentMethods in storage will be appended to the end of queue, when merge by bootSilentFactory', async () => {
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,
@@ -238,7 +238,7 @@ describe('boot silent queue', () => {
     onSilentSubmitSuccess(event => {
       successMockFn();
       // 验证event内的数据
-      expect(event.queueName).toBe(DEFAUT_QUEUE_NAME);
+      expect(event.queueName).toBe(DEFAULT_QUEUE_NAME);
       expect(event).toBeInstanceOf(GlobalSQSuccessEvent);
       expect(event.behavior).toBe('silent');
       if (successCallIndex === 0) {
@@ -344,7 +344,7 @@ describe('boot silent queue', () => {
     await delay(200);
   });
 
-  test('execute queue that the first is primirive response', async () => {
+  test('execute queue that the first is primitive response', async () => {
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
       statesHook: VueHook,

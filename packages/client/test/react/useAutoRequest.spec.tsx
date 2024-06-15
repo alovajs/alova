@@ -267,7 +267,7 @@ describe('react => useAutoRequest', () => {
     });
   });
 
-  test('should request once when emit multiple events within one second defaultly', async () => {
+  test('should request once when emit multiple events within one second in default', async () => {
     let tag = 'init';
     const Page = () => {
       const { data } = useAutoRequest(() =>

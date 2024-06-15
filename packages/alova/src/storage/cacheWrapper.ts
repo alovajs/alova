@@ -56,18 +56,18 @@ export const setWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGeneri
         "$a.[namespace][methodKey]": [cache data],
         ...
         "hss.[sourceMethodKey]": "{
-          [targtMethodKey1]: 0,
-          [targtMethodKey2]: 0,
+          [targetMethodKey1]: 0,
+          [targetMethodKey2]: 0,
           ...
         }",
         "hss.[sourceMethodName]": "{
-          [targtMethodKey3]: 0,
-          [targtMethodKey4]: 0,
+          [targetMethodKey3]: 0,
+          [targetMethodKey4]: 0,
           ...
         }",
-        "hsr.[sourceMethodNameRegxpSource]": "{
-          [targtMethodKey5]: 0,
-          [targtMethodKey6]: 0,
+        "hsr.[sourceMethodNameRegexpSource]": "{
+          [targetMethodKey5]: 0,
+          [targetMethodKey6]: 0,
           ...
         }",
         "hsr.regexp1": ["hss.key1", "hss.key2"],

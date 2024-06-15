@@ -1,7 +1,7 @@
 import { newInstance } from '@alova/shared/function';
 import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
-  AlovaDefaultCacheAdpater,
+  AlovaDefaultCacheAdapter,
   AlovaGenerics,
   AlovaGlobalCacheAdapter,
   AlovaMethodCreateConfig,
@@ -177,8 +177,8 @@ export const createAlova = <
   RequestConfig,
   Response,
   ResponseHeader,
-  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater,
-  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdpater
+  L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter,
+  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter
 >(
   options: AlovaOptions<
     AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>

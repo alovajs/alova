@@ -4,7 +4,7 @@ import {
   createElectronSharedCacheSynchronizer,
   createNodeSharedCacheSynchronizer
 } from '@/index';
-import { ExplictCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
+import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { forEach } from '@alova/shared/vars';
 import { AlovaGlobalCacheAdapter, createAlova, queryCache } from 'alova';
 import GlobalFetch from 'alova/fetch';
@@ -14,7 +14,7 @@ import { Result, delay } from 'root/testUtils';
 
 let eventEmitter: EventEmitter;
 
-// mock IPC behaviour
+// mock IPC behavior
 beforeEach(() => {
   eventEmitter = new EventEmitter();
   createPSCSynchronizer(
@@ -31,7 +31,7 @@ beforeEach(() => {
 
 afterEach(() => eventEmitter.removeAllListeners());
 
-const createSharedL1CacheAdapter = (scope?: string, cacheAdpater?: AlovaGlobalCacheAdapter) => {
+const createSharedL1CacheAdapter = (scope?: string, cacheAdapter?: AlovaGlobalCacheAdapter) => {
   const syncAdapter = createSyncAdapter({
     send(event) {
       eventEmitter.emit('to-main', event);
@@ -40,7 +40,7 @@ const createSharedL1CacheAdapter = (scope?: string, cacheAdpater?: AlovaGlobalCa
       eventEmitter.on('to-client', event => handler(event));
     }
   });
-  return createPSCAdapter(syncAdapter, cacheAdpater ?? new ExplictCacheAdapter(), {
+  return createPSCAdapter(syncAdapter, cacheAdapter ?? new ExplicitCacheAdapter(), {
     scope
   });
 };
@@ -84,7 +84,7 @@ const createFakeElectronExports = () => {
 describe('shared cache', () => {
   test('should clear the cache when init', async () => {
     const cache1 = createSharedL1CacheAdapter('scoped');
-    const cacheInst = new ExplictCacheAdapter();
+    const cacheInst = new ExplicitCacheAdapter();
     cacheInst.set('name', 'Tom');
     cacheInst.set('id', 9527);
 
@@ -95,7 +95,7 @@ describe('shared cache', () => {
     expect(cacheInst.get('name')).toStrictEqual('Tom');
     expect(cacheInst.get('id')).toStrictEqual(9527);
 
-    // will be overrided with empty cache after init.
+    // will be overridden with empty cache after init.
     const cache2 = createSharedL1CacheAdapter('scoped', cacheInst);
 
     // waiting for cache sync.

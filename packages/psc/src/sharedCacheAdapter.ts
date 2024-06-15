@@ -134,7 +134,7 @@ export class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
 /**
  * Same as AlovaGlobalCacheAdapter but expose cache object.
  */
-export class ExplictCacheAdapter implements AlovaGlobalCacheAdapter {
+export class ExplicitCacheAdapter implements AlovaGlobalCacheAdapter {
   protected cache: Record<string, any> = {};
 
   set(key: string, value: any) {
@@ -178,14 +178,14 @@ export class ExplictCacheAdapter implements AlovaGlobalCacheAdapter {
  */
 export function createProcessSharedCacheAdapter(
   syncAdapter: SyncAdapter,
-  cacheAdapter: AlovaGlobalCacheAdapter = new ExplictCacheAdapter(),
+  cacheAdapter: AlovaGlobalCacheAdapter = new ExplicitCacheAdapter(),
   options: ProcessSharedCacheAdapterOptions = {}
 ) {
   return new ProcessSharedCacheAdapter(cacheAdapter, syncAdapter, options);
 }
 
 export function createProcessSharedCacheSynchronizer(syncAdapter: SyncAdapter) {
-  const cache = new ExplictCacheAdapter();
+  const cache = new ExplicitCacheAdapter();
   const cacheEventHandlers = {
     set: (key: string, value?: any) => cache.set(key, value),
     remove: (key: string) => cache.remove(key),

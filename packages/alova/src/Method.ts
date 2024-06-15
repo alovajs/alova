@@ -179,7 +179,7 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   /**
    * 绑定resolve和/或reject Promise的callback
-   * @param onfullified resolve Promise时要执行的回调
+   * @param onfulfilled resolve Promise时要执行的回调
    * @param onrejected 当Promise被reject时要执行的回调
    * @returns 返回一个Promise，用于执行任何回调
    */

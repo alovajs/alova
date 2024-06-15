@@ -4,11 +4,11 @@ import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } fro
 import { PaginationHookConfig } from '~/typings/general';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
-type CollpasedAlovaGenerics = AlovaGenerics<ReactState<unknown>, any[], unknown, unknown>;
+type CollapsedAlovaGenerics = AlovaGenerics<ReactState<unknown>, any[], unknown, unknown>;
 interface Props {
-  getter: (page: number, pageSize: number) => Method<CollpasedAlovaGenerics>;
+  getter: (page: number, pageSize: number) => Method<CollapsedAlovaGenerics>;
   paginationConfig?: PaginationHookConfig<any, unknown[]> | (() => PaginationHookConfig<any, unknown[]>);
-  handleExposure?: (exposure: ReturnType<typeof usePagination<CollpasedAlovaGenerics, any[]>>) => void;
+  handleExposure?: (exposure: ReturnType<typeof usePagination<CollapsedAlovaGenerics, any[]>>) => void;
 }
 
 function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }: Props) {
@@ -24,7 +24,7 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
     }
   }, []);
 
-  const exposure = usePagination<CollpasedAlovaGenerics, any[]>(
+  const exposure = usePagination<CollapsedAlovaGenerics, any[]>(
     getter,
     typeof paginationConfig === 'function' ? paginationConfig() : paginationConfig
   );

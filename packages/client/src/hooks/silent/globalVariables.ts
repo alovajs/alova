@@ -13,7 +13,7 @@ import {
 
 export const STR_VALUE_OF = 'valueOf';
 export const STR_TO_STRING = 'toString';
-export const DEFAUT_QUEUE_NAME = 'default';
+export const DEFAULT_QUEUE_NAME = 'default';
 export const BEHAVIOR_SILENT = 'silent';
 export const BEHAVIOR_QUEUE = 'queue';
 export const BEHAVIOR_STATIC = 'static';
@@ -101,7 +101,7 @@ export const setQueueRequestWaitSetting = (
     ? (requestWaitSetting as QueueRequestWaitSetting[])
     : [
         {
-          queue: DEFAUT_QUEUE_NAME,
+          queue: DEFAULT_QUEUE_NAME,
           wait: requestWaitSetting as QueueRequestWaitSetting['wait']
         }
       ];

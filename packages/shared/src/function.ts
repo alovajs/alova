@@ -365,7 +365,7 @@ interface MemorizedFunction {
   memorized: true;
 }
 /**
- * create simpe and unified, framework-independent states creators and handlers.
+ * create simple and unified, framework-independent states creators and handlers.
  * @param statesHook states hook from `promiseStatesHook` function of alova
  * @param referingObject refering object exported from `promiseStatesHook` function
  * @returns simple and unified states creators and handlers
@@ -476,7 +476,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
           ? ExportedState<StateProxy['v'], AG['State']>
           : ExportedComputed<StateProxy['v'], AG['Computed']>;
 
-      // reset the tracked keys, so that the nest hook providers can be inited.
+      // reset the tracked keys, so that the nest hook providers can be initialized.
       referingObject.trackedKeys = {};
       const extraProvider = {
         // expose referingObject automatically.

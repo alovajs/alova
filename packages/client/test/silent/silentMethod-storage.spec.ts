@@ -1,5 +1,5 @@
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
-import { DEFAUT_QUEUE_NAME, setDependentAlova } from '@/hooks/silent/globalVariables';
+import { DEFAULT_QUEUE_NAME, setDependentAlova } from '@/hooks/silent/globalVariables';
 import { clearSilentQueueMap, pushNewSilentMethod2Queue, silentQueueMap } from '@/hooks/silent/silentQueue';
 import loadSilentQueueMapFromStorage from '@/hooks/silent/storage/loadSilentQueueMapFromStorage';
 import { silentMethodIdQueueMapStorageKey, silentMethodStorageKeyPrefix } from '@/hooks/silent/storage/performers';
@@ -161,13 +161,13 @@ describe('manipulate silent method storage', () => {
     expect(Object.keys(loadedSilentQueueMap)).toHaveLength(1);
     expect(loadedSilentQueueMap.default).toHaveLength(2);
 
-    await spliceStorageSilentMethod(DEFAUT_QUEUE_NAME, silentMethodInstance.id);
+    await spliceStorageSilentMethod(DEFAULT_QUEUE_NAME, silentMethodInstance.id);
     loadedSilentQueueMap = await loadSilentQueueMapFromStorage();
     expect(Object.keys(loadedSilentQueueMap)).toHaveLength(1);
     expect(loadedSilentQueueMap.default).toHaveLength(1);
     expect(storageMock[silentMethodStorageKeyPrefix + silentMethodInstance.id]).toBeUndefined(); // 检查存储中的silentMethod
 
-    await spliceStorageSilentMethod(DEFAUT_QUEUE_NAME, silentMethodInstance2.id);
+    await spliceStorageSilentMethod(DEFAULT_QUEUE_NAME, silentMethodInstance2.id);
     loadedSilentQueueMap = await loadSilentQueueMapFromStorage();
     expect(Object.keys(loadedSilentQueueMap)).toHaveLength(0);
     expect(storageMock[silentMethodStorageKeyPrefix + silentMethodInstance2.id]).toBeUndefined();
