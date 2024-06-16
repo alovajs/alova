@@ -1,0 +1,65 @@
+{
+  "name": "@alova/redis",
+  "version": "1.0.0",
+  "description": "storage adapter for redis",
+  "main": "dist/redis.esm.js",
+  "module": "dist/redis.esm.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "main": "./dist/redis.esm.js",
+      "module": "./dist/redis.esm.js",
+      "require": "./dist/redis.common.cjs"
+    },
+    "./*": "./*"
+  },
+  "keywords": [
+    "alova"
+  ],
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint --ext .ts,.js src/**",
+    "lint:fix": "eslint --ext .ts,.js src/** --fix",
+    "build": "npm run clean && alova-scripts build",
+    "release": "semantic-release",
+    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
+    "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
+    "commit": "git add . && git-cz && git push"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@alova/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*"
+  },
+  "peerDependencies": {
+    "redis": "^4.6.14",
+    "alova": "^3.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "author": "MeetinaXD",
+  "license": "MIT",
+  "homepage": "https://alova.js.org",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alovajs/alova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alovajs/alova/issues"
+  }
+}

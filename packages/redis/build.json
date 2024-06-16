@@ -1,0 +1,12 @@
+{
+  "packageName": "RedisAdapter",
+  "input": "src/index.ts",
+  "output": "dist/index.{suffix}.{ext}",
+  "external": {
+    "@alova/shared/function": null,
+    "@alova/shared/vars": null,
+    "@alova/shared/assert": null
+  },
+  "formats": ["cjs", "esm"],
+  "withDTS": true
+}
