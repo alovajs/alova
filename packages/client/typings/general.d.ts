@@ -8,7 +8,6 @@ import {
   AlovaFetcherMiddlewareContext,
   AlovaFrontMiddlewareContext,
   AlovaGuardNext,
-  ExportedType,
   RequestHookConfig,
   UseHookExposure,
   WatcherHookConfig
@@ -468,7 +467,7 @@ interface SilentFactoryBootOptions {
    * silentMethod依赖的alova实例
    * alova实例的存储适配器、请求适配器等将用于存取SilentMethod实例，以及发送静默提交
    */
-  alova: Alova<any, any, any, any, any>;
+  alova: Alova<AlovaGenerics>;
 
   /** 延迟毫秒数，不传时默认延迟2000ms */
   delay?: number;
@@ -753,9 +752,8 @@ interface TokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, an
    */
   assignToken?: <AG extends AlovaGenerics>(method: Method<AG>) => void | Promise<void>;
 }
-interface ClientTokenAuthenticationOptions<
-  RA extends AlovaRequestAdapter<AG['RequestConfig'], AG['Response'], AG['ResponseHeader'], any, any>
-> extends TokenAuthenticationOptions<RA> {
+interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any>>
+  extends TokenAuthenticationOptions<RA> {
   /**
    * 在请求前的拦截器中判断token是否过期，并刷新token
    */
@@ -832,11 +830,11 @@ interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, a
 
 type AlovaResponded<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> = NonNullable<
   AlovaOptions<
-    ReturnType<SH['create']>,
-    ReturnType<SH['export']>,
-    Parameters<RA>[1] extends Method<any, any, any, any, infer RC> ? RC : never,
-    Parameters<RA>[1] extends Method<any, any, any, any, any, infer RE> ? RE : never,
-    Parameters<RA>[1] extends Method<any, any, any, any, any, any, infer RH> ? RH : never
+    Pick<
+      AlovaGenerics<ReturnType<SH['create']>, SH['export'] extends (...args: any) => infer R ? R : any>,
+      'State' | 'Computed'
+    > &
+      (Parameters<RA>[1] extends Method<infer AG> ? AG : never)
   >['responded']
 >;
 
@@ -880,7 +878,7 @@ type AutoRequestHookConfig<AG extends AlovaGenerics> = {
   throttle?: number;
 } & RequestHookConfig<AG>;
 
-const enum SSEHookReadyState {
+export const enum SSEHookReadyState {
   CONNECTING = 0,
   OPEN = 1,
   CLOSED = 2
@@ -899,9 +897,9 @@ interface AlovaSSEMessageEvent<Data, AG extends AlovaGenerics> extends AlovaSSEE
 type SSEOnOpenTrigger<AG extends AlovaGenerics> = (event: AlovaSSEEvent<AG>) => void;
 type SSEOnMessageTrigger<Data, AG extends AlovaGenerics> = (event: AlovaSSEMessageEvent<Data, AG>) => void;
 type SSEOnErrorTrigger<AG extends AlovaGenerics> = (event: AlovaSSEErrorEvent<AG>) => void;
-type SSEOn<AG extends AlovaGenerics> = (
+type SSEOn<AG extends AlovaGenerics> = <Data = any>(
   eventName: string,
-  handler: (event: AlovaSSEMessageEvent<AG>) => void
+  handler: (event: AlovaSSEMessageEvent<Data, AG>) => void
 ) => () => void;
 
 type NotifyHandler = () => void;
@@ -985,4 +983,4 @@ type SSEExposure<AG extends AlovaGenerics, Data> = {
   on: SSEOn<AG>;
 };
 
-type AnyFn<T = Any> = (...args: any[]) => T;
+type AnyFn<T = any> = (...args: any[]) => T;

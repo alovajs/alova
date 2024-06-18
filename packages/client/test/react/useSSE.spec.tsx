@@ -56,7 +56,7 @@ describe('react => useSSE', () => {
 
     const Page = () => {
       const { on, onOpen, data, readyState, send, close } = useSSE(poster);
-      on(IntervalEventName, mockOnFn);
+      on(IntervalEventName, mockOnFn as any);
       onOpen(mockOpenFn);
 
       return (

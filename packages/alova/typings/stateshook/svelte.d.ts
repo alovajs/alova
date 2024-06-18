@@ -1,5 +1,7 @@
 import { Readable, Writable } from 'svelte/store';
 import { StatesHook } from '..';
 
-declare const svelteHook: StatesHook<Writable<unknown>, Readable<unknown>>;
+export type SvelteHookType = StatesHook<Writable<unknown>, Readable<unknown>>;
+declare const svelteHook: SvelteHookType;
+
 export default svelteHook;

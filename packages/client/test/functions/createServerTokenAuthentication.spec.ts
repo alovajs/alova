@@ -1,18 +1,38 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createServerTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
-import { createAlova, Method } from 'alova';
+import { Alova, createAlova, Method } from 'alova';
 import { useRequest } from 'alova/client';
-import VueHook from 'alova/vue';
+import VueHook, { type VueHookType } from 'alova/vue';
 import { generateContinuousNumbers, untilCbCalled } from 'root/testUtils';
-import { mockRequestAdapter } from '../mockData';
+import { MockRequestAdapter, mockRequestAdapter } from '../mockData';
 
 interface ListResponse {
   total: number;
   list: number[];
 }
 describe('createServerTokenAuthentication', () => {
+  test('type check', async () => {
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType>({});
+
+    onResponseRefreshToken((response, method) => {
+      type Response = typeof response;
+      type Method = typeof method;
+
+      expect<ReturnType<Response['json']> extends Promise<any> ? true : never>(true);
+      expect<Response['status'] extends number ? true : never>(true);
+      expect<Response['status'] extends number ? true : never>(true);
+      expect<Method['context'] extends Alova<any> ? true : never>(true);
+    });
+
+    onAuthRequired(method => {
+      type Method = typeof method;
+      expect<Method['context'] extends Alova<any> ? true : never>(true);
+    });
+  });
   test('should emit custom request and response interceptors', async () => {
-    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({});
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
+      {}
+    );
     const beforeRequestFn = jest.fn();
     const responseFn = jest.fn();
     const alovaInst = createAlova({
@@ -79,13 +99,15 @@ describe('createServerTokenAuthentication', () => {
 
   test('should emit login interceptor when set authRole to `login`', async () => {
     const loginInterceptorFn = jest.fn();
-    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({
-      login(response, method) {
-        expect(response.total).toBe(300);
-        expect(method).toBeInstanceOf(Method);
-        loginInterceptorFn();
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
+      {
+        login(response, method) {
+          expect(response.total).toBe(300);
+          expect(method).toBeInstanceOf(Method);
+          loginInterceptorFn();
+        }
       }
-    });
+    );
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -102,7 +124,7 @@ describe('createServerTokenAuthentication', () => {
     expect(loginInterceptorFn).toHaveBeenCalledTimes(1);
 
     const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
-      createServerTokenAuthentication({
+      createServerTokenAuthentication<VueHookType, MockRequestAdapter>({
         login: {
           metaMatches: {
             login: true
@@ -131,13 +153,15 @@ describe('createServerTokenAuthentication', () => {
   });
   test('should emit logout interceptor when set authRole to `logout`', async () => {
     const logoutInterceptorFn = jest.fn();
-    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({
-      logout(response, method) {
-        expect(response.total).toBe(300);
-        expect(method).toBeInstanceOf(Method);
-        logoutInterceptorFn();
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
+      {
+        logout(response, method) {
+          expect(response.total).toBe(300);
+          expect(method).toBeInstanceOf(Method);
+          logoutInterceptorFn();
+        }
       }
-    });
+    );
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -154,7 +178,7 @@ describe('createServerTokenAuthentication', () => {
     expect(logoutInterceptorFn).toHaveBeenCalledTimes(1);
 
     const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
-      createServerTokenAuthentication({
+      createServerTokenAuthentication<VueHookType, MockRequestAdapter>({
         logout: {
           metaMatches: {
             logout: true
@@ -184,16 +208,18 @@ describe('createServerTokenAuthentication', () => {
 
   test('The async functions runing order should be `login -> logout -> global.onSuccess -> useHook.onSuccess`', async () => {
     let orderAry = [] as string[];
-    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({
-      async login() {
-        await untilCbCalled(setTimeout, 100);
-        orderAry.push('login');
-      },
-      async logout() {
-        await untilCbCalled(setTimeout, 100);
-        orderAry.push('logout');
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
+      {
+        async login() {
+          await untilCbCalled(setTimeout, 100);
+          orderAry.push('login');
+        },
+        async logout() {
+          await untilCbCalled(setTimeout, 100);
+          orderAry.push('logout');
+        }
       }
-    });
+    );
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -237,28 +263,30 @@ describe('createServerTokenAuthentication', () => {
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
     const responseFn = jest.fn();
-    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({
-      refreshTokenOnError: {
-        isExpired: (error, method) => {
-          expect(method).toBeInstanceOf(Method);
-          expireFn();
-          return error.name === '401';
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
+      {
+        refreshTokenOnError: {
+          isExpired: (error, method) => {
+            expect(method).toBeInstanceOf(Method);
+            expireFn();
+            return error.name === '401';
+          },
+          handler: async (error, method) => {
+            expect(error.name).toBe('401');
+            expect(method).toBeInstanceOf(Method);
+            const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
+            refreshMethod.meta = {
+              authRole: 'refreshToken'
+            };
+            token = (await refreshMethod).token;
+            refreshTokenFn();
+          }
         },
-        handler: async (error, method) => {
-          expect(error.name).toBe('401');
-          expect(method).toBeInstanceOf(Method);
-          const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
-          refreshMethod.meta = {
-            authRole: 'refreshToken'
-          };
-          token = (await refreshMethod).token;
-          refreshTokenFn();
+        assignToken: method => {
+          method.config.headers.Authorization = token;
         }
-      },
-      assignToken: method => {
-        method.config.headers.Authorization = token;
       }
-    });
+    );
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -282,28 +310,30 @@ describe('createServerTokenAuthentication', () => {
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
     const responseFn = jest.fn();
-    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({
-      refreshTokenOnSuccess: {
-        isExpired: (response, method) => {
-          expect(method).toBeInstanceOf(Method);
-          expireFn();
-          return response.status === 401;
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
+      {
+        refreshTokenOnSuccess: {
+          isExpired: (response, method) => {
+            expect(method).toBeInstanceOf(Method);
+            expireFn();
+            return response.status === 401;
+          },
+          handler: async (response, method) => {
+            expect(response.status).toBe(401);
+            expect(method).toBeInstanceOf(Method);
+            const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
+            refreshMethod.meta = {
+              authRole: 'refreshToken'
+            };
+            token = (await refreshMethod).token;
+            refreshTokenFn();
+          }
         },
-        handler: async (response, method) => {
-          expect(response.status).toBe(401);
-          expect(method).toBeInstanceOf(Method);
-          const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
-          refreshMethod.meta = {
-            authRole: 'refreshToken'
-          };
-          token = (await refreshMethod).token;
-          refreshTokenFn();
+        assignToken: method => {
+          method.config.headers.Authorization = token;
         }
-      },
-      assignToken: method => {
-        method.config.headers.Authorization = token;
       }
-    });
+    );
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -334,7 +364,10 @@ describe('createServerTokenAuthentication', () => {
       alovaInst.Get(`/list-auth?a=${a}`, {
         transformData: (data: number[]) => data.map(i => i + 5)
       });
-    const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication({
+    const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication<
+      VueHookType,
+      MockRequestAdapter
+    >({
       refreshTokenOnError: {
         isExpired: error => {
           expireFn();
@@ -384,7 +417,10 @@ describe('createServerTokenAuthentication', () => {
     let token = '';
     const refreshTokenFn = jest.fn();
     const beforeRequestFn = jest.fn();
-    const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication({
+    const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication<
+      VueHookType,
+      MockRequestAdapter
+    >({
       refreshTokenOnError: {
         isExpired: error => error.name === '401',
         handler: async () => {
@@ -428,7 +464,10 @@ describe('createServerTokenAuthentication', () => {
     let token = '';
     const refreshTokenFn = jest.fn();
     const redirectLoginFn = jest.fn();
-    const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication({
+    const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication<
+      VueHookType,
+      MockRequestAdapter
+    >({
       refreshTokenOnError: {
         isExpired: error => error.name === '401',
         handler: async () => {
@@ -470,25 +509,27 @@ describe('createServerTokenAuthentication', () => {
     let token = '';
     const expireFn = jest.fn();
     const refreshTokenFn = jest.fn();
-    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication({
-      refreshTokenOnError: {
-        isExpired: error => {
-          expireFn();
-          return error.status === '401';
+    const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
+      {
+        refreshTokenOnError: {
+          isExpired: error => {
+            expireFn();
+            return error.status === '401';
+          },
+          handler: async () => {
+            const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
+            refreshMethod.meta = {
+              authRole: 'refreshToken'
+            };
+            token = (await refreshMethod).token;
+            refreshTokenFn();
+          }
         },
-        handler: async () => {
-          const refreshMethod = alovaInst.Get<{ token: string }>('/refresh-token');
-          refreshMethod.meta = {
-            authRole: 'refreshToken'
-          };
-          token = (await refreshMethod).token;
-          refreshTokenFn();
+        assignToken: method => {
+          method.config.headers.Authorization = token;
         }
-      },
-      assignToken: method => {
-        method.config.headers.Authorization = token;
       }
-    });
+    );
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -510,7 +551,7 @@ describe('createServerTokenAuthentication', () => {
 
     // 自定义忽略method规则;
     const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
-      createServerTokenAuthentication({
+      createServerTokenAuthentication<VueHookType, MockRequestAdapter>({
         visitorMeta: {
           loginRequired: false
         },
