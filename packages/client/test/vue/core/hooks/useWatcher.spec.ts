@@ -893,4 +893,44 @@ describe('use useWatcher hook to send GET with vue', () => {
     const cacheData = await queryCache(getGetterObj);
     expect(cacheData?.params).toStrictEqual({ val: '1' });
   });
+
+  test('should return original return value in on events', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+
+    const successFn = jest.fn();
+    const errorFn = jest.fn();
+    const completeFn = jest.fn();
+    const mutateNum = ref(0);
+    const mutateStr = ref('accc');
+    const { loading, data, error, onSuccess } = useWatcher(
+      () =>
+        alova.Get('/unit-test', {
+          params: { num: mutateNum.value, str: mutateStr.value },
+          transform: (result: Result) => result.data,
+          cacheFor: null
+        }),
+      [mutateNum, mutateStr],
+      {
+        immediate: true
+      }
+    )
+      .onSuccess(successFn)
+      .onError(errorFn)
+      .onComplete(completeFn);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toStrictEqual({ num: '0', str: 'accc' });
+    expect(error.value).toBeUndefined();
+
+    expect(successFn).toHaveBeenCalled();
+    expect(errorFn).not.toHaveBeenCalled();
+    expect(completeFn).toHaveBeenCalled();
+  });
 });

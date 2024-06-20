@@ -5,12 +5,27 @@ import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, UseHookExposure } from '~/typings';
 import { AutoRequestHookConfig, NotifyHandler, UnbindHandler } from '~/typings/general';
 
-interface AutoRequestHook<AG extends AlovaGenerics> {
-  (handler: Method<AG> | AlovaMethodHandler<AG>, config?: AutoRequestHookConfig<AG>): UseHookExposure<AG>;
-  onNetwork(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
-  onPolling(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
-  onVisibility(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
-  onFocus(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+interface AutoRequestHook {
+  <AG extends AlovaGenerics>(
+    handler: Method<AG> | AlovaMethodHandler<AG>,
+    config?: AutoRequestHookConfig<AG>
+  ): UseHookExposure<AG>;
+  onNetwork<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
+  onPolling<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
+  onVisibility<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
+  onFocus<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
 }
 
 export const defaultConfig: AutoRequestHookConfig<AlovaGenerics> = {
@@ -18,7 +33,7 @@ export const defaultConfig: AutoRequestHookConfig<AlovaGenerics> = {
   enableNetwork: trueValue,
   throttle: 1000
 };
-const useAutoRequest: AutoRequestHook<AlovaGenerics> = (handler, config = {}) => {
+const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
   let notifiable = trueValue;
   const {
     enableFocus = trueValue,

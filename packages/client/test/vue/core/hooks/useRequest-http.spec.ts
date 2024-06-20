@@ -474,4 +474,35 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(error.value?.message).toBe('custom request error');
     expect(data.value).toBe(111);
   });
+
+  test('should return original return value in on events', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      params: { a: 'abc', b: 'str' },
+      transform: ({ data }: Result) => data
+    });
+
+    const successFn = jest.fn();
+    const errorFn = jest.fn();
+    const completeFn = jest.fn();
+    const { loading, data, error, onSuccess } = useRequest(Get)
+      .onSuccess(successFn)
+      .onError(errorFn)
+      .onComplete(completeFn);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+
+    await untilCbCalled(onSuccess);
+    expect(loading.value).toBeFalsy();
+    expect(data.value.path).toBe('/unit-test');
+    expect(data.value.params).toStrictEqual({ a: 'abc', b: 'str' });
+    expect(error.value).toBeUndefined();
+
+    expect(successFn).toHaveBeenCalled();
+    expect(errorFn).not.toHaveBeenCalled();
+    expect(completeFn).toHaveBeenCalled();
+  });
 });

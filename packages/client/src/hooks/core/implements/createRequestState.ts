@@ -9,7 +9,6 @@ import {
   instanceOf,
   isFn,
   isNumber,
-  objAssign,
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
@@ -127,7 +126,6 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     complete: AlovaCompleteEvent<AG>;
   }>();
 
-  const hookProvider = exposeProvider(objectify([data, loading, error, downloading, uploading]));
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
 
   /**
@@ -172,7 +170,8 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     });
   }
 
-  return objAssign(hookProvider, {
+  return exposeProvider({
+    ...objectify([data, loading, error, downloading, uploading]),
     abort: () => hookInstance.m && hookInstance.m.abort(),
     /**
      * 通过执行该方法来手动发起请求

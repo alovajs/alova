@@ -1,5 +1,5 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { accessAction, actionDelegationMiddleware } from '@/index';
+import { accessAction, actionDelegationMiddleware, usePagination } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
@@ -1596,5 +1596,37 @@ describe('vue => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent('300');
       expect(successMockFn).toHaveBeenCalledTimes(2);
     });
+  });
+
+  test('should return original return value in on events', async () => {
+    const successMockFn = jest.fn();
+    const completedMockFn = jest.fn();
+    const fetchSuccessMockFn = jest.fn();
+    const fetchCompletedMockFn = jest.fn();
+    const { loading, data, error, page, pageCount, total, pageSize, isLastPage } = usePagination(getter1, {
+      total: res => res.total,
+      data: res => res.list
+    })
+      .onSuccess(successMockFn)
+      .onComplete(completedMockFn)
+      .onFetchComplete(fetchSuccessMockFn)
+      .onFetchComplete(fetchCompletedMockFn);
+
+    await waitFor(() => {
+      expect(fetchSuccessMockFn).toHaveBeenCalled();
+      expect(pageCount.value).toBe(30);
+    });
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeInstanceOf(Array);
+    expect(error.value).toBeUndefined();
+    expect(page.value).toBe(1);
+    expect(pageSize.value).toBe(10);
+    expect(total.value).toBe(300);
+    expect(isLastPage.value).toBeFalsy();
+    expect(successMockFn).toHaveBeenCalled();
+    expect(completedMockFn).toHaveBeenCalled();
+    expect(fetchSuccessMockFn).toHaveBeenCalled();
+    expect(fetchCompletedMockFn).toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import { FrameworkState } from '@alova/shared/FrameworkState';
+import { FrameworkReadableState, FrameworkState } from '@alova/shared/FrameworkState';
 import { EventManager } from '@alova/shared/createEventManager';
 import { IsAny } from '@alova/shared/types';
 import {
@@ -172,9 +172,9 @@ export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> exten
   abort: () => void;
   update: StateUpdater<UseHookExportedState<AG>>;
   send: SendHandler<AG['Responded']>;
-  onSuccess: (handler: SuccessHandler<AG>) => void;
-  onError: (handler: ErrorHandler<AG>) => void;
-  onComplete: (handler: CompleteHandler<AG>) => void;
+  onSuccess(handler: SuccessHandler<AG>): this;
+  onError(handler: ErrorHandler<AG>): this;
+  onComplete(handler: CompleteHandler<AG>): this;
   __proxyState: ProxyStateGetter<UseHookExportedState<AG>>;
   __referingObj: ReferingObject;
 }
@@ -192,6 +192,8 @@ export interface UseFetchHookExposure<State> extends UseFetchExportedState<State
   onSuccess: UseHookExposure['onSuccess'];
   onError: UseHookExposure['onError'];
   onComplete: UseHookExposure['onComplete'];
+  __proxyState: ProxyStateGetter<UseHookExportedState<any>>;
+  __referingObj: ReferingObject;
 }
 
 export interface AlovaMiddlewareContext<AG extends AlovaGenerics> {
@@ -415,15 +417,9 @@ export declare function updateState<Responded>(
   matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
   handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>
 ): Promise<boolean>;
-// TODO: 以上类型是从alova迁移过来
-// ===================================================
-// ===================================================
-// ===================================================
 
-type UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]> = Omit<
-  UseHookExposure<AG>,
-  'data' | 'update'
-> & {
+export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
+  extends UseHookExposure<AG> {
   page: ExportedState<number, AG['State']>;
   pageSize: ExportedState<number, AG['State']>;
   data: ExportedState<
@@ -442,12 +438,10 @@ type UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
   total: ExportedComputed<number | undefined, AG['Computed']>;
   isLastPage: ExportedComputed<boolean, AG['Computed']>;
   fetching: ExportedState<boolean, AG['State']>;
-  onFetchSuccess: (handler: SuccessHandler<AG>) => void;
-  onFetchError: (handler: ErrorHandler<AG>) => void;
-  onFetchComplete: (handler: CompleteHandler<AG>) => void;
-  update: (
-    newFrontStates: Partial<FrontRequestState<boolean, ListData, Error | undefined, Progress, Progress>>
-  ) => void;
+  onFetchSuccess(handler: SuccessHandler<AG>): UsePaginationExposure<AG, ListData>;
+  onFetchError(handler: ErrorHandler<AG>): UsePaginationExposure<AG, ListData>;
+  onFetchComplete(handler: CompleteHandler<AG>): UsePaginationExposure<AG, ListData>;
+  update: StateUpdater<UsePaginationExposure<AG, ListData>>;
 
   /**
    * 刷新指定页码数据，此函数将忽略缓存强制发送请求
@@ -455,7 +449,7 @@ type UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
    * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
    * @param pageOrItemPage 刷新的页码或列表项
    */
-  refresh: (pageOrItemPage?: number | ListData[number]) => void;
+  refresh(pageOrItemPage?: number | ListData[number]): void;
 
   /**
    * 插入一条数据
@@ -464,17 +458,14 @@ type UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
    * @param item 插入项
    * @param position 插入位置（索引）或列表项
    */
-  insert: (
-    item: ListData extends any[] ? ListData[number] : any,
-    position?: number | ListData[number]
-  ) => Promise<void>;
+  insert(item: ListData extends any[] ? ListData[number] : any, position?: number | ListData[number]): Promise<void>;
 
   /**
    * 移除一条数据
    * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
    * @param position 移除的索引或列表项
    */
-  remove: (...positions: (number | ListData[number])[]) => Promise<void>;
+  remove(...positions: (number | ListData[number])[]): Promise<void>;
 
   /**
    * 替换一条数据
@@ -482,13 +473,13 @@ type UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
    * @param item 替换项
    * @param position 替换位置（索引）或列表项
    */
-  replace: (item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number]) => void;
+  replace(item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number]): void;
 
   /**
    * 从第一页开始重新加载列表，并清空缓存
    */
-  reload: () => void;
-};
+  reload(): void;
+}
 
 // /**
 //  * alova分页hook
@@ -507,32 +498,32 @@ export declare function usePagination<AG extends AlovaGenerics, ListData extends
  * 带silentQueue的request hook
  * silentQueue是实现静默提交的核心部件，其中将用于存储silentMethod实例，它们将按顺序串行发送提交
  */
-declare function useSQRequest<AG extends AlovaGenerics>(
+export declare function useSQRequest<AG extends AlovaGenerics>(
   handler: AlovaMethodHandler<AG>,
   config?: SQRequestHookConfig<AG>
 ): SQHookExposure<AG>;
-declare function bootSilentFactory(options: SilentFactoryBootOptions): void;
-declare function onSilentSubmitBoot(handler: SilentSubmitBootHandler): OffEventCallback;
-declare function onSilentSubmitSuccess(handler: SilentSubmitSuccessHandler): OffEventCallback;
-declare function onSilentSubmitError(handler: SilentSubmitErrorHandler): OffEventCallback;
-declare function onSilentSubmitFail(handler: SilentSubmitFailHandler): OffEventCallback;
-declare function onBeforeSilentSubmit(handler: BeforeSilentSubmitHandler): OffEventCallback;
-declare function dehydrateVData<T>(target: T): T;
-declare function stringifyVData(target: any, returnOriginalIfNotVData?: boolean): any;
-declare function isVData(target: any): boolean;
-declare function equals(prevValue: any, nextValue: any): boolean;
-declare function filterSilentMethods(
+export declare function bootSilentFactory(options: SilentFactoryBootOptions): void;
+export declare function onSilentSubmitBoot(handler: SilentSubmitBootHandler): OffEventCallback;
+export declare function onSilentSubmitSuccess(handler: SilentSubmitSuccessHandler): OffEventCallback;
+export declare function onSilentSubmitError(handler: SilentSubmitErrorHandler): OffEventCallback;
+export declare function onSilentSubmitFail(handler: SilentSubmitFailHandler): OffEventCallback;
+export declare function onBeforeSilentSubmit(handler: BeforeSilentSubmitHandler): OffEventCallback;
+export declare function dehydrateVData<T>(target: T): T;
+export declare function stringifyVData(target: any, returnOriginalIfNotVData?: boolean): any;
+export declare function isVData(target: any): boolean;
+export declare function equals(prevValue: any, nextValue: any): boolean;
+export declare function filterSilentMethods(
   methodNameMatcher?: string | number | RegExp,
   queueName?: string,
   filterActive?: boolean
 ): Promise<SilentMethod[]>;
-declare function getSilentMethod(
+export declare function getSilentMethod(
   methodNameMatcher?: string | number | RegExp,
   queueName?: string,
   filterActive?: boolean
 ): Promise<SilentMethod | undefined>;
-declare const updateStateEffect: typeof updateState;
-declare const silentQueueMap: SilentQueueMap;
+export declare const updateStateEffect: typeof updateState;
+export declare const silentQueueMap: SilentQueueMap;
 
 /**
  * 验证码发送场景的请求hook
@@ -540,7 +531,7 @@ declare const silentQueueMap: SilentQueueMap;
  * @param 配置参数
  * @return useCaptcha相关数据和操作函数
  */
-declare function useCaptcha<AG extends AlovaGenerics>(
+export declare function useCaptcha<AG extends AlovaGenerics>(
   handler: Method<AG> | AlovaMethodHandler<AG>,
   config?: CaptchaHookConfig<AG>
 ): CaptchaExposure<AG>;
@@ -557,7 +548,7 @@ declare function useCaptcha<AG extends AlovaGenerics>(
  * @param config 配置参数
  * @return useForm相关数据和操作函数
  */
-declare function useForm<AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
+export declare function useForm<AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
   handler: FormHookHandler<AG, FormData | undefined>,
   config?: FormHookConfig<AG, FormData>
 ): FormExposure<AG, FormData>;
@@ -571,7 +562,7 @@ declare function useForm<AG extends AlovaGenerics, FormData extends Record<strin
  * @param config 配置参数
  * @return useSSE相关数据和操作函数
  */
-declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics>(
+export declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   handler: Method<AG> | AlovaMethodHandler<AG>,
   config?: SSEHookConfig
 ): SSEExposure<AG, Data>;
@@ -587,7 +578,7 @@ declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics>(
  * @param config 配置参数
  * @return useRetriableRequest相关数据和操作函数
  */
-declare function useRetriableRequest<AG extends AlovaGenerics>(
+export declare function useRetriableRequest<AG extends AlovaGenerics>(
   handler: Method<AG> | AlovaMethodHandler<AG>,
   config?: RetriableHookConfig<AG>
 ): RetriableExposure<AG>;
@@ -600,7 +591,7 @@ declare function useRetriableRequest<AG extends AlovaGenerics>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<AG extends AlovaGenerics>(
+export declare function useSerialRequest<AG extends AlovaGenerics>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
   config?: RequestHookConfig<AG>
 ): UseHookExposure<AG>;
@@ -613,7 +604,7 @@ declare function useSerialRequest<AG extends AlovaGenerics>(
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<AG extends AlovaGenerics, AG2 extends AlovaGenerics>(
+export declare function useSerialRequest<AG extends AlovaGenerics, AG2 extends AlovaGenerics>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, AlovaMethodHandler<AG2>, ...AlovaMethodHandler<any>[]],
   config?: RequestHookConfig<AG>
 ): UseHookExposure<AG2>;
@@ -626,7 +617,11 @@ declare function useSerialRequest<AG extends AlovaGenerics, AG2 extends AlovaGen
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<AG extends AlovaGenerics, AG2 extends AlovaGenerics, AG3 extends AlovaGenerics>(
+export declare function useSerialRequest<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics
+>(
   serialHandlers: [
     Method<AG> | AlovaMethodHandler<AG>,
     AlovaMethodHandler<AG2>,
@@ -644,7 +639,7 @@ declare function useSerialRequest<AG extends AlovaGenerics, AG2 extends AlovaGen
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<
+export declare function useSerialRequest<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -668,7 +663,7 @@ declare function useSerialRequest<
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<
+export declare function useSerialRequest<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -694,7 +689,7 @@ declare function useSerialRequest<
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<
+export declare function useSerialRequest<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -722,7 +717,7 @@ declare function useSerialRequest<
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-declare function useSerialRequest<
+export declare function useSerialRequest<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -752,7 +747,7 @@ declare function useSerialRequest<
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<AG extends AlovaGenerics>(
+export declare function useSerialWatcher<AG extends AlovaGenerics>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
   watchingStates: AG['Watched'][],
   config?: WatcherHookConfig<AG>
@@ -766,7 +761,7 @@ declare function useSerialWatcher<AG extends AlovaGenerics>(
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGenerics>(
+export declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGenerics>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, AlovaMethodHandler<AG2>, ...AlovaMethodHandler<any>[]],
   watchingStates: AG['Watched'][],
   config?: WatcherHookConfig<AG>
@@ -780,7 +775,11 @@ declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGen
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGenerics, AG3 extends AlovaGenerics>(
+export declare function useSerialWatcher<
+  AG extends AlovaGenerics,
+  AG2 extends AlovaGenerics,
+  AG3 extends AlovaGenerics
+>(
   serialHandlers: [
     Method<AG> | AlovaMethodHandler<AG>,
     AlovaMethodHandler<AG2>,
@@ -799,7 +798,7 @@ declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGen
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<
+export declare function useSerialWatcher<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -824,7 +823,7 @@ declare function useSerialWatcher<
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<
+export declare function useSerialWatcher<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -851,7 +850,7 @@ declare function useSerialWatcher<
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<
+export declare function useSerialWatcher<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -880,7 +879,7 @@ declare function useSerialWatcher<
  * @param config 配置参数
  * @return useSerialWatcher相关数据和操作函数
  */
-declare function useSerialWatcher<
+export declare function useSerialWatcher<
   AG extends AlovaGenerics,
   AG2 extends AlovaGenerics,
   AG3 extends AlovaGenerics,
@@ -911,14 +910,14 @@ declare function useSerialWatcher<
  * @param id 委托者id
  * @returns alova中间件函数
  */
-declare const actionDelegationMiddleware: ActionDelegationMiddleware;
+export declare const actionDelegationMiddleware: ActionDelegationMiddleware;
 
 /**
  * 访问操作函数，如果匹配多个则会以此调用onMatch
  * @param id 委托者id，或正则表达式
  * @param onMatch 匹配的订阅者
  */
-declare const accessAction: AccessAction;
+export declare const accessAction: AccessAction;
 
 /**
  * 创建客户端的token认证拦截器
@@ -943,7 +942,7 @@ declare const accessAction: AccessAction;
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export function createClientTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
+export declare function createClientTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
   options: ClientTokenAuthenticationOptions<
     AlovaRequestAdapter<AG['RequestConfig'], AG['Response'], AG['ResponseHeader']>
   >
@@ -972,7 +971,7 @@ export function createClientTokenAuthentication<AG extends AlovaGenerics = Alova
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export function createServerTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
+export declare function createServerTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
   options: ServerTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any>>
 ): TokenAuthenticationResult<AG>;
 
@@ -987,13 +986,25 @@ export function createServerTokenAuthentication<AG extends AlovaGenerics = Alova
  * @param config 配置参数
  * @return useAutoRequest相关数据和操作函数
  */
-declare function useAutoRequest<AG extends AlovaGenerics>(
+export declare function useAutoRequest<AG extends AlovaGenerics>(
   handler: Method<AG> | AlovaMethodHandler<AG>,
   config?: AutoRequestHookConfig<AG>
 ): UseHookExposure<AG>;
-declare namespace useAutoRequest {
-  function onNetwork(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
-  function onPolling(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
-  function onVisibility(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
-  function onFocus(notify: NotifyHandler, config: AutoRequestHookConfig<AG>): UnbindHandler;
+export declare namespace useAutoRequest {
+  function onNetwork<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
+  function onPolling<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
+  function onVisibility<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
+  function onFocus<AG extends AlovaGenerics = AlovaGenerics>(
+    notify: NotifyHandler,
+    config: AutoRequestHookConfig<AG>
+  ): UnbindHandler;
 }

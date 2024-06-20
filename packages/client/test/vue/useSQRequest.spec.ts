@@ -46,22 +46,21 @@ describe('vue => useSQRequest', () => {
   test('request immediately with queue behavior', async () => {
     const queue = 'tb1';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
-    const { loading, data, error, downloading, uploading, onSuccess, onComplete, onBeforePushQueue, onPushedQueue } =
-      useSQRequest(() => Get, {
-        queue
-      });
     const beforePushMockFn = jest.fn();
-    onBeforePushQueue(event => {
-      beforePushMockFn(event, [...silentQueueMap[queue]]);
-    });
     const pushedMockFn = jest.fn();
-    onPushedQueue(event => {
-      pushedMockFn(event, [...silentQueueMap[queue]]);
-    });
     const completeMockFn = jest.fn();
-    onComplete(event => {
-      completeMockFn(event);
-    });
+    const { loading, data, error, downloading, uploading, onSuccess } = useSQRequest(() => Get, {
+      queue
+    })
+      .onBeforePushQueue(event => {
+        beforePushMockFn(event, [...silentQueueMap[queue]]);
+      })
+      .onPushedQueue(event => {
+        pushedMockFn(event, [...silentQueueMap[queue]]);
+      })
+      .onComplete(event => {
+        completeMockFn(event);
+      });
 
     expect(loading.value).toBeFalsy(); // 有middleware则默认为false
     expect(data.value).toBeUndefined();

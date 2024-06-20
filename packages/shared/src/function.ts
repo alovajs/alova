@@ -364,6 +364,19 @@ interface MemorizedFunction {
   (...args: any[]): any;
   memorized: true;
 }
+
+type ActualStateTranslator<AG extends AlovaGenerics, StateProxy extends FrameworkReadableState<any, string>> =
+  StateProxy extends FrameworkState<any, string>
+    ? ExportedState<StateProxy['v'], AG['State']>
+    : ExportedComputed<StateProxy['v'], AG['Computed']>;
+type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string | number | symbol, any>> = {
+  [K in keyof O]: O[K] extends FrameworkReadableState<any, string>
+    ? ActualStateTranslator<AG, O[K]>
+    : // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      K extends `on${infer _}`
+      ? (...args: Parameters<O[K]>) => CompletedExposingProvider<AG, O>
+      : O[K];
+};
 /**
  * create simple and unified, framework-independent states creators and handlers.
  * @param statesHook states hook from `promiseStatesHook` function of alova
@@ -446,10 +459,18 @@ export function statesHookHelper<AG extends AlovaGenerics>(
         const value = object[key];
         const isValueFunction = isFn(value);
         // if it's a memorized function, don't memorize it any more, add it to provider directly.
-        // if it's start with `on`, it indicates it is an event binder. add it to provider directly.
+        // if it's start with `on`, it indicates it is an event binder, we should define a new function which return provider object.
         // if it's a common function, add it to provider with memorize mode.
         if (isValueFunction) {
-          provider[key] = (value as MemorizedFunction).memorized || key.startsWith('on') ? value : memorize(value);
+          provider[key] = key.startsWith('on')
+            ? (...args: any[]) => {
+                value(...args);
+                // eslint-disable-next-line
+                return completedProvider;
+              }
+            : (value as MemorizedFunction).memorized
+              ? value
+              : memorize(value);
         } else {
           const isFrameworkState = instanceOf(value, FrameworkReadableState);
           if (isFrameworkState) {
@@ -470,11 +491,6 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       }
 
       const { update: nestedHookUpdate, __proxyState: nestedProxyState } = provider;
-      type ActualStateTranslator<StateProxy extends FrameworkReadableState<any, string>> =
-        StateProxy extends FrameworkState<any, string>
-          ? ExportedState<StateProxy['v'], AG['State']>
-          : ExportedComputed<StateProxy['v'], AG['Computed']>;
-
       // reset the tracked keys, so that the nest hook providers can be initialized.
       referingObject.trackedKeys = {};
       const extraProvider = {
@@ -506,9 +522,12 @@ export function statesHookHelper<AG extends AlovaGenerics>(
           return nestedProxyState(key);
         })
       };
-      return objAssign(provider, extraProvider) as {
-        [K in keyof O]: O[K] extends FrameworkReadableState<any, string> ? ActualStateTranslator<O[K]> : O[K];
-      } & typeof extraProvider;
+
+      const completedProvider = objAssign(provider, extraProvider) as CompletedExposingProvider<
+        AG,
+        O & typeof extraProvider
+      >;
+      return completedProvider;
     },
 
     /**
