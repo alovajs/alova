@@ -26,7 +26,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr]
@@ -78,7 +78,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       () =>
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: null
         }),
       [mutateNum, mutateStr]
@@ -120,7 +120,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       () =>
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
-          transformData: ({ data: responseData }: Result) => {
+          transform: ({ data: responseData }: Result) => {
             if (responseData.path === '/unit-test-1s') {
               throw new Error('error');
             }
@@ -171,7 +171,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       () =>
         alova.Get(i === 1 ? '/unit-test-1s' : '/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
-          transformData: ({ data: responseData }: Result) => responseData,
+          transform: ({ data: responseData }: Result) => responseData,
           cacheFor: null
         }),
       [mutateNum, mutateStr],
@@ -219,7 +219,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
@@ -280,7 +280,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
@@ -336,7 +336,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       () =>
         alova.Get('/unit-test', {
           params: { num: mutateNum.value, str: mutateStr.value },
-          transformData: (result: Result) => result.data
+          transform: (result: Result) => result.data
         }),
       [mutateNum, mutateStr],
       {
@@ -360,7 +360,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     const mutateStr = ref('a');
     const currentGet = alova.Get('/unit-test', {
       params: { num: mutateNum.value, str: mutateStr.value },
-      transformData: (result: Result) => result.data,
+      transform: (result: Result) => result.data,
       cacheFor: 0
     });
     const { data, error, onSuccess } = useWatcher(currentGet, [mutateNum, mutateStr], {
@@ -405,7 +405,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateObj, mutateObjReactive]
@@ -446,7 +446,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [computedStr]
@@ -484,7 +484,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
@@ -540,7 +540,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateNum, mutateStr],
@@ -600,7 +600,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         });
         return get;
@@ -660,7 +660,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateObj, mutateObjReactive],
@@ -715,7 +715,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 100 * 1000
         }),
       [mutateObj, mutateObjReactive],
@@ -766,7 +766,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 0
         }),
       [mutateNum, mutateStr],
@@ -815,7 +815,7 @@ describe('use useWatcher hook to send GET with vue', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          transformData: (result: Result) => result.data,
+          transform: (result: Result) => result.data,
           cacheFor: 0
         }),
       [mutateNum, mutateStr],
@@ -862,7 +862,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
     const getGetterObj = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
+      transform: ({ data }: Result<true>) => data,
       params: {
         val: '1'
       },

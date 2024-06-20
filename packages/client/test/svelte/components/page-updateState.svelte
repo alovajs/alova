@@ -12,7 +12,7 @@
     responded: response => response.json()
   });
   const Get = alova.Get('/unit-test', {
-    transformData: ({ data }) => data
+    transform: ({ data }) => data
   });
 
   const handleUpdateState = () => {

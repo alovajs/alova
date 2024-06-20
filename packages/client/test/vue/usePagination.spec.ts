@@ -27,14 +27,14 @@ interface ListResponse {
   total: number;
   list: number[];
 }
-const getter1 = (page: number, pageSize: number, extra: Record<string, any> = {}, transformData?: GeneralFn) =>
+const getter1 = (page: number, pageSize: number, extra: Record<string, any> = {}, transform?: GeneralFn) =>
   alovaInst.Get<ListResponse>('/list', {
     params: {
       page,
       pageSize,
       ...extra
     },
-    transformData
+    transform
   });
 interface SearchListResponse {
   total: number;

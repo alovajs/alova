@@ -1,9 +1,9 @@
 <script>
   import { useWatcher } from '@/index';
-  import SvelteHook from 'alova/svelte';
   import { key } from '@alova/shared/function';
   import { createAlova } from 'alova';
   import GlobalFetch from 'alova/fetch';
+  import SvelteHook from 'alova/svelte';
   import { writable } from 'svelte/store';
   const stateId1 = writable(0);
   const stateId2 = writable(10);
@@ -21,7 +21,7 @@
         id1,
         id2
       },
-      transformData: ({ data }) => data
+      transform: ({ data }) => data
     });
 
   const handleClick = () => {

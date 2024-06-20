@@ -160,7 +160,7 @@ export type AlovaMethodConfig<AG extends AlovaGenerics, Responded, Transformed> 
   /**
    * 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
    */
-  transformData?: (data: Transformed, headers: AG['ResponseHeader']) => Responded | Promise<Responded>;
+  transform?: (data: Transformed, headers: AG['ResponseHeader']) => Responded | Promise<Responded>;
 
   /**
    * 请求级共享请求开关

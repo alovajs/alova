@@ -41,7 +41,7 @@ describe('method instance', () => {
     const Get1 = alova.Get('/unit-test', {
       params: { aa1: 'aa1', b: 'str' },
       timeout: 10000,
-      transformData(result: Result) {
+      transform(result: Result) {
         return result.data;
       },
       cacheFor: 100 * 1000
@@ -54,14 +54,14 @@ describe('method instance', () => {
     expect(Get1.fromCache).toBeTruthy();
   });
 
-  test('`method.config.transformData` can also support async function', async () => {
+  test('`method.config.transform` can also support async function', async () => {
     const Get = alova.Get('/unit-test', {
       params: { a: 'a22', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
       },
-      async transformData(result: Result) {
+      async transform(result: Result) {
         await new Promise(resolve => {
           setTimeout(resolve, 200);
         });
@@ -164,7 +164,7 @@ describe('method instance', () => {
   test('should send request when call `method.then` or await method instance', async () => {
     const rawData = await alova.Get('/unit-test', {
       params: { e: 'e', f: 'gty' },
-      transformData: (result: Result) => result.data
+      transform: (result: Result) => result.data
     });
     expect(rawData.path).toBe('/unit-test');
     expect(rawData.params).toStrictEqual({ e: 'e', f: 'gty' });
@@ -172,7 +172,7 @@ describe('method instance', () => {
     const rawDataParams = await alova
       .Get('/unit-test', {
         params: { e2: 'gg', f: 'gty2' },
-        transformData: (result: Result) => result.data
+        transform: (result: Result) => result.data
       })
       .then(result => result.params);
     expect(rawDataParams).toStrictEqual({ e2: 'gg', f: 'gty2' });
@@ -196,7 +196,7 @@ describe('method instance', () => {
     const rawData = await alova
       .Get('/unit-test', {
         params: { gb: 'gb', f: 'gty' },
-        transformData: (result: Result) => result.data
+        transform: (result: Result) => result.data
       })
       .finally(() => {
         finallyMockFn();
@@ -221,7 +221,7 @@ describe('method instance', () => {
     const alovaInst = getAlovaInstance();
 
     const Get = alovaInst.Get('/unit-test-download', {
-      transformData: (resp: Response) => resp.blob()
+      transform: (resp: Response) => resp.blob()
     });
 
     let progress = { total: 0, loaded: 0 };
@@ -355,7 +355,7 @@ describe('method instance', () => {
 
     const Getter = alova.Get('', {
       params: { a: 'a', b: 'str' },
-      transformData({ data }: Result<'/unit-test'>) {
+      transform({ data }: Result<'/unit-test'>) {
         return data;
       }
     });

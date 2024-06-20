@@ -338,7 +338,7 @@ describe('createClientTokenAuthentication', () => {
       })
     });
     const method = alovaInst.Get('/list-auth', {
-      transformData: (data: number[]) => data.map(i => i + 5)
+      transform: (data: number[]) => data.map(i => i + 5)
     });
     const [list, list2] = await Promise.all([method, method]);
     expect(list).toStrictEqual(generateContinuousNumbers(10, 5));

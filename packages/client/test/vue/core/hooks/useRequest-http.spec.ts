@@ -39,7 +39,7 @@ describe('use useRequest hook to send GET with vue', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      transformData(result: Result) {
+      transform(result: Result) {
         expect(result.code).toBe(200);
         expect(result.data.path).toBe('/unit-test');
         expect(result.data.params).toStrictEqual({ a: 'a', b: 'str' });
@@ -315,7 +315,7 @@ describe('use useRequest hook to send GET with vue', () => {
     const getGetter = (d: { a: string; b: string }) =>
       alova.Get('/unit-test', {
         timeout: 10000,
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         params: {
           a: d.a,
           b: d.b
@@ -364,7 +364,7 @@ describe('use useRequest hook to send GET with vue', () => {
     });
     const getGetter = (index: number) =>
       alova.Get('/unit-test-404', {
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         params: {
           index
         }
@@ -427,7 +427,7 @@ describe('use useRequest hook to send GET with vue', () => {
     });
     const getGetterObj = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
+      transform: ({ data }: Result<true>) => data,
       params: {
         a: '~',
         b: '~~'

@@ -347,7 +347,7 @@ describe('createServerTokenAuthentication', () => {
 
     // 设置notError=1，当遇到错误时不抛出错误，而是以错误格式返回
     const list = await alovaInst.Get('/list-auth?notError=1', {
-      transformData: (data: number[]) => data.map(i => i + 5)
+      transform: (data: number[]) => data.map(i => i + 5)
     });
     expect(list).toStrictEqual(generateContinuousNumbers(10, 5));
     expect(refreshTokenFn).toHaveBeenCalledTimes(1);
@@ -362,7 +362,7 @@ describe('createServerTokenAuthentication', () => {
     const beforeRequestFn = jest.fn();
     const method = (a: string) =>
       alovaInst.Get(`/list-auth?a=${a}`, {
-        transformData: (data: number[]) => data.map(i => i + 5)
+        transform: (data: number[]) => data.map(i => i + 5)
       });
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication<
       VueHookType,
@@ -450,7 +450,7 @@ describe('createServerTokenAuthentication', () => {
     });
     const method = (a: string) =>
       alovaInst.Get(`/list-auth?a=${a}`, {
-        transformData: (data: number[]) => data.map(i => i + 5)
+        transform: (data: number[]) => data.map(i => i + 5)
       });
 
     const [list, list2] = await Promise.all([method('1'), method('2')]);

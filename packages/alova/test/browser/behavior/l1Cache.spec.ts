@@ -10,7 +10,7 @@ describe('l1cache cache data', () => {
 
     // GET requests no longer have default cache settings
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(await queryCache(Get)).not.toBeUndefined();
@@ -30,14 +30,14 @@ describe('l1cache cache data', () => {
 
     // GET requests no longer have default cache settings
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(await queryCache(Get)).toBeUndefined();
 
     // POST is cached
     const Post = alova.Post('/unit-test', undefined, {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post;
     expect(await queryCache(Post)).toStrictEqual({
@@ -60,14 +60,14 @@ describe('l1cache cache data', () => {
 
     // GET requests no longer have default cache settings
     const Get2 = alova2.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get2;
     expect(await queryCache(Get2)).toBeUndefined();
 
     // POST is cached
     const Post2 = alova2.Post('/unit-test', undefined, {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post2;
     expect(await queryCache(Post2)).toStrictEqual({
@@ -88,14 +88,14 @@ describe('l1cache cache data', () => {
 
     // GET requests no longer have default cache settings
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(await queryCache(Get)).toBeUndefined();
 
     // POST is cached
     const Post = alova.Post('/unit-test', undefined, {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post;
     expect(await queryCache(Post)).toStrictEqual({
@@ -118,14 +118,14 @@ describe('l1cache cache data', () => {
 
     // GET requests no longer have default cache settings
     const Get2 = alova2.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get2;
     expect(await queryCache(Get2)).toBeUndefined();
 
     // POST is cached
     const Post2 = alova2.Post('/unit-test', undefined, {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post2;
     expect(await queryCache(Post2)).toStrictEqual({
@@ -153,14 +153,14 @@ describe('l1cache cache data', () => {
 
     // GET requests no longer have default cache settings
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(await queryCache(Get)).toBeUndefined();
 
     // POST is cached
     const Post = alova.Post('/unit-test', undefined, {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post;
     expect(await queryCache(Post)).toStrictEqual({
@@ -178,7 +178,7 @@ describe('l1cache cache data', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(Get.fromCache).toBeFalsy();
@@ -200,7 +200,7 @@ describe('l1cache cache data', () => {
     expireDate.setTime(expireDate.getTime() + 500);
     const Get = alova.Get('/unit-test', {
       cacheFor: expireDate,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(Get.fromCache).toBeFalsy();
@@ -220,7 +220,7 @@ describe('l1cache cache data', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: Infinity,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     await Get;
@@ -241,7 +241,7 @@ describe('l1cache cache data', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: 0,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(Get.fromCache).toBeFalsy();
@@ -256,7 +256,7 @@ describe('l1cache cache data', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: null,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(Get.fromCache).toBeFalsy();

@@ -8,7 +8,7 @@ describe('createAlova', () => {
       requestAdapter: GlobalFetch()
     });
     const methodInst = alova.Get('http://localhost:3000/unit-test', {
-      transformData: (response: Response) => response.json()
+      transform: (response: Response) => response.json()
     });
     const result = await methodInst;
     expect(result).toStrictEqual({

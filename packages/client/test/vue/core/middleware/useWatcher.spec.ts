@@ -10,7 +10,7 @@ describe('useWatcher middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const stateA = ref(0);
     const { loading, error, onSuccess, data, send } = useWatcher(() => getGetterObj, [stateA], {
@@ -36,7 +36,7 @@ describe('useWatcher middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     const stateA = ref(0);
@@ -66,7 +66,7 @@ describe('useWatcher middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     const stateA = ref(0);

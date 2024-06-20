@@ -266,7 +266,7 @@ describe('createAlova', () => {
     expect(error.message).toBe('fetchError: network timeout');
   });
 
-  test('should transformData but not cache data when return data in `responded-onError` interceptor', async () => {
+  test('should transform but not cache data when return data in `responded-onError` interceptor', async () => {
     const alova = getAlovaInstance({
       cacheFor: {
         GET: 500000
@@ -274,7 +274,7 @@ describe('createAlova', () => {
       resErrorExpect: () => [1, 2, 3]
     });
     const Get = alova.Get('/unit-test-error', {
-      transformData: (arr: number[]) => arr.map(item => item * 2)
+      transform: (arr: number[]) => arr.map(item => item * 2)
     });
     const arr = await Get;
     expect(arr).toStrictEqual([2, 4, 6]);
@@ -308,7 +308,7 @@ describe('createAlova', () => {
     });
 
     const Get = alova.Get('/unit-test', {
-      transformData(result: Result) {
+      transform(result: Result) {
         return result.data;
       }
     });
@@ -413,7 +413,7 @@ describe('createAlova', () => {
     });
 
     const getter1 = alova1.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     // Request twice to hit the cache once
     await getter1;
@@ -438,7 +438,7 @@ describe('createAlova', () => {
         expire: 200000,
         tag: 'v1'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     // Request cached data once
     await getter2;
@@ -500,7 +500,7 @@ describe('createAlova', () => {
     });
 
     const getter1 = alova1.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     // Request cache data twice to hit the cache once
     await getter1;
@@ -520,7 +520,7 @@ describe('createAlova', () => {
         expire: 200000,
         tag: 'v1'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     // Request cache data twice to hit the cache once
     await getter2;
@@ -540,7 +540,7 @@ describe('createAlova', () => {
     });
 
     const getter1 = alova1.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     // Request cache data twice to hit the cache once
     await getter1;
@@ -563,7 +563,7 @@ describe('createAlova', () => {
         expire: 200000,
         tag: 'v1'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     // Request cached data once
     // Request cache data twice to hit the cache once

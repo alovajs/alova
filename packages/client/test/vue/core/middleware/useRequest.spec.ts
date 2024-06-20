@@ -9,7 +9,7 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     const { loading, onSuccess } = useRequest(getGetterObj, {
@@ -28,7 +28,7 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
     const { loading, onSuccess } = useRequest(getGetterObj, {
       middleware: (_, next) => next()
@@ -47,7 +47,7 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     const errorObj = new Error('middleware error');
@@ -84,7 +84,7 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
     const { loading, onSuccess } = useRequest(getGetterObj, {
       middleware: async (context, next) => {
@@ -111,7 +111,7 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
     const { loading, data, onSuccess, send } = useRequest(getGetterObj, {
       middleware: async () => {}
@@ -136,14 +136,14 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
     const { loading, data, onSuccess, send } = useRequest(getGetterObj, {
       middleware: async (_, next) => {
         const resp = await next({
           force: true,
           method: alova.Get('/unit-test', {
-            transformData: ({ data: responseData }: Result<true>) => responseData,
+            transform: ({ data: responseData }: Result<true>) => responseData,
             params: {
               a: 'a',
               b: 'b'
@@ -180,7 +180,7 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test-404', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
     const { loading, error, onSuccess, data, send } = useRequest(getGetterObj, {
       middleware: async (_, next) => {
@@ -213,7 +213,7 @@ describe('useRequest middleware', () => {
       responseExpect: r => r.json()
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
     const middlewareResp = {};
     const { loading, error, onSuccess, data } = useRequest(getGetterObj, {
@@ -233,7 +233,7 @@ describe('useRequest middleware', () => {
   test('the behavior should be the same as normal when return another promise instance', async () => {
     const alova = getAlovaInstance(VueHook);
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     // 成功示例
@@ -281,7 +281,7 @@ describe('useRequest middleware', () => {
   test("shouldn't change loading state after response when prevent loaded", async () => {
     const alova = getAlovaInstance(VueHook);
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     // 调用了controlLoading后将自定义控制loading状态
@@ -319,7 +319,7 @@ describe('useRequest middleware', () => {
     const getGetter = (d?: { a: string; b: string }) =>
       alova.Get('/unit-test', {
         timeout: 10000,
-        transformData: ({ data }: Result) => data,
+        transform: ({ data }: Result) => data,
         params: {
           a: d?.a,
           b: d?.b

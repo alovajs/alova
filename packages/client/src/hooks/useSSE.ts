@@ -121,10 +121,10 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
    * @returns 处理后的response
    */
   const handleResponseTask = async (handlerReturns: any) => {
-    const { headers, transformData: transformDataFn = $self } = getConfig(methodInstance);
+    const { headers, transform: transformFn = $self } = getConfig(methodInstance);
 
     const returnsData = await handlerReturns;
-    const transformedData = await transformDataFn(returnsData, (headers || {}) as AG['ResponseHeader']);
+    const transformedData = await transformFn(returnsData, (headers || {}) as AG['ResponseHeader']);
 
     data.v = transformedData as any;
 

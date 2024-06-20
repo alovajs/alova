@@ -24,7 +24,7 @@ describe('Request by other data', () => {
     formData.append('post2', 'b');
     const Post = alova.Post('/unit-test', formData, {
       cacheFor: 100000,
-      transformData({ data }: Result<true>) {
+      transform({ data }: Result<true>) {
         return data;
       }
     });
@@ -56,7 +56,7 @@ describe('Request by other data', () => {
         'content-type': 'application/x-www-form-urlencoded'
       },
       cacheFor: 100000,
-      transformData({ data }: Result<true>) {
+      transform({ data }: Result<true>) {
         return data;
       }
     });
@@ -85,7 +85,7 @@ describe('Request by other data', () => {
 
     const b = new Blob(['<span>xxx</span>'], { type: 'text/html' });
     const Post = alova.Post('/unit-test', b, {
-      transformData({ data }: Result<true>) {
+      transform({ data }: Result<true>) {
         return data;
       }
     });

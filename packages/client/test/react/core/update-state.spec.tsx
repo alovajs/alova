@@ -15,7 +15,7 @@ describe('update cached response data by user in react', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     function Page() {
@@ -51,7 +51,7 @@ describe('update cached response data by user in react', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     function Page() {
@@ -95,7 +95,7 @@ describe('update cached response data by user in react', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     function Page() {
@@ -155,7 +155,7 @@ describe('update cached response data by user in react', () => {
     const getter = (str1: string) =>
       alova.Get('/unit-test', {
         params: { str1 },
-        transformData: ({ data }: Result) => data
+        transform: ({ data }: Result) => data
       });
 
     const successMockFn = jest.fn();
@@ -220,7 +220,7 @@ describe('update cached response data by user in react', () => {
     const getter = (str1: string) =>
       alova.Get('/unit-test', {
         params: { str1 },
-        transformData: ({ data }: Result) => data
+        transform: ({ data }: Result) => data
       });
 
     const successMockFn = jest.fn();

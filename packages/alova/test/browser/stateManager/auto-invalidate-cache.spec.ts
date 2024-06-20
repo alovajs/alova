@@ -15,7 +15,7 @@ describe('auto invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data,
+      transform: ({ data }: Result) => data,
       hitSource: ['a1', /^a2/, alova.Post('/unit-test', { a: 1 })]
     });
     await targetGet;
@@ -37,7 +37,7 @@ describe('auto invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data,
+      transform: ({ data }: Result) => data,
       hitSource: alova.Post('/unit-test', { a: 1 })
     });
     await targetGet;
@@ -52,7 +52,7 @@ describe('auto invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data,
+      transform: ({ data }: Result) => data,
       hitSource: 'a1'
     });
     await targetGet;
@@ -74,7 +74,7 @@ describe('auto invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data,
+      transform: ({ data }: Result) => data,
       hitSource: /^a2/
     });
     await targetGet;
@@ -95,7 +95,7 @@ describe('auto invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
     const targetGet = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data,
+      transform: ({ data }: Result) => data,
       hitSource: ['a1', /^a2/, alova.Post('/unit-test', { a: 1 })]
     });
 

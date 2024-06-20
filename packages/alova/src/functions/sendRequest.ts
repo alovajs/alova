@@ -126,7 +126,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数
     await beforeRequest(clonedMethod);
-    const { params = {}, headers = {}, transformData = $self, shareRequest } = getConfig(clonedMethod);
+    const { params = {}, headers = {}, transform = $self, shareRequest } = getConfig(clonedMethod);
     const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
     let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
     let responseSuccessHandler: RespondedHandler<AG> = $self;
@@ -178,7 +178,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
      */
     const handleResponseTask = async (handlerReturns: any, responseHeaders: any, callInSuccess = trueValue) => {
       const responseData = await handlerReturns;
-      const transformedData = await transformData(responseData, responseHeaders || {});
+      const transformedData = await transform(responseData, responseHeaders || {});
       snapshots.save(methodInstance);
 
       // 即使缓存操作失败，也正常返回响应结构，避免因缓存操作问题导致请求错误

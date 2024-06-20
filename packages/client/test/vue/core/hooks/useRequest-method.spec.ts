@@ -39,7 +39,7 @@ describe('Test other methods without GET', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData({ code, data }: Result<true>) {
+        transform({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
           expect(data.params).toStrictEqual({ a: 'a', b: 'str' });
@@ -100,7 +100,7 @@ describe('Test other methods without GET', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData({ code, data }: Result<true>) {
+        transform({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
           expect(data.params).toStrictEqual({ a: 'a', b: 'str' });
@@ -158,7 +158,7 @@ describe('Test other methods without GET', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData({ code, data }: Result<true>) {
+        transform({ code, data }: Result<true>) {
           expect(code).toBe(200);
           expect(data.path).toBe('/unit-test');
           expect(data.params).toStrictEqual({ a: 'a', b: 'str', c: '3' });
@@ -198,7 +198,7 @@ describe('Test other methods without GET', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      transformData(resp: Result, headers) {
+      transform(resp: Result, headers) {
         expect(headers.get('content-type')).toBe('application/json');
         return resp;
       }
@@ -231,7 +231,7 @@ describe('Test other methods without GET', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      transformData(resp: Result, headers) {
+      transform(resp: Result, headers) {
         expect(headers.get('content-type')).toBe('application/json');
         return resp;
       }
@@ -266,7 +266,7 @@ describe('Test other methods without GET', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(resp: Result<true>, headers) {
+        transform(resp: Result<true>, headers) {
           expect(headers.get('content-type')).toBe('application/json');
           return resp.data;
         }
@@ -291,7 +291,7 @@ describe('Test other methods without GET', () => {
   test('should download file and pass the right args with cache', async () => {
     const alovaInst = getAlovaInstance(VueHook);
     const Get = alovaInst.Get('/unit-test-download', {
-      transformData: (resp: Response) => resp.blob(),
+      transform: (resp: Response) => resp.blob(),
       cacheFor: 100000
     });
 
@@ -316,7 +316,7 @@ describe('Test other methods without GET', () => {
   test('should abort the file downloading when abort request', async () => {
     const alovaInst = getAlovaInstance(VueHook);
     const Get = alovaInst.Get('/unit-test-download', {
-      transformData: (resp: Response) => resp.blob()
+      transform: (resp: Response) => resp.blob()
     });
 
     const { error, abort, onError } = useRequest(Get);

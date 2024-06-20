@@ -17,7 +17,7 @@ describe('use useFetcher hook to fetch data', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         },
         cacheFor: 100 * 1000
@@ -64,7 +64,7 @@ describe('use useFetcher hook to fetch data', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         },
         cacheFor: 100 * 1000
@@ -107,7 +107,7 @@ describe('use useFetcher hook to fetch data', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         },
         cacheFor: 100 * 1000
@@ -153,7 +153,7 @@ describe('use useFetcher hook to fetch data', () => {
       alova.Get('/unit-test-count', {
         params,
         cacheFor: 0,
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         }
       });
@@ -200,7 +200,7 @@ describe('use useFetcher hook to fetch data', () => {
       alova.Get('/unit-test-count', {
         params,
         cacheFor: 5 * 60 * 1000,
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         }
       });
@@ -249,7 +249,7 @@ describe('use useFetcher hook to fetch data', () => {
       alova.Get('/unit-test-count', {
         params,
         cacheFor: 5 * 60 * 1000,
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         }
       });

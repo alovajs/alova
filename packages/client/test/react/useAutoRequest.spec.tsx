@@ -60,7 +60,7 @@ describe('react => useAutoRequest', () => {
         () =>
           alovaInst.Get('/return-query', {
             params: { tag },
-            transformData: ({ query }: any) => query
+            transform: ({ query }: any) => query
           }),
         {
           throttle: 0
@@ -124,7 +124,7 @@ describe('react => useAutoRequest', () => {
         () =>
           alovaInst.Get('/return-query', {
             params: { tag },
-            transformData: ({ query }: any) => query
+            transform: ({ query }: any) => query
           }),
         {
           enableNetwork: false,
@@ -172,7 +172,7 @@ describe('react => useAutoRequest', () => {
         () =>
           alovaInst.Get('/return-query', {
             params: { tag },
-            transformData: ({ query }: any) => query
+            transform: ({ query }: any) => query
           }),
         {
           enableNetwork: false,
@@ -245,7 +245,7 @@ describe('react => useAutoRequest', () => {
         () =>
           alovaInst.Get('/return-query', {
             params: { tag },
-            transformData: ({ query }: any) => query
+            transform: ({ query }: any) => query
           }),
         {
           pollingTime: 100
@@ -273,7 +273,7 @@ describe('react => useAutoRequest', () => {
       const { data } = useAutoRequest(() =>
         alovaInst.Get('/return-query', {
           params: { tag },
-          transformData: ({ query }: any) => query
+          transform: ({ query }: any) => query
         })
       );
       return <span role="data">{JSON.stringify(data)}</span>;

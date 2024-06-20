@@ -18,7 +18,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         timeout: 10000,
-        transformData: ({ data }: Result) => data,
+        transform: ({ data }: Result) => data,
         cacheFor: 100 * 1000
       });
     const mockfn = jest.fn();
@@ -83,7 +83,7 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         cacheFor: null
       });
     const mockfn = jest.fn();
@@ -155,7 +155,7 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        transformData: ({ data }: Result<true>) => {
+        transform: ({ data }: Result<true>) => {
           if (data.path === '/unit-test-1s') {
             throw new Error('error');
           }
@@ -241,7 +241,7 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         cacheFor: null
       });
     const mockfn = jest.fn();
@@ -314,7 +314,7 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        transformData: ({ data }: Result<true>) => data
+        transform: ({ data }: Result<true>) => data
       });
     const mockfn = jest.fn();
     const sendableFn = jest.fn();
@@ -386,7 +386,7 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        transformData: ({ data }: Result<true>) => data
+        transform: ({ data }: Result<true>) => data
       });
     const mockfn = jest.fn();
     const mockErrorFn = jest.fn();
@@ -459,7 +459,7 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        transformData: ({ data }: Result<true>) => data
+        transform: ({ data }: Result<true>) => data
       });
     const mockfn = jest.fn();
     const sendableFn = jest.fn();
@@ -512,7 +512,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         timeout: 10000,
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         cacheFor: 100 * 1000
       });
     const mockfn = jest.fn();
@@ -593,7 +593,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         timeout: 10000,
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         cacheFor: 100 * 1000
       });
     function Page() {
@@ -650,7 +650,7 @@ describe('useWatcher hook with react', () => {
           id2
         },
         timeout: 10000,
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         cacheFor: 100 * 1000
       });
 
@@ -756,7 +756,7 @@ describe('useWatcher hook with react', () => {
           id1,
           id2
         },
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         cacheFor: 100 * 1000
       });
 
