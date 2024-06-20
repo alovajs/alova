@@ -2,8 +2,13 @@ import useRequest from '@/hooks/core/useRequest';
 import { noop, statesHookHelper } from '@alova/shared/function';
 import { falseValue, isSSR, trueValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler, UseHookExposure } from '~/typings';
-import { AutoRequestHookConfig, NotifyHandler, UnbindHandler } from '~/typings/general';
+import {
+  AlovaMethodHandler,
+  AutoRequestHookConfig,
+  NotifyHandler,
+  UnbindHandler,
+  UseHookExposure
+} from '~/typings/clienthook';
 
 interface AutoRequestHook {
   <AG extends AlovaGenerics>(

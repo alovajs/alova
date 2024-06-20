@@ -20,7 +20,7 @@ import {
   FrontRequestHookConfig,
   Hook,
   WatcherHookConfig
-} from '~/typings';
+} from '~/typings/clienthook';
 import defaultMiddleware from '../defaults/middleware';
 import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './alovaEvent';
 import { assertMethod, coreHookAssert } from './assert';

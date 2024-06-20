@@ -3,8 +3,7 @@ import { AlovaError, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { CaptchaHookConfig } from '~/typings/general';
+import { AlovaMethodHandler, CaptchaHookConfig } from '~/typings/clienthook';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);

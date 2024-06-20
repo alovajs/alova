@@ -9,7 +9,7 @@ import {
   GlobalSQFailEvent,
   GlobalSQSuccessEvent,
   QueueRequestWaitSetting
-} from '~/typings/general';
+} from '~/typings/clienthook';
 
 export const STR_VALUE_OF = 'valueOf';
 export const STR_TO_STRING = 'toString';

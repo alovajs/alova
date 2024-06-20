@@ -1,7 +1,7 @@
 import { FrameworkState } from '@alova/shared/FrameworkState';
 import { deleteAttr } from '@alova/shared/vars';
 import type { FrontRequestState, Progress } from 'alova';
-import { Hook } from '~/typings';
+import { Hook } from '~/typings/clienthook';
 
 // 状态数据缓存
 interface CacheItem {

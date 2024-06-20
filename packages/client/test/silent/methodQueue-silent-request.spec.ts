@@ -15,7 +15,7 @@ import { promiseWithResolvers } from '@alova/shared/function';
 import { Method, createAlova } from 'alova';
 import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
-import { ScopedSQEvents } from '~/typings/general';
+import { ScopedSQEvents } from '~/typings/clienthook';
 
 // 每次需重置状态，因为上一个用例可能因为失败而被设置为2，导致下面的用例不运行
 beforeEach(() => setSilentFactoryStatus(0));

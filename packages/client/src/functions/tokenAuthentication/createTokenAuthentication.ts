@@ -3,11 +3,10 @@ import { falseValue } from '@alova/shared/vars';
 import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
 import { GlobalFetchRequestAdapter } from 'alova/fetch';
 import {
-  AlovaRequestAdapterUnified,
   AlovaResponded,
   ClientTokenAuthenticationOptions,
   ServerTokenAuthenticationOptions
-} from '~/typings/general';
+} from '~/typings/clienthook';
 import {
   PosibbleAuthMap,
   WaitingRequestList,
@@ -21,6 +20,15 @@ import {
   refreshTokenIfExpired,
   waitForTokenRefreshed
 } from './helper';
+
+/**
+ * 统一获取AlovaRequestAdapter的类型
+ */
+type AlovaRequestAdapterUnified<
+  RA extends
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = AlovaRequestAdapter<any, any, any>
+> = RA extends AlovaRequestAdapter<any, any, any> ? RA : ReturnType<RA>;
 
 type BeforeRequestType<AG extends AlovaGenerics> = (
   originalBeforeRequest?: AlovaOptions<AG>['beforeRequest']

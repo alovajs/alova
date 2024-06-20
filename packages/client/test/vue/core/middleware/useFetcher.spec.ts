@@ -1,8 +1,8 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { FetcherType } from 'alova/client';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
+import { FetcherType } from '~/typings/clienthook';
 
 describe('useFetcher middleware', () => {
   test('should send request when call next immediately in middleware function', async () => {

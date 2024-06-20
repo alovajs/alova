@@ -9,7 +9,7 @@ import {
   ResponseErrorHandler,
   StatesHook
 } from 'alova';
-import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/general';
+import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/clienthook';
 
 export type PosibbleAuthMap =
   | {

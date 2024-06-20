@@ -1,7 +1,7 @@
 import { getContext, getMethodInternalKey, isFn } from '@alova/shared/function';
 import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook, setCache } from 'alova';
-import { UpdateStateCollection } from '~/typings';
+import { UpdateStateCollection } from '~/typings/clienthook';
 import { coreAssert } from './hooks/core/implements/assert';
 import { getStateCache } from './hooks/core/implements/stateCache';
 

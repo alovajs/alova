@@ -1,10 +1,10 @@
-import { accessAction, actionDelegationMiddleware } from '@/index';
+import { accessAction, actionDelegationMiddleware, useFetcher, useRequest, useWatcher } from '@/index';
 import { createAlova } from 'alova';
-import { FetcherType, useFetcher, useRequest, useWatcher } from 'alova/client';
 import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { ref } from 'vue';
 import { mockRequestAdapter } from '~/test/mockData';
+import { FetcherType } from '~/typings/clienthook';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
