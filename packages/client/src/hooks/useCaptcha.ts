@@ -1,5 +1,5 @@
 import useRequest from '@/hooks/core/useRequest';
-import { buildErrorMsg, createAssert } from '@alova/shared/assert';
+import { AlovaError, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
 import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
@@ -50,7 +50,7 @@ export default <AG extends AlovaGenerics>(
           })
           .catch(reason => reject(reason));
       } else {
-        reject(new Error(buildErrorMsg(hookPrefix, 'the countdown is not over yet')));
+        reject(newInstance(AlovaError, hookPrefix, 'the countdown is not over yet'));
       }
     });
   return exposeProvider({

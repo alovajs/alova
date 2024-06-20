@@ -1,14 +1,26 @@
 import { getAlovaInstance } from '#/utils';
 import { Method, createAlova, queryCache } from '@/index';
-import GlobalFetch from '@/predefine/adapterFetch';
+import adapterFetch from '@/predefine/adapterFetch';
 import { Result, untilReject } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', () => {
+  test('it can customize alova id', async () => {
+    const alova1 = createAlova({
+      requestAdapter: adapterFetch()
+    });
+    const alova2 = createAlova({
+      id: 'alova-1',
+      requestAdapter: adapterFetch()
+    });
+    expect(alova1.id).toBe('1');
+    expect(alova2.id).toBe('alova-1');
+  });
+
   test('baseURL can not be set and use complete url set in method to send request', async () => {
     const alova = createAlova({
       cacheLogger: null,
-      requestAdapter: GlobalFetch()
+      requestAdapter: adapterFetch()
     });
     const response = await alova.Get<Response>('http://localhost:3000/unit-test').send();
     const result = await response.json();
@@ -27,7 +39,7 @@ describe('createAlova', () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000/unit-test?ctrl=api/',
       cacheLogger: null,
-      requestAdapter: GlobalFetch()
+      requestAdapter: adapterFetch()
     });
     const response = await alova
       .Get<Response>('/unit-test', {
@@ -97,7 +109,7 @@ describe('createAlova', () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
       cacheLogger: null,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       beforeRequest: async method => {
         await new Promise(resolve => {
           setTimeout(resolve, 200);
@@ -125,7 +137,7 @@ describe('createAlova', () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
       cacheLogger: null,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       beforeRequest: method => {
         if (method.config.params.async) {
           return Promise.reject(new Error('reject in beforeRequest'));
@@ -181,7 +193,7 @@ describe('createAlova', () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
       cacheLogger: null,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       beforeRequest: method => {
         expect(method).toBeInstanceOf(Method);
         method.meta = {
@@ -247,7 +259,7 @@ describe('createAlova', () => {
     const alova = createAlova({
       baseURL,
       timeout: 10,
-      requestAdapter: GlobalFetch()
+      requestAdapter: adapterFetch()
     });
     const Get = alova.Get('/unit-test-1s');
     const error = await untilReject(Get);
@@ -356,7 +368,7 @@ describe('createAlova', () => {
     const MockFn = jest.fn();
     const alova = createAlova({
       baseURL,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       cacheLogger: null,
       responded: {
         onComplete: method => {
@@ -396,7 +408,7 @@ describe('createAlova', () => {
     console.log = logConsoleMockFn; // Rewrite for monitoring
     const alova1 = createAlova({
       baseURL,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       responded: r => r.json()
     });
 
@@ -482,7 +494,7 @@ describe('createAlova', () => {
     console.log = logConsoleMockFn; // Rewrite for monitoring
     const alova1 = createAlova({
       baseURL,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       responded: r => r.json(),
       cacheLogger: false
     });
@@ -497,7 +509,7 @@ describe('createAlova', () => {
 
     const alova2 = createAlova({
       baseURL,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       responded: r => r.json(),
       cacheLogger: null
     });
@@ -520,7 +532,7 @@ describe('createAlova', () => {
     const loggerMockFn = jest.fn();
     const alova1 = createAlova({
       baseURL,
-      requestAdapter: GlobalFetch(),
+      requestAdapter: adapterFetch(),
       responded: r => r.json(),
       cacheLogger(response, methodInstance, mode, tag) {
         loggerMockFn(response, methodInstance, mode, tag);

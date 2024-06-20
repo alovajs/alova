@@ -9,7 +9,7 @@ type CacheEventRecord = {
   success: CacheEvent;
   fail: Omit<CacheEvent, 'value'>;
 };
-export const createDefaultL1CacheAdapter = () => {
+export const memoryAdapter = () => {
   let l1Cache = {} as Record<string, any>;
   const l1CacheEmitter = createEventManager<CacheEventRecord>();
   const adapter: AlovaDefaultCacheAdapter = {
@@ -40,7 +40,7 @@ const // delay get localStorage by function, and avoid erroring at initializatio
     myAssert(typeof localStorage !== 'undefined', 'l2Cache is not defined.');
     return localStorage;
   };
-export const createDefaultL2CacheAdapter = () => {
+export const localStorageAdapter = () => {
   const l2CacheEmitter = createEventManager<CacheEventRecord>();
   const adapter: AlovaDefaultCacheAdapter = {
     set: (key, value) => {

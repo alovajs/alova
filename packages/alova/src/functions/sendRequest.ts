@@ -57,7 +57,12 @@ const buildCompletedURL = (baseURL: string, url: string, params: Arg) => {
   // baseURL如果以/结尾，则去掉/
   baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
   // 如果不是/或http协议开头的，则需要添加/
-  url = url.match(/^(\/|https?:\/\/)/) ? url : `/${url}`;
+
+  // Compatible with some RESTful usage
+  // fix: https://github.com/alovajs/alova/issues/382
+  if (url !== '') {
+    url = url.match(/^(\/|https?:\/\/)/) ? url : `/${url}`;
+  }
 
   const completeURL = baseURL + url;
 
@@ -89,14 +94,12 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
   }) as Promise<RequestAdapterReturnType | undefined>;
   const response = async () => {
     const { beforeRequest = noop, responded, requestAdapter, cacheLogger } = getOptions(methodInstance);
-    // 使用克隆的methodKey，防止用户使用克隆的method实例再次发起请求，导致key重复
-    const clonedMethod = cloneMethod(methodInstance);
-    const methodKey = getMethodInternalKey(clonedMethod);
+    const methodKey = getMethodInternalKey(methodInstance);
     const { s: toStorage, t: tag, m: cacheMode, e: expireMilliseconds } = getLocalCacheConfigParam(methodInstance);
     const { id, l1Cache, l2Cache, snapshots } = getContext(methodInstance);
     // 获取受控缓存或非受控缓存
     const { cacheFor } = getConfig(methodInstance);
-    const { baseURL, url: newUrl, type, data, hitSource: methodHitSource } = clonedMethod;
+    const { baseURL, url: newUrl, type, data, hitSource: methodHitSource } = methodInstance;
 
     // 如果当前method设置了受控缓存，则看是否有自定义的数据
     let cachedResponse = await (isFn(cacheFor)
@@ -116,6 +119,9 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
         cachedResponse = l2Response;
       }
     }
+
+    // 克隆method作为参数传给beforeRequest，防止多次使用原method实例请求时产生副作用
+    const clonedMethod = cloneMethod(methodInstance);
 
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数

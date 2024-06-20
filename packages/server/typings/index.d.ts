@@ -9,6 +9,11 @@ export interface AlovaServerHook<Options extends Record<string, any>> {
   <AG extends AlovaGenerics>(method: Method<AG>, options?: Options): Method<AG>;
 }
 
+/**
+ * hooked method
+ */
+export declare const HookedMethod: Method;
+
 export interface RetryOptions {
   /**
    * The maximum number of retries. it can also be set as a function that returns a boolean to dynamically determine whether to continue retry.

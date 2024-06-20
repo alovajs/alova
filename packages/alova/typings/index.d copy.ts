@@ -235,14 +235,14 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * @param initialValue 初始数据
    * @returns 状态值
    */
-  create: (initialValue: any, referingObject: ReferingObject, isRef?: boolean) => State;
+  create: (initialValue: any, referingObject: ReferingObject) => State;
 
   /**
    * create computed state
    * @param initialValue initial data
    * @param referingObject refering object
    */
-  computed: (getter: () => any, deps: Export[], referingObject: ReferingObject, isRef?: boolean) => Computed;
+  computed: (getter: () => any, deps: Export[], referingObject: ReferingObject) => Computed;
 
   /**
    * 导出给开发者使用的值
@@ -495,7 +495,12 @@ export interface Method<AG extends AlovaGenerics = any> {
    * 用于在全局的request和response钩子函数中传递额外信息所用
    * js项目中可使用任意字段
    */
-  meta?: any;
+  meta?: AlovaCustomTypes['meta'];
+
+  /**
+   * 请求Promise实例
+   */
+  promise?: Promise<AG['Responded']>;
 
   /**
    * 使用此method实例直接发送请求
@@ -509,6 +514,11 @@ export interface Method<AG extends AlovaGenerics = any> {
    * @param name 名称
    */
   setName(name: string | number): void;
+
+  /**
+   * 生成当前method的key
+   */
+  generateKey(): string;
 
   /**
    * 中断此method实例直接发送的请求
@@ -701,7 +711,7 @@ export declare function createAlova<
  * invalidateCache(alova.Get('/api/profile'));
  *
  * // match method snapshots then invalidate them.
- * const methods = alova.matchSnapshot('method-name');
+ * const methods = alova.snapshots.match('method-name');
  * invalidateCache(methods);
  *
  * // invalidate all cache.
@@ -743,7 +753,7 @@ export interface CacheSetOptions {
  * });
  *
  * // get methods from snapshots
- * const methods = alova.getSnapshots('method-name');
+ * const methods = alova.snapshots.match('method-name');
  * setCache(methods, newData);
  * ```
  * @param matcher method instance(s)
@@ -788,13 +798,6 @@ export declare function queryCache<AG extends AlovaGenerics>(
  * ```
  */
 export declare function hitCacheBySource<AG extends AlovaGenerics>(sourceMethod: Method<AG>): Promise<void>;
-
-/**
- * 获取请求方式的key值
- * @param {Method} method method实例
- * @returns — 此请求方式的key值
- */
-export declare function getMethodKey<AG extends AlovaGenerics>(method: Method<AG>): string;
 
 /**
  * Set global configuration
