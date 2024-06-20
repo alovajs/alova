@@ -1,16 +1,18 @@
 {
   "mode": "pre",
-  "tag": "alpha",
+  "tag": "beta",
   "initialVersions": {
-    "@alova/adapter-axios": "1.1.2",
-    "@alova/adapter-graphql": "1.0.0",
-    "@alova/mock": "1.5.0",
-    "@alova/adapter-superagent": "1.0.0",
+    "@alova/adapter-axios": "2.0.0",
+    "@alova/mock": "2.0.0",
+    "@alova/adapter-taro": "2.0.0",
+    "@alova/adapter-uniapp": "2.0.0",
     "@alova/adapter-xhr": "1.0.1",
-    "alova": "2.19.2",
-    "@alova/lrucache": "0.0.1",
-    "@alova/psm": "1.0.0",
+    "alova": "3.0.0",
+    "@alova/client": "2.0.0",
+    "@alova/psc": "1.0.0",
+    "@alova/server": "2.0.0",
     "@alova/shared": "0.0.1",
+    "@alova/vue-options": "2.0.0",
     "@alova/scripts": "1.0.0"
   },
   "changesets": []
