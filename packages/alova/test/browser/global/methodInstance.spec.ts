@@ -242,7 +242,7 @@ describe('method instance', () => {
           paramA
         }
       });
-      getter.__key__ = 'custom key';
+      getter.key = 'custom key';
       return getter;
     };
 
@@ -276,14 +276,14 @@ describe('method instance', () => {
         b: 'bbb1'
       }
     });
-    Get1.__key__ = 'custom-key1';
+    Get1.key = 'custom-key1';
     const Get2 = alova.Get<Result>('/unit-test', {
       params: {
         a: 'aaa2',
         b: 'bbb2'
       }
     });
-    Get2.__key__ = 'custom-key1';
+    Get2.key = 'custom-key1';
 
     const data1 = await Get1;
     expect(data1.data.params).toStrictEqual({ a: 'aaa1', b: 'bbb1' });
@@ -326,9 +326,9 @@ describe('method instance', () => {
     });
 
     const Post1 = alova.Post<{ status: number; data: { id: number } }>('/unit-test', { id: 1 });
-    Post1.__key__ = 'custom-key111';
+    Post1.key = 'custom-key111';
     const Post2 = alova.Post<{ status: number; data: { id: number } }>('/unit-test', { id: 2 });
-    Post2.__key__ = 'custom-key111';
+    Post2.key = 'custom-key111';
 
     const p1 = Post1.send();
     const p2 = Post2.send();
@@ -367,9 +367,10 @@ describe('method instance', () => {
 
   test('it can customize the method key', async () => {
     const method1 = alova.Get('/unit-test');
-    method1.__key__ = 'method1-key';
-    expect(method1.__key__).toBe('method1-key');
+    method1.key = 'method1-key';
+    expect(method1.key).toBe('method1-key');
 
+    const originalKey = Method.prototype.generateKey;
     Method.prototype.generateKey = function () {
       if (this.type === 'GET') {
         return 'top-alova1-method-key';
@@ -378,15 +379,17 @@ describe('method instance', () => {
     };
     const method2 = alova.Get('/unit-test');
     const method3 = alova.Post('/unit-test');
-    expect(method2.__key__).toBe('top-alova1-method-key');
-    expect(method3.__key__).toBe('default-method-key');
+    expect(method2.key).toBe('top-alova1-method-key');
+    expect(method3.key).toBe('default-method-key');
+
+    Method.prototype.generateKey = originalKey; // restore the original key function
   });
 
   test('should bind callback to promise instance with `then/catch/finally`', async () => {
     const thenFn = jest.fn();
     const catchFn = jest.fn();
     const finallyFn = jest.fn();
-    const alova = createAlova({
+    const innerAlova = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),
       beforeRequest(method) {
@@ -402,13 +405,13 @@ describe('method instance', () => {
       }
     });
 
-    const res = await alova.Get('/unit-test');
+    const res = await innerAlova.Get('/unit-test');
     expect(thenFn).toHaveBeenCalledTimes(2);
     expect(catchFn).not.toHaveBeenCalled();
     expect(finallyFn).toHaveBeenCalledTimes(2);
     expect(thenFn).toHaveBeenCalledWith(res);
 
-    await expect(alova.Get('/unit-test-error')).rejects.toThrow('Failed to fetch');
+    await expect(innerAlova.Get('/unit-test-error')).rejects.toThrow('Failed to fetch');
     // 请求错误不会进入responded
     expect(thenFn).toHaveBeenCalledTimes(2);
     expect(catchFn).toHaveBeenCalledTimes(1);

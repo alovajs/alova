@@ -34,8 +34,8 @@ export const queryCache = async <Responded>(
   matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
   { policy = 'all' }: CacheQueryOptions = {}
 ) => {
-  // if __key__ exists, that means it's a method instance.
-  if (matcher && matcher.__key__) {
+  // if key exists, that means it's a method instance.
+  if (matcher && matcher.key) {
     const { id, l1Cache, l2Cache } = getContext(matcher);
     const methodKey = getMethodInternalKey(matcher);
     const { f: cacheFor, c: controlled, s: store, e: expireMilliseconds, t: tag } = getLocalCacheConfigParam(matcher);

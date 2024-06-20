@@ -191,11 +191,11 @@ describe('vue => subscriber middleware', () => {
   test('should throws a error when not match any handler', () => {
     expect(() => {
       accessAction('not_match', () => {});
-    }).toThrow('[alova/subscriber]no handler can be matched by using `not_match`');
+    }).toThrow('no handler can be matched by using `not_match`');
 
     expect(() => {
       accessAction(/^bbb/, () => {});
-    }).toThrow('[alova/subscriber]no handler can be matched by using `/^bbb/`');
+    }).toThrow('no handler can be matched by using `/^bbb/`');
   });
 
   test('should NOT throws a error when not match any handler', () => {
@@ -220,7 +220,7 @@ describe('vue => subscriber middleware', () => {
     });
     expect(() => {
       accessAction('not_match2', () => {});
-    }).toThrow('[alova/subscriber]no handler can be matched by using `not_match2`');
+    }).toThrow('no handler can be matched by using `not_match2`');
   });
 
   test('should send by notification when use useWatcher', async () => {

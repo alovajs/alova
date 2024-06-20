@@ -136,7 +136,7 @@ export const uuid = () => {
  * @param methodInstance method实例
  * @returns 此method实例的key值
  */
-export const getMethodInternalKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => methodInstance.__key__;
+export const getMethodInternalKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>) => methodInstance.key;
 
 /**
  * 获取请求方法对象
@@ -150,7 +150,7 @@ export const getHandlerMethod = <AG extends AlovaGenerics>(
   args: any[] = []
 ) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
-  assert(!!methodInstance.__key__, 'hook handler must be a method instance or a function that returns method instance');
+  assert(!!methodInstance.key, 'hook handler must be a method instance or a function that returns method instance');
   return methodInstance;
 };
 /**
@@ -398,11 +398,11 @@ export function statesHookHelper<AG extends AlovaGenerics>(
   const createdStateList = [] as string[];
 
   return {
-    create: <Data, Key extends string>(initialValue: Data, key: Key, isRef = falseValue) => {
+    create: <Data, Key extends string>(initialValue: Data, key: Key) => {
       pushItem(createdStateList, key); // record the keys of created states.
       return newInstance(
         FrameworkState<Data, Key>,
-        statesHook.create(initialValue, referingObject, isRef) as GeneralState<Data>,
+        statesHook.create(initialValue, referingObject) as GeneralState<Data>,
         key,
         state => dehydrate(state, key, referingObject),
         exportState,
@@ -412,12 +412,11 @@ export function statesHookHelper<AG extends AlovaGenerics>(
     computed: <Data, Key extends string>(
       getter: () => Data,
       depList: (GeneralState | FrameworkReadableState<any, string>)[],
-      key: Key,
-      isRef = falseValue
+      key: Key
     ) =>
       newInstance(
         FrameworkReadableState<Data, Key>,
-        statesHook.computed(getter, mapDeps(depList), referingObject, isRef) as GeneralState<Data>,
+        statesHook.computed(getter, mapDeps(depList), referingObject) as GeneralState<Data>,
         key,
         state => dehydrate(state, key, referingObject),
         exportState

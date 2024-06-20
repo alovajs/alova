@@ -1,7 +1,7 @@
 import useRequest from '@/hooks/core/useRequest';
 import { AlovaError, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
-import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import { PromiseCls, falseValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler } from '~/typings';
 import { CaptchaHookConfig } from '~/typings/general';
@@ -30,7 +30,7 @@ export default <AG extends AlovaGenerics>(
     middleware: middleware ? (ctx, next) => middleware({ ...ctx, send }, next) : undefinedValue
   });
 
-  const countdown = create(0, 'countdown', trueValue);
+  const countdown = create(0, 'countdown');
 
   const timer = ref(undefinedValue as NodeJS.Timeout | undefined);
   const send = (...args: any[]) =>

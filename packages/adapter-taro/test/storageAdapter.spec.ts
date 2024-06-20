@@ -41,7 +41,7 @@ describe('storage adapter', () => {
      * 缓存数据如下：
      * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831]
      */
-    const storagedData = mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.__key__)] || {};
+    const storagedData = mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.key)] || {};
     expect(storagedData[0]?.url).toBe('http://xxx/unit-test');
     expect(storagedData[0]?.method).toBe('GET');
     expect(storagedData[0]?.header).toStrictEqual({});
@@ -62,7 +62,7 @@ describe('storage adapter', () => {
      * 缓存数据如下：
      * [{"url":"http://xxx/unit-test","method":"GET","header":{}},1677564705831]
      */
-    const getStoragedData = () => mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.__key__)];
+    const getStoragedData = () => mockStorageContainer[buildNamespacedCacheKey(alovaInst.id, Get.key)];
     expect(getStoragedData()[0]).toStrictEqual({
       data: undefined,
       header: {},

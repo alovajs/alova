@@ -73,8 +73,8 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   const eventSource = ref<EventSource | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
-  const data = create(initialData as Data, 'data', trueValue);
-  const readyState = create(SSEHookReadyState.CLOSED, 'readyState', trueValue);
+  const data = create(initialData as Data, 'data');
+  const readyState = create(SSEHookReadyState.CLOSED, 'readyState');
 
   let methodInstance = getHandlerMethod(handler);
 

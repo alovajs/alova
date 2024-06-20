@@ -1,5 +1,5 @@
 import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
-import { falseValue, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -65,15 +65,9 @@ export default {
       refCurrent(needSave) ? saveStates(frontStates) : setRef(needSave, trueValue);
     });
   },
-  computed: (getter, depList, _, isRef) => {
+  computed: (getter, depList) => {
     const memo = useMemo(getter, depList);
-    const memoAry = [memo, noop];
-    if (isRef) {
-      const ref = useRef();
-      ref.current = memo;
-      pushItem(memoAry, ref);
-    }
-    return memoAry;
+    return [memo, noop];
   },
   watch: (states, callback) => {
     // 当有监听状态时，状态变化再触发

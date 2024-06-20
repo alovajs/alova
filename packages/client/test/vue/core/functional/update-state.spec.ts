@@ -116,7 +116,7 @@ describe('update cached response data by user in vue', () => {
       updateState(Get, {
         extraData3: () => 1
       })
-    ).rejects.toThrow('[alova]state named `extraData3` is not found');
+    ).rejects.toThrow('state named `extraData3` is not found');
 
     // 更新成功
     await updateState(Get, {

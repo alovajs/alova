@@ -58,7 +58,7 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   public meta?: any;
 
-  public __key__: string;
+  public key: string;
 
   public promise?: Promise<AG['Responded']>;
 
@@ -127,7 +127,7 @@ export default class Method<AG extends AlovaGenerics = any> {
 
     // 在外部需要使用原始的key，而不是实时生成key
     // 原因是，method的参数可能传入引用类型值，但引用类型值在外部改变时，实时生成的key也随之改变，因此使用最开始的key更准确
-    instance.__key__ = instance.generateKey();
+    instance.key = instance.generateKey();
   }
 
   /**

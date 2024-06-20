@@ -185,7 +185,7 @@ describe('vue => usePagination', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('error')).toHaveTextContent(
-        '[alova/usePagination]Got wrong array, did you return the correct array of list in `data` function'
+        'Got wrong array, did you return the correct array of list in `data` function'
       );
     });
   });
@@ -461,15 +461,11 @@ describe('vue => usePagination', () => {
     });
     fireEvent.click(screen.getByRole('replaceError1'));
     await waitFor(() => {
-      expect(screen.getByRole('replacedError')).toHaveTextContent(
-        '[alova/usePagination]expect specify the replace position'
-      );
+      expect(screen.getByRole('replacedError')).toHaveTextContent('expect specify the replace position');
     });
     fireEvent.click(screen.getByRole('replaceError2'));
     await waitFor(() => {
-      expect(screen.getByRole('replacedError')).toHaveTextContent(
-        '[alova/usePagination]index must be a number that less than list length'
-      );
+      expect(screen.getByRole('replacedError')).toHaveTextContent('index must be a number that less than list length');
     });
 
     fireEvent.click(screen.getByRole('replace1'));
@@ -532,7 +528,7 @@ describe('vue => usePagination', () => {
 
     fireEvent.click(screen.getByRole('replaceError1__search'));
     await waitFor(() => {
-      expect(screen.getByRole('replacedError')).toHaveTextContent('[alova/usePagination]item is not found in list');
+      expect(screen.getByRole('replacedError')).toHaveTextContent('item is not found in list');
     });
     fireEvent.click(screen.getByRole('replaceByItem__search'));
     currentList[2] = { id: 100, word: 'zzz' };
@@ -611,7 +607,7 @@ describe('vue => usePagination', () => {
 
     fireEvent.click(screen.getByRole('insertError1__search'));
     await waitFor(() => {
-      expect(screen.getByRole('replacedError')).toHaveTextContent('[alova/usePagination]item is not found in list');
+      expect(screen.getByRole('replacedError')).toHaveTextContent('item is not found in list');
     });
     fireEvent.click(screen.getByRole('insertByItem__search'));
     currentList.splice(3, 0, { id: 100, word: 'zzz' });
@@ -728,7 +724,7 @@ describe('vue => usePagination', () => {
 
     fireEvent.click(screen.getByRole('removeError1__search'));
     await waitFor(() => {
-      expect(screen.getByRole('replacedError')).toHaveTextContent('[alova/usePagination]item is not found in list');
+      expect(screen.getByRole('replacedError')).toHaveTextContent('item is not found in list');
     });
     fireEvent.click(screen.getByRole('removeByItem__search'));
 
@@ -1191,9 +1187,7 @@ describe('vue => usePagination', () => {
 
     fireEvent.click(screen.getByRole('refreshError'));
     await waitFor(() => {
-      expect(screen.getByRole('replacedError')).toHaveTextContent(
-        "[alova/usePagination]refresh page can't greater than page"
-      );
+      expect(screen.getByRole('replacedError')).toHaveTextContent("refresh page can't greater than page");
     });
 
     // 手动改变一下接口数据，让刷新后能看出效果

@@ -423,7 +423,7 @@ describe('manipulate cache', () => {
     });
     await setWithCacheAdapter(
       alova.id,
-      Get1.__key__,
+      Get1.key,
       {
         path: 'custom-path',
         params: {},

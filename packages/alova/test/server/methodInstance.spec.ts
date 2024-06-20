@@ -239,7 +239,7 @@ describe('method instance', () => {
           paramA
         }
       });
-      getter.__key__ = 'custom key';
+      getter.key = 'custom key';
       return getter;
     };
 
@@ -273,14 +273,14 @@ describe('method instance', () => {
         b: 'bbb1'
       }
     });
-    Get1.__key__ = 'custom-key1';
+    Get1.key = 'custom-key1';
     const Get2 = alova.Get<Result>('/unit-test', {
       params: {
         a: 'aaa2',
         b: 'bbb2'
       }
     });
-    Get2.__key__ = 'custom-key1';
+    Get2.key = 'custom-key1';
 
     const data1 = await Get1;
     expect(data1.data.params).toStrictEqual({ a: 'aaa1', b: 'bbb1' });
@@ -323,9 +323,9 @@ describe('method instance', () => {
     });
 
     const Post1 = alova.Post<{ status: number; data: { id: number } }>('/unit-test', { id: 1 });
-    Post1.__key__ = 'custom-key111';
+    Post1.key = 'custom-key111';
     const Post2 = alova.Post<{ status: number; data: { id: number } }>('/unit-test', { id: 2 });
-    Post2.__key__ = 'custom-key111';
+    Post2.key = 'custom-key111';
 
     const p1 = Post1.send();
     const p2 = Post2.send();

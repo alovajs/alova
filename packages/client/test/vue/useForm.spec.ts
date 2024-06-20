@@ -1,7 +1,8 @@
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
+import { getMethodInternalKey } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/vue';
-import { AlovaGenerics, Method, createAlova, getMethodKey } from 'alova';
+import { AlovaGenerics, Method, createAlova } from 'alova';
 import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
@@ -10,7 +11,7 @@ import CompPersistentDataReset from './components/persistent-data-reset.vue';
 import CompRestorePersistentData from './components/restore-persistent-data.vue';
 
 type ID = NonNullable<FormHookConfig<AlovaGenerics, any>['id']>;
-const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodKey(methodInstance)}`;
+const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
   statesHook: VueHook,

@@ -38,7 +38,7 @@
     "lint:fix": "npm run lint -- --fix",
     "build:core": "alova-scripts build core",
     "build:fetch": "alova-scripts build fetch",
-    "build:client": "pnpm --filter=alova-client run build",
+    "build:client": "pnpm --filter=@alova/client run build",
     "build:server": "alova-scripts build server",
     "build": "npm run clean && alova-scripts build && npm run build:client",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",

@@ -390,7 +390,7 @@ describe('react => useRetriableRequest', () => {
       onSuccess(mockSuccessFn);
       onFail(event => {
         mockFailFn();
-        expect(event.error.message).toBe('[alova/useRetriableRequest]stop retry manually');
+        expect(event.error.message).toBe('stop retry manually');
       });
 
       return <span role="status">{loading ? 'loading' : 'loaded'}</span>;
@@ -441,9 +441,7 @@ describe('react => useRetriableRequest', () => {
     act(() => {
       fireEvent.click(screen.getByRole('btnStop'));
     });
-    expect(screen.getByRole('error')).toHaveTextContent(
-      '[alova/useRetriableRequest]there are no requests being retried'
-    );
+    expect(screen.getByRole('error')).toHaveTextContent('there are no requests being retried');
   });
 
   test('should throws stop error when stop in requseting', async () => {
@@ -491,7 +489,7 @@ describe('react => useRetriableRequest', () => {
     await waitFor(
       () => {
         expect(screen.getByRole('status')).toHaveTextContent('loaded');
-        expect(screen.getByRole('error')).toHaveTextContent('[alova/useRetriableRequest]stop retry manually');
+        expect(screen.getByRole('error')).toHaveTextContent('stop retry manually');
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
         expect(mockFailFn).toHaveBeenCalledTimes(1);
         /**
@@ -511,7 +509,7 @@ describe('react => useRetriableRequest', () => {
     await waitFor(
       () => {
         expect(screen.getByRole('status')).toHaveTextContent('loaded');
-        expect(screen.getByRole('error')).toHaveTextContent('[alova/useRetriableRequest]stop retry manually');
+        expect(screen.getByRole('error')).toHaveTextContent('stop retry manually');
         expect(mockRetryFn).toHaveBeenCalledTimes(4);
         expect(mockFailFn).toHaveBeenCalledTimes(2);
         /**
@@ -663,7 +661,7 @@ describe('react => useRetriableRequest', () => {
       const { loading, stop, send, onFail, onSuccess, error } = useRetriableRequest(methodInstance);
       onFail(event => {
         mockFailFn();
-        expect(event.error.message).toBe('[alova/useRetriableRequest]stop retry manually');
+        expect(event.error.message).toBe('stop retry manually');
       });
       onSuccess(mockSuccessFn);
       const handleSend = () => {
@@ -702,7 +700,7 @@ describe('react => useRetriableRequest', () => {
         expect(screen.getByRole('status')).toHaveTextContent('loaded');
         expect(mockFailFn).toHaveBeenCalledTimes(1);
         expect(mockSuccessFn).not.toHaveBeenCalled();
-        expect(screen.getByRole('error')).toHaveTextContent('[alova/useRetriableRequest]stop retry manually');
+        expect(screen.getByRole('error')).toHaveTextContent('stop retry manually');
       },
       { timeout: 4000 }
     );

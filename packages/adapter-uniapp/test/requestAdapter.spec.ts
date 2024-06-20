@@ -196,7 +196,7 @@ describe('request adapter', () => {
     expect(error.value).toBeUndefined();
 
     // 过120毫秒后中断请求，因为在[src/statesHook.ts]中延迟了100毫秒请求
-    delay(120).then(() => {
+    delay(110).then(() => {
       abort();
     });
 

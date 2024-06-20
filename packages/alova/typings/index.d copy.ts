@@ -469,9 +469,9 @@ export interface Method<AG extends AlovaGenerics = any> {
   context: Alova<AG>;
 
   /**
-   * 存储临时的key
+   * method key
    */
-  __key__: string;
+  key: string;
 
   /**
    * 下载事件

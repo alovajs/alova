@@ -33,9 +33,7 @@ describe('react => useSerialWatcher', () => {
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent(
-        '[alova/useSerialWatcher]please use an array to represent serial requests'
-      );
+      expect(screen.getByRole('error')).toHaveTextContent('please use an array to represent serial requests');
     });
   });
 
