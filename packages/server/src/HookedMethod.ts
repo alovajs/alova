@@ -11,6 +11,10 @@ export default class HookedMethod<AG extends AlovaGenerics = any> implements Met
     this.handler = requestHandler;
   }
 
+  generateKey() {
+    return this.entity.generateKey();
+  }
+
   public get type() {
     return this.entity.type;
   }
