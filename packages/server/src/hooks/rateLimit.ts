@@ -1,15 +1,16 @@
 import HookedMethod from '@/HookedMethod';
 import { createServerHook } from '@/helper';
 import { createAssert } from '@alova/shared/assert';
-import { getOptions, uuid } from '@alova/shared/function';
+import { getOptions, isFn, uuid } from '@alova/shared/function';
 import { AlovaGenerics, AlovaGlobalCacheAdapter, Method } from 'alova';
-import { IRateLimiterStoreOptions, RateLimiterRes, RateLimiterStoreAbstract } from 'rate-limiter-flexible';
+import { IRateLimiterStoreOptions, RateLimiterRes } from 'rate-limiter-flexible';
+import RateLimiterStoreAbstract from 'rate-limiter-flexible/lib/RateLimiterStoreAbstract.js';
 
 type StoreResult = [points: number, expireTime: number];
 
-interface LimitHandlerOptions {
+interface LimitHandlerOptions<AG extends AlovaGenerics> {
   /** 存储key */
-  key?: string;
+  key?: string | ((method: Method<AG>) => string);
 }
 
 /**
@@ -148,40 +149,70 @@ class RateLimiterStore extends RateLimiterStoreAbstract {
  * AlovaServerHook目前只能返回未扩展的method类型，还没改为可自定义返回扩展的method类型
  */
 export class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
+  private keyGetter: () => string;
+
   constructor(
     method: Method<AG>,
-    protected key: string,
+    limiterKey: string | ((method: Method<AG>) => string),
     protected limiter: RateLimiterStore
   ) {
     super(method, force => method.send(force));
+    this.keyGetter = isFn(limiterKey) ? () => limiterKey(method) : () => limiterKey;
   }
 
+  private getLimiterKey() {
+    return this.keyGetter();
+  }
+
+  /**
+   * Get RateLimiterRes or null.
+   */
   get(options?: { [key: string]: any }) {
-    return this.limiter.get(this.key, options);
+    return this.limiter.get(this.getLimiterKey(), options);
   }
 
+  /**
+   * Set points by key.
+   */
   set(points: number, msDuration: number) {
-    return this.limiter.set(this.key, points, msDuration / 1000);
+    return this.limiter.set(this.getLimiterKey(), points, msDuration / 1000);
   }
 
+  /**
+   * @param points default is 1
+   */
   consume(points?: number) {
-    return this.limiter.consume(this.key, points);
+    return this.limiter.consume(this.getLimiterKey(), points);
   }
 
+  /**
+   * Increase number of consumed points in current duration.
+   * @param points default is 1
+   */
   penalty(points: number) {
-    return this.limiter.penalty(this.key, points);
+    return this.limiter.penalty(this.getLimiterKey(), points);
   }
 
+  /**
+   * Decrease number of consumed points in current duration.
+   * @param points default is 1
+   */
   reward(points: number) {
-    return this.limiter.reward(this.key, points);
+    return this.limiter.reward(this.getLimiterKey(), points);
   }
 
+  /**
+   * Block key for ms.
+   */
   block(msDuration: number) {
-    return this.limiter.block(this.key, msDuration / 1000);
+    return this.limiter.block(this.getLimiterKey(), msDuration / 1000);
   }
 
+  /**
+   * Reset consumed points.
+   */
   delete() {
-    return this.limiter.delete(this.key);
+    return this.limiter.delete(this.getLimiterKey());
   }
 }
 
@@ -196,7 +227,7 @@ export function createRateLimiter(options: RateLimitOptions) {
   } = options ?? {};
 
   const limitedMethodWrapper = createServerHook(
-    <AG extends AlovaGenerics>(method: Method<AG>, wrapperOption?: LimitHandlerOptions) => {
+    <AG extends AlovaGenerics>(method: Method<AG>, wrapperOption?: LimitHandlerOptions<AG>) => {
       const { key = uuid() } = wrapperOption ?? {};
       const storage = options.storage ?? getOptions(method).l2Cache;
 
