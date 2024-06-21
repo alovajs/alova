@@ -48,7 +48,7 @@ const createEventManager = <E extends object>() => {
 
 export default createEventManager;
 
-export const decorateEvent = <OnEvent extends (handler: (event: any) => void) => void>(
+export const decorateEvent = <OnEvent extends (handler: (event: any) => void) => any>(
   onEvent: OnEvent,
   decoratedHandler: (handler: Parameters<OnEvent>[0], event: Parameters<Parameters<OnEvent>[0]>[0]) => void
 ) => {
@@ -56,10 +56,11 @@ export const decorateEvent = <OnEvent extends (handler: (event: any) => void) =>
     [x: string]: any;
   }>();
   const eventType = uuid();
-  onEvent(event => emitter.emit(eventType, event));
+  const eventReturn = onEvent(event => emitter.emit(eventType, event));
   return (handler: Parameters<OnEvent>[0]) => {
     emitter.on(eventType, event => {
       decoratedHandler(handler, event);
     });
+    return eventReturn;
   };
 };

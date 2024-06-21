@@ -2,7 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import useRequest from '@/hooks/core/useRequest';
 import VueHook from '@/statesHook/vue';
 import { Result } from 'root/testUtils';
-import { AlovaSuccessEvent } from '~/typings';
+import { AlovaSuccessEvent } from '~/typings/clienthook';
 
 describe('parallel request', () => {
   test('parallel request with `send` returned promise', async () => {
@@ -10,7 +10,7 @@ describe('parallel request', () => {
       responseExpect: r => r.json()
     });
     const Getter = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const { data: data1, send: send1 } = useRequest(Getter, { immediate: false });
     const { data: data2, send: send2 } = useRequest(Getter, { immediate: false });
@@ -27,10 +27,10 @@ describe('parallel request', () => {
       responseExpect: r => r.json()
     });
     const Getter = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const ErrorGetter = alova.Get('/unit-test-404', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const firstState = useRequest(Getter, { immediate: false });
     const secondState = useRequest(ErrorGetter, { immediate: false });
@@ -48,7 +48,7 @@ describe('parallel request', () => {
       responseExpect: r => r.json()
     });
     const Getter = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const firstState = useRequest(Getter);
     const secondState = useRequest(Getter);
@@ -82,10 +82,10 @@ describe('parallel request', () => {
       responseExpect: r => r.json()
     });
     const Getter = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const ErrorGetter = alova.Get('/unit-test-404', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const firstState = useRequest(Getter);
     const secondState = useRequest(ErrorGetter);

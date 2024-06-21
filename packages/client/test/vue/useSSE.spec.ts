@@ -1,5 +1,6 @@
 import { useSSE } from '@/index';
 import { usePromise } from '@alova/shared/function';
+import { GeneralFn } from '@alova/shared/types';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { AlovaGenerics, createAlova } from 'alova';
@@ -9,7 +10,7 @@ import ES from 'eventsource';
 import { AddressInfo } from 'net';
 import { untilCbCalled } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
-import { AlovaSSEMessageEvent, AnyFn, SSEHookReadyState } from '~/typings/general';
+import { AlovaSSEMessageEvent, SSEHookReadyState } from '~/typings/clienthook';
 import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
 import CompUseSSE from './components/use-sse.vue';
 
@@ -49,7 +50,7 @@ describe('vue => useSSE', () => {
     const openCb = jest.fn();
     on(IntervalEventName, cb);
     onOpen(openCb);
-    const onIntervalCb = (cb: AnyFn) => on(IntervalEventName, cb);
+    const onIntervalCb = (cb: GeneralFn) => on(IntervalEventName, cb);
 
     expect(readyState.value).toStrictEqual(SSEHookReadyState.CLOSED);
     expect(data.value).toBeUndefined();

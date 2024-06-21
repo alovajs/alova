@@ -58,7 +58,9 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   public meta?: any;
 
-  public __key__: string;
+  public key: string;
+
+  public promise?: Promise<AG['Responded']>;
 
   /**
    * 请求中断函数，每次请求都会更新这个函数
@@ -125,7 +127,7 @@ export default class Method<AG extends AlovaGenerics = any> {
 
     // 在外部需要使用原始的key，而不是实时生成key
     // 原因是，method的参数可能传入引用类型值，但引用类型值在外部改变时，实时生成的key也随之改变，因此使用最开始的key更准确
-    instance.__key__ = key(instance);
+    instance.key = instance.generateKey();
   }
 
   /**
@@ -163,10 +165,11 @@ export default class Method<AG extends AlovaGenerics = any> {
     // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
     instance.abort.a = abort;
     instance.fromCache = undefinedValue;
-    return promiseThen(response(), r => {
+    instance.promise = promiseThen(response(), r => {
       instance.fromCache = fromCache();
       return r;
     });
+    return instance.promise;
   }
 
   /**
@@ -175,6 +178,10 @@ export default class Method<AG extends AlovaGenerics = any> {
    */
   public setName(name: string | number) {
     getConfig(this).name = name;
+  }
+
+  public generateKey(): string {
+    return key(this);
   }
 
   /**

@@ -13,7 +13,7 @@ describe('[react]use hooks in SSR', () => {
     });
     const Get = alova.Get('/unit-test', {
       params: { a: 'a', b: 'str' },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     const successMockFn = jest.fn();

@@ -9,7 +9,6 @@ import {
   instanceOf,
   isFn,
   isNumber,
-  objAssign,
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
@@ -34,12 +33,11 @@ import {
   CompleteHandler,
   EnumHookType,
   ErrorHandler,
-  FetcherHookConfig,
   FrontRequestHookConfig,
   SuccessHandler,
   UseHookConfig,
   WatcherHookConfig
-} from '~/typings';
+} from '~/typings/clienthook';
 import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './alovaEvent';
 import { coreHookAssert } from './assert';
 import createHook from './createHook';
@@ -94,9 +92,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
           cachedResponse = data;
         }
       }
-      const forceRequestFinally = sloughConfig(
-        (useHookConfig as FrontRequestHookConfig<AG> | FetcherHookConfig).force ?? falseValue
-      );
+      const forceRequestFinally = sloughConfig((useHookConfig as UseHookConfig<AG>).force ?? falseValue);
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
   }
@@ -127,7 +123,6 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     complete: AlovaCompleteEvent<AG>;
   }>();
 
-  const hookProvider = exposeProvider(objectify([data, loading, error, downloading, uploading]));
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
 
   /**
@@ -172,7 +167,8 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     });
   }
 
-  return objAssign(hookProvider, {
+  return exposeProvider({
+    ...objectify([data, loading, error, downloading, uploading]),
     abort: () => hookInstance.m && hookInstance.m.abort(),
     /**
      * 通过执行该方法来手动发起请求

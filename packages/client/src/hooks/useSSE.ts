@@ -26,8 +26,7 @@ import {
   hitCacheBySource,
   promiseStatesHook
 } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/general';
+import { AlovaMethodHandler, SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/clienthook';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
@@ -73,8 +72,8 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   const eventSource = ref<EventSource | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
-  const data = create(initialData as Data, 'data', trueValue);
-  const readyState = create(SSEHookReadyState.CLOSED, 'readyState', trueValue);
+  const data = create(initialData as Data, 'data');
+  const readyState = create(SSEHookReadyState.CLOSED, 'readyState');
 
   let methodInstance = getHandlerMethod(handler);
 
@@ -121,10 +120,10 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
    * @returns 处理后的response
    */
   const handleResponseTask = async (handlerReturns: any) => {
-    const { headers, transformData: transformDataFn = $self } = getConfig(methodInstance);
+    const { headers, transform: transformFn = $self } = getConfig(methodInstance);
 
     const returnsData = await handlerReturns;
-    const transformedData = await transformDataFn(returnsData, (headers || {}) as AG['ResponseHeader']);
+    const transformedData = await transformFn(returnsData, (headers || {}) as AG['ResponseHeader']);
 
     data.v = transformedData as any;
 

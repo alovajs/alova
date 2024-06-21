@@ -1,6 +1,6 @@
 import { RetriableFailEvent, RetriableRetryEvent } from '@/event';
 import useRequest from '@/hooks/core/useRequest';
-import { buildErrorMsg, createAssert } from '@alova/shared/assert';
+import { AlovaError, createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import { AlovaEventBase } from '@alova/shared/event';
 import { delayWithBackoff, isNumber, newInstance, noop, statesHookHelper, usePromise } from '@alova/shared/function';
@@ -15,8 +15,7 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { RetriableHookConfig } from '~/typings/general';
+import { AlovaMethodHandler, RetriableHookConfig } from '~/typings/clienthook';
 
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');
@@ -151,7 +150,7 @@ export default <AG extends AlovaGenerics>(
    */
   const stop = () => {
     assert(currentLoadingState.current, 'there are no requests being retried');
-    stopManuallyError.current = new Error(buildErrorMsg(hookPrefix, 'stop retry manually'));
+    stopManuallyError.current = newInstance(AlovaError, hookPrefix, 'stop retry manually');
     if (requesting.current) {
       nestedHookProvider.abort();
     } else {

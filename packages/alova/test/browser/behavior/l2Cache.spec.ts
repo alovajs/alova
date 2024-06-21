@@ -21,14 +21,14 @@ describe('l2cache cache data', () => {
 
     // GET requests no longer have default cache settings
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     expect(await queryCache(Get)).toBeUndefined();
 
     // POST is cached
     const Post1 = alova.Post('/unit-test', undefined, {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post1;
     expect(await queryCache(Post1, { policy: 'l1' })).toStrictEqual({
@@ -49,7 +49,7 @@ describe('l2cache cache data', () => {
       '/unit-test',
       { p1: 's1' },
       {
-        transformData: ({ data }: Result) => data
+        transform: ({ data }: Result) => data
       }
     );
     await Post2;
@@ -83,7 +83,7 @@ describe('l2cache cache data', () => {
     });
 
     const Post1 = alova.Post('/unit-test', undefined, {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post1;
     await delay(50); // let the l1 cache expired
@@ -111,7 +111,7 @@ describe('l2cache cache data', () => {
           return mode === 'memory' ? 10 : 600;
         }
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Post1;
     await delay(50); // let the l1 cache expired
@@ -135,11 +135,11 @@ describe('l2cache cache data', () => {
         mode: 'restore',
         tag: 'v1'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     // Clear the cache first to simulate the scenario after the browser is refreshed. At this time, the persistent data will be assigned to the data state first and a request will be initiated.
-    await removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
+    await removeWithCacheAdapter(alova.id, Get.key, alova.l1Cache);
 
     // After setting to restore, even if the local cache fails, the persistent data will be automatically restored to the cache, so the cache will be hit.
     await Get;
@@ -156,12 +156,12 @@ describe('l2cache cache data', () => {
         mode: 'restore',
         tag: 'v10'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     await Get;
     // After clearing the cache, request it to be restored to the memory cache after 400 milliseconds. If the cache time is consistent, the memory cache will expire after 100 milliseconds.
-    await removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
+    await removeWithCacheAdapter(alova.id, Get.key, alova.l1Cache);
     await delay(400);
     Get.send();
     await delay(150);
@@ -180,12 +180,12 @@ describe('l2cache cache data', () => {
         mode: 'restore',
         tag: 'v1'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
 
     // Clear the cache first to simulate the scenario after the browser is refreshed. At this time, the persistent data will be assigned to the data state first and a request will be initiated.
-    removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
+    removeWithCacheAdapter(alova.id, Get.key, alova.l1Cache);
 
     // After setting to restore, even if the local cache fails, the persistent data will be automatically restored to the cache in the macro, so the cache will be hit.
     await Get;
@@ -201,7 +201,7 @@ describe('l2cache cache data', () => {
         expire: Infinity,
         mode: 'restore'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
 
@@ -225,15 +225,15 @@ describe('l2cache cache data', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
 
     // Clear the cache first to simulate the scenario after the browser is refreshed. At this time, the persistent data will be assigned to the data state first and a request will be initiated.
-    removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
+    removeWithCacheAdapter(alova.id, Get.key, alova.l1Cache);
     (alova.options.cacheFor?.GET as DetailCacheConfig<any>).tag = 'v3'; // Modify tag
     const Get2 = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     // After the tag of the alova instance is changed, the persistent data will be invalid, so the request will be re-initiated.
@@ -250,19 +250,19 @@ describe('l2cache cache data', () => {
         expire: 100 * 1000,
         mode: 'restore'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
 
     // Clear the cache first to simulate the scenario after the browser is refreshed. At this time, the persistent data will be assigned to the data state first and a request will be initiated.
-    removeWithCacheAdapter(alova.id, Get.__key__, alova.l1Cache);
+    removeWithCacheAdapter(alova.id, Get.key, alova.l1Cache);
     const Get2 = alova.Get('/unit-test', {
       cacheFor: {
         expire: 100 * 1000,
         mode: 'restore',
         tag: 'v2'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     // After the tag is changed, the persistent data will become invalid, so the request will be re-initiated, and the value of data will become undefined.

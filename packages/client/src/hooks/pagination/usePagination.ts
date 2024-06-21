@@ -11,6 +11,7 @@ import {
   noop,
   statesHookHelper
 } from '@alova/shared/function';
+import { GeneralFn } from '@alova/shared/types';
 import {
   MEMORY,
   falseValue,
@@ -31,8 +32,7 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { Alova, AlovaGenerics, Method, invalidateCache, promiseStatesHook, queryCache, setCache } from 'alova';
-import { FetcherType } from 'alova/client';
-import { AnyFn, PaginationHookConfig } from '~/typings/general';
+import { FetcherType, PaginationHookConfig } from '~/typings/clienthook';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';
 
 const paginationAssert = createAssert('usePagination');
@@ -108,7 +108,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
 
   // 兼容react，将需要代理的函数存放在此
   // 这样可以在代理函数中调用到最新的操作函数，避免react闭包陷阱
-  const delegationActions = ref<Record<string, AnyFn>>({});
+  const delegationActions = ref<Record<string, GeneralFn>>({});
   // 计算data、total、isLastPage参数
   const pageCount = computed(
     () => {

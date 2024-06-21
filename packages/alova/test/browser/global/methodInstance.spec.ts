@@ -1,7 +1,10 @@
 import { getAlovaInstance } from '#/utils';
 import { createAlova } from '@/alova';
+import { Method } from '@/index';
+import adapterFetch from '@/predefine/adapterFetch';
 import { Result, delay } from 'root/testUtils';
 
+const baseURL = process.env.NODE_BASE_URL as string;
 const alova = getAlovaInstance({
   responseExpect: r => r.json()
 });
@@ -31,14 +34,14 @@ describe('method instance', () => {
         'Content-Type': 'application/json'
       }
     });
-    await expect(Get2.send()).rejects.toThrow();
+    await expect(Get2.send()).rejects.toThrow('Failed to fetch');
   });
 
   test('fromCache should be true when request with cache', async () => {
     const Get1 = alova.Get('/unit-test', {
       params: { aa1: 'aa1', b: 'str' },
       timeout: 10000,
-      transformData(result: Result) {
+      transform(result: Result) {
         return result.data;
       },
       cacheFor: 100 * 1000
@@ -51,14 +54,14 @@ describe('method instance', () => {
     expect(Get1.fromCache).toBeTruthy();
   });
 
-  test('`method.config.transformData` can also support async function', async () => {
+  test('`method.config.transform` can also support async function', async () => {
     const Get = alova.Get('/unit-test', {
       params: { a: 'a22', b: 'str' },
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
       },
-      async transformData(result: Result) {
+      async transform(result: Result) {
         await new Promise(resolve => {
           setTimeout(resolve, 200);
         });
@@ -161,7 +164,7 @@ describe('method instance', () => {
   test('should send request when call `method.then` or await method instance', async () => {
     const rawData = await alova.Get('/unit-test', {
       params: { e: 'e', f: 'gty' },
-      transformData: (result: Result) => result.data
+      transform: (result: Result) => result.data
     });
     expect(rawData.path).toBe('/unit-test');
     expect(rawData.params).toStrictEqual({ e: 'e', f: 'gty' });
@@ -169,7 +172,7 @@ describe('method instance', () => {
     const rawDataParams = await alova
       .Get('/unit-test', {
         params: { e2: 'gg', f: 'gty2' },
-        transformData: (result: Result) => result.data
+        transform: (result: Result) => result.data
       })
       .then(result => result.params);
     expect(rawDataParams).toStrictEqual({ e2: 'gg', f: 'gty2' });
@@ -193,7 +196,7 @@ describe('method instance', () => {
     const rawData = await alova
       .Get('/unit-test', {
         params: { gb: 'gb', f: 'gty' },
-        transformData: (result: Result) => result.data
+        transform: (result: Result) => result.data
       })
       .finally(() => {
         finallyMockFn();
@@ -218,7 +221,7 @@ describe('method instance', () => {
     const alovaInst = getAlovaInstance();
 
     const Get = alovaInst.Get('/unit-test-download', {
-      transformData: (resp: Response) => resp.blob()
+      transform: (resp: Response) => resp.blob()
     });
 
     let progress = { total: 0, loaded: 0 };
@@ -239,7 +242,7 @@ describe('method instance', () => {
           paramA
         }
       });
-      getter.__key__ = 'custom key';
+      getter.key = 'custom key';
       return getter;
     };
 
@@ -273,14 +276,14 @@ describe('method instance', () => {
         b: 'bbb1'
       }
     });
-    Get1.__key__ = 'custom-key1';
+    Get1.key = 'custom-key1';
     const Get2 = alova.Get<Result>('/unit-test', {
       params: {
         a: 'aaa2',
         b: 'bbb2'
       }
     });
-    Get2.__key__ = 'custom-key1';
+    Get2.key = 'custom-key1';
 
     const data1 = await Get1;
     expect(data1.data.params).toStrictEqual({ a: 'aaa1', b: 'bbb1' });
@@ -323,9 +326,9 @@ describe('method instance', () => {
     });
 
     const Post1 = alova.Post<{ status: number; data: { id: number } }>('/unit-test', { id: 1 });
-    Post1.__key__ = 'custom-key111';
+    Post1.key = 'custom-key111';
     const Post2 = alova.Post<{ status: number; data: { id: number } }>('/unit-test', { id: 2 });
-    Post2.__key__ = 'custom-key111';
+    Post2.key = 'custom-key111';
 
     const p1 = Post1.send();
     const p2 = Post2.send();
@@ -339,5 +342,79 @@ describe('method instance', () => {
     // The number of global request hook calls remains unchanged
     expect(beforeRequestMockFn).toHaveBeenCalledTimes(2);
     expect(responseMockFn).toHaveBeenCalledTimes(2);
+  });
+
+  test('should not add slash at the end when sending with empty url', async () => {
+    const alova = createAlova({
+      baseURL: `${baseURL}/unit-test`,
+      requestAdapter: adapterFetch(),
+      responded(r) {
+        return r.json();
+      }
+    });
+
+    const Getter = alova.Get('', {
+      params: { a: 'a', b: 'str' },
+      transform({ data }: Result<'/unit-test'>) {
+        return data;
+      }
+    });
+
+    const res = await Getter;
+    expect(res.path).toBe('/unit-test');
+    expect(res.params).toStrictEqual({ a: 'a', b: 'str' });
+  });
+
+  test('it can customize the method key', async () => {
+    const method1 = alova.Get('/unit-test');
+    method1.key = 'method1-key';
+    expect(method1.key).toBe('method1-key');
+
+    const originalKey = Method.prototype.generateKey;
+    Method.prototype.generateKey = function () {
+      if (this.type === 'GET') {
+        return 'top-alova1-method-key';
+      }
+      return 'default-method-key';
+    };
+    const method2 = alova.Get('/unit-test');
+    const method3 = alova.Post('/unit-test');
+    expect(method2.key).toBe('top-alova1-method-key');
+    expect(method3.key).toBe('default-method-key');
+
+    Method.prototype.generateKey = originalKey; // restore the original key function
+  });
+
+  test('should bind callback to promise instance with `then/catch/finally`', async () => {
+    const thenFn = jest.fn();
+    const catchFn = jest.fn();
+    const finallyFn = jest.fn();
+    const innerAlova = createAlova({
+      baseURL,
+      requestAdapter: adapterFetch(),
+      beforeRequest(method) {
+        method.promise?.then(thenFn, () => {});
+        method.promise?.catch(catchFn);
+        method.promise?.finally(finallyFn).catch(() => {});
+      },
+      responded(r, method) {
+        method.promise?.then(thenFn, () => {});
+        method.promise?.catch(catchFn);
+        method.promise?.finally(finallyFn).catch(() => {});
+        return r.json();
+      }
+    });
+
+    const res = await innerAlova.Get('/unit-test');
+    expect(thenFn).toHaveBeenCalledTimes(2);
+    expect(catchFn).not.toHaveBeenCalled();
+    expect(finallyFn).toHaveBeenCalledTimes(2);
+    expect(thenFn).toHaveBeenCalledWith(res);
+
+    await expect(innerAlova.Get('/unit-test-error')).rejects.toThrow('Failed to fetch');
+    // 请求错误不会进入responded
+    expect(thenFn).toHaveBeenCalledTimes(2);
+    expect(catchFn).toHaveBeenCalledTimes(1);
+    expect(finallyFn).toHaveBeenCalledTimes(3);
   });
 });

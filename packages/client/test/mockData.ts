@@ -169,6 +169,12 @@ const mocks = defineMock({
   }
 });
 
+interface BodyType {
+  status: number;
+  statusText: string;
+  [k: string]: any;
+}
+
 // 模拟数据请求适配器
 export const mockRequestAdapter = createAlovaMockAdapter([mocks], {
   delay: 50,
@@ -187,9 +193,11 @@ export const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       }
     }
     return {
-      response: body,
+      response: body as BodyType,
       headers: {} as Record<string, number | string>
     };
   },
   mockRequestLogger: false
 });
+
+export type MockRequestAdapter = typeof mockRequestAdapter;

@@ -17,7 +17,7 @@ import { promiseWithResolvers } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
-import { ScopedSQEvents } from '~/typings/general';
+import { ScopedSQEvents } from '~/typings/clienthook';
 
 describe('boot silent queue', () => {
   test('replace virtual data to real data', () => {
@@ -33,7 +33,7 @@ describe('boot silent queue', () => {
       }),
       `/detail/${stringifyVData(vid)}`,
       {
-        transformData: (data: any) => data
+        transform: (data: any) => data
       },
       { whole: virtualResponse }
     );
@@ -58,7 +58,7 @@ describe('boot silent queue', () => {
       }),
       `/detail`,
       {
-        transformData: (data: any) => data
+        transform: (data: any) => data
       },
       { whole: { id: 123 }, text: '' }
     );
@@ -142,7 +142,7 @@ describe('boot silent queue', () => {
       alovaInst,
       '/detail',
       {
-        transformData: (data: any) => data
+        transform: (data: any) => data
       },
       { text: 'some content', time: new Date().toLocaleString() }
     );
@@ -175,7 +175,7 @@ describe('boot silent queue', () => {
       alovaInst,
       `/detail/${stringifyVData(vid)}`,
       {
-        transformData: (data: any) => data
+        transform: (data: any) => data
       },
       { id: vid }
     );
@@ -289,7 +289,7 @@ describe('boot silent queue', () => {
     const { promise: pms, resolve } = promiseWithResolvers();
     const virtualResponse = createVirtualResponse({ id: undefined, other: undefined });
     const methodInstance = new Method('POST', alovaInst, '/detail', {
-      transformData: () => undefined // 响应数据最终为undefined
+      transform: () => undefined // 响应数据最终为undefined
     });
     const emitter = createEventManager<ScopedSQEvents<any>>();
     const silentMethodInstance = new SilentMethod(methodInstance, 'silent', emitter, 'abcdef', undefined, /.*/, 2, {
@@ -355,7 +355,7 @@ describe('boot silent queue', () => {
     const { promise: pms, resolve } = promiseWithResolvers();
     const virtualResponse = createVirtualResponse(undefined);
     const methodInstance = new Method('POST', alovaInst, '/detail', {
-      transformData: () => true
+      transform: () => true
     });
     const emitter = createEventManager<ScopedSQEvents<any>>();
     const silentMethodInstance = new SilentMethod(methodInstance, 'silent', emitter, 'abcdef', undefined, /.*/, 2, {

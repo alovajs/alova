@@ -1,8 +1,8 @@
 <script>
   import { useWatcher } from '@/index';
-  import SvelteHook from 'alova/svelte';
   import { createAlova } from 'alova';
   import GlobalFetch from 'alova/fetch';
+  import SvelteHook from 'alova/svelte';
   import { writable } from 'svelte/store';
 
   export let throwError = false;
@@ -29,7 +29,7 @@
         id1,
         id2
       },
-      transformData: ({ data }) => {
+      transform: ({ data }) => {
         if (throwError && data.path === '/unit-test-1s') {
           throw new Error('error');
         }

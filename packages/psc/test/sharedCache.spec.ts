@@ -169,7 +169,7 @@ describe('shared cache', () => {
     const alovaA = createSharedCacheAlova();
     const alovaB = createSharedCacheAlova();
     const GetA = alovaA.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await GetA;
 
@@ -205,7 +205,7 @@ describe('shared cache', () => {
     });
 
     const GetA = alovaA.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await GetA;
 
@@ -241,7 +241,7 @@ describe('shared cache', () => {
     });
 
     const GetA = alovaA.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     // expect(mainMockOn).toHaveBeenCalledTimes(1);
@@ -273,7 +273,7 @@ describe('shared cache', () => {
     });
 
     const GetA = alovaA.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await GetA;
 
@@ -335,12 +335,12 @@ describe('shared cache', () => {
     expect(mockReceive).toHaveBeenLastCalledWith({ senderID: '', type: 'init', key: '', value: '{}' });
 
     const GetA = alovaA.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await GetA;
 
     const GetB = alovaC.Get('/unit-test', {
-      transformData: ({ data }: Result) => data,
+      transform: ({ data }: Result) => data,
       params: { name: 'test' }
     });
     await GetB;

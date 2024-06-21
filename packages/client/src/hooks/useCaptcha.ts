@@ -1,10 +1,9 @@
 import useRequest from '@/hooks/core/useRequest';
-import { buildErrorMsg, createAssert } from '@alova/shared/assert';
+import { AlovaError, createAssert } from '@alova/shared/assert';
 import { newInstance, statesHookHelper } from '@alova/shared/function';
-import { PromiseCls, falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import { PromiseCls, falseValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { CaptchaHookConfig } from '~/typings/general';
+import { AlovaMethodHandler, CaptchaHookConfig } from '~/typings/clienthook';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
@@ -30,7 +29,7 @@ export default <AG extends AlovaGenerics>(
     middleware: middleware ? (ctx, next) => middleware({ ...ctx, send }, next) : undefinedValue
   });
 
-  const countdown = create(0, 'countdown', trueValue);
+  const countdown = create(0, 'countdown');
 
   const timer = ref(undefinedValue as NodeJS.Timeout | undefined);
   const send = (...args: any[]) =>
@@ -50,7 +49,7 @@ export default <AG extends AlovaGenerics>(
           })
           .catch(reason => reject(reason));
       } else {
-        reject(new Error(buildErrorMsg(hookPrefix, 'the countdown is not over yet')));
+        reject(newInstance(AlovaError, hookPrefix, 'the countdown is not over yet'));
       }
     });
   return exposeProvider({

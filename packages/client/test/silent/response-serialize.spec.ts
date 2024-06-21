@@ -41,7 +41,7 @@ describe('serialize response data', () => {
         mode: 'restore',
         expire: Infinity
       },
-      transformData: (data: { total: number; list: number[] }) => data.list
+      transform: (data: { total: number; list: number[] }) => data.list
     });
     const { onSuccess, data } = useRequest(Get);
     data; // 访问后才能触发此数据的更新

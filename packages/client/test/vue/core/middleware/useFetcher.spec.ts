@@ -1,8 +1,8 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { FetcherType } from 'alova/client';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
+import { FetcherType } from '~/typings/clienthook';
 
 describe('useFetcher middleware', () => {
   test('should send request when call next immediately in middleware function', async () => {
@@ -15,7 +15,7 @@ describe('useFetcher middleware', () => {
       }
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     fetch(getGetterObj);
@@ -39,7 +39,7 @@ describe('useFetcher middleware', () => {
       }
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
     fetch(getGetterObj);
 
@@ -59,7 +59,7 @@ describe('useFetcher middleware', () => {
       middleware: async () => {}
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
+      transform: ({ data }: Result<true>) => data
     });
 
     fetch(getGetterObj);
@@ -86,7 +86,7 @@ describe('useFetcher middleware', () => {
       }
     });
     const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     expect(fetchInMiddleware).toBeUndefined(); // 未发起请求时不会调用middleware

@@ -8,7 +8,7 @@ describe('invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     const cachedData = await queryCache(Get, {
@@ -23,7 +23,7 @@ describe('invalitate cached response data', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get;
     let cachedData = await queryCache(Get, {
@@ -43,12 +43,12 @@ describe('invalitate cached response data', () => {
     });
     const Get1 = alova.Get('/unit-test', {
       cacheFor: Infinity,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test-count', {
       params: { countKey: 'c' },
       cacheFor: Infinity,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     await Promise.all([Get1, Get2]);
@@ -93,7 +93,7 @@ describe('invalitate cached response data', () => {
         mode: 'restore',
         expire: Infinity
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test-count', {
       params: { countKey: 'ccc' },
@@ -101,7 +101,7 @@ describe('invalitate cached response data', () => {
         mode: 'restore',
         expire: Infinity
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     await Promise.all([Get1, Get2]);
@@ -164,14 +164,14 @@ describe('invalitate cached response data', () => {
       alova.Get('/unit-test', {
         name: 'test10-get',
         cacheFor: Infinity,
-        transformData: ({ data }: Result) => data
+        transform: ({ data }: Result) => data
       });
     const Get2 = () =>
       alova.Get('/unit-test', {
         name: 'test20-get',
         params: { key: 'f' },
         cacheFor: Infinity,
-        transformData: ({ data }: Result) => data
+        transform: ({ data }: Result) => data
       });
 
     await Promise.all([Get1(), Get2()]);

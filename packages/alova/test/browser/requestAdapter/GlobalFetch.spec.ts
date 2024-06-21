@@ -9,7 +9,7 @@ describe('request adapter GlobalFetch', () => {
     const mockFn = jest.fn();
     const Get = alova.Get('/unit-test', {
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result, headers) => {
+      transform: ({ data }: Result, headers) => {
         mockFn(data, headers);
         return data;
       }

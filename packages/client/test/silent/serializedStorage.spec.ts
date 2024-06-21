@@ -172,7 +172,7 @@ describe('serialized storage with virtual response', () => {
           expire: new Date('2022-12-31 00:00:00'),
           mode: 'memory'
         },
-        transformData: (data: any) => data[0]
+        transform: (data: any) => data[0]
       },
       {
         matcher: virtualResponse.matcher,

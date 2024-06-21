@@ -244,7 +244,7 @@
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
 import { ComputedRef, Ref, WatchSource, ref } from 'vue';
-import { PaginationHookConfig } from '~/typings/general';
+import { PaginationHookConfig } from '~/typings/clienthook';
 
 const props = defineProps<{
   getter: (

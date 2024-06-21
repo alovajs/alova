@@ -15,7 +15,7 @@ describe('update cached response data by user in vue', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const { data, onSuccess } = useRequest(Get);
     await untilCbCalled(onSuccess);
@@ -34,7 +34,7 @@ describe('update cached response data by user in vue', () => {
     const Get = alova.Get('/unit-test', {
       params: { a: 1 },
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     const mockfn = jest.fn();
@@ -54,13 +54,13 @@ describe('update cached response data by user in vue', () => {
       name: 'get1',
       params: { a: 1 },
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test', {
       name: 'get2',
       params: { b: 2 },
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     const { onSuccess: get1OnSuccess, data: get1Data } = useRequest(Get1);
@@ -84,7 +84,7 @@ describe('update cached response data by user in vue', () => {
     });
     const Get = alova.Get('/unit-test', {
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     const extraData = ref(0);
@@ -116,7 +116,7 @@ describe('update cached response data by user in vue', () => {
       updateState(Get, {
         extraData3: () => 1
       })
-    ).rejects.toThrow('[alova]state named `extraData3` is not found');
+    ).rejects.toThrow('state named `extraData3` is not found');
 
     // 更新成功
     await updateState(Get, {
@@ -136,7 +136,7 @@ describe('update cached response data by user in vue', () => {
       name: 'get10',
       params: { a: 1 },
       cacheFor: 100000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     const { onSuccess } = useRequest(Get1);

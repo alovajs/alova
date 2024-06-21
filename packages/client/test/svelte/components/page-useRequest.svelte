@@ -1,8 +1,8 @@
 <script>
   import { useRequest } from '@/index';
-  import SvelteHook from 'alova/svelte';
   import { createAlova } from 'alova';
   import GlobalFetch from 'alova/fetch';
+  import SvelteHook from 'alova/svelte';
 
   const alova = createAlova({
     baseURL: 'http://localhost:3000',
@@ -12,7 +12,7 @@
     responded: response => response.json()
   });
   const Get = alova.Get('/unit-test', {
-    transformData: ({ data }) => data
+    transform: ({ data }) => data
   });
 
   const { loading, data } = useRequest(Get, {

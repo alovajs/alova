@@ -1,7 +1,12 @@
 import { $self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method } from 'alova';
-import { ClientTokenAuthenticationOptions, ServerTokenAuthenticationOptions } from '~/typings/general';
+import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
+import { GlobalFetchRequestAdapter } from 'alova/fetch';
+import {
+  AlovaResponded,
+  ClientTokenAuthenticationOptions,
+  ServerTokenAuthenticationOptions
+} from '~/typings/clienthook';
 import {
   PosibbleAuthMap,
   WaitingRequestList,
@@ -16,30 +21,42 @@ import {
   waitForTokenRefreshed
 } from './helper';
 
+/**
+ * 统一获取AlovaRequestAdapter的类型
+ */
+type AlovaRequestAdapterUnified<
+  RA extends
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = AlovaRequestAdapter<any, any, any>
+> = RA extends AlovaRequestAdapter<any, any, any> ? RA : ReturnType<RA>;
+
 type BeforeRequestType<AG extends AlovaGenerics> = (
   originalBeforeRequest?: AlovaOptions<AG>['beforeRequest']
 ) => AlovaOptions<AG>['beforeRequest'];
-type ResponseType<AG extends AlovaGenerics> = (
-  originalResponded?: AlovaOptions<AG>['responded']
-) => AlovaOptions<AG>['responded'];
+type ResponseType<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> = (
+  originalResponded?: AlovaResponded<SH, RA>
+) => AlovaResponded<SH, RA>;
 
 /**
  * 创建客户端的token认证拦截器
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export const createClientTokenAuthentication = <AG extends AlovaGenerics = AlovaGenerics>({
+export const createClientTokenAuthentication = <
+  SH extends StatesHook<any, any>,
+  RA extends
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter
+>({
   visitorMeta,
   login,
   logout,
   refreshToken,
   assignToken = noop
-}: ClientTokenAuthenticationOptions<
-  AlovaRequestAdapter<AG['RequestConfig'], AG['Response'], AG['ResponseHeader']>
->) => {
+}: ClientTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>) => {
   let tokenRefreshing = falseValue;
   const waitingList: WaitingRequestList = [];
-  const onAuthRequired: BeforeRequestType<AG> =
+  const onAuthRequired: BeforeRequestType<AlovaGenerics> =
     <AG extends AlovaGenerics>(onBeforeRequest: AlovaOptions<AG>['beforeRequest']) =>
     async (method: Method<AG>) => {
       const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
@@ -72,11 +89,11 @@ export const createClientTokenAuthentication = <AG extends AlovaGenerics = Alova
       onBeforeRequest?.(method);
     };
 
-  const onResponseRefreshToken: ResponseType<AG> = onRespondedHandlers => {
-    const respondedRecord = onResponded2Record<AG>(onRespondedHandlers);
+  const onResponseRefreshToken: ResponseType<SH, AlovaRequestAdapterUnified<RA>> = originalResponded => {
+    const respondedRecord = onResponded2Record<SH, AlovaRequestAdapterUnified<RA>>(originalResponded);
     return {
       ...respondedRecord,
-      onSuccess: async (response, method) => {
+      onSuccess: async (response: any, method: Method) => {
         await callHandlerIfMatchesMeta(method, login, defaultLoginMeta, response);
         await callHandlerIfMatchesMeta(method, logout, defaultLogoutMeta, response);
         return (respondedRecord.onSuccess || $self)(response, method);
@@ -95,18 +112,23 @@ export const createClientTokenAuthentication = <AG extends AlovaGenerics = Alova
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export const createServerTokenAuthentication = <AG extends AlovaGenerics = AlovaGenerics>({
+export const createServerTokenAuthentication = <
+  SH extends StatesHook<any, any>,
+  RA extends
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter
+>({
   visitorMeta,
   login,
   logout,
   refreshTokenOnSuccess,
   refreshTokenOnError,
   assignToken = noop
-}: ServerTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any>>) => {
+}: ServerTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>) => {
   let tokenRefreshing = falseValue;
   const waitingList: WaitingRequestList = [];
 
-  const onAuthRequired: BeforeRequestType<AG> = onBeforeRequest => async method => {
+  const onAuthRequired: BeforeRequestType<AlovaGenerics> = onBeforeRequest => async method => {
     const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
     const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
     // 被忽略的、登录、刷新token的请求不进行token认证
@@ -127,11 +149,11 @@ export const createServerTokenAuthentication = <AG extends AlovaGenerics = Alova
     onBeforeRequest?.(method);
   };
 
-  const onResponseRefreshToken: ResponseType<AG> = onRespondedHandlers => {
-    const respondedRecord = onResponded2Record<AG>(onRespondedHandlers);
+  const onResponseRefreshToken: ResponseType<SH, AlovaRequestAdapterUnified<RA>> = onRespondedHandlers => {
+    const respondedRecord = onResponded2Record<SH, AlovaRequestAdapterUnified<RA>>(onRespondedHandlers);
     return {
       ...respondedRecord,
-      onSuccess: async (response, method) => {
+      onSuccess: async (response: any, method: Method) => {
         if (
           !checkMethodRole(method, visitorMeta || defaultVisitorMeta) &&
           !checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta) &&
@@ -156,7 +178,7 @@ export const createServerTokenAuthentication = <AG extends AlovaGenerics = Alova
         await callHandlerIfMatchesMeta(method, logout, defaultLogoutMeta, response);
         return (respondedRecord.onSuccess || $self)(response, method);
       },
-      onError: async (error, method) => {
+      onError: async (error: any, method: Method) => {
         if (
           !checkMethodRole(method, visitorMeta || defaultVisitorMeta) &&
           !checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta) &&

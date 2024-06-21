@@ -11,7 +11,7 @@ import {
   StatesHook
 } from '~/typings';
 import Method from './Method';
-import { createDefaultL1CacheAdapter, createDefaultL2CacheAdapter } from './defaults/cacheAdapter';
+import { localStorageAdapter, memoryAdapter } from './defaults/cacheAdapter';
 import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
 
@@ -58,8 +58,8 @@ export class Alova<AG extends AlovaGenerics> {
     const instance = this;
     instance.id = (options.id || (idCount += 1)).toString();
     // 如果storage未指定，则默认使用localStorage
-    instance.l1Cache = options.l1Cache || createDefaultL1CacheAdapter();
-    instance.l2Cache = options.l2Cache || createDefaultL2CacheAdapter();
+    instance.l1Cache = options.l1Cache || memoryAdapter();
+    instance.l2Cache = options.l2Cache || localStorageAdapter();
 
     // 合并默认options
     instance.options = {

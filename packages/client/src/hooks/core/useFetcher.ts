@@ -1,6 +1,7 @@
-import { noop, omit } from '@alova/shared/function';
+import { noop, objAssign } from '@alova/shared/function';
+import { deleteAttr } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
-import { EnumHookType, FetcherHookConfig, FetcherType, type UseFetchHookExposure } from '~/typings';
+import { EnumHookType, FetcherHookConfig, FetcherType } from '~/typings/clienthook';
 import { assertMethod, fetcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 
@@ -15,8 +16,8 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
     config
   );
   const { send } = props;
-  return {
-    ...omit(props, 'send'),
+  deleteAttr(props, 'send');
+  return objAssign(props, {
     /**
      * Fetch data
      * fetch will definitely send a request, and if the currently requested data has a corresponding management state, this state will be updated.
@@ -26,5 +27,5 @@ export default function useFetcher<SE extends FetcherType<any>>(config: FetcherH
       assertMethod(fetcherHookAssert, matcher);
       return send(args, matcher);
     }
-  } as UseFetchHookExposure<SE['state']>;
+  });
 }

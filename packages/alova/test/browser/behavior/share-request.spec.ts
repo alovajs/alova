@@ -106,7 +106,7 @@ describe('Request shared', () => {
       params: {
         countKey: 'bb'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     // An error will be thrown for the first request, but not for the second time.
@@ -143,7 +143,7 @@ describe('Request shared', () => {
       params: {
         countKey: 'cc'
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     // An error will be thrown for the first request, but not for the second time.
@@ -204,7 +204,7 @@ describe('Request shared', () => {
 
     const Get = () =>
       alova.Get('/unit-test', {
-        transformData: (data: { status: number; data: { id: number } }) => data.status
+        transform: (data: { status: number; data: { id: number } }) => data.status
       });
 
     const [rawData1, rawData2] = await Promise.all([Get().send(), Get().send()]);
@@ -238,7 +238,7 @@ describe('Request shared', () => {
     const Get = () =>
       alova.Get('/unit-test', {
         shareRequest: false,
-        transformData: (data: { status: number; data: { id: number } }) => data.status
+        transform: (data: { status: number; data: { id: number } }) => data.status
       });
 
     const [rawData1, rawData2] = await Promise.all([Get().send(), Get().send()]);

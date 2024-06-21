@@ -22,7 +22,7 @@
         id1,
         id2
       },
-      transformData: ({ data }) => data
+      transform: ({ data }) => data
     });
 
   const handleClick1 = () => {

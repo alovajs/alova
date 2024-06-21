@@ -43,8 +43,8 @@ export default class HookedMethod<AG extends AlovaGenerics = any> implements Met
     return this.entity.hitSource;
   }
 
-  public get __key__() {
-    return this.entity.__key__;
+  public get key() {
+    return this.entity.key;
   }
 
   public get abort() {

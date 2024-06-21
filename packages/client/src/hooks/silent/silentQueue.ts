@@ -33,8 +33,7 @@ import {
   trueValue
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method, setCache } from 'alova';
-import { UpdateStateCollection } from '~/typings';
-import { RetryErrorDetailed, SilentMethod, SilentQueueMap } from '~/typings/general';
+import { RetryErrorDetailed, SilentMethod, SilentQueueMap, UpdateStateCollection } from '~/typings/clienthook';
 import {
   BEHAVIOR_SILENT,
   BeforeEventKey,

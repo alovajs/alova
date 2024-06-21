@@ -60,7 +60,7 @@ describe('useRequest hook with react', () => {
     });
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
+      transform: ({ data }: Result<true>) => data,
       cacheFor: 100 * 1000
     });
     function Page() {
@@ -89,7 +89,7 @@ describe('useRequest hook with react', () => {
     });
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
+      transform: ({ data }: Result<true>) => data,
       cacheFor: 100 * 1000
     });
     function Page() {
@@ -126,7 +126,7 @@ describe('useRequest hook with react', () => {
     });
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
+      transform: ({ data }: Result<true>) => data,
       cacheFor: 100 * 1000
     });
     function Page() {
@@ -188,7 +188,7 @@ describe('useRequest hook with react', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     function Page() {
       const { data, loading } = useRequest(Get);
@@ -214,7 +214,7 @@ describe('useRequest hook with react', () => {
     });
     function Page() {
       const Get = alova.Get('/unit-test', {
-        transformData: ({ data }: Result<true>) => data,
+        transform: ({ data }: Result<true>) => data,
         params: {
           a: '~',
           b: '~~'
@@ -274,7 +274,7 @@ describe('useRequest hook with react', () => {
     });
     const Get = alova.Get('/unit-test', {
       timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
+      transform: ({ data }: Result<true>) => data,
       cacheFor: 100 * 1000
     });
 
@@ -303,7 +303,7 @@ describe('useRequest hook with react', () => {
     });
     const Get = alova.Get('/unit-test-1s', {
       timeout: 10000,
-      transformData: ({ data }: Result) => data,
+      transform: ({ data }: Result) => data,
       cacheFor: 100 * 1000
     });
 

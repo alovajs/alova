@@ -1,6 +1,6 @@
-import { instanceOf } from '@alova/shared/function';
+import { getMethodInternalKey, instanceOf } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
-import { AlovaGenerics, getMethodKey, Method } from 'alova';
+import { AlovaGenerics, Method } from 'alova';
 
 interface SnapshotValue<AG extends AlovaGenerics> {
   entity: Method<AG>;
@@ -12,7 +12,7 @@ export default <AG extends AlovaGenerics>(handler: (page: number) => Method<AG>)
   return {
     snapshots: () => methodSnapshots,
     save(methodInstance: Method<AG>, force = falseValue) {
-      const key = getMethodKey<AG>(methodInstance);
+      const key = getMethodInternalKey(methodInstance);
       // 因为无法定位缓存中total数据的位置
       // 因此这边冗余维护这个字段
       if (!methodSnapshots[key] || force) {
@@ -22,7 +22,9 @@ export default <AG extends AlovaGenerics>(handler: (page: number) => Method<AG>)
       }
     },
     get: (entityOrPage: Method<AG> | number) =>
-      methodSnapshots[getMethodKey(instanceOf(entityOrPage, Method<AG>) ? entityOrPage : handler(entityOrPage))],
+      methodSnapshots[
+        getMethodInternalKey(instanceOf(entityOrPage, Method<AG>) ? entityOrPage : handler(entityOrPage))
+      ],
     remove(key?: string) {
       if (key) {
         delete methodSnapshots[key];

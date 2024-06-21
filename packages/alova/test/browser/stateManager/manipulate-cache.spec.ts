@@ -12,7 +12,7 @@ describe('manipulate cache', () => {
   test('the cache response data should be saved', async () => {
     const Get = alova.Get('/unit-test', {
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     // 没有缓存时为undefined
@@ -42,12 +42,12 @@ describe('manipulate cache', () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 1 },
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test', {
       params: { a: 2 },
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Promise.all([Get1, Get2]);
 
@@ -94,12 +94,12 @@ describe('manipulate cache', () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 55 },
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const Get2 = alova.Get('/unit-test', {
       params: { a: 100 },
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Promise.all([Get1, Get2]);
 
@@ -149,7 +149,7 @@ describe('manipulate cache', () => {
     const Get1 = alova.Get('/unit-test', {
       params: { a: 200 },
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get1;
 
@@ -183,7 +183,7 @@ describe('manipulate cache', () => {
         mode: 'restore',
         expire: 100 * 1000
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await Get1;
 
@@ -232,7 +232,7 @@ describe('manipulate cache', () => {
         ccc: '555'
       },
       cacheFor: 100 * 1000,
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     // 持久化自定义缓存
@@ -275,7 +275,7 @@ describe('manipulate cache', () => {
       cacheFor() {
         return mockControlledCache;
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const data = await Get1;
     expect(Get1.fromCache).toBeTruthy();
@@ -295,7 +295,7 @@ describe('manipulate cache', () => {
         });
         return mockControlledCache;
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const data = await Get1;
     expect(Get1.fromCache).toBeTruthy();
@@ -308,7 +308,7 @@ describe('manipulate cache', () => {
       async cacheFor() {
         return undefined;
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const data = await Get1;
     expect(Get1.fromCache).toBeFalsy();
@@ -329,7 +329,7 @@ describe('manipulate cache', () => {
           }
           throw new Error('error in cacheFor');
         },
-        transformData: ({ data }: Result) => data
+        transform: ({ data }: Result) => data
       });
     await expect(Get1()).rejects.toThrow('reject in cacheFor');
     await expect(Get1(false)).rejects.toThrow('error in cacheFor');
@@ -345,7 +345,7 @@ describe('manipulate cache', () => {
           method: 'GET'
         };
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
 
     expect(await queryCache(Get1)).toStrictEqual({
@@ -382,7 +382,7 @@ describe('manipulate cache', () => {
           method: 'GET'
         };
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await setCache(Get1, {
       path: 'custom-path',
@@ -419,11 +419,11 @@ describe('manipulate cache', () => {
           method: 'GET'
         };
       },
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await setWithCacheAdapter(
       alova.id,
-      Get1.__key__,
+      Get1.key,
       {
         path: 'custom-path',
         params: {},

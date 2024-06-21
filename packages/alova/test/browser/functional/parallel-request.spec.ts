@@ -8,7 +8,7 @@ describe('parallel request', () => {
     });
     const Getter = () =>
       alova.Get('/unit-test', {
-        transformData: ({ data }: Result) => data
+        transform: ({ data }: Result) => data
       });
     const [firstResponse, secondResponse] = await Promise.all([Getter().send(), Getter().send()]);
 
@@ -21,10 +21,10 @@ describe('parallel request', () => {
       responseExpect: r => r.json()
     });
     const Getter = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const ErrorGetter = alova.Get('/unit-test-404', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     await expect(Promise.all([Getter.send(), ErrorGetter.send()])).rejects.toThrow();
   });

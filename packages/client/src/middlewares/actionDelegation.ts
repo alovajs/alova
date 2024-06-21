@@ -2,8 +2,12 @@ import { createAssert } from '@alova/shared/assert';
 import { instanceOf, isNumber, isString, statesHookHelper } from '@alova/shared/function';
 import { falseValue, filterItem, forEach, objectKeys, pushItem, trueValue } from '@alova/shared/vars';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
-import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext } from '~/typings';
-import { Actions } from '~/typings/general';
+import {
+  Actions,
+  AlovaFetcherMiddlewareContext,
+  AlovaFrontMiddlewareContext,
+  AlovaGuardNext
+} from '~/typings/clienthook';
 
 const actionsMap: Record<string | number | symbol, Actions[]> = {};
 const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics>(
@@ -65,15 +69,16 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
  * 访问操作函数，如果匹配多个则会以此调用onMatch
  * @param id 委托者id，或正则表达式
  * @param onMatch 匹配的订阅者
+ * @param silent 默认为 false。如果为 true，不匹配时将不会报错
  */
 export const accessAction = (
   id: string | number | symbol | RegExp,
-  onMatch: (matchedSubscriber: Actions, index: number) => void
+  onMatch: (matchedSubscriber: Actions, index: number) => void,
+  silent = false
 ) => {
   const matched = [] as Actions[];
   if (typeof id === 'symbol' || isString(id) || isNumber(id)) {
-    assert(!!actionsMap[id], `no handler which id is \`${id.toString()}\` is matched`);
-    pushItem(matched, ...actionsMap[id]);
+    actionsMap[id] && pushItem(matched, ...actionsMap[id]);
   } else if (instanceOf(id, RegExp)) {
     forEach(
       filterItem(objectKeys(actionsMap), idItem => id.test(idItem)),
@@ -82,5 +87,11 @@ export const accessAction = (
       }
     );
   }
+
+  // its opposite expression is too obscure
+  if (matched.length === 0 && !silent) {
+    assert(false, `no handler can be matched by using \`${id.toString()}\``);
+  }
+
   forEach(matched, onMatch);
 };

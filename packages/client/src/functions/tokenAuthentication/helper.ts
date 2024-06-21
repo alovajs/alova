@@ -9,7 +9,7 @@ import {
   ResponseErrorHandler,
   StatesHook
 } from 'alova';
-import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/general';
+import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/clienthook';
 
 export type PosibbleAuthMap =
   | {
@@ -106,12 +106,12 @@ export const refreshTokenIfExpired = async (
         forEach(waitingList, ({ resolve }) => resolve());
       }
       if (fromResponse) {
-        // 这里因为是重新请求原接口，与上一次请求叠加会导致重复调用transformData，因此需要将transformData置空去除一次调用
+        // 这里因为是重新请求原接口，与上一次请求叠加会导致重复调用transform，因此需要将transform置空去除一次调用
         const { config } = method;
-        const methodTransformData = config.transformData;
-        config.transformData = undefinedValue;
+        const methodTransformData = config.transform;
+        config.transform = undefinedValue;
         const resentData = await method;
-        config.transformData = methodTransformData;
+        config.transform = methodTransformData;
         return resentData;
       }
     } finally {
@@ -120,9 +120,12 @@ export const refreshTokenIfExpired = async (
     }
   }
 };
-export const onResponded2Record = <AG extends AlovaGenerics = AlovaGenerics>(
-  onRespondedHandlers?: AlovaResponded<StatesHook<any, any>, AlovaRequestAdapter<any, any, any>>
+
+export const onResponded2Record = <SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>>(
+  onRespondedHandlers?: AlovaResponded<SH, RA>
 ) => {
+  type AG = AlovaGenerics<ReturnType<SH['create']>, SH['export'] extends (...args: any) => infer R ? R : any> &
+    (Parameters<RA>[1] extends Method<infer AG> ? AG : never);
   let successHandler: RespondedHandler<AG> | undefined = undefinedValue;
   let errorHandler: ResponseErrorHandler<AG> | undefined = undefinedValue;
   let onCompleteHandler: ResponseCompleteHandler<AG> | undefined = undefinedValue;

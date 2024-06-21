@@ -10,7 +10,7 @@ describe('Initial data before request', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const { data, onSuccess } = useRequest(Get, {
       initialData: { method: 'NO' }
@@ -26,7 +26,7 @@ describe('Initial data before request', () => {
       responseExpect: r => r.json()
     });
     const Get = alova.Get('/unit-test', {
-      transformData: ({ data }: Result) => data
+      transform: ({ data }: Result) => data
     });
     const { data, onSuccess } = useWatcher(() => Get, [stateA], {
       initialData: { method: 'NO' },

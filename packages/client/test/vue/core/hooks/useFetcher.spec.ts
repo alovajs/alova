@@ -2,8 +2,8 @@ import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { queryCache } from 'alova';
-import { FetcherType } from 'alova/client';
 import { Result, untilCbCalled } from 'root/testUtils';
+import { FetcherType } from '~/typings/clienthook';
 
 describe('use useFetcher hook to fetch data', () => {
   test('should hit cached response when fetch data with default config', async () => {
@@ -17,7 +17,7 @@ describe('use useFetcher hook to fetch data', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         },
         cacheFor: 100 * 1000
@@ -64,7 +64,7 @@ describe('use useFetcher hook to fetch data', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         },
         cacheFor: 100 * 1000
@@ -107,7 +107,7 @@ describe('use useFetcher hook to fetch data', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         },
         cacheFor: 100 * 1000
@@ -153,7 +153,7 @@ describe('use useFetcher hook to fetch data', () => {
       alova.Get('/unit-test-count', {
         params,
         cacheFor: 0,
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         }
       });
@@ -200,7 +200,7 @@ describe('use useFetcher hook to fetch data', () => {
       alova.Get('/unit-test-count', {
         params,
         cacheFor: 5 * 60 * 1000,
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         }
       });
@@ -249,7 +249,7 @@ describe('use useFetcher hook to fetch data', () => {
       alova.Get('/unit-test-count', {
         params,
         cacheFor: 5 * 60 * 1000,
-        transformData(result: Result) {
+        transform(result: Result) {
           return result.data;
         }
       });
