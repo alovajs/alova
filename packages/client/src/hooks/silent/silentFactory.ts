@@ -6,7 +6,7 @@ import {
   SilentSubmitErrorHandler,
   SilentSubmitFailHandler,
   SilentSubmitSuccessHandler
-} from '~/typings/general';
+} from '~/typings/clienthook';
 import {
   BeforeEventKey,
   BootEventKey,

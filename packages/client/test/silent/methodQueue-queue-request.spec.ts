@@ -5,7 +5,7 @@ import createEventManager from '@alova/shared/createEventManager';
 import { promiseWithResolvers } from '@alova/shared/function';
 import { Method, createAlova } from 'alova';
 import VueHook from 'alova/vue';
-import { ScopedSQEvents } from '~/typings/general';
+import { ScopedSQEvents } from '~/typings/clienthook';
 import { mockRequestAdapter } from '../mockData';
 
 describe('silent method request in queue with queue behavior', () => {

@@ -26,8 +26,7 @@ import {
   hitCacheBySource,
   promiseStatesHook
 } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/general';
+import { AlovaMethodHandler, SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/clienthook';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');

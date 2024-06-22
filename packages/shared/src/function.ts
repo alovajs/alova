@@ -8,7 +8,7 @@ import type {
   ReferingObject,
   StatesHook
 } from '../../alova/typings';
-import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings';
+import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings/clienthook';
 import { FrameworkReadableState, FrameworkState } from './model/FrameworkState';
 import { BackoffPolicy, GeneralFn, GeneralState, UsePromiseExposure } from './types';
 import {

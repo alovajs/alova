@@ -2,7 +2,7 @@ import { FrameworkState } from '@alova/shared/FrameworkState';
 import { undefinedValue } from '@alova/shared/vars';
 import type { AlovaGenerics, FrontRequestState, Progress, ReferingObject } from 'alova';
 import { Method } from 'alova';
-import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings';
+import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings/clienthook';
 
 export default <AG extends AlovaGenerics>(
   ht: TEnumHookType,

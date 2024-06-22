@@ -1,5 +1,5 @@
 import { instanceOf, newInstance } from '@alova/shared/function';
-import { DataSerializer } from '~/typings/general';
+import { DataSerializer } from '~/typings/clienthook';
 
 export default {
   forward: data => (instanceOf(data, RegExp) ? data.source : undefined),

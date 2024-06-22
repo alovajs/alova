@@ -69,7 +69,7 @@
       "default": "./dist/alova.esm.js"
     },
     "./client": {
-      "types": "./typings/clienthook.d.ts",
+      "types": "./typings/clienthook/index.d.ts",
       "require": "./dist/clienthook/index.common.cjs",
       "default": "./dist/clienthook/index.esm.js"
     },

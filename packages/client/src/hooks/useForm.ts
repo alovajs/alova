@@ -12,7 +12,7 @@ import {
 } from '@alova/shared/function';
 import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/general';
+import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/clienthook';
 
 const RestoreEventKey = Symbol('FormRestore');
 const getStoragedKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>, id?: ID) =>
@@ -136,7 +136,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     // 只保存创建hook的共享状态
     if (isCreateShardState.current) {
       typedSharedStates[id] = {
-        hookProvider: hookProvider as FormExposure<AG, any>,
+        hookProvider: hookProvider as any,
         config
       };
     }

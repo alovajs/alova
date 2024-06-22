@@ -17,7 +17,7 @@ import { promiseWithResolvers } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
-import { ScopedSQEvents } from '~/typings/general';
+import { ScopedSQEvents } from '~/typings/clienthook';
 
 describe('boot silent queue', () => {
   test('replace virtual data to real data', () => {

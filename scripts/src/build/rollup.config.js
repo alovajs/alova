@@ -170,7 +170,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
           }),
           commonjs(),
           typescript({
-            include: ['src/**/*.ts'], // 不设置将默认会编译整个项目，导致报错
+            include: ['src/**/*.ts', 'typings/**/*.d.ts'], // 不设置将默认会编译整个项目，导致报错
             compilerOptions: { module: 'es2015' }
           }),
           ...resolveReplacePlugin()

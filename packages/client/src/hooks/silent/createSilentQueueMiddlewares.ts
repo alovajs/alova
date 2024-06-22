@@ -14,16 +14,18 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
-import { AlovaFrontMiddleware, AlovaMethodHandler, UseHookExposure } from '~/typings';
 import {
+  AlovaFrontMiddleware,
+  AlovaMethodHandler,
   BeforePushQueueHandler,
   FallbackHandler,
   PushedQueueHandler,
   RetryHandler,
   SQHookBehavior,
   SQHookConfig,
-  ScopedSQEvents
-} from '~/typings/general';
+  ScopedSQEvents,
+  UseHookExposure
+} from '~/typings/clienthook';
 import { MethodHandler, SilentMethod } from './SilentMethod';
 import {
   BEHAVIOR_QUEUE,

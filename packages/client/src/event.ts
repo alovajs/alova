@@ -15,7 +15,7 @@ import {
   ScopedSQSuccessEvent as IScopedSQSuccessEvent,
   SQHookBehavior,
   SilentMethod
-} from '~/typings/general';
+} from '~/typings/clienthook';
 
 export class AlovaSSEEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
   eventSource: EventSource; // eventSource实例

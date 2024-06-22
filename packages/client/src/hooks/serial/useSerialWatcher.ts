@@ -3,7 +3,7 @@ import { decorateEvent } from '@alova/shared/createEventManager';
 import { statesHookHelper } from '@alova/shared/function';
 import { len } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler, RequestHookConfig } from '~/typings';
+import { AlovaMethodHandler, RequestHookConfig } from '~/typings/clienthook';
 import { assertSerialHandlers, serialMiddleware } from './general';
 
 /**

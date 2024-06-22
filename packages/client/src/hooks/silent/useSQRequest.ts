@@ -2,8 +2,7 @@ import useRequest from '@/hooks/core/useRequest';
 import { noop, statesHookHelper } from '@alova/shared/function';
 import { promiseResolve, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler, UseHookExposure } from '~/typings';
-import { SQRequestHookConfig } from '~/typings/general';
+import { AlovaMethodHandler, SQRequestHookConfig, UseHookExposure } from '~/typings/clienthook';
 import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';
 
 export default function useSQRequest<AG extends AlovaGenerics>(

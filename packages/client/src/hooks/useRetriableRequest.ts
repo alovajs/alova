@@ -15,8 +15,7 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { RetriableHookConfig } from '~/typings/general';
+import { AlovaMethodHandler, RetriableHookConfig } from '~/typings/clienthook';
 
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');

@@ -1,7 +1,7 @@
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { PaginationHookConfig } from '~/typings/general';
+import { PaginationHookConfig } from '~/typings/clienthook';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 type CollapsedAlovaGenerics = AlovaGenerics<ReactState<unknown>, any[], unknown, unknown>;

@@ -24,7 +24,7 @@
     "test:node": "jest --config jest.config.node.ts",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build": "npm run clean && alova-scripts build && ncp ./typings/index.d.ts ../alova/typings/clienthook.d.ts && ncp ./typings/stateshook ../alova/typings/stateshook",
+    "build": "npm run clean && alova-scripts build && ncp ./typings/clienthook ../alova/typings/clienthook && ncp ./typings/stateshook ../alova/typings/stateshook",
     "commit": "git-cz && git push"
   },
   "author": "Scott hu",

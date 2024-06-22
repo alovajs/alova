@@ -2,8 +2,12 @@ import { createAssert } from '@alova/shared/assert';
 import { instanceOf, isNumber, isString, statesHookHelper } from '@alova/shared/function';
 import { falseValue, filterItem, forEach, objectKeys, pushItem, trueValue } from '@alova/shared/vars';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
-import { AlovaFetcherMiddlewareContext, AlovaFrontMiddlewareContext, AlovaGuardNext } from '~/typings';
-import { Actions } from '~/typings/general';
+import {
+  Actions,
+  AlovaFetcherMiddlewareContext,
+  AlovaFrontMiddlewareContext,
+  AlovaGuardNext
+} from '~/typings/clienthook';
 
 const actionsMap: Record<string | number | symbol, Actions[]> = {};
 const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics>(

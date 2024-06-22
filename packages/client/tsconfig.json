@@ -12,7 +12,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.js",
-    "typings/*.d.ts",
+    "typings/**/*.d.ts",
     "test/**/*.ts",
     "test/**/*.tsx",
     "test/**/*.vue",

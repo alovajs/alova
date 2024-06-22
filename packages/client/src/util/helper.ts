@@ -11,8 +11,7 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { Method } from 'alova';
-import { AlovaMethodHandler } from '~/typings';
-import { AnyFn } from '~/typings/general';
+import { AlovaMethodHandler } from '~/typings/clienthook';
 
 const referenceList = [] as { id: string; ref: any }[];
 /**
@@ -52,7 +51,7 @@ export const valueObject = <T>(value: T, writable = falseValue) => ({
   writable
 });
 
-export function useCallback<Fn extends AnyFn = AnyFn>(onCallbackChange: (callbacks: Fn[]) => void = noop) {
+export function useCallback<Fn extends GeneralFn = GeneralFn>(onCallbackChange: (callbacks: Fn[]) => void = noop) {
   let callbacks: Fn[] = [];
 
   const setCallback = (fn: Fn) => {
