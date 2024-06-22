@@ -4,8 +4,7 @@ name: Release next
 on:
   push:
     branches:
-      - alpha
-      - beta
+      - next
 
 jobs:
   quality:
@@ -18,14 +17,14 @@ jobs:
           persist-credentials: false
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
@@ -48,14 +47,14 @@ jobs:
           persist-credentials: false
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
@@ -75,7 +74,7 @@ jobs:
         with:
           # Note: pnpm install after versioning is necessary to refresh lockfile
           version: pnpm run changeset:version
-          publish: pnpm run release
+          publish: pnpm exec changeset publish
           commit: 'ci: release next'
           title: 'ci: release next'
         env:
