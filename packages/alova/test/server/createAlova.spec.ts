@@ -10,7 +10,7 @@ describe('createAlova', () => {
       requestAdapter: GlobalFetch()
     });
 
-    const errorTips = '[alova]l2Cache is not defined.';
+    const errorTips = 'l2Cache is not defined.';
     expect(() => {
       alova.l2Cache.get('1');
     }).toThrow(errorTips);

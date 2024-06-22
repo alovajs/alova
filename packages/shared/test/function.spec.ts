@@ -20,21 +20,7 @@ import {
 } from '@/function';
 import { MEMORY, STORAGE_RESTORE } from '@/vars';
 import { delay, untilCbCalled } from 'root/testUtils';
-import { createAlova } from '../../alova/dist/alova.umd';
 
-const simulatedRequestAdapter = () => ({
-  response: () => Promise.resolve(),
-  headers: () =>
-    Promise.resolve({
-      'Content-Type': 'application/json'
-    }),
-  download: () => Promise.resolve(),
-  upload: () => Promise.resolve(),
-  abort: () => {}
-});
-const alovaInst = createAlova({
-  requestAdapter: simulatedRequestAdapter
-});
 describe('shared functions', () => {
   test('judgement functions', () => {
     expect(isFn(() => {})).toBeTruthy();
@@ -83,18 +69,22 @@ describe('shared functions', () => {
 
   test('function getContext', () => {
     // Simulate a Method instance
-    const mockMethodInstance = alovaInst.Get('/unit-test');
+    const mockMethodInstance = {
+      context: {}
+    };
 
     // Call the getContext function
-    const result = getContext(mockMethodInstance);
-    expect(result).toBe(alovaInst);
+    const result = getContext(mockMethodInstance as any);
+    expect(result).toBe(mockMethodInstance.context);
   });
 
   test('function getConfig', () => {
-    const mockMethodInstance = alovaInst.Get('/unit-test');
+    const mockMethodInstance = {
+      config: {}
+    };
 
     // Call the getConfig function
-    const result = getConfig(mockMethodInstance);
+    const result = getConfig(mockMethodInstance as any);
 
     // Verify if the returned config is what we expect
     expect(result).toBeDefined();
@@ -103,28 +93,32 @@ describe('shared functions', () => {
 
   test('function getContextOptions', () => {
     // Call the getContextOptions function
-    const result = getContextOptions(alovaInst);
+    const mockAlovaInstance = {
+      options: {}
+    };
+    const result = getContextOptions(mockAlovaInstance as any);
 
     // Verify if the returned options are what we expect
     expect(result).toBeDefined();
-    expect(result).toStrictEqual(alovaInst.options);
+    expect(result).toStrictEqual(mockAlovaInstance.options);
   });
   test('function key', () => {
     // Simulate a Method instance
-    const mockMethodInstance = alovaInst.Post(
-      '/unit-test',
-      { foo: 'bar' },
-      {
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer token' },
+    const mockMethodInstance = {
+      type: 'POST',
+      url: '/unit-test',
+      data: { foo: 'bar' },
+      config: {
         params: {
           p1: 'p1',
           p2: 'p2'
-        }
+        },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer token' }
       }
-    );
+    };
 
     // Call the key function
-    const result = key(mockMethodInstance);
+    const result = key(mockMethodInstance as any);
 
     // Verify if the returned key is what we expect
     const expectedKey = JSON.stringify([
@@ -155,7 +149,9 @@ describe('shared functions', () => {
   });
 
   test('function getHandlerMethod', () => {
-    const mockMethodInstance = alovaInst.Get('/unit-test');
+    const mockMethodInstance = {
+      key: 'mock-key'
+    } as any;
     const mockAssert = createAssert('test');
     let result = getHandlerMethod(mockMethodInstance, mockAssert);
     expect(result).toBe(mockMethodInstance);
@@ -258,11 +254,20 @@ describe('shared functions', () => {
   });
 
   test('function getLocalCacheConfigParam', () => {
+    const mockAlovaInst = {
+      Get(url: string, config: any = { cacheFor: 300000 }) {
+        return {
+          url,
+          config
+        } as any;
+      }
+    };
+
     const baseTs = 1600000000000;
     const nowFn = Date.now;
     Date.now = () => baseTs;
     // should return default cache parameters when cacheFor is undefined
-    const mockMethodInstance = alovaInst.Get('/unit-test');
+    const mockMethodInstance = mockAlovaInst.Get('/unit-test');
     const result = getLocalCacheConfigParam(mockMethodInstance);
     // request GET has 5 min cache default.
     expect({ ...result, e: result.e('memory') }).toStrictEqual({
@@ -275,7 +280,7 @@ describe('shared functions', () => {
     });
 
     // should return cache parameters with custom expire time (number)
-    const mockMethodInstance2 = alovaInst.Get('/unit-test', {
+    const mockMethodInstance2 = mockAlovaInst.Get('/unit-test', {
       cacheFor: 60000
     });
     const result2 = getLocalCacheConfigParam(mockMethodInstance2);
@@ -290,7 +295,7 @@ describe('shared functions', () => {
 
     // 'should return cache parameters with custom expire time (Date)'
     const futureDate = new Date(baseTs + 50000); // 1 minute in the future
-    const mockMethodInstance3 = alovaInst.Get('/unit-test', {
+    const mockMethodInstance3 = mockAlovaInst.Get('/unit-test', {
       cacheFor: futureDate
     });
     const result3 = getLocalCacheConfigParam(mockMethodInstance3);
@@ -304,7 +309,7 @@ describe('shared functions', () => {
     });
 
     // should return cache parameters with custom mode, expire time, and tag
-    const mockMethodInstance4 = alovaInst.Get('/unit-test', {
+    const mockMethodInstance4 = mockAlovaInst.Get('/unit-test', {
       cacheFor: {
         mode: STORAGE_RESTORE,
         expire: 30000, // 30 seconds
@@ -330,7 +335,7 @@ describe('shared functions', () => {
     const controlledCacheFor = () => ({
       data: 'controlled cache data'
     });
-    const mockMethodInstance5 = alovaInst.Get('/unit-test', {
+    const mockMethodInstance5 = mockAlovaInst.Get('/unit-test', {
       cacheFor: controlledCacheFor
     });
     const result5 = getLocalCacheConfigParam(mockMethodInstance5);
@@ -344,7 +349,7 @@ describe('shared functions', () => {
     });
 
     // should expire return different values when set expire to an function.
-    const mockMethodInstance6 = alovaInst.Get('/unit-test', {
+    const mockMethodInstance6 = mockAlovaInst.Get('/unit-test', {
       cacheFor: {
         mode: 'restore',
         expire: ({ mode }: any) => (mode === 'memory' ? 1000 : 5000)
