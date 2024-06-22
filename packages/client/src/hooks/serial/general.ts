@@ -10,7 +10,7 @@ import {
   undefinedValue
 } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
-import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings';
+import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings/clienthook';
 
 /**
  * 断言serialHandlers

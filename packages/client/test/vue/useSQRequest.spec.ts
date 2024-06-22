@@ -17,7 +17,7 @@ import { AlovaEventBase } from '@alova/shared/event';
 import { AlovaGenerics, createAlova } from 'alova';
 import VueHook from 'alova/vue';
 import { delay, untilCbCalled } from 'root/testUtils';
-import { SQHookBehavior } from '~/typings/general';
+import { SQHookBehavior } from '~/typings/clienthook';
 
 const alovaInst = createAlova({
   baseURL: process.env.NODE_BASE_URL,

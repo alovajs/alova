@@ -6,7 +6,6 @@ const originalRequire = Module.prototype.require;
 (Module.prototype as any).require = function (...args: any) {
   // 拦截所有的 vue 引用，将其指向 vue2
   if (args[0] === 'vue') {
-    console.log(666);
     return originalRequire.call(this, 'vue2');
   }
   if (args[0] === 'vue/compiler-sfc') {

@@ -8,7 +8,7 @@ import type {
   ScopedSQEvents,
   SilentMethod as SilentMethodInterface,
   SilentQueueMap
-} from '~/typings/general';
+} from '~/typings/clienthook';
 import { silentAssert } from './globalVariables';
 import { silentQueueMap } from './silentQueue';
 import { persistSilentMethod, spliceStorageSilentMethod } from './storage/silentMethodStorage';

@@ -1,7 +1,7 @@
 import { createAssert } from '@alova/shared/assert';
 import { instanceOf } from '@alova/shared/function';
 import { AlovaGenerics, Method } from 'alova';
-import { EnumHookType } from '~/typings';
+import { EnumHookType } from '~/typings/clienthook';
 
 export const coreAssert = createAssert('');
 export const requestHookAssert = createAssert('useRequest');

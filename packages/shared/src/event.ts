@@ -1,5 +1,5 @@
 import { AlovaGenerics, Method } from '../../alova/typings';
-import { AlovaEvent } from '../../client/typings';
+import { AlovaEvent } from '../../client/typings/clienthook';
 
 export class AlovaEventBase<AG extends AlovaGenerics> implements AlovaEvent<AG> {
   readonly sendArgs: any[];

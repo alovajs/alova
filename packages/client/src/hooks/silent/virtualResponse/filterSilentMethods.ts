@@ -1,6 +1,6 @@
 import { getConfig, instanceOf } from '@alova/shared/function';
 import { falseValue, regexpTest, trueValue, undefinedValue } from '@alova/shared/vars';
-import { SilentQueueMap } from '~/typings/general';
+import { SilentQueueMap } from '~/typings/clienthook';
 import { SilentMethod } from '../SilentMethod';
 import { DEFAULT_QUEUE_NAME, silentFactoryStatus } from '../globalVariables';
 import { silentQueueMap } from '../silentQueue';

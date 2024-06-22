@@ -2,7 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import useRequest from '@/hooks/core/useRequest';
 import VueHook from '@/statesHook/vue';
 import { Result } from 'root/testUtils';
-import { AlovaSuccessEvent } from '~/typings';
+import { AlovaSuccessEvent } from '~/typings/clienthook';
 
 describe('parallel request', () => {
   test('parallel request with `send` returned promise', async () => {

@@ -33,12 +33,11 @@ import {
   CompleteHandler,
   EnumHookType,
   ErrorHandler,
-  FetcherHookConfig,
   FrontRequestHookConfig,
   SuccessHandler,
   UseHookConfig,
   WatcherHookConfig
-} from '~/typings';
+} from '~/typings/clienthook';
 import { KEY_COMPLETE, KEY_ERROR, KEY_SUCCESS } from './alovaEvent';
 import { coreHookAssert } from './assert';
 import createHook from './createHook';
@@ -93,9 +92,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
           cachedResponse = data;
         }
       }
-      const forceRequestFinally = sloughConfig(
-        (useHookConfig as FrontRequestHookConfig<AG> | FetcherHookConfig).force ?? falseValue
-      );
+      const forceRequestFinally = sloughConfig((useHookConfig as UseHookConfig<AG>).force ?? falseValue);
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
   }

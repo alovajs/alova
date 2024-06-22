@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "next",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": ["@alova/client", "@alova/server"]
 }

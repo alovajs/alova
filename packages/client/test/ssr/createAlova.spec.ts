@@ -23,8 +23,8 @@ describe('createAlova', () => {
 
     expect(() => {
       useRequest(methodInst);
-    }).toThrow('[alova]`statesHook` is not set in alova instance');
+    }).toThrow('`statesHook` is not set in alova instance');
 
-    expect(() => updateState(methodInst, {})).rejects.toThrow('[alova]`statesHook` is not set in alova instance');
+    expect(() => updateState(methodInst, {})).rejects.toThrow('`statesHook` is not set in alova instance');
   });
 });
