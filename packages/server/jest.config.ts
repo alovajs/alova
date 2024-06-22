@@ -7,7 +7,9 @@ import baseConfig from '../../jest.config.base';
  */
 const config: Config = {
   ...baseConfig,
-  displayName: '@alova/adapter-axios'
+  displayName: '@alova/server',
+  testEnvironment: 'node',
+  testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)']
 };
 
 export default config;

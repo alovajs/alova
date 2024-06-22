@@ -28,6 +28,7 @@ const config: Config = {
     '<rootDir>/packages/adapter-taro',
     '<rootDir>/packages/shared',
     '<rootDir>/packages/client',
+    '<rootDir>/packages/server',
     '<rootDir>/packages/vue-options',
     '<rootDir>/packages/psc'
   ]
