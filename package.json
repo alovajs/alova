@@ -45,6 +45,7 @@
     "changeset": "changeset",
     "changeset:alpha": "changeset pre enter alpha",
     "changeset:beta": "changeset pre enter beta",
+    "changeset:pre.exit": "changeset pre exit",
     "changeset:version": "changeset version",
     "release": "pnpm changeset publish"
   },
