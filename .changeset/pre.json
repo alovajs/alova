@@ -15,5 +15,5 @@
     "@alova/vue-options": "2.0.0",
     "@alova/scripts": "1.0.0"
   },
-  "changesets": []
+  "changesets": ["calm-balloons-wave"]
 }

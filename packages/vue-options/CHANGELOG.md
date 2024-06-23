@@ -1,4 +1,4 @@
-# @alova/adapter-axios
+# @alova/vue-options
 
 ## 2.0.1-beta.0
 
@@ -8,12 +8,3 @@
 
 - Updated dependencies [[`467cda5`](https://github.com/alovajs/alova/commit/467cda582262f92a5f859a9d357815be6234bc16)]:
   - alova@3.0.1-beta.0
-  - @alova/shared@1.0.1-beta.0
-
-## 1.1.2
-
-### Patch Changes
-
-- Updated dependencies []:
-  - @alova/shared@1.1.0
-  - alova@2.19.2
