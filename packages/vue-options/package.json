@@ -1,6 +1,6 @@
 {
   "name": "@alova/vue-options",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "vue options statesHook and wrapper function for alova.js",
   "homepage": "https://github.com/alovajs/alova",
   "main": "dist/alova-vue-options.esm.js",
@@ -33,7 +33,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.0-beta.1"
+    "alova": "^3.0.0-beta.2"
   },
   "devDependencies": {
     "@alova/mock": "workspace:*",

@@ -1,6 +1,6 @@
 {
   "name": "@alova/psc",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "process shared cache for alova.js on nodejs, deno, bun and electron",
   "homepage": "https://alova.js.org",
   "main": "dist/psc.esm.js",
@@ -68,7 +68,7 @@
   },
   "peerDependencies": {
     "electron": "^30.1.0",
-    "alova": "^3.0.0-beta.1"
+    "alova": "^3.0.0-beta.2"
   },
   "config": {
     "commitizen": {
