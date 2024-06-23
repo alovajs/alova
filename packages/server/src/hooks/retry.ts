@@ -1,8 +1,11 @@
 import HookedMethod from '@/HookedMethod';
+import { createServerHook } from '@/helper';
 import { delayWithBackoff, isNumber, noop } from '@alova/shared/function';
-import { AlovaServerHook, RetryOptions } from '~/typings';
+import { AlovaGenerics, Method } from 'alova';
+import { RetryOptions } from '~/typings';
 
-const retry: AlovaServerHook<RetryOptions> = (method, { retry = 3, backoff = { delay: 1000 } }) => {
+const retry = createServerHook(<AG extends AlovaGenerics>(method: Method<AG>, options: RetryOptions) => {
+  const { retry = 3, backoff = { delay: 1000 } } = options ?? {};
   let retryTimes = 0;
   return new HookedMethod(method, forceRequest =>
     method.send(forceRequest).then(
@@ -21,6 +24,6 @@ const retry: AlovaServerHook<RetryOptions> = (method, { retry = 3, backoff = { d
       }
     )
   );
-};
+});
 
 export default retry;
