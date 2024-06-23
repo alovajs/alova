@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.0-beta.3
+
+### Minor Changes
+
+- [#401](https://github.com/alovajs/alova/pull/401) [`9252e07`](https://github.com/alovajs/alova/commit/9252e07639446279c86cb58222793b514341f8a7) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: alova does not export all type declarations
+
 ## 3.0.0-beta.2
 
 ### Minor Changes
