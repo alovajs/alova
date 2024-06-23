@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-taro",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "taro adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-taro.esm.js",
@@ -52,7 +52,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.0-beta.1"
+    "alova": "^3.0.0-beta.2"
   },
   "devDependencies": {
     "@alova/mock": "workspace:*",

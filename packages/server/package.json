@@ -34,7 +34,7 @@
     "url": "https://github.com/alovajs/alova/issues"
   },
   "peerDependencies": {
-    "alova": "^3.0.0-beta.1"
+    "alova": "^3.0.0-beta.2"
   },
   "dependencies": {
     "@alova/shared": "workspace:*",
