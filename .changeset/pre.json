@@ -15,5 +15,12 @@
     "@alova/vue-options": "2.0.0",
     "@alova/scripts": "1.0.0"
   },
-  "changesets": ["afraid-jars-buy", "calm-balloons-wave", "olive-pens-sin", "wild-ants-draw"]
+  "changesets": [
+    "afraid-jars-buy",
+    "calm-balloons-wave",
+    "cuddly-mice-double",
+    "olive-pens-sin",
+    "shy-balloons-wash",
+    "wild-ants-draw"
+  ]
 }
