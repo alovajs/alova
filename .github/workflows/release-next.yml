@@ -61,9 +61,6 @@ jobs:
       - name: Install deps
         run: pnpm install
 
-      # - name: Test SSR
-      #   run: npm run test:node
-
       # This has contained test and upload coverage
       # - name: Coverage
       #   run: npm run test:coveralls
