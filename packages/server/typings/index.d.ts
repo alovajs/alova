@@ -1,3 +1,4 @@
+import { BackoffPolicy } from '@alova/shared/types';
 import { AlovaGenerics, Method } from 'alova';
 
 /**

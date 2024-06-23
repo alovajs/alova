@@ -57,7 +57,7 @@
   },
   "files": [
     "dist",
-    "typings/*.d.ts"
+    "typings/**/*.d.ts"
   ],
   "engines": {
     "node": ">= 18.0.0"
