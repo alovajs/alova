@@ -73,8 +73,9 @@ jobs:
         uses: changesets/action@v1
         with:
           # Note: pnpm install after versioning is necessary to refresh lockfile
+          setupGitUser: true
           version: pnpm run changeset:version
-          publish: pnpm exec changeset publish
+          publish: pnpm run release
           commit: 'ci: release next'
           title: 'ci: release next'
         env:
