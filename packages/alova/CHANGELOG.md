@@ -1,5 +1,13 @@
 # alova
 
+## 3.0.0-beta.4
+
+### Patch Changes
+
+- [#410](https://github.com/alovajs/alova/pull/410) [`3cb5874`](https://github.com/alovajs/alova/commit/3cb5874f473a25678285f17f7e193a24a2e9e541) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: cannot request in uniapp
+
+- [#410](https://github.com/alovajs/alova/pull/410) [`abc7cb3`](https://github.com/alovajs/alova/commit/abc7cb3e4c05fa34acc7daaff22ffac103fd9419) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: export type version for client (#407)
+
 ## 3.0.0-beta.3
 
 ### Minor Changes
