@@ -1,0 +1,61 @@
+{
+  "assert": {
+    "packageName": "AlovaSharedAssert",
+    "input": "src/assert.ts",
+    "output": "dist/assert.{ext}",
+    "formats": ["esm"],
+    "withDTS": true
+  },
+  "function": {
+    "packageName": "AlovaSharedFunction",
+    "input": "src/function.ts",
+    "output": "dist/function.{ext}",
+    "formats": ["esm"],
+    "withDTS": true
+  },
+  "vars": {
+    "packageName": "AlovaSharedVars",
+    "input": "src/vars.ts",
+    "output": "dist/vars.{ext}",
+    "formats": ["esm"],
+    "withDTS": true
+  },
+  "types": {
+    "packageName": "AlovaSharedTypes",
+    "input": "src/types.ts",
+    "output": "dist/types.{ext}",
+    "formats": ["esm"],
+    "withDTS": true
+  },
+  "event": {
+    "packageName": "AlovaSharedEvent",
+    "input": "src/event.ts",
+    "output": "dist/event.{ext}",
+    "formats": ["esm"],
+    "external": {
+      "alova": null
+    },
+    "withDTS": true
+  },
+  "createEventManager": {
+    "packageName": "AlovaSharedEventManager",
+    "input": "src/createEventManager.ts",
+    "output": "dist/createEventManager.{ext}",
+    "formats": ["esm"],
+    "withDTS": true
+  },
+  "queueCallback": {
+    "packageName": "AlovaSharedQueueCallback",
+    "input": "src/queueCallback.ts",
+    "output": "dist/queueCallback.{ext}",
+    "formats": ["esm"],
+    "withDTS": true
+  },
+  "FrameworkState": {
+    "packageName": "AlovaSharedFrameworkState",
+    "input": "src/model/FrameworkState.ts",
+    "output": "dist/model/FrameworkState.{ext}",
+    "formats": ["esm"],
+    "withDTS": true
+  }
+}

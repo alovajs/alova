@@ -37,7 +37,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
   const buildName = bundleConfig.packageName;
   const entryFile = bundleConfig.input;
   const outputPattern = bundleConfig.output;
-  const globalPackages = bundleConfig.external;
+  const globalPackages = bundleConfig.external ?? {};
 
   /**
    * @param {object} options
