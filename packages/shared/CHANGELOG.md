@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- [#417](https://github.com/alovajs/alova/pull/417) [`73daeab`](https://github.com/alovajs/alova/commit/73daeabefa072324aca0a672c5c423c189c9c224) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: use tsc to generate d.ts
+
 ## 1.0.0-beta.3
 
 ### Minor Changes
