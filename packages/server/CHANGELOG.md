@@ -1,5 +1,15 @@
 # @alova/server
 
+## 1.0.0-beta.1
+
+### Patch Changes
+
+- [#408](https://github.com/alovajs/alova/pull/408) [`ac286ae`](https://github.com/alovajs/alova/commit/ac286aebde92fde65f8138ca01fd16669f3d02f5) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - chore: set version to 1.0.0
+
+- Updated dependencies [[`a45db02`](https://github.com/alovajs/alova/commit/a45db024bf7023420f39d27ea528a17b8c4fc0d7)]:
+  - @alova/shared@1.0.0-beta.3
+  - alova@3.0.0-beta.5
+
 ## 1.0.0-beta.0
 
 ### Minor Changes
