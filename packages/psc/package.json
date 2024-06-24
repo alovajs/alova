@@ -68,7 +68,7 @@
   },
   "peerDependencies": {
     "electron": "^30.1.0",
-    "alova": "^3.0.0-beta.3"
+    "alova": "^3.0.0-beta.4"
   },
   "config": {
     "commitizen": {
