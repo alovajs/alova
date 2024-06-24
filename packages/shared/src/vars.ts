@@ -51,8 +51,11 @@ export const includes = <T>(ary: T[], target: T) => ary.includes(target);
 export const valueObject = <T>(value: T, writable = falseValue) => ({ value, writable });
 export const defineProperty = (o: object, key: string | symbol, value: any, isDescriptor = falseValue) =>
   ObjectCls.defineProperty(o, key, isDescriptor ? value : valueObject(value, falseValue));
-// 是否为服务端运行，node和bun通过process判断，deno通过Deno判断，但是支付宝小程序有process需要再判断下process.browser
-export const isSSR = typeof process !== undefStr ? !(process as any).browser : typeof Deno !== undefStr;
+// 是否为服务端运行，node和bun通过process判断，deno通过Deno判断
+// 部分框架（如支付宝和 uniapp）会注入 process 对象作为全局变量使用
+// 因此使用服务端独有的 process.cwd 函数作为判断依据
+export const isSSR =
+  typeof process !== undefStr ? typeof (process as any).cwd === 'function' : typeof Deno !== undefStr;
 
 /** cache mode */
 // only cache in memory, it's default option
