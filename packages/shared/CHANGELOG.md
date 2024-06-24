@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.0-beta.3
+
+### Minor Changes
+
+- [#408](https://github.com/alovajs/alova/pull/408) [`a45db02`](https://github.com/alovajs/alova/commit/a45db024bf7023420f39d27ea528a17b8c4fc0d7) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: cannot import from alova in react
+
 ## 1.0.0-beta.2
 
 ### Minor Changes
