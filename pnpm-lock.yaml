@@ -369,10 +369,6 @@ importers:
         version: link:../alova
 
   packages/shared:
-    dependencies:
-      alova:
-        specifier: ^3.0.0-beta.0
-        version: 3.0.0
     devDependencies:
       '@alova/scripts':
         specifier: workspace:*
@@ -412,9 +408,6 @@ packages:
 
   '@adobe/css-tools@4.3.3':
     resolution: {integrity: sha512-rE0Pygv0sEZ4vBWHlAgJLGDU7Pm8xoO6p3wsEceb7GYAjScrOHpEo8KK/eVkAcnSM+slAEtXjA2JpdjLp4fJQQ==}
-
-  '@alova/shared@1.0.0':
-    resolution: {integrity: sha512-QrcMkEfq6YdFuCzG7SjurfRcBtBTaCsug8zswkbOJs2WIxGf2uXoebm4hyUupidDN8UIrUYrWUFNB/FgC4hK+g==, tarball: https://registry.npmjs.org/@alova/shared/-/shared-1.0.0.tgz}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -2452,10 +2445,6 @@ packages:
 
   ajv@8.14.0:
     resolution: {integrity: sha512-oYs1UUtO97ZO2lJ4bwnWeQW8/zvOIQLGKcvPTsWmvc2SYgBb+upuNS5NxoLaMU4h8Ju3Nbj6Cq8mD2LQoqVKFA==}
-
-  alova@3.0.0:
-    resolution: {integrity: sha512-Ippkfo1vyIRHrNtdXa5AoafbykRnjqaByfeK5FzydvMPYKeT8KcF3URE1L9dg85GvGTBYEC2/pm4ocz8MUmpYQ==, tarball: https://registry.npmjs.org/alova/-/alova-3.0.0.tgz}
-    engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
     resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
@@ -6507,8 +6496,6 @@ snapshots:
 
   '@adobe/css-tools@4.3.3': {}
 
-  '@alova/shared@1.0.0': {}
-
   '@ampproject/remapping@2.3.0':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.5
@@ -9175,11 +9162,6 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
       uri-js: 4.4.1
-
-  alova@3.0.0:
-    dependencies:
-      '@alova/shared': 1.0.0
-      '@node-ipc/node-ipc': 11.0.3
 
   ansi-colors@4.1.3: {}
 
