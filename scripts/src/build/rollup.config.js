@@ -218,7 +218,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
         }
       })
     ];
-    const outputPath = bundleConfig.dtsOutput ?? resolveOutput({ suffix: 'd', ext: 'ts' });
+    const outputPath = bundleConfig.dtsOutput ?? resolveOutput({ suffix: '', ext: 'd.ts' });
 
     configForDTSGenerate.name = 'dts';
     configForDTSGenerate.outputOptionsList[0].file = outputPath;
