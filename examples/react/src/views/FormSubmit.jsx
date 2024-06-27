@@ -1,7 +1,7 @@
 import { useRequest } from 'alova/client';
 import { useState } from 'react';
 import { addFruit } from '../api/methods';
-import { useEvent } from '../helper';
+import { showToast } from '../helper';
 
 function View() {
   const [fruit, setFruit] = useState('');
@@ -17,43 +17,38 @@ function View() {
     setFruit('');
   });
 
-  const { ref: inputRef } = useEvent({
-    'sl-input'({ target }) {
-      setFruit(target.value);
-    }
-  });
   const submitFruit = () => {
     if (!fruit) {
-      alert('Please input a fruit');
+      showToast('Please input a fruit');
       return;
     }
     send();
   };
 
   return (
-    <div>
+    <div className="flex flex-col items-start">
       <div className="flex flex-row items-end">
-        <sl-input
+        <nord-input
           label="What is your favorite fruits?"
           value={fruit}
-          ref={inputRef}></sl-input>
-        <sl-button
+          onInput={({ target }) => setFruit(target.value)}></nord-input>
+        <nord-button
           class="ml-2"
           variant="primary"
           loading={submiting || undefined}
           onClick={submitFruit}>
           Submit
-        </sl-button>
+        </nord-button>
       </div>
       {error ? <span className="text-red-500">{error.message}</span> : null}
 
-      <div className="flex flex-row mt-4">
+      <div className="mt-4 grid grid-cols-6 gap-2">
         {fruitsList.map(item => (
-          <sl-badge
+          <nord-badge
             key={item}
-            variant="primary">
+            variant="info">
             {item}
-          </sl-badge>
+          </nord-badge>
         ))}
       </div>
     </div>

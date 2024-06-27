@@ -2,6 +2,7 @@ import { createAlovaMockAdapter } from '@alova/mock';
 import { createAlova } from 'alova';
 import reactHook from 'alova/react';
 import basics from './mock/basics';
+import cache from './mock/cache';
 import list from './mock/list';
 
 export const networkStatus = {
@@ -16,7 +17,7 @@ export const networkStatus = {
 };
 
 // mock adapter
-const mockRequestAdapter = createAlovaMockAdapter([basics, list], {
+const mockRequestAdapter = createAlovaMockAdapter([basics, list, cache], {
   delay: 1000,
   onMockResponse: async ({ body, responseHeaders, status = 200, statusText = 'ok' }) => {
     // mock network status

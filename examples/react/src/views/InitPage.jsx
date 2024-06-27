@@ -14,13 +14,12 @@ function View() {
   return (
     <div className="flex flex-row">
       {data.map(item => (
-        <sl-badge
+        <nord-badge
           key={item}
           class="mr-2"
-          variant="primary"
-          pill>
+          variant="success">
           {item}
-        </sl-badge>
+        </nord-badge>
       ))}
     </div>
   );

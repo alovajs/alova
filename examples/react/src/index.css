@@ -59,3 +59,10 @@ button:focus-visible {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.responsive {
+  @apply grid;
+  @apply grid-cols-1;
+  @apply md:grid-cols-2;
+  @apply gap-4;
+}

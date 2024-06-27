@@ -22,11 +22,13 @@ export default [
       },
       {
         title: 'Old Data Placeholder',
-        component: React.lazy(() => import('./views/OldDataPlaceholder'))
+        source: 'OldDataPlaceholder/index',
+        component: React.lazy(() => import('./views/OldDataPlaceholder/index'))
       },
       {
         title: 'Update State Across Component',
-        component: React.lazy(() => import('./views/OldDataPlaceholder'))
+        source: 'UpdateStateAcrossComponent/index',
+        component: React.lazy(() => import('./views/UpdateStateAcrossComponent/index'))
       }
     ]
   },
@@ -35,15 +37,15 @@ export default [
     items: [
       {
         title: 'Memory Cache',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/MemoryCache'))
       },
       {
         title: 'Restore Cache',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/RestoreCache'))
       },
       {
         title: 'Auto Invalidate Cache',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/AutoInvalidateCache'))
       },
       {
         title: 'Cache With IndexedDB',
