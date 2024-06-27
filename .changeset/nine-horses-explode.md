@@ -1,5 +1,5 @@
 ---
-'@alova/scripts': patch
+'@alova/scripts': minor
 ---
 
 fix: incorrect suffix
