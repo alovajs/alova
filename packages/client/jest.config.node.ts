@@ -10,7 +10,8 @@ const config: Config = {
   ...baseConfig,
   displayName: '[SSR]alova/client',
   testEnvironment: 'node',
-  testMatch: ['**/test/ssr/**/*.[jt]s?(x)']
+  testMatch: ['**/test/ssr/**/*.[jt]s?(x)'],
+  globals: {}
 };
 
 export default config;

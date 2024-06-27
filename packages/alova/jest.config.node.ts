@@ -10,7 +10,8 @@ const config: Config = {
   ...baseConfig,
   displayName: 'alova',
   testEnvironment: 'node',
-  testMatch: ['**/test/server/**/*.[jt]s?(x)']
+  testMatch: ['**/test/server/**/*.[jt]s?(x)'],
+  globals: {}
 };
 
 export default config;
