@@ -46,7 +46,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
    */
   function resolveOutput({ suffix, ext }) {
     const newOutputPattern = `${outputPattern}`;
-    return newOutputPattern.replace('{suffix}', suffix).replace('{ext}', ext);
+    return newOutputPattern.replace('{suffix}', suffix).replace('{ext}', ext).replace('..', '.');
   }
 
   /** @type {Record<BuildFormat, BuildOptions[]>} */
