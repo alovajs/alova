@@ -55,7 +55,7 @@ function Layout() {
   return (
     <div className="flex flex-col md:flex-row md:max-w-[1440px] md:mx-auto h-full">
       <div
-        className={`fixed top-0 left-[max(0px, calc(50% - 45rem))] z-20 bg-white h-full transition-transform duration-300 flex flex-col w-80 border-r-[1px] border-gray-300 py-8 px-4 md:translate-x-0 overflow-y-auto ${showMenu ? 'translate-x-0' : '-translate-x-full'}`}>
+        className={`fixed top-0 left-[max(0px, calc(50% - 45rem))] z-20 h-full transition-transform duration-300 flex flex-col w-80 border-r-[1px] border-gray-300 py-8 px-4 md:translate-x-0 overflow-y-auto ${showMenu ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-row">
           <strong>Alova Demo</strong>
           <nord-badge

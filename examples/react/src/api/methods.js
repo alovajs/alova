@@ -10,11 +10,7 @@ export const queryStudents = (page, pageSize, studentName, clsName) =>
   });
 export const queryStudentDetail = id =>
   alova.Get(`/student/${id}`, {
-    transform: data => {
-      console.log('student-' + id);
-      return data;
-    },
-    name: 'student-' + id
+    hitSource: 'student-' + id
   });
 export const editStudent = (name, cls, id) =>
   alova.Post(
@@ -25,11 +21,7 @@ export const editStudent = (name, cls, id) =>
       cls
     },
     {
-      hitSource: 'student-' + id,
-      transform: data => {
-        console.log('student-' + id);
-        return data;
-      }
+      name: 'student-' + id
     }
   );
 export const removeStudent = id => alova.Delete('/student', { id });

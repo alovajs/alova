@@ -100,7 +100,7 @@ const StudentInfoModal = ({ id, onClose }) => {
   return (
     <>
       <h3 slot="header">
-        Now close modal, and reopen this item, it will hit response cache, and wouldn't send request.
+        Now close modal, and reopen this item, it will hit response cache, and wouldn&apos;t send request.
       </h3>
       <div>
         {loading ? (
