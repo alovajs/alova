@@ -1,5 +1,5 @@
 import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
-import { StatesHook } from 'alova';
+import { StatesExportHelper, StatesHook } from 'alova';
 import {
   ComputedRef,
   Ref,
@@ -12,9 +12,19 @@ import {
   watch
 } from 'vue-demi';
 
-type UnknownRef = Ref<unknown>;
+export type VueDemiHookExportType<T> = StatesExportHelper<{
+  name: 'VueDemi';
+  State: Ref<T>;
+  Computed: ComputedRef<T>;
+  Export: Ref<T> | ComputedRef<T>;
+  Watched: WatchSource<T> | object;
+  StateExport: Ref<T>;
+  ComputedExport: ComputedRef<T>;
+}>;
+
 // Vue的预定义hooks
 export default {
+  name: 'VueDemi',
   create: data => ref(data),
   dehydrate: state => state.value,
   update: (newVal, state) => {
@@ -59,4 +69,4 @@ export default {
   onUnmounted: callback => {
     onUnmounted(callback);
   }
-} as StatesHook<UnknownRef, ComputedRef<unknown>, WatchSource<any> | object>;
+} as StatesHook<VueDemiHookExportType<unknown>>;

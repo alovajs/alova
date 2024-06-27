@@ -2,6 +2,7 @@ import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
 import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactHookExportType } from '~/typings/stateshook/react';
 
 type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
 const stateToData = <D>([state]: ReactState<D>) => state;
@@ -12,6 +13,7 @@ const setRef = <T>(ref: MutableRefObject<T>, newVal: T) => {
 
 // React的预定义hooks
 export default {
+  name: 'React',
   create: initialValue => useState(initialValue),
   export: stateToData,
   dehydrate: stateToData,
@@ -82,4 +84,4 @@ export default {
   onUnmounted: callback => {
     useEffect(() => callback, []);
   }
-} as StatesHook<ReactState<unknown>, any[], unknown, unknown>;
+} as StatesHook<ReactHookExportType<unknown>>;

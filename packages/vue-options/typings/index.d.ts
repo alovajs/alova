@@ -1,5 +1,5 @@
 import { GeneralFn } from '@alova/shared/types';
-import { StatesHook } from 'alova';
+import { StatesExportHelper, StatesHook } from 'alova';
 
 export interface OptionsState<T> {
   value: T;
@@ -45,12 +45,17 @@ export declare function mapAlovaHook<UHM extends UseHookCallers>(
   mapGetter: UseHookMapGetter<UHM>
 ): VueHookMapperMixin<UHM>[];
 
+export type VueOptionExportType<T> = StatesExportHelper<{
+  name: 'VueOption';
+  State: OptionsState<T>;
+  Computed: OptionsComputed<any>;
+  Export: OptionsState<T> | OptionsComputed<any>;
+  Watched: string;
+  StateExport: T;
+  ComputedExport: T;
+}>;
+
 /**
  * vue options statesHook
  */
-export declare const VueOptionsHook: StatesHook<
-  OptionsState<any>,
-  OptionsComputed<any>,
-  string,
-  OptionsState<any> | OptionsComputed<any>
->;
+export declare const VueOptionsHook: StatesHook<VueOptionExportType<unknown>>;

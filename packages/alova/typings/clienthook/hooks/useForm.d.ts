@@ -63,7 +63,7 @@ export interface FormExposure<AG extends AlovaGenerics, F> extends UseHookExposu
   /**
    * 表单数据
    */
-  form: ExportedState<F, AG['State']>;
+  form: ExportedState<F, AG['StatesExport']>;
 
   /**
    * 持久化数据恢复事件绑定，数据恢复后触发

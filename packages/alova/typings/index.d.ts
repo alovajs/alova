@@ -11,7 +11,8 @@ export interface AlovaGenerics<
   RE = any,
   RH = any,
   L1 extends AlovaGlobalCacheAdapter = any,
-  L2 extends AlovaGlobalCacheAdapter = any
+  L2 extends AlovaGlobalCacheAdapter = any,
+  SE extends StatesExport<any> = any
 > {
   State: S;
   Computed: C;
@@ -24,6 +25,7 @@ export interface AlovaGenerics<
   ResponseHeader: RH;
   L1Cache: L1;
   L2Cache: L2;
+  StatesExport: SE;
 }
 
 type Arg = Record<string, any>;
@@ -229,20 +231,33 @@ export interface ReferingObject {
   trackedKeys: Record<string, boolean>;
   [key: string]: any;
 }
-export interface StatesHook<State, Computed, Watched = State | Computed, Export = State> {
+export type StatesExportHelper<I extends StatesExport<any>> = I;
+
+export interface StatesExport<T> {
+  name: string;
+  State: any | T;
+  Computed: any | T;
+  Watched: any | T;
+  Export: any | T;
+  StateExport: T;
+  ComputedExport: T;
+}
+
+export interface StatesHook<SE extends StatesExport<any>> {
+  name: SE['name'];
   /**
    * 创建状态
    * @param initialValue 初始数据
    * @returns 状态值
    */
-  create: (initialValue: any, referingObject: ReferingObject) => State;
+  create: (initialValue: any, referingObject: ReferingObject) => SE['StateExport'];
 
   /**
    * create computed state
    * @param initialValue initial data
    * @param referingObject refering object
    */
-  computed: (getter: () => any, deps: Export[], referingObject: ReferingObject) => Computed;
+  computed: (getter: () => any, deps: SE['Export'][], referingObject: ReferingObject) => SE['Computed'];
 
   /**
    * 导出给开发者使用的值
@@ -250,10 +265,10 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * @param referingObject refering object
    * @returns 导出的值
    */
-  export?: (state: State, referingObject: ReferingObject) => Export;
+  export?: (state: SE['State'], referingObject: ReferingObject) => SE['Export'];
 
   /** 将状态转换为普通数据 */
-  dehydrate: (state: State, key: string, referingObject: ReferingObject) => any;
+  dehydrate: (state: SE['State'], key: string, referingObject: ReferingObject) => any;
 
   /**
    * 更新状态值
@@ -261,7 +276,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * @param state 原状态值
    * @param @param referingObject refering object
    */
-  update: (newVal: any, state: State, key: string, referingObject: ReferingObject) => void;
+  update: (newVal: any, state: SE['State'], key: string, referingObject: ReferingObject) => void;
 
   /**
    * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
@@ -295,7 +310,7 @@ export interface StatesHook<State, Computed, Watched = State | Computed, Export 
    * @param callback callback when states changes
    * @param referingObject refering object
    */
-  watch: (source: Watched[], callback: () => void, referingObject: ReferingObject) => void;
+  watch: (source: SE['Watched'][], callback: () => void, referingObject: ReferingObject) => void;
 
   /**
    * bind mounted callback.
@@ -346,7 +361,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
   /**
    * 状态hook函数，用于定义和更新指定MVVM库的状态
    */
-  statesHook?: StatesHook<AG['State'], AG['Computed'], AG['Watched'], AG['Export']>;
+  statesHook?: StatesHook<AG['StatesExport']>;
 
   /**
    * request adapter.
@@ -694,13 +709,40 @@ export declare function createAlova<
   Response,
   ResponseHeader,
   L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter,
-  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter
+  L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter,
+  SE extends StatesExport<any> = StatesExport<any>
 >(
   options: AlovaOptions<
-    AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
+    AlovaGenerics<
+      State,
+      Computed,
+      Watched,
+      Export,
+      any,
+      any,
+      RequestConfig,
+      Response,
+      ResponseHeader,
+      L1Cache,
+      L2Cache,
+      SE
+    >
   >
 ): Alova<
-  AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
+  AlovaGenerics<
+    State,
+    Computed,
+    Watched,
+    Export,
+    any,
+    any,
+    RequestConfig,
+    Response,
+    ResponseHeader,
+    L1Cache,
+    L2Cache,
+    SE
+  >
 >;
 
 /**
@@ -809,4 +851,4 @@ export declare function globalConfig(config: AlovaGlobalConfig): void;
  * get the unified statesHook, and it will throw error if not set.
  * @returns the unified statesHook
  */
-export declare function promiseStatesHook<State, Computed>(): StatesHook<State, Computed>;
+export declare function promiseStatesHook<SE extends StatesExport<any>>(): StatesHook<SE>;

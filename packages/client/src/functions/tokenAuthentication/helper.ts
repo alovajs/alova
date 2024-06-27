@@ -7,6 +7,7 @@ import {
   RespondedHandler,
   ResponseCompleteHandler,
   ResponseErrorHandler,
+  StatesExport,
   StatesHook
 } from 'alova';
 import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/clienthook';
@@ -121,7 +122,10 @@ export const refreshTokenIfExpired = async (
   }
 };
 
-export const onResponded2Record = <SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>>(
+export const onResponded2Record = <
+  SH extends StatesHook<StatesExport<any>>,
+  RA extends AlovaRequestAdapter<any, any, any>
+>(
   onRespondedHandlers?: AlovaResponded<SH, RA>
 ) => {
   type AG = AlovaGenerics<ReturnType<SH['create']>, SH['export'] extends (...args: any) => infer R ? R : any> &

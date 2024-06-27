@@ -2,10 +2,11 @@ import { createSyncOnceRunner } from '@alova/shared/function';
 import { falseValue, forEach, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { onDestroy, onMount } from 'svelte';
-import { Readable, Writable, derived, writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
+import { SvelteHookExportType } from '~/typings/stateshook/svelte';
 
-type UnknownWritable = Writable<unknown>;
 export default {
+  name: 'Svelte',
   create: data => writable(data),
   dehydrate: state => {
     let raw;
@@ -52,4 +53,4 @@ export default {
   onUnmounted: callback => {
     onDestroy(callback);
   }
-} as StatesHook<UnknownWritable, Readable<unknown>>;
+} as StatesHook<SvelteHookExportType<unknown>>;
