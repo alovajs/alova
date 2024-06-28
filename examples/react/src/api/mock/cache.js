@@ -3,6 +3,17 @@ import { defineMock } from '@alova/mock';
 export default defineMock({
   '/query-festivals': () => {
     return festivals;
+  },
+  '/image/{fileName}': ({ params }) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('get', `/${params.fileName}`, true);
+    xhr.responseType = 'blob';
+    return new Promise(resolve => {
+      xhr.send();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+    });
   }
 });
 

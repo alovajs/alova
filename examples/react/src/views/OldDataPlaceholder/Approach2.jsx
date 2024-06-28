@@ -38,12 +38,12 @@ function Approach2() {
   }
 
   return (
-    <div>
-      <FileViewer
-        filePath="OldDataPlaceholder/Approach2"
-        className="mb-4">
-        <h3 className="text-2xl">Use `middleware`</h3>
-      </FileViewer>
+    <nord-card>
+      <div slot="header">
+        <FileViewer filePath="OldDataPlaceholder/Approach2">
+          <h3 className="text-xl">Use `middleware`</h3>
+        </FileViewer>
+      </div>
       <div className="grid gap-2 grid-cols-[fit-content(100px)_fit-content(100px)] mb-4">
         <nord-button onClick={() => location.reload()}>Reload page</nord-button>
         <nord-button onClick={handleClearCache}>Clear Cache</nord-button>
@@ -57,7 +57,7 @@ function Approach2() {
           </nord-badge>
         ))}
       </div>
-    </div>
+    </nord-card>
   );
 }
 

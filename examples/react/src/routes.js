@@ -49,7 +49,7 @@ export default [
       },
       {
         title: 'Cache With IndexedDB',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/CacheWithIndexedDB'))
       }
     ]
   },

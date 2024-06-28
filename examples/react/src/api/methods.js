@@ -1,4 +1,5 @@
-import { alova } from '.';
+import { alova, alovaIndexedDB } from '.';
+import { createIndexedDBAdapter } from './IndexedDBAdapter';
 
 export const getData = () => alova.Get('/get-list');
 
@@ -6,6 +7,7 @@ export const addFruit = fruit => alova.Post('/add-fruit', { item: fruit });
 
 export const queryStudents = (page, pageSize, studentName, clsName) =>
   alova.Get('/query-students', {
+    hitSource: /^student-/,
     params: { page, pageSize, studentName, clsName }
   });
 export const queryStudentDetail = id =>
@@ -40,3 +42,40 @@ export const queryFestivals = () => {
     }
   });
 };
+
+const transformBlob2Base64 = blob => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise(resolve => {
+    reader.onload = ({ target }) => {
+      resolve(target.result);
+    };
+  });
+};
+export const imagePlain = fileName =>
+  alovaIndexedDB.Get(`/image/${fileName}`, {
+    cacheFor: {
+      mode: 'restore',
+      expire: 300000
+    },
+    meta: {
+      dataType: 'blob'
+    },
+    transform: transformBlob2Base64
+  });
+const adapter = createIndexedDBAdapter();
+export const imageWithControlledCache = fileName =>
+  alovaIndexedDB.Get(`/image/${fileName}`, {
+    meta: {
+      dataType: 'blob'
+    },
+    cacheFor() {
+      return adapter.get(fileName);
+    },
+    async transform(imgBlob) {
+      const base64Img = await transformBlob2Base64(imgBlob);
+      // save the image data to IndexedDB
+      await adapter.set(fileName, base64Img);
+      return base64Img;
+    }
+  });

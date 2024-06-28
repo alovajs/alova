@@ -9,12 +9,15 @@ import { showToast, useEvent } from '../helper';
 function View() {
   const [showDetail, setShowDetail] = useState(false);
   const [viewingId, setViewingId] = useState(0);
-  const { loading, data: students } = useRequest(() => queryStudents(), {
+  const {
+    loading,
+    data: students,
+    send
+  } = useRequest(() => queryStudents(), {
     initialData: {
       list: [],
       total: 0
-    },
-    immediate: true
+    }
   });
 
   const handleDetailShow = id => {
@@ -30,11 +33,18 @@ function View() {
   useEffect(() => {
     const offHandler = alova.l1Cache.emitter.on('success', event => {
       if (event.type === 'remove') {
-        showToast(`The cache of key \`${event.key}\` has been removed.`, { duration: 5000 });
+        showToast(`The cache of key \`${event.key}\` has been removed.`, { autoDismiss: 5000 });
       }
     });
     return offHandler;
   });
+
+  const handleModalClose = isSubmit => {
+    setShowDetail(false);
+    if (isSubmit) {
+      send();
+    }
+  };
 
   return (
     <div>
@@ -68,7 +78,7 @@ function View() {
         {showDetail ? (
           <StudentInfoModal
             id={viewingId}
-            onClose={() => setShowDetail(false)}
+            onClose={handleModalClose}
           />
         ) : null}
       </nord-modal>
@@ -94,7 +104,7 @@ const StudentInfoModal = ({ id, onClose }) => {
   });
   const handleSubmit = async () => {
     await submit();
-    onClose();
+    onClose(true);
   };
 
   return (

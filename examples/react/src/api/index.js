@@ -1,6 +1,7 @@
 import { createAlovaMockAdapter } from '@alova/mock';
 import { createAlova } from 'alova';
 import reactHook from 'alova/react';
+import { createIndexedDBAdapter } from './IndexedDBAdapter';
 import basics from './mock/basics';
 import cache from './mock/cache';
 import list from './mock/list';
@@ -31,10 +32,15 @@ const mockRequestAdapter = createAlovaMockAdapter([basics, list, cache], {
     }
 
     return {
-      response: new Response(JSON.stringify(body), {
-        status,
-        statusText
-      }),
+      response: new Response(
+        /^\[object (Blob|FormData|ReadableStream|URLSearchParams)\]$/i.test(Object.prototype.toString.call(body))
+          ? body
+          : JSON.stringify(body),
+        {
+          status,
+          statusText
+        }
+      ),
       headers: new Headers(responseHeaders)
     };
   }
@@ -46,4 +52,12 @@ export const alova = createAlova({
   statesHook: reactHook,
   requestAdapter: mockRequestAdapter,
   responded: response => response.json()
+});
+
+export const alovaIndexedDB = createAlova({
+  baseURL: 'http://example.com',
+  statesHook: reactHook,
+  requestAdapter: mockRequestAdapter,
+  responded: (response, method) => (method.meta.dataType === 'blob' ? response.blob() : response.json()),
+  l2Cache: createIndexedDBAdapter()
 });
