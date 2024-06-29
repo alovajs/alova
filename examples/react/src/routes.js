@@ -58,11 +58,13 @@ export default [
     items: [
       {
         title: 'Paginated List',
-        component: React.lazy(() => import('./views/InitPage'))
+        source: 'PaginatedList/index',
+        component: React.lazy(() => import('./views/PaginatedList'))
       },
       {
         title: 'Load More List',
-        component: React.lazy(() => import('./views/InitPage'))
+        source: 'LoadMoreList/index',
+        component: React.lazy(() => import('./views/LoadMoreList'))
       }
     ]
   },
