@@ -79,3 +79,6 @@ export const imageWithControlledCache = fileName =>
       return base64Img;
     }
   });
+
+export const getSettings = () => alova.Get('/settings');
+export const updateSetting = (name, value) => alova.Post('/settings', { name, value });

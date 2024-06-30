@@ -73,7 +73,7 @@ export default [
     items: [
       {
         title: 'Settings',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/Settings'))
       },
       {
         title: 'Simple List',
