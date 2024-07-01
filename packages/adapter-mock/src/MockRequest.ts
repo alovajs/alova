@@ -1,5 +1,5 @@
-import { isFn, isNumber, isString, noop } from '@alova/shared/function';
-import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import { isFn, isNumber, isString, newInstance, usePromise } from '@alova/shared/function';
+import { falseValue, promiseReject, promiseResolve, trueValue, undefinedValue } from '@alova/shared/vars';
 import type { AlovaGenerics, Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit } from '~/typings';
 import consoleRequestInfo from './consoleRequestInfo';
@@ -103,44 +103,45 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
           });
         return httpAdapter(elements, method);
       }
-      throw new Error(`could not find the httpAdapter which send request.\n[url]${url}`);
+      throw new Error(`cannot find the httpAdapter.\n[url]${url}`);
     }
 
-    let timer: NodeJS.Timeout;
-    let rejectFn: (reason?: any) => void = noop;
+    const promiseResolver = usePromise();
+    const { resolve } = promiseResolver;
+    let { promise: resonpsePromise, reject } = promiseResolver;
     const timeout = method.config.timeout || 0;
     if (timeout > 0) {
       setTimeout(() => {
-        rejectFn(new Error('request timeout'));
+        reject(new Error('request timeout'));
       }, timeout);
     }
-    const resonpsePromise = new Promise<any>((resolve, reject) => {
-      rejectFn = reject;
-      timer = setTimeout(() => {
-        // response支持返回promise对象
-        try {
-          const res = isFn(mockDataRaw)
-            ? mockDataRaw({
-                query,
-                params,
-                data: isString(data) || !data ? {} : data,
-                headers: requestHeaders
-              })
-            : mockDataRaw;
 
-          // 这段代码表示，将内部reject赋值到外部，如果超时了则立即触发reject，或者等待res（如果res为promise）resolve
-          resolve(
-            new Promise<any>((resolveInner, rejectInner) => {
-              rejectFn = rejectInner;
-              Promise.resolve(res).then(resolveInner).catch(rejectInner);
+    const timer = setTimeout(() => {
+      // response支持返回promise对象
+      try {
+        const res = isFn(mockDataRaw)
+          ? mockDataRaw({
+              query,
+              params,
+              data: isString(data) || !data ? {} : data,
+              headers: requestHeaders
             })
-          );
-        } catch (error) {
-          reject(error);
-        }
-      }, delay);
-    })
-      .then(response => {
+          : mockDataRaw;
+
+        // 这段代码表示，将内部reject赋值到外部，如果超时了则立即触发reject，或者等待res（如果res为promise）resolve
+        resolve(
+          newInstance(Promise<any>, (resolveInner, rejectInner) => {
+            reject = rejectInner;
+            promiseResolve(res).then(resolveInner).catch(rejectInner);
+          })
+        );
+      } catch (error) {
+        reject(error);
+      }
+    }, delay);
+
+    resonpsePromise = resonpsePromise
+      .then((response: any) => {
         let status = 200;
         let statusText = 'ok';
         let responseHeaders = {};
@@ -150,7 +151,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
         if (response === undefinedValue) {
           status = 404;
           statusText = 'api not found';
-        } else if (isNumber(response.status) && isString(response.statusText)) {
+        } else if (response && isNumber(response.status) && isString(response.statusText)) {
           // 返回了自定义状态码和状态文本，将它作为响应信息
           status = response.status;
           statusText = response.statusText;
@@ -161,42 +162,51 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
           body = response;
         }
 
-        // 打印模拟数据请求信息
-        isFn(mockRequestLogger) &&
-          mockRequestLogger({
-            isMock: trueValue,
-            url,
-            method: type,
-            params,
-            headers: requestHeaders,
-            query,
-            data: (data as any) || {},
-            responseHeaders,
-            response: body
-          });
-        return onMockResponse(
-          { status, statusText, responseHeaders, body },
-          {
-            headers: requestHeaders,
-            query,
-            params,
-            data: (data as any) || {}
-          },
-          method
-        );
+        return newInstance(Promise, (resolve, reject) => {
+          try {
+            const res = onMockResponse(
+              { status, statusText, responseHeaders, body },
+              {
+                headers: requestHeaders,
+                query,
+                params,
+                data: (data as any) || {}
+              },
+              method
+            );
+            resolve(res);
+          } catch (error) {
+            reject(error);
+          }
+        }).then(response => {
+          // 打印模拟数据请求信息
+          isFn(mockRequestLogger) &&
+            mockRequestLogger({
+              isMock: trueValue,
+              url,
+              method: type,
+              params,
+              headers: requestHeaders,
+              query,
+              data: (data as any) || {},
+              responseHeaders,
+              response: body
+            });
+          return response;
+        });
       })
-      .catch(error => Promise.reject(onMockError(error, method)));
+      .catch(error => promiseReject(onMockError(error, method)));
 
     // 返回响应数据
     return {
       response: () =>
         resonpsePromise.then(({ response }) =>
-          (response as any).toString() === '[object Response]' ? (response as any).clone() : response
+          response && response.toString() === '[object Response]' ? (response as any).clone() : response
         ),
       headers: () => resonpsePromise.then(({ headers }) => headers),
       abort: () => {
         clearTimeout(timer);
-        rejectFn(new Error('The user abort request'));
+        reject(new Error('The user abort request'));
       }
     };
   };

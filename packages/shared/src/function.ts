@@ -385,7 +385,7 @@ type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string
  */
 export function statesHookHelper<AG extends AlovaGenerics>(
   statesHook: StatesHook<GeneralState, GeneralState>,
-  referingObject: ReferingObject = { trackedKeys: {} }
+  referingObject: ReferingObject = { trackedKeys: {}, bindError: falseValue }
 ) {
   const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
@@ -491,8 +491,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       }
 
       const { update: nestedHookUpdate, __proxyState: nestedProxyState } = provider;
-      // reset the tracked keys, so that the nest hook providers can be initialized.
+      // reset the tracked keys and bingError flag, so that the nest hook providers can be initialized.
       referingObject.trackedKeys = {};
+      referingObject.bindError = falseValue;
+
       const extraProvider = {
         // expose referingObject automatically.
         __referingObj: referingObject,

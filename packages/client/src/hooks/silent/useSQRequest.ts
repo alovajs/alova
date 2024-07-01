@@ -1,6 +1,5 @@
 import useRequest from '@/hooks/core/useRequest';
 import { noop, statesHookHelper } from '@alova/shared/function';
-import { promiseResolve, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, SQRequestHookConfig, UseHookExposure } from '~/typings/clienthook';
 import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';
@@ -21,8 +20,9 @@ export default function useSQRequest<AG extends AlovaGenerics>(
     ...config,
     __referingObj: referingObj,
     middleware: (ctx, next) => {
-      middleware(ctx, () => promiseResolve(undefinedValue as any));
-      return silentMiddleware(ctx, next);
+      const silentMidPromise = silentMiddleware(ctx, next);
+      middleware(ctx, () => silentMidPromise);
+      return silentMidPromise;
     }
   });
   decorateEvent(states as UseHookExposure<AG>);
