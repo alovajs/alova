@@ -5,7 +5,7 @@ module.exports = {
     node: true
   },
   root: true,
-  ignorePatterns: ['**/dist'],
+  ignorePatterns: ['**/dist', 'packages/alova/typings/serverhook.d.ts'],
   extends: ['airbnb', 'airbnb-typescript', 'prettier'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
