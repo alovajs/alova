@@ -5,7 +5,6 @@ export type ReactHookExportType<T> = StatesExportHelper<{
   name: 'React';
   State: ReactState<T>;
   Computed: any[];
-  Export: T | any[];
   Watched: T;
   StateExport: T;
   ComputedExport: T;

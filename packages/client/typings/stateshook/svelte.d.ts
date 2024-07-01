@@ -5,7 +5,6 @@ export type SvelteHookExportType<T> = StatesExportHelper<{
   name: 'Svelte';
   State: Writable<T>;
   Computed: Readable<T>;
-  Export: Writable<T> | Readable<T>;
   Watched: Writable<T>;
   StateExport: Writable<T>;
   ComputedExport: Readable<T>;

@@ -238,7 +238,6 @@ export interface StatesExport<T> {
   State: any | T;
   Computed: any | T;
   Watched: any | T;
-  Export: any | T;
   StateExport: T;
   ComputedExport: T;
 }
@@ -250,14 +249,18 @@ export interface StatesHook<SE extends StatesExport<any>> {
    * @param initialValue 初始数据
    * @returns 状态值
    */
-  create: (initialValue: any, referingObject: ReferingObject) => SE['StateExport'];
+  create: (initialValue: any, referingObject: ReferingObject) => SE['State'];
 
   /**
    * create computed state
    * @param initialValue initial data
    * @param referingObject refering object
    */
-  computed: (getter: () => any, deps: SE['Export'][], referingObject: ReferingObject) => SE['Computed'];
+  computed: (
+    getter: () => any,
+    deps: (SE['StateExport'] | SE['ComputedExport'])[],
+    referingObject: ReferingObject
+  ) => SE['Computed'];
 
   /**
    * 导出给开发者使用的值
@@ -265,7 +268,7 @@ export interface StatesHook<SE extends StatesExport<any>> {
    * @param referingObject refering object
    * @returns 导出的值
    */
-  export?: (state: SE['State'], referingObject: ReferingObject) => SE['Export'];
+  export?: (state: SE['State'], referingObject: ReferingObject) => SE['StateExport'] | SE['ComputedExport'];
 
   /** 将状态转换为普通数据 */
   dehydrate: (state: SE['State'], key: string, referingObject: ReferingObject) => any;
