@@ -11,7 +11,7 @@ export interface FrontRequestHookConfig<AG extends AlovaGenerics> extends UseHoo
   initialData?: InitialDataType | (() => InitialDataType);
 
   /** 额外的监管状态，可通过updateState更新 */
-  managedStates?: Record<string | symbol, AG['State']>;
+  managedStates?: Record<string | symbol, AG['StatesExport']['State']>;
 
   /** 中间件 */
   middleware?: AlovaFrontMiddleware<AG>;

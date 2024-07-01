@@ -22,6 +22,6 @@ export interface WatcherHookConfig<AG extends AlovaGenerics> extends FrontReques
  */
 export declare function useWatcher<AG extends AlovaGenerics>(
   methodHandler: Method<AG> | AlovaMethodHandler<AG>,
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG>;

@@ -1,6 +1,6 @@
 import { $self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
+import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesExport, StatesHook } from 'alova';
 import { GlobalFetchRequestAdapter } from 'alova/fetch';
 import {
   AlovaResponded,
@@ -33,7 +33,7 @@ type AlovaRequestAdapterUnified<
 type BeforeRequestType<AG extends AlovaGenerics> = (
   originalBeforeRequest?: AlovaOptions<AG>['beforeRequest']
 ) => AlovaOptions<AG>['beforeRequest'];
-type ResponseType<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> = (
+type ResponseType<SH extends StatesHook<StatesExport<any>>, RA extends AlovaRequestAdapter<any, any, any>> = (
   originalResponded?: AlovaResponded<SH, RA>
 ) => AlovaResponded<SH, RA>;
 
@@ -43,7 +43,7 @@ type ResponseType<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapte
  * @returns token认证拦截器函数
  */
 export const createClientTokenAuthentication = <
-  SH extends StatesHook<any, any>,
+  SH extends StatesHook<any>,
   RA extends
     | AlovaRequestAdapter<any, any, any>
     | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter
@@ -113,7 +113,7 @@ export const createClientTokenAuthentication = <
  * @returns token认证拦截器函数
  */
 export const createServerTokenAuthentication = <
-  SH extends StatesHook<any, any>,
+  SH extends StatesHook<any>,
   RA extends
     | AlovaRequestAdapter<any, any, any>
     | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter

@@ -20,7 +20,7 @@ export interface CaptchaExposure<AG extends AlovaGenerics> extends UseHookExposu
   /**
    * 当前倒计时，每秒-1，当倒计时到0时可再次发送验证码
    */
-  countdown: ExportedState<number, AG['State']>;
+  countdown: ExportedState<number, AG['StatesExport']>;
 }
 
 /**

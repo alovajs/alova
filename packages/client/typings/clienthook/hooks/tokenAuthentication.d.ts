@@ -1,9 +1,6 @@
 import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
 
-export type AlovaResponded<
-  SH extends StatesHook<any, any>,
-  RA extends AlovaRequestAdapter<any, any, any>
-> = NonNullable<
+export type AlovaResponded<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> = NonNullable<
   AlovaOptions<
     Pick<
       AlovaGenerics<ReturnType<SH['create']>, SH['export'] extends (...args: any) => infer R ? R : any>,

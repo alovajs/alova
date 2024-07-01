@@ -7,7 +7,7 @@ import createRequestState from './implements/createRequestState';
 
 export default function useWatcher<AG extends AlovaGenerics>(
   handler: Method<AG> | AlovaMethodHandler<AG>,
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config: WatcherHookConfig<AG> = {}
 ) {
   watcherHookAssert(watchingStates && len(watchingStates) > 0, 'expected at least one watching state');

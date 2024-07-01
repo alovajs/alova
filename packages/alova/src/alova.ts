@@ -8,6 +8,7 @@ import {
   AlovaOptions,
   RequestBody,
   RespondedAlovaGenerics,
+  StatesExport,
   StatesHook
 } from '~/typings';
 import Method from './Method';
@@ -160,7 +161,7 @@ export class Alova<AG extends AlovaGenerics> {
   }
 }
 
-export let boundStatesHook: StatesHook<any, any> | undefined = undefinedValue;
+export let boundStatesHook: StatesHook<StatesExport<any>> | undefined = undefinedValue;
 export const usingL1CacheAdapters: AlovaGlobalCacheAdapter[] = [];
 export const usingL2CacheAdapters: AlovaGlobalCacheAdapter[] = [];
 

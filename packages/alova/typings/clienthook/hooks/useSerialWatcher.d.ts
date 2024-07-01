@@ -12,7 +12,7 @@ import { WatcherHookConfig } from './useWatcher';
  */
 export declare function useSerialWatcher<AG extends AlovaGenerics>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG>;
 
@@ -26,7 +26,7 @@ export declare function useSerialWatcher<AG extends AlovaGenerics>(
  */
 export declare function useSerialWatcher<AG extends AlovaGenerics, AG2 extends AlovaGenerics>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, AlovaMethodHandler<AG2>, ...AlovaMethodHandler<any>[]],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG2>;
 
@@ -49,7 +49,7 @@ export declare function useSerialWatcher<
     AlovaMethodHandler<AG3>,
     ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG3>;
 
@@ -74,7 +74,7 @@ export declare function useSerialWatcher<
     AlovaMethodHandler<AG4>,
     ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG4>;
 
@@ -101,7 +101,7 @@ export declare function useSerialWatcher<
     AlovaMethodHandler<AG5>,
     ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG5>;
 
@@ -130,7 +130,7 @@ export declare function useSerialWatcher<
     AlovaMethodHandler<AG6>,
     ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG6>;
 
@@ -161,6 +161,6 @@ export declare function useSerialWatcher<
     AlovaMethodHandler<AG7>,
     ...AlovaMethodHandler<any>[]
   ],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
 ): UseHookExposure<AG7>;

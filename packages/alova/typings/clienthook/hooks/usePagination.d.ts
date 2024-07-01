@@ -53,13 +53,13 @@ export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extend
    * 状态监听触发请求，使用 useWatcher 实现
    * @default [page, pageSize]
    */
-  watchingStates?: AG['Watched'][];
+  watchingStates?: AG['StatesExport']['Watched'][];
 }
 
 export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
-  extends UseHookExposure<AG> {
-  page: ExportedState<number, AG['State']>;
-  pageSize: ExportedState<number, AG['State']>;
+  extends Omit<UseHookExposure<AG>, 'update'> {
+  page: ExportedState<number, AG['StatesExport']>;
+  pageSize: ExportedState<number, AG['StatesExport']>;
   data: ExportedState<
     IsUnknown<
       ListData[number],
@@ -70,12 +70,12 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
         : ListData,
       ListData
     >,
-    AG['State']
+    AG['StatesExport']
   >;
-  pageCount: ExportedComputed<number | undefined, AG['Computed']>;
-  total: ExportedComputed<number | undefined, AG['Computed']>;
-  isLastPage: ExportedComputed<boolean, AG['Computed']>;
-  fetching: ExportedState<boolean, AG['State']>;
+  pageCount: ExportedComputed<number | undefined, AG['StatesExport']>;
+  total: ExportedComputed<number | undefined, AG['StatesExport']>;
+  isLastPage: ExportedComputed<boolean, AG['StatesExport']>;
+  fetching: ExportedState<boolean, AG['StatesExport']>;
   onFetchSuccess(handler: SuccessHandler<AG>): UsePaginationExposure<AG, ListData>;
   onFetchError(handler: ErrorHandler<AG>): UsePaginationExposure<AG, ListData>;
   onFetchComplete(handler: CompleteHandler<AG>): UsePaginationExposure<AG, ListData>;

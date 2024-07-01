@@ -15,7 +15,7 @@ import { assertSerialHandlers, serialMiddleware } from './general';
  */
 export default <AG extends AlovaGenerics>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
-  watchingStates: AG['Watched'][],
+  watchingStates: AG['StatesExport']['Watched'][],
   config: RequestHookConfig<AG> = {} as any
 ) => {
   assertSerialHandlers('useSerialWatcher', serialHandlers);
