@@ -36,8 +36,8 @@ jobs:
       - name: Lint check
         run: pnpm run lint
 
-      - name: Unit tests
-        run: pnpm run test
-
       - name: Format
         run: pnpm run format
+
+      - name: Unit tests
+        run: pnpm run test
