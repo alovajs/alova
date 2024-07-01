@@ -82,3 +82,16 @@ export const imageWithControlledCache = fileName =>
 
 export const getSettings = () => alova.Get('/settings');
 export const updateSetting = (name, value) => alova.Post('/settings', { name, value });
+
+export const queryTodo = keyword =>
+  alova.Get('/query-todo', {
+    params: { keyword }
+  });
+export const todoDetail = id => alova.Get(`/todo/` + id);
+export const editTodo = (content, time, id) =>
+  alova.Post('/todo', {
+    id,
+    content,
+    time
+  });
+export const removeTodo = id => alova.Delete('/todo', { id });

@@ -33,21 +33,27 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
             </tr>
           </thead>
           <tbody>
-            {data.map((row, index) => {
-              const { onClick, style } = rowProps ? rowProps(row, index) : {};
-              return (
-                <tr
-                  key={index}
-                  style={style}
-                  onClick={onClick}>
-                  {columns.map(({ dataIndex, render }) => (
-                    <td key={dataIndex}>
-                      {typeof render === 'function' ? render(row[dataIndex], row) : row[dataIndex]}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
+            {data.length > 0 ? (
+              data.map((row, index) => {
+                const { onClick, style } = rowProps ? rowProps(row, index) : {};
+                return (
+                  <tr
+                    key={index}
+                    style={style}
+                    onClick={onClick}>
+                    {columns.map(({ dataIndex, render }) => (
+                      <td key={dataIndex}>
+                        {typeof render === 'function' ? render(row[dataIndex], row) : row[dataIndex]}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={columns.length}>No Data</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </nord-table>

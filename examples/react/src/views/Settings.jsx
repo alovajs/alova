@@ -6,35 +6,33 @@ import QueueConsole from '../components/QueueConsole';
 function View() {
   // The `bootSilentFactory` has been called in `main.js`
   const [networkMode, setNetworkMode] = useState(0);
-  const { data: settingData, loading } = useSQRequest(getSettings, {
+  const {
+    data: settingData,
+    loading,
+    update
+  } = useSQRequest(getSettings, {
     behavior: () => (networkMode === 0 ? 'queue' : 'static'),
     initialData: {
       textContent: ''
-    },
-    async middleware({ proxyStates, method }, next) {
-      const { data } = proxyStates;
-      const cache = method.context.l2Cache.get(method.key);
-      if (cache) {
-        data.v = cache;
-      }
-      const res = await next();
-      res && method.context.l2Cache.set(method.key, res);
-      return res;
     }
   }).onSuccess(() => {
-    fillSilentMethodsData();
-  });
-
-  const fillSilentMethodsData = async () => {
-    const smAry = await filterSilentMethods();
-    smAry.forEach(smItem => {
-      if (!smItem.reviewData) {
-        return;
-      }
-      const { name, value } = smItem.reviewData;
-      settingData[name] = value;
+    // fill the request data in waiting list to current data
+    filterSilentMethods().then(smAry => {
+      console.log(smAry, 'fff');
+      smAry.forEach(smItem => {
+        if (!smItem.reviewData) {
+          return;
+        }
+        const { name, value } = smItem.reviewData;
+        update({
+          data: {
+            ...settingData,
+            [name]: value
+          }
+        });
+      });
     });
-  };
+  });
 
   const { send: submitData, loading: submittingLoading } = useSQRequest((name, value) => updateSetting(name, value), {
     behavior: () => (networkMode === 0 ? 'silent' : 'static'),

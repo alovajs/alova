@@ -77,7 +77,8 @@ export default [
       },
       {
         title: 'Simple List',
-        component: React.lazy(() => import('./views/InitPage'))
+        source: 'SimpleList/index',
+        component: React.lazy(() => import('./views/SimpleList/index'))
       },
       {
         title: 'Editor',
