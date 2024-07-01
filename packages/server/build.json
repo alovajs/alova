@@ -1,6 +1,6 @@
 {
   "input": "src/index.ts",
-  "output": "dist/index.{suffix}.{ext}",
+  "output": "../alova/dist/serverhook/index.{suffix}.{ext}",
   "packageName": "AlovaServerHook",
   "formats": ["esm", "cjs"],
   "external": {
@@ -9,5 +9,6 @@
     "@alova/shared/vars": null,
     "@alova/shared/assert": null
   },
-  "withDTS": true
+  "withDTS": true,
+  "dtsOutput": "../alova/typings/serverhook.d.ts"
 }
