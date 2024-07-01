@@ -533,13 +533,13 @@ describe('vue => useSQRequest', () => {
         id: '--'
       })
     });
-    onPostSuccess(event => {
+    onPostSuccess(async event => {
       const { data } = event;
       expect(postRes.value[symbolVDataId]).toBeTruthy(); // 此时还是虚拟响应数据
 
       // 调用updateStateEffect后将首先立即更新虚拟数据到listData中
       // 等到请求响应后再次更新实际数据到listData中
-      const updated = updateStateEffect(getter(), listDataRaw => {
+      const updated = await updateStateEffect(getter(), listDataRaw => {
         listDataRaw.push({
           id: data.id,
           text: 'abc'
