@@ -1,6 +1,6 @@
 {
   "name": "@alova/server",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "server request strategies for alova.js",
   "homepage": "https://alova.js.org",
   "private": true,
@@ -37,7 +37,7 @@
     "dist"
   ],
   "peerDependencies": {
-    "alova": "^3.0.0-beta.6"
+    "alova": "^3.0.0-beta.7"
   },
   "dependencies": {
     "@alova/shared": "workspace:*",
