@@ -6,6 +6,6 @@
   "linked": [],
   "access": "public",
   "baseBranch": "next",
-  "updateInternalDependencies": "patch",
-  "ignore": ["@alova/client"]
+  "updateInternalDependencies": "minor",
+  "ignore": ["@alova/client", "@alova/server"]
 }
