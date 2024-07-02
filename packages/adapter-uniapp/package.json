@@ -49,7 +49,7 @@
     "alova": "workspace:*"
   },
   "peerDependencies": {
-    "alova": "^3.0.0-beta.7"
+    "alova": "^3.0.0-beta.8"
   },
   "config": {
     "commitizen": {

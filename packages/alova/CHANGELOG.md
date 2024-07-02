@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.0-beta.8
+
+### Patch Changes
+
+- [#430](https://github.com/alovajs/alova/pull/430) [`0929db3`](https://github.com/alovajs/alova/commit/0929db3830e656eaff90517c38da3739b0eb5917) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that states updating not work with `updateStateEffect` in `alova/client`
+
 ## 3.0.0-beta.7
 
 ### Patch Changes
