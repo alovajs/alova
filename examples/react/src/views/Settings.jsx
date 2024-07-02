@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { getSettings, updateSetting } from '../api/methods';
 import QueueConsole from '../components/QueueConsole';
 
+const queue = 'settings';
 function View() {
   // The `bootSilentFactory` has been called in `main.js`
   const [networkMode, setNetworkMode] = useState(0);
@@ -12,13 +13,13 @@ function View() {
     update
   } = useSQRequest(getSettings, {
     behavior: () => (networkMode === 0 ? 'queue' : 'static'),
+    queue,
     initialData: {
       textContent: ''
     }
   }).onSuccess(() => {
     // fill the request data in waiting list to current data
-    filterSilentMethods().then(smAry => {
-      console.log(smAry, 'fff');
+    filterSilentMethods(undefined, queue).then(smAry => {
       smAry.forEach(smItem => {
         if (!smItem.reviewData) {
           return;
@@ -36,6 +37,7 @@ function View() {
 
   const { send: submitData, loading: submittingLoading } = useSQRequest((name, value) => updateSetting(name, value), {
     behavior: () => (networkMode === 0 ? 'silent' : 'static'),
+    queue,
     retryError: /network error/,
     maxRetryTimes: 5,
     backoff: {
@@ -95,7 +97,10 @@ function View() {
             placeholder="input some text"></nord-input>
         </div>
       </nord-card>
-      <QueueConsole onModeChange={value => setNetworkMode(value)} />
+      <QueueConsole
+        onModeChange={value => setNetworkMode(value)}
+        queueName={queue}
+      />
     </div>
   );
 }

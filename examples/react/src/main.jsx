@@ -16,5 +16,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 // need to boot silent factory before using useSQRequest
 bootSilentFactory({
   alova: alova,
-  delay: 500
+  delay: 500,
+
+  // set the request delay
+  requestWait: [
+    {
+      queue: 'note',
+      wait: silentMethod => silentMethod.entity.meta?.silentDelay
+    }
+  ]
 });

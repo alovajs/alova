@@ -30,9 +30,9 @@ const useWaitingSilentQueue = queueName => {
   };
 };
 
-function QueueConsole({ onModeChange }) {
+function QueueConsole({ onModeChange, queueName }) {
   const [networkMode, setNetworkMode] = useState(0);
-  const defaultWaitingSilentQueue = useWaitingSilentQueue('default');
+  const defaultWaitingSilentQueue = useWaitingSilentQueue(queueName);
 
   // 静默提交，多次重试后失败
   const [silentRequestError, setSilentRequestError] = useState('');
@@ -72,8 +72,9 @@ function QueueConsole({ onModeChange }) {
         value={networkMode}
         hide-label
         onInput={({ target }) => {
-          setNetworkMode(target.value);
-          onModeChange(target.value);
+          const value = Number(target.value);
+          setNetworkMode(value);
+          onModeChange(value);
         }}>
         <option value={0}>Silent Request</option>
         <option value={1}>Normal Request</option>
@@ -81,7 +82,7 @@ function QueueConsole({ onModeChange }) {
       <div className="border-b-[1px] last:border-b-0 pb-4 border-slate-200">
         {[defaultWaitingSilentQueue].map(({ queue, queueName }) => (
           <div key={queueName}>
-            <div className="text-base font-semibold mb-2">[{queueName}] Request Queue</div>
+            <div className="text-base font-semibold mb-2">Background Request Queue[{queueName}]</div>
             <div className="grid gap-y-4">
               {queue.map((sm, i) => (
                 <div
@@ -113,6 +114,7 @@ function QueueConsole({ onModeChange }) {
   );
 }
 QueueConsole.propTypes = {
+  queueName: PropTypes.string.isRequired,
   onModeChange: PropTypes.func.isRequired
 };
 export default QueueConsole;

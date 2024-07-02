@@ -11,6 +11,7 @@ function EditorModal({ id, networkMode, onClose }) {
     update
   } = useSQRequest(() => todoDetail(id), {
     behavior: 'static',
+    queue: 'simpleList',
     initialData: { content: 'new todo', time: nowDate.getHours() + ':' + nowDate.getMinutes() },
     immediate: !!id,
     vDataCaptured: () => {
@@ -24,6 +25,7 @@ function EditorModal({ id, networkMode, onClose }) {
   // submit with silent request
   const { loading: submitting, send: sendTodoEdit } = useSQRequest(() => editTodo(detail.content, detail.time, id), {
     behavior: () => (networkMode === 0 ? 'silent' : 'static'),
+    queue: 'simpleList',
     retryError: /network error/,
     maxRetryTimes: 5,
     backoff: {
@@ -46,7 +48,6 @@ function EditorModal({ id, networkMode, onClose }) {
     }
 
     updateStateEffect(queryTodo(), todoList => {
-      todoList = [...todoList];
       if (id) {
         const index = todoList.findIndex(item => equals(item.id, id));
         if (index >= 0) {

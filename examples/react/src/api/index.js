@@ -6,6 +6,7 @@ import basics from './mock/basics';
 import cache from './mock/cache';
 import list from './mock/list';
 import optimistic from './mock/optimistic';
+import tokenAuth from './mock/tokenAuth';
 
 export const networkStatus = {
   _value: Number(sessionStorage.getItem('network.status') || 1),
@@ -19,7 +20,7 @@ export const networkStatus = {
 };
 
 // mock adapter
-const mockRequestAdapter = createAlovaMockAdapter([basics, list, cache, optimistic], {
+export const mockRequestAdapter = createAlovaMockAdapter([basics, list, cache, optimistic, tokenAuth], {
   delay: 1000,
   onMockResponse: async ({ body, responseHeaders, status = 200, statusText = 'ok' }) => {
     // mock network status

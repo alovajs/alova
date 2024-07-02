@@ -18,10 +18,11 @@ function View() {
     update
   } = useSQRequest(queryTodo, {
     behavior: () => (networkMode === 0 ? 'queue' : 'static'),
-    initialData: []
+    initialData: [],
+    queue: 'simpleList'
   }).onSuccess(() => {
     // fill the list data when request success
-    filterSilentMethods().then(smAry => {
+    filterSilentMethods(undefined, 'simpleList').then(smAry => {
       smAry.forEach(smItem => {
         if (!smItem.reviewData) {
           return;
@@ -80,6 +81,7 @@ function View() {
 
   const { send: removeSend, loading: removing } = useSQRequest(id => removeTodo(id), {
     behavior: () => (networkMode === 0 ? 'silent' : 'static'),
+    queue: 'simpleList',
     retryError: /network error/,
     maxRetryTimes: 5,
     backoff: {
@@ -142,7 +144,10 @@ function View() {
           ) : null}
         </nord-modal>
       </div>
-      <QueueConsole onModeChange={value => setNetworkMode(value)} />
+      <QueueConsole
+        onModeChange={value => setNetworkMode(value)}
+        queueName="simpleList"
+      />
     </div>
   );
 }

@@ -1,3 +1,5 @@
+import { queryCache } from 'alova';
+import { equals } from 'alova/client';
 import { alova, alovaIndexedDB } from '.';
 import { createIndexedDBAdapter } from './IndexedDBAdapter';
 
@@ -80,9 +82,11 @@ export const imageWithControlledCache = fileName =>
     }
   });
 
+// Settings
 export const getSettings = () => alova.Get('/settings');
 export const updateSetting = (name, value) => alova.Post('/settings', { name, value });
 
+// SimpleList
 export const queryTodo = keyword =>
   alova.Get('/query-todo', {
     params: { keyword }
@@ -95,3 +99,28 @@ export const editTodo = (content, time, id) =>
     time
   });
 export const removeTodo = id => alova.Delete('/todo', { id });
+
+// Editor
+export const queryNotes = () => alova.Get('/note');
+export const noteDetail = id =>
+  alova.Get(`/note/${id}`, {
+    async cacheFor() {
+      // 自定义获取缓存，有则返回否则不返回
+      const storageNoteList = await queryCache(queryNotes());
+      if (storageNoteList) {
+        return storageNoteList.find(noteItem => equals(noteItem.id, id));
+      }
+    }
+  });
+export const editNote = (content, id) =>
+  alova.Post(
+    '/note',
+    { content, id },
+    {
+      meta: {
+        silentDelay: 5000
+      },
+      name: id ? 'methodEditNote' + id : undefined
+    }
+  );
+export const removeNote = id => alova.Delete('/note', { id });

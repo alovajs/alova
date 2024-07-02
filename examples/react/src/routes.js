@@ -81,8 +81,9 @@ export default [
         component: React.lazy(() => import('./views/SimpleList/index'))
       },
       {
-        title: 'Editor',
-        component: React.lazy(() => import('./views/InitPage'))
+        title: 'Notes',
+        source: 'Notes/index',
+        component: React.lazy(() => import('./views/Notes/index'))
       }
     ]
   },
@@ -90,12 +91,12 @@ export default [
     category: 'Token Authentication',
     items: [
       {
-        title: 'Client Based',
-        component: React.lazy(() => import('./views/InitPage'))
+        title: 'Server Based',
+        component: React.lazy(() => import('./views/ServerBased'))
       },
       {
-        title: 'Server Based',
-        component: React.lazy(() => import('./views/InitPage'))
+        title: 'Client Based',
+        component: React.lazy(() => import('./views/ClientBased'))
       }
     ]
   },
