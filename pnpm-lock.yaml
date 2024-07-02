@@ -320,9 +320,6 @@ importers:
       '@node-ipc/node-ipc':
         specifier: ^11.0.3
         version: 11.0.3
-      electron:
-        specifier: ^30.1.0
-        version: 30.1.0
     devDependencies:
       '@alova/scripts':
         specifier: workspace:*
@@ -333,6 +330,9 @@ importers:
       alova:
         specifier: workspace:*
         version: link:../alova
+      electron:
+        specifier: ^30.1.0
+        version: 30.1.0
 
   packages/server:
     dependencies:
