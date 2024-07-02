@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.0-beta.6
+
+### Patch Changes
+
+- [#432](https://github.com/alovajs/alova/pull/432) [`586103f`](https://github.com/alovajs/alova/commit/586103fefdb3ddc1ae8eab40f6c92ebab4f495a8) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that states updating not work with `updateStateEffect` in react
+
 ## 1.0.0-beta.5
 
 ### Patch Changes
