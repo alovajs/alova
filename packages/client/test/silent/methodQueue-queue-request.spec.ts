@@ -2,7 +2,7 @@ import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { bootSilentFactory, onSilentSubmitError, onSilentSubmitSuccess } from '@/hooks/silent/silentFactory';
 import { pushNewSilentMethod2Queue, silentQueueMap } from '@/hooks/silent/silentQueue';
 import createEventManager from '@alova/shared/createEventManager';
-import { promiseWithResolvers } from '@alova/shared/function';
+import { usePromise } from '@alova/shared/function';
 import { Method, createAlova } from 'alova';
 import VueHook from 'alova/vue';
 import { ScopedSQEvents } from '~/typings/clienthook';
@@ -18,7 +18,7 @@ describe('silent method request in queue with queue behavior', () => {
     });
 
     const methodInstance = new Method('POST', alovaInst, '/detail');
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const silentMethodInstance = new SilentMethod(
       methodInstance,
       'queue',
@@ -64,7 +64,7 @@ describe('silent method request in queue with queue behavior', () => {
     const methodInstance = new Method('POST', alovaInst, '/detail-error', undefined, {
       id: 'aa'
     });
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const emitter = createEventManager<ScopedSQEvents<any>>();
     emitter.on('fallback', fallbackMockFn);
     emitter.on('retry', retryMockFn);

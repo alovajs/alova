@@ -3,7 +3,9 @@
 const undefStr = 'undefined';
 const MockGlobal: any = {};
 const isSSR = () =>
-  typeof MockGlobal.process !== undefStr ? !MockGlobal.process.browser : typeof MockGlobal.Deno !== undefStr;
+  typeof MockGlobal.process !== undefStr
+    ? typeof MockGlobal.process.cwd === 'function'
+    : typeof MockGlobal.Deno !== undefStr;
 
 const setGlobalProcess = (process: any) => {
   MockGlobal.process = process;
@@ -69,8 +71,8 @@ describe('isSSR', () => {
   });
 
   it('should return true in Node.js environment', () => {
-    // Node.js: process is {}, Deno is undefined
-    setGlobalProcess({});
+    // Node.js: process is { cwd() {...}, ... }, Deno is undefined
+    setGlobalProcess({ cwd() {} });
     setGlobalDeno(undefined);
     expect(isSSR()).toBeTruthy();
   });
@@ -83,8 +85,8 @@ describe('isSSR', () => {
   });
 
   it('should return true in bun environment', () => {
-    // Bun: process is {}, Deno is undefined (assuming bun has a similar process object)
-    setGlobalProcess({});
+    // Bun: process is { cwd() {...}, ... }, Deno is undefined (assuming bun has a similar process object)
+    setGlobalProcess({ cwd() {} });
     setGlobalDeno(undefined);
     expect(isSSR()).toBeTruthy();
   });

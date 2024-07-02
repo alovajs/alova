@@ -11,7 +11,7 @@ import {
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import createEventManager from '@alova/shared/createEventManager';
-import { promiseWithResolvers } from '@alova/shared/function';
+import { usePromise } from '@alova/shared/function';
 import { Method, createAlova } from 'alova';
 import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
@@ -32,7 +32,7 @@ describe('silent method request in queue with silent behavior', () => {
     const retryMockFn = jest.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail');
 
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -99,7 +99,7 @@ describe('silent method request in queue with silent behavior', () => {
       failTimes: 1
     });
 
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -154,7 +154,7 @@ describe('silent method request in queue with silent behavior', () => {
     const retryMockFn = jest.fn();
     const executeOrder = [] as string[]; // 用于记录执行顺序，后续验证
     const methodInstance = new Method('POST', alovaInst, '/detail-error', {}, { id: 'b' });
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -244,7 +244,7 @@ describe('silent method request in queue with silent behavior', () => {
     const fallbackMockFn = jest.fn();
     const retryMockFn = jest.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail-error', {}, { id: 'c' });
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -292,7 +292,7 @@ describe('silent method request in queue with silent behavior', () => {
     const fallbackMockFn = jest.fn();
     const retryMockFn = jest.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail');
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -339,7 +339,7 @@ describe('silent method request in queue with silent behavior', () => {
     const fallbackMockFn = jest.fn();
     const retryMockFn = jest.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail-error');
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -387,7 +387,7 @@ describe('silent method request in queue with silent behavior', () => {
         id: 'f'
       }
     );
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const emitter = createEventManager<ScopedSQEvents<any>>();
     emitter.on('fallback', () => {
       fallbackMockFn();
@@ -423,7 +423,7 @@ describe('silent method request in queue with silent behavior', () => {
     const fallbackMockFn = jest.fn();
     const retryMockFn = jest.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail-error', {}, { id: 'g' });
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const emitter = createEventManager<ScopedSQEvents<any>>();
     emitter.on('fallback', () => {
       fallbackMockFn();
@@ -456,7 +456,7 @@ describe('silent method request in queue with silent behavior', () => {
     });
 
     const methodInstance = new Method('POST', alovaInst, '/detail-error', {}, { id: 'hh' });
-    const { promise: pms, resolve } = promiseWithResolvers<void>();
+    const { promise: pms, resolve } = usePromise<void>();
     const emitter = createEventManager<ScopedSQEvents<any>>();
     emitter.on('fallback', () => {
       resolve();

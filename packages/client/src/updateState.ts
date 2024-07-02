@@ -1,5 +1,5 @@
-import { getContext, getMethodInternalKey, isFn } from '@alova/shared/function';
-import { falseValue, forEach, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
+import { getContext, getMethodInternalKey, isFn, isObject } from '@alova/shared/function';
+import { falseValue, forEach, isArray, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method, promiseStatesHook, setCache } from 'alova';
 import { UpdateStateCollection } from '~/typings/clienthook';
 import { coreAssert } from './hooks/core/implements/assert';
@@ -34,7 +34,14 @@ export default async function updateState<AG extends AlovaGenerics>(
         coreAssert(stateName in frontStates, `state named \`${stateName}\` is not found`);
         coreAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
         const targetStateProxy = frontStates[stateName as keyof typeof frontStates];
-        const updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](targetStateProxy.v);
+        let updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](targetStateProxy.v);
+
+        // shallow clone the updatedData so that can effect in react.
+        updatedData = isArray(updatedData)
+          ? [...updatedData]
+          : isObject(updatedData)
+            ? { ...updatedData }
+            : updatedData;
 
         // 记录data字段的更新值，用于更新缓存数据
         if (stateName === 'data') {

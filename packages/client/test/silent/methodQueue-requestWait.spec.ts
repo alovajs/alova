@@ -4,7 +4,7 @@ import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import createEventManager from '@alova/shared/createEventManager';
-import { promiseWithResolvers } from '@alova/shared/function';
+import { usePromise } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
@@ -24,7 +24,7 @@ describe('silent method request in queue with silent behavior', () => {
 
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const delayRequestTs = [] as number[];
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -86,7 +86,7 @@ describe('silent method request in queue with silent behavior', () => {
     const queueName = 'ttt1';
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const delayRequestTs = [] as number[];
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
@@ -239,7 +239,7 @@ describe('silent method request in queue with silent behavior', () => {
     const queueName = 'ttt2';
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const delayRequestTs = [] as number[];
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse({
       id: ''
     });
