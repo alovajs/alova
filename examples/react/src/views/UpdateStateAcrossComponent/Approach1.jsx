@@ -18,19 +18,21 @@ function Approach1() {
 
   return (
     <div>
-      <FileViewer
-        filePath="UpdateStateAcrossComponent/Approach1"
-        className="mb-4">
-        <h3 className="title">update state by `updateState`</h3>
-      </FileViewer>
       <nord-card>
+        <div slot="header">
+          <FileViewer filePath="UpdateStateAcrossComponent/Approach1">
+            <h3 className="title">update state by `updateState`</h3>
+          </FileViewer>
+        </div>
         <div className="grid gap-y-2 text-lg">
           <div>id: {data.id}</div>
           <div>name: {data.name}</div>
           <div>class: {data.cls}</div>
         </div>
+        <div slot="footer">
+          <EditCard></EditCard>
+        </div>
       </nord-card>
-      <EditCard></EditCard>
     </div>
   );
 }
@@ -41,8 +43,9 @@ function EditCard() {
   const [cls, setCls] = useState('');
   const handleUpdateState = () => {
     // update state
-    updateState(queryStudentDetail(1), () => {
+    updateState(queryStudentDetail(1), oldData => {
       return {
+        ...oldData,
         name,
         cls
       };
@@ -50,27 +53,24 @@ function EditCard() {
   };
 
   return (
-    <nord-card class="mt-4">
-      <h1 slot="header">Update The Above Info</h1>
-      <div className="grid grid-rows-3 gap-y-4">
-        <nord-input
-          label="name"
-          value={name}
-          onInput={({ target }) => setName(target.value)}
-          expand></nord-input>
-        <nord-input
-          label="class"
-          value={cls}
-          onInput={({ target }) => setCls(target.value)}
-          expand></nord-input>
+    <div className="border-t-[1px] pt-4 border-slate-200 grid grid-rows-3 gap-y-4">
+      <nord-input
+        label="name"
+        value={name}
+        onInput={({ target }) => setName(target.value)}
+        expand></nord-input>
+      <nord-input
+        label="class"
+        value={cls}
+        onInput={({ target }) => setCls(target.value)}
+        expand></nord-input>
 
-        <nord-button
-          variant="primary"
-          expand
-          onClick={handleUpdateState}>
-          Submit
-        </nord-button>
-      </div>
-    </nord-card>
+      <nord-button
+        variant="primary"
+        expand
+        onClick={handleUpdateState}>
+        Submit to update the above info
+      </nord-button>
+    </div>
   );
 }

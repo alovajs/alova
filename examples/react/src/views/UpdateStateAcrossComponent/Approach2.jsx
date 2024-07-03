@@ -16,21 +16,21 @@ function Approach2() {
     return <span className="text-red-500">{error.message}</span>;
   }
   return (
-    <div>
-      <FileViewer
-        filePath="UpdateStateAcrossComponent/Approach2"
-        className="mb-4">
-        <h3 className="title">update state by `useFetcher`</h3>
-      </FileViewer>
-      <nord-card>
-        <div className="grid gap-y-2 text-lg">
-          <div>id: {data.id}</div>
-          <div>name: {data.name}</div>
-          <div>class: {data.cls}</div>
-        </div>
-      </nord-card>
-      <EditCard id={data.id}></EditCard>
-    </div>
+    <nord-card>
+      <div slot="header">
+        <FileViewer filePath="UpdateStateAcrossComponent/Approach2">
+          <h3 className="title">update state by `useFetcher`</h3>
+        </FileViewer>
+      </div>
+      <div className="grid gap-y-2 text-lg">
+        <div>id: {data.id}</div>
+        <div>name: {data.name}</div>
+        <div>class: {data.cls}</div>
+      </div>
+      <div slot="footer">
+        <EditCard id={data.id}></EditCard>
+      </div>
+    </nord-card>
   );
 }
 export default Approach2;
@@ -48,29 +48,26 @@ function EditCard({ id }) {
   };
 
   return (
-    <nord-card class="mt-4">
-      <h1 slot="header">Update The Above Info</h1>
-      <div className="grid grid-rows-3 gap-y-4">
-        <nord-input
-          label="name"
-          value={name}
-          onInput={({ target }) => setName(target.value)}
-          expand></nord-input>
-        <nord-input
-          label="class"
-          value={cls}
-          onInput={({ target }) => setCls(target.value)}
-          expand></nord-input>
+    <div className="border-t-[1px] pt-4 border-slate-200 grid grid-rows-3 gap-y-4">
+      <nord-input
+        label="name"
+        value={name}
+        onInput={({ target }) => setName(target.value)}
+        expand></nord-input>
+      <nord-input
+        label="class"
+        value={cls}
+        onInput={({ target }) => setCls(target.value)}
+        expand></nord-input>
 
-        <nord-button
-          variant="primary"
-          expand
-          disabled={submiting || fetching || undefined}
-          onClick={handleRefetch}>
-          {submiting ? 'Submiting...' : fetching ? 'fetching...' : 'Submit'}
-        </nord-button>
-      </div>
-    </nord-card>
+      <nord-button
+        variant="primary"
+        expand
+        disabled={submiting || fetching || undefined}
+        onClick={handleRefetch}>
+        {submiting ? 'Submiting...' : fetching ? 'Fetching...' : 'Submit to update the above info'}
+      </nord-button>
+    </div>
   );
 }
 EditCard.propTypes = {

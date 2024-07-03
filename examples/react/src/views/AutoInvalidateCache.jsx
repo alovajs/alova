@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { alova } from '../api';
 import { editStudent, queryStudentDetail, queryStudents } from '../api/methods';
 import Table from '../components/Table';
-import { showToast, useEvent } from '../helper';
+import { useEvent } from '../helper';
 
 function View() {
   const [showDetail, setShowDetail] = useState(false);
   const [viewingId, setViewingId] = useState(0);
+  const [cacheInvalidatingRecords, setCacheInvalidatingRecords] = useState([]);
   const {
     loading,
     data: students,
@@ -33,7 +34,10 @@ function View() {
   useEffect(() => {
     const offHandler = alova.l1Cache.emitter.on('success', event => {
       if (event.type === 'remove') {
-        showToast(`The cache of key \`${event.key}\` has been removed.`, { autoDismiss: 5000 });
+        setCacheInvalidatingRecords(prev => [
+          ...prev,
+          `[${prev.length + 1}]. The cache of key \`${event.key}\` has been removed.`
+        ]);
       }
     });
     return offHandler;
@@ -47,11 +51,15 @@ function View() {
   };
 
   return (
-    <div>
+    <div className="responsive">
       <Table
         title="Please select one item and modify it."
         loading={loading}
         columns={[
+          {
+            title: 'ID',
+            dataIndex: 'id'
+          },
           {
             title: 'Name',
             dataIndex: 'name'
@@ -82,12 +90,25 @@ function View() {
           />
         ) : null}
       </nord-modal>
+
+      <nord-card>
+        <h3
+          slot="header"
+          className="title">
+          Cache invalidating Records
+        </h3>
+        <div className="flex flex-col leading-6">
+          {cacheInvalidatingRecords.map(msg => (
+            <span key={msg}>{msg}</span>
+          ))}
+        </div>
+      </nord-card>
     </div>
   );
 }
 export default View;
 
-const StudentInfoModal = ({ id, onClose }) => {
+function StudentInfoModal({ id, onClose }) {
   const [fromCache, setFromCache] = useState(false);
   const {
     loading,
@@ -164,7 +185,7 @@ const StudentInfoModal = ({ id, onClose }) => {
       </nord-button-group>
     </>
   );
-};
+}
 
 StudentInfoModal.propTypes = {
   id: PropTypes.number.isRequired,
