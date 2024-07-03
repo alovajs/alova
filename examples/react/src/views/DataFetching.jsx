@@ -1,4 +1,4 @@
-import { useRequest } from 'alova/client';
+import { useFetcher, useRequest } from 'alova/client';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { queryStudentDetail, queryStudents } from '../api/methods';
@@ -16,6 +16,21 @@ function View() {
     immediate: true
   });
 
+  const timers = {};
+  const { fetch, loading: fetching } = useFetcher();
+  // Prefetch detail data when staying for more than 200 milliseconds
+  const handleFetchDetail = id => {
+    timers[id] = setTimeout(() => {
+      fetch(queryStudentDetail(id));
+    }, 200);
+  };
+  const handleRemoveFetch = id => {
+    if (timers[id]) {
+      clearTimeout(timers[id]);
+      delete timers[id];
+    }
+  };
+
   const handleDetailShow = id => {
     setViewingId(id);
     setShowDetail(true);
@@ -27,9 +42,14 @@ function View() {
   });
 
   return (
-    <div>
+    <div className="relative">
+      {fetching && (
+        <nord-spinner
+          size="xl"
+          class="flex absolute top-4 right-4"></nord-spinner>
+      )}
       <Table
-        title="Please click the same item twice."
+        title="Mouse move to items below, it will prefetch detail data."
         loading={loading}
         columns={[
           {
@@ -48,7 +68,9 @@ function View() {
           },
           onClick: () => {
             handleDetailShow(row.id);
-          }
+          },
+          onMouseEnter: () => handleFetchDetail(row.id),
+          onMouseLeave: () => handleRemoveFetch(row.id)
         })}
       />
       <nord-modal

@@ -3,7 +3,7 @@ import { equals } from 'alova/client';
 import { alova, alovaIndexedDB } from '.';
 import { createIndexedDBAdapter } from './IndexedDBAdapter';
 
-export const getData = () => alova.Get('/get-list');
+export const getData = params => alova.Get('/get-list', { params });
 
 export const addFruit = fruit => alova.Post('/add-fruit', { item: fruit });
 
@@ -124,3 +124,20 @@ export const editNote = (content, id) =>
     }
   );
 export const removeNote = id => alova.Delete('/note', { id });
+
+// other strategies
+export const getConfiguration = () => alova.Get('/configuration');
+export const submitForm = data => alova.Post('/form', data);
+export const getCityArea = params =>
+  alova.Get('/cityArea', {
+    params
+  });
+
+export const getLatestTime = () =>
+  alova.Get('/latestTime', {
+    cacheFor: null
+  });
+
+export const sendCaptcha = phoneNumber => alova.Post('/captcha', { phoneNumber });
+
+export const getRetryData = params => alova.Get('/retryData', { params, cacheFor: null });

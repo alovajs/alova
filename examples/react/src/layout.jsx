@@ -22,9 +22,8 @@ function Layout() {
   provideToast.instance = toastGroupRef;
 
   useEffect(() => {
-    // popstate
-    window.addEventListener('popstate', event => {
-      console.log(event);
+    // change path in popstate
+    window.addEventListener('popstate', () => {
       const path = new URLSearchParams(location.search).get('path');
       setActiveRoute(path || defaultPath);
     });

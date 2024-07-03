@@ -36,7 +36,7 @@ function Approach1() {
     <nord-card>
       <div slot="header">
         <FileViewer filePath="OldDataPlaceholder/Approach1">
-          <h3 className="text-xl">Use `initialData` function</h3>
+          <h3 className="title">Use `initialData` function</h3>
         </FileViewer>
       </div>
       <div className="grid gap-2 grid-cols-[fit-content(100px)_fit-content(100px)] mb-4">

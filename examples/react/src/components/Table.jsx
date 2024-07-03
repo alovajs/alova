@@ -35,12 +35,11 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
           <tbody>
             {data.length > 0 ? (
               data.map((row, index) => {
-                const { onClick, style } = rowProps ? rowProps(row, index) : {};
+                const props = rowProps ? rowProps(row, index) : {};
                 return (
                   <tr
                     key={index}
-                    style={style}
-                    onClick={onClick}>
+                    {...props}>
                     {columns.map(({ dataIndex, render }) => (
                       <td key={dataIndex}>
                         {typeof render === 'function' ? render(row[dataIndex], row) : row[dataIndex]}

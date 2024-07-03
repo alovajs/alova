@@ -41,7 +41,7 @@ function Approach2() {
     <nord-card>
       <div slot="header">
         <FileViewer filePath="OldDataPlaceholder/Approach2">
-          <h3 className="text-xl">Use `middleware`</h3>
+          <h3 className="title">Use `middleware`</h3>
         </FileViewer>
       </div>
       <div className="grid gap-2 grid-cols-[fit-content(100px)_fit-content(100px)] mb-4">

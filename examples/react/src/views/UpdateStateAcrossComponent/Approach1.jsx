@@ -21,7 +21,7 @@ function Approach1() {
       <FileViewer
         filePath="UpdateStateAcrossComponent/Approach1"
         className="mb-4">
-        <h3 className="text-2xl">update state by `updateState`</h3>
+        <h3 className="title">update state by `updateState`</h3>
       </FileViewer>
       <nord-card>
         <div className="grid gap-y-2 text-lg">

@@ -67,3 +67,7 @@ button:focus-visible {
   @apply gap-4;
   @apply items-start;
 }
+.title {
+  @apply text-lg;
+  @apply font-bold;
+}

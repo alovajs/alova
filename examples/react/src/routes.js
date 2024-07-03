@@ -105,40 +105,35 @@ export default [
     items: [
       {
         title: 'Data Fetching',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/DataFetching'))
       },
       {
         title: 'Form Hook',
-        component: React.lazy(() => import('./views/InitPage'))
+        source: 'FormHook/index',
+        component: React.lazy(() => import('./views/FormHook/index'))
       },
       {
         title: 'Auto Request',
-        component: React.lazy(() => import('./views/InitPage'))
+        source: 'AutoRequest/index',
+        component: React.lazy(() => import('./views/AutoRequest/index'))
       },
       {
         title: 'Send Captcha',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/SendCaptcha'))
       },
       {
         title: 'Retriable Request',
-        component: React.lazy(() => import('./views/InitPage'))
+        source: 'RetriableRequest/Implementation',
+        component: React.lazy(() => import('./views/RetriableRequest/index'))
       },
       {
         title: 'Action Delegation',
-        component: React.lazy(() => import('./views/InitPage'))
+        source: 'ActionDelegation/index',
+        component: React.lazy(() => import('./views/ActionDelegation/index'))
       },
       {
         title: 'Serial Request',
-        component: React.lazy(() => import('./views/InitPage'))
-      }
-    ]
-  },
-  {
-    category: 'Middleware',
-    items: [
-      {
-        title: 'Usage',
-        component: React.lazy(() => import('./views/InitPage'))
+        component: React.lazy(() => import('./views/SerialRequest'))
       }
     ]
   }
