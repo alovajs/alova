@@ -59,7 +59,6 @@ function View() {
       render: (_, row) => (
         <div className="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
           <nord-button
-            variant="primary"
             size="s"
             onClick={() => editItem(row.id)}>
             Edit

@@ -44,97 +44,97 @@ export default [
         component: () => import('./views/UpdateStateAcrossComponent')
       }
     ]
+  },
+  {
+    category: 'Cache',
+    items: [
+      {
+        title: 'Memory Cache',
+        description: 'Cache response and re-use it in next request',
+        doc: 'cache/mode#memory-mode-default',
+        component: () => import('./views/MemoryCache')
+      },
+      {
+        title: 'Restore Cache',
+        description: 'You can persist response to prevent extra requst in some scenes',
+        doc: 'cache/mode#restore-mode',
+        component: () => import('./views/RestoreCache')
+      },
+      {
+        title: 'Auto Invalidate Cache',
+        description:
+          'You can invalidate caches automatically by binding the source requests. In this case, the form submiting request will invalidate the item detailed cache',
+        doc: 'cache/auto-invalidate',
+        component: () => import('./views/AutoInvalidateCache')
+      },
+      {
+        title: 'Cache With IndexedDB',
+        description:
+          'The caches are stored in memory default, but you can also custom the storing place such as `IndexedDB`, or custom manage the caches',
+        doc: ['advanced/custom/storage-adapter', 'cache/controlled-cache'],
+        source: ['CacheWithIndexedDB/Approach1', 'CacheWithIndexedDB/Approach2'],
+        component: () => import('./views/CacheWithIndexedDB')
+      }
+    ]
+  },
+  {
+    category: 'List',
+    items: [
+      {
+        title: 'Paginated List',
+        description:
+          'The best pagination module which can improve fluency by 300%, and reduce coding difficulty by 50%, it provides fully list operating functions',
+        source: 'PaginatedList/index',
+        doc: 'client/strategy/use-pagination',
+        component: () => import('./views/PaginatedList')
+      },
+      {
+        title: 'Load More List',
+        description:
+          'The best pagination module which can improve fluency by 300%, and reduce coding difficulty by 50%, it provides fully list operating functions',
+        source: 'LoadMoreList/index',
+        doc: 'client/strategy/use-pagination',
+        component: () => import('./views/LoadMoreList')
+      }
+    ]
+  },
+  {
+    category: 'Optimistic Update',
+    items: [
+      {
+        title: 'Settings',
+        description: `Use the silent submission strategy, submit and respond immediately, greatly reducing the impact of network fluctuations, so that your application is still very smooth even when the network is unstable or even disconnected.
+
+  Operation guide:
+  1. Operate the setting item, it will generate feedback immediately without waiting for the server to respond;
+  2. Switch the request mode and network status to experience the difference between them;`,
+        doc: 'client/strategy/sensorless-data-interaction',
+        component: () => import('./views/Settings')
+      },
+      {
+        title: 'Simple List',
+        description: `A simple list implemented using the silent submission strategy, which responds immediately after submission, greatly reduces the impact of network fluctuations, allowing your application to remain very smooth even when the network is unstable or even disconnected.
+
+      Operation guide:
+      1. Add, edit, and delete list items, it will response immediately without waiting for the server to respond;
+      2. Switch the request mode and network status to experience the difference between them;`,
+        source: 'SimpleList/index',
+        doc: 'client/strategy/sensorless-data-interaction',
+        component: () => import('./views/SimpleList')
+      }
+      //       {
+      //         title: 'Notes',
+      //         description: `A note application implemented using the silent submission strategy, which responds immediately after submission, greatly reduces the impact of network fluctuations, allowing your application to remain very smooth even when the network is unstable or even disconnected.
+
+      // Operation guide:
+      // 1. Add, edit, and delete notes, it will response immediately without waiting for the server to respond;
+      // 2. Switch the request mode and network status to experience the difference between them;`,
+      //         source: 'Notes/index',
+      //         doc: 'client/strategy/sensorless-data-interaction',
+      //         component: () => import('./views/Notes')
+      //       }
+    ]
   }
-  //   {
-  //     category: 'Cache',
-  //     items: [
-  //       {
-  //         title: 'Memory Cache',
-  //         description: 'Cache response and re-use it in next request',
-  //         doc: 'cache/mode#memory-mode-default',
-  //         component: () => import('./views/MemoryCache')
-  //       },
-  //       {
-  //         title: 'Restore Cache',
-  //         description: 'You can persist response to prevent extra requst in some scenes',
-  //         doc: 'cache/mode#restore-mode',
-  //         component: () => import('./views/RestoreCache')
-  //       },
-  //       {
-  //         title: 'Auto Invalidate Cache',
-  //         description:
-  //           'You can invalidate caches automatically by binding the source requests. In this case, the form submiting request will invalidate the item detailed cache',
-  //         doc: 'cache/auto-invalidate',
-  //         component: () => import('./views/AutoInvalidateCache')
-  //       },
-  //       {
-  //         title: 'Cache With IndexedDB',
-  //         description:
-  //           'The caches are stored in memory default, but you can also custom the storing place such as `IndexedDB`, or custom manage the caches',
-  //         doc: ['advanced/custom/storage-adapter', 'cache/controlled-cache'],
-  //         source: ['CacheWithIndexedDB/Approach1', 'CacheWithIndexedDB/Approach2'],
-  //         component: () => import('./views/CacheWithIndexedDB')
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     category: 'List',
-  //     items: [
-  //       {
-  //         title: 'Paginated List',
-  //         description:
-  //           'The best pagination module which can improve fluency by 300%, and reduce coding difficulty by 50%, it provides fully list operating functions',
-  //         source: 'PaginatedList/index',
-  //         doc: 'client/strategy/use-pagination',
-  //         component: () => import('./views/PaginatedList')
-  //       },
-  //       {
-  //         title: 'Load More List',
-  //         description:
-  //           'The best pagination module which can improve fluency by 300%, and reduce coding difficulty by 50%, it provides fully list operating functions',
-  //         source: 'LoadMoreList/index',
-  //         doc: 'client/strategy/use-pagination',
-  //         component: () => import('./views/LoadMoreList')
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     category: 'Optimistic Update',
-  //     items: [
-  //       {
-  //         title: 'Settings',
-  //         description: `Use the silent submission strategy, submit and respond immediately, greatly reducing the impact of network fluctuations, so that your application is still very smooth even when the network is unstable or even disconnected.
-
-  // Operation guide:
-  // 1. Operate the setting item, it will generate feedback immediately without waiting for the server to respond;
-  // 2. Switch the request mode and network status to experience the difference between them;`,
-  //         doc: 'client/strategy/sensorless-data-interaction',
-  //         component: () => import('./views/Settings')
-  //       },
-  //       {
-  //         title: 'Simple List',
-  //         description: `A simple list implemented using the silent submission strategy, which responds immediately after submission, greatly reduces the impact of network fluctuations, allowing your application to remain very smooth even when the network is unstable or even disconnected.
-
-  // Operation guide:
-  // 1. Add, edit, and delete list items, it will response immediately without waiting for the server to respond;
-  // 2. Switch the request mode and network status to experience the difference between them;`,
-  //         source: 'SimpleList/index',
-  //         doc: 'client/strategy/sensorless-data-interaction',
-  //         component: () => import('./views/SimpleList')
-  //       },
-  //       {
-  //         title: 'Notes',
-  //         description: `A note application implemented using the silent submission strategy, which responds immediately after submission, greatly reduces the impact of network fluctuations, allowing your application to remain very smooth even when the network is unstable or even disconnected.
-
-  // Operation guide:
-  // 1. Add, edit, and delete notes, it will response immediately without waiting for the server to respond;
-  // 2. Switch the request mode and network status to experience the difference between them;`,
-  //         source: 'Notes/index',
-  //         doc: 'client/strategy/sensorless-data-interaction',
-  //         component: () => import('./views/Notes')
-  //       }
-  //     ]
-  //   },
   //   {
   //     category: 'Token Authentication',
   //     items: [

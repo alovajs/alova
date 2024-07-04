@@ -33,9 +33,12 @@
               <td
                 v-for="{ dataIndex, render } in columns"
                 :key="dataIndex">
-                <template v-if="typeof render === 'function'">
-                  {{ render(row[dataIndex], row) }}
-                </template>
+                <component
+                  v-if="typeof render === 'function'"
+                  :is="render(row[dataIndex], row)"
+                  :row="row"
+                  :index="index">
+                </component>
                 <template v-else>
                   {{ row[dataIndex] }}
                 </template>

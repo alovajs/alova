@@ -49,20 +49,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
 import { onSilentSubmitError, onSilentSubmitFail, silentQueueMap } from 'alova/client';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { showToast } from '../helper';
 
 const props = defineProps({
   queueName: {
     type: String,
     required: true
-  },
-  onModeChange: {
-    type: Function,
-    required: true
   }
 });
+const emit = defineEmits(['modeChange']);
 
 const networkMode = ref(0);
 const silentRequestError = ref('');
@@ -90,14 +87,12 @@ const useWaitingSilentQueue = queueName => {
 const handleModeChange = event => {
   const value = Number(event.target.value);
   networkMode.value = value;
-  props.onModeChange(value);
+  emit('modeChange', value);
 };
 
 onMounted(() => {
   useWaitingSilentQueue(props.queueName);
-
   const offSubmitError = onSilentSubmitError(event => {
-    console.error(event.error);
     showToast(
       `Request Error: ${event.error}` + (event.retryDelay ? `, ${event.retryDelay / 1000}s after will retry` : ''),
       {
@@ -113,8 +108,7 @@ onMounted(() => {
     });
   });
 
-  props.onModeChange(networkMode.value);
-
+  emit('modeChange', networkMode.value);
   onUnmounted(() => {
     offSubmitError();
     offSubmitFail();

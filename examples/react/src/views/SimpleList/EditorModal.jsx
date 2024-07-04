@@ -60,12 +60,12 @@ function EditorModal({ id, networkMode, onClose }) {
     });
   });
 
-  const submitTodo = () => {
+  const submitTodo = async () => {
     if (!detail.content || !detail.time) {
       showToast('Content and time cannot be empty');
       return;
     }
-    sendTodoEdit();
+    await sendTodoEdit();
     onClose();
   };
 

@@ -1,28 +1,22 @@
-import { useEffect, useState } from 'react';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const useScroll = (offset = 0) => {
-  const [isBottom, setIsBottom] = useState(false);
-  useEffect(() => {
-    const handleScroll = e => {
-      const target = e.target === document ? e.target.documentElement : e.target;
-      const scrollTop = target.scrollTop;
-      const windowHeight = target.clientHeight;
-      const scrollHeight = target.scrollHeight;
-      if (scrollTop + windowHeight + offset >= scrollHeight) {
-        setIsBottom(true);
-      } else {
-        setIsBottom(false);
-      }
-    };
-
+  const isBottom = ref(false);
+  const handleScroll = e => {
+    const target = e.target === document ? e.target.documentElement : e.target;
+    const scrollTop = target.scrollTop;
+    const windowHeight = target.clientHeight;
+    const scrollHeight = target.scrollHeight;
+    isBottom.value = scrollTop + windowHeight + offset >= scrollHeight;
+  };
+  onMounted(() => {
     window.addEventListener('scroll', handleScroll);
+  });
 
-    // Call the handleScroll function to set the initial state correctly
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Call the handleScroll function to set the initial state correctly
+  onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+  });
   return { isBottom };
 };
 
