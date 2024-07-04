@@ -3,9 +3,9 @@ import '@nordhealth/css';
 import { bootSilentFactory } from 'alova/client';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import Layout from './Layout';
 import { alova } from './api';
 import './index.css';
-import Layout from './layout';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

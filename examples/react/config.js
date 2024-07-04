@@ -1,3 +1,5 @@
+import reactHook from 'alova/react';
+
 export default {
   // theme primary color
   theme: '#087ea4',
@@ -8,8 +10,10 @@ export default {
   // source file extension
   fileExt: 'jsx',
 
+  alovaStatesHook: reactHook,
+
   // source branch in GitHub
-  sourceBranch: 'chore/demo',
+  sourceBranch: 'next',
 
   docUrl: 'https://alova.js.org/next/'
 };

@@ -9,6 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@alova/mock": "beta",
+    "@nordhealth/components": "^3.14.1",
+    "@nordhealth/css": "^3.2.1",
+    "alova": "beta",
+    "trix": "^2.1.1",
     "vue": "^3.4.29"
   },
   "devDependencies": {

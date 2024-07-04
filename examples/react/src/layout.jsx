@@ -1,5 +1,5 @@
 import { invalidateCache } from 'alova';
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import config from '../config';
 import { networkStatus } from './api';
 import FileViewer from './components/FileViewer';
@@ -19,7 +19,10 @@ function Layout() {
       ({ title }) => formatActiveRoute(targetCategory.category, title) === activeRoute
     );
     window.__page = activeView;
-    return activeView;
+    return {
+      ...activeView,
+      component: lazy(activeView.component)
+    };
   }, [activeRoute]);
 
   const toastGroupRef = useRef();

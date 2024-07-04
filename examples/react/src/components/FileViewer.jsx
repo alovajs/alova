@@ -15,7 +15,7 @@ function FileViewer({ children, filePath, docPath, showPath = false, className }
   return (
     <div className={clsx('flex flex-row items-center justify-between', className)}>
       {children}
-      <div className="flex items-center">
+      <div className="flex items-center ml-2">
         <div
           onClick={handleToGithub}
           className={clsx(

@@ -249,6 +249,21 @@ importers:
 
   examples/vue:
     dependencies:
+      '@alova/mock':
+        specifier: beta
+        version: 2.0.0-beta.7(alova@3.0.0-beta.9)
+      '@nordhealth/components':
+        specifier: ^3.14.1
+        version: 3.14.1
+      '@nordhealth/css':
+        specifier: ^3.2.1
+        version: 3.2.1
+      alova:
+        specifier: beta
+        version: 3.0.0-beta.9
+      trix:
+        specifier: ^2.1.1
+        version: 2.1.1
       vue:
         specifier: ^3.4.29
         version: 3.4.30(typescript@5.4.5)
@@ -3418,6 +3433,7 @@ packages:
   axobject-query@3.2.3:
     resolution: {integrity: sha512-8IRNqqgCWlKXJXAW2U24xAUBiHrtt493LaSvFiULNehvZ0JULE38pjCS7aJu1ieQeyUnT0et9aPszh4WI9l4ng==}
     engines: {node: '>= 0.4'}
+    deprecated: The build step was forgotten for this version; please upgrade to ^3.2.4
 
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
