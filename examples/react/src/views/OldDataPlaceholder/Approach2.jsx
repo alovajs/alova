@@ -40,7 +40,9 @@ function Approach2() {
   return (
     <nord-card>
       <div slot="header">
-        <FileViewer filePath="OldDataPlaceholder/Approach2">
+        <FileViewer
+          filePath={window.__page.source[1]}
+          docPath={window.__page.doc[1]}>
           <h3 className="title">Use `middleware`</h3>
         </FileViewer>
       </div>

@@ -1,46 +1,27 @@
 import { useRequest } from 'alova/client';
-import PropTypes from 'prop-types';
-import { imagePlain, imageWithControlledCache } from '../api/methods';
+import { imageWithControlledCache } from '../../api/methods';
+import FileViewer from '../../components/FileViewer';
 
-function View() {
-  return (
-    <div className="responsive">
-      <Approach id="1"></Approach>
-      <Approach id="2"></Approach>
-    </div>
-  );
-}
-export default View;
-
-const ApproachMap = {
-  1: {
-    title: 'Custom `l2Cache` adapter',
-    methodHandler: imagePlain
-  },
-  2: {
-    title: 'Controlled cache',
-    methodHandler: imageWithControlledCache
-  }
-};
-
-function Approach({ id }) {
+function Approach2() {
   const imageList = ['1.jpg', '2.jpg'];
   const {
     data,
     loading,
     error,
     send: showImage
-  } = useRequest(fileName => ApproachMap[id].methodHandler(fileName), {
+  } = useRequest(fileName => imageWithControlledCache(fileName), {
     immediate: false
   });
 
   return (
     <nord-card>
-      <h3
-        slot="header"
-        className="text-xl">
-        {ApproachMap[id].title}
-      </h3>
+      <div slot="header">
+        <FileViewer
+          filePath={window.__page.source[1]}
+          docPath={window.__page.doc[1]}>
+          <h3 className="title">Controlled cache</h3>
+        </FileViewer>
+      </div>
       <div className="grid gap-y-2">
         <p>Please select an image</p>
         <nord-button-group>
@@ -67,6 +48,4 @@ function Approach({ id }) {
     </nord-card>
   );
 }
-Approach.propTypes = {
-  id: PropTypes.string.isRequired
-};
+export default Approach2;

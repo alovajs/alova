@@ -20,7 +20,9 @@ function Interval() {
 
   return (
     <div className="grid gap-y-4">
-      <FileViewer filePath="AutoRequest/Interval">
+      <FileViewer
+        filePath={window.__page.source[0]}
+        docPath={window.__page.doc}>
         <nord-banner>It will request every 3 seconds</nord-banner>
       </FileViewer>
       <nord-button

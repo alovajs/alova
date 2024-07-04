@@ -31,7 +31,7 @@ function View() {
   return (
     <nord-card>
       <h3 slot="header">Festivals of This Year</h3>
-      <nord-banner type="info">
+      <nord-banner variant="warning">
         <div>
           <nord-button
             variant="plain"
@@ -39,7 +39,7 @@ function View() {
             onClick={reloadPage}>
             Reload page
           </nord-button>
-          <span>, you don't need to re-request festival data until next year.</span>
+          <span>, you don&apos;t need to re-request festival data until next year.</span>
         </div>
         <div>
           <nord-button
@@ -49,7 +49,7 @@ function View() {
             onClick={invalidateOldData}>
             Invalidate the persistent data
           </nord-button>
-          <span> and reload page, you can see 'Loading...' again.</span>
+          <span> and reload page, you can see &apos;Loading...&apos; again.</span>
         </div>
       </nord-banner>
       <div className="grid grid-cols-6 gap-2 mt-4">

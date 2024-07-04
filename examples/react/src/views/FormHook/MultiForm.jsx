@@ -40,7 +40,9 @@ export default function MultiFormCard() {
   return (
     <nord-card>
       <div slot="header">
-        <FileViewer filePath="FormHook/MultiForm">
+        <FileViewer
+          filePath={window.__page.source[2]}
+          docPath={window.__page.doc}>
           <h3 className="title">[Multiple steps form] Fill step by step, and submit all data in final step</h3>
         </FileViewer>
       </div>

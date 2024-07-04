@@ -20,7 +20,9 @@ function Approach1() {
     <div>
       <nord-card>
         <div slot="header">
-          <FileViewer filePath="UpdateStateAcrossComponent/Approach1">
+          <FileViewer
+            filePath={window.__page.source[0]}
+            docPath={window.__page.doc[0]}>
             <h3 className="title">update state by `updateState`</h3>
           </FileViewer>
         </div>

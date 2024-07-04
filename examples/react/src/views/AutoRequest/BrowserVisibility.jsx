@@ -19,7 +19,9 @@ function BrowserVisibility() {
 
   return (
     <div className="grid gap-y-4">
-      <FileViewer filePath="AutoRequest/BrowserVisibility">
+      <FileViewer
+        filePath={window.__page.source[2]}
+        docPath={window.__page.doc}>
         <nord-banner variant="warning">minimize your browser, and then revert it</nord-banner>
       </FileViewer>
       <nord-button

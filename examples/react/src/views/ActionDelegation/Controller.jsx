@@ -12,7 +12,8 @@ function Controller() {
       <div slot="header">
         <FileViewer
           showPath
-          filePath="ActionDelegation/Controller">
+          filePath={window.__page.source[1]}
+          docPath={window.__page.doc}>
           <h3 className="title">Controller Panel</h3>
         </FileViewer>
       </div>

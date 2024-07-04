@@ -130,9 +130,7 @@ function StudentInfoModal({ id, onClose }) {
 
   return (
     <>
-      <h3 slot="header">
-        Now close modal, and reopen this item, it will hit response cache, and wouldn&apos;t send request.
-      </h3>
+      <h3 slot="header">Edit Info</h3>
       <div>
         {loading ? (
           <nord-spinner />

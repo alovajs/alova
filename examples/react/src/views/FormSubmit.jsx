@@ -42,11 +42,11 @@ function View() {
       </div>
       {error ? <span className="text-red-500">{error.message}</span> : null}
 
-      <div className="mt-4 grid grid-cols-6 gap-2">
+      <div className="mt-4 grid grid-cols-[repeat(8,fit-content(100px))] gap-2">
         {fruitsList.map(item => (
           <nord-badge
             key={item}
-            variant="info">
+            variant="success">
             {item}
           </nord-badge>
         ))}

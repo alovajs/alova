@@ -4,7 +4,7 @@ import { getData, submitForm } from '../api/methods';
 
 function View() {
   const [msgs, setMsgs] = useState([]);
-  const { data, loading, error, send } = useSerialRequest(
+  const { loading, send } = useSerialRequest(
     [
       () => getData(),
       fruits => {

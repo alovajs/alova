@@ -109,8 +109,8 @@ function View() {
 
   return (
     <div>
-      <div>
-        <div className="grid grid-cols-[repeat(5,fit-content(100px))] gap-x-2 mb-8">
+      <div className="grid gap-y-4">
+        <div className="grid grid-cols-[repeat(5,fit-content(100px))] gap-x-2">
           <nord-input
             hide-label
             value={studentName}

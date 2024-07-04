@@ -37,7 +37,9 @@ export default function ConditionFilter() {
   return (
     <nord-card>
       <div slot="header">
-        <FileViewer filePath="FormHook/MultiForm">
+        <FileViewer
+          filePath={window.__page.source[3]}
+          docPath={window.__page.doc}>
           <h3 className="title">List condition search with storing</h3>
         </FileViewer>
       </div>

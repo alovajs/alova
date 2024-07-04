@@ -43,11 +43,15 @@ function View() {
 
   return (
     <div className="relative">
-      {fetching && (
-        <nord-spinner
-          size="xl"
-          class="flex absolute top-4 right-4"></nord-spinner>
-      )}
+      {fetching ? (
+        <div className="flex items-center absolute top-4 right-4 z-50">
+          <nord-spinner
+            size="l"
+            class="mr-4"></nord-spinner>
+          <span className="font-bold">Fetching...</span>
+        </div>
+      ) : null}
+
       <Table
         title="Mouse move to items below, it will prefetch detail data."
         loading={loading}

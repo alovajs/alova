@@ -35,7 +35,9 @@ function Approach1() {
   return (
     <nord-card>
       <div slot="header">
-        <FileViewer filePath="OldDataPlaceholder/Approach1">
+        <FileViewer
+          filePath={window.__page.source[0]}
+          docPath={window.__page.doc[0]}>
           <h3 className="title">Use `initialData` function</h3>
         </FileViewer>
       </div>

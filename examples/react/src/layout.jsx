@@ -1,5 +1,6 @@
 import { invalidateCache } from 'alova';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import config from '../config';
 import { networkStatus } from './api';
 import FileViewer from './components/FileViewer';
 import { provideToast } from './helper';
@@ -7,15 +8,18 @@ import routes from './routes';
 
 const formatActiveRoute = (category, title) => `${category.toLowerCase()}.${title.toLowerCase().replace(/\s/g, '_')}`;
 const defaultPath = formatActiveRoute(routes[0].category, routes[0].items[0].title);
-export const packageName = 'react';
 function Layout() {
   const path = new URLSearchParams(location.search).get('path') || defaultPath;
   const [activeRoute, setActiveRoute] = useState(path);
   const [showMenu, setShowMenu] = useState(false);
-  const ActiveView = useMemo(() => {
+  const activeView = useMemo(() => {
     const [activeCategory] = activeRoute.split('.');
     const targetCategory = routes.find(r => r.category.toLowerCase() === activeCategory);
-    return targetCategory?.items.find(({ title }) => formatActiveRoute(targetCategory.category, title) === activeRoute);
+    const activeView = targetCategory?.items.find(
+      ({ title }) => formatActiveRoute(targetCategory.category, title) === activeRoute
+    );
+    window.__page = activeView;
+    return activeView;
   }, [activeRoute]);
 
   const toastGroupRef = useRef();
@@ -29,8 +33,8 @@ function Layout() {
     });
   }, []);
 
-  const handleMenuClick = (category, title) => {
-    const routeFlag = formatActiveRoute(category, title);
+  const handleMenuClick = (route, item) => {
+    const routeFlag = formatActiveRoute(route.category, item.title);
     history.pushState({}, '', `?path=${routeFlag}`);
     setActiveRoute(routeFlag);
     setShowMenu(false);
@@ -52,19 +56,27 @@ function Layout() {
   }, [network]);
 
   return (
-    <div className="flex flex-col md:flex-row md:max-w-[1440px] md:mx-auto h-full">
+    <div
+      className="flex flex-col md:flex-row md:max-w-[1440px] md:mx-auto h-full"
+      style={{
+        '--n-color-accent': config.theme
+      }}>
       <div
         className={`fixed top-0 left-[max(0px, calc(50% - 45rem))] bg-white z-20 h-full transition-transform duration-300 flex flex-col w-80 border-r-[1px] border-gray-300 py-8 px-4 md:translate-x-0 overflow-y-auto ${showMenu ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex flex-row">
-          <strong>Alova Demo</strong>
+        <div className="flex flex-row items-center">
+          <img
+            className="h-8 mr-2"
+            src="https://alova.js.org/img/logo.svg"
+          />
+          <h1 className="text-xl font-bold">Alova demos</h1>
           <nord-badge
             class="ml-2"
             style={{
-              '--_n-badge-chip-color': '#087ea4',
-              '--_n-badge-border-color': '#087ea4',
+              '--_n-badge-chip-color': config.theme,
+              '--_n-badge-border-color': config.theme,
               '--_n-badge-background-color': '#fff'
             }}>
-            {packageName}
+            {config.pkgName}
           </nord-badge>
         </div>
         <div className="grid grid-cols-3 gap-x-2 mt-4">
@@ -117,9 +129,9 @@ function Layout() {
               <div className="flex flex-col border-l-[1px] border-gray-200">
                 {route.items.map(item => (
                   <a
-                    onClick={() => handleMenuClick(route.category, item.title)}
+                    onClick={() => handleMenuClick(route, item)}
                     key={item.title}
-                    className="pl-4 border-l-[1px] -ml-[1px] hover:border-blue-800 cursor-pointer my-2">
+                    className="pl-4 border-l-[1px] -ml-[1px] hover:border-primary cursor-pointer my-2">
                     {item.title}
                   </a>
                 ))}
@@ -144,7 +156,7 @@ function Layout() {
         </nord-button>
         <div className="flex flex-col mb-6 md:flex-row md:justify-between">
           <div className="flex flex-row items-center justify-between mb-2 md:justify-start">
-            <h2 className="font-bold text-2xl mr-4">{ActiveView.title}</h2>
+            <h2 className="font-bold text-2xl mr-4">{activeView.title}</h2>
             <nord-dropdown
               size="s"
               ref={dropdownRef}>
@@ -161,13 +173,23 @@ function Layout() {
             </nord-dropdown>
           </div>
 
-          <FileViewer
-            filePath={ActiveView.source || ActiveView.title.replace(/\s/g, '')}
-            showPath
-            packageName={packageName}></FileViewer>
+          {typeof activeView.source === 'string' || activeView.source === undefined ? (
+            <FileViewer
+              filePath={activeView.source || activeView.title.replace(/\s/g, '')}
+              docPath={activeView.doc}
+              showPath></FileViewer>
+          ) : null}
         </div>
+        {activeView.description && (
+          <nord-banner class="mb-4">
+            <div>
+              <h3 className="title">Demo description</h3>
+              <p className="whitespace-pre-line">{activeView.description}</p>
+            </div>
+          </nord-banner>
+        )}
         <Suspense>
-          <ActiveView.component />
+          <activeView.component />
         </Suspense>
       </div>
 

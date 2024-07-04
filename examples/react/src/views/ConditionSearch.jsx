@@ -21,12 +21,12 @@ function View() {
   );
 
   return (
-    <div className="p-4">
-      <div className="flex items-center mb-4">
+    <div className="grid gap-y-4">
+      <div className="flex items-center">
         <nord-input
           class="mr-4"
           value={studentName}
-          hideLabel
+          hide-label
           onInput={({ target }) => setStudentName(target.value)}
           placeholder="Input student name"
           clearable
@@ -34,6 +34,7 @@ function View() {
         <nord-select
           class="mr-4"
           value={clsName}
+          hide-label
           onInput={({ target }) => setClsName(target.value)}
           placeholder="Select class">
           <option value="class1">class 1</option>

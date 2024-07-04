@@ -42,7 +42,9 @@ export default function StoreFormCard() {
   return (
     <nord-card>
       <div slot="header">
-        <FileViewer filePath="FormHook/EditForm">
+        <FileViewer
+          filePath={window.__page.source[1]}
+          docPath={window.__page.doc}>
           {loading ? <nord-spinner class="mr-4" /> : null}
           <h3 className="title">Load editing data</h3>
         </FileViewer>

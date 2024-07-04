@@ -33,7 +33,8 @@ function Target() {
       <div slot="header">
         <FileViewer
           showPath
-          filePath="ActionDelegation/Target">
+          filePath={window.__page.source[0]}
+          docPath={window.__page.doc}>
           <h3 className="title">Data Panel</h3>
         </FileViewer>
       </div>

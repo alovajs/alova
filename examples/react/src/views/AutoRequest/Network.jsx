@@ -19,7 +19,9 @@ function Network() {
 
   return (
     <div className="grid gap-y-4">
-      <FileViewer filePath="AutoRequest/Network">
+      <FileViewer
+        filePath={window.__page.source[1]}
+        docPath={window.__page.doc}>
         <nord-banner variant="danger">Try to toggle your network</nord-banner>
       </FileViewer>
       <nord-button

@@ -19,7 +19,9 @@ function PageFocus() {
 
   return (
     <div className="grid gap-y-4">
-      <FileViewer filePath="AutoRequest/PageFocus">
+      <FileViewer
+        filePath={window.__page.source[3]}
+        docPath={window.__page.doc}>
         <nord-banner variant="success">Toggle your browser page tabs</nord-banner>
       </FileViewer>
       <nord-button

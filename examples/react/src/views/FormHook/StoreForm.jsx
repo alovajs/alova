@@ -37,7 +37,9 @@ export default function StoreFormCard() {
   return (
     <nord-card>
       <div slot="header">
-        <FileViewer filePath="FormHook/StoreForm">
+        <FileViewer
+          filePath={window.__page.source[0]}
+          docPath={window.__page.doc}>
           <h3 className="title">[Draft form] Data will be stored until submit them</h3>
         </FileViewer>
       </div>

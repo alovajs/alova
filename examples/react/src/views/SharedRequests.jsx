@@ -27,14 +27,14 @@ function View() {
   };
 
   return (
-    <div className="grid grid-rows-4 gap-2">
+    <div className="grid gap-y-2">
       <nord-button onClick={handleSend}>send two request</nord-button>
-      <span>
-        the second request will reuse the first request while the first one is requesting, so they will response at the
-        same time
-      </span>
-      <nord-banner>{loading1 ? 'request1 is loading...' : `response1: ${JSON.stringify(data1)}`}</nord-banner>
-      <nord-banner>{loading2 ? 'request2 is loading...' : `response2: ${JSON.stringify(data2)}`}</nord-banner>
+      <nord-banner variant={loading1 ? 'warning' : 'success'}>
+        {loading1 ? 'request1 is loading...' : `response1: ${JSON.stringify(data1)}`}
+      </nord-banner>
+      <nord-banner variant={loading1 ? 'warning' : 'success'}>
+        {loading2 ? 'request2 is loading...' : `response2: ${JSON.stringify(data2)}`}
+      </nord-banner>
     </div>
   );
 }
