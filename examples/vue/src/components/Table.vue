@@ -59,7 +59,7 @@
       role="list"
       class="p-4">
       <nord-button
-        v-if="pagination.page > 1"
+        :disabled="pagination.page <= 1 || undefined"
         role="listitem"
         @click="pagination.onChange(pagination.page - 1, pagination.pageSize)">
         <nord-icon
@@ -89,7 +89,7 @@
         …
       </p>
       <nord-button
-        v-if="pagination.page < pagination.pageCount"
+        :disabled="pagination.page >= pagination.pageCount || undefined"
         role="listitem"
         @click="pagination.onChange(pagination.page + 1, pagination.pageSize)">
         <nord-icon

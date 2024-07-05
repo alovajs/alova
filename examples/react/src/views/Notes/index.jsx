@@ -167,6 +167,7 @@ function View() {
           <nord-button
             loading={adding || undefined}
             variant="primary"
+            // here mustn't pass event object, otherwise will throw error of maximum call stack
             onClick={() => createNote()}>
             <nord-icon name="interface-add"></nord-icon>
           </nord-button>

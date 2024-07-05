@@ -121,98 +121,98 @@ export default [
         source: 'SimpleList/index',
         doc: 'client/strategy/sensorless-data-interaction',
         component: () => import('./views/SimpleList')
-      }
-      //       {
-      //         title: 'Notes',
-      //         description: `A note application implemented using the silent submission strategy, which responds immediately after submission, greatly reduces the impact of network fluctuations, allowing your application to remain very smooth even when the network is unstable or even disconnected.
+      },
+      {
+        title: 'Notes',
+        description: `A note application implemented using the silent submission strategy, which responds immediately after submission, greatly reduces the impact of network fluctuations, allowing your application to remain very smooth even when the network is unstable or even disconnected.
 
-      // Operation guide:
-      // 1. Add, edit, and delete notes, it will response immediately without waiting for the server to respond;
-      // 2. Switch the request mode and network status to experience the difference between them;`,
-      //         source: 'Notes/index',
-      //         doc: 'client/strategy/sensorless-data-interaction',
-      //         component: () => import('./views/Notes')
-      //       }
+      Operation guide:
+      1. Add, edit, and delete notes, it will response immediately without waiting for the server to respond;
+      2. Switch the request mode and network status to experience the difference between them;`,
+        source: 'Notes/index',
+        doc: 'client/strategy/sensorless-data-interaction',
+        component: () => import('./views/Notes')
+      }
+    ]
+  },
+  {
+    category: 'Token Authentication',
+    items: [
+      {
+        title: 'Server Based',
+        description:
+          'Token authentication interceptor provides unified management of token-based login, logout, token assignment, and token refresh, and supports silent token refresh.',
+        doc: 'client/strategy/token-authentication',
+        component: () => import('./views/ServerBased')
+      },
+      {
+        title: 'Client Based',
+        description:
+          'Token authentication interceptor provides unified management of token-based login, logout, token assignment, and token refresh, and supports silent token refresh.',
+        doc: 'client/strategy/token-authentication',
+        component: () => import('./views/ClientBased')
+      }
+    ]
+  },
+  {
+    category: 'Other Strategies',
+    items: [
+      {
+        title: 'Data Fetching',
+        description:
+          'This is the demo that fetching the data of corresponding item when hovering items for 300ms. You can see the data immediately when you open this item',
+        doc: 'client/strategy/use-fetcher',
+        component: () => import('./views/DataFetching')
+      },
+      {
+        title: 'Form Hook',
+        description:
+          'A hook designed for form submission. Through it, you can easily implement form drafts and multi-page (multi-step) forms. In addition, it also provides common functions such as form reset.',
+        source: ['FormHook/StoreForm', 'FormHook/EditForm', 'FormHook/MultiForm', 'FormHook/ConditionFilter'],
+        doc: 'client/strategy/use-form',
+        component: () => import('./views/FormHook')
+      },
+      {
+        title: 'Auto Request',
+        description:
+          'Automatically re-request data through browser events or polling, your users always see the newest data.',
+        source: [
+          'AutoRequest/Interval',
+          'AutoRequest/Network',
+          'AutoRequest/BrowserVisibility',
+          'AutoRequest/PageFocus'
+        ],
+        doc: 'client/strategy/use-auto-request',
+        component: () => import('./views/AutoRequest')
+      },
+      {
+        title: 'Send Captcha',
+        description: 'The Captcha sending strategy provides the automatic countdown and limit the sending frequency',
+        doc: 'client/strategy/use-captcha',
+        component: () => import('./views/SendCaptcha')
+      },
+      {
+        title: 'Retriable Request',
+        description:
+          'Automatically retry failed request, you can use it for important requests. Custom your retry parameters.',
+        source: 'RetriableRequest/Implementation',
+        doc: 'client/strategy/use-retriable-request',
+        component: () => import('./views/RetriableRequest')
+      },
+      {
+        title: 'Action Delegation',
+        description:
+          'action delegation let you cast off the limitation of component hierarchy, trigger request within the target component at any place',
+        source: ['ActionDelegation/Target', 'ActionDelegation/Controller'],
+        doc: 'client/strategy/action-delegation-middleware',
+        component: () => import('./views/ActionDelegation')
+      },
+      {
+        title: 'Serial Request',
+        description: 'An easier way to complete serial request with useHook',
+        doc: 'client/strategy/use-serial-request',
+        component: () => import('./views/SerialRequest')
+      }
     ]
   }
-  //   {
-  //     category: 'Token Authentication',
-  //     items: [
-  //       {
-  //         title: 'Server Based',
-  //         description:
-  //           'Token authentication interceptor provides unified management of token-based login, logout, token assignment, and token refresh, and supports silent token refresh.',
-  //         doc: 'client/strategy/token-authentication',
-  //         component: () => import('./views/ServerBased')
-  //       },
-  //       {
-  //         title: 'Client Based',
-  //         description:
-  //           'Token authentication interceptor provides unified management of token-based login, logout, token assignment, and token refresh, and supports silent token refresh.',
-  //         doc: 'client/strategy/token-authentication',
-  //         component: () => import('./views/ClientBased')
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     category: 'Other Strategies',
-  //     items: [
-  //       {
-  //         title: 'Data Fetching',
-  //         description:
-  //           'This is the demo that fetching the data of corresponding item when hovering items for 300ms. You can see the data immediately when you open this item',
-  //         doc: 'client/strategy/use-fetcher',
-  //         component: () => import('./views/DataFetching')
-  //       },
-  //       {
-  //         title: 'Form Hook',
-  //         description:
-  //           'A hook designed for form submission. Through it, you can easily implement form drafts and multi-page (multi-step) forms. In addition, it also provides common functions such as form reset.',
-  //         source: ['FormHook/StoreForm', 'FormHook/EditForm', 'FormHook/MultiForm', 'FormHook/ConditionFilter'],
-  //         doc: 'client/strategy/use-form',
-  //         component: () => import('./views/FormHook')
-  //       },
-  //       {
-  //         title: 'Auto Request',
-  //         description:
-  //           'Automatically re-request data through browser events or polling, your users always see the newest data.',
-  //         source: [
-  //           'AutoRequest/Interval',
-  //           'AutoRequest/Network',
-  //           'AutoRequest/BrowserVisibility',
-  //           'AutoRequest/PageFocus'
-  //         ],
-  //         doc: 'client/strategy/use-auto-request',
-  //         component: () => import('./views/AutoRequest')
-  //       },
-  //       {
-  //         title: 'Send Captcha',
-  //         description: 'The Captcha sending strategy provides the automatic countdown and limit the sending frequency',
-  //         doc: 'client/strategy/use-captcha',
-  //         component: () => import('./views/SendCaptcha')
-  //       },
-  //       {
-  //         title: 'Retriable Request',
-  //         description:
-  //           'Automatically retry failed request, you can use it for important requests. Custom your retry parameters.',
-  //         source: 'RetriableRequest/Implementation',
-  //         doc: 'client/strategy/use-retriable-request',
-  //         component: () => import('./views/RetriableRequest')
-  //       },
-  //       {
-  //         title: 'Action Delegation',
-  //         description:
-  //           'action delegation let you cast off the limitation of component hierarchy, trigger request within the target component at any place',
-  //         source: ['ActionDelegation/Target', 'ActionDelegation/Controller'],
-  //         doc: 'client/strategy/action-delegation-middleware',
-  //         component: () => import('./views/ActionDelegation')
-  //       },
-  //       {
-  //         title: 'Serial Request',
-  //         description: 'An easier way to complete serial request with useHook',
-  //         doc: 'client/strategy/use-serial-request',
-  //         component: () => import('./views/SerialRequest')
-  //       }
-  //     ]
-  //   }
 ];

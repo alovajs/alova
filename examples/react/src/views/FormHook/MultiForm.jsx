@@ -33,10 +33,9 @@ export default function MultiFormCard() {
     initialForm,
     resetAfterSubmiting: true
   }).onSuccess(({ data }) => {
-    console.log('Submited, request body is: ' + JSON.stringify(data));
+    alert('Submited, request body is: ' + JSON.stringify(data));
   });
 
-  console.log('submiting: ', submiting);
   return (
     <nord-card>
       <div slot="header">

@@ -63,15 +63,14 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
           align-items="center"
           role="list"
           class="p-4">
-          {pagination.page > 1 ? (
-            <nord-button
-              role="listitem"
-              onClick={() => pagination.onChange(pagination.page - 1, pagination.pageSize)}>
-              <nord-icon
-                name="arrow-left-small"
-                label="Previous"></nord-icon>
-            </nord-button>
-          ) : null}
+          <nord-button
+            disabled={pagination.page <= 1 || undefined}
+            role="listitem"
+            onClick={() => pagination.onChange(pagination.page - 1, pagination.pageSize)}>
+            <nord-icon
+              name="arrow-left-small"
+              label="Previous"></nord-icon>
+          </nord-button>
           {pagination.page > 5 ? (
             <p
               className="n-padding-i-m n-color-text-weaker"
@@ -96,15 +95,14 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
               …
             </p>
           ) : null}
-          {pagination.page < pagination.pageCount ? (
-            <nord-button
-              role="listitem"
-              onClick={() => pagination.onChange(pagination.page + 1, pagination.pageSize)}>
-              <nord-icon
-                name="arrow-right-small"
-                label="Next"></nord-icon>
-            </nord-button>
-          ) : null}
+          <nord-button
+            disabled={pagination.page >= pagination.pageCount || undefined}
+            role="listitem"
+            onClick={() => pagination.onChange(pagination.page + 1, pagination.pageSize)}>
+            <nord-icon
+              name="arrow-right-small"
+              label="Next"></nord-icon>
+          </nord-button>
 
           {pagination.pageSizes ? (
             <nord-select
