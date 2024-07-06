@@ -65,10 +65,10 @@ export type ExportedComputed<Responded, SE extends StatesExport<any>> = SE['name
   ? StateMap<Responded>[SE['name']]['ComputedExport']
   : Responded;
 
-export type StateUpdater<ExportedStates extends Record<string, any>> = (newStates: {
-  [K in keyof ExportedStates]?: ExportedStates[K] extends ExportedState<infer R, any> | ExportedComputed<infer R, any>
+export type StateUpdater<ExportedStates extends Record<string, any>, SE extends StatesExport> = (newStates: {
+  [K in keyof ExportedStates]?: ExportedStates[K] extends ExportedState<infer R, SE> | ExportedComputed<infer R, SE>
     ? R
-    : never;
+    : ExportedStates[K];
 }) => void;
 
 export type AlovaMethodHandler<AG extends AlovaGenerics = any> = (...args: any[]) => Method<AG>;
@@ -207,7 +207,7 @@ export interface UseHookExportedState<AG extends AlovaGenerics>
   > {}
 export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> extends UseHookExportedState<AG> {
   abort: () => void;
-  update: StateUpdater<UseHookExportedState<AG>>;
+  update: StateUpdater<UseHookExportedState<AG>, AG['StatesExport']>;
   send: SendHandler<AG['Responded']>;
   onSuccess(handler: SuccessHandler<AG>): this;
   onError(handler: ErrorHandler<AG>): this;

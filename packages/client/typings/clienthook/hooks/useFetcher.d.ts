@@ -31,9 +31,9 @@ export interface UseFetchExportedState<State>
     ExportedState<Progress, State>,
     ExportedState<Progress, State>
   > {}
-export interface UseFetchHookExposure<State> extends UseFetchExportedState<State> {
+export interface UseFetchHookExposure<SE extends StatesExport> extends UseFetchExportedState<SE['State']> {
   fetch<R>(matcher: Method<AlovaGenerics<R>>, ...args: any[]): Promise<R>;
-  update: StateUpdater<UseFetchExportedState<State>>;
+  update: StateUpdater<UseFetchExportedState<SE['State']>, SE>;
   abort: UseHookExposure['abort'];
   onSuccess: UseHookExposure['onSuccess'];
   onError: UseHookExposure['onError'];
@@ -54,6 +54,6 @@ export interface UseFetchHookExposure<State> extends UseFetchExportedState<State
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useFetcher<SE extends FetcherType<any>>(
+export declare function useFetcher<F extends FetcherType<any>>(
   config?: FetcherHookConfig
-): UseFetchHookExposure<SE['state']>;
+): UseFetchHookExposure<F['StatesExport']>;

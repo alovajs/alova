@@ -79,7 +79,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   onFetchSuccess(handler: SuccessHandler<AG>): UsePaginationExposure<AG, ListData>;
   onFetchError(handler: ErrorHandler<AG>): UsePaginationExposure<AG, ListData>;
   onFetchComplete(handler: CompleteHandler<AG>): UsePaginationExposure<AG, ListData>;
-  update: StateUpdater<UsePaginationExposure<AG, ListData>>;
+  update: StateUpdater<UsePaginationExposure<AG, ListData>, AG['StatesExport']>;
 
   /**
    * 刷新指定页码数据，此函数将忽略缓存强制发送请求

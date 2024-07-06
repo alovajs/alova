@@ -9,7 +9,8 @@ import {
   FrontRequestState,
   Method,
   Progress,
-  ReferingObject
+  ReferingObject,
+  StatesExport
 } from 'alova';
 import { Readable, Writable } from 'svelte/store';
 import { ComputedRef, Ref } from 'vue';
@@ -145,8 +146,8 @@ export type ExportedComputed<Responded, Computed> =
       ? Readable<Responded>
       : Responded;
 
-export type StateUpdater<ExportedStates extends Record<string, any>> = (newStates: {
-  [K in keyof ExportedStates]?: ExportedStates[K] extends ExportedState<infer R, any> | ExportedComputed<infer R, any>
+export type StateUpdater<ExportedStates extends Record<string, any>, SE extends StatesExport> = (newStates: {
+  [K in keyof ExportedStates]?: ExportedStates[K] extends ExportedState<infer R, SE> | ExportedComputed<infer R, SE>
     ? R
     : never;
 }) => void;
@@ -170,7 +171,7 @@ export interface UseHookExportedState<AG extends AlovaGenerics>
   > {}
 export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> extends UseHookExportedState<AG> {
   abort: () => void;
-  update: StateUpdater<UseHookExportedState<AG>>;
+  update: StateUpdater<UseHookExportedState<AG>, AG['StatesExport']>;
   send: SendHandler<AG['Responded']>;
   onSuccess(handler: SuccessHandler<AG>): this;
   onError(handler: ErrorHandler<AG>): this;
@@ -185,9 +186,9 @@ export interface UseFetchExportedState<State>
     ExportedState<Progress, State>,
     ExportedState<Progress, State>
   > {}
-export interface UseFetchHookExposure<State> extends UseFetchExportedState<State> {
+export interface UseFetchHookExposure<SE extends StatesExport> extends UseFetchExportedState<SE['State']> {
   fetch<R>(matcher: Method<AlovaGenerics<R>>, ...args: any[]): Promise<R>;
-  update: StateUpdater<UseFetchExportedState<State>>;
+  update: StateUpdater<UseFetchExportedState<SE['State']>, SE>;
   abort: UseHookExposure['abort'];
   onSuccess: UseHookExposure['onSuccess'];
   onError: UseHookExposure['onError'];
@@ -342,8 +343,7 @@ export interface FetcherHookConfig<AG extends AlovaGenerics = AlovaGenerics> ext
 
 /** 调用useFetcher时需要传入的类型，否则会导致状态类型错误 */
 export type FetcherType<A extends Alova<any>> = {
-  state: ReturnType<NonNullable<A['options']['statesHook']>['create']>;
-  export: ReturnType<NonNullable<NonNullable<A['options']['statesHook']>['export']>>;
+  StatesExport: NonNullable<A['options']['statesHook']> extends StatesHook<infer SE> ? SE : any;
 };
 
 /**
@@ -390,9 +390,9 @@ export declare function useWatcher<AG extends AlovaGenerics>(
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useFetcher<SE extends FetcherType<any>>(
+export declare function useFetcher<F extends FetcherType<any>>(
   config?: FetcherHookConfig
-): UseFetchHookExposure<SE['state']>;
+): UseFetchHookExposure<F['StatesExport']>;
 
 export type UpdateStateCollection<Responded> = {
   [key: string | number | symbol]: (data: any) => any;
@@ -441,7 +441,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   onFetchSuccess(handler: SuccessHandler<AG>): UsePaginationExposure<AG, ListData>;
   onFetchError(handler: ErrorHandler<AG>): UsePaginationExposure<AG, ListData>;
   onFetchComplete(handler: CompleteHandler<AG>): UsePaginationExposure<AG, ListData>;
-  update: StateUpdater<UsePaginationExposure<AG, ListData>>;
+  update: StateUpdater<UsePaginationExposure<AG, ListData>, AG['StatesExport']>;
 
   /**
    * 刷新指定页码数据，此函数将忽略缓存强制发送请求
