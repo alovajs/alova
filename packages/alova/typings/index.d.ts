@@ -225,11 +225,11 @@ export interface ReferingObject {
 }
 export type StatesExportHelper<I extends StatesExport<any>> = I;
 
-export interface StatesExport<T> {
+export interface StatesExport<T = any> {
   name: string;
-  State: any | T;
-  Computed: any | T;
-  Watched: any | T;
+  State: T;
+  Computed: T;
+  Watched: T;
   StateExport: T;
   ComputedExport: T;
 }

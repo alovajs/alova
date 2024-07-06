@@ -1,4 +1,4 @@
-import { Alova, AlovaGenerics, FetchRequestState, Method, Progress, ReferingObject } from 'alova';
+import { Alova, AlovaGenerics, FetchRequestState, Method, Progress, ReferingObject, StatesHook } from 'alova';
 import {
   AlovaFetcherMiddleware,
   ExportedState,
@@ -13,8 +13,7 @@ import {
  * 调用useFetcher时需要传入的类型，否则会导致状态类型错误
  */
 export type FetcherType<A extends Alova<any>> = {
-  state: ReturnType<NonNullable<A['options']['statesHook']>['create']>;
-  export: ReturnType<NonNullable<NonNullable<A['options']['statesHook']>['export']>>;
+  StatesExport: NonNullable<A['options']['statesHook']> extends StatesHook<infer SE> ? SE : any;
 };
 
 /** useFetcher config export type */
