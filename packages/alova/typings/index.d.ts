@@ -1,10 +1,6 @@
 import { EventManager } from '@alova/shared/createEventManager';
 
 export interface AlovaGenerics<
-  S = any,
-  C = any,
-  W = any,
-  E = any,
   R = any,
   T = any,
   RC = any,
@@ -14,10 +10,6 @@ export interface AlovaGenerics<
   L2 extends AlovaGlobalCacheAdapter = any,
   SE extends StatesExport<any> = any
 > {
-  State: S;
-  Computed: C;
-  Watched: W;
-  Export: E;
   Responded: R;
   Transformed: T;
   RequestConfig: RC;
@@ -43,7 +35,7 @@ export interface RequestElements {
 export type ProgressUpdater = (loaded: number, total: number) => void;
 export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader> = (
   elements: RequestElements,
-  method: Method<AlovaGenerics<any, any, any, any, any, any, RequestConfig, Response, ResponseHeader>>
+  method: Method<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader>>
 ) => {
   response: () => Promise<Response>;
   headers: () => Promise<ResponseHeader>;
@@ -704,10 +696,6 @@ export interface AlovaGlobalConfig {
  * @returns alova instance
  */
 export declare function createAlova<
-  State,
-  Computed,
-  Watched,
-  Export,
   RequestConfig,
   Response,
   ResponseHeader,
@@ -715,38 +703,8 @@ export declare function createAlova<
   L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter,
   SE extends StatesExport<any> = StatesExport<any>
 >(
-  options: AlovaOptions<
-    AlovaGenerics<
-      State,
-      Computed,
-      Watched,
-      Export,
-      any,
-      any,
-      RequestConfig,
-      Response,
-      ResponseHeader,
-      L1Cache,
-      L2Cache,
-      SE
-    >
-  >
-): Alova<
-  AlovaGenerics<
-    State,
-    Computed,
-    Watched,
-    Export,
-    any,
-    any,
-    RequestConfig,
-    Response,
-    ResponseHeader,
-    L1Cache,
-    L2Cache,
-    SE
-  >
->;
+  options: AlovaOptions<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache, SE>>
+): Alova<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache, SE>>;
 
 /**
  * invalidate cache

@@ -9,12 +9,13 @@ import createRequestState from './implements/createRequestState';
  * Fetch request data and cache
  * @param method request method object
  */
-export default function useFetcher<SE extends FetcherType<any>>(config: FetcherHookConfig = {}) {
-  const props = createRequestState<AlovaGenerics<SE['state'], SE['export']>, FetcherHookConfig>(
-    EnumHookType.USE_FETCHER,
-    noop as any,
-    config
-  );
+export default function useFetcher<F extends FetcherType<any>>(config: FetcherHookConfig = {}) {
+  const props = createRequestState<
+    Omit<AlovaGenerics, 'StatesExport'> & {
+      StatesExport: F['StatesExport'];
+    },
+    FetcherHookConfig
+  >(EnumHookType.USE_FETCHER, noop as any, config);
   const { send } = props;
   deleteAttr(props, 'send');
   return objAssign(props, {

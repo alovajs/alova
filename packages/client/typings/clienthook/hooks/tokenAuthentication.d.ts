@@ -2,11 +2,9 @@ import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } 
 
 export type AlovaResponded<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> = NonNullable<
   AlovaOptions<
-    Pick<
-      AlovaGenerics<ReturnType<SH['create']>, SH['export'] extends (...args: any) => infer R ? R : any>,
-      'State' | 'Computed'
-    > &
-      (Parameters<RA>[1] extends Method<infer AG> ? AG : never)
+    Omit<AlovaGenerics, 'StatesExport'> & {
+      StatesExport: SH extends StatesHook<infer SE> ? SE : any;
+    } & (Parameters<RA>[1] extends Method<infer AG> ? AG : never)
   >['responded']
 >;
 

@@ -33,7 +33,7 @@ export interface UseFetchExportedState<State>
     ExportedState<Progress, State>
   > {}
 export interface UseFetchHookExposure<State> extends UseFetchExportedState<State> {
-  fetch<R>(matcher: Method<AlovaGenerics<any, any, any, any, R>>, ...args: any[]): Promise<R>;
+  fetch<R>(matcher: Method<AlovaGenerics<R>>, ...args: any[]): Promise<R>;
   update: StateUpdater<UseFetchExportedState<State>>;
   abort: UseHookExposure['abort'];
   onSuccess: UseHookExposure['onSuccess'];

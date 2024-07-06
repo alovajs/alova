@@ -186,7 +186,7 @@ export interface UseFetchExportedState<State>
     ExportedState<Progress, State>
   > {}
 export interface UseFetchHookExposure<State> extends UseFetchExportedState<State> {
-  fetch<R>(matcher: Method<AlovaGenerics<any, any, any, any, R>>, ...args: any[]): Promise<R>;
+  fetch<R>(matcher: Method<AlovaGenerics<R>>, ...args: any[]): Promise<R>;
   update: StateUpdater<UseFetchExportedState<State>>;
   abort: UseHookExposure['abort'];
   onSuccess: UseHookExposure['onSuccess'];
@@ -414,7 +414,7 @@ export type UpdateStateCollection<Responded> = {
  * @returns is updated
  */
 export declare function updateState<Responded>(
-  matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
+  matcher: Method<AlovaGenerics<Responded>>,
   handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>
 ): Promise<boolean>;
 

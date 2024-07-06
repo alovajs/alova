@@ -10,7 +10,7 @@ import {
 import GlobalFetch from 'alova/fetch';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
-type FetchMethod = Method<AlovaGenerics<any, any, any, any, any, any, FetchRequestInit, Response, Headers>>;
+type FetchMethod = Method<AlovaGenerics<any, any, FetchRequestInit, Response, Headers>>;
 export const getAlovaInstance = <SE extends StatesExport<any>>(
   statesHook: StatesHook<SE>,
   {
