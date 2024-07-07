@@ -1,5 +1,14 @@
 # @alova/vue-options
 
+## 2.0.0-beta.4
+
+### Patch Changes
+
+- [#419](https://github.com/alovajs/alova/pull/419) [`9b86038`](https://github.com/alovajs/alova/commit/9b860386429cc6d77d51341e8158d1245a973241) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - chore: use `StateExport` for type inference instead of generics
+
+- Updated dependencies [[`68482fd`](https://github.com/alovajs/alova/commit/68482fd0f9856052f34e0dc6b8c67ad63bf02040), [`9b86038`](https://github.com/alovajs/alova/commit/9b860386429cc6d77d51341e8158d1245a973241)]:
+  - alova@3.0.0-beta.10
+
 ## 2.0.0-beta.3
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @alova/mock
 
+## 2.0.0-beta.8
+
+### Patch Changes
+
+- [#419](https://github.com/alovajs/alova/pull/419) [`38adae8`](https://github.com/alovajs/alova/commit/38adae840040a83f56bb63ec242b47f8a1fc8e8e) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix that empty response headers when defaults
+
+- [#419](https://github.com/alovajs/alova/pull/419) [`9b86038`](https://github.com/alovajs/alova/commit/9b860386429cc6d77d51341e8158d1245a973241) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - chore: use `StateExport` for type inference instead of generics
+
+- Updated dependencies [[`68482fd`](https://github.com/alovajs/alova/commit/68482fd0f9856052f34e0dc6b8c67ad63bf02040), [`bfde660`](https://github.com/alovajs/alova/commit/bfde660e94eaedd7c4f32b231cdf574a95d36146), [`9b86038`](https://github.com/alovajs/alova/commit/9b860386429cc6d77d51341e8158d1245a973241)]:
+  - alova@3.0.0-beta.10
+  - @alova/shared@1.0.0-beta.7
+
 ## 2.0.0-beta.7
 
 ### Patch Changes
