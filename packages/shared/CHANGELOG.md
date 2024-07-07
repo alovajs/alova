@@ -1,5 +1,13 @@
 # @alova/shared
 
+## 1.0.0-beta.7
+
+### Patch Changes
+
+- [#419](https://github.com/alovajs/alova/pull/419) [`bfde660`](https://github.com/alovajs/alova/commit/bfde660e94eaedd7c4f32b231cdf574a95d36146) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: get incorrect isSSR value in tests
+
+- [#419](https://github.com/alovajs/alova/pull/419) [`9b86038`](https://github.com/alovajs/alova/commit/9b860386429cc6d77d51341e8158d1245a973241) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - chore: use `StateExport` for type inference instead of generics
+
 ## 1.0.0-beta.6
 
 ### Patch Changes
