@@ -1,11 +1,12 @@
 import { createSyncOnceRunner } from '@alova/shared/function';
 import { forEach, setTimeoutFn, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { ComputedRef, Ref, WatchSource, computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
+import { VueHookExportType } from '~/typings/stateshook/vue';
 
-type UnknownRef = Ref<unknown>;
 // Vue的预定义hooks
 export default {
+  name: 'Vue',
   create: data => ref(data),
   dehydrate: state => state.value,
   update: (newVal, state) => {
@@ -48,4 +49,4 @@ export default {
   onUnmounted: callback => {
     onUnmounted(callback);
   }
-} as StatesHook<UnknownRef, ComputedRef<unknown>, WatchSource<any> | object>;
+} as StatesHook<VueHookExportType<unknown>>;

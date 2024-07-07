@@ -28,7 +28,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
 ) {
   return (
     elements: RequestElements,
-    method: Method<AlovaGenerics<any, any, any, any, any, any, RequestConfig, Response, ResponseHeader>>
+    method: Method<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader>>
   ) => {
     // 获取当前请求的模拟数据集合，如果enable为false，则不返回模拟数据
     mock = (enable && mock) || {};

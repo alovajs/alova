@@ -1,10 +1,12 @@
 import { $self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
-import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
+import { AlovaRequestAdapter, Method, StatesHook } from 'alova';
 import { GlobalFetchRequestAdapter } from 'alova/fetch';
 import {
-  AlovaResponded,
+  AlovaRequestAdapterUnified,
+  BeforeRequestType,
   ClientTokenAuthenticationOptions,
+  ResponseType,
   ServerTokenAuthenticationOptions
 } from '~/typings/clienthook';
 import {
@@ -22,28 +24,12 @@ import {
 } from './helper';
 
 /**
- * 统一获取AlovaRequestAdapter的类型
- */
-type AlovaRequestAdapterUnified<
-  RA extends
-    | AlovaRequestAdapter<any, any, any>
-    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = AlovaRequestAdapter<any, any, any>
-> = RA extends AlovaRequestAdapter<any, any, any> ? RA : ReturnType<RA>;
-
-type BeforeRequestType<AG extends AlovaGenerics> = (
-  originalBeforeRequest?: AlovaOptions<AG>['beforeRequest']
-) => AlovaOptions<AG>['beforeRequest'];
-type ResponseType<SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>> = (
-  originalResponded?: AlovaResponded<SH, RA>
-) => AlovaResponded<SH, RA>;
-
-/**
  * 创建客户端的token认证拦截器
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
 export const createClientTokenAuthentication = <
-  SH extends StatesHook<any, any>,
+  SH extends StatesHook<any>,
   RA extends
     | AlovaRequestAdapter<any, any, any>
     | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter
@@ -56,38 +42,36 @@ export const createClientTokenAuthentication = <
 }: ClientTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>) => {
   let tokenRefreshing = falseValue;
   const waitingList: WaitingRequestList = [];
-  const onAuthRequired: BeforeRequestType<AlovaGenerics> =
-    <AG extends AlovaGenerics>(onBeforeRequest: AlovaOptions<AG>['beforeRequest']) =>
-    async (method: Method<AG>) => {
-      const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
-      const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
-      // 被忽略的、登录、刷新token的请求不进行token认证
-      if (
-        !isVisitorRole &&
-        !isLoginRole &&
-        !checkMethodRole(method, (refreshToken as PosibbleAuthMap)?.metaMatches || defaultRefreshTokenMeta)
-      ) {
-        // 如果正在刷新token，则等待刷新完成后再发请求
-        if (tokenRefreshing) {
-          await waitForTokenRefreshed(method, waitingList);
-        }
-        await refreshTokenIfExpired(
-          method,
-          waitingList,
-          refreshing => {
-            tokenRefreshing = refreshing;
-          },
-          [method],
-          refreshToken
-        );
+  const onAuthRequired: BeforeRequestType<SH, AlovaRequestAdapterUnified<RA>> = onBeforeRequest => async method => {
+    const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
+    const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
+    // 被忽略的、登录、刷新token的请求不进行token认证
+    if (
+      !isVisitorRole &&
+      !isLoginRole &&
+      !checkMethodRole(method, (refreshToken as PosibbleAuthMap)?.metaMatches || defaultRefreshTokenMeta)
+    ) {
+      // 如果正在刷新token，则等待刷新完成后再发请求
+      if (tokenRefreshing) {
+        await waitForTokenRefreshed(method, waitingList);
       }
+      await refreshTokenIfExpired(
+        method,
+        waitingList,
+        refreshing => {
+          tokenRefreshing = refreshing;
+        },
+        [method],
+        refreshToken
+      );
+    }
 
-      // 非访客和登录角色的请求会进入赋值token函数
-      if (!isVisitorRole && !isLoginRole) {
-        await assignToken(method);
-      }
-      onBeforeRequest?.(method);
-    };
+    // 非访客和登录角色的请求会进入赋值token函数
+    if (!isVisitorRole && !isLoginRole) {
+      await assignToken(method);
+    }
+    onBeforeRequest?.(method);
+  };
 
   const onResponseRefreshToken: ResponseType<SH, AlovaRequestAdapterUnified<RA>> = originalResponded => {
     const respondedRecord = onResponded2Record<SH, AlovaRequestAdapterUnified<RA>>(originalResponded);
@@ -113,7 +97,7 @@ export const createClientTokenAuthentication = <
  * @returns token认证拦截器函数
  */
 export const createServerTokenAuthentication = <
-  SH extends StatesHook<any, any>,
+  SH extends StatesHook<any>,
   RA extends
     | AlovaRequestAdapter<any, any, any>
     | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter
@@ -128,7 +112,7 @@ export const createServerTokenAuthentication = <
   let tokenRefreshing = falseValue;
   const waitingList: WaitingRequestList = [];
 
-  const onAuthRequired: BeforeRequestType<AlovaGenerics> = onBeforeRequest => async method => {
+  const onAuthRequired: BeforeRequestType<SH, AlovaRequestAdapterUnified<RA>> = onBeforeRequest => async method => {
     const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
     const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
     // 被忽略的、登录、刷新token的请求不进行token认证

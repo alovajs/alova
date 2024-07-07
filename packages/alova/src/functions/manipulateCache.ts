@@ -31,7 +31,7 @@ import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Met
  * @returns 缓存数据，未查到时返回undefined
  */
 export const queryCache = async <Responded>(
-  matcher: Method<AlovaGenerics<any, any, any, any, Responded>>,
+  matcher: Method<AlovaGenerics<Responded>>,
   { policy = 'all' }: CacheQueryOptions = {}
 ) => {
   // if key exists, that means it's a method instance.
@@ -63,9 +63,7 @@ export const queryCache = async <Responded>(
  * @param data 缓存数据
  */
 export const setCache = async <Responded>(
-  matcher:
-    | Method<AlovaGenerics<any, any, any, any, Responded>>
-    | Method<AlovaGenerics<any, any, any, any, Responded>>[],
+  matcher: Method<AlovaGenerics<Responded>> | Method<AlovaGenerics<Responded>>[],
   dataOrUpdater: Responded | ((oldCache?: Responded) => Responded | undefined | void),
   { policy = 'all' }: CacheSetOptions = {}
 ) => {

@@ -137,7 +137,8 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
             replace: createDelegationAction('replace'),
             reload: createDelegationAction('reload'),
             getState: (stateKey: string) => {
-              const states: Record<string, AG['Export']> = {
+              type SE = AG['StatesExport'];
+              const states: Record<string, SE['StateExport']> = {
                 page,
                 pageSize,
                 data,

@@ -1,7 +1,6 @@
 import { instanceOf, isFn, isPlainObject, newInstance, noop } from '@alova/shared/function';
 import { PromiseCls, falseValue, forEach, len, pushItem, splice, trueValue, undefinedValue } from '@alova/shared/vars';
 import {
-  AlovaGenerics,
   AlovaRequestAdapter,
   Method,
   RespondedHandler,
@@ -9,7 +8,12 @@ import {
   ResponseErrorHandler,
   StatesHook
 } from 'alova';
-import { AlovaResponded, MetaMatches, ResponseAuthorizationInterceptor } from '~/typings/clienthook';
+import {
+  AlovaResponded,
+  MetaMatches,
+  ResponseAuthorizationInterceptor,
+  StateHookAdapter2AG
+} from '~/typings/clienthook';
 
 export type PosibbleAuthMap =
   | {
@@ -121,11 +125,10 @@ export const refreshTokenIfExpired = async (
   }
 };
 
-export const onResponded2Record = <SH extends StatesHook<any, any>, RA extends AlovaRequestAdapter<any, any, any>>(
+export const onResponded2Record = <SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>>(
   onRespondedHandlers?: AlovaResponded<SH, RA>
 ) => {
-  type AG = AlovaGenerics<ReturnType<SH['create']>, SH['export'] extends (...args: any) => infer R ? R : any> &
-    (Parameters<RA>[1] extends Method<infer AG> ? AG : never);
+  type AG = StateHookAdapter2AG<SH, RA>;
   let successHandler: RespondedHandler<AG> | undefined = undefinedValue;
   let errorHandler: ResponseErrorHandler<AG> | undefined = undefinedValue;
   let onCompleteHandler: ResponseCompleteHandler<AG> | undefined = undefinedValue;

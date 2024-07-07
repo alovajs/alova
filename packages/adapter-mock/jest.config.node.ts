@@ -12,7 +12,8 @@ const config: Config = {
   displayName: '@alova/mock',
   setupFilesAfterEnv: [resolve(__dirname, '../../internal/jest.setup.mock.ts')],
   testEnvironment: 'node',
-  testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)']
+  testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
+  globals: {}
 };
 
 export default config;

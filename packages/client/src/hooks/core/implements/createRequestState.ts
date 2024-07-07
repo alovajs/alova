@@ -61,7 +61,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   useHookConfig: Config,
   initialData?: FrontRequestHookConfig<AG>['initialData'],
   immediate = falseValue,
-  watchingStates?: AG['Watched'][],
+  watchingStates?: AG['StatesExport']['Watched'][],
   debounceDelay: WatcherHookConfig<AG>['debounce'] = 0
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error

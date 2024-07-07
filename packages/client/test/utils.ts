@@ -1,10 +1,18 @@
-import { AlovaGenerics, AlovaGlobalCacheAdapter, GlobalCacheConfig, Method, StatesHook, createAlova } from 'alova';
+import {
+  AlovaGenerics,
+  AlovaGlobalCacheAdapter,
+  GlobalCacheConfig,
+  Method,
+  StatesExport,
+  StatesHook,
+  createAlova
+} from 'alova';
 import GlobalFetch from 'alova/fetch';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
-type FetchMethod = Method<AlovaGenerics<any, any, any, any, any, any, FetchRequestInit, Response, Headers>>;
-export const getAlovaInstance = <State, Computed, Watched, Export>(
-  statesHook: StatesHook<State, Computed, Watched, Export>,
+type FetchMethod = Method<AlovaGenerics<any, any, FetchRequestInit, Response, Headers>>;
+export const getAlovaInstance = <SE extends StatesExport<any>>(
+  statesHook: StatesHook<SE>,
   {
     baseURL = 'http://localhost:3000',
     cacheFor,
@@ -16,7 +24,7 @@ export const getAlovaInstance = <State, Computed, Watched, Export>(
     resCompleteExpect
   }: {
     baseURL?: string;
-    cacheFor?: GlobalCacheConfig<AlovaGenerics<State, Computed, Watched, Export>>;
+    cacheFor?: GlobalCacheConfig<Omit<AlovaGenerics, 'StatesExport'> & { StatesExport: SE }>;
     l1Cache?: AlovaGlobalCacheAdapter;
     l2Cache?: AlovaGlobalCacheAdapter;
     beforeRequestExpect?: (methodInstance: FetchMethod) => void;

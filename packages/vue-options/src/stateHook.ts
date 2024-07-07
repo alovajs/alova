@@ -1,6 +1,6 @@
 import { ObjectCls, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { OptionsComputed, OptionsState } from '~/typings';
+import { VueOptionExportType } from '~/typings';
 
 const on = (component: any, lifecycle: 'um' | 'm', handler: () => void) => {
   const { $, $options } = component;
@@ -26,6 +26,7 @@ const on = (component: any, lifecycle: 'um' | 'm', handler: () => void) => {
 };
 
 export default {
+  name: 'VueOption',
   create: data => ({ value: data, type: 's' }),
 
   // 解释：在computed中一般会依赖states，因此必须访问组件上的states才能实现依赖追踪
@@ -70,4 +71,4 @@ export default {
   onUnmounted: (callback, { component }) => {
     on(component, 'm', callback);
   }
-} as StatesHook<OptionsState<any>, OptionsComputed<any>, string, OptionsState<any> | OptionsComputed<any>>;
+} as StatesHook<VueOptionExportType<unknown>>;

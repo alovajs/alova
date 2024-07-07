@@ -1,4 +1,13 @@
-import { Alova, AlovaGenerics, FetchRequestState, Method, Progress, ReferingObject } from 'alova';
+import {
+  Alova,
+  AlovaGenerics,
+  FetchRequestState,
+  Method,
+  Progress,
+  ReferingObject,
+  StatesExport,
+  StatesHook
+} from 'alova';
 import {
   AlovaFetcherMiddleware,
   ExportedState,
@@ -13,8 +22,7 @@ import {
  * 调用useFetcher时需要传入的类型，否则会导致状态类型错误
  */
 export type FetcherType<A extends Alova<any>> = {
-  state: ReturnType<NonNullable<A['options']['statesHook']>['create']>;
-  export: ReturnType<NonNullable<NonNullable<A['options']['statesHook']>['export']>>;
+  StatesExport: NonNullable<A['options']['statesHook']> extends StatesHook<infer SE> ? SE : any;
 };
 
 /** useFetcher config export type */
@@ -25,16 +33,16 @@ export interface FetcherHookConfig<AG extends AlovaGenerics = AlovaGenerics> ext
   updateState?: boolean;
 }
 
-export interface UseFetchExportedState<State>
+export interface UseFetchExportedState<SE extends StatesExport>
   extends FetchRequestState<
-    ExportedState<boolean, State>,
-    ExportedState<Error | undefined, State>,
-    ExportedState<Progress, State>,
-    ExportedState<Progress, State>
+    ExportedState<boolean, SE>,
+    ExportedState<Error | undefined, SE>,
+    ExportedState<Progress, SE>,
+    ExportedState<Progress, SE>
   > {}
-export interface UseFetchHookExposure<State> extends UseFetchExportedState<State> {
-  fetch<R>(matcher: Method<AlovaGenerics<any, any, any, any, R>>, ...args: any[]): Promise<R>;
-  update: StateUpdater<UseFetchExportedState<State>>;
+export interface UseFetchHookExposure<SE extends StatesExport> extends UseFetchExportedState<SE> {
+  fetch<R>(matcher: Method<AlovaGenerics<R>>, ...args: any[]): Promise<R>;
+  update: StateUpdater<UseFetchExportedState<SE['State']>, SE>;
   abort: UseHookExposure['abort'];
   onSuccess: UseHookExposure['onSuccess'];
   onError: UseHookExposure['onError'];
@@ -55,6 +63,6 @@ export interface UseFetchHookExposure<State> extends UseFetchExportedState<State
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useFetcher<SE extends FetcherType<any>>(
+export declare function useFetcher<F extends FetcherType<any>>(
   config?: FetcherHookConfig
-): UseFetchHookExposure<SE['state']>;
+): UseFetchHookExposure<F['StatesExport']>;

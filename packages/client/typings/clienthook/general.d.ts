@@ -1,11 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FrameworkReadableState, FrameworkState } from '@alova/shared/FrameworkState';
 import { EventManager } from '@alova/shared/createEventManager';
-import { IsAny } from '@alova/shared/types';
-import { AlovaGenerics, FetchRequestState, FrontRequestState, Method, Progress, ReferingObject } from 'alova';
-import { Readable, Writable } from 'svelte/store';
-import { ComputedRef, Ref } from 'vue';
+import {
+  AlovaGenerics,
+  FetchRequestState,
+  FrontRequestState,
+  Method,
+  Progress,
+  ReferingObject,
+  StatesExport
+} from 'alova';
+import { ReactHookExportType } from '../stateshook/react';
+import { SvelteHookExportType } from '../stateshook/svelte';
+import { VueHookExportType } from '../stateshook/vue';
 
+export interface StateMap<T> {
+  Vue: VueHookExportType<T>;
+  React: ReactHookExportType<T>;
+  Svelte: SvelteHookExportType<T>;
+}
 /**
  * alova base event
  */
@@ -45,23 +58,17 @@ export interface AlovaCompleteEvent<AG extends AlovaGenerics> extends AlovaEvent
  * 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
  * 使用不同库的特征作为父类进行判断
  */
-export type ExportedState<Responded, State> =
-  IsAny<Ref, unknown, Ref> extends State
-    ? Ref<Responded>
-    : IsAny<Writable<any>, unknown, Writable<any>> extends State
-      ? Writable<Responded>
-      : Responded;
-export type ExportedComputed<Responded, Computed> =
-  IsAny<ComputedRef, unknown, ComputedRef> extends Computed
-    ? ComputedRef<Responded>
-    : IsAny<Readable<any>, unknown, Readable<any>> extends Computed
-      ? Readable<Responded>
-      : Responded;
+export type ExportedState<Responded, SE extends StatesExport<any>> = SE['name'] extends keyof StateMap<any>
+  ? StateMap<Responded>[SE['name']]['StateExport']
+  : Responded;
+export type ExportedComputed<Responded, SE extends StatesExport<any>> = SE['name'] extends keyof StateMap<any>
+  ? StateMap<Responded>[SE['name']]['ComputedExport']
+  : Responded;
 
-export type StateUpdater<ExportedStates extends Record<string, any>> = (newStates: {
-  [K in keyof ExportedStates]?: ExportedStates[K] extends ExportedState<infer R, any> | ExportedComputed<infer R, any>
+export type StateUpdater<ExportedStates extends Record<string, any>, SE extends StatesExport> = (newStates: {
+  [K in keyof ExportedStates]?: ExportedStates[K] extends ExportedState<infer R, SE> | ExportedComputed<infer R, SE>
     ? R
-    : never;
+    : ExportedStates[K];
 }) => void;
 
 export type AlovaMethodHandler<AG extends AlovaGenerics = any> = (...args: any[]) => Method<AG>;
@@ -192,15 +199,15 @@ export interface AlovaGuardNext<AG extends AlovaGenerics> {
 export type SendHandler<R> = (...args: any[]) => Promise<R>;
 export interface UseHookExportedState<AG extends AlovaGenerics>
   extends FrontRequestState<
-    ExportedState<boolean, AG['State']>,
-    ExportedState<AG['Responded'], AG['State']>,
-    ExportedState<Error | undefined, AG['State']>,
-    ExportedState<Progress, AG['State']>,
-    ExportedState<Progress, AG['State']>
+    ExportedState<boolean, AG['StatesExport']>,
+    ExportedState<AG['Responded'], AG['StatesExport']>,
+    ExportedState<Error | undefined, AG['StatesExport']>,
+    ExportedState<Progress, AG['StatesExport']>,
+    ExportedState<Progress, AG['StatesExport']>
   > {}
 export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> extends UseHookExportedState<AG> {
   abort: () => void;
-  update: StateUpdater<UseHookExportedState<AG>>;
+  update: StateUpdater<UseHookExportedState<AG>, AG['StatesExport']>;
   send: SendHandler<AG['Responded']>;
   onSuccess(handler: SuccessHandler<AG>): this;
   onError(handler: ErrorHandler<AG>): this;

@@ -3,7 +3,7 @@ import GlobalFetch from '@/predefine/adapterFetch';
 import { AlovaGenerics, AlovaGlobalCacheAdapter, GlobalCacheConfig, Method } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
-type FetchMethod = Method<AlovaGenerics<any, any, any, any, any, any, FetchRequestInit, Response, Headers>>;
+type FetchMethod = Method<AlovaGenerics<any, any, FetchRequestInit, Response, Headers>>;
 export const getAlovaInstance = ({
   id,
   endWithSlash = false,

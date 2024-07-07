@@ -45,7 +45,10 @@ module.exports = function createRollupConfig(bundleConfig, version) {
    * @param {string} options.ext
    */
   function resolveOutput({ suffix, ext }) {
-    const newOutputPattern = `${outputPattern}`;
+    let newOutputPattern = `${outputPattern}`;
+    if (!suffix) {
+      newOutputPattern = newOutputPattern.replace('.{suffix}', '');
+    }
     return newOutputPattern.replace('{suffix}', suffix).replace('{ext}', ext);
   }
 
@@ -218,7 +221,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
         }
       })
     ];
-    const outputPath = bundleConfig.dtsOutput ?? resolveOutput({ suffix: 'd', ext: 'ts' });
+    const outputPath = bundleConfig.dtsOutput ?? resolveOutput({ suffix: '', ext: 'd.ts' });
 
     configForDTSGenerate.name = 'dts';
     configForDTSGenerate.outputOptionsList[0].file = outputPath;

@@ -243,17 +243,17 @@
 <script setup lang="ts">
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
-import { ComputedRef, Ref, WatchSource, ref } from 'vue';
+import { VueHookExportType } from 'alova/vue';
+import { ref } from 'vue';
 import { PaginationHookConfig } from '~/typings/clienthook';
 
+type CollapsedAlovaGenerics = Omit<AlovaGenerics, 'StatesExport'> & {
+  StatesExport: VueHookExportType<unknown>;
+};
+
 const props = defineProps<{
-  getter: (
-    page: number,
-    pageSize: number
-  ) => Method<
-    AlovaGenerics<Ref<any>, ComputedRef<any>, object | WatchSource<any>, Ref<any>, any, any, any, any, any, any, any>
-  >;
-  paginationConfig?: PaginationHookConfig<any, unknown[]>;
+  getter: (page: number, pageSize: number) => Method<CollapsedAlovaGenerics>;
+  paginationConfig?: PaginationHookConfig<CollapsedAlovaGenerics, unknown[]>;
   handleExposure?: (exposure: ReturnType<typeof usePagination>) => void;
 }>();
 

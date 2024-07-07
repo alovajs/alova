@@ -36,7 +36,7 @@ export interface MockResponse<RequestConfig, Response, ResponseHeader> {
       body: any;
     },
     request: MockServerRequest,
-    currentMethod: Method<AlovaGenerics<any, any, any, any, any, any, RequestConfig, Response, ResponseHeader>>
+    currentMethod: Method<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader>>
   ): {
     response: Response;
     headers: ResponseHeader;

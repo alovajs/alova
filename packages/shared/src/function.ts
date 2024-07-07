@@ -6,6 +6,7 @@ import type {
   EffectRequestParams,
   Method,
   ReferingObject,
+  StatesExport,
   StatesHook
 } from '../../alova/typings';
 import { AlovaMethodHandler, ExportedComputed, ExportedState } from '../../client/typings/clienthook';
@@ -370,8 +371,8 @@ interface MemorizedFunction {
 
 type ActualStateTranslator<AG extends AlovaGenerics, StateProxy extends FrameworkReadableState<any, string>> =
   StateProxy extends FrameworkState<any, string>
-    ? ExportedState<StateProxy['v'], AG['State']>
-    : ExportedComputed<StateProxy['v'], AG['Computed']>;
+    ? ExportedState<StateProxy['v'], AG['StatesExport']>
+    : ExportedComputed<StateProxy['v'], AG['StatesExport']>;
 type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string | number | symbol, any>> = {
   [K in keyof O]: O[K] extends FrameworkReadableState<any, string>
     ? ActualStateTranslator<AG, O[K]>
@@ -387,7 +388,7 @@ type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string
  * @returns simple and unified states creators and handlers
  */
 export function statesHookHelper<AG extends AlovaGenerics>(
-  statesHook: StatesHook<GeneralState, GeneralState>,
+  statesHook: StatesHook<StatesExport<unknown>>,
   referingObject: ReferingObject = { trackedKeys: {}, bindError: falseValue }
 ) {
   const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });

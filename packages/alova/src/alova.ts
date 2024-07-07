@@ -8,6 +8,7 @@ import {
   AlovaOptions,
   RequestBody,
   RespondedAlovaGenerics,
+  StatesExport,
   StatesHook
 } from '~/typings';
 import Method from './Method';
@@ -160,7 +161,7 @@ export class Alova<AG extends AlovaGenerics> {
   }
 }
 
-export let boundStatesHook: StatesHook<any, any> | undefined = undefinedValue;
+export let boundStatesHook: StatesHook<StatesExport<any>> | undefined = undefinedValue;
 export const usingL1CacheAdapters: AlovaGlobalCacheAdapter[] = [];
 export const usingL2CacheAdapters: AlovaGlobalCacheAdapter[] = [];
 
@@ -170,36 +171,16 @@ export const usingL2CacheAdapters: AlovaGlobalCacheAdapter[] = [];
  * @returns alova instance.
  */
 export const createAlova = <
-  State,
-  Computed,
-  Watched,
-  Export,
   RequestConfig,
   Response,
   ResponseHeader,
   L1Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter,
   L2Cache extends AlovaGlobalCacheAdapter = AlovaDefaultCacheAdapter
 >(
-  options: AlovaOptions<
-    AlovaGenerics<State, Computed, Watched, Export, any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>
-  >
+  options: AlovaOptions<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>>
 ) => {
   const alovaInstance = newInstance(
-    Alova<
-      AlovaGenerics<
-        State,
-        Computed,
-        Watched,
-        Export,
-        any,
-        any,
-        RequestConfig,
-        Response,
-        ResponseHeader,
-        L1Cache,
-        L2Cache
-      >
-    >,
+    Alova<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache>>,
     options
   );
   const newStatesHook = alovaInstance.options.statesHook;

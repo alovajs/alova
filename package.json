@@ -2,6 +2,7 @@
   "name": "alova-root",
   "version": "0.0.0",
   "homepage": "https://alova.js.org",
+  "private": "true",
   "keywords": [
     "alova",
     "react",

@@ -9,9 +9,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "main": "./dist/psc.esm.js",
-      "module": "./dist/psc.esm.js",
-      "require": "./dist/psc.common.cjs"
+      "main": "./dist/index.esm.js",
+      "module": "./dist/index.esm.js",
+      "require": "./dist/index.common.cjs"
     },
     "./*": "./*"
   },
