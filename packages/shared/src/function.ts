@@ -190,10 +190,13 @@ export const omit = <T extends Record<string, any>, K extends keyof T>(obj: T, .
   return result;
 };
 
+/**
+ * the same as `Promise.withResolvers`
+ * @returns promise with resolvers.
+ */
 export function usePromise<T = any>(): UsePromiseExposure<T> {
   let retResolve: UsePromiseExposure<T>['resolve'];
   let retReject: UsePromiseExposure<T>['reject'];
-
   const promise = new Promise<T>((resolve, reject) => {
     retResolve = resolve;
     retReject = reject;
@@ -386,7 +389,7 @@ type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string
  */
 export function statesHookHelper<AG extends AlovaGenerics>(
   statesHook: StatesHook<StatesExport<unknown>>,
-  referingObject: ReferingObject = { trackedKeys: {} }
+  referingObject: ReferingObject = { trackedKeys: {}, bindError: falseValue }
 ) {
   const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
@@ -492,8 +495,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       }
 
       const { update: nestedHookUpdate, __proxyState: nestedProxyState } = provider;
-      // reset the tracked keys, so that the nest hook providers can be initialized.
+      // reset the tracked keys and bingError flag, so that the nest hook providers can be initialized.
       referingObject.trackedKeys = {};
+      referingObject.bindError = falseValue;
+
       const extraProvider = {
         // expose referingObject automatically.
         __referingObj: referingObject,
@@ -570,20 +575,6 @@ const cacheKeyPrefix = '$a.';
  * build common cache key.
  */
 export const buildNamespacedCacheKey = (namespace: string, key: string) => cacheKeyPrefix + namespace + key;
-
-/**
- * the same as `Promise.withResolvers`
- * @returns promise with resolvers.
- */
-export const promiseWithResolvers = <T>() => {
-  let resolve: (value: T | PromiseLike<T>) => void = noop;
-  let reject: (reason?: any) => void = noop;
-  const promise = newInstance(Promise<T>, (res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-};
 
 /**
  * 根据避让策略和重试次数计算重试延迟时间

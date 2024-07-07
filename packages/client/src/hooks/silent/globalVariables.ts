@@ -125,4 +125,4 @@ export type GlobalSQEvents = {
 export const globalSQEventManager = createEventManager<GlobalSQEvents>();
 
 /** silentAssert */
-export const silentAssert = createAssert('useSQHook');
+export const silentAssert = createAssert('useSQRequest');

@@ -92,7 +92,7 @@ module.exports = function createRollupConfig(bundleConfig, version) {
     const env = isProdBuild ? 'production' : isBrowser ? 'development' : undefined;
 
     const banner = `/**
-  * ${pkg.name} ${version} (${pkg.homepage})
+  * ${pkg.name} ${version || pkg.version} (${pkg.homepage})
   * Document ${pkg.homepage}
   * Copyright ${new Date().getFullYear()} ${author}. All Rights Reserved
   * Licensed under MIT (${repository}/blob/main/LICENSE)

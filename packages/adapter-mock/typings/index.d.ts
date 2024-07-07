@@ -84,7 +84,7 @@ export interface StatusResponse {
   body?: any;
 }
 export type MockFunction = (request: MockServerRequest) => StatusResponse | any;
-export type Mock = Record<string, MockFunction | string | number | Record<string, any> | any[]>;
+export type Mock = Record<string, MockFunction | string | number | null | Record<string, any> | any[]>;
 
 export interface MockWrapper {
   enable: boolean;

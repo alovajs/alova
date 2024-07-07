@@ -13,7 +13,7 @@ import { push2PersistentSilentQueue } from '@/hooks/silent/storage/silentMethodS
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
 import createEventManager from '@alova/shared/createEventManager';
-import { promiseWithResolvers } from '@alova/shared/function';
+import { usePromise } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
 import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
@@ -132,7 +132,7 @@ describe('boot silent queue', () => {
     const successMockFn = jest.fn();
     const beforeMockFn = jest.fn();
 
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse({ id: 'loading...' });
     const vid = virtualResponse.id;
 
@@ -286,7 +286,7 @@ describe('boot silent queue', () => {
       requestAdapter: mockRequestAdapter,
       cacheLogger: false
     });
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse({ id: undefined, other: undefined });
     const methodInstance = new Method('POST', alovaInst, '/detail', {
       transform: () => undefined // 响应数据最终为undefined
@@ -352,7 +352,7 @@ describe('boot silent queue', () => {
       cacheLogger: false
     });
 
-    const { promise: pms, resolve } = promiseWithResolvers();
+    const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse(undefined);
     const methodInstance = new Method('POST', alovaInst, '/detail', {
       transform: () => true

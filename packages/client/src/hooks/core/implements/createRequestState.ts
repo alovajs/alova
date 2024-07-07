@@ -18,7 +18,6 @@ import {
   forEach,
   isArray,
   isSSR,
-  len,
   promiseCatch,
   trueValue,
   undefinedValue
@@ -67,7 +66,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
-  const { middleware, __referingObj: referingObject = { trackedKeys: {} } } = useHookConfig;
+  const { middleware, __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
   let initialLoading = middleware ? falseValue : !!immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
@@ -142,8 +141,8 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   // 捕获异常避免异常继续向外抛出
   const wrapEffectRequest = () => {
     promiseCatch(handleRequest(), error => {
-      // the existence of error handlers and the error tracking indicates that the error need to throw.
-      if (len(eventManager.eventMap[KEY_ERROR] || []) <= 0 && !referingObject.trackedKeys.error) {
+      // the error tracking indicates that the error need to throw.
+      if (!referingObject.bindError && !referingObject.trackedKeys.error) {
         throw error;
       }
     });
@@ -182,6 +181,9 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
       eventManager.on(KEY_SUCCESS, handler);
     },
     onError(handler: ErrorHandler<AG>) {
+      // will not throw error when bindError is true.
+      // it will reset in `exposeProvider` so that ignore the error binding in custom use hooks.
+      referingObject.bindError = trueValue;
       eventManager.on(KEY_ERROR, handler);
     },
     onComplete(handler: CompleteHandler<AG>) {

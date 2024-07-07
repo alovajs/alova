@@ -221,6 +221,10 @@ export interface ReferingObject {
    * the map of tracked state keys
    */
   trackedKeys: Record<string, boolean>;
+  /**
+   * has been bound error event
+   */
+  bindError: boolean;
   [key: string]: any;
 }
 export type StatesExportHelper<I extends StatesExport<any>> = I;

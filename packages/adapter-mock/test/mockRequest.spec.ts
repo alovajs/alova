@@ -66,42 +66,33 @@ describe('mock request', () => {
       )
       .send();
     expect(payload).toStrictEqual({ id: 1 });
-    expect(mockApi).toBeCalled();
-    expect(mockResponse).toBeCalled();
+    expect(mockApi).toHaveBeenCalled();
+    expect(mockResponse).toHaveBeenCalled();
   });
 
-  test('should receive all request data', async () => {
+  test('should call `mockRequestLogger` and receive all request data', async () => {
     const mocks = defineMock({
       '[POST]/detail': () => ({
         id: 1
-      })
+      }),
+      '[POST]/detail2': null
     });
 
     const mockFn = jest.fn();
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
-      onMockResponse: responseData => ({
-        response: responseData.body,
-        headers: {}
-      }),
-      mockRequestLogger: ({ isMock, url, method, headers, query, data, responseHeaders, response }) => {
-        mockFn();
-        expect(isMock).toBeTruthy();
-        expect(url).toBe('http://xxx/detail?aa=1&bb=2');
-        expect(method).toBe('POST');
-        expect(headers).toStrictEqual({
-          customHeader: 1
-        });
-        expect(query).toStrictEqual({
-          aa: '1',
-          bb: '2'
-        });
-        expect(data).toStrictEqual({});
-        expect(responseHeaders).toStrictEqual({});
-        expect(response).toStrictEqual({
-          id: 1
-        });
+      onMockResponse: (responseData, _, method) => {
+        if (method.url === '/detail2') {
+          throw new Error('response error');
+        }
+        return {
+          response: responseData.body,
+          headers: {}
+        };
+      },
+      mockRequestLogger: logger => {
+        mockFn(logger);
       }
     });
 
@@ -109,19 +100,38 @@ describe('mock request', () => {
       baseURL: 'http://xxx',
       requestAdapter: mockRequestAdapter
     });
-    const payload = await alovaInst
-      .Post(
-        '/detail?aa=1&bb=2',
-        {},
-        {
-          headers: {
-            customHeader: 1
-          }
+    const payload = await alovaInst.Post(
+      '/detail?aa=1&bb=2',
+      {},
+      {
+        headers: {
+          customHeader: 1
         }
-      )
-      .send();
+      }
+    );
     expect(payload).toStrictEqual({ id: 1 });
-    expect(mockFn).toBeCalled();
+    expect(mockFn).toHaveBeenCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledWith({
+      isMock: true,
+      url: 'http://xxx/detail?aa=1&bb=2',
+      method: 'POST',
+      headers: {
+        customHeader: 1
+      },
+      params: {},
+      query: {
+        aa: '1',
+        bb: '2'
+      },
+      data: {},
+      responseHeaders: {},
+      response: {
+        id: 1
+      }
+    });
+
+    await expect(alovaInst.Post('/detail2').send()).rejects.toThrow('response error');
+    expect(mockFn).toHaveBeenCalledTimes(1); // mockRequestLogger will not be called when throw error in `onMockResponse`
   });
 
   test('response with status and statusText', async () => {
@@ -162,7 +172,51 @@ describe('mock request', () => {
       expect(err.name).toBe('403');
       expect(err.message).toBe('customer error');
     }
-    expect(mockFn).toBeCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return null when return `null` in mock', async () => {
+    const mocks = defineMock({
+      '[POST]/detail': () => null
+    });
+
+    // 模拟数据请求适配器
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      delay: 10,
+      onMockResponse({ body }) {
+        return {
+          response: body,
+          headers: {}
+        };
+      }
+    });
+    const alova = createAlova({
+      baseURL: 'http://xxx',
+      requestAdapter: mockRequestAdapter
+    });
+    const data = await alova.Post('/detail');
+    expect(data).toBeNull();
+  });
+
+  test('should throw error of 404 when return `undefined` in mock', async () => {
+    const mocks = defineMock({
+      '[POST]/detail': () => undefined
+    });
+
+    // 模拟数据请求适配器
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      delay: 10
+    });
+    const alova = createAlova({
+      baseURL: 'http://xxx',
+      requestAdapter: mockRequestAdapter
+    });
+    const response = await alova.Post<Response>('/detail');
+    expect(response.status).toBe(404);
+    expect(response.statusText).toBe('api not found');
+
+    // access api that not exists
+    expect(alova.Post<Response>('/detail234')).rejects.toThrow('cannot find the httpAdapter');
   });
 
   test('should receive error when throw it in mock function', async () => {

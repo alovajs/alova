@@ -1,6 +1,6 @@
 import { EventManager } from '@alova/shared/createEventManager';
-import { getContext, instanceOf, uuid } from '@alova/shared/function';
-import { falseValue, isArray, splice, undefinedValue } from '@alova/shared/vars';
+import { uuid } from '@alova/shared/function';
+import { isArray, splice, undefinedValue } from '@alova/shared/vars';
 import { AlovaGenerics, Method } from 'alova';
 import type {
   BackoffPolicy,
@@ -166,19 +166,15 @@ export class SilentMethod<AG extends AlovaGenerics> {
   }
 
   /**
-   * // TODO: 检查matcher参数
    * 设置延迟更新状态对应的method实例以及对应的状态名
    * 它将在此silentMethod响应后，找到对应的状态数据并将vData更新为实际数据
    *
-   * @param matcher method实例匹配器
+   * @param method method实例
    * @param updateStateName 更新的状态名，默认为data，也可以设置多个
    */
-  public setUpdateState(matcher: Method<AG>, updateStateName: string | string[] = 'data') {
-    const methodInstance = instanceOf(matcher, Method<AG>)
-      ? matcher
-      : getContext(this.entity).snapshots.match(matcher, falseValue);
-    if (methodInstance) {
-      this.targetRefMethod = methodInstance;
+  public setUpdateState(method: Method<AG>, updateStateName: string | string[] = 'data') {
+    if (method) {
+      this.targetRefMethod = method;
       this.updateStates = isArray(updateStateName) ? (updateStateName as string[]) : [updateStateName as string];
     }
   }

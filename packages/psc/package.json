@@ -1,6 +1,6 @@
 {
   "name": "@alova/psc",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.7",
   "description": "process shared cache for alova.js on nodejs, deno, bun and electron",
   "homepage": "https://alova.js.org",
   "main": "dist/psc.esm.js",
@@ -63,12 +63,12 @@
   "devDependencies": {
     "@alova/scripts": "workspace:*",
     "@types/node-ipc": "^9.2.3",
-    "vue-demi": "^0.14.7",
-    "alova": "workspace:*"
+    "alova": "workspace:*",
+    "electron": "^30.1.0"
   },
   "peerDependencies": {
-    "electron": "^30.1.0",
-    "alova": "^3.0.0-beta.6"
+    "alova": "^3.0.0-beta.9",
+    "electron": "^30.1.0"
   },
   "config": {
     "commitizen": {

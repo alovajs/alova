@@ -15,9 +15,9 @@ Object.defineProperties(globalThis, {
   }
 });
 
-// if the environment is jsdom, set process.browser to true
+// if the environment is jsdom, set process.cwd to undefined
 if (typeof window !== 'undefined') {
-  (process as any).browser = true;
+  (process as any).cwd = undefined;
 }
 
 // undici must import after defining TextDecoder and TextEncoder, otherwise it will throw error
