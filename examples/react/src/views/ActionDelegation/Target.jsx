@@ -11,7 +11,8 @@ function Target() {
   const content = () => {
     if (loading) {
       return <nord-spinner size="s" />;
-    } else if (error) {
+    }
+    if (error) {
       return <div>{error.message}</div>;
     }
     return (

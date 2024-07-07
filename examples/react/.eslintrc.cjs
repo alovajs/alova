@@ -1,5 +1,4 @@
 module.exports = {
-  root: true,
   env: { browser: true, es2020: true },
   extends: [
     'eslint:recommended',
@@ -13,6 +12,10 @@ module.exports = {
   plugins: ['react-refresh'],
   rules: {
     'react/jsx-no-target-blank': 'off',
-    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    'jsx-a11y/control-has-associated-label': 'off',
+    'jsx-a11y/anchor-is-valid': 'off',
+    'jsx-a11y/click-events-have-key-events': 'off',
+    'jsx-a11y/no-static-element-interactions': 'off'
   }
 };

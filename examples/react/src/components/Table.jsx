@@ -13,7 +13,7 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
       class="relative">
       {loading ? (
         <div className="absolute top-0 left-0 right-0 bottom-0 bg-gray-600 bg-opacity-30 z-10 flex items-center justify-center">
-          <nord-spinner></nord-spinner>
+          <nord-spinner />
         </div>
       ) : null}
       {title ? (
@@ -69,7 +69,8 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
             onClick={() => pagination.onChange(pagination.page - 1, pagination.pageSize)}>
             <nord-icon
               name="arrow-left-small"
-              label="Previous"></nord-icon>
+              label="Previous"
+            />
           </nord-button>
           {pagination.page > 5 ? (
             <p
@@ -101,7 +102,8 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
             onClick={() => pagination.onChange(pagination.page + 1, pagination.pageSize)}>
             <nord-icon
               name="arrow-right-small"
-              label="Next"></nord-icon>
+              label="Next"
+            />
           </nord-button>
 
           {pagination.pageSizes ? (

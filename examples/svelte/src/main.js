@@ -1,17 +1,13 @@
 import '@nordhealth/components';
 import '@nordhealth/css';
 import { bootSilentFactory } from 'alova/client';
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import Layout from './Layout';
+import Layout from './Layout.svelte';
 import { alova } from './api';
-import './index.css';
+import './app.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <Layout />
-  </React.StrictMode>
-);
+export default new Layout({
+  target: document.getElementById('app')
+});
 
 // need to boot silent factory before using useSQRequest
 bootSilentFactory({
