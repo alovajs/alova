@@ -92,11 +92,33 @@
             <tr use:bindProps={rowProps(row)}>
               {#each columns as { dataIndex, render }}
                 <td>
-                  {#if typeof render === 'function'}
-                    <svelte:component
-                      this={render(row[dataIndex], row)}
-                      {row}
-                      {index} />
+                  {#if typeof render === 'string'}
+                    {#if render === 'slot1'}
+                      <slot
+                        name="slot1"
+                        {row}
+                        {index}></slot>
+                    {:else if render === 'slot2'}
+                      <slot
+                        name="slot2"
+                        {row}
+                        {index}></slot>
+                    {:else if render === 'slot3'}
+                      <slot
+                        name="slot3"
+                        {row}
+                        {index}></slot>
+                    {:else if render === 'slot4'}
+                      <slot
+                        name="slot4"
+                        {row}
+                        {index}></slot>
+                    {:else if render === 'slot5'}
+                      <slot
+                        name="slot5"
+                        {row}
+                        {index}></slot>
+                    {/if}
                   {:else}
                     {row[dataIndex]}
                   {/if}
