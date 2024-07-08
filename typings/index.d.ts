@@ -94,12 +94,6 @@ export interface MethodRequestConfig {
   params: Arg;
 
   /**
-   * 参数序列化
-   * @param params 参数
-   */
-  paramsSerializer?: ParamsSerializer;
-
-  /**
    * 请求头
    */
   headers: Arg;

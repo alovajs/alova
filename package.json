@@ -140,6 +140,7 @@
     "@testing-library/vue": "^6.6.0",
     "@types/jest": "^29.2.4",
     "@types/node-fetch": "^2.6.1",
+    "@types/qs": "^6.9.15",
     "@types/react": "^17.0.60",
     "@types/react-dom": "^17.0.20",
     "@types/testing-library__jest-dom": "^5.14.5",
@@ -181,5 +182,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "qs": "^6.12.2"
   }
 }

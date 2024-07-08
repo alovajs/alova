@@ -6,8 +6,6 @@ import { getPersistentRawData, persistResponse } from '@/storage/responseStorage
 import cloneMethod from '@/utils/cloneMethod';
 import {
   AlovaRequestAdapter,
-  Arg,
-  ParamsSerializer,
   ProgressUpdater,
   ResponseCompleteHandler,
   ResponsedHandler,
@@ -31,10 +29,7 @@ import {
 import {
   deleteAttr,
   falseValue,
-  filterItem,
   len,
-  mapItem,
-  objectKeys,
   PromiseCls,
   promiseFinally,
   promiseReject,
@@ -44,73 +39,11 @@ import {
   undefinedValue
 } from '../utils/variables';
 import { invalidateCache } from './manipulateCache';
+import { buildCompletedURL } from '@/functions/buildURL';
 
 // 请求适配器返回信息暂存，用于实现请求共享
 type RequestAdapterReturnType = ReturnType<AlovaRequestAdapter<any, any, any, any, any>>;
 const adapterReturnMap: Record<string, Record<string, RequestAdapterReturnType>> = {};
-
-/**
- * 构建完整的url
- * @param baseURL baseURL
- * @param url 路径
- * @param params url参数
- * @param paramsSerializer 参数序列化
- * @returns 完整的url
- */
-const buildCompletedURL = (baseURL: string, url: string, params: Arg, paramsSerializer?: ParamsSerializer) => {
-  // 如果不是/或http协议开头的，则需要添加/
-  url = url.match(/^(\/|https?:\/\/)/) ? url : `/${url}`;
-
-  // 忽略 url 中 # 后面的内容
-  const urlHashIndex = url.indexOf('#');
-
-  if (urlHashIndex !== -1) {
-    url = url.slice(0, urlHashIndex);
-  }
-
-  const fullPath = buildFullPath(baseURL, url);
-
-  return buildUrlParams(fullPath, params, paramsSerializer ?? defaultParamsSerializer);
-};
-
-/**
- * 构建完整 url 路径
- * @param baseURL baseURL
- * @param url 路径
- */
-const buildFullPath = (baseURL: string, url: string) => {
-  // baseURL如果以/结尾，则去掉/
-  const _baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
-
-  return _baseURL + url;
-};
-
-/**
- * 构建 url 查询参数
- * @param url url
- * @param params 查询参数
- * @param paramsSerializer 参数序列化
- */
-const buildUrlParams = (url: string, params: Arg, paramsSerializer: ParamsSerializer) => {
-  const paramsStr = paramsSerializer(params);
-
-  if (!paramsStr) return url;
-
-  // 将get参数拼接到url后面，注意url可能已存在参数
-  return url.includes('?') ? `${url}&${paramsStr}` : `${url}?${paramsStr}`;
-};
-
-const defaultParamsSerializer: ParamsSerializer = params => {
-  // 将params对象转换为get字符串
-  // 过滤掉值为undefined的
-
-  if (!params) return '';
-
-  return mapItem(
-    filterItem(objectKeys(params), key => params[key] !== undefinedValue),
-    key => `${key}=${params[key]}`
-  ).join('&');
-};
 
 /**
  * 实际的请求函数
@@ -166,7 +99,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
       // 发送请求前调用钩子函数
       // beforeRequest支持同步函数和异步函数
       await beforeRequest(clonedMethod);
-      const { baseURL, url: newUrl, type, data, config } = clonedMethod,
+      const { baseURL, url: newUrl, type, data } = clonedMethod,
         {
           params = {},
           headers = {},
@@ -206,7 +139,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         // 请求数据
         const ctrls = requestAdapter(
           {
-            url: buildCompletedURL(baseURL, newUrl, params, config.paramsSerializer ?? paramsSerializer),
+            url: buildCompletedURL(baseURL, newUrl, params, paramsSerializer),
             type,
             data,
             headers
