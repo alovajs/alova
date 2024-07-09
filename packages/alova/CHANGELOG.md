@@ -1,5 +1,14 @@
 # alova
 
+## 3.0.0-beta.11
+
+### Patch Changes
+
+- [#442](https://github.com/alovajs/alova/pull/442) [`fa6d2bc`](https://github.com/alovajs/alova/commit/fa6d2bc98a71eb8fe76db15b01f99253f2b98413) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - remove the variable `isTesting`
+
+- Updated dependencies [[`fa6d2bc`](https://github.com/alovajs/alova/commit/fa6d2bc98a71eb8fe76db15b01f99253f2b98413)]:
+  - @alova/shared@1.0.0-beta.8
+
 ## 3.0.0-beta.10
 
 ### Patch Changes

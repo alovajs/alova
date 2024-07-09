@@ -1,5 +1,13 @@
 # @alova/psc
 
+## 1.0.0-beta.9
+
+### Patch Changes
+
+- Updated dependencies [[`fa6d2bc`](https://github.com/alovajs/alova/commit/fa6d2bc98a71eb8fe76db15b01f99253f2b98413)]:
+  - @alova/shared@1.0.0-beta.8
+  - alova@3.0.0-beta.11
+
 ## 1.0.0-beta.8
 
 ### Patch Changes
