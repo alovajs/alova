@@ -52,7 +52,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.0-beta.10"
+    "alova": "^3.0.0-beta.11"
   },
   "devDependencies": {
     "@alova/mock": "workspace:*",
