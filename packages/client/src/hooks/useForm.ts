@@ -94,23 +94,23 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   /**
    * 重置form数据
    */
-  const reset = memorize(() => {
+  const reset = () => {
     reseting.current = trueValue;
     const clonedFormData = cloneFormData(initialForm);
     clonedFormData && (form.v = clonedFormData);
     enableStore && storageContext.remove(storagedKey);
-  });
+  };
 
   /**
    * 更新form数据
    * @param newForm 新表单数据
    */
-  const updateForm = memorize((newForm: Partial<FormData> | ((oldForm: FormData) => FormData)) => {
+  const updateForm = (newForm: Partial<FormData> | ((oldForm: FormData) => FormData)) => {
     form.v = {
       ...form.v,
       ...newForm
     } as FormData;
-  });
+  };
 
   const hookProvider = exposeProvider({
     // 第一个参数固定为form数据
