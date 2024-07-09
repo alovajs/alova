@@ -849,4 +849,65 @@ describe('useWatcher hook with react', () => {
       expect(successMockFn).toHaveBeenCalledTimes(3);
     });
   });
+
+  test('should request only once when debounce is set', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const getter = (id1: number, id2: number) =>
+      alova.Get('/unit-test', {
+        params: {
+          id1,
+          id2
+        },
+        timeout: 10000,
+        transform: ({ data }: Result<true>) => data,
+        cacheFor: 100 * 1000
+      });
+    function Page() {
+      const [stateId1, setStateId1] = useState(0);
+      const [stateId2, setStateId2] = useState(10);
+
+      const { loading, data, send } = useWatcher(() => getter(stateId1, stateId2), [stateId1, stateId2], {
+        debounce: 500,
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
+        }
+      });
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            onClick={() => {
+              setStateId1(stateId1 + 1);
+              setTimeout(() => setStateId2(11), 100);
+              setTimeout(() => setStateId2(12), 200);
+              setTimeout(() => setStateId2(13), 300);
+            }}>
+            btn
+          </button>
+          <button
+            role="btn2"
+            onClick={() => send()}>
+            btn2
+          </button>
+        </div>
+      );
+    }
+
+    const startTs = Date.now();
+    render((<Page />) as ReactElement<any, any>);
+    fireEvent.click(screen.getByRole('button'));
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('13');
+      expect(Date.now() - startTs).toBeGreaterThan(500);
+    });
+  });
 });
