@@ -73,7 +73,7 @@ jobs:
         uses: changesets/action@v1
         with:
           # Note: pnpm install after versioning is necessary to refresh lockfile
-          setupGitUser: github-actions[bot]
+          setupGitUser: true
           version: pnpm run changeset:version
           publish: pnpm run release
           commit: 'ci: release next'
