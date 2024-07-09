@@ -139,14 +139,26 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
   // 以捕获异常的方式调用handleRequest
   // 捕获异常避免异常继续向外抛出
-  const wrapEffectRequest = () => {
-    promiseCatch(handleRequest(), error => {
+  const wrapEffectRequest = (ro = referingObject, handler?: Method<AG> | AlovaMethodHandler<AG>) =>
+    promiseCatch(handleRequest(handler), error => {
       // the error tracking indicates that the error need to throw.
-      if (!referingObject.bindError && !referingObject.trackedKeys.error) {
+      if (!ro.bindError && !ro.trackedKeys.error) {
         throw error;
       }
     });
-  };
+
+  /**
+   * fix: #421
+   * Use ref wraps to prevent react from creating new debounce function in every render
+   * Explicit passing is required because the context will change
+   */
+  const debouncingSendHandler = ref(
+    debounce(
+      (delay, ro, handler) => wrapEffectRequest(ro, handler),
+      (changedIndex?: number) =>
+        isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
+    )
+  );
 
   // 在服务端渲染时不发送请求
   if (!isSSR) {
@@ -154,10 +166,8 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
       handler:
         // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
         hasWatchingStates
-          ? debounce(wrapEffectRequest, (changedIndex?: number) =>
-              isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
-            )
-          : wrapEffectRequest,
+          ? delay => debouncingSendHandler.current(delay, referingObject, methodHandler)
+          : () => wrapEffectRequest(referingObject),
       removeStates: () => forEach(hookInstance.rf, fn => fn()),
       saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),
       frontStates,
