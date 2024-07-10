@@ -19,6 +19,7 @@ import {
   PromiseCls,
   STORAGE_RESTORE,
   falseValue,
+  forEach,
   includes,
   len,
   mapItem,
@@ -414,6 +415,9 @@ export function statesHookHelper<AG extends AlovaGenerics>(
     mapItem(deps, item => (instanceOf(item, FrameworkReadableState) ? item.e : item));
   const createdStateList = [] as string[];
 
+  // key of deps on computed
+  const depKeys: Record<string, true> = {};
+
   return {
     create: <Data, Key extends string>(initialValue: Data, key: Key) => {
       pushItem(createdStateList, key); // record the keys of created states.
@@ -430,14 +434,22 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       getter: () => Data,
       depList: (GeneralState | FrameworkReadableState<any, string>)[],
       key: Key
-    ) =>
-      newInstance(
+    ) => {
+      // Collect all dependencies in computed
+      forEach(depList, dep => {
+        if (dep.k) {
+          depKeys[dep.k as string] = true;
+        }
+      });
+
+      return newInstance(
         FrameworkReadableState<Data, Key>,
         statesHook.computed(getter, mapDeps(depList), referingObject) as GeneralState<Data>,
         key,
         state => dehydrate(state, key, referingObject),
         exportState
-      ),
+      );
+    },
     effectRequest: (effectRequestParams: EffectRequestParams<any>) =>
       statesHook.effectRequest(effectRequestParams, referingObject),
     ref,
@@ -496,7 +508,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
 
       const { update: nestedHookUpdate, __proxyState: nestedProxyState } = provider;
       // reset the tracked keys and bingError flag, so that the nest hook providers can be initialized.
-      referingObject.trackedKeys = {};
+      // Always track the dependencies in computed
+      referingObject.trackedKeys = {
+        ...depKeys
+      };
       referingObject.bindError = falseValue;
 
       const extraProvider = {
