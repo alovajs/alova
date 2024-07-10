@@ -1,20 +1,20 @@
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onDestroy, onMount } from 'svelte';
 
 const useScroll = (offset = 0) => {
-  const isBottom = ref(false);
+  let isBottom = false;
   const handleScroll = e => {
     const target = e.target === document ? e.target.documentElement : e.target;
-    const scrollTop = target.scrollTop;
+    const { scrollTop } = target;
     const windowHeight = target.clientHeight;
-    const scrollHeight = target.scrollHeight;
-    isBottom.value = scrollTop + windowHeight + offset >= scrollHeight;
+    const { scrollHeight } = target;
+    isBottom = scrollTop + windowHeight + offset >= scrollHeight;
   };
-  onMounted(() => {
+  onMount(() => {
     window.addEventListener('scroll', handleScroll);
   });
 
   // Call the handleScroll function to set the initial state correctly
-  onUnmounted(() => {
+  onDestroy(() => {
     window.removeEventListener('scroll', handleScroll);
   });
   return { isBottom };

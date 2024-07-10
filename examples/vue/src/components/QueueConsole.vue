@@ -69,20 +69,18 @@ const useWaitingSilentQueue = queueName => {
   const customQueue = [];
   const originalPush = customQueue.push;
   const originalShift = customQueue.shift;
-
   customQueue.push = function (...items) {
     defaultWaitingSilentQueue.value.queue.push(...items);
     return originalPush.call(this, ...items);
   };
-
   customQueue.shift = function () {
     const silentMethodInstance = originalShift.call(this);
     defaultWaitingSilentQueue.value.queue.shift();
     return silentMethodInstance;
   };
-
   silentQueueMap[queueName] = customQueue;
 };
+useWaitingSilentQueue(props.queueName);
 
 const handleModeChange = event => {
   const value = Number(event.target.value);
@@ -91,7 +89,6 @@ const handleModeChange = event => {
 };
 
 onMounted(() => {
-  useWaitingSilentQueue(props.queueName);
   const offSubmitError = onSilentSubmitError(event => {
     showToast(
       `Request Error: ${event.error}` + (event.retryDelay ? `, ${event.retryDelay / 1000}s after will retry` : ''),

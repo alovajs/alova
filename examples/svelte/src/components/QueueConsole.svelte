@@ -6,7 +6,7 @@
   export let queueName;
   let silentRequestError = '';
   let networkMode = 0;
-  let defaultWaitingSilentQueue = { queue: [], queueName };
+  let waitingSilentQueue = { queue: [], queueName };
 
   const handleModeChange = event => {
     networkMode = Number(event.target.value);
@@ -17,42 +17,41 @@
     const customQueue = [];
     const originalPush = customQueue.push;
     const originalShift = customQueue.shift;
-
     customQueue.push = function (...items) {
-      defaultWaitingSilentQueue.queue.push(...items);
+      waitingSilentQueue.queue.push(...items);
+      waitingSilentQueue = waitingSilentQueue;
       return originalPush.call(this, ...items);
     };
-
     customQueue.shift = function () {
       const silentMethodInstance = originalShift.call(this);
-      defaultWaitingSilentQueue.queue.shift();
+      waitingSilentQueue.queue.shift();
+      waitingSilentQueue = waitingSilentQueue;
       return silentMethodInstance;
     };
-
     silentQueueMap[queueName] = customQueue;
   }
+  useWaitingSilentQueue(queueName);
 
+  let offSubmitError, offSubmitFail;
   onMount(() => {
-    useWaitingSilentQueue(queueName);
-    const offSubmitError = onSilentSubmitError(event => {
+    offSubmitError = onSilentSubmitError(event => {
       showToast(
         `Request Error: ${event.error}` + (event.retryDelay ? `, ${event.retryDelay / 1000}s after will retry` : ''),
         { variant: 'error' }
       );
     });
 
-    const offSubmitFail = onSilentSubmitFail(event => {
+    offSubmitFail = onSilentSubmitFail(event => {
       silentRequestError = event.error;
       showToast('Reach max retry times, but you can still operate it', { variant: 'error' });
     });
 
     dispatch('modeChange', networkMode);
-    onDestroy(() => {
-      offSubmitError();
-      offSubmitFail();
-    });
   });
-
+  onDestroy(() => {
+    offSubmitError();
+    offSubmitFail();
+  });
   const dispatch = createEventDispatcher();
 </script>
 
@@ -71,10 +70,10 @@
   <div class="border-b-[1px] last:border-b-0 pb-4 border-slate-200">
     <div>
       <div class="text-base font-semibold mb-2">
-        Background Request Queue[{defaultWaitingSilentQueue.queueName}]
+        Background Request Queue[{waitingSilentQueue.queueName}]
       </div>
       <div class="grid gap-y-4">
-        {#each defaultWaitingSilentQueue.queue as sm, i (sm.id)}
+        {#each waitingSilentQueue.queue as sm, i (sm.id)}
           <div class="border-2 border-slate-200 rounded-md px-3 py-2 flex items-center justify-between">
             {#if !silentRequestError || i > 0}
               <div class="flex items-center">

@@ -4,7 +4,8 @@
       <div class="grid grid-cols-[repeat(2,fit-content(100px))] items-end gap-x-4">
         <nord-input
           label="Phone Number"
-          v-model="phone" />
+          v-model="phone"
+          :error="error?.message" />
         <nord-button
           variant="primary"
           @click="handleCaptchaSend"
@@ -34,7 +35,7 @@ import { sendCaptcha, submitForm } from '../api/methods';
 const phone = ref('');
 const code = ref('');
 
-const { loading, countdown, send } = useCaptcha(sendCaptcha, {
+const { loading, countdown, send, error } = useCaptcha(sendCaptcha, {
   initialCountdown: 20
 }).onSuccess(({ data }) => {
   code.value = data.code;

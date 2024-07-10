@@ -3,7 +3,7 @@
     <FileViewer
       :filePath="filePath"
       :docPath="docPath">
-      <nord-banner>It will request every 3 seconds</nord-banner>
+      <nord-banner variant="success">Toggle your browser page tabs</nord-banner>
     </FileViewer>
     <nord-button
       @click="toggleStop"

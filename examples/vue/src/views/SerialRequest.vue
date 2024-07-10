@@ -30,10 +30,8 @@ import { useSerialRequest } from 'alova/client';
 import { ref } from 'vue';
 import { getData, submitForm } from '../api/methods';
 
-// 使用ref声明响应式变量
 const msgs = ref([]);
 
-// 使用useSerialRequest处理串行请求
 const { loading, send } = useSerialRequest(
   [
     () => getData(),

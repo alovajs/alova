@@ -97,26 +97,31 @@
                       <slot
                         name="slot1"
                         {row}
+                        value={row[dataIndex]}
                         {index}></slot>
                     {:else if render === 'slot2'}
                       <slot
                         name="slot2"
                         {row}
+                        value={row[dataIndex]}
                         {index}></slot>
                     {:else if render === 'slot3'}
                       <slot
                         name="slot3"
                         {row}
+                        value={row[dataIndex]}
                         {index}></slot>
                     {:else if render === 'slot4'}
                       <slot
                         name="slot4"
                         {row}
+                        value={row[dataIndex]}
                         {index}></slot>
                     {:else if render === 'slot5'}
                       <slot
                         name="slot5"
                         {row}
+                        value={row[dataIndex]}
                         {index}></slot>
                     {/if}
                   {:else}

@@ -13,16 +13,16 @@
     "@nordhealth/components": "^3.14.1",
     "@nordhealth/css": "^3.2.1",
     "alova": "beta",
-    "trix": "^2.1.1",
-    "vue": "^3.4.29"
+    "trix": "^2.1.2",
+    "vue": "^3.4.31"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "autoprefixer": "^10.4.19",
     "eslint-plugin-vue": "^9.27.0",
-    "postcss": "^8.4.38",
+    "postcss": "^8.4.39",
     "tailwindcss": "^3.4.4",
-    "vite": "^5.3.1"
+    "vite": "^5.3.3"
   }
 }

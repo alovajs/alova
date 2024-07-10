@@ -14,8 +14,7 @@
       </nord-banner>
       <nord-input
         label="Suffix"
-        :value="suffix"
-        @input="handleInput" />
+        v-model="suffix" />
       <nord-button @click="handleRefreshSideMenu">Re-request with this suffix</nord-button>
     </div>
   </nord-card>
@@ -30,11 +29,6 @@ const filePath = window.__page.source[1];
 const docPath = window.__page.doc;
 // 使用ref声明响应式变量
 const suffix = ref('');
-
-// handleInput方法用于处理输入事件
-const handleInput = event => {
-  suffix.value = event.target.value;
-};
 
 // handleRefreshSideMenu方法用于触发刷新侧边菜单的操作
 const handleRefreshSideMenu = () => {

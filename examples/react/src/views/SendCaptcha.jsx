@@ -5,7 +5,7 @@ import { sendCaptcha, submitForm } from '../api/methods';
 function View() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
-  const { loading, countdown, send } = useCaptcha(sendCaptcha, {
+  const { loading, countdown, send, error } = useCaptcha(sendCaptcha, {
     initialCountdown: 20
   }).onSuccess(({ data }) => {
     setCode(data.code);
@@ -14,7 +14,7 @@ function View() {
   const { loading: submiting, send: submitSend } = useRequest(() => submitForm({ phone, code }), {
     immediate: false
   }).onSuccess(({ data }) => {
-    alert('Submited, request body is: ' + JSON.stringify(data));
+    alert(`Submited, request body is: ${JSON.stringify(data)}`);
   });
 
   return (
@@ -24,9 +24,11 @@ function View() {
           <nord-input
             label="Phone Number"
             value={phone}
+            error={error?.message}
             onInput={({ target }) => {
               setPhone(target.value);
-            }}></nord-input>
+            }}
+          />
           <nord-button
             variant="primary"
             onClick={() => send(phone)}
@@ -40,7 +42,8 @@ function View() {
           value={code}
           onInput={({ target }) => {
             setCode(target.value);
-          }}></nord-input>
+          }}
+        />
         <nord-button
           variant="primary"
           loading={submiting || undefined}
