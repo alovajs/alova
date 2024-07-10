@@ -1,5 +1,14 @@
 # alova
 
+## 3.0.0-beta.12
+
+### Patch Changes
+
+- [#445](https://github.com/alovajs/alova/pull/445) [`f080d13`](https://github.com/alovajs/alova/commit/f080d138e81ae14a7aa9359a92317c628e527d99) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: debounce not working in useWatcher
+
+- Updated dependencies [[`7265ba2`](https://github.com/alovajs/alova/commit/7265ba288a6afae27a8d05c4186a87c5a072fbdc)]:
+  - @alova/shared@1.0.0-beta.9
+
 ## 3.0.0-beta.11
 
 ### Patch Changes

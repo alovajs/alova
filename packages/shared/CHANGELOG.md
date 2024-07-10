@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.0-beta.9
+
+### Patch Changes
+
+- [#447](https://github.com/alovajs/alova/pull/447) [`7265ba2`](https://github.com/alovajs/alova/commit/7265ba288a6afae27a8d05c4186a87c5a072fbdc) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: computed does not work when its dependent exported value is not used (#423)
+
 ## 1.0.0-beta.8
 
 ### Patch Changes
