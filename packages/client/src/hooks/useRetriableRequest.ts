@@ -149,7 +149,7 @@ export default <AG extends AlovaGenerics>(
    * 停止后将立即触发onFail事件
    */
   const stop = () => {
-    assert(currentLoadingState.current, 'there are no requests being retried');
+    assert(currentLoadingState.current, 'there is no requests being retried');
     stopManuallyError.current = newInstance(AlovaError, hookPrefix, 'stop retry manually');
     if (requesting.current) {
       nestedHookProvider.abort();

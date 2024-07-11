@@ -1,3 +1,4 @@
+import { isSpecialRequestBody } from '@alova/shared/function';
 import { MockResponse } from '~/typings';
 
 /**
@@ -9,7 +10,7 @@ export const defaultMockResponse: MockResponse<any, any, any> = ({
   statusText = 'ok',
   body
 }) => ({
-  response: new Response(JSON.stringify(body), {
+  response: new Response(isSpecialRequestBody(body) ? body : JSON.stringify(body), {
     status,
     statusText
   }),
