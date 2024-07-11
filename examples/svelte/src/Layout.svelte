@@ -57,18 +57,10 @@
     { title: 'Offline', value: 0 }
   ];
   let network = networkStatus.value;
-  let dropdownRef;
-  $: {
-    console.log(network, dropdownRef, '444');
-    networkStatus.value = network;
-    if (dropdownRef) {
-      try {
-        // dropdownRef.hide();
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  }
+  const handleNetworkChange = ({ target }) => {
+    networkStatus.value = network = Number(target.value) || 0;
+    window.location.reload();
+  };
 </script>
 
 <div
@@ -163,23 +155,18 @@
         name="navigation-toggle"></nord-icon>
     </nord-button>
     <div class="flex flex-col mb-6 md:flex-row md:justify-between">
-      <div class="flex flex-row items-center justify-between mb-2 md:justify-start">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
         <h2 class="font-bold text-2xl mr-4">{activeView.title}</h2>
-        <nord-dropdown
-          bind:this={dropdownRef}
-          size="s">
-          <nord-button slot="toggle">
-            {networkOptions.find(n => n.value === network)?.title || 'Unknown'}
-          </nord-button>
+        <nord-segmented-control on:input={handleNetworkChange}>
           {#each networkOptions as { title, value }}
-            <nord-dropdown-item
-              on:click={() => {
-                network = value;
-              }}>
-              {title}
-            </nord-dropdown-item>
+            <nord-segmented-control-item
+              label={title}
+              name="network"
+              key={value}
+              {value}
+              checked={network === value ? true : undefined} />
           {/each}
-        </nord-dropdown>
+        </nord-segmented-control>
       </div>
       {#if typeof activeView.source === 'string' || activeView.source === undefined}
         <FileViewer

@@ -29,7 +29,8 @@ function Network() {
         variant="primary">
         <nord-icon
           class="mr-2"
-          name={isStop ? 'interface-play' : 'interface-pause'}></nord-icon>
+          name={isStop ? 'interface-play' : 'interface-pause'}
+        />
         {isStop ? 'Start Request' : 'Stop Request'}
       </nord-button>
       <div className="flex">

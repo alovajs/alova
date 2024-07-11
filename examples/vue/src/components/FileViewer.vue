@@ -1,12 +1,14 @@
 <template>
   <div :class="['flex flex-row items-center justify-between', className]">
     <slot></slot>
-    <div class="flex items-center ml-2">
+    <div
+      class="flex items-center"
+      :class="$slots.default ? 'ml-2' : ''">
       <div
         @click="handleToGithub"
         :class="[
           'rounded-lg bg-slate-100 cursor-pointer transition-colors hover:bg-slate-200 flex flex-row items-center justify-between',
-          hasChildren ? 'ml-2' : '',
+          $slots.default ? 'ml-2' : '',
           showPath ? 'px-4 py-2' : ''
         ]">
         <span
@@ -36,18 +38,15 @@
 </template>
 
 <script setup>
-import { computed, defineProps } from 'vue';
+import { defineProps } from 'vue';
 import config from '../../config';
 
 const props = defineProps({
   filePath: { type: String, required: true },
   docPath: { type: String, default: null },
   showPath: { type: Boolean, default: false },
-  children: { type: Array, default: () => [] },
   className: { type: String, default: '' }
 });
-
-const hasChildren = computed(() => props.children && props.children.length > 0);
 
 const handleToGithub = () => {
   window.open(

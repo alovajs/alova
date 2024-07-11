@@ -43,7 +43,7 @@ export default function ConditionFilter() {
           <h3 className="title">List condition search with storing</h3>
         </FileViewer>
       </div>
-      <div className="grid lg:grid-cols-[repeat(3,auto)] items-end gap-4 mb-4">
+      <div className="grid md:grid-cols-[repeat(3,auto)] items-end gap-4 mb-4">
         <nord-input
           label="Search Area"
           value={form.search}

@@ -98,19 +98,15 @@
       <div class="flex flex-col mb-6 md:flex-row md:justify-between">
         <div class="flex flex-row items-center justify-between mb-2 md:justify-start">
           <h2 class="font-bold text-2xl mr-4">{{ activeView.title }}</h2>
-          <nord-dropdown
-            size="s"
-            ref="dropdownRef">
-            <nord-button slot="toggle">
-              {{ networkOptions.find(n => n.value === network)?.title || 'Unknown' }}
-            </nord-button>
-            <nord-dropdown-item
+          <nord-segmented-control @input="handleNetworkChange">
+            <nord-segmented-control-item
               v-for="{ title, value } in networkOptions"
+              :label="title"
+              name="network"
               :key="value"
-              @click="network = value">
-              {{ title }}
-            </nord-dropdown-item>
-          </nord-dropdown>
+              :value="value"
+              :checked="network === value ? true : undefined" />
+          </nord-segmented-control>
         </div>
         <FileViewer
           v-if="typeof activeView.source === 'string' || activeView.source === undefined"
@@ -137,7 +133,7 @@
 
 <script setup>
 import { invalidateCache } from 'alova';
-import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 import config from '../config';
 import { networkStatus } from './api';
 import FileViewer from './components/FileViewer';
@@ -190,10 +186,8 @@ const networkOptions = [
   { title: 'Offline', value: 0 }
 ];
 const network = ref(networkStatus.value);
-const dropdownRef = ref();
-
-watch(network, newNetwork => {
-  networkStatus.value = newNetwork;
-  dropdownRef.value.hide();
-});
+const handleNetworkChange = ({ target }) => {
+  networkStatus.value = network.value = Number(target.value) || 0;
+  window.location.reload();
+};
 </script>

@@ -52,11 +52,13 @@ function Layout() {
     { title: 'Offline', value: 0 }
   ];
   const [network, setNetwork] = useState(networkStatus.value);
-  const dropdownRef = useRef();
   useEffect(() => {
     networkStatus.value = network;
-    dropdownRef.current.hide();
   }, [network]);
+  const handleNetworkChange = ({ target }) => {
+    setNetwork(Number(target.value));
+    window.location.reload();
+  };
 
   return (
     <div
@@ -162,22 +164,19 @@ function Layout() {
           />
         </nord-button>
         <div className="flex flex-col mb-6 md:flex-row md:justify-between">
-          <div className="flex flex-row items-center justify-between mb-2 md:justify-start">
-            <h2 className="font-bold text-2xl mr-4">{activeView.title}</h2>
-            <nord-dropdown
-              size="s"
-              ref={dropdownRef}>
-              <nord-button slot="toggle">
-                {networkOptions.find(n => n.value === network)?.title || 'Unknown'}
-              </nord-button>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
+            <h2 className="font-bold text-2xl md:mr-4 mb-2">{activeView.title}</h2>
+            <nord-segmented-control onInput={handleNetworkChange}>
               {networkOptions.map(({ title, value }) => (
-                <nord-dropdown-item
-                  onClick={() => setNetwork(value)}
-                  key={value}>
-                  {title}
-                </nord-dropdown-item>
+                <nord-segmented-control-item
+                  label={title}
+                  name="network"
+                  key={value}
+                  value={value}
+                  checked={network === value ? true : undefined}
+                />
               ))}
-            </nord-dropdown>
+            </nord-segmented-control>
           </div>
 
           {typeof activeView.source === 'string' || activeView.source === undefined ? (

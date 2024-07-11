@@ -4,10 +4,7 @@
   export let filePath;
   export let docPath = null;
   export let showPath = false;
-  export let children = [];
   export let className = '';
-
-  $: hasChildren = children.length > 0;
 
   function handleToGithub() {
     window.open(
@@ -22,12 +19,15 @@
 
 <div class="flex flex-row items-center justify-between {className}">
   <slot></slot>
-  <div class="flex items-center ml-2">
+  <div
+    class="flex items-center"
+    class:ml-2={$$slots.default}>
     <div
       on:click={handleToGithub}
-      class="rounded-lg bg-slate-100 cursor-pointer transition-colors hover:bg-slate-200 flex flex-row items-center justify-between {hasChildren
-        ? 'ml-2'
-        : ''} {showPath ? 'px-4 py-2' : ''}">
+      class="rounded-lg bg-slate-100 cursor-pointer transition-colors hover:bg-slate-200 flex flex-row items-center justify-between"
+      class:ml-2={$$slots.default}
+      class:px-4={showPath}
+      class:py-2={showPath}>
       {#if showPath}
         <span class="font-mono font-bold mr-2 break-all">
           Source: src/views/{filePath}.{config.fileExt}

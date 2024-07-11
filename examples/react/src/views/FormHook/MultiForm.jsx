@@ -33,7 +33,7 @@ export default function MultiFormCard() {
     initialForm,
     resetAfterSubmiting: true
   }).onSuccess(({ data }) => {
-    alert('Submited, request body is: ' + JSON.stringify(data));
+    alert(`Submited, request body is: ${JSON.stringify(data)}`);
   });
 
   return (
@@ -155,7 +155,8 @@ function FormThree() {
                 checkbox: [...form.checkbox]
               });
             });
-          }}></nord-checkbox>
+          }}
+        />
       ))}
     </div>
   );

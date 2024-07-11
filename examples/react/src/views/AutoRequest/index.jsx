@@ -23,7 +23,8 @@ function View() {
             label={item}
             name="group"
             value={item}
-            checked={item === checkedSeg ? true : undefined}></nord-segmented-control-item>
+            checked={item === checkedSeg ? true : undefined}
+          />
         ))}
       </nord-segmented-control>
       <nord-card>{segmentGroup[checkedSeg]}</nord-card>
