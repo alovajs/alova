@@ -364,13 +364,14 @@ export const pushNewSilentMethod2Queue = async <AG extends AlovaGenerics>(
   silentMethodInstance: SilentMethod<AG>,
   cache: boolean,
   targetQueueName = DEFAULT_QUEUE_NAME,
-  onBeforePush: () => any[] = () => []
+  onBeforePush: () => any[] | Promise<any>[] = () => []
 ) => {
   silentMethodInstance.cache = cache;
   const currentQueue = (silentQueueMap[targetQueueName] =
     silentQueueMap[targetQueueName] || []) as unknown as SilentMethod<AG>[];
   const isNewQueue = len(currentQueue) <= 0;
-  const isPush2Queue = !onBeforePush().some(returns => returns === falseValue);
+  const beforePushReturns = await Promise.all(onBeforePush());
+  const isPush2Queue = !beforePushReturns.some(returns => returns === falseValue);
 
   // silent行为下，如果没有绑定fallback事件回调，则持久化
   // 如果在onBeforePushQueue返回false，也不再放入队列中

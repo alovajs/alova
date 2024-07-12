@@ -351,7 +351,9 @@ export interface SQHookConfig<AG extends AlovaGenerics> {
 export type SQRequestHookConfig<AG extends AlovaGenerics> = SQHookConfig<AG> & RequestHookConfig<AG>;
 export type FallbackHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
 export type RetryHandler<AG extends AlovaGenerics> = (event: ScopedSQRetryEvent<AG>) => void;
-export type BeforePushQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void | boolean;
+export type BeforePushQueueHandler<AG extends AlovaGenerics> = (
+  event: ScopedSQEvent<AG>
+) => void | boolean | Promise<void | boolean>;
 export type PushedQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
 export type SQHookExposure<AG extends AlovaGenerics> = Omit<
   UseHookExposure<AG>,
