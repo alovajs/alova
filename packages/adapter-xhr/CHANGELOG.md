@@ -1,5 +1,13 @@
 # @alova/adapter-xhr
 
+## 2.0.0-beta.10
+
+### Patch Changes
+
+- Updated dependencies [[`7265ba2`](https://github.com/alovajs/alova/commit/7265ba288a6afae27a8d05c4186a87c5a072fbdc), [`f080d13`](https://github.com/alovajs/alova/commit/f080d138e81ae14a7aa9359a92317c628e527d99)]:
+  - @alova/shared@1.0.0-beta.9
+  - alova@3.0.0-beta.12
+
 ## 2.0.0-beta.9
 
 ### Patch Changes
