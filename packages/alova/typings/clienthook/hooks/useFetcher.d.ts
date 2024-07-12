@@ -1,4 +1,13 @@
-import { Alova, AlovaGenerics, FetchRequestState, Method, Progress, ReferingObject, StatesHook } from 'alova';
+import {
+  Alova,
+  AlovaGenerics,
+  FetchRequestState,
+  Method,
+  Progress,
+  ReferingObject,
+  StatesExport,
+  StatesHook
+} from 'alova';
 import {
   AlovaFetcherMiddleware,
   ExportedState,
@@ -24,14 +33,14 @@ export interface FetcherHookConfig<AG extends AlovaGenerics = AlovaGenerics> ext
   updateState?: boolean;
 }
 
-export interface UseFetchExportedState<State>
+export interface UseFetchExportedState<SE extends StatesExport>
   extends FetchRequestState<
-    ExportedState<boolean, State>,
-    ExportedState<Error | undefined, State>,
-    ExportedState<Progress, State>,
-    ExportedState<Progress, State>
+    ExportedState<boolean, SE>,
+    ExportedState<Error | undefined, SE>,
+    ExportedState<Progress, SE>,
+    ExportedState<Progress, SE>
   > {}
-export interface UseFetchHookExposure<SE extends StatesExport> extends UseFetchExportedState<SE['State']> {
+export interface UseFetchHookExposure<SE extends StatesExport> extends UseFetchExportedState<SE> {
   fetch<R>(matcher: Method<AlovaGenerics<R>>, ...args: any[]): Promise<R>;
   update: StateUpdater<UseFetchExportedState<SE['State']>, SE>;
   abort: UseHookExposure['abort'];

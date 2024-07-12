@@ -263,15 +263,19 @@ describe('vue => useSQRequest', () => {
 
   test('should prevent to push silentMethod when return false in certain callback of onBeforePushQueue', async () => {
     const queue = 'tb4';
+    const successMockFn = jest.fn();
     const Get = () => alovaInst.Get<any>('/list');
-    const { onBeforePushQueue, onSuccess } = useSQRequest(Get, {
+    const { onBeforePushQueue } = useSQRequest(Get, {
       behavior: 'queue',
       queue
-    });
+    }).onSuccess(successMockFn);
+    const { onBeforePushQueue: onBeforePushQueueAsync } = useSQRequest(Get, {
+      behavior: 'queue',
+      queue
+    }).onSuccess(successMockFn);
     onBeforePushQueue(() => false);
+    onBeforePushQueueAsync(() => Promise.resolve(false));
 
-    const successMockFn = jest.fn();
-    onSuccess(successMockFn);
     await delay(0);
     expect(silentQueueMap[queue]).toStrictEqual([]);
     await delay(500);

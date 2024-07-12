@@ -1,11 +1,23 @@
 import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } from 'alova';
+import adapterFetch from 'alova/fetch';
+
+/**
+ * 统一获取AlovaRequestAdapter的类型
+ */
+export type AlovaRequestAdapterUnified<
+  RA extends
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = AlovaRequestAdapter<any, any, any>
+> = RA extends AlovaRequestAdapter<any, any, any> ? RA : ReturnType<RA>;
+
+// transform types StateHook and AlovaRequestAdapter to an AlovaGenerics
+export type StateHookAdapter2AG<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> =
+  Parameters<RA>[1] extends Method<AlovaGenerics<infer R, infer T, infer RC, infer RE, infer RH>>
+    ? AlovaGenerics<R, T, RC, RE, RH, any, any, SH extends StatesHook[''] ? SE : unknown>
+    : never;
 
 export type AlovaResponded<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> = NonNullable<
-  AlovaOptions<
-    Omit<AlovaGenerics, 'StatesExport'> & {
-      StatesExport: SH extends StatesHook<infer SE> ? SE : any;
-    } & (Parameters<RA>[1] extends Method<infer AG> ? AG : never)
-  >['responded']
+  AlovaOptions<StateHookAdapter2AG<SH, RA>>['responded']
 >;
 
 export type MetaMatches = Record<string, any>;
@@ -69,18 +81,22 @@ export interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter
   };
 }
 
-export type BeforeRequestType<AG extends AlovaGenerics> = (
-  originalBeforeRequest?: AlovaOptions<AG>['beforeRequest']
-) => AlovaOptions<AG>['beforeRequest'];
-export type ResponseType<AG extends AlovaGenerics> = (
-  originalResponded?: AlovaOptions<AG>['responded']
-) => AlovaOptions<AG>['responded'];
+export type AlovaBeforeRequest<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> = (
+  method: Method<StateHookAdapter2AG<SH, RA>>
+) => void | Promise<void>;
 
-export interface TokenAuthenticationResult<AG extends AlovaGenerics> {
-  onAuthRequired: BeforeRequestType<AG>;
-  onResponseRefreshToken: ResponseType<AG>;
+type BeforeRequestType<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> = (
+  originalBeforeRequest?: AlovaBeforeRequest<SH, RA>
+) => AlovaBeforeRequest<SH, RA>;
+type ResponseType<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> = (
+  originalResponded?: AlovaResponded<SH, RA>
+) => AlovaResponded<SH, RA>;
+
+export interface TokenAuthenticationResult<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> {
+  onAuthRequired: BeforeRequestType<SH, RA>;
+  onResponseRefreshToken: ResponseType<SH, RA>;
   waitingList: {
-    method: Method;
+    method: Method<StateHookAdapter2AG<SH, RA>>;
     resolve: () => void;
   }[];
 }
@@ -147,11 +163,14 @@ export interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export declare function createClientTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
-  options: ClientTokenAuthenticationOptions<
-    AlovaRequestAdapter<AG['RequestConfig'], AG['Response'], AG['ResponseHeader']>
-  >
-): TokenAuthenticationResult<AG>;
+export declare function createClientTokenAuthentication<
+  SH extends StatesHook<any>,
+  RA extends
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = typeof adapterFetch
+>(
+  options: ClientTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>
+): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
 
 /**
  * 创建服务端的token认证拦截器
@@ -176,6 +195,11 @@ export declare function createClientTokenAuthentication<AG extends AlovaGenerics
  * @param options 配置参数
  * @returns token认证拦截器函数
  */
-export declare function createServerTokenAuthentication<AG extends AlovaGenerics = AlovaGenerics>(
-  options: ServerTokenAuthenticationOptions<AlovaRequestAdapter<any, any, any>>
-): TokenAuthenticationResult<AG>;
+export declare function createServerTokenAuthentication<
+  SH extends StatesHook<any>,
+  RA extends
+    | AlovaRequestAdapter<any, any, any>
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = typeof adapterFetch
+>(
+  options: ServerTokenAuthenticationOptions<AlovaRequestAdapterUnified<RA>>
+): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
