@@ -441,7 +441,7 @@ describe('react => useRetriableRequest', () => {
     act(() => {
       fireEvent.click(screen.getByRole('btnStop'));
     });
-    expect(screen.getByRole('error')).toHaveTextContent('there are no requests being retried');
+    expect(screen.getByRole('error')).toHaveTextContent('there is no requests being retried');
   });
 
   test('should throws stop error when stop in requseting', async () => {
