@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.0-beta.13
+
+### Patch Changes
+
+- [#453](https://github.com/alovajs/alova/pull/453) [`a5c6dd3`](https://github.com/alovajs/alova/commit/a5c6dd341abe796944ef21fa0c72c1e55cf14c82) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: cannot stop pushing SilentMethod into queue when using async handler in onBeforePushQueue(#434)
+
 ## 3.0.0-beta.12
 
 ### Patch Changes
