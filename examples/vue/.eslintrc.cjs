@@ -6,5 +6,6 @@ module.exports = {
   plugins: ['vue'],
   rules: {
     // 在这里添加或覆盖规则
-  }
+  },
+  root: true
 };

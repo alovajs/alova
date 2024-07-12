@@ -13,5 +13,6 @@ module.exports = {
     'a11y-no-static-element-interactions': 'off',
     'a11y-missing-attribute': 'off',
     'import/no-unresolved': 'off'
-  }
+  },
+  root: true
 };
