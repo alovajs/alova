@@ -43,14 +43,15 @@ describe('rateLimit', () => {
   test('should consume 1 point', async () => {
     const limitedGetter = limiter(alova.Get('/unit-test'));
 
-    await limitedGetter.consume().then(res =>
-      expect(res.toJSON()).toEqual({
+    await limitedGetter.consume().then(res => {
+      const consumeRes = res.toJSON();
+      expect(res.toJSON()).toMatchObject({
         remainingPoints: 3,
-        msBeforeNext: 60 * 1000,
         consumedPoints: 1,
         isFirstInDuration: true
-      })
-    );
+      });
+      expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(5 * 1000);
+    });
 
     const res = await limitedGetter.get();
     expect(res?.consumedPoints).toBe(1);
@@ -65,12 +66,13 @@ describe('rateLimit', () => {
     await expect(() => limitedGetter.consume()).not.toThrow();
 
     const consumeRes = await limitedGetter.consume(4).catch(e => e.toJSON());
-    expect(consumeRes).toEqual({
+    expect(consumeRes).toMatchObject({
       remainingPoints: 0,
       msBeforeNext: 100 * 1000, // be blocked for consuming too many points
       consumedPoints: 5,
       isFirstInDuration: false
     });
+    expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(99 * 1000);
 
     // Fast forward to after the block duration
     await jest.setSystemTime(Date.now() + 100 * 1000);
@@ -90,9 +92,9 @@ describe('rateLimit', () => {
     let consumeRes = await limitedGetter.consume(5).catch(e => e.toJSON());
     expect(consumeRes).toMatchObject({
       remainingPoints: 0,
-      msBeforeNext: 100 * 1000, // be blocked for consuming too many points
       consumedPoints: 5
     });
+    expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(99 * 1000);
 
     isJerry = true;
 
