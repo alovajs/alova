@@ -118,7 +118,7 @@ export default function sendRequest<S, E, R, T, RC, RE, RH>(
         : getResponseCache(id, methodKey);
 
       // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中，过期时间要使用缓存的
-      if (cacheMode === STORAGE_RESTORE && !cachedResponse) {
+      if (!forceRequest && cacheMode === STORAGE_RESTORE && !cachedResponse) {
         const rawPersistentData = getPersistentRawData(id, methodKey, storage, tag);
         if (rawPersistentData) {
           const [persistentResponse, persistentExpireMilliseconds] = rawPersistentData;

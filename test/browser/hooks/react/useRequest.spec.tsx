@@ -330,4 +330,52 @@ describe('useRequet hook with react', () => {
       expect(screen.getByRole('error')).toHaveTextContent('The user aborted a request.');
     });
   });
+
+  // #449: https://github.com/alovajs/alova/issues/449
+  test('should not use cache when forcing send request', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      timeout: 10000,
+      transformData: ({ data }: Result<true>) => data,
+      localCache: {
+        mode: 'restore',
+        expire: 100 * 1000
+      }
+    });
+    const completeFn = jest.fn();
+
+    function Page() {
+      const { loading, onComplete, send } = useRequest(Get, { immediate: false, force: true });
+      onComplete(completeFn);
+
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <button
+            role="btn"
+            onClick={send}>
+            send request
+          </button>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    fireEvent.click(screen.getByRole('btn'));
+    expect(screen.getByRole('status')).toHaveTextContent('loading');
+
+    await waitFor(() => {
+      expect(completeFn).toHaveBeenCalledTimes(1);
+      expect(completeFn).toHaveBeenLastCalledWith(expect.objectContaining({ fromCache: false }));
+    });
+
+    fireEvent.click(screen.getByRole('btn'));
+    expect(screen.getByRole('status')).toHaveTextContent('loading');
+    await waitFor(() => {
+      expect(completeFn).toHaveBeenCalledTimes(2);
+      expect(completeFn).toHaveBeenLastCalledWith(expect.objectContaining({ fromCache: false }));
+    });
+  });
 });
