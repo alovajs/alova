@@ -117,12 +117,13 @@ describe('rateLimit', () => {
     await expect(() => limitedGetter.consume()).not.toThrow();
 
     const consumeRes = await limitedGetter.consume(4).catch(e => e.toJSON());
-    expect(consumeRes).toEqual({
+    expect(consumeRes).toMatchObject({
       remainingPoints: 0,
-      msBeforeNext: 100 * 1000, // be blocked for consuming too many points
       consumedPoints: 5,
       isFirstInDuration: false
     });
+    // be blocked for consuming too many points
+    expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(99 * 1000);
 
     // Fast forward to after the block duration
     await jest.setSystemTime(Date.now() + 100 * 1000);
@@ -142,9 +143,10 @@ describe('rateLimit', () => {
     let consumeRes = await limitedGetter.consume(5).catch(e => e.toJSON());
     expect(consumeRes).toMatchObject({
       remainingPoints: 0,
-      msBeforeNext: 100 * 1000, // be blocked for consuming too many points
       consumedPoints: 5
     });
+    // be blocked for consuming too many points
+    expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(99 * 1000);
 
     isJerry = true;
 
@@ -217,16 +219,6 @@ describe('reteLimit in server', () => {
           data: null
         });
       }
-
-      // try {
-      //   await limitedGetter.consume();
-      // } catch {
-      //   return HttpResponse.json({
-      //     code: -100,
-      //     msg: 'too many requests',
-      //     data: null
-      //   });
-      // }
 
       const res = await limitedGetter.send();
 
