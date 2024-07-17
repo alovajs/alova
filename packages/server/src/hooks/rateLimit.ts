@@ -227,8 +227,8 @@ export function createRateLimiter(options: RateLimitOptions) {
   } = options ?? {};
 
   const limitedMethodWrapper = createServerHook(
-    <AG extends AlovaGenerics>(method: Method<AG>, wrapperOption?: LimitHandlerOptions<AG>) => {
-      const { key = uuid() } = wrapperOption ?? {};
+    <AG extends AlovaGenerics>(method: Method<AG>, handlerOptions?: LimitHandlerOptions<AG>) => {
+      const { key = uuid() } = handlerOptions ?? {};
       const storage = options.storage ?? getOptions(method).l2Cache;
 
       assert(!!storage, 'storage is not defined');
