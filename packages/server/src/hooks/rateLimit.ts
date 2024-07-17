@@ -156,7 +156,7 @@ export class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
     limiterKey: string | ((method: Method<AG>) => string),
     protected limiter: RateLimiterStore
   ) {
-    super(method, force => method.send(force));
+    super(method, force => this.consume().then(() => method.send(force)));
     this.keyGetter = isFn(limiterKey) ? () => limiterKey(method) : () => limiterKey;
   }
 
