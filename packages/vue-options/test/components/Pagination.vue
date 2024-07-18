@@ -7,7 +7,7 @@
     <span role="total">{{ paging.total }}</span>
     <span role="isLastPage">{{ paging.isLastPage }}</span>
     <span role="response">{{ stringify(paging.data) }}</span>
-    <span role="error">{{ paging.error ? paging.error.message : ' }}</span>
+    <span role="error">{{ paging.error ? paging.error.message : '' }}</span>
     <button
       role="setPage"
       @click="paging$update({ page: paging.page + 1 })">

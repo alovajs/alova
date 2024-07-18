@@ -499,6 +499,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
               referingObject.trackedKeys[key] = trueValue;
               return isFrameworkState ? value.e : value;
             },
+
+            // set need to set an function,
+            // otherwise it will throw `TypeError: Cannot set property __referingObj of #<Object> which has only a getter` when setting value
+            set: noop,
             enumerable: trueValue,
             configurable: trueValue
           });
