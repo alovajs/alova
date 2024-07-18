@@ -1,5 +1,14 @@
 # @alova/vue-options
 
+## 2.0.0-beta.5
+
+### Patch Changes
+
+- [#457](https://github.com/alovajs/alova/pull/457) [`8ddf112`](https://github.com/alovajs/alova/commit/8ddf1126186d0e5d0ca2e162054ee1bda0078259) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix scenes hooks using in vue options style such as usePagination
+
+- Updated dependencies [[`8ddf112`](https://github.com/alovajs/alova/commit/8ddf1126186d0e5d0ca2e162054ee1bda0078259), [`5699a02`](https://github.com/alovajs/alova/commit/5699a02c25db2753be994e4acfc4310c239f72a0)]:
+  - alova@3.0.0-beta.14
+
 ## 2.0.0-beta.4
 
 ### Patch Changes

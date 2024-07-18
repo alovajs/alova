@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-uniapp",
-  "version": "2.0.0-beta.10",
+  "version": "2.0.0-beta.11",
   "description": "uniapp adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-uniapp.esm.js",
@@ -49,7 +49,7 @@
     "alova": "workspace:*"
   },
   "peerDependencies": {
-    "alova": "^3.0.0-beta.13"
+    "alova": "^3.0.0-beta.14"
   },
   "config": {
     "commitizen": {
