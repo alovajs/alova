@@ -499,7 +499,6 @@ export function statesHookHelper<AG extends AlovaGenerics>(
               referingObject.trackedKeys[key] = trueValue;
               return isFrameworkState ? value.e : value;
             },
-            set: noop,
             enumerable: trueValue,
             configurable: trueValue
           });
