@@ -245,16 +245,18 @@ export interface StatesHook<SE extends StatesExport<any>> {
    * @param initialValue 初始数据
    * @returns 状态值
    */
-  create: (initialValue: any, referingObject: ReferingObject) => SE['State'];
+  create: (initialValue: any, key: string, referingObject: ReferingObject) => SE['State'];
 
   /**
    * create computed state
    * @param initialValue initial data
+   * @param key attribute name
    * @param referingObject refering object
    */
   computed: (
     getter: () => any,
     deps: (SE['StateExport'] | SE['ComputedExport'])[],
+    key: string,
     referingObject: ReferingObject
   ) => SE['Computed'];
 
@@ -273,6 +275,7 @@ export interface StatesHook<SE extends StatesExport<any>> {
    * 更新状态值
    * @param newVal 新的数据集合
    * @param state 原状态值
+   * @param key attribute name
    * @param @param referingObject refering object
    */
   update: (newVal: any, state: SE['State'], key: string, referingObject: ReferingObject) => void;
