@@ -66,7 +66,7 @@ jobs:
         with:
           # Note: pnpm install after versioning is necessary to refresh lockfile
           setupGitUser: true
-          version: pnpm run test && pnpm run changeset:version
+          version: pnpm run changeset:version
           publish: pnpm run test:coveralls && pnpm run release
           commit: 'ci: release next'
           title: 'ci: release next'
