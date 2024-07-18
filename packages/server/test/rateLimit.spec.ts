@@ -101,8 +101,9 @@ describe('rateLimit', () => {
         remainingPoints: 3,
         consumedPoints: 1,
         isFirstInDuration: true
-      })
-    );
+      });
+      expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(5 * 1000);
+    });
 
     const res = await limitedGetter.get();
     expect(res?.consumedPoints).toBe(1);
