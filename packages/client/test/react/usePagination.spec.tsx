@@ -173,7 +173,6 @@ describe('react => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('reload1'));
-    await delay(0);
     await waitFor(async () => {
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toBeUndefined();
@@ -429,7 +428,6 @@ describe('react => usePagination', () => {
       expect(cache?.list).toEqual(generateContinuousNumbers(11, 8));
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
-    total;
 
     fireEvent.click(screen.getByRole('batchInsert1'));
     total += 2;
@@ -440,8 +438,9 @@ describe('react => usePagination', () => {
     });
 
     // 正在重新fetch下一页数据，但还没响应，此时翻页到下一页
-    await delay(20);
-    fireEvent.click(screen.getByRole('setPage'));
+    delay(20).then(() => {
+      fireEvent.click(screen.getByRole('setPage'));
+    });
     // 等待fetch
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 6))); // 有两项被挤到后面一页了
@@ -793,8 +792,9 @@ describe('react => usePagination', () => {
     );
 
     // 正在重新fetch下一页数据，但还没响应（响应有50ms延迟），此时翻页到下一页
-    await delay(10);
-    fireEvent.click(screen.getByRole('setPage'));
+    delay(10).then(() => {
+      fireEvent.click(screen.getByRole('setPage'));
+    });
     await waitFor(() => {
       // 有两项用于填补前一页数据了
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([10, 11]));

@@ -8,7 +8,6 @@ on:
 
 jobs:
   quality:
-    # server: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -61,21 +60,14 @@ jobs:
       - name: Install deps
         run: pnpm install
 
-      # - name: Test SSR
-      #   run: npm run test:node
-
-      # This has contained test and upload coverage
-      # - name: Coverage
-      #   run: npm run test:coveralls
-
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
           # Note: pnpm install after versioning is necessary to refresh lockfile
           setupGitUser: true
-          version: pnpm run changeset:version
-          publish: pnpm run release
+          version: pnpm run test && pnpm run changeset:version
+          publish: pnpm run test:coveralls && pnpm run release
           commit: 'ci: release next'
           title: 'ci: release next'
         env:

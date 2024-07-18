@@ -9,7 +9,7 @@ import ReactHook from 'alova/react';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
 import React, { ReactElement } from 'react';
-import { untilCbCalled } from 'root/testUtils';
+import { delay } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
 import { SSEHookReadyState } from '~/typings/clienthook';
 // eslint-disable-next-line import/no-named-as-default
@@ -88,7 +88,7 @@ describe('react => useSSE', () => {
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
 
     // 如果 immediate 有问题，1000ms 内就会得到至少一个 interval 消息
-    await untilCbCalled(setTimeout, 1000);
+    await delay(1000);
 
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
@@ -106,7 +106,7 @@ describe('react => useSSE', () => {
     );
 
     fireEvent.click(screen.getByRole('close-btn'));
-    await untilCbCalled(setTimeout, 200);
+    await delay(200);
     expect(screen.getByRole('status')).toHaveTextContent('closed');
   });
 
@@ -154,7 +154,7 @@ describe('react => useSSE', () => {
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
     // 如果 immediate 有问题，1000ms 内就会得到至少一个 interval 消息
-    await untilCbCalled(setTimeout, 1000);
+    await delay(1000);
 
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
@@ -164,21 +164,19 @@ describe('react => useSSE', () => {
 
     // 服务器发送信息
     await serverSend(testDataA);
-    await untilCbCalled(setTimeout, 300);
+    await delay(300);
 
     // 此时还没有调用 send，不应该收到信息
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
-
     expect(mockOnFn).not.toHaveBeenCalled();
     expect(mockOpenFn).not.toHaveBeenCalled();
 
     // 调用 send 连接服务器，并使服务器发送信息
     fireEvent.click(screen.getByRole('btn'));
-
-    await untilCbCalled(setTimeout, 300);
-    serverSend(testDataB);
-
+    delay(300).then(() => {
+      serverSend(testDataB);
+    });
     await waitFor(
       () => {
         expect(screen.getByRole('status')).toHaveTextContent('opened');
@@ -285,58 +283,63 @@ describe('react => useSSE', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-
     expect(screen.getByRole('status')).toHaveTextContent('connecting');
-    await screen.findByText(/opened/);
-
-    expect(screen.getByRole('data')).toBeEmptyDOMElement();
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('opened');
+      expect(screen.getByRole('data')).toBeEmptyDOMElement();
+    });
 
     // 测试发送数据 A
     await serverSend(testDataA);
-    await untilCbCalled(setTimeout, 300);
-
-    expect(mockOnMessageFn).toHaveBeenCalledTimes(1);
-    expect(recv).toStrictEqual(testDataA);
-    expect(screen.getByRole('status')).toHaveTextContent('opened');
-    expect(screen.getByRole('data')).toHaveTextContent(testDataA);
+    await waitFor(() => {
+      expect(mockOnMessageFn).toHaveBeenCalledTimes(1);
+      expect(recv).toStrictEqual(testDataA);
+      expect(screen.getByRole('status')).toHaveTextContent('opened');
+      expect(screen.getByRole('data')).toHaveTextContent(testDataA);
+    });
 
     // 关闭连接
     fireEvent.click(screen.getByRole('close'));
-    await untilCbCalled(setTimeout, 100);
-    expect(screen.getByRole('status')).toHaveTextContent('closed');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('closed');
+    });
 
-    // 测试发送数据 B
+    // 测试发送数据 B，连接已经关闭，不应该触发事件，数据也应该不变
     await serverSend(testDataB);
-
-    // 连接已经关闭，不应该触发事件，数据也应该不变
-    expect(mockOnMessageFn).toHaveBeenCalledTimes(1);
-    expect(recv).toStrictEqual(testDataA);
-    expect(screen.getByRole('data')).toHaveTextContent(testDataA);
+    await waitFor(() => {
+      expect(mockOnMessageFn).toHaveBeenCalledTimes(1);
+      expect(recv).toStrictEqual(testDataA);
+      expect(screen.getByRole('data')).toHaveTextContent(testDataA);
+    });
 
     // 重新连接若干次。。。
-    fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
-    fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
-    fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
-    fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
-    fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
-
-    expect(mockOpenFn).toHaveBeenCalledTimes(6);
-    expect(screen.getByRole('status')).toHaveTextContent('opened');
-    expect(screen.getByRole('data')).toHaveTextContent(testDataA);
+    const reconnect = async () => {
+      fireEvent.click(screen.getByRole('send'));
+      await delay(100);
+      fireEvent.click(screen.getByRole('send'));
+      await delay(100);
+      fireEvent.click(screen.getByRole('send'));
+      await delay(100);
+      fireEvent.click(screen.getByRole('send'));
+      await delay(100);
+      fireEvent.click(screen.getByRole('send'));
+      await delay(100);
+    };
+    reconnect();
+    await waitFor(() => {
+      expect(mockOpenFn).toHaveBeenCalledTimes(6);
+      expect(screen.getByRole('status')).toHaveTextContent('opened');
+      expect(screen.getByRole('data')).toHaveTextContent(testDataA);
+    });
 
     // 测试发送数据 B
     await serverSend(testDataB);
-    await untilCbCalled(setTimeout, 300);
-
-    // abortLast 为 true（默认）时，调用 send 会断开之前建立的连接
-    expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
-    expect(recv).toStrictEqual(testDataB);
-    expect(screen.getByRole('data')).toHaveTextContent(testDataB);
+    await waitFor(() => {
+      // abortLast 为 true（默认）时，调用 send 会断开之前建立的连接
+      expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
+      expect(recv).toStrictEqual(testDataB);
+      expect(screen.getByRole('data')).toHaveTextContent(testDataB);
+    });
   });
 
   // ! 打开失败应该报错，立即发送请求
@@ -372,15 +375,14 @@ describe('react => useSSE', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-
-    await untilCbCalled(setTimeout, 1500);
-    await screen.findByText(/closed/);
-
-    expect(screen.getByRole('data')).toBeEmptyDOMElement();
-    expect(recv).toBeUndefined();
-    expect(mockOpenFn).not.toHaveBeenCalled();
-    expect(mockMessageFn).not.toHaveBeenCalled();
-    expect(mockErrorFn).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('closed');
+      expect(screen.getByRole('data')).toBeEmptyDOMElement();
+      expect(recv).toBeUndefined();
+      expect(mockOpenFn).not.toHaveBeenCalled();
+      expect(mockMessageFn).not.toHaveBeenCalled();
+      expect(mockErrorFn).toHaveBeenCalled();
+    });
   });
 
   // ! 打开失败应该报错，不立即发送请求
@@ -421,7 +423,6 @@ describe('react => useSSE', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-
     await screen.findByText(/closed/);
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
     expect(mockOpenFn).not.toHaveBeenCalled();
@@ -430,8 +431,6 @@ describe('react => useSSE', () => {
 
     fireEvent.click(screen.getByRole('send'));
     await screen.findByText(/connecting/);
-    await untilCbCalled(setTimeout, 500);
-
     await screen.findByText(/closed/);
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
     expect(recv).toBeUndefined();
@@ -530,7 +529,6 @@ describe('react => useSSE', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('connecting');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
-
     await screen.findByText(/opened/);
     expect(mockOpenFn).toHaveBeenCalled();
     expect(mockResponseFn).not.toHaveBeenCalled();
@@ -538,8 +536,6 @@ describe('react => useSSE', () => {
 
     // 这个数据会被响应拦截器替换掉
     await serverSend(dataReplaceMe);
-    await untilCbCalled(setTimeout, 500);
-
     await waitFor(
       () => {
         expect(screen.getByRole('data')).toHaveTextContent(replacedData);
@@ -556,51 +552,51 @@ describe('react => useSSE', () => {
 
     // 连接到不存在的地址
     fireEvent.click(screen.getByRole('send-to-not-exist'));
-    expect(screen.getByRole('status')).toHaveTextContent('connecting');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('connecting');
+    });
+    await waitFor(() => {
+      // 因为目标不存在，所以：
+      // 1. resErrorExpect 会触发
+      // 2. onMessage, responseExpect 不会被触发，触发次数和上面一样；onError不被触发，因为被 onError 拦截
+      // 3. resCompleteExpect 会被触发
 
-    // 等 useSSE 反应一会儿
-    await untilCbCalled(setTimeout, 100);
+      // 全局错误拦截器会返回 initialData
+      expect(recv).toEqual(initialData);
+      expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
-    // 因为目标不存在，所以：
-    // 1. resErrorExpect 会触发
-    // 2. onMessage, responseExpect 不会被触发，触发次数和上面一样；onError不被触发，因为被 onError 拦截
-    // 3. resCompleteExpect 会被触发
+      expect(mockErrorFn).toHaveBeenCalledTimes(0);
+      expect(mockResponseFn).toHaveBeenCalledTimes(1);
 
-    // 全局错误拦截器会返回 initialData
-    expect(recv).toEqual(initialData);
-    expect(screen.getByRole('data')).toHaveTextContent(initialData);
-
-    expect(mockErrorFn).toHaveBeenCalledTimes(0);
-    expect(mockResponseFn).toHaveBeenCalledTimes(1);
-
-    // 因为错误被全局拦截器拦截，所以 会调用 onMessage
-    expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
-    expect(mockResponseErrorFn).toHaveBeenCalledTimes(1);
-    expect(mockResponseCompleteFn).toHaveBeenCalledTimes(2);
+      // 因为错误被全局拦截器拦截，所以 会调用 onMessage
+      expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
+      expect(mockResponseErrorFn).toHaveBeenCalledTimes(1);
+      expect(mockResponseCompleteFn).toHaveBeenCalledTimes(2);
+    });
 
     // ! 测试抛出错误
 
     // 连接到正常地址
     fireEvent.click(screen.getByRole('send'));
-    // 等 useSSE 反应一会儿
-    await untilCbCalled(setTimeout, 100);
-    expect(screen.getByRole('status')).toHaveTextContent('opened');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('opened');
+    });
 
     // 这个数据会导致抛出异常
     // 触发responseExpect 和 onError
     await serverSend(dataThrowError);
-    await untilCbCalled(setTimeout, 300);
+    await waitFor(() => {
+      // 全局错误拦截器会返回 initialData
+      expect(recv).toEqual(initialData);
+      expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
-    // 全局错误拦截器会返回 initialData
-    expect(recv).toEqual(initialData);
-    expect(screen.getByRole('data')).toHaveTextContent(initialData);
+      expect(mockErrorFn).toHaveBeenCalledTimes(1);
+      expect(mockResponseFn).toHaveBeenCalledTimes(2);
 
-    expect(mockErrorFn).toHaveBeenCalledTimes(1);
-    expect(mockResponseFn).toHaveBeenCalledTimes(2);
-
-    expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
-    expect(mockResponseErrorFn).toHaveBeenCalledTimes(1);
-    expect(mockResponseCompleteFn).toHaveBeenCalledTimes(3);
+      expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
+      expect(mockResponseErrorFn).toHaveBeenCalledTimes(1);
+      expect(mockResponseCompleteFn).toHaveBeenCalledTimes(3);
+    });
   });
 
   // ! 拦截器不应该触发 (interceptByGlobalResponded: false)
