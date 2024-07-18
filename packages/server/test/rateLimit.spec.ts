@@ -1,4 +1,5 @@
 import createRateLimiter from '@/hooks/rateLimit';
+import { createAlovaMockAdapter, defineMock } from '@alova/mock';
 import { createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
 import VueHook from 'alova/vue';
@@ -11,7 +12,37 @@ interface MockResponse {
   data: any;
 }
 
-const getAlovaInstance = (baseURL = process.env.NODE_BASE_URL) => {
+const mocks = defineMock({
+  '/return-query': ({ query }) => ({
+    query
+  })
+});
+
+const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+  delay: 50,
+  onMockResponse: ({ status, statusText, body }) => {
+    // 当status为错误码时，如果包含notError则以body的形式返回错误信息
+    if (status >= 300) {
+      if (!/notError/.test(statusText)) {
+        const err = new Error(statusText);
+        err.name = status.toString();
+        throw err;
+      } else {
+        body = {
+          status,
+          statusText
+        };
+      }
+    }
+    return {
+      response: body,
+      headers: {} as Record<string, number | string>
+    };
+  },
+  mockRequestLogger: false
+});
+
+const getAlovaInstance = (baseURL: string) => {
   const alova = createAlova({
     baseURL,
     statesHook: VueHook,
@@ -32,7 +63,12 @@ const createDefaultRateLimiter = () =>
   });
 
 describe('rateLimit', () => {
-  const alova = getAlovaInstance();
+  const alova = createAlova({
+    statesHook: VueHook,
+    requestAdapter: mockRequestAdapter
+  });
+  alova.options.l2Cache = alova.l1Cache;
+
   const limiter = createDefaultRateLimiter();
 
   test('should have null initial value', async () => {
@@ -40,11 +76,27 @@ describe('rateLimit', () => {
     await expect(limitedGetter.get()).resolves.toBeNull();
   });
 
+  test('should consume when trying to send request', async () => {
+    const limitedGetter = limiter(alova.Get('/return-query'));
+    let res = await limitedGetter.get();
+    expect(res).toBeNull();
+
+    await limitedGetter.send();
+    await limitedGetter.send();
+    await limitedGetter.send();
+    await limitedGetter.send();
+
+    res = await limitedGetter.get();
+    expect(res).toMatchObject({
+      remainingPoints: 0,
+      consumedPoints: 4
+    });
+  });
+
   test('should consume 1 point', async () => {
     const limitedGetter = limiter(alova.Get('/unit-test'));
 
-    await limitedGetter.consume().then(res => {
-      const consumeRes = res.toJSON();
+    await limitedGetter.consume().then(res =>
       expect(res.toJSON()).toMatchObject({
         remainingPoints: 3,
         consumedPoints: 1,
@@ -68,10 +120,10 @@ describe('rateLimit', () => {
     const consumeRes = await limitedGetter.consume(4).catch(e => e.toJSON());
     expect(consumeRes).toMatchObject({
       remainingPoints: 0,
-      msBeforeNext: 100 * 1000, // be blocked for consuming too many points
       consumedPoints: 5,
       isFirstInDuration: false
     });
+    // be blocked for consuming too many points
     expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(99 * 1000);
 
     // Fast forward to after the block duration
@@ -94,6 +146,7 @@ describe('rateLimit', () => {
       remainingPoints: 0,
       consumedPoints: 5
     });
+    // be blocked for consuming too many points
     expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(99 * 1000);
 
     isJerry = true;
@@ -161,16 +214,6 @@ describe('reteLimit in server', () => {
 
       const limitedResult = await limitedGetter.get();
       if (limitedResult && limitedResult.remainingPoints <= 0) {
-        return HttpResponse.json({
-          code: -100,
-          msg: 'too many requests',
-          data: null
-        });
-      }
-
-      try {
-        await limitedGetter.consume();
-      } catch {
         return HttpResponse.json({
           code: -100,
           msg: 'too many requests',

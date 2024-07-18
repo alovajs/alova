@@ -156,7 +156,7 @@ export class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
     limiterKey: string | ((method: Method<AG>) => string),
     protected limiter: RateLimiterStore
   ) {
-    super(method, force => method.send(force));
+    super(method, force => this.consume().then(() => method.send(force)));
     this.keyGetter = isFn(limiterKey) ? () => limiterKey(method) : () => limiterKey;
   }
 
@@ -227,8 +227,8 @@ export function createRateLimiter(options: RateLimitOptions) {
   } = options ?? {};
 
   const limitedMethodWrapper = createServerHook(
-    <AG extends AlovaGenerics>(method: Method<AG>, wrapperOption?: LimitHandlerOptions<AG>) => {
-      const { key = uuid() } = wrapperOption ?? {};
+    <AG extends AlovaGenerics>(method: Method<AG>, handlerOptions?: LimitHandlerOptions<AG>) => {
+      const { key = uuid() } = handlerOptions ?? {};
       const storage = options.storage ?? getOptions(method).l2Cache;
 
       assert(!!storage, 'storage is not defined');

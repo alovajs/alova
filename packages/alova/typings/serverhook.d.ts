@@ -148,21 +148,19 @@ declare class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
      */
     delete(): Promise<boolean>;
 }
-declare function createRateLimiter(options: RateLimitOptions): <AG extends AlovaGenerics<any, any, any, any, any, any, any, any>>(method: Method<AG>, wrapperOption?: LimitHandlerOptions<AG>) => LimitedMethod<AG>;
+declare function createRateLimiter(options: RateLimitOptions): <AG extends AlovaGenerics<any, any, any, any, any, any, any, any>>(method: Method<AG>, handlerOptions?: LimitHandlerOptions<AG>) => LimitedMethod<AG>;
 
 interface RetryOptions {
-  /**
-   * The maximum number of retries. it can also be set as a function that returns a boolean to dynamically determine whether to continue retry.
-   * @default 3
-   */
-  retry?: number | ((error: Error) => boolean);
-
-  /**
-   * backoff policy
-   */
-  backoff?: BackoffPolicy;
+    /**
+     * The maximum number of retries. it can also be set as a function that returns a boolean to dynamically determine whether to continue retry.
+     * @default 3
+     */
+    retry?: number | ((error: Error) => boolean);
+    /**
+     * backoff policy
+     */
+    backoff?: BackoffPolicy;
 }
-
-declare const retry: <AG extends AlovaGenerics<any, any, any, any, any, any, any, any>>(method: Method<AG>, options: RetryOptions) => HookedMethod<AG>;
+declare const retry: <AG extends AlovaGenerics<any, any, any, any, any, any, any, any>>(method: Method<AG>, options?: RetryOptions) => HookedMethod<AG>;
 
 export { HookedMethod, createRateLimiter, retry };
