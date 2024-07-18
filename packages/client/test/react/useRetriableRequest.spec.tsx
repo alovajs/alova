@@ -4,7 +4,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { untilCbCalled } from 'root/testUtils';
+import { delay, untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 
 const alovaInst = createAlova({
@@ -39,13 +39,13 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-    await untilCbCalled(setTimeout, 200);
-    await screen.findByText(/loaded/);
-    expect(mockRetryFn).not.toBeCalled();
-    expect(mockErrorFn).not.toBeCalled();
-    expect(mockCompleteFn).toBeCalled();
-    expect(mockSuccessFn).toBeCalled();
-    expect(mockFailFn).not.toBeCalled();
+    await waitFor(() => {
+      expect(mockRetryFn).not.toHaveBeenCalled();
+      expect(mockErrorFn).not.toHaveBeenCalled();
+      expect(mockCompleteFn).toHaveBeenCalled();
+      expect(mockSuccessFn).toHaveBeenCalled();
+      expect(mockFailFn).not.toHaveBeenCalled();
+    });
   });
 
   test('should default retry 3 times and events emit in the right time', async () => {
@@ -436,12 +436,15 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-    await untilCbCalled(setTimeout, 200);
-    await screen.findByText('loaded');
-    act(() => {
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    });
+    delay(200).then(() => {
       fireEvent.click(screen.getByRole('btnStop'));
     });
-    expect(screen.getByRole('error')).toHaveTextContent('there is no requests being retried');
+    await waitFor(() => {
+      expect(screen.getByRole('error')).toHaveTextContent('there is no requests being retried');
+    });
   });
 
   test('should throws stop error when stop in requseting', async () => {
@@ -485,7 +488,6 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-    await untilCbCalled(setTimeout, 200);
     await waitFor(
       () => {
         expect(screen.getByRole('status')).toHaveTextContent('loaded');
@@ -640,16 +642,18 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-    await untilCbCalled(setTimeout, 200);
-    await screen.findByText(/loaded/);
-    expect(mockSuccessFn).toHaveBeenCalledTimes(1);
-    expect(mockCompleteFn).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(mockSuccessFn).toHaveBeenCalledTimes(1);
+      expect(mockCompleteFn).toHaveBeenCalledTimes(1);
+    });
 
     fireEvent.click(screen.getByRole('btn'));
-    await untilCbCalled(setTimeout, 200);
-    await screen.findByText(/loaded/);
-    expect(mockSuccessFn).toHaveBeenCalledTimes(2);
-    expect(mockCompleteFn).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(mockSuccessFn).toHaveBeenCalledTimes(2);
+      expect(mockCompleteFn).toHaveBeenCalledTimes(2);
+    });
   }, 10000);
 
   test('should stop before response', async () => {
@@ -690,9 +694,7 @@ describe('react => useRetriableRequest', () => {
     };
 
     render((<Page />) as ReactElement<any, any>);
-    await untilCbCalled(setTimeout, 100);
-    await screen.findByText('loading');
-    act(() => {
+    delay(100).then(() => {
       fireEvent.click(screen.getByRole('btnStop'));
     });
     await waitFor(
@@ -704,13 +706,9 @@ describe('react => useRetriableRequest', () => {
       },
       { timeout: 4000 }
     );
-    act(() => {
-      fireEvent.click(screen.getByRole('btnSend'));
-    });
 
+    fireEvent.click(screen.getByRole('btnSend'));
     // ensure the first request have been responded
-    await untilCbCalled(setTimeout, 1000);
-
     await waitFor(
       () => {
         expect(screen.getByRole('status')).toHaveTextContent('loaded');
