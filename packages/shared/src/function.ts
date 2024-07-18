@@ -423,7 +423,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       pushItem(createdStateList, key); // record the keys of created states.
       return newInstance(
         FrameworkState<Data, Key>,
-        statesHook.create(initialValue, referingObject) as GeneralState<Data>,
+        statesHook.create(initialValue, key, referingObject) as GeneralState<Data>,
         key,
         state => dehydrate(state, key, referingObject),
         exportState,
@@ -444,7 +444,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
 
       return newInstance(
         FrameworkReadableState<Data, Key>,
-        statesHook.computed(getter, mapDeps(depList), referingObject) as GeneralState<Data>,
+        statesHook.computed(getter, mapDeps(depList), key, referingObject) as GeneralState<Data>,
         key,
         state => dehydrate(state, key, referingObject),
         exportState

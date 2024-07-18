@@ -1,3 +1,4 @@
+import { isObject } from '@alova/shared/function';
 import { ObjectCls, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { VueOptionExportType } from '~/typings';
@@ -27,7 +28,7 @@ const on = (component: any, lifecycle: 'um' | 'm', handler: () => void) => {
 
 export default {
   name: 'VueOption',
-  create: data => ({ value: data, type: 's' }),
+  create: (data, key) => ({ value: data, key, type: 's' }),
 
   // 解释：在computed中一般会依赖states，因此必须访问组件上的states才能实现依赖追踪
   dehydrate: (_, key, { component, dataKey }) => component[dataKey][key],
@@ -37,13 +38,14 @@ export default {
   effectRequest({ handler, removeStates, immediate, watchingStates }, referingObject) {
     // 需要异步执行，在mapAlovaHook中对config注入component和dataKey
     setTimeout(() => {
-      const { component } = referingObject;
+      const { component, dataKey } = referingObject;
       on(component, 'um', removeStates);
       immediate && handler();
       let timer: NodeJS.Timeout | void;
       (watchingStates || []).forEach((state, i) => {
         component.$watch(
-          state,
+          // watchingStates 可能来自请求策略hooks，此时接收到的是state或computed
+          isObject(state) ? `${dataKey}.${(state as any).key}` : state,
           () => {
             timer && clearTimeout(timer);
             timer = setTimeout(() => {
@@ -56,8 +58,9 @@ export default {
       });
     });
   },
-  computed: getter => ({
+  computed: (getter, _, key) => ({
     value: getter,
+    key,
     type: 'c'
   }),
   watch: (states, callback, { component }) => {
