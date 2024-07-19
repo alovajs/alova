@@ -5,46 +5,16 @@
   * Licensed under MIT (https://github.com/alovajs/alova/blob/main/LICENSE)
 */
 
-import * as alova from 'alova';
-import { AlovaGenerics, Method, ProgressHandler, AlovaGlobalCacheAdapter } from 'alova';
+import { AlovaGenerics, Method, AlovaGlobalCacheAdapter } from 'alova';
 import { RateLimiterRes, IRateLimiterStoreOptions } from 'rate-limiter-flexible';
 import RateLimiterStoreAbstract from 'rate-limiter-flexible/lib/RateLimiterStoreAbstract.js';
 import { BackoffPolicy } from '@alova/shared/types';
 
 type RequestHandler<Responded> = (forceRequest?: boolean) => Promise<Responded>;
-declare class HookedMethod<AG extends AlovaGenerics = any> implements Method<AG> {
-    private entity;
+declare class HookedMethod<AG extends AlovaGenerics> extends Method<AG> {
     private handler;
     constructor(entity: Method<AG>, requestHandler: RequestHandler<AG['Responded']>);
-    generateKey(): string;
-    get type(): alova.MethodType;
-    get config(): alova.MethodRequestConfig & {
-        name?: string | number | undefined;
-        timeout?: number | undefined;
-        cacheFor?: alova.CacheConfig<alova.RespondedAlovaGenerics<AG, AG["Responded"], AG["Transformed"]>> | alova.CacheController<AG["Responded"]> | undefined;
-        hitSource?: string | RegExp | Method<any> | (string | RegExp | Method<any>)[] | undefined;
-        transform?: ((data: AG["Transformed"], headers: AG["ResponseHeader"]) => AG["Responded"] | Promise<AG["Responded"]>) | undefined;
-        shareRequest?: boolean | undefined;
-        meta?: any;
-    } & AG["RequestConfig"];
-    get baseURL(): string;
-    get context(): alova.Alova<AG>;
-    get url(): string;
-    get data(): alova.RequestBody | undefined;
-    get meta(): any;
-    get hitSource(): (string | RegExp)[] | undefined;
-    get key(): string;
-    get abort(): alova.AbortFunction;
-    get dhs(): ProgressHandler[];
-    get uhs(): ProgressHandler[];
-    get fromCache(): boolean | undefined;
-    setName(name: string | number): void;
     send(forceRequest?: boolean): Promise<AG["Responded"]>;
-    onDownload(downloadHandler: ProgressHandler): () => void;
-    onUpload(uploadHandler: ProgressHandler): () => void;
-    then<TResult1 = AG['Responded'], TResult2 = never>(onfulfilled?: (value: AG['Responded']) => TResult1 | PromiseLike<TResult1>, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;
-    catch(onrejected: Parameters<Method<AG>['catch']>[0]): Promise<unknown>;
-    finally(onfinally: Parameters<Method<AG>['finally']>[0]): Promise<AG["Responded"]>;
 }
 
 type StoreResult = [points: number, expireTime: number];
