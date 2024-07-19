@@ -4,7 +4,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 import React, { ReactElement } from 'react';
-import { untilCbCalled } from 'root/testUtils';
+import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 
 const alovaInst = createAlova({
@@ -193,13 +193,11 @@ describe('react => useAutoRequest', () => {
     });
 
     tag = 'polling 1';
-    await untilCbCalled(setTimeout, 100);
     await waitFor(() => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag }));
     });
 
     tag = 'polling 2';
-    await untilCbCalled(setTimeout, 100);
     await waitFor(() => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag }));
     });
@@ -286,12 +284,16 @@ describe('react => useAutoRequest', () => {
     // 默认1000ms内只有第一次会触发请求
     tag = 'online';
     mockGlobalEventEmit('online');
-    await untilCbCalled(setTimeout, 100);
-    tag = 'visibilitychange';
-    mockGlobalEventEmit('visibilitychange');
-    await untilCbCalled(setTimeout, 100);
-    tag = 'focus';
-    mockGlobalEventEmit('focus');
+    delay(100)
+      .then(() => {
+        tag = 'visibilitychange';
+        mockGlobalEventEmit('visibilitychange');
+      })
+      .then(() => delay(100))
+      .then(() => {
+        tag = 'focus';
+        mockGlobalEventEmit('focus');
+      });
     await waitFor(() => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag: 'online' }));
     });

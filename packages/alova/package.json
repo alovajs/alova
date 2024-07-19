@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "3.0.0-beta.13",
+  "version": "3.0.0-beta.14",
   "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
   "main": "dist/alova.esm.js",
   "module": "dist/alova.esm.js",

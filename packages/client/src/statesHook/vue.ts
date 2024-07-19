@@ -44,9 +44,13 @@ export default {
     });
   },
   onMounted: callback => {
-    onMounted(callback);
+    if (getCurrentInstance()) {
+      onMounted(callback);
+    } else {
+      setTimeoutFn(callback, 10);
+    }
   },
   onUnmounted: callback => {
-    onUnmounted(callback);
+    getCurrentInstance() && onUnmounted(callback);
   }
 } as StatesHook<VueHookExportType<unknown>>;

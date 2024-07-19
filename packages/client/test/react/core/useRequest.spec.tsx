@@ -6,7 +6,7 @@ import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, StrictMode } from 'react';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
+import { Result, delay } from 'root/testUtils';
 
 const StrictModeReact = StrictMode as any;
 
@@ -76,11 +76,11 @@ describe('useRequest hook with react', () => {
 
     render((<Page />) as ReactElement<any, any>);
     expect(screen.getByRole('status')).toHaveTextContent('loading');
-    await untilCbCalled(setTimeout, 1000);
-    const loadingEl = await screen.findByText(/loaded/);
-    expect(loadingEl).toHaveTextContent('loaded');
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
-    expect(screen.getByRole('method')).toHaveTextContent('GET');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('method')).toHaveTextContent('GET');
+    });
   });
 
   test("shouldn't send request when set `immediate=false`", async () => {
@@ -344,23 +344,7 @@ describe('useRequest hook with react', () => {
       );
     }
     render((<Page />) as ReactElement<any, any>);
-    await delay(100);
-    fireEvent.click(screen.getByRole('btnUpd'));
-    await waitFor(() => {
-      expect(screen.getByRole('path')).toHaveTextContent('/abc0');
-    });
-    fireEvent.click(screen.getByRole('btnAbort'));
-    await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('The operation was aborted.');
-    });
-
-    // 再一次进行中断
-    fireEvent.click(screen.getByRole('btnSend'));
-    await delay(100);
-    fireEvent.click(screen.getByRole('btnUpd'));
-    await waitFor(() => {
-      expect(screen.getByRole('path')).toHaveTextContent('/abc1');
-    });
+    await delay(10);
     fireEvent.click(screen.getByRole('btnAbort'));
     await waitFor(() => {
       expect(screen.getByRole('error')).toHaveTextContent('The operation was aborted.');

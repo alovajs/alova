@@ -10,8 +10,8 @@ on:
 
 jobs:
   quality:
-    # server: ubuntu-latest
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.ref, 'changeset-release') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

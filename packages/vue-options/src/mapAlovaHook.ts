@@ -1,4 +1,5 @@
 import { isPlainObject } from '@alova/shared/function';
+import { ObjectCls } from '@alova/shared/vars';
 import { computed, reactive, version } from 'vue';
 import { UseHookCallers, UseHookMapGetter, VueHookMapperMixin } from '~/typings';
 import { classifyHookExposure, extractWatches } from './helper';
@@ -44,9 +45,23 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
         myAssert(/^3|2\.7/.test(version), 'please upgrade vue to `2.7.x` or `3.x`');
 
         // 挂载响应式状态和计算属性
-        vm[dataKey] = reactive(states);
+        const proxy = {};
+        vm[dataKey] = proxy;
+        const rectiveStates = reactive(states);
+        for (const key in states) {
+          ObjectCls.defineProperty(proxy, key, {
+            get: () => rectiveStates[key],
+            set: value => {
+              rectiveStates[key] = value;
+              return value;
+            }
+          });
+        }
         for (const key in computeds) {
-          vm[dataKey][key] = computed(() => computeds[key]());
+          const computedState = computed(computeds[key]);
+          ObjectCls.defineProperty(proxy, key, {
+            get: () => computedState.value
+          });
         }
 
         // 设置watchers

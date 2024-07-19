@@ -130,11 +130,11 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button1'));
-
-    await untilCbCalled(setTimeout);
-    fireEvent.click(screen.getByRole('button2'));
+    delay().then(() => {
+      fireEvent.click(screen.getByRole('button2'));
+    });
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -214,11 +214,11 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button1'));
-
-    await untilCbCalled(setTimeout);
-    fireEvent.click(screen.getByRole('button2'));
+    delay().then(() => {
+      fireEvent.click(screen.getByRole('button2'));
+    });
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -289,12 +289,11 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button1'));
-
-    await untilCbCalled(setTimeout);
-    fireEvent.click(screen.getByRole('button2'));
-    await delay(1000);
+    delay().then(() => {
+      fireEvent.click(screen.getByRole('button2'));
+    });
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
