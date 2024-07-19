@@ -7,13 +7,7 @@ const router = express.Router();
 router.post('/api/retry', async (req, res) => {
   const body = req.body;
   const method = getRetryData({ id: Math.floor(Math.random() * 1000).toString(), errTimes: body.apiErrorTimes });
-  setTimeout(() => {
-    method.promise?.catch(error => {
-      pushLog(`error: ${error.message}`);
-    });
-  }, 5);
-
-  retry(method, {
+  const retryMethod = retry(method, {
     retry: body.retry,
     backoff: {
       delay: body.delay,
@@ -21,9 +15,29 @@ router.post('/api/retry', async (req, res) => {
       startQuiver: body.startQuiver,
       endQuiver: body.endQuiver
     }
-  }).then(data => {
-    pushLog(`success: ${JSON.stringify(data)}`, null);
   });
+
+  // check if is retrying
+  let currentPromise: Promise<any>;
+  const timer = setInterval(() => {
+    if (method.promise && currentPromise !== method.promise) {
+      currentPromise = method.promise;
+      method.promise?.catch(error => {
+        pushLog(`error: ${error.message}`);
+      });
+    }
+  }, 10);
+
+  retryMethod
+    .then((data: any) => {
+      pushLog(`success: ${JSON.stringify(data)}`, null);
+    })
+    .catch(error => {
+      pushLog(`fail: ${error.message}`, null);
+    })
+    .finally(() => {
+      clearInterval(timer);
+    });
   return res.json({});
 });
 

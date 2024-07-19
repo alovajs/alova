@@ -4,7 +4,6 @@ export default defineMock({
   '/retryData': ({ query }) => {
     const { errTimes, id } = query;
     retriedTimes[id] = retriedTimes[id] || 0;
-    console.log(errTimes, id, retriedTimes[id], errTimes > retriedTimes[id]);
     if (errTimes && errTimes > retriedTimes[id]) {
       retriedTimes[id]++;
       return {

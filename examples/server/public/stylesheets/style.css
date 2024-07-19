@@ -11,3 +11,15 @@ body {
 .col {
   margin: 10px 0;
 }
+.title {
+  display: flex;
+}
+.title > a:first-child {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+.title > a:first-child::before {
+  content: '<-';
+  margin-right: 10px;
+}

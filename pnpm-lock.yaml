@@ -475,6 +475,9 @@ importers:
       '@alova/shared':
         specifier: workspace:*
         version: link:../shared
+      rate-limiter-flexible:
+        specifier: ^5.0.3
+        version: 5.0.3
     devDependencies:
       '@alova/scripts':
         specifier: workspace:*

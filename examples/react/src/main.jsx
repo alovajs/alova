@@ -5,7 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { alova } from './api';
 import './index.css';
-import Layout from './layout';
+import Layout from './Layout';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
