@@ -3,7 +3,7 @@
   "version": "2.0.0-beta.3",
   "description": "taro adapter for alova.js",
   "homepage": "https://alova.js.org",
-  "main": "dist/alova-adapter-taro.esm.js",
+  "main": "dist/alova-adapter-taro.common.cjs",
   "module": "dist/alova-adapter-taro.esm.js",
   "types": "typings/index.d.ts",
   "keywords": [
@@ -28,8 +28,16 @@
     "access": "public"
   },
   "exports": {
-    ".": "./dist/alova-adapter-taro.esm.js",
-    "./vue": "./dist/alova-adapter-taro-vue.esm.js"
+    ".": {
+      "types": "./typings/index.d.ts",
+      "require": "./dist/alova-adapter-taro.common.cjs",
+      "default": "./dist/alova-adapter-taro.esm.js"
+    },
+    "./vue": {
+      "types": "./typings/adaptervue.d.ts",
+      "require": "./dist/alova-adapter-taro-vue.common.cjs",
+      "default": "./dist/alova-adapter-taro-vue.esm.js"
+    }
   },
   "typesVersions": {
     "*": {

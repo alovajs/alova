@@ -1,5 +1,5 @@
 {
-  "name": "demo-server",
+  "name": "server-demo",
   "version": "1.0.0",
   "description": "Node.js example server starter project",
   "main": "index.ts",
@@ -9,6 +9,7 @@
   },
   "keywords": [],
   "devDependencies": {
+    "@types/body-parser": "^1.19.5",
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.7",
     "nodemon": "^3.0.3",
@@ -16,6 +17,10 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "@alova/mock": "workspace:*",
+    "alova": "workspace:*",
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "hbs": "~4.0.4"
   }
 }

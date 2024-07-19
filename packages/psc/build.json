@@ -1,7 +1,7 @@
 {
   "packageName": "ProcessSharedCache",
   "input": "src/index.ts",
-  "output": "dist/index.{suffix}.{ext}",
+  "output": "dist/psc.{suffix}.{ext}",
   "external": {
     "@alova/shared/function": null,
     "@alova/shared/vars": null,

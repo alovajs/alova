@@ -3,7 +3,7 @@
   "version": "2.0.0-beta.11",
   "description": "mock request adapter for alova.js",
   "homepage": "https://github.com/alovajs/mock",
-  "main": "dist/alova-mock.esm.js",
+  "main": "dist/alova-mock.common.cjs",
   "module": "dist/alova-mock.esm.js",
   "types": "typings/index.d.ts",
   "type": "module",

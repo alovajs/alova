@@ -1,0 +1,13 @@
+body {
+  padding: 50px;
+  margin: 0;
+  font:
+    16px 'Lucida Grande',
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+.col {
+  margin: 10px 0;
+}

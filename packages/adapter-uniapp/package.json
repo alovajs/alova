@@ -3,7 +3,7 @@
   "version": "2.0.0-beta.11",
   "description": "uniapp adapter for alova.js",
   "homepage": "https://alova.js.org",
-  "main": "dist/alova-adapter-uniapp.esm.js",
+  "main": "dist/alova-adapter-uniapp.common.cjs",
   "module": "dist/alova-adapter-uniapp.esm.js",
   "type": "module",
   "types": "typings/index.d.ts",
