@@ -1,0 +1,21 @@
+{
+  "name": "demo-server",
+  "version": "1.0.0",
+  "description": "Node.js example server starter project",
+  "main": "index.ts",
+  "private": "true",
+  "scripts": {
+    "start": "nodemon index.ts"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "nodemon": "^3.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
