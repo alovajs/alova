@@ -101,12 +101,12 @@ declare class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
     consume(points?: number): Promise<RateLimiterRes>;
     /**
      * Increase number of consumed points in current duration.
-     * @param points default is 1
+     * @param points penalty points
      */
     penalty(points: number): Promise<RateLimiterRes>;
     /**
      * Decrease number of consumed points in current duration.
-     * @param points default is 1
+     * @param points reward points
      */
     reward(points: number): Promise<RateLimiterRes>;
     /**

@@ -187,7 +187,7 @@ export class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
 
   /**
    * Increase number of consumed points in current duration.
-   * @param points default is 1
+   * @param points penalty points
    */
   penalty(points: number) {
     return this.limiter.penalty(this.getLimiterKey(), points);
@@ -195,7 +195,7 @@ export class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
 
   /**
    * Decrease number of consumed points in current duration.
-   * @param points default is 1
+   * @param points reward points
    */
   reward(points: number) {
     return this.limiter.reward(this.getLimiterKey(), points);
@@ -217,7 +217,7 @@ export class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
 }
 
 export function createRateLimiter(options: RateLimitOptions = {}) {
-  const { points = 4, duration = 4 * 1000, keyPrefix = '', execEvenly, execEvenlyMinDelayMs, blockDuration } = options;
+  const { points = 4, duration = 4 * 1000, keyPrefix, execEvenly, execEvenlyMinDelayMs, blockDuration } = options;
 
   const limitedMethodWrapper = createServerHook(
     <AG extends AlovaGenerics>(method: Method<AG>, handlerOptions: LimitHandlerOptions<AG> = {}) => {

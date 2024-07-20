@@ -11,9 +11,9 @@
   <label>duration</label>
   <input
     type="number"
-    placeholder="duration 4"
+    placeholder="duration 4000ms"
     id="durationEl" />
-  <span>The time for points to reset, in seconds, the default is 4 seconds</span>
+  <span>The time for points to reset, in ms, the default is 4000 ms</span>
 </div>
 <div class="col">
   <label>blockDuration</label>
@@ -22,9 +22,9 @@
     placeholder="default 0"
     id="blockDurationEl" />
   <span
-    >After reaching the rate limit, the block duration will be extended by [blockDuration] seconds. For example, if the
-    password is incorrect 5 times within 1 hour, the block will be locked for 24 hours. This 24 hours is the value of
-    this parameter.</span
+    >After reaching the rate limit, the block duration will be extended by [blockDuration] millisecond. For example, if
+    the password is incorrect 5 times within 1 hour, the block will be locked for 24 hours. you can set this value to 24
+    * 60 * 60 * 1000.</span
   >
 </div>
 <div class="col">
@@ -37,11 +37,33 @@
 </div>
 <div class="col">
   <button id="btnSubmit">Start</button>
+  <button
+    id="btnReward"
+    disabled>
+    Reward points
+  </button>
+  <button
+    id="btnPenalty"
+    disabled>
+    Penalty points
+  </button>
+  <button
+    id="btnReset"
+    disabled>
+    Reset points
+  </button>
 </div>
 <div id="dashboard"></div>
 
 <script>
   const requestTimes = 10;
+  let uid;
+  const append2Dashboard = res => {
+    const divEl = document.createElement('div');
+    divEl.innerHTML = JSON.stringify(res);
+    dashboard.appendChild(divEl);
+  };
+
   on('#btnSubmit', 'click', async () => {
     const points = toNumber(pointsEl.value);
     const duration = toNumber(durationEl.value);
@@ -49,24 +71,73 @@
     const isCustomStorage = isCustomStorageEl.value === '0' ? false : true;
     dashboard.innerHTML = '';
     btnSubmit.setAttribute('disabled', 'disabled');
+    btnReward.removeAttribute('disabled');
+    btnPenalty.removeAttribute('disabled');
+    btnReset.removeAttribute('disabled');
     await alovaInstance.Put('/api/rateLimit', {
       points,
       duration,
       blockDuration,
       isCustomStorage
     });
+    uid = Math.floor(Math.random() * 100000);
+
     try {
       for (let i = 0; i < requestTimes; i++) {
         const res = await alovaInstance.Get('/api/rateLimit', {
-          cacheFor: null
+          cacheFor: null,
+          headers: { uid }
         });
-        const divEl = document.createElement('div');
-        divEl.innerHTML = JSON.stringify(res);
-        dashboard.appendChild(divEl);
+        append2Dashboard(res);
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } finally {
       btnSubmit.removeAttribute('disabled');
+      btnReward.setAttribute('disabled', 'disabled');
+      btnPenalty.setAttribute('disabled', 'disabled');
+      btnReset.setAttribute('disabled', 'disabled');
     }
+  });
+
+  on('#btnReward', 'click', async () => {
+    btnReward.setAttribute('disabled', 'disabled');
+    const res = await alovaInstance.Post(
+      '/api/rateLimit/reward',
+      {},
+      {
+        cacheFor: null,
+        headers: { uid }
+      }
+    );
+    append2Dashboard(res);
+    btnReward.removeAttribute('disabled');
+  });
+
+  on('#btnPenalty', 'click', async () => {
+    btnPenalty.setAttribute('disabled', 'disabled');
+    const res = await alovaInstance.Post(
+      '/api/rateLimit/penalty',
+      {},
+      {
+        cacheFor: null,
+        headers: { uid }
+      }
+    );
+    append2Dashboard(res);
+    btnPenalty.removeAttribute('disabled');
+  });
+
+  on('#btnReset', 'click', async () => {
+    btnReset.setAttribute('disabled', 'disabled');
+    const res = await alovaInstance.Post(
+      '/api/rateLimit/delete',
+      {},
+      {
+        cacheFor: null,
+        headers: { uid }
+      }
+    );
+    append2Dashboard(res);
+    btnReset.removeAttribute('disabled');
   });
 </script>

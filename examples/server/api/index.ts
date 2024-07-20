@@ -19,5 +19,6 @@ export const alova = createAlova({
     }
     return response.json();
   },
-  l1Cache: createPSCAdapter(NodeSyncAdapter())
+  l1Cache: createPSCAdapter(NodeSyncAdapter()),
+  l2Cache: createPSCAdapter(NodeSyncAdapter())
 });
