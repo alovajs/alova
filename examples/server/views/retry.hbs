@@ -40,15 +40,27 @@
 <div class='col'>
   <button id='btnSubmit'>Start</button>
 </div>
-<div id='dashbaord'></div>
+<div id='dashboard'></div>
 
 <script>
-  const toNumber = value => value ? Number(value) : undefined; on('#btnSubmit', 'click', () => { const retry =
-  toNumber(retryTimesEl.value) || 3; const delay = toNumber(delayEl.value) || 1000; const multiplier =
-  toNumber(multiplierEl.value) || 1; const startQuiver = toNumber(startQuiverEl.value) || 0; const endQuiver =
-  toNumber(endQuiverEl.value) || 0; const apiErrorTimes = toNumber(apiErrorTimesEl.value) || 2; dashbaord.innerHTML =
-  ''; alovaInstance.Post('/api/retry', { retry, delay, multiplier, startQuiver, endQuiver, apiErrorTimes }).send();
-  btnSubmit.setAttribute('disabled', 'disabled'); listenServerResponse({ handle(data) { data.forEach(item => { const
-  divEl = document.createElement('div'); divEl.innerHTML = item; dashbaord.appendChild(divEl); }); }, close() {
-  btnSubmit.removeAttribute('disabled'); } }); });
+const toNumber = value => (value ? Number(value) : undefined);
+on('#btnSubmit', 'click', () => {
+  const retry = toNumber(retryTimesEl.value) || 3;
+  const delay = toNumber(delayEl.value) || 1000;
+  const multiplier = toNumber(multiplierEl.value) || 1;
+  const startQuiver = toNumber(startQuiverEl.value) || 0;
+  const endQuiver = toNumber(endQuiverEl.value) || 0;
+  const apiErrorTimes = toNumber(apiErrorTimesEl.value) || 2;
+  dashboard.innerHTML = '';
+  alovaInstance.Post('/api/retry', { retry, delay, multiplier, startQuiver, endQuiver, apiErrorTimes }).send();
+  btnSubmit.setAttribute('disabled', 'disabled');
+  listenServerResponse({
+    handle(el) {
+      dashboard.appendChild(el);
+    },
+    close() {
+      btnSubmit.removeAttribute('disabled');
+    }
+  });
+});
 </script>

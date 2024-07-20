@@ -29,7 +29,7 @@ router.post('/api/retry', async (req, res) => {
   }, 10);
 
   retryMethod
-    .then((data: any) => {
+    .then(data => {
       pushLog(`success: ${JSON.stringify(data)}`, null);
     })
     .catch(error => {

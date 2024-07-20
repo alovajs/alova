@@ -5,50 +5,31 @@
   <a href='{{sourceHref}}/psc.ts' target='_blank'>source code</a>
 </div>
 
-<div class='col'>
-  <label>max retry times</label>
-  <input type='number' placeholder='default 3' id='retryTimesEl' />
+<div class='banner'>
+  It will the same request 5 times to different processes, they will hit the same cache.
 </div>
-<div class='col'>
-  <label>backoff</label>
-  <div style='margin-left: 20px;'>
-    <div class='col'>
-      <label>retry delay</label>
-      <input type='number' placeholder='default 1000ms' id='delayEl' />
-    </div>
-    <div class='col'>
-      <label>multiplier</label>
-      <input type='number' placeholder='default 1' id='multiplierEl' />
-    </div>
-    <div class='col'>
-      <label>start quiver</label>
-      <input type='number' placeholder='default 0' id='startQuiverEl' />
-      <span>0-1</span>
-    </div>
-    <div class='col'>
-      <label>end quiver</label>
-      <input type='number' placeholder='default 0' id='endQuiverEl' />
-      <span>0-1</span>
-    </div>
-  </div>
+<div>
+  <button id='btnRequest'>Start request</button>
 </div>
-<div class='col'>
-  <label>mock api error times</label>
-  <input type='number' placeholder='default 2' id='apiErrorTimesEl' />
-  <span>control the error times of api</span>
-</div>
-<div class='col'>
-  <button id='btnSubmit'>Start</button>
-</div>
-<div id='dashbaord'></div>
+<div id='dashboard'></div>
 
 <script>
-  const toNumber = value => value ? Number(value) : undefined; on('#btnSubmit', 'click', () => { const retry =
-  toNumber(retryTimesEl.value) || 3; const delay = toNumber(delayEl.value) || 1000; const multiplier =
-  toNumber(multiplierEl.value) || 1; const startQuiver = toNumber(startQuiverEl.value) || 0; const endQuiver =
-  toNumber(endQuiverEl.value) || 0; const apiErrorTimes = toNumber(apiErrorTimesEl.value) || 2; dashbaord.innerHTML =
-  ''; alovaInstance.Post('/api/retry', { retry, delay, multiplier, startQuiver, endQuiver, apiErrorTimes }).send();
-  btnSubmit.setAttribute('disabled', 'disabled'); listenServerResponse({ handle(data) { data.forEach(item => { const
-  divEl = document.createElement('div'); divEl.innerHTML = item; dashbaord.appendChild(divEl); }); }, close() {
-  btnSubmit.removeAttribute('disabled'); } }); });
+const requestTimes = 10;
+on('#btnRequest', 'click', async () => {
+  dashboard.innerHTML = '';
+  btnRequest.setAttribute('disabled', 'disabled');
+  try {
+    for (let i = 0; i < requestTimes; i++) {
+      const res = await alovaInstance.Get('/api/psc', {
+        cacheFor: null
+      });
+      const divEl = document.createElement('div');
+      divEl.innerHTML = JSON.stringify(res);
+      dashboard.appendChild(divEl);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  } finally {
+    btnRequest.removeAttribute('disabled');
+  }
+});
 </script>

@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@alova/mock": "workspace:*",
+    "@alova/psc": "workspace:*",
     "alova": "workspace:*",
     "body-parser": "^1.20.2",
     "express": "^4.19.2",

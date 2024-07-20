@@ -252,6 +252,9 @@ importers:
       '@alova/mock':
         specifier: workspace:*
         version: link:../../packages/adapter-mock
+      '@alova/psc':
+        specifier: workspace:*
+        version: link:../../packages/psc
       alova:
         specifier: workspace:*
         version: link:../../packages/alova

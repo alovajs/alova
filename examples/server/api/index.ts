@@ -1,4 +1,5 @@
 import { createAlovaMockAdapter } from '@alova/mock';
+import { createPSCAdapter, NodeSyncAdapter } from '@alova/psc';
 import { createAlova } from 'alova';
 import mock from './mock';
 
@@ -17,5 +18,6 @@ export const alova = createAlova({
       throw new Error(`[${response.status}]${response.statusText}`);
     }
     return response.json();
-  }
+  },
+  l1Cache: createPSCAdapter(NodeSyncAdapter())
 });

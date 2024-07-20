@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "next",
   "updateInternalDependencies": "minor",
-  "ignore": ["@alova/client", "@alova/server"]
+  "ignore": ["@alova/client", "@alova/server", "react-demo", "vue-demo", "svelte-demo", "server-demo"]
 }

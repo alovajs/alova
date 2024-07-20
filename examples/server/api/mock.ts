@@ -1,7 +1,7 @@
 import { defineMock } from '@alova/mock';
 
 export default defineMock({
-  '/retryData': ({ query }) => {
+  '/fruits': ({ query }) => {
     const { errTimes, id } = query;
     retriedTimes[id] = retriedTimes[id] || 0;
     if (errTimes && errTimes > retriedTimes[id]) {

@@ -22,7 +22,11 @@ function listenServerResponse({ handle, close }) {
         cacheFor: 0
       });
       const logsFiltered = logs.filter(item => item !== null);
-      handle(logsFiltered);
+      logsFiltered.forEach(item => {
+        const divEl = document.createElement('div');
+        divEl.innerHTML = item;
+        handle(divEl, item);
+      });
 
       // stop interval while receiving null item
       if (logsFiltered.length !== logs.length) {
@@ -43,11 +47,12 @@ function listenServerResponse({ handle, close }) {
 var alovaInstance = alova.createAlova({
   requestAdapter: alovaFetch(),
   responded: async response => {
-    const res = await response.text();
-    // const res = await response.json();
-    if (response.statusCode > 200) {
-      throw new Error(res.message);
+    if (response.status > 200) {
+      const msg = 'error:' + response.statusText;
+      alert(msg);
+      throw new Error(msg);
     }
-    return JSON.parse(res);
+    const res = await response.json();
+    return res;
   }
 });
