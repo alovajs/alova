@@ -19,7 +19,13 @@ body {
   content: 'Introduce: ';
 }
 .col {
-  margin: 10px 0;
+  margin: 20px 0;
+}
+.col span:last-child {
+  display: block;
+  color: #aaa;
+  font-size: 14px;
+  width: 50%;
 }
 .title {
   display: flex;
@@ -32,6 +38,9 @@ body {
 .title > a:first-child::before {
   content: '<-';
   margin-right: 10px;
+}
+.title > a:not(:first-child) {
+  padding: 0 20px;
 }
 #dashboard {
   margin-top: 20px;

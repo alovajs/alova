@@ -56,3 +56,7 @@ var alovaInstance = alova.createAlova({
     return res;
   }
 });
+
+function toNumber(value) {
+  return value ? Number(value) : undefined;
+}

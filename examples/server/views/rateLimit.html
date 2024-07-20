@@ -1,0 +1,72 @@
+{{> header}}
+<div class="col">
+  <label>points</label>
+  <input
+    type="number"
+    placeholder="default 4"
+    id="pointsEl" />
+  <span>Maximum amount that can be consumed within [duration]</span>
+</div>
+<div class="col">
+  <label>duration</label>
+  <input
+    type="number"
+    placeholder="duration 4"
+    id="durationEl" />
+  <span>The time for points to reset, in seconds, the default is 4 seconds</span>
+</div>
+<div class="col">
+  <label>blockDuration</label>
+  <input
+    type="number"
+    placeholder="default 0"
+    id="blockDurationEl" />
+  <span
+    >After reaching the rate limit, the block duration will be extended by [blockDuration] seconds. For example, if the
+    password is incorrect 5 times within 1 hour, the block will be locked for 24 hours. This 24 hours is the value of
+    this parameter.</span
+  >
+</div>
+<div class="col">
+  <label>set custom storage</label>
+  <select id="isCustomStorageEl">
+    <option value="0">No</option>
+    <option value="1">Yes</option>
+  </select>
+  <span>Whether to set a custom storage adapter</span>
+</div>
+<div class="col">
+  <button id="btnSubmit">Start</button>
+</div>
+<div id="dashboard"></div>
+
+<script>
+  const requestTimes = 10;
+  on('#btnSubmit', 'click', async () => {
+    const points = toNumber(pointsEl.value);
+    const duration = toNumber(durationEl.value);
+    const blockDuration = toNumber(blockDurationEl.value);
+    const isCustomStorage = isCustomStorageEl.value === '0' ? false : true;
+    dashboard.innerHTML = '';
+    btnSubmit.setAttribute('disabled', 'disabled');
+    await alovaInstance.Put('/api/rateLimit', {
+      points,
+      duration,
+      blockDuration,
+      isCustomStorage
+    });
+    try {
+      for (let i = 0; i < requestTimes; i++) {
+        const res = await alovaInstance.Get('/api/rateLimit', {
+          cacheFor: null
+        });
+        const divEl = document.createElement('div');
+        divEl.innerHTML = JSON.stringify(res);
+        dashboard.appendChild(divEl);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    } finally {
+      btnSubmit.removeAttribute('disabled');
+    }
+  });
+</script>

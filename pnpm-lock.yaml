@@ -265,7 +265,7 @@ importers:
         specifier: ^4.19.2
         version: 4.19.2
       hbs:
-        specifier: ~4.0.4
+        specifier: ^4.0.4
         version: 4.0.6
     devDependencies:
       '@types/body-parser':
@@ -274,6 +274,9 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
+      '@types/hbs':
+        specifier: ^4.0.4
+        version: 4.0.4
       '@types/node':
         specifier: ^20.12.7
         version: 20.14.11
@@ -2560,6 +2563,9 @@ packages:
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
+
+  '@types/hbs@4.0.4':
+    resolution: {integrity: sha512-GH3SIb2tzDBnTByUSOIVcD6AcLufnydBllTuFAIAGMhqPNbz8GL4tLryVdNqhq0NQEb5mVpu2FJOrUeqwJrPtg==}
 
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
@@ -9772,6 +9778,10 @@ snapshots:
   '@types/graceful-fs@4.1.9':
     dependencies:
       '@types/node': 20.14.11
+
+  '@types/hbs@4.0.4':
+    dependencies:
+      handlebars: 4.7.8
 
   '@types/http-cache-semantics@4.0.4': {}
 

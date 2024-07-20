@@ -1,0 +1,15 @@
+<div class="title">
+  <a href="/">
+    <h1>{{ title }}</h1>
+  </a>
+  <a
+    href="{{sourceUrl}}/{{#if filePath}}{{filePath}}{{else}}{{title}}{{/if}}.ts"
+    target="_blank"
+    >source code</a
+  >
+  <a
+    href="{{docUrl}}{{docPath}}"
+    target="_blank"
+    >document</a
+  >
+</div>

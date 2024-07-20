@@ -118,7 +118,7 @@ declare class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
      */
     delete(): Promise<boolean>;
 }
-declare function createRateLimiter(options: RateLimitOptions): <AG extends AlovaGenerics>(method: Method<AG>, handlerOptions?: LimitHandlerOptions<AG>) => LimitedMethod<AG>;
+declare function createRateLimiter(options?: RateLimitOptions): <AG extends AlovaGenerics>(method: Method<AG>, handlerOptions?: LimitHandlerOptions<AG>) => LimitedMethod<AG>;
 
 interface RetryOptions {
     /**

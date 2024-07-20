@@ -1,8 +1,10 @@
 import bodyParser from 'body-parser';
 import express from 'express';
+import hbs from 'hbs';
 import path from 'path';
 import { clearLogs, flushLogs } from './logs';
 import pscRouter from './routes/psc';
+import rateLimitRouter from './routes/rateLimit';
 import retryRouter from './routes/retry';
 
 const app = express();
@@ -18,33 +20,41 @@ app.use((_, res, next) => {
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+app.set('view engine', 'html');
+app.engine('html', hbs.__express);
+hbs.registerPartials(__dirname + '/views/partials');
+
 // set global variable
 app.use((_, res, next) => {
-  res.locals.sourceHref = `https://github.com/alovajs/alova/blob/${sourceBranch ? `${sourceBranch}/` : ''}examples/${pkgName}/routes`;
+  res.locals.sourceUrl = `https://github.com/alovajs/alova/blob/${sourceBranch ? `${sourceBranch}/` : ''}examples/${pkgName}/routes`;
+  res.locals.docUrl = `https://alova.js.org${sourceBranch ? `/${sourceBranch}` : ''}`;
   next();
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
-app.use(retryRouter, pscRouter);
+app.use(retryRouter, pscRouter, rateLimitRouter);
 
 app.get('/', (_, res) => {
-  res.render('index', { title: 'Alova Demo - server' });
+  res.render('index', { title: 'Home' });
 });
 app.get('/retry', (req, res) => {
   res.render('retry', {
-    title: 'retry - Server Demo'
+    title: 'retry',
+    docPath: '/tutorial/server/strategy/retry'
   });
 });
 app.get('/rateLimit', (req, res) => {
   res.render('rateLimit', {
-    title: 'rateLimit - Server Demo'
+    title: 'rate limit',
+    filePath: 'rateLimit',
+    docPath: '/tutorial/server/strategy/rate-limit'
   });
 });
 app.get('/psc', (req, res) => {
   res.render('psc', {
-    title: 'psc - Server Demo'
+    title: 'psc',
+    docPath: '/resource/storage-adapter/psc'
   });
 });
 

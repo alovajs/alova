@@ -1,0 +1,86 @@
+{{> header}}
+<div class="col">
+  <label>max retry times</label>
+  <input
+    type="number"
+    placeholder="default 3"
+    id="retryTimesEl" />
+</div>
+<div class="col">
+  <label>backoff</label>
+  <div style="margin-left: 20px">
+    <div class="col">
+      <label>retry delay</label>
+      <input
+        type="number"
+        placeholder="default 1000ms"
+        id="delayEl" />
+    </div>
+    <div class="col">
+      <label>multiplier</label>
+      <input
+        type="number"
+        placeholder="default 1"
+        id="multiplierEl" />
+    </div>
+    <div class="col">
+      <label>start quiver</label>
+      <input
+        type="number"
+        placeholder="default 0"
+        id="startQuiverEl" />
+      <span>0-1</span>
+    </div>
+    <div class="col">
+      <label>end quiver</label>
+      <input
+        type="number"
+        placeholder="default 0"
+        id="endQuiverEl" />
+      <span>0-1</span>
+    </div>
+  </div>
+</div>
+<div class="col">
+  <label>mock api error times</label>
+  <input
+    type="number"
+    placeholder="default 2"
+    id="apiErrorTimesEl" />
+  <span>control the error times of api</span>
+</div>
+<div class="col">
+  <button id="btnSubmit">Start</button>
+</div>
+<div id="dashboard"></div>
+
+<script>
+  on('#btnSubmit', 'click', () => {
+    const retry = toNumber(retryTimesEl.value) || 3;
+    const delay = toNumber(delayEl.value) || 1000;
+    const multiplier = toNumber(multiplierEl.value) || 1;
+    const startQuiver = toNumber(startQuiverEl.value) || 0;
+    const endQuiver = toNumber(endQuiverEl.value) || 0;
+    const apiErrorTimes = toNumber(apiErrorTimesEl.value) || 2;
+    dashboard.innerHTML = '';
+    alovaInstance
+      .Post('/api/retry', {
+        retry,
+        delay,
+        multiplier,
+        startQuiver,
+        endQuiver,
+        apiErrorTimes
+      })
+      .send();
+    btnSubmit.setAttribute('disabled', 'disabled');
+    listenServerResponse({
+      handle(el) {
+        dashboard.appendChild(el);
+      },
+      close() {
+        btnSubmit.removeAttribute('disabled');
+      }
+    });
+  });
+</script>

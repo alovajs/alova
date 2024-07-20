@@ -216,22 +216,15 @@ export class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
   }
 }
 
-export function createRateLimiter(options: RateLimitOptions) {
-  const {
-    points = 4,
-    duration = 4 * 1000,
-    keyPrefix = '',
-    execEvenly,
-    execEvenlyMinDelayMs,
-    blockDuration
-  } = options ?? {};
+export function createRateLimiter(options: RateLimitOptions = {}) {
+  const { points = 4, duration = 4 * 1000, keyPrefix = '', execEvenly, execEvenlyMinDelayMs, blockDuration } = options;
 
   const limitedMethodWrapper = createServerHook(
-    <AG extends AlovaGenerics>(method: Method<AG>, handlerOptions?: LimitHandlerOptions<AG>) => {
-      const { key = uuid() } = handlerOptions ?? {};
+    <AG extends AlovaGenerics>(method: Method<AG>, handlerOptions: LimitHandlerOptions<AG> = {}) => {
+      const { key = uuid() } = handlerOptions;
       const storage = options.storage ?? getOptions(method).l2Cache;
 
-      assert(!!storage, 'storage is not defined');
+      assert(!!storage, 'storage is not define');
       const limiter = new RateLimiterStore(storage!, {
         points,
         duration: Math.floor(duration / 1000),

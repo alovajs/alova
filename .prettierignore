@@ -3,4 +3,3 @@
 /examples/*/dist
 pnpm-lock.yaml
 /packages/alova/typings/serverhook.d.ts
-*.hbs
