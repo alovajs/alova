@@ -20,7 +20,7 @@ function View() {
     behavior: () => (networkMode === 0 ? 'queue' : 'static'),
     queue,
     initialData: [],
-    force: ({ sendArgs: [isForce] }) => !!isForce
+    force: ({ args: [isForce] }) => !!isForce
   }).onSuccess(({ data: noteListRaw }) => {
     // 步骤3：将未提交的数据手动补充到列表，以便即使数据未提交也能展示最新状态
     filterSilentMethods(undefined, queue).then(noteSilentMethods => {
@@ -58,7 +58,7 @@ function View() {
       endQuiver: 0.5
     },
     immediate: false
-  }).onSuccess(({ silentMethod, sendArgs: [removedId] }) => {
+  }).onSuccess(({ silentMethod, args: [removedId] }) => {
     // setp1: update list data manually
     updateStateEffect(queryNotes(), noteList => {
       const index = noteList.findIndex(({ id }) => id === removedId);

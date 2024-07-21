@@ -87,7 +87,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   // 初始化fetcher
   const fetchStates = useFetcher<FetcherType<Alova<AG>>>({
     __referingObj: referingObject,
-    force: ({ sendArgs }) => sendArgs[0]
+    force: ({ args }) => args[0]
   });
   const { loading, fetch, abort: abortFetch, onSuccess: onFetchSuccess } = fetchStates;
   const fetchingRef = ref(loading);
@@ -156,7 +156,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
 
       return next();
     },
-    force: event => event.sendArgs[1] || (isFn(force) ? force(event) : force),
+    force: event => event.args[1] || (isFn(force) ? force(event) : force),
     ...others
   });
   const { send } = states;
@@ -289,7 +289,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       }
     }
   });
-  states.onSuccess(({ data: rawData, sendArgs: [refreshPage, isRefresh], method }) => {
+  states.onSuccess(({ data: rawData, args: [refreshPage, isRefresh], method }) => {
     const { total: cachedTotal } = getSnapshotMethods(method) || {};
     const typedRawData = rawData as any[];
     total.v = cachedTotal !== undefinedValue ? cachedTotal : totalGetter(typedRawData);

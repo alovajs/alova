@@ -75,7 +75,7 @@ const { send: removeSend, loading: removing } = useSQRequest(id => removeTodo(id
     endQuiver: 0.5
   },
   immediate: false
-}).onSuccess(({ sendArgs: [removeId], silentMethod }) => {
+}).onSuccess(({ args: [removeId], silentMethod }) => {
   todos.value = todos.value.filter(todo => todo.id !== removeId);
   if (silentMethod) {
     silentMethod.reviewData = {

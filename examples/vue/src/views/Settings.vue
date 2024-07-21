@@ -86,7 +86,7 @@ const { send: submitData, loading: submittingLoading } = useSQRequest((name, val
     endQuiver: 0.5
   },
   immediate: false
-}).onSuccess(({ silentMethod, sendArgs: [name, value] }) => {
+}).onSuccess(({ silentMethod, args: [name, value] }) => {
   settingData[name] = value;
   if (silentMethod) {
     silentMethod.reviewData = { name, value };

@@ -67,7 +67,7 @@ describe('parallel request', () => {
 
     const [firstEvent, secondEvent] = await Promise.all([firstPromise, secondPromise]);
     expect(firstEvent.method).toBe(Getter);
-    expect(firstEvent.sendArgs).toStrictEqual([]);
+    expect(firstEvent.args).toStrictEqual([]);
 
     const firstResponse = firstEvent.data;
     const secondResponse = secondEvent.data;

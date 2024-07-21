@@ -18,7 +18,7 @@
     behavior: () => (networkMode === 0 ? 'queue' : 'static'),
     queue,
     initialData: [],
-    force: ({ sendArgs: [isForce] }) => !!isForce
+    force: ({ args: [isForce] }) => !!isForce
   }).onSuccess(({ data: noteListRaw }) => {
     filterSilentMethods(undefined, queue).then(noteSilentMethods => {
       console.log(noteSilentMethods);
@@ -53,7 +53,7 @@
       endQuiver: 0.5
     },
     immediate: false
-  }).onSuccess(({ silentMethod, sendArgs: [removedId] }) => {
+  }).onSuccess(({ silentMethod, args: [removedId] }) => {
     updateStateEffect(queryNotes(), noteList => {
       const index = noteList.findIndex(({ id }) => id === removedId);
       if (index >= 0) {

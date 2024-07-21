@@ -871,7 +871,7 @@ describe('use useWatcher hook to send GET with vue', () => {
 
     const ctrlVal = ref(0);
     const { data, send, onSuccess } = useWatcher(() => getGetterObj, [ctrlVal], {
-      force: ({ sendArgs: [force] }) => force
+      force: ({ args: [force] }) => force
     });
 
     setCache(getGetterObj, {

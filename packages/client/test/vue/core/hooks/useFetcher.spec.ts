@@ -122,7 +122,7 @@ describe('use useFetcher hook to fetch data', () => {
       fetch,
       onSuccess: onFetchSuccess
     } = useFetcher<FetcherType<typeof alova>>({
-      force({ sendArgs: [p1, p2] }) {
+      force({ args: [p1, p2] }) {
         mockFn();
         expect(p1).toBeTruthy();
         expect(p2).toBeFalsy();

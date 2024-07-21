@@ -26,7 +26,7 @@ export interface AlovaEvent<AG extends AlovaGenerics> {
   /**
    * params from send function
    */
-  sendArgs: any[];
+  args: any[];
   /**
    * current method instance
    */

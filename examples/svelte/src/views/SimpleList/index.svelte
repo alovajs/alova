@@ -41,7 +41,7 @@
       endQuiver: 0.5
     },
     immediate: false
-  }).onSuccess(({ sendArgs: [removeId], silentMethod }) => {
+  }).onSuccess(({ args: [removeId], silentMethod }) => {
     $todos = $todos.filter(todo => todo.id !== removeId);
     if (silentMethod) {
       silentMethod.reviewData = {

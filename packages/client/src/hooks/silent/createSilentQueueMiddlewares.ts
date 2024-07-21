@@ -84,7 +84,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
           behaviorFinally,
           event.method,
           silentMethodInstance,
-          event.sendArgs,
+          event.args,
           event.data
         ) as any
       );
@@ -97,7 +97,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
           behaviorFinally,
           event.method,
           silentMethodInstance,
-          event.sendArgs,
+          event.args,
           event.error
         )
       );
@@ -109,7 +109,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
           behaviorFinally,
           event.method,
           silentMethodInstance,
-          event.sendArgs,
+          event.args,
           event.status,
           event.data,
           event.error
