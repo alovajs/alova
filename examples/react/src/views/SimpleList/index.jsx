@@ -89,7 +89,7 @@ function View() {
       endQuiver: 0.5
     },
     immediate: false
-  }).onSuccess(({ sendArgs: [removeId], silentMethod }) => {
+  }).onSuccess(({ args: [removeId], silentMethod }) => {
     update({
       data: todos.filter(todo => todo.id !== removeId)
     });

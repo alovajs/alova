@@ -89,7 +89,7 @@ export const getData = () => alovaInst.Get('/todolist');
       this.todoRequest$send();
       this.todoRequest$onSuccess(event => {
         event.data.match;
-        event.sendArgs.copyWithin;
+        event.args.copyWithin;
       });
       this.todoRequest$onSuccess(event => {
         console.log('success', event);

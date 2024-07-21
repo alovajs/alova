@@ -85,7 +85,7 @@ const editItem = id => {
 
 const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
   immediate: false
-}).onSuccess(({ sendArgs: [row] }) => {
+}).onSuccess(({ args: [row] }) => {
   remove(row);
 });
 

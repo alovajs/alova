@@ -120,11 +120,11 @@ describe('use useRequest hook to send GET with vue', () => {
       expect(event.status).toBe('error');
       expect(event.error).toBe(error.value);
       expect(event.method).toBe(Get);
-      expect(event.sendArgs).toStrictEqual([]);
+      expect(event.args).toStrictEqual([]);
     });
     const errEvent = await untilCbCalled(onError);
     expect(errEvent.method).toBe(Get);
-    expect(errEvent.sendArgs).toStrictEqual([]);
+    expect(errEvent.args).toStrictEqual([]);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
@@ -326,16 +326,16 @@ describe('use useRequest hook to send GET with vue', () => {
     const { data, send, onSuccess, onComplete } = useRequest(params => getGetter(params), {
       immediate: false
     });
-    onSuccess(({ data, sendArgs }) => {
-      expect(sendArgs).toHaveLength(1);
-      const obj = sendArgs[0];
+    onSuccess(({ data, args }) => {
+      expect(args).toHaveLength(1);
+      const obj = args[0];
       expect(data.path).toBe('/unit-test');
       expect(obj.a).toMatch(/~|\./);
       expect(obj.b).toMatch(/~|\./);
     });
-    onComplete(({ sendArgs }) => {
-      expect(sendArgs).toHaveLength(1);
-      const obj = sendArgs[0];
+    onComplete(({ args }) => {
+      expect(args).toHaveLength(1);
+      const obj = args[0];
       expect(obj.a).toMatch(/~|\./);
       expect(obj.b).toMatch(/~|\./);
     });
@@ -375,14 +375,14 @@ describe('use useRequest hook to send GET with vue', () => {
     });
 
     const mockFn = jest.fn();
-    onError(({ error, sendArgs }) => {
-      const index = sendArgs[0];
+    onError(({ error, args }) => {
+      const index = args[0];
       mockFn();
       expect(error.message).toMatch(/404/);
       expect(index.toString()).toMatch(/3|5/);
     });
-    onComplete(({ error, sendArgs }) => {
-      const index = sendArgs[0];
+    onComplete(({ error, args }) => {
+      const index = args[0];
       mockFn();
       expect(error.message).toMatch(/404/);
       expect(index.toString()).toMatch(/3|5/);
@@ -412,7 +412,7 @@ describe('use useRequest hook to send GET with vue', () => {
       force: event => {
         mockFn();
         expect(event).toBeInstanceOf(AlovaEventBase);
-        expect(event.sendArgs).toStrictEqual([1, 2, 3]);
+        expect(event.args).toStrictEqual([1, 2, 3]);
         return true;
       }
     });
@@ -437,7 +437,7 @@ describe('use useRequest hook to send GET with vue', () => {
 
     const { data, send } = useRequest(getGetterObj, {
       immediate: false,
-      force: ({ sendArgs: [force] }) => force
+      force: ({ args: [force] }) => force
     });
 
     setCache(getGetterObj, {

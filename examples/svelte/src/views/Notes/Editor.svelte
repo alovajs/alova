@@ -53,7 +53,7 @@
         return false;
       }
     })
-    .onSuccess(async ({ silentMethod, sendArgs: [content] }) => {
+    .onSuccess(async ({ silentMethod, args: [content] }) => {
       let editingItem = undefined;
       await setCache(methodNoteList, noteList => {
         if (!noteList || !currentId) {

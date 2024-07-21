@@ -68,9 +68,9 @@ export interface SSEExposure<AG extends AlovaGenerics, Data> {
   eventSource: ExportedState<EventSource | undefined, AG['StatesExport']>;
   /**
    * 手动发起请求。在使用 `immediate: true` 时该方法会自动触发
-   * @param sendArgs 请求参数，会传递给 method
+   * @param args 请求参数，会传递给 method
    */
-  send(...sendArgs: any[]): Promise<void>;
+  send(...args: any[]): Promise<void>;
   /**
    * 关闭连接
    */

@@ -21,7 +21,7 @@ export class AlovaSSEEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> 
   eventSource: EventSource; // eventSource实例
 
   constructor(base: AlovaEventBase<AG>, eventSource: EventSource) {
-    super(base.method, base.sendArgs);
+    super(base.method, base.args);
     this.eventSource = eventSource;
   }
 }
@@ -174,11 +174,11 @@ export class ScopedSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> impleme
   /**
    * 通过send触发请求时传入的参数
    */
-  sendArgs: any[];
+  args: any[];
 
-  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, sendArgs: any[]) {
+  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: any[]) {
     super(behavior, method, silentMethod);
-    this.sendArgs = sendArgs;
+    this.args = args;
   }
 }
 
@@ -195,10 +195,10 @@ export class ScopedSQSuccessEvent<AG extends AlovaGenerics>
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    sendArgs: any[],
+    args: any[],
     data: AG['Responded']
   ) {
-    super(behavior, method, silentMethod, sendArgs);
+    super(behavior, method, silentMethod, args);
     this.data = data;
   }
 }
@@ -209,14 +209,8 @@ export class ScopedSQErrorEvent<AG extends AlovaGenerics> extends ScopedSQEvent<
    */
   error: any;
 
-  constructor(
-    behavior: SQHookBehavior,
-    method: Method<AG>,
-    silentMethod: SilentMethod<AG>,
-    sendArgs: any[],
-    error: any
-  ) {
-    super(behavior, method, silentMethod, sendArgs);
+  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: any[], error: any) {
+    super(behavior, method, silentMethod, args);
     this.error = error;
   }
 }
@@ -236,11 +230,11 @@ export class ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEvent<
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    sendArgs: any[],
+    args: any[],
     retryTimes: number,
     retryDelay: number
   ) {
-    super(behavior, method, silentMethod, sendArgs);
+    super(behavior, method, silentMethod, args);
     this.retryTimes = retryTimes;
     this.retryDelay = retryDelay;
   }
@@ -269,12 +263,12 @@ export class ScopedSQCompleteEvent<AG extends AlovaGenerics>
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    sendArgs: any[],
+    args: any[],
     status: AlovaCompleteEvent<AG>['status'],
     data?: AG['Responded'],
     error?: any
   ) {
-    super(behavior, method, silentMethod, sendArgs);
+    super(behavior, method, silentMethod, args);
     this.status = status;
     this.data = data;
     this.error = error;
@@ -296,7 +290,7 @@ export class RetriableRetryEvent<AG extends AlovaGenerics>
   retryDelay: number;
 
   constructor(base: AlovaEventBase<AG>, retryTimes: number, retryDelay: number) {
-    super(base.method, base.sendArgs);
+    super(base.method, base.args);
     this.retryTimes = retryTimes;
     this.retryDelay = retryDelay;
   }

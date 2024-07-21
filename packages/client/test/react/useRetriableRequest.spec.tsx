@@ -64,7 +64,7 @@ describe('react => useRetriableRequest', () => {
       const { loading, error, onError, onComplete, onSuccess, onRetry, onFail } = useRetriableRequest(methodInstance);
       onRetry(event => {
         mockRetryFn();
-        expect(event.sendArgs).toStrictEqual([]);
+        expect(event.args).toStrictEqual([]);
         expect(event.method).toBe(methodInstance);
         expect(event.retryDelay).toBe(1000);
         expect(event.retryTimes).toBeLessThanOrEqual(3);
@@ -74,7 +74,7 @@ describe('react => useRetriableRequest', () => {
       onSuccess(mockSuccessFn);
       onFail(event => {
         mockFailFn();
-        expect(event.sendArgs).toStrictEqual([]);
+        expect(event.args).toStrictEqual([]);
         expect(event.error).toBeInstanceOf(Error);
         expect(event.method).toBe(methodInstance);
         expect(event.retryTimes).toBe(3);

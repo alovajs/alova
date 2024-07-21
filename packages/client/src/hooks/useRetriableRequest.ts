@@ -41,14 +41,14 @@ export default <AG extends AlovaGenerics>(
   const retryTimes = useFlag$(0);
   const stopManuallyError = useFlag$(undefinedValue as Error | undefined); // 停止错误对象，在手动触发停止时有值
   const methodInstanceLastest = useFlag$(undefinedValue as Method<AG> | undefined);
-  const sendArgsLatest = useFlag$(undefinedValue as any[] | undefined);
+  const argsLatest = useFlag$(undefinedValue as any[] | undefined);
   const currentLoadingState = useFlag$(falseValue);
   const requesting = useFlag$(falseValue); // 是否正在请求
   const retryTimer = useFlag$(undefinedValue as string | number | NodeJS.Timeout | undefined);
   const promiseObj = useFlag$(usePromise());
   const requestResolved = useFlag$(falseValue);
 
-  const emitOnFail = (method: Method<AG>, sendArgs: any[], error: any) => {
+  const emitOnFail = (method: Method<AG>, args: any[], error: any) => {
     if (requestResolved.current) {
       return;
     }
@@ -57,7 +57,7 @@ export default <AG extends AlovaGenerics>(
     setTimeoutFn(() => {
       eventManager.emit(
         FailEventKey,
-        newInstance(RetriableFailEvent<AG>, AlovaEventBase.spawn(method, sendArgs), error, retryTimes.current)
+        newInstance(RetriableFailEvent<AG>, AlovaEventBase.spawn(method, args), error, retryTimes.current)
       );
       stopManuallyError.current = undefinedValue;
       retryTimes.current = 0; // 重置已重试次数
@@ -88,7 +88,7 @@ export default <AG extends AlovaGenerics>(
       controlLoading();
       setLoading(trueValue);
       methodInstanceLastest.current = method;
-      sendArgsLatest.current = args;
+      argsLatest.current = args;
       requesting.current = trueValue;
 
       // init the resolved flag as `false` before first request.
@@ -164,7 +164,7 @@ export default <AG extends AlovaGenerics>(
 
       // raise fail event at the end, because the above process depends on `stopManuallyError`
       // emit this event will clears this variable
-      emitOnFail(methodInstanceLastest.current as any, sendArgsLatest.current as any, stopManuallyError.current);
+      emitOnFail(methodInstanceLastest.current as any, argsLatest.current as any, stopManuallyError.current);
     }
   };
 

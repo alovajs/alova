@@ -81,7 +81,7 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQSuccessEvent.method).toBe(Get);
     expect(scopedSQSuccessEvent.data.total).toBe(300);
     expect(scopedSQSuccessEvent.data.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([]);
+    expect(scopedSQSuccessEvent.args).toStrictEqual([]);
     expect(!!scopedSQSuccessEvent.silentMethod).toBeTruthy();
 
     expect(beforePushMockFn).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('vue => useSQRequest', () => {
     expect(beforePushEvent.behavior).toBe('queue');
     expect(beforePushEvent.method).toBe(Get);
     expect(beforePushEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(beforePushEvent.sendArgs).toStrictEqual([]);
+    expect(beforePushEvent.args).toStrictEqual([]);
     expect(currentQueueStageBeforePush).toHaveLength(0);
 
     expect(pushedMockFn).toHaveBeenCalledTimes(1);
@@ -99,7 +99,7 @@ describe('vue => useSQRequest', () => {
     expect(pushedEvent.behavior).toBe('queue');
     expect(pushedEvent.method).toBe(Get);
     expect(pushedEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(pushedEvent.sendArgs).toStrictEqual([]);
+    expect(pushedEvent.args).toStrictEqual([]);
     expect(currentQueueStagePushed).toHaveLength(1);
     expect(currentQueueStagePushed[0]).toBe(pushedEvent.silentMethod);
 
@@ -110,7 +110,7 @@ describe('vue => useSQRequest', () => {
     expect(completedEvent.method).toBe(Get);
     expect(completedEvent.data.total).toBe(300);
     expect(completedEvent.data.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(completedEvent.sendArgs).toStrictEqual([]);
+    expect(completedEvent.args).toStrictEqual([]);
     expect(!!completedEvent.silentMethod).toBeTruthy();
 
     expect(Object.keys(silentQueueMap[queue])).toHaveLength(0);
@@ -209,7 +209,7 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQSuccessEvent.behavior).toBe('queue');
     expect(scopedSQSuccessEvent.data.total).toBe(300);
     expect(scopedSQSuccessEvent.data.list).toStrictEqual([8, 9, 10, 11, 12, 13, 14, 15]);
-    expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([2, 8]);
+    expect(scopedSQSuccessEvent.args).toStrictEqual([2, 8]);
     expect(!!scopedSQSuccessEvent.silentMethod).toBeTruthy();
 
     expect(beforePushMockFn).toHaveBeenCalledTimes(1);
@@ -218,7 +218,7 @@ describe('vue => useSQRequest', () => {
     expect(beforePushEvent.method.url).toBe('/list');
     expect(beforePushEvent.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
     expect(beforePushEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(beforePushEvent.sendArgs).toStrictEqual([2, 8]);
+    expect(beforePushEvent.args).toStrictEqual([2, 8]);
 
     expect(pushedMockFn).toHaveBeenCalledTimes(1);
     const [pushedEvent] = pushedMockFn.mock.calls[0];
@@ -226,7 +226,7 @@ describe('vue => useSQRequest', () => {
     expect(pushedEvent.method.url).toBe('/list');
     expect(pushedEvent.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
     expect(pushedEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(pushedEvent.sendArgs).toStrictEqual([2, 8]);
+    expect(pushedEvent.args).toStrictEqual([2, 8]);
   });
 
   test('should emit onError immediately while request error and never retry', async () => {
@@ -249,7 +249,7 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQErrorEvent).toBeInstanceOf(ScopedSQErrorEvent);
     expect(scopedSQErrorEvent.behavior).toBe('queue');
     expect(scopedSQErrorEvent.error.message).toBe('server error');
-    expect(scopedSQErrorEvent.sendArgs).toStrictEqual([]);
+    expect(scopedSQErrorEvent.args).toStrictEqual([]);
     expect(scopedSQErrorEvent.silentMethod).not.toBeUndefined();
     expect(silentQueueMap[queue]).toHaveLength(0); // 在队列中移除了
 
@@ -257,7 +257,7 @@ describe('vue => useSQRequest', () => {
     expect(completedEvent).toBeInstanceOf(ScopedSQCompleteEvent);
     expect(completedEvent.behavior).toBe('queue');
     expect(completedEvent.error.message).toBe('server error');
-    expect(completedEvent.sendArgs).toStrictEqual([]);
+    expect(completedEvent.args).toStrictEqual([]);
     expect(completedEvent.silentMethod).not.toBeUndefined();
   });
 
@@ -326,7 +326,7 @@ describe('vue => useSQRequest', () => {
       total: 300,
       list: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     });
-    expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([]);
+    expect(scopedSQSuccessEvent.args).toStrictEqual([]);
     expect(scopedSQSuccessEvent.method).not.toBeUndefined();
     expect(scopedSQSuccessEvent.silentMethod).toBeUndefined();
   });
@@ -366,7 +366,7 @@ describe('vue => useSQRequest', () => {
     expect(fallbackEvent.behavior).toBe('silent');
     expect(fallbackEvent.method).not.toBeUndefined();
     expect(fallbackEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(fallbackEvent.sendArgs).toStrictEqual([]);
+    expect(fallbackEvent.args).toStrictEqual([]);
   });
 
   test('should be change behavior when param behavior set to a function that return different value', async () => {
@@ -383,7 +383,7 @@ describe('vue => useSQRequest', () => {
     expect(event.data).toBeInstanceOf(Undefined);
     expect(event.data[symbolVDataId]).not.toBeUndefined();
     expect(event.behavior).toBe('silent');
-    expect(event.sendArgs).toStrictEqual([]);
+    expect(event.args).toStrictEqual([]);
 
     behaviorStr = 'static';
     send(1, 2, 3);
@@ -391,7 +391,7 @@ describe('vue => useSQRequest', () => {
     expect(data.value).toStrictEqual({ id: 1 });
     expect(event.data).toStrictEqual({ id: 1 });
     expect(event.behavior).toBe('static');
-    expect(event.sendArgs).toStrictEqual([1, 2, 3]);
+    expect(event.args).toStrictEqual([1, 2, 3]);
   });
 
   test('should be intercepted when has virtual data in method instance', async () => {
@@ -483,7 +483,7 @@ describe('vue => useSQRequest', () => {
     expect(event.behavior).toBe('silent');
     expect(event.method).not.toBeUndefined();
     expect(event.silentMethod).not.toBeUndefined();
-    expect(event.sendArgs).toStrictEqual([]);
+    expect(event.args).toStrictEqual([]);
     expect(data.value[symbolVDataId]).toBeTruthy();
     expect(dehydrateVData(event.data)).toBeUndefined();
     expect(dehydrateVData(data.value)).toBeUndefined();
