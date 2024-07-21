@@ -7,7 +7,7 @@ import type { IPC } from 'node-ipc';
 // fix(type-issue): https://github.com/node-ipc/node-ipc/issues/4
 const IPCModule = IPCModule_ as unknown as typeof IPC;
 
-export const AlovaIPCID = uuid();
+export const AlovaIPCID = 'alova-default-channel';
 
 const EventName = {
   TO_MAIN: 'alova-ipc-to-main',
