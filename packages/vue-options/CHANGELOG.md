@@ -1,5 +1,16 @@
 # @alova/vue-options
 
+## 2.0.0-beta.7
+
+### Minor Changes
+
+- [#465](https://github.com/alovajs/alova/pull/465) [`8486b65`](https://github.com/alovajs/alova/commit/8486b654ed29531377b630b0b434c34e2b39d5db) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - change the name `sendArgs` to `args`
+
+### Patch Changes
+
+- Updated dependencies [[`8486b65`](https://github.com/alovajs/alova/commit/8486b654ed29531377b630b0b434c34e2b39d5db)]:
+  - alova@3.0.0-beta.16
+
 ## 2.0.0-beta.6
 
 ### Patch Changes
