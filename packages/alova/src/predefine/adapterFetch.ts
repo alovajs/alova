@@ -92,6 +92,12 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
           pump();
         }
       },
+      onUpload() {
+        // eslint-disable-next-line no-console
+        console.error(
+          'fetch API cannot support uploading progress. please consider to change `@alova/adapter-xhr` or `@alova/adapter-axios`'
+        );
+      },
       /* c8 ignore stop */
       abort: () => {
         ctrl.abort();
