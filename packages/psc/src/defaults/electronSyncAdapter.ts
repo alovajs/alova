@@ -1,4 +1,4 @@
-import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
+import { createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import type { IpcMain, IpcRenderer } from 'electron';
 
 const EventName = {
@@ -20,12 +20,16 @@ export function ElectronSyncAdapter(ipcRenderer: IpcRenderer) {
   });
 }
 
+export function createElectronPSCAdapter(ipcRenderer: IpcRenderer) {
+  return createPSCAdapter(ElectronSyncAdapter(ipcRenderer));
+}
+
 let hasSynchronizer = false;
 
 /**
  * Use this function in main process.
  */
-export function createElectronSharedCacheSynchronizer(ipcMain: IpcMain) {
+export function createElectronPSCSynchronizer(ipcMain: IpcMain) {
   if (hasSynchronizer) {
     return;
   }
