@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.0-beta.12
+
+### Minor Changes
+
+- [#465](https://github.com/alovajs/alova/pull/465) [`8486b65`](https://github.com/alovajs/alova/commit/8486b654ed29531377b630b0b434c34e2b39d5db) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - change the name `sendArgs` to `args`
+
 ## 1.0.0-beta.11
 
 ### Patch Changes
