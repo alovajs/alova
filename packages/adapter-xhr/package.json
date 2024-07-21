@@ -3,7 +3,7 @@
   "version": "2.0.0-beta.11",
   "description": "XMLHttpRequest adapter for alova.js",
   "homepage": "https://alova.js.org",
-  "main": "dist/alova-adapter-xhr.esm.js",
+  "main": "dist/alova-adapter-xhr.common.cjs",
   "module": "dist/alova-adapter-xhr.esm.js",
   "types": "typings/index.d.ts",
   "type": "module",

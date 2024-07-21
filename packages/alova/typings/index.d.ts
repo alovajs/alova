@@ -455,31 +455,45 @@ export interface AbortFunction {
 /**
  * 请求方法类型
  */
-export interface Method<AG extends AlovaGenerics = any> {
+export declare class Method<AG extends AlovaGenerics = any> {
+  constructor(
+    type: MethodType,
+    context: Alova<AG>,
+    url: string,
+    config?: AlovaMethodCreateConfig<AG, AG['Responded'], AG['Transformed']>,
+    data?: RequestBody
+  );
+
   /**
    * baseURL of alova instance
    */
   baseURL: string;
+
   /**
    * 请求地址
    */
   url: string;
+
   /**
    * 请求类型
    */
   type: MethodType;
+
   /**
    * method配置
    */
   config: MethodRequestConfig & AlovaMethodConfig<AG, AG['Responded'], AG['Transformed']>;
+
   /**
    * 请求体
    */
   data?: RequestBody;
+
   /**
    * 缓存打击源
    */
   hitSource?: (string | RegExp)[];
+
   /**
    * alova实例
    */
@@ -585,18 +599,6 @@ export interface Method<AG extends AlovaGenerics = any> {
    */
   onUpload(progressHandler: ProgressHandler): () => void;
 }
-export interface MethodConstructor {
-  new <AG extends AlovaGenerics>(
-    type: MethodType,
-    context: Alova<AG>,
-    url: string,
-    config?: AlovaMethodCreateConfig<AG, AG['Responded'], AG['Transformed']>,
-    data?: RequestBody
-  ): Method<AG>;
-  readonly prototype: Method;
-}
-// eslint-disable-next-line
-export declare const Method: MethodConstructor;
 
 export interface MethodSnapshotContainer<AG extends AlovaGenerics> {
   records: Record<string, Set<Method<AG>>>;

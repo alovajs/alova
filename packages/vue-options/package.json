@@ -3,7 +3,7 @@
   "version": "2.0.0-beta.5",
   "description": "vue options statesHook and wrapper function for alova.js",
   "homepage": "https://github.com/alovajs/alova",
-  "main": "dist/alova-vue-options.esm.js",
+  "main": "dist/alova-vue-options.common.cjs",
   "module": "dist/alova-vue-options.esm.js",
   "types": "typings/index.d.ts",
   "type": "module",

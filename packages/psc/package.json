@@ -3,15 +3,15 @@
   "version": "1.0.0-beta.11",
   "description": "process shared cache for alova.js on nodejs, deno, bun and electron",
   "homepage": "https://alova.js.org",
-  "main": "dist/psc.esm.js",
+  "main": "dist/psc.common.cjs",
   "module": "dist/psc.esm.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/psc.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "main": "./dist/index.esm.js",
-      "module": "./dist/index.esm.js",
-      "require": "./dist/index.common.cjs"
+      "types": "./dist/psc.d.ts",
+      "main": "./dist/psc.esm.js",
+      "module": "./dist/psc.esm.js",
+      "require": "./dist/psc.common.cjs"
     },
     "./*": "./*"
   },

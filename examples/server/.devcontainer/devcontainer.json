@@ -1,0 +1,4 @@
+{
+  "name": "Devcontainer",
+  "image": "ghcr.io/codesandbox/devcontainers/typescript-node:latest"
+}
