@@ -1,4 +1,4 @@
-import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
+import { createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { usePromise, uuid } from '@alova/shared/function';
 import { QueueCallback } from '@alova/shared/queueCallback';
 import { IPCModule as IPCModule_ } from '@node-ipc/node-ipc';
@@ -44,6 +44,9 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
     });
   });
 
+  // disconnect when the process is terminated.
+  process.on('SIGTERM', () => ipc.disconnect(id));
+
   return createSyncAdapter({
     send(event) {
       queue.queueCallback(() => ipc.of[id]?.emit(EventName.TO_MAIN, event));
@@ -56,6 +59,10 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
   });
 }
 
+export function createNodePSCAdapter(onConnect?: (stopFn: () => void) => void, id = AlovaIPCID) {
+  return createPSCAdapter(NodeSyncAdapter(onConnect, id));
+}
+
 /**
  * Use this function in main process.
  *
@@ -64,7 +71,7 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
  * When running multiple synchronizers in main process, please assign `id` manually.
  * And make sure the ids are unique between synchronizers
  */
-export async function createNodeSharedCacheSynchronizer(id = AlovaIPCID) {
+export async function createNodePSCSynchronizer(id = AlovaIPCID) {
   const ipc = createIPC(id);
 
   const { promise, resolve } = usePromise<() => void>();
@@ -87,6 +94,7 @@ export async function createNodeSharedCacheSynchronizer(id = AlovaIPCID) {
   });
 
   ipc.server.start();
+  process.on('SIGTERM', () => ipc.server.stop());
 
   return promise;
 }
