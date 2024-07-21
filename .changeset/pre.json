@@ -16,7 +16,8 @@
     "@alova/scripts": "1.0.0",
     "react-demo": "0.0.0",
     "svelte-demo": "0.0.0",
-    "vue-demo": "0.0.0"
+    "vue-demo": "0.0.0",
+    "server-demo": "1.0.0"
   },
   "changesets": [
     "afraid-jars-buy",
@@ -26,6 +27,7 @@
     "cuddly-mice-double",
     "honest-brooms-develop",
     "light-seahorses-tease",
+    "little-hotels-kneel",
     "lovely-ads-camp",
     "lucky-wolves-agree",
     "nine-horses-explode",

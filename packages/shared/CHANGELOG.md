@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.0-beta.11
+
+### Patch Changes
+
+- [#463](https://github.com/alovajs/alova/pull/463) [`bf0ca43`](https://github.com/alovajs/alova/commit/bf0ca43613eda751bee134067dfd3494b3a77280) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - commonjs module reference, fix server retry error
+
 ## 1.0.0-beta.10
 
 ### Patch Changes
