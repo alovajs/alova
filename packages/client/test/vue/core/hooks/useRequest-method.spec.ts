@@ -1,17 +1,3 @@
-<<<<<<< HEAD:test/browser/hooks/vue/useRequest-method.spec.ts
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import xhrRequestAdapter from '#/xhrRequestAdapter';
-import { createAlova, Method, useRequest } from '@/index';
-import GlobalFetch from '@/predefine/GlobalFetch';
-import VueHook from '@/predefine/VueHook';
-import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@/utils/helper';
-import { baseURL } from '~/test/mockServer';
-
-// 其他请求方式测试
-describe('Test other methods without GET', function () {
-  test('send POST', async () => {
-=======
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
@@ -21,7 +7,6 @@ import { Result, delay, untilCbCalled } from 'root/testUtils';
 // 其他请求方式测试
 describe('Test other methods without GET', () => {
   test('send POST with cache', async () => {
->>>>>>> next:packages/client/test/vue/core/hooks/useRequest-method.spec.ts
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
@@ -306,12 +291,8 @@ describe('Test other methods without GET', () => {
   test('should download file and pass the right args with cache', async () => {
     const alovaInst = getAlovaInstance(VueHook);
     const Get = alovaInst.Get('/unit-test-download', {
-<<<<<<< HEAD:test/browser/hooks/vue/useRequest-method.spec.ts
-      responseType: 'blob'
-=======
       transform: (resp: Response) => resp.blob(),
       cacheFor: 100000
->>>>>>> next:packages/client/test/vue/core/hooks/useRequest-method.spec.ts
     });
 
     const { loading, data, downloading, error, onSuccess } = useRequest(Get);
@@ -332,24 +313,9 @@ describe('Test other methods without GET', () => {
   });
 
   test('should abort the file downloading when abort request', async () => {
-<<<<<<< HEAD:test/browser/hooks/vue/useRequest-method.spec.ts
-    const alovaInst = createAlova({
-      baseURL,
-      requestAdapter: xhrRequestAdapter,
-      statesHook: VueHook,
-      responded({ data }) {
-        return data;
-      },
-      cacheLogger: null
-    });
-
-    const Get = alovaInst.Get('/unit-test-download', {
-      responseType: 'blob'
-=======
     const alovaInst = getAlovaInstance(VueHook);
     const Get = alovaInst.Get('/unit-test-download', {
       transform: (resp: Response) => resp.blob()
->>>>>>> next:packages/client/test/vue/core/hooks/useRequest-method.spec.ts
     });
 
     const { error, abort, onError } = useRequest(Get);
@@ -357,41 +323,4 @@ describe('Test other methods without GET', () => {
     const e = await untilCbCalled(onError);
     expect(error.value).toStrictEqual(e.error);
   });
-<<<<<<< HEAD:test/browser/hooks/vue/useRequest-method.spec.ts
-
-  test('should not add slash at the end when sending with empty url', async () => {
-    const alova = createAlova({
-      baseURL: baseURL + '/unit-test',
-      requestAdapter: GlobalFetch(),
-      statesHook: VueHook,
-      async responded(r, method) {
-        expect(method).toBeInstanceOf(Method);
-        const res = await r.json();
-        const { data } = res;
-        expect(data.path).toBe('/unit-test');
-        return res;
-      },
-      cacheLogger: null
-    });
-
-    const Getter = alova.Get('', {
-      params: { a: 'a', b: 'str' },
-      transformData({ code, data }: Result<'/unit-test'>) {
-        expect(code).toBe(200);
-        return data;
-      }
-    });
-    const { loading, data, error, onSuccess } = useRequest(Getter);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
-
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.path).toBe('/unit-test');
-    expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
-    expect(error.value).toBeUndefined();
-  });
-=======
->>>>>>> next:packages/client/test/vue/core/hooks/useRequest-method.spec.ts
 });

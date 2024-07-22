@@ -1,8 +1,4 @@
-<<<<<<< HEAD:test/browser/middleware/useRequest.spec.ts
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
->>>>>>> next:packages/client/test/vue/core/middleware/useRequest.spec.ts
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
@@ -179,65 +175,6 @@ describe('useRequest middleware', () => {
     expect(mockFn).toHaveBeenCalledTimes(2);
   });
 
-<<<<<<< HEAD:test/browser/middleware/useRequest.spec.ts
-  test('the behavior will be the same as normal when request error', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const getGetterObj = alova.Get('/unit-test-404', {
-      transformData: ({ data }: Result<true>) => data
-    });
-    const mockFn = jest.fn();
-    const mockFn2 = jest.fn();
-    const { loading, error, onError, onComplete, data } = useRequest(getGetterObj, {
-      middleware: async ({ decorateError, decorateComplete }, next) => {
-        decorateError((handler, event, index) => {
-          mockFn();
-          expect(event.error).toBeInstanceOf(Error);
-          expect(event.method).toBe(getGetterObj);
-          expect(event.sendArgs).toStrictEqual([]);
-          (event as any).index = index;
-          const ret = handler(event);
-          expect(ret).toBe('a');
-        });
-        decorateComplete((_, event) => {
-          expect(event.status).toBe('error');
-          expect(event.error).toBeInstanceOf(Error);
-          expect(event.method).toBe(getGetterObj);
-          expect(event.sendArgs).toStrictEqual([]);
-          mockFn2();
-        });
-        await delay(400);
-        await next();
-      }
-    });
-
-    onError(event => {
-      expect((event as any).index).toBe(0);
-      return 'a';
-    });
-    onError(event => {
-      expect((event as any).index).toBe(1);
-      return 'a';
-    });
-    onComplete(() => {
-      // 因为装饰函数中未调用handler，因此这个函数不会被执行
-      mockFn2();
-    });
-
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
-    await delay(500);
-    expect(loading.value).toBeFalsy();
-    expect(error.value).toBeInstanceOf(Error);
-    expect(data.value).toBeUndefined();
-    expect(mockFn).toHaveBeenCalledTimes(2);
-    expect(mockFn2).toHaveBeenCalledTimes(1);
-  });
-
-=======
->>>>>>> next:packages/client/test/vue/core/middleware/useRequest.spec.ts
   test('can catch error in middleware function when request error', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
@@ -293,57 +230,6 @@ describe('useRequest middleware', () => {
     expect(data.value).toEqual(middlewareResp);
   });
 
-<<<<<<< HEAD:test/browser/middleware/useRequest.spec.ts
-  test('should decorate callbacks when set decorators', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
-    });
-    const getGetterObj = alova.Get('/unit-test', {
-      transformData: ({ data }: Result<true>) => data
-    });
-    const mockFn = jest.fn();
-    const mockFn2 = jest.fn();
-    const { onSuccess, onComplete } = useRequest(getGetterObj, {
-      middleware: async ({ decorateSuccess, decorateComplete }, next) => {
-        // 在成功回调中注入代码
-        decorateSuccess((handler, event, index, length) => {
-          mockFn();
-          (event as any).index = index;
-          const ret = handler(event);
-          expect(ret).toBe('a');
-          expect(length).toBe(2);
-        });
-        decorateComplete((handler, event) => {
-          mockFn2();
-          expect(event.status).toBe('success');
-          expect(event.data).not.toBeUndefined();
-          expect(event.method).toBe(getGetterObj);
-          expect(event.sendArgs).toStrictEqual([]);
-          handler(1 as any);
-        });
-        await next();
-      }
-    });
-
-    onSuccess(event => {
-      expect((event as any).index).toBe(0);
-      return 'a';
-    });
-    onSuccess(event => {
-      expect((event as any).index).toBe(1);
-      return 'a';
-    });
-    onComplete(customNum => {
-      mockFn2();
-      expect(customNum).toBe(1);
-    });
-    await delay(100);
-    expect(mockFn).toHaveBeenCalledTimes(2);
-    expect(mockFn2).toHaveBeenCalledTimes(2);
-  });
-
-=======
->>>>>>> next:packages/client/test/vue/core/middleware/useRequest.spec.ts
   test('the behavior should be the same as normal when return another promise instance', async () => {
     const alova = getAlovaInstance(VueHook);
     const getGetterObj = alova.Get('/unit-test', {
@@ -372,13 +258,8 @@ describe('useRequest middleware', () => {
       data: failData,
       error
     } = useRequest(getGetterObj, {
-<<<<<<< HEAD:test/browser/middleware/useRequest.spec.ts
-      middleware: ({ update }) => {
-        update({ loading: true });
-=======
       middleware: ({ proxyStates }) => {
         proxyStates.loading.v = true;
->>>>>>> next:packages/client/test/vue/core/middleware/useRequest.spec.ts
         expect(loadingFail.value).toBeTruthy();
         return new Promise((_, reject) => {
           setTimeout(() => {
@@ -417,11 +298,7 @@ describe('useRequest middleware', () => {
     const state2 = useRequest(getGetterObj, {
       middleware: ({ proxyStates, controlLoading }, next) => {
         controlLoading();
-<<<<<<< HEAD:test/browser/middleware/useRequest.spec.ts
-        update({ loading: true });
-=======
         proxyStates.loading.v = true;
->>>>>>> next:packages/client/test/vue/core/middleware/useRequest.spec.ts
         expect(state2.loading.value).toBeTruthy();
         return next();
       }
@@ -496,11 +373,7 @@ describe('useRequest middleware', () => {
     expect(data.value).toBeUndefined();
     expect(error.value).toBeInstanceOf(Object);
     expect(error.value).toStrictEqual(err.error);
-<<<<<<< HEAD:test/browser/middleware/useRequest.spec.ts
-    expect(error.value?.message).toBe('The user aborted a request.');
-=======
     expect(error.value?.message).toBe('The operation was aborted.');
->>>>>>> next:packages/client/test/vue/core/middleware/useRequest.spec.ts
   });
 
   test('should abort request like abort function in returns when call abort in middleware(non-immediate)', async () => {

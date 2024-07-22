@@ -1,16 +1,3 @@
-<<<<<<< HEAD:src/Method.ts
-import {
-  AbortFunction,
-  AlovaMethodConfig,
-  MethodRequestConfig,
-  MethodType,
-  ProgressHandler,
-  RequestBody
-} from '~/typings';
-import { Alova } from './alova';
-import sendRequest from './functions/sendRequest';
-=======
->>>>>>> next:packages/alova/src/Method.ts
 import {
   getConfig,
   getContextOptions,
@@ -50,19 +37,7 @@ const offEventCallback = (offHandler: any, handlers: any[]) => () => {
   index >= 0 && handlers.splice(index, 1);
 };
 
-<<<<<<< HEAD:src/Method.ts
-export const typeGet = 'GET';
-export const typeHead = 'HEAD';
-export const typePost = 'POST';
-export const typePut = 'PUT';
-export const typePatch = 'PATCH';
-export const typeDelete = 'DELETE';
-export const typeOptions = 'OPTIONS';
-
-export default class Method<S = any, E = any, R = any, T = any, RC = any, RE = any, RH = any> {
-=======
 export default class Method<AG extends AlovaGenerics = any> {
->>>>>>> next:packages/alova/src/Method.ts
   public type: MethodType;
 
   public baseURL: string;
@@ -91,10 +66,7 @@ export default class Method<AG extends AlovaGenerics = any> {
    * 请求中断函数，每次请求都会更新这个函数
    */
   public abort: AbortFunction;
-<<<<<<< HEAD:src/Method.ts
-=======
 
->>>>>>> next:packages/alova/src/Method.ts
   public fromCache: boolean | undefined = undefinedValue;
 
   constructor(
@@ -109,13 +81,8 @@ export default class Method<AG extends AlovaGenerics = any> {
     };
     abortRequest.a = noop;
 
-<<<<<<< HEAD:src/Method.ts
-    const instance = this,
-      contextOptions = getContextOptions(context);
-=======
     const instance = this;
     const contextOptions = getContextOptions(context);
->>>>>>> next:packages/alova/src/Method.ts
     instance.abort = abortRequest;
     instance.baseURL = contextOptions.baseURL || '';
     instance.url = url;

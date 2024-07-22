@@ -1,8 +1,4 @@
-<<<<<<< HEAD:test/browser/middleware/useFetcher.spec.ts
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
->>>>>>> next:packages/client/test/vue/core/middleware/useFetcher.spec.ts
 import { useFetcher } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
@@ -70,11 +66,7 @@ describe('useFetcher middleware', () => {
     const mockFn = jest.fn();
     onSuccess(mockFn);
     // middleware中未调用next，因此不会发送请求
-<<<<<<< HEAD:test/browser/middleware/useFetcher.spec.ts
-    expect(fetching.value).toBeFalsy();
-=======
     expect(loading.value).toBeFalsy();
->>>>>>> next:packages/client/test/vue/core/middleware/useFetcher.spec.ts
     await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();

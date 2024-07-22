@@ -1,9 +1,5 @@
-<<<<<<< HEAD:test/browser/stateManager/update-state-react.spec.tsx
-import { delay, getAlovaInstance, Result } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
 import { getStateCache } from '@/hooks/core/implements/stateCache';
->>>>>>> next:packages/client/test/react/core/update-state.spec.tsx
 import { updateState, useRequest, useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
 import { key } from '@alova/shared/function';

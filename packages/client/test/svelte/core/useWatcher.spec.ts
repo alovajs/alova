@@ -1,17 +1,8 @@
-<<<<<<< HEAD:test/browser/hooks/svelte/useWatcher.spec.ts
-import pageAbortLast from '#/components/svelte/page-useWatcher-abortLast.svelte';
-import pageDebounceImmediate from '#/components/svelte/page-useWatcher-debounce-immediate.svelte';
-import pageDifferentDebounce from '#/components/svelte/page-useWatcher-different-debounce.svelte';
-import pageImmediate from '#/components/svelte/page-useWatcher-immediate.svelte';
-import page from '#/components/svelte/page-useWatcher.svelte';
-import { delay } from '#/utils';
-=======
 import pageAbortLast from '../components/page-useWatcher-abortLast.svelte';
 import pageDebounceImmediate from '../components/page-useWatcher-debounce-immediate.svelte';
 import pageDifferentDebounce from '../components/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '../components/page-useWatcher-immediate.svelte';
 import page from '#/svelte/components/page-useWatcher.svelte';
->>>>>>> next:packages/client/test/svelte/core/useWatcher.spec.ts
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { delay } from 'root/testUtils';

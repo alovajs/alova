@@ -1,8 +1,4 @@
-<<<<<<< HEAD:test/server/hooks-svelte.spec.ts
-import { delay, getAlovaInstance, Result } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
->>>>>>> next:packages/client/test/ssr/hooks-svelte.spec.ts
 import { useRequest } from '@/index';
 import SvelteHook from '@/statesHook/svelte';
 import { delay, Result } from 'root/testUtils';

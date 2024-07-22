@@ -1,10 +1,3 @@
-<<<<<<< HEAD:test/browser/hooks/vue/useRequest-http.spec.ts
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { setCache, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
-import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@/utils/helper';
-=======
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
@@ -35,7 +28,6 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(data2.value).toStrictEqual('test');
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
->>>>>>> next:packages/client/test/vue/core/hooks/useRequest-http.spec.ts
 
   test('init and send get request', async () => {
     const alova = getAlovaInstance(VueHook, {

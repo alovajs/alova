@@ -68,7 +68,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
 
   const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper<AG>(promiseStatesHook());
 
-  const usingargs = ref<any[]>([]);
+  const usingArgs = ref<any[]>([]);
   const eventSource = ref<EventSource | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
@@ -142,7 +142,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
     assert(!!eventSource.current, 'EventSource is not initialized');
     const es = eventSource.current!;
 
-    const baseEvent = new AlovaSSEEvent(AlovaEventBase.spawn(methodInstance, usingargs.current), es);
+    const baseEvent = new AlovaSSEEvent(AlovaEventBase.spawn(methodInstance, usingArgs.current), es);
 
     if (eventFrom === MessageType.Open) {
       return Promise.resolve(baseEvent);
@@ -292,7 +292,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
         });
     }
 
-    usingargs.current = args;
+    usingArgs.current = args;
     methodInstance = getHandlerMethod(handler, args);
     // 设置响应拦截器
     setResponseHandler(methodInstance);

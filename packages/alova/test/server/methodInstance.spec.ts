@@ -1,25 +1,13 @@
-<<<<<<< HEAD:test/browser/global/methodInstance.spec.ts
-import { getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import xhrRequestAdapter from '#/xhrRequestAdapter';
-import { createAlova, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
-import { baseURL } from '~/test/mockServer';
-=======
 import { getAlovaInstance } from '#/utils';
 import { createAlova } from '@/alova';
 import { Result, delay } from 'root/testUtils';
->>>>>>> next:packages/alova/test/server/methodInstance.spec.ts
 
 const alova = getAlovaInstance({
   responseExpect: r => r.json()
 });
 describe('method instance', () => {
   test('should send request when call `method.send` and return promise', async () => {
-<<<<<<< HEAD:test/browser/global/methodInstance.spec.ts
-    const Get1 = alova.Get('/unit-test', {
-=======
     const Get1 = alova.Get<Result>('/unit-test', {
->>>>>>> next:packages/alova/test/server/methodInstance.spec.ts
       params: { a: 'a', b: 'str' },
       timeout: 10000,
       headers: {
@@ -93,11 +81,7 @@ describe('method instance', () => {
     const Get = alova.Get('/unit-test');
     const p = Get.send(true);
     Get.abort();
-<<<<<<< HEAD:test/browser/global/methodInstance.spec.ts
-    await expect(p).rejects.toThrow('The user aborted a request.');
-=======
     await expect(p).rejects.toThrow('This operation was aborted');
->>>>>>> next:packages/alova/test/server/methodInstance.spec.ts
   });
 
   test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
@@ -108,21 +92,7 @@ describe('method instance', () => {
       responseExpect: r => r.json()
     }).Get('/unit-test');
     const p = Get.send(true);
-<<<<<<< HEAD:test/browser/global/methodInstance.spec.ts
-    await expect(p).rejects.toThrow('The user aborted a request.');
-  });
-
-  test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
-    const Get = getAlovaInstance(VueHook, {
-      beforeRequestExpect(methodInstance) {
-        methodInstance.abort();
-      },
-      responseExpect: r => r.json()
-    }).Get('/unit-test');
-    await expect(Get.send(true)).rejects.toThrow('The user aborted a request.');
-=======
     await expect(p).rejects.toThrow('This operation was aborted');
->>>>>>> next:packages/alova/test/server/methodInstance.spec.ts
     expect(Get.fromCache).toBeFalsy();
   });
 
@@ -269,11 +239,7 @@ describe('method instance', () => {
           paramA
         }
       });
-<<<<<<< HEAD:test/browser/global/methodInstance.spec.ts
-      getter.__key__ = 'custom key';
-=======
       getter.key = 'custom key';
->>>>>>> next:packages/alova/test/server/methodInstance.spec.ts
       return getter;
     };
 
@@ -299,8 +265,6 @@ describe('method instance', () => {
     });
     expect(getterB.fromCache).toBeTruthy();
   });
-<<<<<<< HEAD:test/browser/global/methodInstance.spec.ts
-=======
 
   test('should hit cache when custom the same method key, event if these two methods have different request info', async () => {
     const Get1 = alova.Get<Result>('/unit-test', {
@@ -376,5 +340,4 @@ describe('method instance', () => {
     expect(beforeRequestMockFn).toHaveBeenCalledTimes(2);
     expect(responseMockFn).toHaveBeenCalledTimes(2);
   });
->>>>>>> next:packages/alova/test/server/methodInstance.spec.ts
 });

@@ -1,8 +1,4 @@
-<<<<<<< HEAD:test/server/hooks-react.spec.tsx
-import { delay, getAlovaInstance, Result } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
->>>>>>> next:packages/client/test/ssr/hooks-react.spec.tsx
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
 import React, { ReactElement } from 'react';

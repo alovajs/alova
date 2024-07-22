@@ -1,16 +1,8 @@
-<<<<<<< HEAD:test/browser/hooks/vue/useWatcher.spec.ts
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { setCache, useWatcher } from '@/index';
-import VueHook from '@/predefine/VueHook';
-import { getResponseCache } from '@/storage/responseCache';
-import { key } from '@/utils/helper';
-=======
 import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { queryCache, setCache } from 'alova';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
->>>>>>> next:packages/client/test/vue/core/hooks/useWatcher.spec.ts
 import { computed, reactive, ref } from 'vue';
 
 describe('use useWatcher hook to send GET with vue', () => {

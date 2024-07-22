@@ -1,39 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-<<<<<<< HEAD
-    "resolveJsonModule": true,
-    "target": "es2018",
-    "module": "commonjs",
-    "strict": true,
-    "noImplicitAny": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "moduleResolution": "Node",
-    "charset": "utf8",
-    "noEmitOnError": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "strictPropertyInitialization": false,
-    "noFallthroughCasesInSwitch": false,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": false,
-    "inlineSourceMap": false,
-    "importHelpers": true,
-    "removeComments": false,
-    "esModuleInterop": true,
-    "jsx": "react",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"],
-      "~/*": ["./*"],
-      "#/*": ["test/*"]
-    }
-=======
     "outDir": "./dist"
->>>>>>> next
   },
   "include": ["internal", "scripts", "packages/**/*", "*.ts", ".eslintrc.cjs", "examples"]
 }

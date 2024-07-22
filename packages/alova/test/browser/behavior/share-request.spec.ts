@@ -1,12 +1,6 @@
-<<<<<<< HEAD:test/browser/behavior/share-request.spec.ts
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-import { createAlova, useRequest } from '@/index';
-import VueHook from '@/predefine/VueHook';
-=======
 import { getAlovaInstance } from '#/utils';
 import { createAlova } from '@/index';
 import { Result, delay, untilReject } from 'root/testUtils';
->>>>>>> next:packages/alova/test/browser/behavior/share-request.spec.ts
 
 describe('Request shared', () => {
   test('should share request when use usehooks', async () => {
@@ -42,30 +36,6 @@ describe('Request shared', () => {
     });
 
     const Get = () => alova.Get<{ status: number; data: { id: number } }>('/unit-test');
-<<<<<<< HEAD:test/browser/behavior/share-request.spec.ts
-    const state1 = useRequest(Get);
-    const state2 = useRequest(Get);
-    expect(state1.loading.value).toBeTruthy();
-    expect(state1.data.value).toBeUndefined();
-    expect(state1.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(state1.error.value).toBeUndefined();
-    expect(state2.loading.value).toBeTruthy();
-    expect(state2.data.value).toBeUndefined();
-    expect(state2.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(state2.error.value).toBeUndefined();
-
-    const [{ data: rawData }] = await Promise.all([untilCbCalled(state1.onSuccess), untilCbCalled(state2.onSuccess)]);
-    expect(state1.loading.value).toBeFalsy();
-    expect(state1.data.value.status).toBe(200);
-    expect(state1.data.value.data).toStrictEqual({ id: 1 });
-    expect(rawData.status).toBe(200);
-    expect(rawData.data).toStrictEqual({ id: 1 });
-    expect(state1.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-    expect(state2.loading.value).toBeFalsy();
-    expect(state2.data.value.status).toBe(200);
-    expect(state2.data.value.data).toStrictEqual({ id: 1 });
-    expect(state2.downloading.value).toStrictEqual({ total: 0, loaded: 0 });
-=======
     const p1 = Get().send();
     const p2 = Get().send();
 
@@ -74,7 +44,6 @@ describe('Request shared', () => {
     expect(data1.data).toStrictEqual({ id: 1 });
     expect(data2.status).toBe(200);
     expect(data2.data).toStrictEqual({ id: 1 });
->>>>>>> next:packages/alova/test/browser/behavior/share-request.spec.ts
 
     // Because the request is shared, it is only executed once
     expect(requestMockFn).toHaveBeenCalledTimes(1);
@@ -193,31 +162,17 @@ describe('Request shared', () => {
   });
 
   test('request shared promise will be removed when abort request manually', async () => {
-<<<<<<< HEAD:test/browser/behavior/share-request.spec.ts
-    const alova = getAlovaInstance(VueHook, {
-      localCache: {
-=======
     const alova = getAlovaInstance({
       cacheFor: {
->>>>>>> next:packages/alova/test/browser/behavior/share-request.spec.ts
         GET: 0
       }
     });
     const Get = alova.Get('/unit-test');
     const prom = Get.send();
 
-<<<<<<< HEAD:test/browser/behavior/share-request.spec.ts
-    // 手动中断请求，将抛出错误
-    await delay(0);
-    abort();
-    await untilCbCalled(onError);
-    expect(error.value?.message).toBe('The user aborted a request.');
-    expect(!!data.value).toBeFalsy();
-=======
     // Manually interrupt the request and an error will be thrown
     await delay(0);
     Get.abort();
->>>>>>> next:packages/alova/test/browser/behavior/share-request.spec.ts
 
     const error = await untilReject(prom);
     expect(error.message).toBe('The operation was aborted.');

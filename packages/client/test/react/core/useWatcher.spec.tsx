@@ -1,8 +1,4 @@
-<<<<<<< HEAD:test/browser/hooks/react/useWatcher.spec.tsx
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
->>>>>>> next:packages/client/test/react/core/useWatcher.spec.tsx
 import { useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
 import '@testing-library/jest-dom';
@@ -295,16 +291,9 @@ describe('useWatcher hook with react', () => {
 
     await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button1'));
-<<<<<<< HEAD:test/browser/hooks/react/useWatcher.spec.tsx
-
-    await untilCbCalled(setTimeout);
-    fireEvent.click(screen.getByRole('button2'));
-    await delay(1000);
-=======
     delay().then(() => {
       fireEvent.click(screen.getByRole('button2'));
     });
->>>>>>> next:packages/client/test/react/core/useWatcher.spec.tsx
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');

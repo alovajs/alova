@@ -4,12 +4,7 @@ import VueHook from '@/statesHook/vue';
 import { Result } from 'root/testUtils';
 import { AlovaSuccessEvent } from '~/typings/clienthook';
 
-<<<<<<< HEAD:test/browser/batch/parallel-request.spec.ts
-type AnyAlovaSuccessEvent<R> = AlovaSuccessEvent<any, any, R, any, any, any, any, any>;
-describe('parallel request', function () {
-=======
 describe('parallel request', () => {
->>>>>>> next:packages/client/test/vue/core/functional/parallel-request.spec.ts
   test('parallel request with `send` returned promise', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

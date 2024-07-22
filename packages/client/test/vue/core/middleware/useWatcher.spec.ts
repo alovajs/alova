@@ -1,8 +1,4 @@
-<<<<<<< HEAD:test/browser/middleware/useWatcher.spec.ts
-import { delay, getAlovaInstance, Result, untilCbCalled } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
->>>>>>> next:packages/client/test/vue/core/middleware/useWatcher.spec.ts
 import { useWatcher } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
@@ -88,11 +84,7 @@ describe('useWatcher middleware', () => {
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
 
-<<<<<<< HEAD:test/browser/middleware/useWatcher.spec.ts
-    stateA.value++;
-=======
     stateA.value += 1;
->>>>>>> next:packages/client/test/vue/core/middleware/useWatcher.spec.ts
     await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
 

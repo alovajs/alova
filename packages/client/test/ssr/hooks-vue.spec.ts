@@ -1,8 +1,4 @@
-<<<<<<< HEAD:test/server/hooks-vue.spec.ts
-import { delay, getAlovaInstance, Result } from '#/utils';
-=======
 import { getAlovaInstance } from '#/utils';
->>>>>>> next:packages/client/test/ssr/hooks-vue.spec.ts
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { delay, Result } from 'root/testUtils';

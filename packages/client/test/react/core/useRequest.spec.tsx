@@ -1,17 +1,8 @@
-<<<<<<< HEAD:test/browser/hooks/react/useRequest.spec.tsx
-import { delay, getAlovaInstance, Result } from '#/utils';
-import { createAlova, useRequest } from '@/index';
-import GlobalFetch from '@/predefine/GlobalFetch';
-import ReactHook from '@/predefine/ReactHook';
-import { getStateCache } from '@/storage/stateCache';
-import { key } from '@/utils/helper';
-=======
 import { getAlovaInstance } from '#/utils';
 import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
 import { key } from '@alova/shared/function';
->>>>>>> next:packages/client/test/react/core/useRequest.spec.tsx
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ReactElement, StrictMode } from 'react';
@@ -321,16 +312,9 @@ describe('useRequest hook with react', () => {
             onClick={() => {
               update({
                 data: {
-<<<<<<< HEAD:test/browser/hooks/react/useRequest.spec.tsx
-                  path: '/abc' + i++,
-                  method: 'GET',
-                  params: {},
-                  data: {}
-=======
                   path: `/abc${i}`,
                   method: 'GET',
                   params: {}
->>>>>>> next:packages/client/test/react/core/useRequest.spec.tsx
                 },
                 error: undefined
               });
@@ -352,81 +336,10 @@ describe('useRequest hook with react', () => {
       );
     }
     render((<Page />) as ReactElement<any, any>);
-<<<<<<< HEAD:test/browser/hooks/react/useRequest.spec.tsx
-    await delay(100);
-    fireEvent.click(screen.getByRole('btnUpd'));
-    await waitFor(() => {
-      expect(screen.getByRole('path')).toHaveTextContent('/abc0');
-    });
-    fireEvent.click(screen.getByRole('btnAbort'));
-    await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('The user aborted a request.');
-    });
-
-    // 再一次进行中断
-    fireEvent.click(screen.getByRole('btnSend'));
-    await delay(100);
-    fireEvent.click(screen.getByRole('btnUpd'));
-    await waitFor(() => {
-      expect(screen.getByRole('path')).toHaveTextContent('/abc1');
-    });
-    fireEvent.click(screen.getByRole('btnAbort'));
-    await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('The user aborted a request.');
-    });
-  });
-
-  // #449: https://github.com/alovajs/alova/issues/449
-  test('should not use cache when forcing send request', async () => {
-    const alova = getAlovaInstance(ReactHook, {
-      responseExpect: r => r.json()
-    });
-    const Get = alova.Get('/unit-test', {
-      timeout: 10000,
-      transformData: ({ data }: Result<true>) => data,
-      localCache: {
-        mode: 'restore',
-        expire: 100 * 1000
-      }
-    });
-    const completeFn = jest.fn();
-
-    function Page() {
-      const { loading, onComplete, send } = useRequest(Get, { immediate: false, force: true });
-      onComplete(completeFn);
-
-      return (
-        <div role="wrap">
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <button
-            role="btn"
-            onClick={send}>
-            send request
-          </button>
-        </div>
-      );
-    }
-
-    render((<Page />) as ReactElement<any, any>);
-    fireEvent.click(screen.getByRole('btn'));
-    expect(screen.getByRole('status')).toHaveTextContent('loading');
-
-    await waitFor(() => {
-      expect(completeFn).toHaveBeenCalledTimes(1);
-      expect(completeFn).toHaveBeenLastCalledWith(expect.objectContaining({ fromCache: false }));
-    });
-
-    fireEvent.click(screen.getByRole('btn'));
-    expect(screen.getByRole('status')).toHaveTextContent('loading');
-    await waitFor(() => {
-      expect(completeFn).toHaveBeenCalledTimes(2);
-      expect(completeFn).toHaveBeenLastCalledWith(expect.objectContaining({ fromCache: false }));
-=======
     await delay(10);
     fireEvent.click(screen.getByRole('btnAbort'));
     await waitFor(() => {
       expect(screen.getByRole('error')).toHaveTextContent('The operation was aborted.');
->>>>>>> next:packages/client/test/react/core/useRequest.spec.tsx
     });
   });
 });
