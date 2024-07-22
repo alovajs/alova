@@ -1,0 +1,73 @@
+{
+  "name": "@alova/adapter-taro",
+  "version": "2.0.0-beta.6",
+  "description": "taro adapter for alova.js",
+  "homepage": "https://alova.js.org",
+  "main": "dist/alova-adapter-taro.common.cjs",
+  "module": "dist/alova-adapter-taro.esm.js",
+  "types": "typings/index.d.ts",
+  "keywords": [
+    "hooks",
+    "vuejs",
+    "typescript",
+    "vue",
+    "request",
+    "vue3",
+    "superagent",
+    "alova",
+    "taro"
+  ],
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "build": "npm run clean && alova-scripts build",
+    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./typings/index.d.ts",
+      "require": "./dist/alova-adapter-taro.common.cjs",
+      "default": "./dist/alova-adapter-taro.esm.js"
+    },
+    "./vue": {
+      "types": "./typings/adaptervue.d.ts",
+      "require": "./dist/alova-adapter-taro-vue.common.cjs",
+      "default": "./dist/alova-adapter-taro-vue.esm.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "vue": [
+        "typings/adaptervue.d.ts"
+      ]
+    }
+  },
+  "author": "Scott Hu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alovajs/alova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alovajs/alova/issues"
+  },
+  "files": [
+    "dist",
+    "typings/*.d.ts"
+  ],
+  "peerDependencies": {
+    "alova": "^3.0.0-beta.17"
+  },
+  "devDependencies": {
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
+    "@alova/shared": "workspace:*",
+    "@tarojs/shared": "^3.6.30",
+    "@tarojs/taro": "^3.6.30",
+    "alova": "workspace:*"
+  }
+}

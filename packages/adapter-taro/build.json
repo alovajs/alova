@@ -1,0 +1,28 @@
+{
+  "react": {
+    "input": "src/adapterReact.ts",
+    "output": "dist/alova-adapter-taro.{suffix}.{ext}",
+    "packageName": "AlovaAdapterTaro",
+    "external": {
+      "alova": "alova",
+      "alova/react": null,
+      "@tarojs/taro": null,
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    }
+  },
+  "vue": {
+    "input": "src/adapterVue.ts",
+    "output": "dist/alova-adapter-taro-vue.{suffix}.{ext}",
+    "packageName": "AlovaAdapterTaroVue",
+    "external": {
+      "alova": "alova",
+      "alova/vue": null,
+      "@tarojs/taro": null,
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    }
+  }
+}

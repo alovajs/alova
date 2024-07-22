@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": ["@changesets/changelog-github", { "repo": "alovajs/alova" }],
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "next",
+  "updateInternalDependencies": "minor",
+  "ignore": ["@alova/client", "@alova/server", "react-demo", "vue-demo", "svelte-demo", "server-demo"]
+}

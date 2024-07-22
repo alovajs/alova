@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "//#lint": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "//#lint:fix": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "//#format": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "//#format:fix": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "lint": {},
+    "lint:fix": {},
+    "format": {},
+    "format:fix": {},
+    "test": {
+      "dependsOn": ["^build"]
+    }
+  },
+  "globalDependencies": [".editorconfig", ".eslintrc.cjs", ".prettierrc.cjs", "tsconfig.base.json", "tsconfig.json"]
+}

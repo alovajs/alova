@@ -1,1 +1,5 @@
-dist
+/dist
+/packages/*/dist
+/examples/*/dist
+pnpm-lock.yaml
+/packages/alova/typings/serverhook.d.ts

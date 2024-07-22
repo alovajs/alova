@@ -7,32 +7,34 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "browser unit test",
-      "runtimeExecutable": "npm",
-      "windows": {
-        "runtimeExecutable": "npm.cmd"
-      },
-      "runtimeArgs": ["run", "test:browser"],
+      "name": "Jest Current File",
+      "program": "./node_modules/.bin/jest",
+      "args": ["${file}"],
+      "runtimeExecutable": "pnpm",
       "console": "integratedTerminal",
-      "cwd": "${workspaceRoot}",
-      "env": {
-        "NODE_ENV": "test"
+      "internalConsoleOptions": "neverOpen",
+      "windows": {
+        "program": "./node_modules/jest/bin/jest"
       }
     },
+    // replace the 'alova' at the end of name with your workspace folder name
     {
       "type": "node",
+      "name": "vscode-jest-tests.v2.alova",
       "request": "launch",
-      "name": "server unit test",
-      "runtimeExecutable": "npm",
-      "windows": {
-        "runtimeExecutable": "npm.cmd"
-      },
-      "runtimeArgs": ["run", "test:node"],
-      "console": "integratedTerminal",
+      "args": [
+        "--runInBand",
+        "--watchAll=false",
+        "--testNamePattern",
+        "${jest.testNamePattern}",
+        "--runTestsByPath",
+        "${jest.testFile}"
+      ],
+      "runtimeExecutable": "pnpm",
       "cwd": "${workspaceRoot}",
-      "env": {
-        "NODE_ENV": "test"
-      }
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "program": "./node_modules/.bin/jest"
     }
   ]
 }
