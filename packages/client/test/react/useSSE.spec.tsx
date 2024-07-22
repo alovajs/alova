@@ -14,6 +14,7 @@ import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as s
 import { SSEHookReadyState } from '~/typings/clienthook';
 // eslint-disable-next-line import/no-named-as-default
 import { usePromise } from '@alova/shared/function';
+import mockServer from 'root/mockServer';
 import { getAlovaInstance } from '../utils';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
@@ -25,6 +26,10 @@ afterEach(() => {
     return promise;
   }
 });
+// 关掉下默认的server，避免抛出大量警告
+beforeAll(() => {
+  mockServer.close();
+});
 
 type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
 
@@ -32,7 +37,7 @@ type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageE
  * 准备 Alova 实例环境，并且开始 SSE 服务器的监听
  */
 const prepareAlova = async () => {
-  await server.listen();
+  server.listen();
   const { port } = server.address() as AddressInfo;
   return createAlova({
     baseURL: `http://127.0.0.1:${port}`,
@@ -468,10 +473,8 @@ describe('react => useSSE', () => {
 
         return data;
       },
-      resErrorExpect(err) {
+      resErrorExpect() {
         mockResponseErrorFn();
-
-        console.log(err);
         return initialData;
       },
       resCompleteExpect() {

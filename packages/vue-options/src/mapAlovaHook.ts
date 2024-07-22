@@ -1,5 +1,5 @@
 import { isPlainObject } from '@alova/shared/function';
-import { ObjectCls } from '@alova/shared/vars';
+import { ObjectCls, trueValue } from '@alova/shared/vars';
 import { computed, reactive, version } from 'vue';
 import { UseHookCallers, UseHookMapGetter, VueHookMapperMixin } from '~/typings';
 import { classifyHookExposure, extractWatches } from './helper';
@@ -39,7 +39,9 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
 
         referingObject.component = vm;
         referingObject.dataKey = dataKey;
+        const originalTrackedKeys = { ...referingObject.trackedKeys };
         const [states, computeds, fns] = classifyHookExposure(useHookExposure);
+        referingObject.trackedKeys = originalTrackedKeys; // recovery trackedKeys
 
         // require the version of vue must be 3.x or 2.7.x
         myAssert(/^3|2\.7/.test(version), 'please upgrade vue to `2.7.x` or `3.x`');
@@ -50,7 +52,10 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
         const rectiveStates = reactive(states);
         for (const key in states) {
           ObjectCls.defineProperty(proxy, key, {
-            get: () => rectiveStates[key],
+            get: () => {
+              referingObject.trackedKeys[key] = trueValue;
+              return rectiveStates[key];
+            },
             set: value => {
               rectiveStates[key] = value;
               return value;
@@ -60,7 +65,10 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
         for (const key in computeds) {
           const computedState = computed(computeds[key]);
           ObjectCls.defineProperty(proxy, key, {
-            get: () => computedState.value
+            get: () => {
+              referingObject.trackedKeys[key] = trueValue;
+              return computedState.value;
+            }
           });
         }
 

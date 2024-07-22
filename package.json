@@ -113,7 +113,7 @@
     "prettier": "^3.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "rimraf": "2.6.2",
+    "rimraf": "5.0.9",
     "rollup": "^4.14.3",
     "rollup-plugin-dts": "^6.1.1",
     "svelte": "^3.49.0",

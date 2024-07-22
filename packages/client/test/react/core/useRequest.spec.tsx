@@ -220,7 +220,7 @@ describe('useRequest hook with react', () => {
           b: '~~'
         }
       });
-      const { loading, data, error, downloading, uploading, update } = useRequest(Get);
+      const { loading, data, error, downloading, update } = useRequest(Get);
       return (
         <div>
           <span role="loading">{loading ? 'loading...' : 'loaded'}</span>
@@ -228,9 +228,6 @@ describe('useRequest hook with react', () => {
           <span role="error">{error?.message}</span>
           <span role="downloading">
             {downloading.loaded}_{downloading.total}
-          </span>
-          <span role="uploading">
-            {uploading.loaded}_{uploading.total}
           </span>
           <button
             role="btn"
@@ -245,10 +242,6 @@ describe('useRequest hook with react', () => {
                 downloading: {
                   loaded: 1,
                   total: 1000
-                },
-                uploading: {
-                  loaded: 100,
-                  total: 2000
                 }
               })
             }>
@@ -264,7 +257,6 @@ describe('useRequest hook with react', () => {
     expect(screen.getByRole('loading')).toHaveTextContent('loading...');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test-changed');
     expect(screen.getByRole('downloading')).toHaveTextContent('1_1000');
-    expect(screen.getByRole('uploading')).toHaveTextContent('100_2000');
   });
 
   // 如果立即发送请求，react的loading状态将初始为true

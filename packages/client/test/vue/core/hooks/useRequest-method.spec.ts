@@ -295,11 +295,10 @@ describe('Test other methods without GET', () => {
       cacheFor: 100000
     });
 
-    const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Get);
+    const { loading, data, downloading, error, onSuccess } = useRequest(Get);
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeInstanceOf(Blob);
-    expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(downloading.value).toStrictEqual({ total: 250569, loaded: 250569 });
     expect(error.value).toBeUndefined();
 

@@ -141,8 +141,8 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       rimraf:
-        specifier: 2.6.2
-        version: 2.6.2
+        specifier: 5.0.9
+        version: 5.0.9
       rollup:
         specifier: ^4.14.3
         version: 4.18.1
@@ -187,7 +187,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: beta
-        version: 2.0.0-beta.11(alova@3.0.0-beta.14)
+        version: 2.0.0-beta.13(alova@3.0.0-beta.16)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -196,7 +196,7 @@ importers:
         version: 3.2.1
       alova:
         specifier: beta
-        version: 3.0.0-beta.14
+        version: 3.0.0-beta.16
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -294,7 +294,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: beta
-        version: 2.0.0-beta.11(alova@3.0.0-beta.14)
+        version: 2.0.0-beta.13(alova@3.0.0-beta.16)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -303,7 +303,7 @@ importers:
         version: 3.2.1
       alova:
         specifier: beta
-        version: 3.0.0-beta.14
+        version: 3.0.0-beta.16
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -337,7 +337,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: beta
-        version: 2.0.0-beta.11(alova@3.0.0-beta.14)
+        version: 2.0.0-beta.13(alova@3.0.0-beta.16)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -346,7 +346,7 @@ importers:
         version: 3.2.1
       alova:
         specifier: beta
-        version: 3.0.0-beta.14
+        version: 3.0.0-beta.16
       trix:
         specifier: ^2.1.2
         version: 2.1.3
@@ -597,13 +597,13 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@alova/mock@2.0.0-beta.11':
-    resolution: {integrity: sha512-lX6dJ5AM5+0DLlMWRf+X7gEZmuMyN4Dyds9CqK/BcW+AI6JWrGrrF75lY7bAMwaIZjnvtnQflRYDYJ4yItYDWQ==}
+  '@alova/mock@2.0.0-beta.13':
+    resolution: {integrity: sha512-pwLr0+Q74vBMV85uHDeC1zh/Xb3Slu8PNmzd9rXtIU1Q+aaIRd+pYWi19MLb72GR3/xaBaKTwqHGWfxIUcUz0A==}
     peerDependencies:
-      alova: ^3.0.0-beta.14
+      alova: ^3.0.0-beta.16
 
-  '@alova/shared@1.0.0-beta.10':
-    resolution: {integrity: sha512-B0bZedBP3uisww7CT0pOGxkkfk1Jz6NiD4kXzt1NEiW8ieWiBkhmavLLZCEu5WoR1jj5h/qvx/tZl3DCpPHJ2A==}
+  '@alova/shared@1.0.0-beta.12':
+    resolution: {integrity: sha512-fiNlM+PtLly1m3sKJMqxAHqqLlL6RndjP679FUkniYX6wKJrALno3fpj6g9M3S4NMaWynGcrzUoFaYJZsXWJ8A==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -2913,8 +2913,8 @@ packages:
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
-  alova@3.0.0-beta.14:
-    resolution: {integrity: sha512-9RrH9VntLEEIl+f0h8l2jf+D7NWO95SpuM6HRX9HXVeNhBaLYFK20iojc7VIhMhiR4d4ZnETNcJ9oMmNxYCk+Q==}
+  alova@3.0.0-beta.16:
+    resolution: {integrity: sha512-mBEpxkUvJWq/gUSgOrR62AsmgRDbwCjQn5RANgHnZ1LuZ/GNP3cA+54S2TWohvSXEXGk9k4xvbelcYKBwyPkaw==}
     engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
@@ -6349,14 +6349,14 @@ packages:
   rfdc@1.4.1:
     resolution: {integrity: sha512-q1b3N5QkRUWUl7iyylaaj3kOpIT0N2i9MqIEQXP73GVsN9cw3fdx8X63cEmWhJGi2PPCF23Ijp7ktmd39rawIA==}
 
-  rimraf@2.6.2:
-    resolution: {integrity: sha512-lreewLK/BlghmxtfH36YYVg1i8IAce4TI7oao75I1g245+6BctqTVQiBP3YUJ9C6DQOXJmkYR9X9fCLtCOJc5w==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
-    hasBin: true
-
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
     deprecated: Rimraf versions prior to v4 are no longer supported
+    hasBin: true
+
+  rimraf@5.0.9:
+    resolution: {integrity: sha512-3i7b8OcswU6CpU8Ej89quJD4O98id7TtVM5U4Mybh84zQXdrFmDLouWBEEaD/QfO3gDDfH+AGFCGsR7kngzQnA==}
+    engines: {node: 14 >=14.20 || 16 >=16.20 || >=18}
     hasBin: true
 
   roarr@2.15.4:
@@ -7356,12 +7356,12 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alova/mock@2.0.0-beta.11(alova@3.0.0-beta.14)':
+  '@alova/mock@2.0.0-beta.13(alova@3.0.0-beta.16)':
     dependencies:
-      '@alova/shared': 1.0.0-beta.10
-      alova: 3.0.0-beta.14
+      '@alova/shared': 1.0.0-beta.12
+      alova: 3.0.0-beta.16
 
-  '@alova/shared@1.0.0-beta.10': {}
+  '@alova/shared@1.0.0-beta.12': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -10352,9 +10352,10 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alova@3.0.0-beta.14:
+  alova@3.0.0-beta.16:
     dependencies:
-      '@alova/shared': 1.0.0-beta.10
+      '@alova/shared': 1.0.0-beta.12
+      rate-limiter-flexible: 5.0.3
 
   ansi-colors@4.1.3: {}
 
@@ -14137,13 +14138,13 @@ snapshots:
 
   rfdc@1.4.1: {}
 
-  rimraf@2.6.2:
-    dependencies:
-      glob: 7.2.3
-
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
+
+  rimraf@5.0.9:
+    dependencies:
+      glob: 10.4.5
 
   roarr@2.15.4:
     dependencies:

@@ -77,4 +77,19 @@ describe('request adapter GlobalFetch', () => {
     res = await method;
     expect(res.data.requestHeaders['content-type']).toBe('application/x-www-form-urlencoded');
   });
+
+  test('should console error that the fetch api does not support uploading progress', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+    const method = alova.Get<Result>('/unit-test');
+    method.onUpload(() => {});
+    await method;
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalledWith(
+      "fetch API does'nt support uploading progress. please consider to change `@alova/adapter-xhr` or `@alova/adapter-axios`"
+    );
+    consoleError.mockRestore();
+  });
 });
