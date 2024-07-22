@@ -10,5 +10,4 @@ const config: Config = {
   ...baseConfig,
   displayName: 'alova'
 };
-
 export default config;
