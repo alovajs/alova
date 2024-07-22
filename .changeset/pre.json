@@ -1,5 +1,5 @@
 {
-  "mode": "pre",
+  "mode": "exit",
   "tag": "beta",
   "initialVersions": {
     "@alova/adapter-axios": "2.0.0",
@@ -13,11 +13,7 @@
     "@alova/server": "2.0.0",
     "@alova/shared": "1.0.0",
     "@alova/vue-options": "2.0.0",
-    "@alova/scripts": "1.0.0",
-    "react-demo": "0.0.0",
-    "svelte-demo": "0.0.0",
-    "vue-demo": "0.0.0",
-    "server-demo": "1.0.0"
+    "@alova/scripts": "1.0.0"
   },
   "changesets": [
     "afraid-jars-buy",
