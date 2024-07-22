@@ -1,0 +1,115 @@
+name: "\U0001F41E Bug Report"
+description: Create a report to help us improve alova
+title: '[Bug]: '
+labels:
+  - 'bug:need-confirm'
+  - 'lang:english'
+assignees:
+  - MeetinaXD
+body:
+  - type: markdown
+    attributes:
+      value: |
+        :wave: Hi, thank you very much for your support for alova, it is really important!
+
+        **We hope to build alova into a project shared by everyone, and encourage every developer to become a contributor to the alova community with an open and inclusive attitude. If you are willing, you can try to participate in the contribution by submitting PR, so that your code can provide value for developers all over the world. For specific contributions, please [refer to the contribution guide](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md)!**
+
+        :warning: Before submitting a bug report, please read the following:
+        - Before submitting a bug, you can first look for a solution through the [official documentation](https://alova.js.org);
+        - Confirm that you have searched the [historical issues](https://github.com/alovajs/alova/issues) and have not found the same problem.
+        - If it is a question or doubt, you can post it on [Discussions](https://github.com/alovajs/alova/discussions), which will help the author manage the alova community better.
+        - Join the [Discord](https://discord.gg/S47QGJgkVb) or [WeChat group](https://alova.js.org/img/wechat_qrcode.jpg) for online discussions.
+
+  - type: checkboxes
+    id: is-this-a-bug
+    attributes:
+      label: Is this a Bug?
+      description: ':warning: If you want to report a proposal or have difficulties in use, please return to the New Issue page and check other options.'
+      options:
+        - label: I have confirmed that I want to report a Bug
+          required: true
+
+  - type: checkboxes
+    id: have-been-report-before
+    attributes:
+      label: Has this issue been reported before?
+      description: ':warning: Please search the Issue to confirm that the issue you are about to submit has not been reported before'
+      options:
+        - label: I have confirmed that this Issue has not been reported before
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Alova Version
+      description: Please fill in the version number in node_modules/alova/package.json
+      placeholder: e.g. 3.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Framework
+      description: Please choose the framework of the impact of this issue.
+      multiple: false
+      options:
+        - 'React'
+        - 'Vue'
+        - 'Svelte'
+        - 'Nodejs'
+        - 'Deno'
+        - 'Bun'
+        - 'Other Framework'
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem Description
+      description: Describe in detail the circumstances under which the problem occurred. You can use Markdown syntax to provide key code snippets.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expect
+    attributes:
+      label: Expected Behavior
+      description: Clearly and briefly describe the desired effect
+
+  - type: input
+    id: reproduce
+    attributes:
+      label: Reproduction Link
+      description: |
+        Providing a reproducible project will help the resolver solve the problem faster. You can choose one from the [official example collection](https://alova.js.org/category/examples/) as a template.
+        You can also reproduce it on your own on [codesandbox](https://codesandbox.io), [stackBlitz](https://stackblitz.com).
+        You can also provide a GitHub repository link.
+        Please do not fill in invalid links, otherwise the issue will be closed.
+
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: Reproduction Steps
+      description: How do we need to do to reproduce the problem you encountered? Please provide the simplest operation steps to help us quickly reproduce the problem
+      placeholder: |
+        For example:
+        1. Click the button
+        2. The request is not sent
+    validations:
+      required: true
+
+  - type: textarea
+    id: browsers
+    attributes:
+      label: System Information
+      description: 'Paste the output of the following command: `npx envinfo --system --npmPackages alova,vue,react,svelte --binaries --browsers`'
+      render: shell
+      placeholder: System, Binaries, Browsers
+
+  - type: textarea
+    id: remark
+    attributes:
+      label: Additional Information
+      description: If there is any background information about the problem and other useful context information. Such as the solutions you have tried
