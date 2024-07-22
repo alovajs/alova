@@ -53,6 +53,7 @@ module.exports = {
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-implied-eval': 'off',
     '@typescript-eslint/no-shadow': 'off',
+    '@typescript-eslint/no-loop-func': 'off',
     'no-empty': 'off'
   }
 };

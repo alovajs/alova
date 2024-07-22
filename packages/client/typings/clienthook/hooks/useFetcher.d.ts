@@ -52,16 +52,16 @@ export interface UseFetchHookExposure<SE extends StatesExport> extends UseFetchE
 }
 
 /**
- * 数据预拉取
+ * prefetch data
  * @example
  * ```js
- * const { fetching, error, fetch } = useFetcher();
+ * const { loading, error, fetch } = useFetcher();
  * const handleFetch = () => {
  *   fetch(alova.Get('/api/profile'));
  * };
  * ```
- * @param config 配置项
- * @returns 响应式请求数据、操作函数及事件绑定函数
+ * @param config config
+ * @returns reactive request data、operate function and event binding function
  */
 export declare function useFetcher<F extends FetcherType<any>>(
   config?: FetcherHookConfig

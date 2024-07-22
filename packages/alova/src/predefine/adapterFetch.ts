@@ -95,7 +95,7 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
       onUpload() {
         // eslint-disable-next-line no-console
         console.error(
-          'fetch API cannot support uploading progress. please consider to change `@alova/adapter-xhr` or `@alova/adapter-axios`'
+          "fetch API does'nt support uploading progress. please consider to change `@alova/adapter-xhr` or `@alova/adapter-axios`"
         );
       },
       /* c8 ignore stop */
