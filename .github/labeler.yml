@@ -1,44 +1,61 @@
 # See https://github.com/actions/labeler
 
-'pkg: example':
+'example':
   - examples/**/*
 
 '🚨 action':
   - .github/workflows/**
 
-'pkg: astro':
-  - packages/astro/**
+'alova':
+  - packages/alova/**
 
-'pkg: create-astro':
-  - packages/create-astro/**
+'adapter-axios':
+  - packages/adapter-axios/**
 
-'pkg: db':
-  - packages/integrations/db/**
+'adapter-graphql':
+  - packages/adapter-graphql/**
 
-'feat: markdown':
-  - packages/markdown/**
+'adapter-mock':
+  - packages/adapter-mock/**
 
-'pkg: integration':
-  - packages/integrations/**
+'adapter-superagent':
+  - packages/adapter-superagent/**
 
-'pkg: lit':
-  - packages/integrations/lit/**
+'adapter-taro':
+  - packages/adapter-taro/**
 
-'pkg: preact':
-  - packages/integrations/preact/**
+'adapter-uniapp':
+  - packages/adapter-uniapp/**
 
-'pkg: react':
-  - packages/integrations/react/**
+'adapter-xhr':
+  - packages/adapter-xhr/**
 
-'pkg: solid':
-  - packages/integrations/solid/**
+'angular':
+  - packages/angular/**
 
-'pkg: svelte':
-  - packages/integrations/svelte/**
+'ark-ts':
+  - packages/ark-ts/**
 
-'pkg: vue':
-  - packages/integrations/vue/**
+'client':
+  - packages/client/**
 
-'docs pr':
-  - packages/astro/src/@types/astro.ts
-  - packages/astro/src/core/errors/errors-data.ts
+'lit':
+  - packages/lit/**
+
+'miniprogram':
+  - packages/miniprogram/**
+
+'psc':
+  - packages/psc/**
+
+'server':
+  - packages/server/**
+
+'shared':
+  - packages/shared/**
+
+'stencil':
+  - packages/stencil/**
+
+'vue-options':
+  - packages/vue-options/**
