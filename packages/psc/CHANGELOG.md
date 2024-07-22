@@ -1,5 +1,16 @@
 # @alova/psc
 
+## 1.0.0-beta.15
+
+### Minor Changes
+
+- [#469](https://github.com/alovajs/alova/pull/469) [`34aa76a`](https://github.com/alovajs/alova/commit/34aa76a64bfa810ea077e1dada1eb16654ebf5ba) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - console error when getting uploading progress
+
+### Patch Changes
+
+- Updated dependencies [[`34aa76a`](https://github.com/alovajs/alova/commit/34aa76a64bfa810ea077e1dada1eb16654ebf5ba)]:
+  - alova@3.0.0-beta.17
+
 ## 1.0.0-beta.14
 
 ### Patch Changes
