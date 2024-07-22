@@ -38,7 +38,7 @@ export const createSyncAdapter = (syncAdapter: SyncAdapter) => syncAdapter;
  * 2. Emit an event when the status changes.
  * 3. Proxy the behavior of the incoming cacheAdapter.
  */
-export class PSCAdapter implements AlovaGlobalCacheAdapter {
+class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
   protected id = uuid();
 
   protected queue = new QueueCallback();
@@ -182,15 +182,15 @@ export class ExplicitCacheAdapter implements AlovaGlobalCacheAdapter {
  * )
  * ```
  */
-export function createPSCAdapter(
+function createProcessSharedCacheAdapter(
   syncAdapter: SyncAdapter,
   cacheAdapter: AlovaGlobalCacheAdapter = new ExplicitCacheAdapter(),
   options: ProcessSharedCacheAdapterOptions = {}
 ) {
-  return new PSCAdapter(cacheAdapter, syncAdapter, options);
+  return new ProcessSharedCacheAdapter(cacheAdapter, syncAdapter, options);
 }
 
-export function createPSCSynchronizer(syncAdapter: SyncAdapter) {
+function createProcessSharedCacheSynchronizer(syncAdapter: SyncAdapter) {
   const cache = new ExplicitCacheAdapter();
   const cacheEventHandlers = {
     set: (key: string, value?: any) => cache.set(key, value),
@@ -224,3 +224,17 @@ export function createPSCSynchronizer(syncAdapter: SyncAdapter) {
     syncAdapter.send(newEvent);
   });
 }
+
+// shorter alias
+/**
+ * Alias of `ProcessSharedCacheAdapter`
+ */
+export const PSCAdapter = ProcessSharedCacheAdapter;
+/**
+ * Alias of `createProcessSharedCacheAdapter`
+ */
+export const createPSCAdapter = createProcessSharedCacheAdapter;
+/**
+ * Alias of `createProcessSharedCacheSynchronizer`
+ */
+export const createPSCSynchronizer = createProcessSharedCacheSynchronizer;

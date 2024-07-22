@@ -1,5 +1,19 @@
 # @alova/psc
 
+## 1.0.0-beta.14
+
+### Patch Changes
+
+- [`10da6b6`](https://github.com/alovajs/alova/commit/10da6b6109a722861a9bc3701622b676249186f5) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: unable to establish ipc channel in node
+
+## 1.0.0-beta.13
+
+### Patch Changes
+
+- Updated dependencies [[`8486b65`](https://github.com/alovajs/alova/commit/8486b654ed29531377b630b0b434c34e2b39d5db)]:
+  - @alova/shared@1.0.0-beta.12
+  - alova@3.0.0-beta.16
+
 ## 1.0.0-beta.12
 
 ### Patch Changes
