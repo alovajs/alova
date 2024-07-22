@@ -1,5 +1,14 @@
 # @alova/vue-options
 
+## 2.0.0-beta.8
+
+### Patch Changes
+
+- [#469](https://github.com/alovajs/alova/pull/469) [`83eabb8`](https://github.com/alovajs/alova/commit/83eabb8bc8660fbdeec2a3f8d5d96afa6b19751d) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that trackedKeys not effect
+
+- Updated dependencies [[`34aa76a`](https://github.com/alovajs/alova/commit/34aa76a64bfa810ea077e1dada1eb16654ebf5ba)]:
+  - alova@3.0.0-beta.17
+
 ## 2.0.0-beta.7
 
 ### Minor Changes
