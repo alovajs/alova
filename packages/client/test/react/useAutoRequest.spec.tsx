@@ -178,7 +178,8 @@ describe('react => useAutoRequest', () => {
           enableNetwork: false,
           enableFocus: false,
           enableVisibility: false,
-          pollingTime: 5
+          pollingTime: 5,
+          throttle: 0
         }
       );
       return <span role="data">{JSON.stringify(data)}</span>;

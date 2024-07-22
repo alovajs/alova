@@ -400,12 +400,10 @@ describe('createAlova', () => {
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  const { groupCollapsed } = console;
-  const { groupEnd } = console;
   test('should print cache hit message default when hit response cache', async () => {
-    const logConsoleMockFn = jest.fn();
-    // eslint-disable-next-line
-    console.log = logConsoleMockFn; // Rewrite for monitoring
+    const logConsoleMockFn = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const groupCollapsedMockFn = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    const groupEndMockFn = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
     const alova1 = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),
@@ -418,6 +416,8 @@ describe('createAlova', () => {
     // Request twice to hit the cache once
     await getter1;
     await getter1;
+    expect(groupCollapsedMockFn).toHaveBeenCalledTimes(1);
+    expect(groupEndMockFn).toHaveBeenCalledTimes(1);
     expect(logConsoleMockFn).toHaveBeenCalledTimes(3); // Each cache will call console.log 3 times
     const calls1 = logConsoleMockFn.mock.calls.slice(0);
     expect(calls1[0][0]).toBe('%c[Cache]');
@@ -443,6 +443,8 @@ describe('createAlova', () => {
     // Request cached data once
     await getter2;
     await getter2;
+    expect(groupCollapsedMockFn).toHaveBeenCalledTimes(2);
+    expect(groupEndMockFn).toHaveBeenCalledTimes(2);
     expect(logConsoleMockFn).toHaveBeenCalledTimes(7); // Restore cache will also print tag
     const calls2 = logConsoleMockFn.mock.calls.slice(3);
     expect(calls2[0][0]).toBe('%c[Cache]');
@@ -460,7 +462,7 @@ describe('createAlova', () => {
     expect(calls2[3][0]).toBe('%c[Method]');
     expect(calls2[3][2]).toBeInstanceOf(Method);
 
-    // Will be printed in another form when console.groupCollapsed is empty
+    // Will be printed in another way when console.groupCollapsed is empty
     (console as any).groupCollapsed = (console as any).groupEnd = undefined;
     await getter2;
     expect(logConsoleMockFn).toHaveBeenCalledTimes(13);
@@ -482,10 +484,9 @@ describe('createAlova', () => {
     expect(calls3[4][0]).toBe('%c[Method]');
     expect(calls3[4][2]).toBeInstanceOf(Method);
     expect(calls3[5][1]).toBe(Array(startSep.length + 1).join('^'));
-    // eslint-disable-next-line
-    console.groupCollapsed = groupCollapsed;
-    // eslint-disable-next-line
-    console.groupEnd = groupEnd;
+    logConsoleMockFn.mockRestore();
+    groupCollapsedMockFn.mockRestore();
+    groupEndMockFn.mockRestore();
   });
 
   test("shouldn't print cache hit message when set cacheLogger to false or null", async () => {

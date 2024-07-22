@@ -148,6 +148,7 @@ describe('mock request', () => {
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
+      mockRequestLogger: false,
       onMockResponse: ({ status, statusText, responseHeaders, body }) => {
         expect(responseHeaders).toStrictEqual({ rh1: 'rh1' });
         if (status >= 300) {
@@ -183,6 +184,7 @@ describe('mock request', () => {
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
+      mockRequestLogger: false,
       onMockResponse({ body }) {
         return {
           response: body,
@@ -205,7 +207,8 @@ describe('mock request', () => {
 
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-      delay: 10
+      delay: 10,
+      mockRequestLogger: false
     });
     const alova = createAlova({
       baseURL: 'http://xxx',
@@ -229,6 +232,7 @@ describe('mock request', () => {
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
+      mockRequestLogger: false,
       onMockResponse: ({ status, statusText, body }) => {
         if (status >= 300) {
           const err = new Error(statusText);
@@ -287,6 +291,7 @@ describe('mock request', () => {
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
+      mockRequestLogger: false,
       onMockResponse: ({ status, statusText, body }) => {
         if (status >= 300) {
           const err = new Error(statusText);
@@ -315,6 +320,7 @@ describe('mock request', () => {
     });
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      mockRequestLogger: false,
       onMockResponse: ({ body }) => ({
         response: body,
         headers: {}
@@ -341,7 +347,8 @@ describe('mock request', () => {
 
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-      delay: 1000
+      delay: 1000,
+      mockRequestLogger: false
     });
 
     const alovaInst = createAlova({
@@ -373,7 +380,8 @@ describe('mock request', () => {
 
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-      delay: 10
+      delay: 10,
+      mockRequestLogger: false
     });
 
     const alovaInst = createAlova({
@@ -399,7 +407,8 @@ describe('mock request', () => {
 
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-      delay: 1000
+      delay: 1000,
+      mockRequestLogger: false
     });
 
     const alovaInst = createAlova({
@@ -424,7 +433,8 @@ describe('mock request', () => {
 
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
-      delay: 10
+      delay: 10,
+      mockRequestLogger: false
     });
     const alovaInst = createAlova({
       baseURL: 'http://xxx',
@@ -446,6 +456,7 @@ describe('mock request', () => {
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
+      mockRequestLogger: false,
       matchMode: 'methodurl',
       onMockResponse({ body }) {
         return {

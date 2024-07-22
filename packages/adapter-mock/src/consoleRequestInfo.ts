@@ -1,17 +1,13 @@
 import { MockRequestLoggerAdapter } from '~/typings';
 
 // 预定义的样式和固定文本
-const mockLabel = 'Mock';
-const mockLabelColor = '#64E8D6';
+const mockLabel = 'mock';
+const mockLabelColor = '#64bde8';
+const mockLabelBg = '#ccefff';
 const realRequestLabel = 'Realtime';
 const realRequestLabelColor = '#999999';
-const labelStyle = (bgColor: string, borderColor = '') => {
-  let style = `padding: 2px 6px; background: ${bgColor}; color: white;`;
-  if (borderColor) {
-    style += `border: solid 1px ${borderColor}`;
-  }
-  return style;
-};
+const realRequestLabelBg = '#ededed';
+const labelStyle = (bgColor: string, color: string) => `padding: 2px 6px; background: ${bgColor}; color: ${color};`;
 const titleStyle = 'color: black; font-size: 12px; font-weight: bolder';
 const transform2TableData = (obj: AnyObject) => {
   const tableData = {} as AnyObject;
@@ -36,7 +32,7 @@ const consoleRequestInfo: MockRequestLoggerAdapter = ({
   const cole = console;
   cole.groupCollapsed(
     `%c${isMock ? mockLabel : realRequestLabel}`,
-    labelStyle(isMock ? mockLabelColor : realRequestLabelColor),
+    labelStyle(isMock ? mockLabelBg : realRequestLabelBg, isMock ? mockLabelColor : realRequestLabelColor),
     url
   );
 

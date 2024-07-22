@@ -8,6 +8,7 @@ import GlobalFetch from 'alova/fetch';
 import VueHook from 'alova/vue';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
+import mockServer from 'root/mockServer';
 import { untilCbCalled } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
 import { AlovaSSEMessageEvent, SSEHookReadyState } from '~/typings/clienthook';
@@ -15,13 +16,16 @@ import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
 import CompUseSSE from './components/use-sse.vue';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
-
 afterEach(() => {
   const { promise, resolve } = usePromise();
   if (server.listening) {
     server.close(resolve);
     return promise;
   }
+});
+// 关掉下默认的server，避免抛出大量警告
+beforeAll(() => {
+  mockServer.close();
 });
 
 type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
@@ -30,7 +34,7 @@ type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageE
  * 准备 Alova 实例环境，并且开始 SSE 服务器的监听
  */
 const prepareAlova = async () => {
-  await server.listen();
+  server.listen();
   const { port } = server.address() as AddressInfo;
   return createAlova({
     baseURL: `http://127.0.0.1:${port}`,
