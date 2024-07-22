@@ -2,8 +2,7 @@
 <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>Creative next-generation request tools, Extremely improve your API using efficiency and save brainpower
-Just one step</b></p>
+<p align="center"><b>Creative next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
 <p align="center">English | <a href="./README.zh-CN.md">Chinese</a></p>
 
