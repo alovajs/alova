@@ -2,7 +2,7 @@
   <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>创新的下一代请求工具，别再花时间在请求这件小事上了，交给我们</b></p>
+<p align="center"><b>创新的下一代请求工具，极致地提升你的API接入效率，节约大脑，仅需一步</b></p>
 
 <p align="center">中文 | <a href="./README.md">📑English</a></p>
 

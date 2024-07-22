@@ -2,7 +2,7 @@
 <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>Creative next-generation request tools, don't spend time on the request, leave it to us</b></p>
+<p align="center"><b>Creative next-generation request tools. Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
 <p align="center">Chinese | <a href="./README.md">📑English</a></p>
 

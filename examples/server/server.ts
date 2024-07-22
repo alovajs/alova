@@ -9,7 +9,7 @@ import retryRouter from './routes/retry';
 
 const app = express();
 const port = 3000;
-const sourceBranch = 'next';
+const sourceBranch = 'main';
 const pkgName = 'server';
 
 // disable Keep-Alive to random hit different process
@@ -27,7 +27,7 @@ hbs.registerPartials(__dirname + '/views/partials');
 // set global variable
 app.use((_, res, next) => {
   res.locals.sourceUrl = `https://github.com/alovajs/alova/blob/${sourceBranch ? `${sourceBranch}/` : ''}examples/${pkgName}/routes`;
-  res.locals.docUrl = `https://alova.js.org${sourceBranch ? `/${sourceBranch}` : ''}`;
+  res.locals.docUrl = `https://alova.js.org`;
   next();
 });
 
