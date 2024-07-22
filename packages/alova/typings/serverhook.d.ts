@@ -5,10 +5,10 @@
   * Licensed under MIT (https://github.com/alovajs/alova/blob/main/LICENSE)
 */
 
-import { AlovaGenerics, Method, AlovaGlobalCacheAdapter } from 'alova';
-import { RateLimiterRes, IRateLimiterStoreOptions } from 'rate-limiter-flexible';
-import RateLimiterStoreAbstract from 'rate-limiter-flexible/lib/RateLimiterStoreAbstract.js';
 import { BackoffPolicy } from '@alova/shared/types';
+import { IRateLimiterStoreOptions, RateLimiterRes } from 'rate-limiter-flexible';
+import RateLimiterStoreAbstract from 'rate-limiter-flexible/lib/RateLimiterStoreAbstract.js';
+import { AlovaGenerics, AlovaGlobalCacheAdapter, Method } from '.';
 
 type RequestHandler<Responded> = (forceRequest?: boolean) => Promise<Responded>;
 declare class HookedMethod<AG extends AlovaGenerics> extends Method<AG> {
@@ -133,4 +133,5 @@ interface RetryOptions {
 }
 declare const retry: <AG extends AlovaGenerics>(method: Method<AG>, options?: RetryOptions) => HookedMethod<AG>;
 
-export { HookedMethod, createRateLimiter, retry };
+export { createRateLimiter, HookedMethod, retry };
+

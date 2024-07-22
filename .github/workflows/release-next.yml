@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           persist-credentials: false
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@master
         with:
           version: 9
 
@@ -41,12 +41,12 @@ jobs:
     needs: [quality]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           persist-credentials: false
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@master
         with:
           version: 9
 
@@ -62,10 +62,9 @@ jobs:
 
       - name: Create Release Pull Request or Publish
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@main
         with:
           # Note: pnpm install after versioning is necessary to refresh lockfile
-          setupGitUser: true
           version: pnpm run changeset:version
           publish: pnpm run release
           commit: 'ci: release next'
