@@ -1,5 +1,11 @@
 # @alova/scripts
 
+## 1.1.1
+
+### Patch Changes
+
+- [#471](https://github.com/alovajs/alova/pull/471) [`7a888c8`](https://github.com/alovajs/alova/commit/7a888c87c9e4153402765e46c40dfcb6c0c680e6) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - STL version publish
+
 ## 1.1.0
 
 ### Minor Changes
