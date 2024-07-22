@@ -1,4 +1,4 @@
-import { NodeSyncAdapter, createElectronPSCAdapter, createNodePSCAdapter, createNodePSCSynchronizer } from '@/index';
+import { ElectronSyncAdapter, NodeSyncAdapter, createNodePSCSynchronizer } from '@/index';
 import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { key } from '@alova/shared/function';
 import { forEach } from '@alova/shared/vars';
@@ -193,15 +193,15 @@ describe('shared cache', () => {
 
     const alovaA = getAlovaInstance({
       id: 1,
-      l1Cache: createElectronPSCAdapter(ipcRenderer)
+      l1Cache: createPSCAdapter(ElectronSyncAdapter(ipcRenderer))
     });
     const alovaB = getAlovaInstance({
       id: 1,
-      l1Cache: createElectronPSCAdapter(ipcRenderer)
+      l1Cache: createPSCAdapter(ElectronSyncAdapter(ipcRenderer))
     });
     const alovaC = getAlovaInstance({
       id: 2,
-      l1Cache: createElectronPSCAdapter(ipcRenderer)
+      l1Cache: createPSCAdapter(ElectronSyncAdapter(ipcRenderer))
     });
 
     const GetA = alovaA.Get('/unit-test', {
@@ -233,7 +233,7 @@ describe('shared cache', () => {
     // simulate init operation in the main procress
     createElectronPSCSynchronizer(ipcMain);
 
-    const l1Cache = createElectronPSCAdapter(ipcRenderer);
+    const l1Cache = createPSCAdapter(ElectronSyncAdapter(ipcRenderer));
 
     const alovaA = getAlovaInstance({
       id: 1,
@@ -261,15 +261,15 @@ describe('shared cache', () => {
 
     const alovaA = getAlovaInstance({
       id: 1,
-      l1Cache: createNodePSCAdapter(stop => stopHandler.push(stop))
+      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
     });
     const alovaB = getAlovaInstance({
       id: 1,
-      l1Cache: createNodePSCAdapter(stop => stopHandler.push(stop))
+      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
     });
     const alovaC = getAlovaInstance({
       id: 2,
-      l1Cache: createNodePSCAdapter(stop => stopHandler.push(stop))
+      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
     });
 
     const GetA = alovaA.Get('/unit-test', {
