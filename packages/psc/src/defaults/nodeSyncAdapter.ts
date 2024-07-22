@@ -1,4 +1,4 @@
-import { createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
+import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { usePromise, uuid } from '@alova/shared/function';
 import { QueueCallback } from '@alova/shared/queueCallback';
 import { IPCModule as IPCModule_ } from '@node-ipc/node-ipc';
@@ -57,10 +57,6 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
       });
     }
   });
-}
-
-export function createNodePSCAdapter(onConnect?: (stopFn: () => void) => void, id = AlovaIPCID) {
-  return createPSCAdapter(NodeSyncAdapter(onConnect, id));
 }
 
 /**
