@@ -166,7 +166,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
       handler:
         // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
         hasWatchingStates
-          ? delay => debouncingSendHandler.current(delay, referingObject, methodHandler)
+          ? (delay: number) => debouncingSendHandler.current(delay, referingObject, methodHandler)
           : () => wrapEffectRequest(referingObject),
       removeStates: () => forEach(hookInstance.rf, fn => fn()),
       saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),

@@ -6,6 +6,7 @@ import { pushLog } from '../logs';
 const router = express.Router();
 router.post('/api/retry', async (req, res) => {
   const body = req.body;
+  console.log(body.apiErrorTimes);
   const method = getRetryData({ id: Math.floor(Math.random() * 1000).toString(), errTimes: body.apiErrorTimes });
   const retryMethod = retry(method, {
     retry: body.retry,

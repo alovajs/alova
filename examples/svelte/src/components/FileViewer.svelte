@@ -47,7 +47,7 @@
     {#if docPath}
       <img
         title="Show current document"
-        src="/doubt.png"
+        src="/doubt.svg"
         on:click={handleToDoc}
         class="ml-2 cursor-pointer {showPath ? 'w-12' : 'w-8'}" />
     {/if}
