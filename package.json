@@ -49,7 +49,7 @@
     "changeset:beta": "changeset pre enter beta",
     "changeset:pre.exit": "changeset pre exit",
     "changeset:version": "changeset version",
-    "release": "pnpm run build && pnpm run coveralls && changeset publish"
+    "release": "pnpm run build && pnpm run coveralls && pnpm --filter=@alova/shared fix:reference && changeset publish"
   },
   "author": "Scott Hu",
   "license": "MIT",
