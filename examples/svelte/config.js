@@ -13,7 +13,7 @@ export default {
   alovaStatesHook: svelteHook,
 
   // source branch in GitHub
-  sourceBranch: 'next',
+  sourceBranch: 'main',
 
-  docUrl: 'https://alova.js.org/next/'
+  docUrl: 'https://alova.js.org/'
 };

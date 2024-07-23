@@ -41,7 +41,7 @@ function FileViewer({ children, filePath, docPath, showPath = false, className }
         {docPath && (
           <img
             title="Show current document"
-            src="/doubt.png"
+            src="/doubt.svg"
             onClick={handleToDoc}
             alt=""
             className={clsx('ml-2 cursor-pointer', showPath ? 'w-12' : 'w-8')}
