@@ -164,9 +164,10 @@ const config: Config = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '\\.(j|t)sx?$': 'ts-jest',
+    '^(?!.*\\.solid\\.tsx$).*\\.(j|t)sx$': 'ts-jest',
     '^.+\\.svelte$': 'svelte-jester',
-    '^.+\\.vue$': '@vue/vue3-jest'
+    '^.+\\.vue$': '@vue/vue3-jest',
+    '^.+\\.solid\\.(j|t)sx$': 'solid-jest/preset/browser'
   }
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

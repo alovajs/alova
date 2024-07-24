@@ -7,7 +7,9 @@
       "~/*": ["./*"],
       "#/*": ["test/*"],
       "root/*": ["../../internal/*"]
-    }
+    },
+    "jsx": "preserve",
+    "types": ["solid-js", "react"]
   },
   "include": [
     "src/**/*.ts",

@@ -132,5 +132,11 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "@solidjs/testing-library": "^0.8.9",
+    "babel-preset-solid": "^1.8.18",
+    "solid-jest": "^0.2.0",
+    "solid-js": "^1.8.18"
   }
 }

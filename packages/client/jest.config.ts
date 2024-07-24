@@ -9,7 +9,7 @@ import baseConfig from '../../jest.config.base';
 const config: Config = {
   ...baseConfig,
   displayName: 'alova/client',
-  testMatch: ['**/test/**/*.spec.[tj]s?(x)'],
+  testMatch: ['**/test/**/*.spec.[tj]s?(x)', '**/test/**/*.spec.solid.[tj]s?(x)'],
   modulePathIgnorePatterns: ['<rootDir>/test/ssr'],
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
