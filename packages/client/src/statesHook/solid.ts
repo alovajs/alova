@@ -1,7 +1,7 @@
 import { createSyncOnceRunner } from '@alova/shared/function';
 import { forEach } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { Accessor, createEffect, createSignal, onCleanup, Setter } from 'solidjs';
+import { Accessor, createEffect, createSignal, onCleanup, Setter } from 'solid-js';
 import { SolidHookExportType } from '~/typings/stateshook/solid';
 
 // 定义类型
@@ -11,8 +11,9 @@ export default {
   name: 'Solid',
   create: <D>(data: D): SolidState<D> => createSignal(data),
   dehydrate: <D>(state: SolidState<D>): D => state[0](),
+  // 更新状态
   update: <D>(newVal: D, state: SolidState<D>) => {
-    state[1](newVal);
+    state[1](() => newVal); // 确保 newVal 不是函数类型
   },
   effectRequest: ({
     handler,
@@ -48,7 +49,7 @@ export default {
   computed: <D>(getter: () => D): Accessor<D> => {
     const [value, setValue] = createSignal(getter());
     createEffect(() => {
-      setValue(getter());
+      setValue(() => getter()); // 包装成函数
     });
     return value;
   },

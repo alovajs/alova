@@ -1,9 +1,16 @@
 import { useWatcher } from '@/index';
 import SolidHook from '@/statesHook/solid';
-import '@testing-library/jest-dom';
-import { queryCache, setCache } from 'alova';
-import { delay, Result } from 'root/testUtils';
+import { fireEvent, render, screen, waitFor } from '@solidjs/testing-library';
+import { queryCache } from 'alova';
+import { delay, Result, untilCbCalled } from 'root/testUtils';
+import { createMemo, createSignal, JSX } from 'solid-js';
+import getAlovaInstance from '~/test/utils';
 
+function createDelay(ms: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(), ms);
+  });
+}
 describe('use useWatcher hook with Solid.js', () => {
   test('should specify at least one watching state', () => {
     const alova = getAlovaInstance(SolidHook, {
@@ -35,20 +42,20 @@ describe('use useWatcher hook with Solid.js', () => {
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
 
     await delay(10);
     setMutateNum(1);
     setMutateStr('b');
 
     const { method } = await untilCbCalled(onSuccess);
-    expect(loading()).toBeFalsy();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data.path).toBe('/unit-test');
+    expect(data.params.num).toBe('1');
+    expect(data.params.str).toBe('b');
+    expect(error).toBeUndefined();
 
     let cacheData = await queryCache(method);
     expect(cacheData?.path).toBe('/unit-test');
@@ -59,8 +66,8 @@ describe('use useWatcher hook with Solid.js', () => {
     setMutateStr('c');
 
     const { method: method2 } = await untilCbCalled(onSuccess);
-    expect(data().params.num).toBe('2');
-    expect(data().params.str).toBe('c');
+    expect(data.params.num).toBe('2');
+    expect(data.params.str).toBe('c');
     cacheData = await queryCache(method2);
     expect(cacheData?.params).toStrictEqual({ num: '2', str: 'c' });
     expect(mockCallback).toHaveBeenCalledTimes(2);
@@ -86,9 +93,9 @@ describe('use useWatcher hook with Solid.js', () => {
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
 
     await delay(10);
     i += 1;
@@ -101,8 +108,8 @@ describe('use useWatcher hook with Solid.js', () => {
     setMutateNum(2);
     setMutateStr('c');
     await untilCbCalled(onSuccess);
-    expect(data().params.num).toBe('2');
-    expect(data().params.str).toBe('c');
+    expect(data.params.num).toBe('2');
+    expect(data.params.str).toBe('c');
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -133,9 +140,9 @@ describe('use useWatcher hook with Solid.js', () => {
     const mockErrorCallback = jest.fn();
     onError(mockErrorCallback);
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
 
     await delay(10);
     i += 1;
@@ -148,11 +155,11 @@ describe('use useWatcher hook with Solid.js', () => {
     setMutateNum(2);
     setMutateStr('c');
     await untilCbCalled(onSuccess);
-    expect(data().params.num).toBe('2');
-    expect(data().params.str).toBe('c');
+    expect(data.params.num).toBe('2');
+    expect(data.params.str).toBe('c');
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockErrorCallback).not.toHaveBeenCalled();
-    expect(error()).toBeUndefined();
+    expect(error).toBeUndefined();
   });
 
   test('should receive the last response when abortLast is false', async () => {
@@ -178,9 +185,9 @@ describe('use useWatcher hook with Solid.js', () => {
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
 
     await delay(10);
     i += 1;
@@ -192,8 +199,8 @@ describe('use useWatcher hook with Solid.js', () => {
     setMutateNum(2);
     setMutateStr('c');
     await delay(1100);
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
+    expect(data.params.num).toBe('1');
+    expect(data.params.str).toBe('b');
     expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
@@ -229,9 +236,9 @@ describe('use useWatcher hook with Solid.js', () => {
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
     expect(sendableFn).not.toHaveBeenCalled();
 
     await delay(10);
@@ -239,19 +246,19 @@ describe('use useWatcher hook with Solid.js', () => {
     setMutateStr('b');
 
     await untilCbCalled(onSuccess);
-    expect(loading()).toBeFalsy();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data.path).toBe('/unit-test');
+    expect(data.params.num).toBe('1');
+    expect(data.params.str).toBe('b');
+    expect(error).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledTimes(1);
 
     setMutateNum(2);
     setMutateStr('c');
     await delay(50);
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
+    expect(data.params.num).toBe('1');
+    expect(data.params.str).toBe('b');
     expect(sendableFn).toHaveBeenCalledTimes(2);
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
@@ -286,27 +293,27 @@ describe('use useWatcher hook with Solid.js', () => {
     const mockCallback = jest.fn();
     onSuccess(mockCallback);
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
     expect(sendableFn).not.toHaveBeenCalled();
 
     await delay(10);
     setMutateNum(1);
     setMutateStr('b');
     await delay(50);
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(1);
     expect(mockCallback).not.toHaveBeenCalled();
 
     setMutateNum(2);
     setMutateStr('c');
     await delay(50);
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
     expect(sendableFn).toHaveBeenCalledTimes(2);
     expect(mockCallback).not.toHaveBeenCalled();
   });
@@ -315,13 +322,13 @@ describe('use useWatcher hook with Solid.js', () => {
     const alova = getAlovaInstance(SolidHook, {
       responseExpect: r => r.json()
     });
-    const [mutateNum, setMutateNum] = createSignal(0);
-    const [mutateStr, setMutateStr] = createSignal('a');
+    const mutateNum = createSignal(0);
+    const mutateStr = createSignal('a');
     const sendableFn = jest.fn();
     const { loading } = useWatcher(
       () =>
         alova.Get('/unit-test', {
-          params: { num: mutateNum(), str: mutateStr() },
+          params: { num: mutateNum, str: mutateStr },
           transform: (result: Result) => result.data
         }),
       [mutateNum, mutateStr],
@@ -334,7 +341,7 @@ describe('use useWatcher hook with Solid.js', () => {
     );
 
     await delay();
-    expect(loading()).toBeFalsy();
+    expect(loading).toBeFalsy();
     expect(sendableFn).toHaveBeenCalledTimes(1);
   });
 
@@ -356,22 +363,22 @@ describe('use useWatcher hook with Solid.js', () => {
     onSuccess(successMockFn);
 
     await untilCbCalled(onSuccess);
-    expect(data()).toBeDefined();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('0');
-    expect(data().params.str).toBe('a');
-    expect(error()).toBeUndefined();
+    expect(data).toBeDefined();
+    expect(data.path).toBe('/unit-test');
+    expect(data.params.num).toBe('0');
+    expect(data.params.str).toBe('a');
+    expect(error).toBeUndefined();
     expect(successMockFn).toHaveBeenCalledTimes(1);
 
     setMutateNum(2);
     setMutateStr('c');
     await untilCbCalled(onSuccess);
 
-    expect(data()).toBeDefined();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('0');
-    expect(data().params.str).toBe('a');
-    expect(error()).toBeUndefined();
+    expect(data).toBeDefined();
+    expect(data.path).toBe('/unit-test');
+    expect(data.params.num).toBe('0');
+    expect(data.params.str).toBe('a');
+    expect(error).toBeUndefined();
     expect(successMockFn).toHaveBeenCalledTimes(2);
   });
 
@@ -395,25 +402,25 @@ describe('use useWatcher hook with Solid.js', () => {
       [mutateObj, mutateObjReactive]
     );
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
 
     setMutateObj({ num: 1 });
     await untilCbCalled(onSuccess);
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeDefined();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('');
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeDefined();
+    expect(data.path).toBe('/unit-test');
+    expect(data.params.num).toBe('1');
+    expect(data.params.str).toBe('');
+    expect(error).toBeUndefined();
 
     setMutateObj({ num: 2 });
     setMutateObjReactive({ str: 'c' });
     await untilCbCalled(onSuccess);
-    expect(data()).toBeDefined();
-    expect(data().params.num).toBe('2');
-    expect(data().params.str).toBe('c');
+    expect(data).toBeDefined();
+    expect(data.params.num).toBe('2');
+    expect(data.params.str).toBe('c');
   });
 
   test('计算值变化时也应发送请求', async () => {
@@ -436,21 +443,21 @@ describe('use useWatcher hook with Solid.js', () => {
       [computedStr]
     );
 
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeUndefined();
+    expect(error).toBeUndefined();
 
     setMutateNum(1);
     await untilCbCalled(onSuccess);
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeDefined();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.str).toBe('str2');
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeDefined();
+    expect(data.path).toBe('/unit-test');
+    expect(data.params.str).toBe('str2');
+    expect(error).toBeUndefined();
 
     setMutateNum(0);
     await untilCbCalled(onSuccess);
-    expect(data().params.str).toBe('str1');
+    expect(data.params.str).toBe('str1');
   });
 
   test('当值变化次数少于防抖时间时只发送一次请求', async () => {
@@ -479,9 +486,9 @@ describe('use useWatcher hook with Solid.js', () => {
     await delay(10);
 
     const checkInitData = () => {
-      expect(loading()).toBeFalsy();
-      expect(data()).toBeUndefined();
-      expect(error()).toBeUndefined();
+      expect(loading).toBeFalsy();
+      expect(data).toBeUndefined();
+      expect(error).toBeUndefined();
       expect(mockCallback).not.toHaveBeenCalled();
     };
     setMutateNum(1);
@@ -496,12 +503,12 @@ describe('use useWatcher hook with Solid.js', () => {
 
     const startTs = Date.now();
     const { method } = await untilCbCalled(onSuccess);
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeDefined();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('2');
-    expect(data().params.str).toBe('c');
-    expect(error()).toBeUndefined();
+    expect(loading).toBeFalsy();
+    expect(data).toBeDefined();
+    expect(data.path).toBe('/unit-test');
+    expect(data.params.num).toBe('2');
+    expect(data.params.str).toBe('c');
+    expect(error).toBeUndefined();
     expect(Date.now() - startTs).toBeLessThanOrEqual(200); // 实际异步时间会较长
 
     // 缓存中应有值
@@ -511,411 +518,281 @@ describe('use useWatcher hook with Solid.js', () => {
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
-  import { createSignal, createEffect, createResource } from 'solid-js';
-  import { render } from 'solid-js/web';
-  import { test, expect } from 'vitest';
-  import { createDelay, untilCbCalled } from './utils'; // 需要根据实际情况导入
-
-  // 模拟网络请求的实例
-  const getAlovaInstance = (hook, config) => {
-    // ...实现你的 getAlovaInstance
-  };
-
-  test('在不同防抖时间设置参数 debounce 为数组', async () => {
-    const alova = getAlovaInstance(null, { responseExpect: r => r.json() }); // hook 设置为 null 或实际值
-    const [mutateNum, setMutateNum] = createSignal(0);
-    const [mutateStr, setMutateStr] = createSignal('a');
-
-    const [loading, data, downloading, error, onSuccess] = createResource(
-      () =>
-        alova.Get('/unit-test', {
-          params: { num: mutateNum(), str: mutateStr() },
-          timeout: 10000,
-          headers: { 'Content-Type': 'application/json' },
-          transform: result => result.data,
-          cacheFor: 100 * 1000
-        }),
-      { debounce: [200, 100] }
-    );
-
-    // 请求尚未发送
-    expect(loading()).toBeFalsy();
-    expect(data()).toBeUndefined();
-    expect(downloading()).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error()).toBeUndefined();
-
-    await createDelay(10);
-    setMutateNum(1);
-    let startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    let endTs = Date.now();
-    // 请求已响应
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('a');
-    expect(endTs - startTs).toBeLessThan(300);
-
-    setMutateStr('b');
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    endTs = Date.now();
-    // 请求已响应
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
-    expect(endTs - startTs).toBeLessThan(200);
-
-    // 同时改变，以后一个为准
-    setMutateNum(3);
-    setMutateStr('c');
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    endTs = Date.now();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('3');
-    expect(data().params.str).toBe('c');
-    expect(endTs - startTs).toBeLessThan(200);
-  });
-
-  test('将参数 debounce 设置为包含一个项的数组', async () => {
-    const alova = getAlovaInstance(null, { responseExpect: r => r.json() }); // hook 设置为 null 或实际值
-    const [mutateNum, setMutateNum] = createSignal(0);
-    const [mutateStr, setMutateStr] = createSignal('a');
-
-    const [data, onSuccess] = createResource(
-      () => {
-        const get = alova.Get('/unit-test', {
-          params: { num: mutateNum(), str: mutateStr() },
-          timeout: 10000,
-          headers: { 'Content-Type': 'application/json' },
-          transform: result => result.data,
-          cacheFor: 100 * 1000
-        });
-        return get;
-      },
-      { debounce: [100] }
-    );
-
-    await createDelay(10);
-    setMutateNum(1);
-    let startTs = Date.now();
-    // 请求已响应
-    await untilCbCalled(onSuccess);
-    let endTs = Date.now();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('a');
-    expect(endTs - startTs).toBeLessThan(200);
-
-    setMutateStr('b');
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    endTs = Date.now();
-    // 第二个值未设置防抖，请求已发送并响应
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
-    expect(endTs - startTs).toBeLessThan(100);
-
-    // 同时改变，以后一个为准
-    setMutateNum(3);
-    setMutateStr('c');
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    endTs = Date.now();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('3');
-    expect(data().params.str).toBe('c');
-    expect(endTs - startTs).toBeLessThan(100);
-  });
-
-  test('嵌套值变化时防抖应生效', async () => {
-    const alova = getAlovaInstance(null, { responseExpect: r => r.json() }); // hook 设置为 null 或实际值
-    const [mutateObj, setMutateObj] = createSignal({ num: 0 });
-    const [mutateObjReactive, setMutateObjReactive] = createSignal({ str: 'a' });
-
-    const [data, onSuccess] = createResource(
-      () =>
-        alova.Get('/unit-test', {
-          params: { num: mutateObj().num, str: mutateObjReactive().str },
-          timeout: 10000,
-          headers: { 'Content-Type': 'application/json' },
-          transform: result => result.data,
-          cacheFor: 100 * 1000
-        }),
-      { debounce: 200 }
-    );
-
-    await createDelay(10);
-    setMutateObj({ num: 1 });
-    let startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    // 请求已响应
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('a');
-    expect(Date.now() - startTs).toBeLessThanOrEqual(300);
-
-    setMutateObjReactive({ str: 'b' });
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    // 请求已响应
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
-    expect(Date.now() - startTs).toBeLessThan(300);
-
-    // 同时改变，以后一个为准
-    setMutateObj({ num: 3 });
-    setMutateObjReactive({ str: 'c' });
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('3');
-    expect(data().params.str).toBe('c');
-    expect(Date.now() - startTs).toBeLessThan(300);
-  });
-
-  test('the debounce of array should be effective when nested value is changed', async () => {
-    const alova = getAlovaInstance(null, { responseExpect: r => r.json() }); // Set hook to null or actual value
-    const [mutateObj, setMutateObj] = createSignal({ num: 0 });
-    const [mutateObjReactive, setMutateObjReactive] = createSignal({ str: 'a' });
-
-    const [data, onSuccess] = createResource(
-      () =>
-        alova.Get('/unit-test', {
-          params: { num: mutateObj().num, str: mutateObjReactive().str },
-          timeout: 10000,
-          headers: { 'Content-Type': 'application/json' },
-          transform: result => result.data,
-          cacheFor: 100 * 1000
-        }),
-      { debounce: [200, 100] }
-    );
-
-    await createDelay(10);
-    setMutateObj({ num: 1 });
-    let startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    let endTs = Date.now();
-    // Request should respond
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('a');
-    expect(endTs - startTs).toBeLessThan(300);
-
-    setMutateObjReactive({ str: 'b' });
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    endTs = Date.now();
-    // Request should respond
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('1');
-    expect(data().params.str).toBe('b');
-    expect(endTs - startTs).toBeLessThanOrEqual(200);
-
-    // Changing both, the latter change should take precedence
-    setMutateObj({ num: 3 });
-    setMutateObjReactive({ str: 'c' });
-    startTs = Date.now();
-    await untilCbCalled(onSuccess);
-    endTs = Date.now();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('3');
-    expect(data().params.str).toBe('c');
-    expect(endTs - startTs).toBeLessThanOrEqual(200);
-  });
-
-  test('should send request when `immediate` parameter is set', async () => {
-    const alova = getAlovaInstance(null, { responseExpect: r => r.json() }); // Set hook to null or actual value
-    const [mutateNum, setMutateNum] = createSignal(0);
-    const [mutateStr, setMutateStr] = createSignal('a');
-
-    const [loading, data, downloading, error, onSuccess] = createResource(
-      () =>
-        alova.Get('/unit-test', {
-          params: { num: mutateNum(), str: mutateStr() },
-          timeout: 10000,
-          headers: { 'Content-Type': 'application/json' },
-          transform: result => result.data,
-          cacheFor: 0
-        }),
-      { immediate: true }
-    );
-
-    expect(loading()).toBeTruthy();
-    expect(data()).toBeUndefined();
-    expect(downloading()).toStrictEqual({ total: 0, loaded: 0 });
-    expect(error()).toBeUndefined();
-
-    const mockCallback = jest.fn();
-    onSuccess(mockCallback);
-
-    const { method } = await untilCbCalled(onSuccess);
-    expect(loading()).toBeFalsy();
-    expect(data().path).toBe('/unit-test');
-    expect(data().params.num).toBe('0');
-    expect(data().params.str).toBe('a');
-    expect(downloading()).toStrictEqual({ total: 96, loaded: 96 });
-    expect(error()).toBeUndefined();
-
-    // Cache should be undefined
-    let cacheData = await queryCache(method);
-    expect(cacheData).toBeUndefined();
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-
-    setMutateNum(2);
-    setMutateStr('c');
-    const { method: method2 } = await untilCbCalled(onSuccess);
-    expect(data().params.num).toBe('2');
-    expect(data().params.str).toBe('c');
-    cacheData = await queryCache(method2);
-    expect(cacheData).toBeUndefined();
-    expect(mockCallback).toHaveBeenCalledTimes(2);
-  });
-
-  test("initial request shouldn't delay when `immediate` and `debounce` are set", async () => {
-    const fetcher = createFetcher({
+  test('in different debounce time when set param debounce to be an array', async () => {
+    const alova = getAlovaInstance(SolidHook, {
       responseExpect: r => r.json()
     });
 
-    const [mutateNum, setMutateNum] = createSignal(0);
-    const [mutateStr, setMutateStr] = createSignal('a');
-    const [state, setState] = createSignal({
-      loading: false,
-      data: undefined,
-      error: undefined
-    });
-
-    const fetchData = () => {
-      setState(prev => ({ ...prev, loading: true }));
-      fetcher
-        .Get('/unit-test', {
-          params: { num: mutateNum(), str: mutateStr() },
-          timeout: 10000,
-          headers: { 'Content-Type': 'application/json' },
-          transform: result => result.data,
-          cacheFor: 0
-        })
-        .then(data => setState({ loading: false, data, error: undefined }))
-        .catch(error => setState({ loading: false, data: undefined, error }));
-    };
-
-    createEffect(() => {
-      fetchData();
-    });
-
-    // Initial request should trigger immediately
-    expect(state().loading).toBeTruthy();
-    expect(state().data).toBeUndefined();
-    expect(state().error).toBeUndefined();
-
-    const mockCallback = jest.fn();
-    fetchData().then(() => mockCallback());
-
-    await createDelay(100); // Wait for data processing
-
-    expect(state().loading).toBeFalsy();
-    expect(state().data.path).toBe('/unit-test');
-    expect(state().data.params.num).toBe('0');
-    expect(state().data.params.str).toBe('a');
-    expect(state().error).toBeUndefined();
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-
-    setMutateNum(2);
-    setMutateStr('c');
-
-    // Change should delay request by 200ms, so 150ms should still show old data
-    await createDelay(150);
-    expect(state().data.params.num).toBe('0');
-    expect(state().data.params.str).toBe('a');
-
-    await fetchData(); // Trigger update
-    expect(state().data.params.num).toBe('2');
-    expect(state().data.params.str).toBe('c');
-    expect(mockCallback).toHaveBeenCalledTimes(2);
-  });
-
-  test('should force request when `force` param is set to a function which returns a truthy value', async () => {
-    const fetcher = createFetcher({
-      responseExpect: r => r.json()
-    });
-
-    const [ctrlVal, setCtrlVal] = createSignal(0);
-    const getGetterObj = () =>
-      fetcher.Get('/unit-test', {
+    const getter = (id1: Number, id2: Number) =>
+      alova.Get('/unit-test', {
+        params: {
+          id1,
+          id2
+        },
         timeout: 10000,
-        transform: ({ data }) => data,
-        params: { val: '1' },
+        transform: ({ data }: Result<true>) => data,
         cacheFor: 100 * 1000
       });
 
-    const [state, setState] = createStore({
-      data: undefined
+    const successMockFn = jest.fn();
+    function Page() {
+      const [stateId1, setStateId1] = createSignal(0);
+      const [stateId2, setStateId2] = createSignal(10);
+      const [pending, setPending] = createSignal(false);
+
+      const { loading, data, onSuccess } = useWatcher(() => getter(stateId1(), stateId2()), [stateId1, stateId2], {
+        initialData: {
+          path: '',
+          params: { id1: '', id2: '' }
+        },
+        debounce: [500, 200]
+      });
+
+      onSuccess(() => {
+        successMockFn();
+        setPending(false);
+      });
+
+      return (
+        <div role="wrap">
+          <span>{pending() ? 'pending' : 'pended'}</span>
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data.path}</span>
+          <span role="id1">{data.params.id1}</span>
+          <span role="id2">{data.params.id2}</span>
+          <button
+            role="btn1"
+            onClick={() => {
+              setStateId1(stateId1() + 1);
+              setPending(true);
+            }}>
+            btn1
+          </button>
+          <button
+            role="btn2"
+            onClick={() => {
+              setStateId2(stateId2() + 1);
+              setPending(true);
+            }}>
+            btn2
+          </button>
+        </div>
+      );
+    }
+
+    render(() => (<Page />) as unknown as JSX.Element);
+
+    await waitFor(() => {
+      // 暂没发送请求
+      expect(screen.getByRole('path')).toHaveTextContent('');
+      expect(screen.getByRole('id1')).toHaveTextContent('');
+      expect(screen.getByRole('id2')).toHaveTextContent('');
+      expect(successMockFn).not.toHaveBeenCalled();
     });
 
-    const fetchData = (force = false) => {
-      if (force) {
-        fetcher.Get('/unit-test', { params: { val: ctrlVal() } }).then(data => setState({ data }));
-      }
-    };
-
-    // Simulate cached data
-    setCache(getGetterObj(), {
-      path: '/unit-test',
-      method: 'GET',
-      params: { val: '-1' },
-      data: {}
+    await untilCbCalled(setTimeout); // 由于SolidHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    fireEvent.click(screen.getByRole('btn1'));
+    let startTs = Date.now();
+    await waitFor(() => {
+      // 请求已响应
+      const endTs = Date.now();
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('10');
+      expect(endTs - startTs).toBeLessThan(600);
+      expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
-    setCtrlVal(1);
-    await fetchData(); // Simulate request
+    fireEvent.click(screen.getByRole('btn2'));
+    startTs = Date.now();
+    await waitFor(() => {
+      const endTs = Date.now();
+      // 请求已响应
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(endTs - startTs).toBeLessThan(300);
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+    });
 
-    expect(state.data.params.val).toBe('-1');
-
-    fetchData(true);
-    await fetchData(); // Simulate request
-    expect(state.data.params.val).toBe('1');
-    const cacheData = await queryCache(getGetterObj);
-    expect(cacheData?.params).toStrictEqual({ val: '1' });
+    // 同时改变，以后一个为准
+    fireEvent.click(screen.getByRole('btn1'));
+    fireEvent.click(screen.getByRole('btn2'));
+    startTs = Date.now();
+    await waitFor(() => {
+      const endTs = Date.now();
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(endTs - startTs).toBeLessThan(300);
+      expect(successMockFn).toHaveBeenCalledTimes(3);
+    });
   });
-  test('should return original return value in on events', async () => {
-    const alova = getAlovaInstance(VueHook, {
-      responseExpect: r => r.json()
+
+  test('set param debounce to be an array that contains an item', async () => {
+    const alova = getAlovaInstance(SolidHook, { responseExpect: r => r.json() });
+
+    const successMockFn = jest.fn();
+
+    function Page() {
+      const [stateId1, setStateId1] = createSignal(0);
+      const [stateId2, setStateId2] = createSignal(10);
+      const [pending, setPending] = createSignal(false);
+
+      const { loading, data, onSuccess } = useWatcher(
+        () =>
+          alova.Get('/unit-test', {
+            params: { id1: stateId1(), id2: stateId2() },
+            transform: ({ data }: Result<true>) => data,
+            cacheFor: 100 * 1000
+          }),
+        [stateId1, stateId2],
+        {
+          initialData: {
+            path: '',
+            params: { id1: '', id2: '' }
+          },
+          debounce: [300]
+        }
+      );
+
+      onSuccess(() => {
+        successMockFn();
+        setPending(false);
+      });
+
+      return (
+        <div role="wrap">
+          <span>{pending() ? 'pending' : 'pended'}</span>
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data?.path}</span>
+          <span role="id1">{data?.params.id1}</span>
+          <span role="id2">{data?.params.id2}</span>
+          <button
+            role="btn1"
+            onClick={() => {
+              setStateId1(stateId1() + 1);
+              setPending(true);
+            }}>
+            btn1
+          </button>
+          <button
+            role="btn2"
+            onClick={() => {
+              setStateId2(stateId2() + 1);
+              setPending(true);
+            }}>
+            btn2
+          </button>
+        </div>
+      );
+    }
+
+    render(() => (<Page />) as unknown as JSX.Element);
+
+    await createDelay(10); // 等待初始化
+
+    expect(screen.getByRole('path')).toHaveTextContent('');
+    expect(screen.getByRole('id1')).toHaveTextContent('');
+    expect(screen.getByRole('id2')).toHaveTextContent('');
+    expect(successMockFn).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('btn1'));
+    let startTs = Date.now();
+    await waitFor(() => {
+      const endTs = Date.now();
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('10');
+      expect(endTs - startTs).toBeGreaterThanOrEqual(300);
+      expect(endTs - startTs).toBeLessThan(450);
+      expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
-    const successFn = jest.fn();
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
-    const mutateNum = ref(0);
-    const mutateStr = ref('accc');
-    const { loading, data, error, onSuccess } = useWatcher(
-      () =>
-        alova.Get('/unit-test', {
-          params: { num: mutateNum.value, str: mutateStr.value },
-          transform: (result: Result) => result.data,
-          cacheFor: null
-        }),
-      [mutateNum, mutateStr],
-      {
-        immediate: true
-      }
-    )
-      .onSuccess(successFn)
-      .onError(errorFn)
-      .onComplete(completeFn);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
-    expect(error.value).toBeUndefined();
+    fireEvent.click(screen.getByRole('btn2'));
+    startTs = Date.now();
+    await waitFor(() => {
+      const endTs = Date.now();
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('11');
+      expect(endTs - startTs).toBeLessThan(100);
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+    });
 
-    await untilCbCalled(onSuccess);
-    expect(loading.value).toBeFalsy();
-    expect(data.value.path).toBe('/unit-test');
-    expect(data.value.params).toStrictEqual({ num: '0', str: 'accc' });
-    expect(error.value).toBeUndefined();
+    fireEvent.click(screen.getByRole('btn1'));
+    fireEvent.click(screen.getByRole('btn2'));
+    startTs = Date.now();
+    await waitFor(() => {
+      const endTs = Date.now();
+      expect(screen.getByRole('id1')).toHaveTextContent('2');
+      expect(screen.getByRole('id2')).toHaveTextContent('12');
+      expect(endTs - startTs).toBeLessThan(100);
+      expect(successMockFn).toHaveBeenCalledTimes(3);
+    });
+  });
+  test('should request only once when debounce is set', async () => {
+    const alova = getAlovaInstance(SolidHook, { responseExpect: r => r.json() });
 
-    expect(successFn).toHaveBeenCalled();
-    expect(errorFn).not.toHaveBeenCalled();
-    expect(completeFn).toHaveBeenCalled();
+    function Page() {
+      const [stateId1, setStateId1] = createSignal(0);
+      const [stateId2, setStateId2] = createSignal(10);
+
+      const { loading, data, send } = useWatcher(
+        () =>
+          alova.Get('/unit-test', {
+            params: {
+              id1: stateId1(),
+              id2: stateId2()
+            },
+            timeout: 10000,
+            transform: ({ data }: Result<true>) => data,
+            cacheFor: 100 * 1000
+          }),
+        [stateId1, stateId2],
+        {
+          debounce: 500,
+          initialData: {
+            path: '',
+            params: { id1: '', id2: '' }
+          }
+        }
+      );
+
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="path">{data?.path}</span>
+          <span role="id1">{data?.params.id1}</span>
+          <span role="id2">{data?.params.id2}</span>
+          <button
+            onClick={() => {
+              setStateId1(stateId1() + 1);
+              setTimeout(() => setStateId2(11), 100);
+              setTimeout(() => setStateId2(12), 200);
+              setTimeout(() => setStateId2(13), 300);
+            }}>
+            btn
+          </button>
+          <button
+            role="btn2"
+            onClick={() => send()}>
+            btn2
+          </button>
+        </div>
+      );
+    }
+
+    const startTs = Date.now();
+    render(() => (<Page />) as unknown as JSX.Element);
+
+    fireEvent.click(screen.getByText('btn'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('id1')).toHaveTextContent('1');
+      expect(screen.getByRole('id2')).toHaveTextContent('13');
+      expect(Date.now() - startTs).toBeGreaterThan(500);
+    });
   });
 });

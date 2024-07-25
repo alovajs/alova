@@ -3,10 +3,10 @@ import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { updateState, useRequest, useWatcher } from '@/index';
 import SolidHook from '@/statesHook/solid';
 import { key } from '@alova/shared/function';
-import { createSignal, JSX } from '@solidjs';
 import { fireEvent, render, screen, waitFor } from '@solidjs/testing-library';
 import '@testing-library/jest-dom';
 import { delay, Result } from 'root/testUtils';
+import { createSignal, JSX } from 'solid-js';
 
 describe('update cached response data by user in solid', () => {
   test('the cached response data should be changed and the screen should be update', async () => {
@@ -34,9 +34,9 @@ describe('update cached response data by user in solid', () => {
           path: '/unit-test-updated'
         });
       });
-      return <div role="path">{data().path}</div>;
+      return <div role="path">{data.path}</div>;
     }
-    render(() => (<Page />) as JSX.Element);
+    render(() => (<Page />) as unknown as JSX.Element);
     await screen.findByText(/unit-test/);
 
     // 延迟检查页面是否有更新
@@ -56,13 +56,13 @@ describe('update cached response data by user in solid', () => {
 
     function Page() {
       const [count, setCount] = createSignal(0);
-      const { data } = useRequest(Get, {
+      const { data } = useRequest(alova.Get(''), {
         initialData: { path: '' }
       });
 
       return (
         <div>
-          <div role="path">{data().path}</div>
+          <div role="path">{(data as any).path}</div>
           <button
             role="count"
             onClick={() => setCount(v => v + 1)}>
@@ -71,7 +71,7 @@ describe('update cached response data by user in solid', () => {
         </div>
       );
     }
-    render(() => (<Page />) as JSX.Element);
+    render(() => (<Page />) as unknown as JSX.Element);
     await screen.findByText(/unit-test/);
 
     // useRequest返回的状态未改变，此时看看还能不能通过updateState改变来渲染页面
@@ -108,12 +108,12 @@ describe('update cached response data by user in solid', () => {
       });
       return (
         <div>
-          <div role="path">{data().path}</div>
+          <div role="path">{data.path}</div>
           <span role="extraData">{extraData[0]()}</span>
         </div>
       );
     }
-    render(() => (<Page />) as JSX.Element);
+    render(() => (<Page />) as unknown as JSX.Element);
     await screen.findByText(/unit-test/);
 
     // 预设状态不能更新
@@ -165,8 +165,8 @@ describe('update cached response data by user in solid', () => {
       onSuccess(successMockFn);
       return (
         <div>
-          <div>{loading() ? 'loading...' : 'loaded'}</div>
-          <div role="path">{data().path}</div>
+          <div>{loading ? 'loading...' : 'loaded'}</div>
+          <div role="path">{data.path}</div>
           <div>{strState()}</div>
           <button
             role="btnUpd"
@@ -176,7 +176,7 @@ describe('update cached response data by user in solid', () => {
         </div>
       );
     }
-    render(() => (<Page />) as JSX.Element);
+    render(() => (<Page />) as unknown as JSX.Element);
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
     });
@@ -226,8 +226,8 @@ describe('update cached response data by user in solid', () => {
       onSuccess(successMockFn);
       return (
         <div>
-          <div>{loading() ? 'loading...' : 'loaded'}</div>
-          <div role="path">{data().path}</div>
+          <div>{loading ? 'loading...' : 'loaded'}</div>
+          <div role="path">{data.path}</div>
           <div>{strState()}</div>
           <button
             role="btnUpd"
@@ -238,7 +238,7 @@ describe('update cached response data by user in solid', () => {
       );
     }
 
-    const { unmount } = render(() => (<Page />) as JSX.Element);
+    const { unmount } = render(() => (<Page />) as unknown as JSX.Element);
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
       expect(getStateCache(alova.id, key(getter('a')))).not.toBeUndefined();
