@@ -3,7 +3,7 @@ import { useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('useWatcher hook with react', () => {

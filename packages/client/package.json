@@ -45,11 +45,9 @@
   "devDependencies": {
     "@alova/mock": "workspace:*",
     "@alova/scripts": "workspace:*",
-    "@solidjs/testing-library": "^0.8.9",
     "@types/eventsource": "^1.1.15",
     "alova": "workspace:*",
-    "eventsource": "^2.0.2",
-    "solid-jest": "^0.2.0"
+    "eventsource": "^2.0.2"
   },
   "config": {
     "commitizen": {

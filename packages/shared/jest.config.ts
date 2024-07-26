@@ -8,13 +8,7 @@ import baseConfig from '../../jest.config.base';
 const config: Config = {
   ...baseConfig,
   displayName: '@alova/shared',
-  testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)', '**/test/**/*.spec.solid.[tj]s?(x)'],
-  transform: {
-    '^.+\\.(j|t)sx$': 'ts-jest',
-    '^.+\\.svelte$': 'svelte-jester',
-    '^.+\\.vue$': '@vue/vue3-jest',
-    '\\.solid\\.(j|t)sx$': 'solid-jest/transform'
-  },
+  testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
   // 还需要在tsconfig.json中设置allowJs为true
   transformIgnorePatterns: ['/node_modules/(?!(alova))']
 };

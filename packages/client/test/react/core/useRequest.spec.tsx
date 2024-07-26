@@ -5,7 +5,7 @@ import ReactHook from '@/statesHook/react';
 import { key } from '@alova/shared/function';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { ReactElement, StrictMode } from 'react';
+import { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
 
 const StrictModeReact = StrictMode as any;

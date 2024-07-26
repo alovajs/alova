@@ -86,7 +86,8 @@ const config: Config = {
     '~/(.*)': '<rootDir>/$1',
     '#/(.*)': '<rootDir>/test/$1',
     '^root/(.*)': resolve(__dirname, 'internal/$1'),
-    '^vue$': 'vue/dist/vue.cjs.js'
+    '^vue$': 'vue/dist/vue.cjs.js',
+    '^solid-js/web$': 'solid-js/web/dist/web.cjs'
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -99,7 +100,7 @@ const config: Config = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: 'ts-jest',
+  // preset: 'ts-jest',
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -164,10 +165,10 @@ const config: Config = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^(?!.*\\.solid\\.tsx$).*\\.(j|t)sx$': 'ts-jest',
+    '^.+\\.solid\\.spec\\.(j|t)sx?$': 'babel-jest',
+    '\\.(j|t)sx?$': 'ts-jest',
     '^.+\\.svelte$': 'svelte-jester',
-    '^.+\\.vue$': '@vue/vue3-jest',
-    '^.+\\.solid\\.(j|t)sx$': 'solid-jest/preset/browser'
+    '^.+\\.vue$': '@vue/vue3-jest'
   }
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

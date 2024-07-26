@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { delay, Result } from 'root/testUtils';
 

@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 

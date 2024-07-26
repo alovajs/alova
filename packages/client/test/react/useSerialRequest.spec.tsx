@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Method, createAlova } from 'alova';
 import ReactHook from 'alova/react';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { mockRequestAdapter } from '~/test/mockData';
 
 const alovaInst = createAlova({

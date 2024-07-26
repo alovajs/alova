@@ -22,7 +22,7 @@
     "importHelpers": true,
     "removeComments": false,
     "esModuleInterop": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "paths": {
       "@alova/*": ["packages/*/src"],
       "root/*": ["./internal/*"]

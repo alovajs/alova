@@ -8,7 +8,7 @@ import GlobalFetch from 'alova/fetch';
 import ReactHook from 'alova/react';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { delay } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
 import { SSEHookReadyState } from '~/typings/clienthook';
