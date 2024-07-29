@@ -600,9 +600,11 @@ export declare class Method<AG extends AlovaGenerics = any> {
   onUpload(progressHandler: ProgressHandler): () => void;
 }
 
-export interface MethodSnapshotContainer<AG extends AlovaGenerics> {
+export class MethodSnapshotContainer<AG extends AlovaGenerics> {
   records: Record<string, Set<Method<AG>>>;
+
   capacity: number;
+
   occupy: number;
   save(methodInstance: Method<AG>): void;
 

@@ -105,6 +105,40 @@ describe('createAlova', () => {
     expect(mockFn).toHaveBeenCalled();
   });
 
+  test('should use the newest params to request modified in `beforeRequest` hook', async () => {
+    const alova = createAlova({
+      requestAdapter: adapterFetch(),
+      beforeRequest: method => {
+        method.url = '/unit-test';
+        method.config.params = {
+          a: 7,
+          b: 8
+        };
+        method.config.headers = {
+          newHeader: 123
+        };
+        method.baseURL = 'http://localhost:3000';
+      },
+      responded: r => r.json()
+    });
+    const Get = alova.Get<Result>('/unknown', {
+      params: { a: 'a', b: 'str' },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const result = await Get;
+    expect(result).toStrictEqual({
+      code: 200,
+      msg: '',
+      data: {
+        path: '/unit-test',
+        method: 'GET',
+        params: { a: '7', b: '8' }
+      }
+    });
+  });
+
   test('`beforeRequest` hook support async function', async () => {
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
