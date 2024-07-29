@@ -1,5 +1,12 @@
 # @alova/adapter-axios
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`b4deaef`](https://github.com/alovajs/alova/commit/b4deaef6fb6f90740d212bfad7632cfc6c4d44d2)]:
+  - alova@3.0.3
+
 ## 2.0.2
 
 ### Patch Changes

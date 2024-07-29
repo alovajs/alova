@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.3
+
+### Patch Changes
+
+- [#482](https://github.com/alovajs/alova/pull/482) [`b4deaef`](https://github.com/alovajs/alova/commit/b4deaef6fb6f90740d212bfad7632cfc6c4d44d2) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - use the newest params to request modified in `beforeRequest`
+
 ## 3.0.2
 
 ### Patch Changes
