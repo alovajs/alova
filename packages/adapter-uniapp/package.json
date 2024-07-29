@@ -51,11 +51,6 @@
   "peerDependencies": {
     "alova": "^3.0.3"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "dependencies": {
     "@alova/shared": "workspace:^"
   }

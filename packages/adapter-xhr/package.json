@@ -57,10 +57,5 @@
     "@alova/scripts": "workspace:*",
     "alova": "workspace:*",
     "form-data": "^4.0.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }
