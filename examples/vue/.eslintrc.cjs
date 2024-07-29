@@ -7,5 +7,9 @@ module.exports = {
   rules: {
     // 在这里添加或覆盖规则
   },
-  root: true
+  root: true,
+  rules: {
+    semi: 'off',
+    'vue/multi-word-component-names': 'off'
+  }
 };

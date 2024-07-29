@@ -80,7 +80,6 @@
 
   function handleEditorChange({ target }) {
     submitNote(target.value);
-    console.log(6667, target.value);
   }
 </script>
 

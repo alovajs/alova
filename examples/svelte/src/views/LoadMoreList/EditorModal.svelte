@@ -52,7 +52,7 @@
     <nord-input
       label="Name"
       value={$detail.name}
-      on:input={({ target }) => ($detail.name = target.name)} />
+      on:input={({ target }) => ($detail.name = target.value)} />
     <nord-select
       label="Class"
       value={$detail.cls}

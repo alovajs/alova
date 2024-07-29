@@ -39,25 +39,24 @@
       <h3 slot="header">Student Info</h3>
       <EditorModal
         v-if="detailVisible"
-        :id="selectedId"
+        :id="selectedItem?.id"
         @submit="updateList" />
     </nord-modal>
   </div>
 </template>
 
 <script setup lang="jsx">
-import { ref, reactive, watch, onMounted } from 'vue';
 import { usePagination, useRequest } from 'alova/client';
+import { ref, watch } from 'vue';
 import { queryStudents, removeStudent } from '../../api/methods';
 import Table from '../../components/Table.vue';
-import { useEvent } from '../../helper';
 import EditorModal from './EditorModal';
 import useScroll from './useScroll';
 
 const studentName = ref('');
 const clsName = ref();
 const detailVisible = ref(false);
-const selectedId = ref();
+let selectedItem = null;
 
 const {
   loading,
@@ -67,20 +66,20 @@ const {
   insert,
   refresh,
   reload,
-  isLastPage,
-  update
+  isLastPage
 } = usePagination((page, pageSize) => queryStudents(page, pageSize, studentName.value, clsName.value), {
   watchingStates: [studentName, clsName],
   initialData: { total: 0, list: [] },
   debounce: [800],
   append: true,
+  initialPageSize: 15,
   total: res => res.total,
   data: res => res.list
 });
 
-const editItem = id => {
+const editItem = row => {
   detailVisible.value = true;
-  selectedId.value = id;
+  selectedItem = row;
 };
 
 const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
@@ -90,8 +89,8 @@ const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStu
 });
 
 const updateList = detail => {
-  if (selectedId.value) {
-    refresh(page.value);
+  if (selectedItem) {
+    refresh(selectedItem);
   } else {
     insert(detail);
   }
@@ -119,7 +118,7 @@ const columns = [
       <div class="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
         <nord-button
           size="s"
-          onClick={() => editItem(row.id)}>
+          onClick={() => editItem(row)}>
           Edit
         </nord-button>
         <nord-button

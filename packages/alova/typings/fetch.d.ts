@@ -3,9 +3,9 @@ import { AlovaRequestAdapter } from '.';
 export type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 
 /**
- * GlobalFetch请求适配器
+ * adapterFetch请求适配器
  */
-export type GlobalFetchRequestAdapter = AlovaRequestAdapter<FetchRequestInit, Response, Headers>;
+export type FetchRequestAdapter = AlovaRequestAdapter<FetchRequestInit, Response, Headers>;
 
-declare function GlobalFetch(): GlobalFetchRequestAdapter;
-export = GlobalFetch;
+declare function adapterFetch(): FetchRequestAdapter;
+export = adapterFetch;

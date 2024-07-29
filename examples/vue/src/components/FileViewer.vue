@@ -30,7 +30,7 @@
       <img
         v-if="docPath"
         title="Show current document"
-        src="/doubt.png"
+        src="/doubt.svg"
         @click="handleToDoc"
         :class="['ml-2 cursor-pointer', showPath ? 'w-12' : 'w-8']" />
     </div>
