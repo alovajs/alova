@@ -70,7 +70,7 @@ export const createClientTokenAuthentication = <
     if (!isVisitorRole && !isLoginRole) {
       await assignToken(method);
     }
-    onBeforeRequest?.(method);
+    return onBeforeRequest?.(method);
   };
 
   const onResponseRefreshToken: ResponseType<SH, AlovaRequestAdapterUnified<RA>> = originalResponded => {
@@ -130,7 +130,7 @@ export const createServerTokenAuthentication = <
     if (!isVisitorRole && !isLoginRole) {
       await assignToken(method);
     }
-    onBeforeRequest?.(method);
+    return onBeforeRequest?.(method);
   };
 
   const onResponseRefreshToken: ResponseType<SH, AlovaRequestAdapterUnified<RA>> = onRespondedHandlers => {

@@ -2,10 +2,13 @@
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import { useRequest } from '@/index';
 import { Alova, createAlova, Method } from 'alova';
+import adapterFetch from 'alova/fetch';
 import VueHook, { type VueHookType } from 'alova/vue';
-import { generateContinuousNumbers, untilCbCalled } from 'root/testUtils';
+import { delay } from 'msw';
+import { generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
 import { MockRequestAdapter, mockRequestAdapter } from '../mockData';
 
+const baseURL = process.env.NODE_BASE_URL as string;
 interface ListResponse {
   total: number;
   list: number[];
@@ -40,7 +43,7 @@ describe('createClientTokenAuthentication', () => {
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
       cacheFor: null,
-      beforeRequest: onAuthRequired(method => {
+      beforeRequest: onAuthRequired(async method => {
         expect(method).toBeInstanceOf(Method);
         beforeRequestFn();
       }),
@@ -96,6 +99,47 @@ describe('createClientTokenAuthentication', () => {
     expect(responseFn).toHaveBeenCalledTimes(2);
     expect(responseErrorFn).toHaveBeenCalledTimes(1);
     expect(completeFn).toHaveBeenCalledTimes(2);
+  });
+
+  test('the callback should support async function', async () => {
+    const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<
+      VueHookType,
+      typeof adapterFetch
+    >({});
+    const alovaInst = createAlova({
+      baseURL,
+      statesHook: VueHook,
+      requestAdapter: adapterFetch(),
+      cacheFor: null,
+      beforeRequest: onAuthRequired(async method => {
+        await delay(10);
+        method.config.params = {
+          a: 7,
+          b: 8
+        };
+      }),
+      responded: onResponseRefreshToken({
+        onSuccess: response => response.json(),
+        onError: async error => {
+          await delay(10);
+          return error.message;
+        }
+      })
+    });
+
+    expect(await alovaInst.Get<Result>('/unit-test')).toStrictEqual({
+      code: 200,
+      msg: '',
+      data: {
+        method: 'GET',
+        params: {
+          a: '7',
+          b: '8'
+        },
+        path: '/unit-test'
+      }
+    });
+    expect(await alovaInst.Get<Result>('/unit-test-error')).toStrictEqual('Failed to fetch');
   });
 
   test('should emit login interceptor when set authRole to `login`', async () => {

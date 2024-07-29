@@ -50,17 +50,12 @@
     "alova": "^3.0.3"
   },
   "dependencies": {
-    "@alova/shared": "workspace:*"
+    "@alova/shared": "workspace:^"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:*",
-    "@alova/scripts": "workspace:*",
-    "alova": "workspace:*",
+    "@alova/mock": "workspace:^",
+    "@alova/scripts": "workspace:^",
+    "alova": "workspace:^",
     "form-data": "^4.0.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }

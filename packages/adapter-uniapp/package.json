@@ -42,19 +42,14 @@
     "typings/*.d.ts"
   ],
   "devDependencies": {
-    "@alova/mock": "workspace:*",
-    "@alova/scripts": "workspace:*",
+    "@alova/mock": "workspace:^",
+    "@alova/scripts": "workspace:^",
     "@dcloudio/types": "^3.4.8",
     "@dcloudio/uni-app": "^3.0.0-3090920231225001",
-    "alova": "workspace:*"
+    "alova": "workspace:^"
   },
   "peerDependencies": {
     "alova": "^3.0.3"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   },
   "dependencies": {
     "@alova/shared": "workspace:^"

@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
-import { Method, createAlova, queryCache } from '@/index';
+import { createAlova, Method, queryCache } from '@/index';
 import adapterFetch from '@/predefine/adapterFetch';
-import { Result, untilReject } from 'root/testUtils';
+import { delay, Result, untilReject } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
 describe('createAlova', () => {
@@ -145,9 +145,7 @@ describe('createAlova', () => {
       cacheLogger: null,
       requestAdapter: adapterFetch(),
       beforeRequest: async method => {
-        await new Promise(resolve => {
-          setTimeout(resolve, 200);
-        });
+        await delay(200);
         method.config.params = {
           a: 7,
           b: 8

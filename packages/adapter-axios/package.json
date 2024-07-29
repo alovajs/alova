@@ -48,19 +48,16 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
+    "alova": "^3.0.3",
     "axios": ">=0.4.0"
   },
-  "dependencies": {
-    "@alova/shared": "workspace:*"
-  },
   "devDependencies": {
-    "@alova/mock": "workspace:*",
-    "@alova/scripts": "workspace:*",
+    "@alova/mock": "workspace:^",
+    "@alova/scripts": "workspace:^",
+    "alova": "workspace:^",
     "form-data": "^4.0.0"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
+  "dependencies": {
+    "@alova/shared": "workspace:^"
   }
 }
