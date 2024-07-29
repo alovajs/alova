@@ -187,7 +187,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.1(alova@3.0.1)
+        version: 2.0.2(alova@3.0.2)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -196,7 +196,7 @@ importers:
         version: 3.2.1
       alova:
         specifier: latest
-        version: 3.0.1
+        version: 3.0.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -251,13 +251,13 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.1(alova@3.0.1)
+        version: 2.0.2(alova@3.0.2)
       '@alova/psc':
         specifier: latest
-        version: 1.0.1(alova@3.0.1)(electron@30.2.0)
+        version: 1.0.2(alova@3.0.2)(electron@30.2.0)
       alova:
         specifier: latest
-        version: 3.0.1
+        version: 3.0.2
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -294,7 +294,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.1(alova@3.0.1)
+        version: 2.0.2(alova@3.0.2)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -303,7 +303,7 @@ importers:
         version: 3.2.1
       alova:
         specifier: latest
-        version: 3.0.1
+        version: 3.0.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -384,9 +384,6 @@ importers:
       '@alova/shared':
         specifier: workspace:*
         version: link:../shared
-      alova:
-        specifier: workspace:*
-        version: link:../alova
       axios:
         specifier: '>=0.4.0'
         version: 1.7.2
@@ -602,22 +599,22 @@ packages:
     peerDependencies:
       alova: ^3.0.0-beta.17
 
-  '@alova/mock@2.0.1':
-    resolution: {integrity: sha512-BUo27mQ32VRsNdBKZf+usFEyzW9wxMOyemZH7/vr2lU7EIRUGHCrEmkayklXPB8wT3+SAOQZBFja762qgMUMJg==}
+  '@alova/mock@2.0.2':
+    resolution: {integrity: sha512-eXvMnaRcVmuOSuvoCnAiBNB//LXk1tf5pGauaQ32Z8t7CHDV1wkpPMjrJz3OAZ7a0O+0YO62+Jz4T5YF6kviGA==}
     peerDependencies:
-      alova: ^3.0.1
+      alova: ^3.0.2
 
-  '@alova/psc@1.0.1':
-    resolution: {integrity: sha512-3Qsb+2QN2v35Kkm5nku3QmqW4XQSWJAMAcV1cDcrDroiu+sHW25F4ZALWrTnd3a/FKStnIwhkSVngBPdQEMoDg==}
+  '@alova/psc@1.0.2':
+    resolution: {integrity: sha512-NeWs7GOKyzTzr22k8y+C3uKjZJ6KzobVRPMca0/p9bBr+MF2+L8mViW/Fmv0ElhX3iUBVVFqLxV9CC6qYbPElQ==}
     peerDependencies:
-      alova: ^3.0.1
+      alova: ^3.0.2
       electron: ^30.1.0
 
   '@alova/shared@1.0.0-beta.12':
     resolution: {integrity: sha512-fiNlM+PtLly1m3sKJMqxAHqqLlL6RndjP679FUkniYX6wKJrALno3fpj6g9M3S4NMaWynGcrzUoFaYJZsXWJ8A==}
 
-  '@alova/shared@1.0.1':
-    resolution: {integrity: sha512-c/Xb0sqNO4jEZ3uusLkMEYDbR2e9ptXxjigxCXwBcjlBle1siVGIrAzlq4cbA37NowG5nLnhsWoCtxISKrkY1A==}
+  '@alova/shared@1.0.2':
+    resolution: {integrity: sha512-Kuf/2I/RxOc6RdgZlGj38fncOgTq7X7+KaYOxpZjjLuwuDh5XErulrXGZI7EX1key07CCuFCUlDUvmasXzBwNQ==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -3011,8 +3008,8 @@ packages:
     resolution: {integrity: sha512-hDdFmThajfsQtjZMLI7+URnIeitW1eYuNcR826azhfg2JuzjhTQBsFXrxY4N06as98B9FaJDy8FhMRRM+72Nrw==}
     engines: {node: '>= 18.0.0'}
 
-  alova@3.0.1:
-    resolution: {integrity: sha512-lsKJ9pBATZkPV18bZxAuBL69kS3cd0kmPWkfq3oI1H7EvlC59e3Pzia6vsYJkSNk2EhqEHd5UaHtrgnuI5FkaA==}
+  alova@3.0.2:
+    resolution: {integrity: sha512-nPPJMcasU24kdWwQrUzEBWVQ0RC09+cIL9uNpB/KM0gUzk2exsJXw/UX+0MYegZWTSSeWDxPT3G+LsJ8UwzQ1w==}
     engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
@@ -7451,21 +7448,21 @@ snapshots:
       '@alova/shared': 1.0.0-beta.12
       alova: 3.0.0-beta.17
 
-  '@alova/mock@2.0.1(alova@3.0.1)':
+  '@alova/mock@2.0.2(alova@3.0.2)':
     dependencies:
-      '@alova/shared': 1.0.1
-      alova: 3.0.1
+      '@alova/shared': 1.0.2
+      alova: 3.0.2
 
-  '@alova/psc@1.0.1(alova@3.0.1)(electron@30.2.0)':
+  '@alova/psc@1.0.2(alova@3.0.2)(electron@30.2.0)':
     dependencies:
-      '@alova/shared': 1.0.1
+      '@alova/shared': 1.0.2
       '@node-ipc/node-ipc': 11.0.3
-      alova: 3.0.1
+      alova: 3.0.2
       electron: 30.2.0
 
   '@alova/shared@1.0.0-beta.12': {}
 
-  '@alova/shared@1.0.1': {}
+  '@alova/shared@1.0.2': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -10517,9 +10514,9 @@ snapshots:
       '@alova/shared': 1.0.0-beta.12
       rate-limiter-flexible: 5.0.3
 
-  alova@3.0.1:
+  alova@3.0.2:
     dependencies:
-      '@alova/shared': 1.0.1
+      '@alova/shared': 1.0.2
       rate-limiter-flexible: 5.0.3
 
   ansi-colors@4.1.3: {}
