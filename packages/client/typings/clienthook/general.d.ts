@@ -11,11 +11,13 @@ import {
   StatesExport
 } from 'alova';
 import { ReactHookExportType } from '../stateshook/react';
+import { SolidHookExportType } from '../stateshook/solid';
 import { SvelteHookExportType } from '../stateshook/svelte';
 import { VueHookExportType } from '../stateshook/vue';
 
 export interface StateMap<T> {
   Vue: VueHookExportType<T>;
+  Solid: SolidHookExportType<T>;
   React: ReactHookExportType<T>;
   Svelte: SvelteHookExportType<T>;
 }

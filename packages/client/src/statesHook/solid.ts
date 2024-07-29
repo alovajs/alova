@@ -1,7 +1,7 @@
-import { createSyncOnceRunner } from '@alova/shared/function';
-import { forEach } from '@alova/shared/vars';
+import { createSyncOnceRunner, isFn } from '@alova/shared/function';
+import { forEach, setTimeoutFn } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { Accessor, createEffect, createSignal, onCleanup, Setter } from 'solid-js';
+import { Accessor, createEffect, createMemo, createRenderEffect, createSignal, on, onCleanup, Setter } from 'solid-js';
 import { SolidHookExportType } from '~/typings/stateshook/solid';
 
 // 定义类型
@@ -10,57 +10,62 @@ type SolidState<D> = [Accessor<D>, Setter<D>];
 export default {
   name: 'Solid',
   create: <D>(data: D): SolidState<D> => createSignal(data),
+  export: <D>(state: SolidState<D>): Accessor<D> => state[0],
   dehydrate: <D>(state: SolidState<D>): D => state[0](),
   // 更新状态
   update: <D>(newVal: D, state: SolidState<D>) => {
-    state[1](() => newVal); // 确保 newVal 不是函数类型
+    queueMicrotask(() => {
+      state[1](() => (isFn(newVal) ? newVal() : newVal)); // 确保 newVal 不是函数类型
+      // state[1](newVal as Exclude<D, Function>);
+    });
   },
-  effectRequest: ({
-    handler,
-    removeStates,
-    immediate,
-    watchingStates = []
-  }: {
-    handler: (index?: number) => void;
-    removeStates: () => void;
-    immediate: boolean;
-    watchingStates: SolidState<any>[];
-  }) => {
+  effectRequest: ({ handler, removeStates, immediate, watchingStates = [] }) => {
     const syncRunner = createSyncOnceRunner();
-
-    createEffect(() => {
-      if (immediate) {
-        handler();
-      }
-    });
-
-    forEach(watchingStates, (state: any, i?: number) => {
-      createEffect(() => {
-        state[0](); // getter触发effect
-        syncRunner(() => {
-          handler(i);
-        });
+    // 判断是否在组件内部使用
+    const isComponent = typeof onCleanup === 'function';
+    if (isComponent) {
+      // 组件卸载时移除对应状态
+      onCleanup(removeStates);
+      // 组件挂载时立即执行 handler
+      createRenderEffect(() => {
+        immediate && handler();
       });
-    });
+    } else {
+      // 非组件内部使用，使用定时器延迟执行
+      setTimeoutFn(() => {
+        immediate && handler();
+      });
+    }
 
-    // 在组件卸载时移除对应状态
-    onCleanup(removeStates);
-  },
-  computed: <D>(getter: () => D): Accessor<D> => {
-    const [value, setValue] = createSignal(getter());
-    createEffect(() => {
-      setValue(() => getter()); // 包装成函数
-    });
-    return value;
-  },
-  watch: (states: SolidState<any>[], callback: () => void) => {
-    createEffect(() => {
-      states.forEach(state => state[0]()); // 访问所有getter触发effect
-      callback();
+    forEach(watchingStates, (state: Accessor<unknown>, i?: number) => {
+      createEffect(
+        on(
+          state,
+          () =>
+            syncRunner(() => {
+              handler(i);
+            }),
+          { defer: true }
+        )
+      );
     });
   },
+  computed: (getter, depList) => {
+    const memo = createMemo(getter, depList);
+    return memo;
+  },
+  watch: (states: Accessor<any>[], callback) => {
+    createEffect(
+      on(
+        states.map(state => state),
+        callback,
+        { defer: true }
+      )
+    );
+  },
+
   onMounted: (callback: () => void) => {
-    createEffect(() => {
+    createRenderEffect(() => {
       callback();
     });
   },

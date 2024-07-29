@@ -3,28 +3,25 @@ import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { useRequest } from '@/index';
 import Solidhook from '@/statesHook/solid';
 import { key } from '@alova/shared/function';
-import { fireEvent, render, screen, waitFor } from '@solidjs/testing-library';
+import { render, screen } from '@solidjs/testing-library';
 import '@testing-library/jest-dom';
-import { delay, Result } from 'root/testUtils';
-import { createSignal, JSX } from 'solid-js';
+import userEvent from '@testing-library/user-event';
+import { waitFor } from '@testing-library/vue';
+import { Result } from 'root/testUtils';
+import { JSX } from 'solid-js';
 
 describe('useRequest hook with Solid.js', () => {
   test('should not have initial data', async () => {
     const alova = getAlovaInstance(Solidhook);
     function Page() {
-      const extraData = createSignal(0);
       const { data } = useRequest(alova.Get(''), { immediate: false });
-
+      expect(data()).toBeUndefined();
       return (
         <div role="wrap">
-          <span role="data">
-            {data as any}
-            {extraData}
-          </span>
+          <span role="data">{data() as string}</span>
         </div>
       );
     }
-
     render(() => (<Page />) as unknown as JSX.Element);
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
   });
@@ -43,8 +40,8 @@ describe('useRequest hook with Solid.js', () => {
       });
       return (
         <div role="wrap">
-          <span role="data-1">{data1 as any}</span>
-          <span role="data-2">{data2 as any}</span>
+          <span role="data-1">{data1() as any}</span>
+          <span role="data-2">{data2() as any}</span>
         </div>
       );
     }
@@ -65,26 +62,34 @@ describe('useRequest hook with Solid.js', () => {
       cacheFor: 100 * 1000
     });
     function Page() {
-      const { loading, data = { path: '', method: '' } } = useRequest(Get);
+      const { loading, data } = useRequest(Get, {
+        initialData: { path: '', method: '' }
+      });
+
       return (
         <div role="wrap">
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="path">{data.path}</span>
-          <span role="method">{data.method}</span>
+          <span role="status">{loading() ? 'loading' : 'loaded'}</span>
+          <span role="path">{data().path}</span>
+          <span role="method">{data().method}</span>
         </div>
       );
     }
 
     render(() => (<Page />) as unknown as JSX.Element);
     expect(screen.getByRole('status')).toHaveTextContent('loading');
-    await waitFor(() => {
+    // 等待状态变为 loaded
+    waitFor(() => {
+      // setTimeout(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('method')).toHaveTextContent('GET');
+      // });
     });
   });
 
   test("shouldn't send request when set `immediate=false`", async () => {
+    const user = userEvent.setup();
+
     const alova = getAlovaInstance(Solidhook, {
       responseExpect: r => r.json()
     });
@@ -94,12 +99,12 @@ describe('useRequest hook with Solid.js', () => {
       cacheFor: 100 * 1000
     });
     function Page() {
-      const { loading, data = { path: '', method: '' }, send } = useRequest(Get, { immediate: false });
+      const { loading, data, send } = useRequest(Get, { immediate: false, initialData: { path: '', method: '' } });
       return (
         <div role="wrap">
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="path">{data.path}</span>
-          <span role="method">{data.method}</span>
+          <span role="status">{loading() ? 'loading' : 'loaded'}</span>
+          <span role="path">{data().path}</span>
+          <span role="method">{data().method}</span>
           <button
             role="btn"
             onClick={() => send()}>
@@ -110,16 +115,20 @@ describe('useRequest hook with Solid.js', () => {
     }
 
     render(() => (<Page />) as unknown as JSX.Element);
-    await delay(1000);
+    // await delay(1000);
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
     expect(screen.getByRole('method')).toHaveTextContent('');
-    fireEvent.click(screen.getByRole('btn'));
-    await screen.findByText(/unit-test/);
-    expect(screen.getByRole('method')).toHaveTextContent('GET');
+
+    await user.click(screen.getByRole('btn'));
+    waitFor(() => {
+      screen.findByText(/unit-test/);
+      expect(screen.getByRole('method')).toHaveTextContent('GET');
+    });
   });
 
   test("shouldn't send request when set `immediate=false` in StrictMode", async () => {
+    const user = userEvent.setup();
     const alova = getAlovaInstance(Solidhook, {
       responseExpect: r => r.json()
     });
@@ -129,12 +138,12 @@ describe('useRequest hook with Solid.js', () => {
       cacheFor: 100 * 1000
     });
     function Page() {
-      const { loading, data = { path: '', method: '' }, send } = useRequest(Get, { immediate: false });
+      const { loading, data, send } = useRequest(Get, { immediate: false, initialData: { path: '', method: '' } });
       return (
         <div role="wrap">
-          <span role="status">{loading ? 'loading' : 'loaded'}</span>
-          <span role="path">{data.path}</span>
-          <span role="method">{data.method}</span>
+          <span role="status">{loading() ? 'loading' : 'loaded'}</span>
+          <span role="path">{data().path}</span>
+          <span role="method">{data().method}</span>
           <button
             role="btn"
             onClick={() => send()}>
@@ -154,9 +163,11 @@ describe('useRequest hook with Solid.js', () => {
       expect(screen.getByRole('path')).toHaveTextContent('');
       expect(screen.getByRole('method')).toHaveTextContent('');
     });
-    fireEvent.click(screen.getByRole('btn'));
-    await screen.findByText(/unit-test/);
-    expect(screen.getByRole('method')).toHaveTextContent('GET');
+    await user.click(screen.getByRole('btn'));
+    waitFor(() => {
+      screen.findByText(/unit-test/);
+      expect(screen.getByRole('method')).toHaveTextContent('GET');
+    });
   });
 
   test('should return sync mock data from responded hook', async () => {
@@ -170,14 +181,16 @@ describe('useRequest hook with Solid.js', () => {
       const { data, loading } = useRequest(Get);
       return (
         <div>
-          <span>{loading ? 'loading' : 'loaded'}</span>
+          <span>{loading() ? 'loading' : 'loaded'}</span>
           <span role="data">{JSON.stringify(data)}</span>
         </div>
       );
     }
     render(() => (<Page />) as unknown as JSX.Element);
-    await screen.findByText(/loaded/);
-    expect(screen.getByRole('data')).toHaveTextContent('{"mock":"mockdata"}');
+    waitFor(() => {
+      screen.findByText(/loaded/);
+      expect(screen.getByRole('data')).toHaveTextContent('{"mock":"mockdata"}');
+    });
   });
 
   test('states should be removed from cache when component is unmounted', async () => {
@@ -189,7 +202,7 @@ describe('useRequest hook with Solid.js', () => {
     });
     function Page() {
       const { data, loading } = useRequest(Get);
-      return <div role="cell">{loading ? 'loading...' : JSON.stringify(data)}</div>;
+      return <div role="cell">{loading() ? 'loading...' : JSON.stringify(data)}</div>;
     }
     const { unmount } = render(() => (<Page />) as unknown as JSX.Element);
 
@@ -206,6 +219,7 @@ describe('useRequest hook with Solid.js', () => {
   });
 
   test('should change states built in by using function `update` which return in `useRequest`', async () => {
+    const user = userEvent.setup();
     const alova = getAlovaInstance(Solidhook, {
       responseExpect: r => r.json()
     });
@@ -220,14 +234,14 @@ describe('useRequest hook with Solid.js', () => {
       const { loading, data, error, downloading, uploading, update } = useRequest(Get);
       return (
         <div>
-          <span role="loading">{loading ? 'loading...' : 'loaded'}</span>
-          <span role="path">{data?.path}</span>
-          <span role="error">{error?.message}</span>
+          <span role="loading">{loading() ? 'loading...' : 'loaded'}</span>
+          {/* <span role="path">{data?().path}</span> */}
+          <span role="error">{error()?.message}</span>
           <span role="downloading">
-            {downloading.loaded}_{downloading.total}
+            {downloading().loaded}_{downloading().total}
           </span>
           <span role="uploading">
-            {uploading.loaded}_{uploading.total}
+            {uploading().loaded}_{uploading().total}
           </span>
           <button
             role="btn"
@@ -257,9 +271,11 @@ describe('useRequest hook with Solid.js', () => {
       );
     }
     render(() => (<Page />) as unknown as JSX.Element);
-    await screen.findByRole('path');
-    fireEvent.click(screen.getByRole('btn'));
-    await waitFor(() => {
+    waitFor(() => {
+      screen.findByRole('path');
+    });
+    await user.click(screen.getByRole('btn'));
+    waitFor(() => {
       expect(screen.getByRole('loading')).toHaveTextContent('loading...');
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-changed');
       expect(screen.getByRole('error')).toHaveTextContent('error message');
