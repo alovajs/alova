@@ -95,11 +95,12 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
   const response = async () => {
     const { beforeRequest = noop, responded, requestAdapter, cacheLogger } = getOptions(methodInstance);
     const methodKey = getMethodInternalKey(methodInstance);
+
     const { s: toStorage, t: tag, m: cacheMode, e: expireMilliseconds } = getLocalCacheConfigParam(methodInstance);
     const { id, l1Cache, l2Cache, snapshots } = getContext(methodInstance);
     // 获取受控缓存或非受控缓存
     const { cacheFor } = getConfig(methodInstance);
-    const { baseURL, url: newUrl, type, data, hitSource: methodHitSource } = methodInstance;
+    const { hitSource: methodHitSource } = methodInstance;
 
     // 如果当前method设置了受控缓存，则看是否有自定义的数据
     let cachedResponse = await (isFn(cacheFor)
@@ -121,11 +122,13 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
     }
 
     // 克隆method作为参数传给beforeRequest，防止多次使用原method实例请求时产生副作用
+    // 放在` let cachedResponse = await ...`之后，解决在method.send中先赋值promise给method实例的问题，否则在clonedMethod中promise为undefined
     const clonedMethod = cloneMethod(methodInstance);
 
     // 发送请求前调用钩子函数
     // beforeRequest支持同步函数和异步函数
     await beforeRequest(clonedMethod);
+    const { baseURL, url: newUrl, type, data } = clonedMethod;
     const { params = {}, headers = {}, transform = $self, shareRequest } = getConfig(clonedMethod);
     const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
     let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
