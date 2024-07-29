@@ -26,9 +26,9 @@ const cloneFormData = <T>(form: T): T => {
 };
 
 export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
-  handler: FormHookHandler<AG, FormData | undefined>,
+  handler: FormHookHandler<AG, FormData>,
   config: FormHookConfig<AG, FormData> = {}
-) => {
+): FormExposure<AG, FormData> => {
   const typedSharedStates = sharedStates as Record<
     ID,
     {
@@ -69,7 +69,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   );
   // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
   const isCreateShardState = useFlag$(false);
-  const originalHookProvider = useRequest((...args: any[]) => methodHandler(form.v, ...args), {
+  const originalHookProvider = useRequest((...args: any[]) => methodHandler(form.v as FormData, ...args), {
     ...config,
     __referingObj: referingObject,
 

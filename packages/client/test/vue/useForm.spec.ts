@@ -100,7 +100,7 @@ describe('vue => useForm', () => {
     onRestore(restoreMockHandler);
 
     await untilCbCalled(setTimeout, 100);
-    expect(restoreMockHandler).not.toBeCalled(); // 没有缓存不会触发onRestore
+    expect(restoreMockHandler).not.toHaveBeenCalled(); // 没有缓存不会触发onRestore
 
     // storageKey会在useForm被调用时同步生成
     const methodStorageKey = getStoragedKey(poster(initialForm));
@@ -169,7 +169,7 @@ describe('vue => useForm', () => {
       name: 'Hong',
       age: '22'
     };
-    const { form, reset, updateForm } = useForm(poster, {
+    const { form, reset, updateForm } = useForm(form => poster(form), {
       initialForm
     });
 
