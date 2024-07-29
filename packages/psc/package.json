@@ -57,13 +57,13 @@
     "dist"
   ],
   "dependencies": {
-    "@alova/shared": "workspace:*",
+    "@alova/shared": "workspace:^",
     "@node-ipc/node-ipc": "^11.0.3"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:*",
+    "@alova/scripts": "workspace:^",
     "@types/node-ipc": "^9.2.3",
-    "alova": "workspace:*",
+    "alova": "workspace:^",
     "electron": "^30.1.0"
   },
   "peerDependencies": {

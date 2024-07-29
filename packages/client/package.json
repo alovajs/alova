@@ -40,13 +40,13 @@
     "alova": "^3.0.3"
   },
   "dependencies": {
-    "@alova/shared": "workspace:*"
+    "@alova/shared": "workspace:^"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:*",
-    "@alova/scripts": "workspace:*",
+    "@alova/mock": "workspace:^",
+    "@alova/scripts": "workspace:^",
     "@types/eventsource": "^1.1.15",
-    "alova": "workspace:*",
+    "alova": "workspace:^",
     "eventsource": "^2.0.2"
   },
   "config": {

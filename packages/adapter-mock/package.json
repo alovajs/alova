@@ -42,10 +42,10 @@
     "alova": "^3.0.3"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:*",
-    "alova": "workspace:*"
+    "@alova/scripts": "workspace:^",
+    "alova": "workspace:^"
   },
   "dependencies": {
-    "@alova/shared": "workspace:*"
+    "@alova/shared": "workspace:^"
   }
 }

@@ -52,12 +52,12 @@
     "axios": ">=0.4.0"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:*",
-    "@alova/scripts": "workspace:*",
-    "alova": "workspace:*",
+    "@alova/mock": "workspace:^",
+    "@alova/scripts": "workspace:^",
+    "alova": "workspace:^",
     "form-data": "^4.0.0"
   },
   "dependencies": {
-    "@alova/shared": "workspace:*"
+    "@alova/shared": "workspace:^"
   }
 }
