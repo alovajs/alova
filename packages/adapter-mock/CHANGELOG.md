@@ -1,5 +1,15 @@
 # @alova/mock
 
+## 2.0.3
+
+### Patch Changes
+
+- [#486](https://github.com/alovajs/alova/pull/486) [`e0b0f48`](https://github.com/alovajs/alova/commit/e0b0f48c17c5d2fc9956588944f471e4c99143eb) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - update local deps value
+
+- Updated dependencies [[`e0b0f48`](https://github.com/alovajs/alova/commit/e0b0f48c17c5d2fc9956588944f471e4c99143eb), [`e0b0f48`](https://github.com/alovajs/alova/commit/e0b0f48c17c5d2fc9956588944f471e4c99143eb)]:
+  - alova@3.0.4
+  - @alova/shared@1.0.3
+
 ## 2.0.2
 
 ### Patch Changes
