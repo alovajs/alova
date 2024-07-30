@@ -1,23 +1,18 @@
-import { createSyncOnceRunner, isFn } from '@alova/shared/function';
+import { createSyncOnceRunner, isFn, noop } from '@alova/shared/function';
 import { forEach, setTimeoutFn } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { Accessor, createEffect, createMemo, createRenderEffect, createSignal, on, onCleanup, Setter } from 'solid-js';
+import { Accessor, createEffect, createMemo, createRenderEffect, createSignal, on, onCleanup } from 'solid-js';
 import { SolidHookExportType } from '~/typings/stateshook/solid';
 
 // 定义类型
-type SolidState<D> = [Accessor<D>, Setter<D>];
-
 export default {
   name: 'Solid',
-  create: <D>(data: D): SolidState<D> => createSignal(data),
-  export: <D>(state: SolidState<D>): Accessor<D> => state[0],
-  dehydrate: <D>(state: SolidState<D>): D => state[0](),
+  create: data => createSignal(data),
+  export: state => state[0],
+  dehydrate: state => state[0](),
   // 更新状态
-  update: <D>(newVal: D, state: SolidState<D>) => {
-    queueMicrotask(() => {
-      state[1](() => (isFn(newVal) ? newVal() : newVal)); // 确保 newVal 不是函数类型
-      // state[1](newVal as Exclude<D, Function>);
-    });
+  update: (newVal, state) => {
+    state[1](() => (isFn(newVal) ? newVal() : newVal)); // 确保 newVal 不是函数类型
   },
   effectRequest: ({ handler, removeStates, immediate, watchingStates = [] }) => {
     const syncRunner = createSyncOnceRunner();
@@ -37,7 +32,7 @@ export default {
       });
     }
 
-    forEach(watchingStates, (state: Accessor<unknown>, i?: number) => {
+    forEach(watchingStates, (state: Accessor<unknown>, i) => {
       createEffect(
         on(
           state,
@@ -50,11 +45,8 @@ export default {
       );
     });
   },
-  computed: (getter, depList) => {
-    const memo = createMemo(getter, depList);
-    return memo;
-  },
-  watch: (states: Accessor<any>[], callback) => {
+  computed: getter => [createMemo(getter), noop],
+  watch: (states, callback) => {
     createEffect(
       on(
         states.map(state => state),
@@ -64,12 +56,10 @@ export default {
     );
   },
 
-  onMounted: (callback: () => void) => {
-    createRenderEffect(() => {
-      callback();
-    });
+  onMounted: callback => {
+    createEffect(callback);
   },
-  onUnmounted: (callback: () => void) => {
+  onUnmounted: callback => {
     onCleanup(callback);
   }
 } as StatesHook<SolidHookExportType<unknown>>;
