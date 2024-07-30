@@ -336,8 +336,8 @@ importers:
   examples/vue:
     dependencies:
       '@alova/mock':
-        specifier: beta
-        version: 2.0.0-beta.14(alova@3.0.0-beta.17)
+        specifier: latest
+        version: 2.0.3(alova@3.0.4)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -345,8 +345,8 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1
       alova:
-        specifier: beta
-        version: 3.0.0-beta.17
+        specifier: latest
+        version: 3.0.4
       trix:
         specifier: ^2.1.3
         version: 2.1.3
@@ -599,15 +599,15 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@alova/mock@2.0.0-beta.14':
-    resolution: {integrity: sha512-qO6eGeWjs7S2vM8XDmtMyhDx1Anld2s0IB4coowUkMcP4uI5TrHMVsY0VmEJtT6yGD3bImTkXlUlqnduTSV5rQ==}
-    peerDependencies:
-      alova: ^3.0.0-beta.17
-
   '@alova/mock@2.0.2':
     resolution: {integrity: sha512-eXvMnaRcVmuOSuvoCnAiBNB//LXk1tf5pGauaQ32Z8t7CHDV1wkpPMjrJz3OAZ7a0O+0YO62+Jz4T5YF6kviGA==}
     peerDependencies:
       alova: ^3.0.2
+
+  '@alova/mock@2.0.3':
+    resolution: {integrity: sha512-fXghKRbbzc8dMlMowiGeoIiJa+gUxiYR65GomAsSKDz5WM/nmZLT7lJOfzsBJ7gIbeFpevglckOcfY0MSnBA5A==}
+    peerDependencies:
+      alova: ^3.0.4
 
   '@alova/psc@1.0.2':
     resolution: {integrity: sha512-NeWs7GOKyzTzr22k8y+C3uKjZJ6KzobVRPMca0/p9bBr+MF2+L8mViW/Fmv0ElhX3iUBVVFqLxV9CC6qYbPElQ==}
@@ -615,11 +615,11 @@ packages:
       alova: ^3.0.2
       electron: ^30.1.0
 
-  '@alova/shared@1.0.0-beta.12':
-    resolution: {integrity: sha512-fiNlM+PtLly1m3sKJMqxAHqqLlL6RndjP679FUkniYX6wKJrALno3fpj6g9M3S4NMaWynGcrzUoFaYJZsXWJ8A==}
-
   '@alova/shared@1.0.2':
     resolution: {integrity: sha512-Kuf/2I/RxOc6RdgZlGj38fncOgTq7X7+KaYOxpZjjLuwuDh5XErulrXGZI7EX1key07CCuFCUlDUvmasXzBwNQ==}
+
+  '@alova/shared@1.0.3':
+    resolution: {integrity: sha512-tkqDTC+BM3uuUYJtO7aha3kRO1NWKsVnucw1x1rTPAGeRcCQGLIccxfNFyZERpKe9bcYlwtTYj+u0Pzio/QlDg==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -2907,12 +2907,12 @@ packages:
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
-  alova@3.0.0-beta.17:
-    resolution: {integrity: sha512-hDdFmThajfsQtjZMLI7+URnIeitW1eYuNcR826azhfg2JuzjhTQBsFXrxY4N06as98B9FaJDy8FhMRRM+72Nrw==}
-    engines: {node: '>= 18.0.0'}
-
   alova@3.0.3:
     resolution: {integrity: sha512-h/R70Ph3skrj/u+mIXnc6+rimPEVMPjHOcCrCv1v9m65WQgB4GIyCgfLvQe7LPgBOnAXbRYhGcquadzNGq9W/w==}
+    engines: {node: '>= 18.0.0'}
+
+  alova@3.0.4:
+    resolution: {integrity: sha512-v5pjrHTEfC2OJSTWpH5vgYQpZCrUk4o+QAkcxU4c/Yghw6lkRBw8W/TrcdWdP7Jz00oJjizH8CIEwMsf3vhWtQ==}
     engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
@@ -7358,15 +7358,15 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alova/mock@2.0.0-beta.14(alova@3.0.0-beta.17)':
-    dependencies:
-      '@alova/shared': 1.0.0-beta.12
-      alova: 3.0.0-beta.17
-
   '@alova/mock@2.0.2(alova@3.0.3)':
     dependencies:
       '@alova/shared': 1.0.2
       alova: 3.0.3
+
+  '@alova/mock@2.0.3(alova@3.0.4)':
+    dependencies:
+      '@alova/shared': 1.0.3
+      alova: 3.0.4
 
   '@alova/psc@1.0.2(alova@3.0.3)(electron@30.3.1)':
     dependencies:
@@ -7375,9 +7375,9 @@ snapshots:
       alova: 3.0.3
       electron: 30.3.1
 
-  '@alova/shared@1.0.0-beta.12': {}
-
   '@alova/shared@1.0.2': {}
+
+  '@alova/shared@1.0.3': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -10361,14 +10361,14 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alova@3.0.0-beta.17:
-    dependencies:
-      '@alova/shared': 1.0.0-beta.12
-      rate-limiter-flexible: 5.0.3
-
   alova@3.0.3:
     dependencies:
       '@alova/shared': 1.0.2
+      rate-limiter-flexible: 5.0.3
+
+  alova@3.0.4:
+    dependencies:
+      '@alova/shared': 1.0.3
       rate-limiter-flexible: 5.0.3
 
   ansi-colors@4.1.3: {}
