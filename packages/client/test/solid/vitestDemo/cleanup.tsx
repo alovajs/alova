@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { onCleanup } from 'solid-js';
-import { cleanup, render } from '..';
+import { cleanup, render } from './index';
 
 test('cleans up the document', () => {
   const spy = vi.fn();
