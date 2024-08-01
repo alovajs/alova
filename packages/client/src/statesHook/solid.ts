@@ -47,9 +47,10 @@ export default {
   },
   computed: getter => [createMemo(getter), noop],
   watch: (states, callback) => {
+    const curStates = Array.isArray(states) ? states : [states];
     createEffect(
       on(
-        states.map(state => state),
+        curStates.map(state => state),
         callback,
         { defer: true }
       )

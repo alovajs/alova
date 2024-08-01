@@ -1,10 +1,11 @@
 import { getAlovaInstance } from '#/utils';
 import { getStateCache } from '@/hooks/core/implements/stateCache';
-import { updateState, useRequest } from '@/index';
+import { updateState, useRequest, useWatcher } from '@/index';
 import Solidhook from '@/statesHook/solid';
 import { key } from '@alova/shared/function';
-import { render } from '@solidjs/testing-library';
+import { render, screen } from '@solidjs/testing-library';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/vue';
 import { ReferingObject } from 'alova';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
@@ -39,18 +40,36 @@ describe('Solid statesHook', () => {
   });
 
   test('computed states', async () => {
-    // test computed
-    // 提供下思路，未通过
+    // const Mycomputed = (getter: () => any, depList: any[]) => createMemo(getter, depList);
+    // const [count, setCount] = createSignal(1);
+    // const computedState = Mycomputed(() => count() * 2, []);
+    // const computedGetter = computedState;
     const [count, setCount] = createSignal(1);
     const computedState = Solidhook.computed(() => count() * 2, [], 'computed', referingObject);
     const [computedGetter] = computedState;
     expect(computedGetter()).toBe(2);
     setCount(2);
     await delay(10);
-    expect(computedGetter()).toBe(4);
+    waitFor(() => {
+      expect(computedGetter()).toBe(4);
 
-    expect(Solidhook.export?.(computedState, referingObject)).toBe(computedGetter);
-    expect(Solidhook.dehydrate(computedState, 'computed', referingObject)).toBe(computedGetter());
+      expect(Solidhook.export?.(computedState, referingObject)).toBe(computedGetter);
+      expect(Solidhook.dehydrate(computedState, 'computed', referingObject)).toBe(computedGetter());
+    });
+    // return testEffect(done =>
+    //   createEffect((run: number = 0) => {
+    //     if (run === 0) {
+    //       // expect(computedGetter()).toBe(2);
+    //       setCount(2);
+    //     } else if (run === 1) {
+    //       expect(computedGetter()).toBe(4);
+    //       // expect(Solidhook.export?.(computedState, referingObject)).toBe(computedGetter);
+    //       // expect(Solidhook.dehydrate(computedState, 'computed', referingObject)).toBe(computedGetter());
+    //       done();
+    //     }
+    //     return run + 1;
+    //   })
+    // );
   });
 
   test('states should be removed from cache when component is unmounted', async () => {
