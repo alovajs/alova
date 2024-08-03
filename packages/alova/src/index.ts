@@ -1,5 +1,5 @@
-export { default as Method } from './Method';
 export { createAlova } from './alova';
 export * from './functions/manipulateCache';
-export { default as globalConfig } from './globalConfig';
+export { default as globalConfig, globalConfigMap } from './globalConfig';
+export { default as Method } from './Method';
 export { promiseStatesHook } from './utils/helper';

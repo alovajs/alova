@@ -54,8 +54,10 @@ export const defineProperty = (o: object, key: string | symbol, value: any, isDe
 // 是否为服务端运行，node和bun通过process判断，deno通过Deno判断
 // 部分框架（如支付宝和 uniapp）会注入 process 对象作为全局变量使用
 // 因此使用服务端独有的 process.cwd 函数作为判断依据
-export const isSSR =
-  typeof process !== undefStr ? typeof (process as any).cwd === 'function' : typeof Deno !== undefStr;
+export const defaultIsSSR =
+  typeof window === undefStr &&
+  (typeof process !== undefStr ? typeof (process as any).cwd === 'function' : typeof Deno !== undefStr);
+export const isSSR = defaultIsSSR;
 
 /** cache mode */
 // only cache in memory, it's default option

@@ -3,9 +3,14 @@
 const undefStr = 'undefined';
 const MockGlobal: any = {};
 const isSSR = () =>
-  typeof MockGlobal.process !== undefStr
+  typeof MockGlobal.window === undefStr &&
+  (typeof MockGlobal.process !== undefStr
     ? typeof MockGlobal.process.cwd === 'function'
-    : typeof MockGlobal.Deno !== undefStr;
+    : typeof MockGlobal.Deno !== undefStr);
+
+const setGlobalWindow = (window: any) => {
+  MockGlobal.window = window;
+};
 
 const setGlobalProcess = (process: any) => {
   MockGlobal.process = process;
@@ -16,6 +21,7 @@ const setGlobalDeno = (deno: any) => {
 
 // Mock the global process and Deno objects before each test
 beforeEach(() => {
+  delete MockGlobal.window;
   delete MockGlobal.process;
   delete MockGlobal.Deno;
 });
@@ -24,6 +30,14 @@ describe('isSSR', () => {
   it('should return false in browser environment', () => {
     // Browser: process is undefined, Deno is undefined
     setGlobalProcess(undefined);
+    setGlobalDeno(undefined);
+    expect(isSSR()).toBeFalsy();
+  });
+
+  it('should return false in codesandbox environment', () => {
+    // Browser: process is undefined, Deno is undefined
+    setGlobalWindow({});
+    setGlobalProcess({ cwd: () => 'test' });
     setGlobalDeno(undefined);
     expect(isSSR()).toBeFalsy();
   });

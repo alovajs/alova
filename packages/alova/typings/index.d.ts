@@ -698,6 +698,12 @@ export interface AlovaGlobalConfig {
    * @default 'global'
    */
   autoHitCache?: 'global' | 'self' | 'close';
+  /**
+   * whether the app is running in the server
+   * If not set or set to `undefined`, alova determines whether it is now running in the server
+   * @default undefined
+   */
+  ssr?: boolean | undefined;
 }
 
 // ************ exports ***************
@@ -812,6 +818,8 @@ export declare function queryCache<AG extends AlovaGenerics>(
  * ```
  */
 export declare function hitCacheBySource<AG extends AlovaGenerics>(sourceMethod: Method<AG>): Promise<void>;
+
+export declare const globalConfigMap: Required<AlovaGlobalConfig>;
 
 /**
  * Set global configuration
