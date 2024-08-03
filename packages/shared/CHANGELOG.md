@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.4
+
+### Patch Changes
+
+- [#490](https://github.com/alovajs/alova/pull/490) [`5b381b4`](https://github.com/alovajs/alova/commit/5b381b4c4cbfd802f8c80f17ad373b094e4606df) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: ssr in codesandbox
+
 ## 1.0.3
 
 ### Patch Changes
