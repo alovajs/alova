@@ -1,7 +1,7 @@
 import useRequest from '@/hooks/core/useRequest';
 import { noop, statesHookHelper } from '@alova/shared/function';
-import { falseValue, isSSR, trueValue } from '@alova/shared/vars';
-import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { falseValue, trueValue } from '@alova/shared/vars';
+import { AlovaGenerics, globalConfigMap, Method, promiseStatesHook } from 'alova';
 import {
   AlovaMethodHandler,
   AutoRequestHookConfig,
@@ -69,7 +69,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
   let offVisiblity = noop;
   let offPolling = noop;
   onMounted(() => {
-    if (!isSSR) {
+    if (!globalConfigMap.ssr) {
       offNetwork = enableNetwork ? useAutoRequest.onNetwork(notify, config) : offNetwork;
       offFocus = enableFocus ? useAutoRequest.onFocus(notify, config) : offFocus;
       offVisiblity = enableVisibility ? useAutoRequest.onVisibility(notify, config) : offVisiblity;

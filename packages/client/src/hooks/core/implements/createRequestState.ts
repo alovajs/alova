@@ -12,18 +12,9 @@ import {
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
-import {
-  PromiseCls,
-  falseValue,
-  forEach,
-  isArray,
-  isSSR,
-  promiseCatch,
-  trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
+import { PromiseCls, falseValue, forEach, isArray, promiseCatch, trueValue, undefinedValue } from '@alova/shared/vars';
 import type { AlovaGlobalCacheAdapter, FrontRequestState, Method, Progress } from 'alova';
-import { AlovaGenerics, promiseStatesHook } from 'alova';
+import { AlovaGenerics, globalConfigMap, promiseStatesHook } from 'alova';
 import {
   AlovaCompleteEvent,
   AlovaErrorEvent,
@@ -161,7 +152,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   );
 
   // 在服务端渲染时不发送请求
-  if (!isSSR) {
+  if (!globalConfigMap.ssr) {
     effectRequest({
       handler:
         // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态

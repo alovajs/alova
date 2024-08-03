@@ -1,4 +1,5 @@
-import { STORAGE_RESTORE, isSSR, len } from '@alova/shared/vars';
+import { globalConfigMap } from '@/globalConfig';
+import { STORAGE_RESTORE, len } from '@alova/shared/vars';
 import { CacheMode } from '~/typings';
 import { Method } from '..';
 
@@ -16,7 +17,7 @@ export default (response: any, methodInstance: Method, cacheMode: CacheMode, tag
   const labelStyle = '\x1B[32m%s\x1B[39m';
   const startSep = ` [HitCache]${url} `;
   const endSepFn = () => Array(len(startSep) + 1).join('^');
-  if (isSSR) {
+  if (globalConfigMap.ssr) {
     log(hdStyle, startSep);
     log(labelStyle, ' Cache ', response);
     log(labelStyle, ' Mode  ', cacheMode);
