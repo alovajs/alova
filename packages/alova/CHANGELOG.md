@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.6
+
+### Patch Changes
+
+- [#494](https://github.com/alovajs/alova/pull/494) [`5b9ac16`](https://github.com/alovajs/alova/commit/5b9ac161025764272b19ea30becb76b564af11e1) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - compatible with preact when using react
+
 ## 3.0.5
 
 ### Patch Changes
