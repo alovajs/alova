@@ -10,7 +10,7 @@ export type ReactHookExportType<T> = StatesExportHelper<{
   ComputedExport: T;
 }>;
 
-type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
+export type ReactState<D> = [D, Dispatch<SetStateAction<D>>, D?];
 export type ReactHookType = StatesHook<ReactHookExportType<unknown>>;
 declare const reactHook: ReactHookType;
 

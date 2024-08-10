@@ -1,11 +1,10 @@
 import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
 import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ReactHookExportType } from '~/typings/stateshook/react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactHookExportType, ReactState } from '~/typings/stateshook/react';
 
-type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
-const stateToData = <D>([state]: ReactState<D>) => state;
+const stateToData = <D>(reactState: ReactState<D>) => (2 in reactState ? reactState[2] : reactState[0]);
 const refCurrent = <T>(ref: MutableRefObject<T>) => ref.current;
 const setRef = <T>(ref: MutableRefObject<T>, newVal: T) => {
   ref.current = newVal;
@@ -19,7 +18,7 @@ export default {
   dehydrate: stateToData,
   update: (newVal, state) => {
     // update value synchronously so that we can access the new value synchronously.
-    state[0] = newVal;
+    state[2] = newVal;
     state[1](newVal);
   },
   memorize: fn => {
