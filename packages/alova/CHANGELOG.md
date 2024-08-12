@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.7
+
+### Patch Changes
+
+- [#497](https://github.com/alovajs/alova/pull/497) [`6fb5e32`](https://github.com/alovajs/alova/commit/6fb5e32059b42aec9bada5b1fd2cf39b68d57eaa) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: incorrect type inference to statehook
+
 ## 3.0.6
 
 ### Patch Changes
