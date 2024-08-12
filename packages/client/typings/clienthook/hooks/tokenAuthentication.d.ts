@@ -13,7 +13,7 @@ export type AlovaRequestAdapterUnified<
 // transform types StateHook and AlovaRequestAdapter to an AlovaGenerics
 export type StateHookAdapter2AG<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> =
   Parameters<RA>[1] extends Method<AlovaGenerics<infer R, infer T, infer RC, infer RE, infer RH>>
-    ? AlovaGenerics<R, T, RC, RE, RH, any, any, SH extends StatesHook[''] ? SE : unknown>
+    ? AlovaGenerics<R, T, RC, RE, RH, any, any, SH extends StatesHook<infer SE> ? SE : 123123>
     : never;
 
 export type AlovaResponded<SH extends StatesHook<any>, RA extends AlovaRequestAdapter<any, any, any>> = NonNullable<

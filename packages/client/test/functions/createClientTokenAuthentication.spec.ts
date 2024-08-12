@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import { useRequest } from '@/index';
+import type { Equal } from '@alova/shared/types';
 import { Alova, createAlova, Method } from 'alova';
 import adapterFetch from 'alova/fetch';
 import VueHook, { type VueHookType } from 'alova/vue';
 import { delay } from 'msw';
 import { generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
+import type { Ref } from 'vue';
 import { MockRequestAdapter, mockRequestAdapter } from '../mockData';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -279,7 +281,7 @@ describe('createClientTokenAuthentication', () => {
     loginMethod.meta = {
       authRole: 'login'
     };
-    const { onSuccess } = useRequest(loginMethod);
+    const { onSuccess, data } = useRequest(loginMethod);
     onSuccess(() => {
       orderAry.push('useHook.onSuccess');
     });
@@ -300,6 +302,7 @@ describe('createClientTokenAuthentication', () => {
 
     await untilCbCalled(onLogoutSuccess);
     expect(orderAry).toStrictEqual(['logout', 'global.onSuccess', 'useHook.onSuccess']);
+    expect<Equal<typeof data, Ref<ListResponse>>>(true);
   });
 
   test('should refresh token first when it is expired', async () => {
