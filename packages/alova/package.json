@@ -2,7 +2,7 @@
   "name": "alova",
   "version": "3.0.7",
   "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
-  "main": "dist/alova.esm.js",
+  "main": "dist/alova.common.cjs",
   "module": "dist/alova.esm.js",
   "types": "typings/index.d.ts",
   "type": "module",
@@ -85,14 +85,22 @@
     },
     "./vue": {
       "types": "./typings/stateshook/vue.d.ts",
+      "require": "./dist/stateshook/vue.common.cjs",
       "default": "./dist/stateshook/vue.esm.js"
+    },
+    "./vue-demi": {
+      "types": "./typings/stateshook/vue-demi.d.ts",
+      "require": "./dist/stateshook/vue-demi.common.cjs",
+      "default": "./dist/stateshook/vue-demi.esm.js"
     },
     "./react": {
       "types": "./typings/stateshook/react.d.ts",
+      "require": "./dist/stateshook/react.common.cjs",
       "default": "./dist/stateshook/react.esm.js"
     },
     "./svelte": {
       "types": "./typings/stateshook/svelte.d.ts",
+      "require": "./dist/stateshook/svelte.common.cjs",
       "default": "./dist/stateshook/svelte.esm.js"
     }
   },
