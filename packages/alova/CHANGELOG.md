@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.8
+
+### Patch Changes
+
+- [#499](https://github.com/alovajs/alova/pull/499) [`9509427`](https://github.com/alovajs/alova/commit/95094271583cc10034ec701594832b3cbc5913e1) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that statesHook vue-demi is not found
+
 ## 3.0.7
 
 ### Patch Changes
