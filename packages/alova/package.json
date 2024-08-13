@@ -118,6 +118,9 @@
       "vue": [
         "typings/stateshook/vue.d.ts"
       ],
+      "vue-demi": [
+        "typings/stateshook/vue-demi.d.ts"
+      ],
       "react": [
         "typings/stateshook/react.d.ts"
       ],
