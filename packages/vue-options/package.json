@@ -33,7 +33,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.8"
+    "alova": "^3.0.9"
   },
   "dependencies": {
     "@alova/shared": "workspace:^"
