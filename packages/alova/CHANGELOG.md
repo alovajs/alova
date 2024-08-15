@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.9
+
+### Patch Changes
+
+- [#503](https://github.com/alovajs/alova/pull/503) [`06f811d`](https://github.com/alovajs/alova/commit/06f811db0408a2a9f55892c0b686550dcb09e578) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - uploading and downloading from usehooks do not update by calling send in react
+
 ## 3.0.8
 
 ### Patch Changes
