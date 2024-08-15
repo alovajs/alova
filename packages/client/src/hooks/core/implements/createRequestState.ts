@@ -121,7 +121,6 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   hookInstance.fs = frontStates;
   hookInstance.em = eventManager;
   hookInstance.c = useHookConfig;
-  hookInstance.ro = referingObject;
 
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
