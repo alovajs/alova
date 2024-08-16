@@ -12,7 +12,7 @@ const isBodyData = (data: any): data is XMLHttpRequestBodyInit => isString(data)
 export default function requestAdapter() {
   const adapter: AlovaXHRAdapter = ({ type, url, data = null, headers }, method) => {
     const { config } = method;
-    const { auth, withCredentials, mimeType } = config;
+    const { auth, withCredentials, mimeType, responseType } = config;
     let downloadHandler: ProgressUpdater = noop;
     let uploadHandler: ProgressUpdater = noop;
 
@@ -21,7 +21,12 @@ export default function requestAdapter() {
       try {
         xhr = new XMLHttpRequest();
         xhr.open(type, url, trueValue, auth?.username, auth?.password);
-        xhr.responseType = config.responseType || 'json';
+
+        // fix #501
+        if (responseType && responseType !== 'json') {
+          xhr.responseType = responseType;
+        }
+
         xhr.timeout = config.timeout || 0;
 
         if (withCredentials === trueValue) {
@@ -61,10 +66,21 @@ export default function requestAdapter() {
 
         // 请求成功事件
         xhr.addEventListener('load', () => {
+          let responseData =
+            !responseType || responseType === 'text' || responseType === 'json' ? xhr.responseText : xhr.response;
+
+          // try to parse data as json
+          // if fails, use raw response
+          if (!responseType || responseType === 'json') {
+            try {
+              responseData = JSON.parse(responseData);
+            } catch {}
+          }
+
           resolve({
             status: xhr.status,
             statusText: xhr.statusText,
-            data: xhr.response,
+            data: responseData,
             headers: parseResponseHeaders(xhr.getAllResponseHeaders())
           });
         });
