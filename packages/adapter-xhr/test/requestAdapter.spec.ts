@@ -314,4 +314,20 @@ describe('request adapter', () => {
     Get.then(ret => expect(ret).toStrictEqual(''));
     await Get;
   });
+  test('should respect the type', async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter(),
+      responded({ data }) {
+        return data;
+      },
+      shareRequest: false
+    });
+
+    const Get1 = alovaInst.Get('/unit-test').then(ret => typeof ret);
+    const Get2 = alovaInst.Get('/unit-test', { responseType: 'json' }).then(ret => typeof ret);
+    const Get3 = alovaInst.Get('/unit-test', { responseType: 'text' }).then(ret => typeof ret);
+
+    await expect(Promise.all([Get1, Get2, Get3])).resolves.toStrictEqual(['object', 'object', 'string']);
+  });
 });
