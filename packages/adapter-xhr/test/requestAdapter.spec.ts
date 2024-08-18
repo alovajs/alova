@@ -171,7 +171,7 @@ describe('request adapter', () => {
     const Get = alovaInst.Get<AlovaXHRResponse<Result>>('/unit-test-404');
 
     const data = await Get;
-    expect(data.data).toBeNull();
+    expect(data.data).toStrictEqual('');
     expect(data.status).toBe(404);
     expect(data.statusText).toBe('api not found');
   });
@@ -273,5 +273,61 @@ describe('request adapter', () => {
     });
     await Get;
     expect(downloading).toStrictEqual({ total: 250569, loaded: 250569 });
+  });
+
+  // https://github.com/alovajs/alova/issues/501
+  test('should return string in text type response', async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter(),
+      responded({ data }) {
+        return data;
+      }
+    });
+
+    const Get = alovaInst.Get('/unit-test-plaintext');
+    const GetWithJSONType = alovaInst.Get('/unit-test-plaintext', {
+      responseType: 'json'
+    });
+    const GetWithTextType = alovaInst.Get('/unit-test-plaintext', {
+      responseType: 'text'
+    });
+
+    Get.then(ret => expect(ret).toStrictEqual('plaintext'));
+    GetWithJSONType.then(ret => expect(ret).toStrictEqual('plaintext'));
+    GetWithTextType.then(ret => expect(ret).toStrictEqual('plaintext'));
+
+    await Promise.all([Get, GetWithJSONType, GetWithTextType]);
+  });
+
+  test('should get empty string when receive nothing from response', async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter(),
+      responded({ data }) {
+        return data;
+      }
+    });
+
+    const Get = alovaInst.Get('/unit-test-empty');
+
+    Get.then(ret => expect(ret).toStrictEqual(''));
+    await Get;
+  });
+  test('should respect the type', async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter(),
+      responded({ data }) {
+        return data;
+      },
+      shareRequest: false
+    });
+
+    const Get1 = alovaInst.Get('/unit-test').then(ret => typeof ret);
+    const Get2 = alovaInst.Get('/unit-test', { responseType: 'json' }).then(ret => typeof ret);
+    const Get3 = alovaInst.Get('/unit-test', { responseType: 'text' }).then(ret => typeof ret);
+
+    await expect(Promise.all([Get1, Get2, Get3])).resolves.toStrictEqual(['object', 'object', 'string']);
   });
 });
