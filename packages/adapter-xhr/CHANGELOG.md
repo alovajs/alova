@@ -1,5 +1,11 @@
 # @alova/adapter-xhr
 
+## 2.0.5
+
+### Patch Changes
+
+- [#505](https://github.com/alovajs/alova/pull/505) [`7ef8ca0`](https://github.com/alovajs/alova/commit/7ef8ca04e4dacdf5efa38fd437b798a564cea624) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: prevent null response for text type #501
+
 ## 2.0.4
 
 ### Patch Changes
