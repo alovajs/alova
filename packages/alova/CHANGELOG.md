@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.10
+
+### Patch Changes
+
+- [#508](https://github.com/alovajs/alova/pull/508) [`f117787`](https://github.com/alovajs/alova/commit/f117787628ae49c283d3c3be6dfa4a3f1344e10d) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: `msBeforeNext` not reduce in server/rate-limit (#462)
+
 ## 3.0.9
 
 ### Patch Changes
