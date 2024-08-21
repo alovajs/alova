@@ -71,7 +71,7 @@ class RateLimiterStore extends RateLimiterStoreAbstract {
    */
   _getRateLimiterRes(key: string | number, changedPoints: number, result: StoreResult) {
     const [consumed = 0, expireTime = 0] = result ?? [];
-    const msBeforeNext = expireTime !== -1 ? Math.max(expireTime - Date.now(), 0) : -1;
+    const msBeforeNext = expireTime > 0 ? Math.max(expireTime - Date.now(), 0) : -1;
     const isFirstInDuration = !consumed || changedPoints === consumed;
     const currentConsumedPoints = isFirstInDuration ? changedPoints : consumed;
 
@@ -88,7 +88,7 @@ class RateLimiterStore extends RateLimiterStoreAbstract {
   async _upsert(key: string | number, points: number, msDuration: number, forceExpire = false) {
     key = key.toString();
     const isNeverExpired = msDuration <= 0;
-    const expireTime = isNeverExpired ? 0 : Date.now() + msDuration;
+    const expireTime = isNeverExpired ? -1 : Date.now() + msDuration;
     const newRecord = [points, expireTime];
     if (!forceExpire) {
       const [oldPoints = 0, oldExpireTime = 0] = ((await this.storage.get(key)) ?? []) as StoreResult;
@@ -98,8 +98,7 @@ class RateLimiterStore extends RateLimiterStoreAbstract {
         newRecord[0] += oldPoints;
       }
 
-      // if the old one is longer, use it
-      if (!isNeverExpired && expireTime < oldExpireTime) {
+      if (!isNeverExpired && oldExpireTime > Date.now()) {
         newRecord[1] = oldExpireTime;
       }
     }
