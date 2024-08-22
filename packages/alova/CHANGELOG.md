@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.11
+
+### Patch Changes
+
+- [#511](https://github.com/alovajs/alova/pull/511) [`3dc0328`](https://github.com/alovajs/alova/commit/3dc032868ddb97f73790c8f5780cb069c3311d51) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - to be effective for `usePagination` when calling `updateState`
+
 ## 3.0.10
 
 ### Patch Changes
