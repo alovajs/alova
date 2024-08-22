@@ -126,6 +126,10 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     __referingObj: referingObject,
     immediate,
     initialData,
+    managedStates: {
+      ...objectify([page, pageSize, total], 's'),
+      listData: data.s
+    },
     middleware(ctx, next) {
       (middleware as any)(
         {
