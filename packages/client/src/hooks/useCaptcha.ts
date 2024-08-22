@@ -21,15 +21,15 @@ export default <AG extends AlovaGenerics>(
     __referingObj: referingObject
   } = statesHookHelper(promiseStatesHook());
 
+  const countdown = create(0, 'countdown');
   const requestReturned = useRequest(handler, {
     ...config,
     __referingObj: referingObject,
     immediate: falseValue,
+    managedStates: objectify([countdown], 's'),
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     middleware: middleware ? (ctx, next) => middleware({ ...ctx, send }, next) : undefinedValue
   });
-
-  const countdown = create(0, 'countdown');
 
   const timer = ref(undefinedValue as NodeJS.Timeout | undefined);
   const send = (...args: any[]) =>

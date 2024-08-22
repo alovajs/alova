@@ -1,5 +1,5 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { accessAction, actionDelegationMiddleware, usePagination } from '@/index';
+import { accessAction, actionDelegationMiddleware, updateState, usePagination } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
@@ -1628,5 +1628,34 @@ describe('vue => usePagination', () => {
     expect(completedMockFn).toHaveBeenCalled();
     expect(fetchSuccessMockFn).toHaveBeenCalled();
     expect(fetchCompletedMockFn).toHaveBeenCalled();
+  });
+
+  jest.setTimeout(1000000);
+  test('should update state data when call `updateState` function', async () => {
+    const initialPageSize = 4;
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          data: (res: any) => res.list,
+          append: true,
+          initialPageSize
+        }
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
+    });
+
+    const updated = await updateState(getter1(1, initialPageSize), {
+      listData: (list: number[]) => [...list, 100, 200],
+      total: old => old + 10
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3, 100, 200]));
+      expect(screen.getByRole('total')).toHaveTextContent('310');
+      expect(updated).toBeTruthy();
+    });
   });
 });
