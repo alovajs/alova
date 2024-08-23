@@ -5,6 +5,7 @@ import {
   AlovaGenerics,
   FetchRequestState,
   FrontRequestState,
+  MergedStatesMap,
   Method,
   Progress,
   ReferingObject,
@@ -226,7 +227,7 @@ export interface Hook {
   m?: Method;
 
   /** saveStatesFns */
-  sf: ((frontStates: FrontRequestState) => void)[];
+  sf: ((frontStates: MergedStatesMap) => void)[];
 
   /** removeStatesFns */
   rf: (() => void)[];
@@ -255,4 +256,7 @@ export interface Hook {
 
   /** refering object */
   ro: ReferingObject;
+
+  /** managed states */
+  ms: MergedStatesMap;
 }

@@ -11,9 +11,9 @@ import { getStateCache } from './hooks/core/implements/stateCache';
  * @param handleUpdate 更新回调
  * @returns 是否更新成功，未找到对应的状态时不会更新成功
  */
-export default async function updateState<AG extends AlovaGenerics>(
-  matcher: Method<AG>,
-  handleUpdate: ((data: AG['Responded']) => any) | UpdateStateCollection<AG['Responded']>
+export default async function updateState<Responded = unknown>(
+  matcher: Method<AlovaGenerics<Responded extends unknown ? any : Responded>>,
+  handleUpdate: ((data: Responded) => any) | UpdateStateCollection<Responded>
 ) {
   let updated = falseValue;
 
@@ -24,7 +24,7 @@ export default async function updateState<AG extends AlovaGenerics>(
     const { id } = getContext(matcher);
     const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
     const updateStateCollection = isFn(handleUpdate)
-      ? ({ data: handleUpdate } as UpdateStateCollection<AG['Responded']>)
+      ? ({ data: handleUpdate } as UpdateStateCollection<Responded>)
       : handleUpdate;
 
     let updatedDataColumnData = undefinedValue as any;
@@ -32,7 +32,6 @@ export default async function updateState<AG extends AlovaGenerics>(
       // 循环遍历更新数据，并赋值给受监管的状态
       forEach(objectKeys(updateStateCollection), stateName => {
         coreAssert(stateName in frontStates, `state named \`${stateName}\` is not found`);
-        coreAssert(!objectKeys(frontStates).slice(-4).includes(stateName), 'can not update preset states');
         const targetStateProxy = frontStates[stateName as keyof typeof frontStates];
         let updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](targetStateProxy.v);
 

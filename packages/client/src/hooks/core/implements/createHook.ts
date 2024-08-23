@@ -39,5 +39,8 @@ export default <AG extends AlovaGenerics>(
     c,
 
     /** referingObject */
-    ro
+    ro,
+
+    /** managedStates */
+    ms: {}
   }) as Hook;

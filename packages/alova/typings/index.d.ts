@@ -1,4 +1,5 @@
 import { EventManager } from '@alova/shared/createEventManager';
+import { FrameworkState } from '@alova/shared/FrameworkState';
 
 export interface AlovaGenerics<
   R = any,
@@ -207,11 +208,12 @@ export interface FrontRequestState<L = any, R = any, E = any, D = any, U = any> 
   data: R;
 }
 
+export type MergedStatesMap = Record<string, FrameworkState<any, string>>;
 export interface EffectRequestParams<E> {
   handler: (...args: any[]) => void;
   removeStates: () => void;
-  saveStates: (frontStates: FrontRequestState) => void;
-  frontStates: FrontRequestState;
+  saveStates: (frontStates: MergedStatesMap) => void;
+  frontStates: MergedStatesMap;
   watchingStates?: E[];
   immediate: boolean;
 }

@@ -87,6 +87,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   // 初始化fetcher
   const fetchStates = useFetcher<FetcherType<Alova<AG>>>({
     __referingObj: referingObject,
+    updateState: falseValue,
     force: ({ args }) => args[0]
   });
   const { loading, fetch, abort: abortFetch, onSuccess: onFetchSuccess } = fetchStates;
@@ -126,10 +127,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     __referingObj: referingObject,
     immediate,
     initialData,
-    managedStates: {
-      ...objectify([page, pageSize, total], 's'),
-      listData: data.s
-    },
+    managedStates: objectify([data, page, pageSize, total], 's'),
     middleware(ctx, next) {
       (middleware as any)(
         {
