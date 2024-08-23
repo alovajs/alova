@@ -48,7 +48,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.11",
+    "alova": "^3.0.12",
     "axios": ">=0.4.0"
   },
   "devDependencies": {
