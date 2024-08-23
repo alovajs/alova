@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.12
+
+### Patch Changes
+
+- [#514](https://github.com/alovajs/alova/pull/514) [`b6816d5`](https://github.com/alovajs/alova/commit/b6816d53b1bb5b94cf5e0fa0e93ae662d8e0f368) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - modify key `listData` to `data` in `usePagination`
+
 ## 3.0.11
 
 ### Patch Changes
