@@ -13,7 +13,7 @@ import {
   statesHookHelper
 } from '@alova/shared/function';
 import { PromiseCls, falseValue, forEach, isArray, promiseCatch, trueValue, undefinedValue } from '@alova/shared/vars';
-import type { AlovaGlobalCacheAdapter, FrontRequestState, Method, Progress } from 'alova';
+import type { AlovaGlobalCacheAdapter, Method, Progress } from 'alova';
 import { AlovaGenerics, globalConfigMap, promiseStatesHook } from 'alova';
 import {
   AlovaCompleteEvent,
@@ -97,16 +97,14 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
   };
   // 将外部传入的受监管的状态一同放到frontStates集合中
   const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG>;
+  const managedStatesProxy = mapObject(managedStates, (state, key) => transformState2Proxy(state, key));
   const data = create((isFn(initialData) ? initialData() : initialData) as AG['Responded'], 'data');
   const loading = create(initialLoading, 'loading');
   const error = create(undefinedValue as Error | undefined, 'error');
   const downloading = create({ ...progress }, 'downloading');
   const uploading = create({ ...progress }, 'uploading');
 
-  const frontStates = {
-    ...mapObject(managedStates, (state, key) => transformState2Proxy(state, key)),
-    ...objectify([data, loading, error, downloading, uploading])
-  };
+  const frontStates = objectify([data, loading, error, downloading, uploading]);
   const eventManager = createEventManager<{
     success: AlovaSuccessEvent<AG>;
     error: AlovaErrorEvent<AG>;
@@ -117,10 +115,11 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
 
   /**
    * ## react ##每次执行函数都需要重置以下项
-   * */
+   */
   hookInstance.fs = frontStates;
   hookInstance.em = eventManager;
   hookInstance.c = useHookConfig;
+  hookInstance.ms = managedStatesProxy;
 
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
@@ -159,8 +158,8 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
           ? (delay: number) => debouncingSendHandler.current(delay, referingObject, methodHandler)
           : () => wrapEffectRequest(referingObject),
       removeStates: () => forEach(hookInstance.rf, fn => fn()),
-      saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),
-      frontStates,
+      saveStates: states => forEach(hookInstance.sf, fn => fn(states)),
+      frontStates: { ...frontStates, ...managedStatesProxy },
       watchingStates,
       immediate: immediate ?? trueValue
     });

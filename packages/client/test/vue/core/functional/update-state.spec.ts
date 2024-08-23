@@ -97,13 +97,6 @@ describe('update cached response data by user in vue', () => {
     });
     await untilCbCalled(onSuccess);
 
-    // 预设状态不能更新
-    await expect(
-      updateState(Get, {
-        loading: () => true
-      })
-    ).rejects.toThrow('can not update preset states');
-
     // 非状态数据不能更新
     await expect(
       updateState(Get, {

@@ -9,7 +9,7 @@ import {
   sloughConfig
 } from '@alova/shared/function';
 import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
-import { AlovaGenerics, FrontRequestState, Method, Progress, queryCache } from 'alova';
+import { AlovaGenerics, Method, Progress, queryCache } from 'alova';
 import {
   AlovaFetcherMiddleware,
   AlovaFrontMiddleware,
@@ -40,7 +40,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
   let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);
-  const { fs: frontStates, ht: hookType, c: useHookConfig } = hookInstance;
+  const { fs: frontStates, ht: hookType, c: useHookConfig, ms: managedStates } = hookInstance;
   const { loading: loadingState, data: dataState, error: errorState } = frontStates;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
@@ -67,8 +67,8 @@ export default function useHookToSendRequest<AG extends AlovaGenerics>(
     let controlledLoading = falseValue;
     if (!isFetcher) {
       // 将初始状态存入缓存以便后续更新
-      saveStates = (frontStates: FrontRequestState) => setStateCache(id, methodKey, frontStates, hookInstance);
-      saveStates(frontStates);
+      saveStates = frontStates => setStateCache(id, methodKey, frontStates, hookInstance);
+      saveStates({ ...frontStates, ...managedStates });
 
       // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
       removeStates = () => removeStateCache(id, methodKey);

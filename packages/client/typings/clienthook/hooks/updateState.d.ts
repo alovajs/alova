@@ -20,6 +20,6 @@ export type UpdateStateCollection<Responded> = {
  * @returns is updated
  */
 export declare function updateState<Responded>(
-  matcher: Method<AlovaGenerics<Responded>>,
+  matcher: Method<AlovaGenerics<Responded extends unknown ? any : Responded>>,
   handleUpdate: UpdateStateCollection<Responded>['data'] | UpdateStateCollection<Responded>
 ): Promise<boolean>;
