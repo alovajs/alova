@@ -1,5 +1,5 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { accessAction, actionDelegationMiddleware } from '@/index';
+import { accessAction, actionDelegationMiddleware, updateState } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -1637,6 +1637,46 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
       expect(screen.getByRole('total')).toHaveTextContent('300');
       expect(successMockFn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  test('should update state data when call `updateState` function', async () => {
+    const initialPageSize = 4;
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list,
+          append: true,
+          initialPageSize
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
+    });
+
+    let updated: boolean;
+    delay()
+      .then(() =>
+        updateState<number[]>(getter1(1, initialPageSize), {
+          data: list => [...list, 100, 200],
+          total: old => old + 10
+        })
+      )
+      .then(res => {
+        updated = res;
+      });
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3, 100, 200]));
+      expect(screen.getByRole('total')).toHaveTextContent('310');
+      expect(updated).toBeTruthy();
+    });
+
+    delay().then(() => updateState<number[]>(getter1(1, initialPageSize), list => [...list, 300]));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3, 100, 200, 300]));
     });
   });
 });

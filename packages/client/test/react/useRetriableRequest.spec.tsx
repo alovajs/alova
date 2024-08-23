@@ -99,7 +99,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockErrorFn).toHaveBeenCalledTimes(4);
         expect(mockRetryFn).toHaveBeenCalledTimes(3);
         expect(mockCompleteFn).toHaveBeenCalledTimes(4);
-        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
         /**
          * loading defaults to false (even if set immediate to true)
@@ -149,7 +149,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockErrorFn).toHaveBeenCalledTimes(1);
         expect(mockCompleteFn).toHaveBeenCalledTimes(2);
         expect(mockSuccessFn).toHaveBeenCalledTimes(1);
-        expect(mockFailFn).not.toBeCalled();
+        expect(mockFailFn).not.toHaveBeenCalled();
       },
       {
         timeout: 4000
@@ -198,7 +198,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
         expect(mockErrorFn).toHaveBeenCalledTimes(3);
         expect(mockCompleteFn).toHaveBeenCalledTimes(3);
-        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
       },
       {
@@ -253,7 +253,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
         expect(mockErrorFn).toHaveBeenCalledTimes(3);
         expect(mockCompleteFn).toHaveBeenCalledTimes(3);
-        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
       },
       {
@@ -343,11 +343,11 @@ describe('react => useRetriableRequest', () => {
     render((<Page />) as ReactElement<any, any>);
     await untilCbCalled(setTimeout, 200);
     await screen.findByText(/loaded/);
-    expect(mockRetryFn).not.toBeCalled();
-    expect(mockErrorFn).not.toBeCalled();
-    expect(mockCompleteFn).not.toBeCalled();
-    expect(mockSuccessFn).not.toBeCalled();
-    expect(mockFailFn).not.toBeCalled();
+    expect(mockRetryFn).not.toHaveBeenCalled();
+    expect(mockErrorFn).not.toHaveBeenCalled();
+    expect(mockCompleteFn).not.toHaveBeenCalled();
+    expect(mockSuccessFn).not.toHaveBeenCalled();
+    expect(mockFailFn).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('btn'));
     await waitFor(
@@ -355,7 +355,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
         expect(mockErrorFn).toHaveBeenCalledTimes(3);
         expect(mockCompleteFn).toHaveBeenCalledTimes(3);
-        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
       },
       {
@@ -399,10 +399,10 @@ describe('react => useRetriableRequest', () => {
     render((<Page />) as ReactElement<any, any>);
     await waitFor(
       () => {
-        expect(mockRetryFn).not.toBeCalled(); // 第一次重试前停止了重试
+        expect(mockRetryFn).not.toHaveBeenCalled(); // 第一次重试前停止了重试
         expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
         expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
-        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
       },
       { timeout: 4000 }
@@ -576,7 +576,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockErrorFn).toHaveBeenCalledTimes(4);
         expect(mockRetryFn).toHaveBeenCalledTimes(3);
         expect(mockCompleteFn).toHaveBeenCalledTimes(4);
-        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
         /**
          * loading defaults to false (even if set immediate to true)
@@ -597,7 +597,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockErrorFn).toHaveBeenCalledTimes(8);
         expect(mockRetryFn).toHaveBeenCalledTimes(6);
         expect(mockCompleteFn).toHaveBeenCalledTimes(8);
-        expect(mockSuccessFn).not.toBeCalled();
+        expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(2);
         expect(mockLoadingChangeFn).toHaveBeenCalledTimes(5);
       },

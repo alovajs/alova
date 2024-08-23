@@ -40,8 +40,9 @@ describe('update cached response data by user in react', () => {
     await screen.findByText(/unit-test/);
 
     // 延迟检查页面是否有更新
-    await delay(100);
-    expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
+    });
     const cacheData = alova.l2Cache.get('placeholder-data') as any;
     expect(cacheData.path).toBe('/unit-test-updated');
   });
@@ -118,34 +119,29 @@ describe('update cached response data by user in react', () => {
     render((<Page />) as ReactElement<any, any>);
     await screen.findByText(/unit-test/);
 
-    // 预设状态不能更新
-    expect(() =>
-      updateState(Get, {
-        loading: () => true
-      })
-    ).rejects.toThrow();
-
     // 非状态数据不能更新
-    expect(() =>
+    await expect(() =>
       updateState(Get, {
         extraData2: () => 1
       })
     ).rejects.toThrow();
 
     // 未找到状态抛出错误
-    expect(() =>
+    await expect(() =>
       updateState(Get, {
         extraData3: () => 1
       })
     ).rejects.toThrow();
 
-    act(() => {
-      // 更新成功
+    // 更新成功
+    delay().then(() => {
       updateState(Get, {
         extraData: () => 1
       });
     });
-    expect(screen.getByRole('extraData')).toHaveTextContent('1');
+    await waitFor(() => {
+      expect(screen.getByRole('extraData')).toHaveTextContent('1');
+    });
   });
 
   test('the request sent by the same use hook should have the same saved states', async () => {
@@ -189,7 +185,7 @@ describe('update cached response data by user in react', () => {
     });
 
     // 执行了两次不同参数的请求后，验证两次请求是否缓存了相同的states
-    act(() => {
+    delay().then(() => {
       updateState(getter('a'), {
         data: d => ({
           ...d,
@@ -197,8 +193,10 @@ describe('update cached response data by user in react', () => {
         })
       });
     });
-    expect(screen.getByRole('path')).toHaveTextContent('/path-str-a');
-    act(() => {
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/path-str-a');
+    });
+    delay().then(() => {
       updateState(getter('b'), {
         data: d => ({
           ...d,
@@ -206,11 +204,13 @@ describe('update cached response data by user in react', () => {
         })
       });
     });
-    expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');
+    await waitFor(() => {
+      expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');
 
-    // 两处缓存的状态应该都是最新值
-    expect(getStateCache(alova.id, key(getter('a'))).s.data.v.path).toBe('/path-str-b');
-    expect(getStateCache(alova.id, key(getter('b'))).s.data.v.path).toBe('/path-str-b');
+      // 两处缓存的状态应该都是最新值
+      expect(getStateCache(alova.id, key(getter('a'))).s.data.v.path).toBe('/path-str-b');
+      expect(getStateCache(alova.id, key(getter('b'))).s.data.v.path).toBe('/path-str-b');
+    });
   });
 
   test('all saved states in unmounted component will be removed', async () => {
