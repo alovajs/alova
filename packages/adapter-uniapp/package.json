@@ -49,7 +49,7 @@
     "alova": "workspace:^"
   },
   "peerDependencies": {
-    "alova": "^3.0.12"
+    "alova": "^3.0.13"
   },
   "dependencies": {
     "@alova/shared": "workspace:^"
