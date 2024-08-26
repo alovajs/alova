@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.13
+
+### Patch Changes
+
+- [#517](https://github.com/alovajs/alova/pull/517) [`de4fc6a`](https://github.com/alovajs/alova/commit/de4fc6a56240026e5c68b233dd8eb358d422e9a2) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix formData typof of `useForm`
+
 ## 3.0.12
 
 ### Patch Changes
