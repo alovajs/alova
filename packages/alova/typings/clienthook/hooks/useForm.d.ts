@@ -95,6 +95,6 @@ export interface FormExposure<AG extends AlovaGenerics, F> extends UseHookExposu
  * @return useForm相关数据和操作函数
  */
 export declare function useForm<AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
-  handler: FormHookHandler<AG, FormData | undefined>,
+  handler: FormHookHandler<AG, FormData>,
   config?: FormHookConfig<AG, FormData>
 ): FormExposure<AG, FormData>;
