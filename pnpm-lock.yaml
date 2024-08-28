@@ -251,13 +251,13 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.4(alova@file:examples/server/alova-3.0.10.tgz)
+        version: 2.0.4(alova@3.0.13)
       '@alova/psc':
         specifier: latest
-        version: 1.0.4(alova@file:examples/server/alova-3.0.10.tgz)(electron@30.3.1)
+        version: 1.0.4(alova@3.0.13)(electron@30.3.1)
       alova:
-        specifier: file:alova-3.0.10.tgz
-        version: file:examples/server/alova-3.0.10.tgz
+        specifier: latest
+        version: 3.0.13
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -606,7 +606,6 @@ packages:
 
   '@alova/psc@1.0.4':
     resolution: {integrity: sha512-JsuDDGppqGgspa2ZQ58NCLEHYRgwUcX2yo8UpEXSK/CgmHIUJJ5q9yBVSrir7Z+IsMfuie0e83RDLW5TmmbpNQ==}
-    version: 1.0.4
     peerDependencies:
       alova: ^3.0.5
       electron: ^30.1.0
@@ -2959,9 +2958,8 @@ packages:
     resolution: {integrity: sha512-nYt3Xv+huzsekOsIkJNtR7R1Rkhz2gpuNAHjkbRtDWtV6RGyV6sA3T+Uy4MKvkJ4YBID6hGQoOuZeteUCNG5Ug==}
     engines: {node: '>= 18.0.0'}
 
-  alova@file:examples/server/alova-3.0.10.tgz:
-    resolution: {integrity: sha512-h5JYGZqTx0Pl//Taychvk5YQs0i0cpiRC/1+hyzg6C5dWP56VNbGZG7zeAHOn1Nc3OnSbu3+m8CZHSi+mvCFIQ==, tarball: file:examples/server/alova-3.0.10.tgz}
-    version: 3.0.10
+  alova@3.0.13:
+    resolution: {integrity: sha512-oN62zyG3PcgGRIH1u4O2EWtk2fiRXLfMZaDMsKDGQK7dokUxagtDqcYBZRwQhG8x9OlVj8MR/UC5ZAzPwGdU/A==, tarball: https://registry.npmjs.org/alova/-/alova-3.0.13.tgz}
     engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
@@ -7435,16 +7433,16 @@ snapshots:
       '@alova/shared': 1.0.4
       alova: 3.0.10
 
-  '@alova/mock@2.0.4(alova@file:examples/server/alova-3.0.10.tgz)':
+  '@alova/mock@2.0.4(alova@3.0.13)':
     dependencies:
       '@alova/shared': 1.0.4
-      alova: file:examples/server/alova-3.0.10.tgz
+      alova: 3.0.13
 
-  '@alova/psc@1.0.4(alova@file:examples/server/alova-3.0.10.tgz)(electron@30.3.1)':
+  '@alova/psc@1.0.4(alova@3.0.13)(electron@30.3.1)':
     dependencies:
       '@alova/shared': 1.0.4
       '@node-ipc/node-ipc': 11.0.3
-      alova: file:examples/server/alova-3.0.10.tgz
+      alova: 3.0.13
       electron: 30.3.1
 
   '@alova/shared@1.0.4': {}
@@ -11138,7 +11136,7 @@ snapshots:
       '@alova/shared': 1.0.4
       rate-limiter-flexible: 5.0.3
 
-  alova@file:examples/server/alova-3.0.10.tgz:
+  alova@3.0.13:
     dependencies:
       '@alova/shared': 1.0.4
       rate-limiter-flexible: 5.0.3
