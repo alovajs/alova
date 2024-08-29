@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.5
+
+### Patch Changes
+
+- [#524](https://github.com/alovajs/alova/pull/524) [`6ec9e42`](https://github.com/alovajs/alova/commit/6ec9e42d93b73307d49e0917ac41cccf4f995f11) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: cannot import types from @alova/shared in the build (close #523)
+
 ## 1.0.4
 
 ### Patch Changes
