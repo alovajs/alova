@@ -1,10 +1,10 @@
 # @alova/adapter-taro
 
-## 3.0.0
+## 2.0.4
 
-### Major Changes
+### Patch Changes
 
-- [#522](https://github.com/alovajs/alova/pull/522) [`c1051da`](https://github.com/alovajs/alova/commit/c1051da1cc66992a8e472a57eeab304d83b77add) Thanks [@z0ffy](https://github.com/z0ffy)! - 在 /packages/adapter-taro/README.md 中，将uni API更换为Taro API
+- [#522](https://github.com/alovajs/alova/pull/522) [`c1051da`](https://github.com/alovajs/alova/commit/c1051da1cc66992a8e472a57eeab304d83b77add) Thanks [@z0ffy](https://github.com/z0ffy)! - modify uni API to Taro API in `/packages/adapter-taro/README.md`
 
 ### Patch Changes
 
