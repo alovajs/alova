@@ -1,6 +1,6 @@
 {
   "name": "@alova/vue-options",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "vue options statesHook and wrapper function for alova.js",
   "homepage": "https://github.com/alovajs/alova",
   "main": "dist/alova-vue-options.common.cjs",
@@ -33,7 +33,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.13"
+    "alova": "^3.0.14"
   },
   "dependencies": {
     "@alova/shared": "workspace:^"
