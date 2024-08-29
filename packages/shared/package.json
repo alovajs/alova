@@ -61,6 +61,34 @@
       "default": "./dist/model/FrameworkState.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "assert": [
+        "./dist/assert.d.ts"
+      ],
+      "function": [
+        "./dist/function.d.ts"
+      ],
+      "vars": [
+        "./dist/vars.d.ts"
+      ],
+      "types": [
+        "./dist/types.d.ts"
+      ],
+      "event": [
+        "./dist/event.d.ts"
+      ],
+      "createEventManager": [
+        "./dist/createEventManager.d.ts"
+      ],
+      "queueCallback": [
+        "./dist/queueCallback.d.ts"
+      ],
+      "FrameworkState": [
+        "./dist/model/FrameworkState.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
