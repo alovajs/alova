@@ -61,11 +61,11 @@ const uploadFile = (name, filePath, formData) =>
       name,
       filePath,
 
-      // 额外数据将传入uni.uploadFile的formData中
+      // 额外数据将传入Taro.uploadFile的formData中
       ...formData
     },
     {
-      // 设置请求方式为上传，适配器内将调用uni.uploadFile
+      // 设置请求方式为上传，适配器内将调用Taro.uploadFile
       requestType: 'upload',
 
       // 开启上传进度
@@ -108,7 +108,7 @@ const App = () => {
 ```jsx
 const downloadFile = filePath =>
   alovaInst.Get('/bigImage.jpg', {
-    // 设置请求方式为下载，适配器内将调用uni.downloadFile
+    // 设置请求方式为下载，适配器内将调用Taro.downloadFile
     requestType: 'download',
     filePath,
 
