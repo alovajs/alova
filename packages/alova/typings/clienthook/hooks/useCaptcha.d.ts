@@ -16,7 +16,8 @@ export type CaptchaHookConfig<AG extends AlovaGenerics> = {
 /**
  * useCaptcha返回值
  */
-export interface CaptchaExposure<AG extends AlovaGenerics> extends UseHookExposure<AG> {
+// @ts-ignore
+export interface CaptchaExposure<AG extends AlovaGenerics> extends UseHookExposure<AG, CaptchaExposure<AG>> {
   /**
    * 当前倒计时，每秒-1，当倒计时到0时可再次发送验证码
    */

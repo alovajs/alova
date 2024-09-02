@@ -49,3 +49,6 @@ export const generateContinuousNumbers = (
   const transformFn = typeof transform === 'object' ? (i: number) => transform[i] || i : transform;
   return Array.from({ length: Math.abs(end - start + 1) }).map((_, i) => transformFn(start + i));
 };
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const expectType = <T>(value: T) => {};

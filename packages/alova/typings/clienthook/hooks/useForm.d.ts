@@ -59,7 +59,8 @@ export type RestoreHandler = () => void;
 /**
  * useForm返回值
  */
-export interface FormExposure<AG extends AlovaGenerics, F> extends UseHookExposure<AG> {
+// @ts-ignore
+export interface FormExposure<AG extends AlovaGenerics, F> extends UseHookExposure<AG, FormExposure<AG, F>> {
   /**
    * 表单数据
    */
