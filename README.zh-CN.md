@@ -2,7 +2,7 @@
   <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>创新的下一代请求工具<br />极致地提升你的API接入效率，节约大脑，仅需一步</b></p>
+<p align="center"><b>工作流精简的下一代请求工具<br />极致地简化你的API集成工作流，仅需一步</b></p>
 
 <p align="center"><a href="./README.md">📑English</a> | 中文</p>
 
@@ -18,7 +18,7 @@
 
 ## alova 是什么？
 
-alova 是一个创新的下一代请求工具，从前后端协作和 API 消费作为出发点，将 API 的消费从 7 步简化为只有 1 步，帮你在请求方面省去大部分的工作，让网络请求变得非常简单。我们来看看 alova 是如何帮你的简化工作的。
+alova（读作/əˈləʊva/）是一个流程精简的下一代请求工具，从前后端协作和 API 集成作为出发点，将 API 集成步骤从 7 步简化为只有 1 步，极致地简化 API 集成工作流，让网络请求变得非常简单。我们来看看 alova 是如何帮你的简化工作的。
 
 ![](https://alova.js.org/img/overview_flow_cn.png)
 

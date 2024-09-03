@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FrameworkReadableState, FrameworkState } from '@alova/shared/FrameworkState';
 import { EventManager } from '@alova/shared/createEventManager';
+import type { IsUnknown } from '@alova/shared/types';
 import {
   AlovaGenerics,
   FetchRequestState,
@@ -206,13 +207,14 @@ export interface UseHookExportedState<AG extends AlovaGenerics>
     ExportedState<Progress, AG['StatesExport']>,
     ExportedState<Progress, AG['StatesExport']>
   > {}
-export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics> extends UseHookExportedState<AG> {
+export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics, SelfType = unknown>
+  extends UseHookExportedState<AG> {
   abort: () => void;
   update: StateUpdater<UseHookExportedState<AG>, AG['StatesExport']>;
   send: SendHandler<AG['Responded']>;
-  onSuccess(handler: SuccessHandler<AG>): this;
-  onError(handler: ErrorHandler<AG>): this;
-  onComplete(handler: CompleteHandler<AG>): this;
+  onSuccess(handler: SuccessHandler<AG>): IsUnknown<SelfType, this, SelfType>;
+  onError(handler: ErrorHandler<AG>): IsUnknown<SelfType, this, SelfType>;
+  onComplete(handler: CompleteHandler<AG>): IsUnknown<SelfType, this, SelfType>;
   __proxyState: ProxyStateGetter<UseHookExportedState<AG>>;
   __referingObj: ReferingObject;
 }

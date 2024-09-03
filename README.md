@@ -2,7 +2,7 @@
 <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>Creative next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
+<p align="center"><b>Workflow-Streamlined next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
 <p align="center">English | <a href="./README.zh-CN.md">Chinese</a></p>
 
@@ -18,7 +18,7 @@
 
 ## What is alova?
 
-Alova is an creative next-generation request tool. Starting from front-end and back-end collaboration and API consumption, it simplifies API consumption from 7 steps to only 1 step, saving you most of the work in requesting and making network requests very simple. Let's see how alova can help you simplify your work.
+alova(pronounced /əˈləʊva/) is a workflow-streamlined next-generation request tool. Starting from front-end and back-end collaboration and API integration, it streamline API integration workflow from 7 steps to only 1 step, extremely streamline API integration workflow and making network requests very simple. Let's see how alova can help you simplify your work.
 
 ![](https://alova.js.org/img/overview_flow_en.png)
 
