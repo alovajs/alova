@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.15
+
+### Patch Changes
+
+- [#528](https://github.com/alovajs/alova/pull/528) [`103a1b1`](https://github.com/alovajs/alova/commit/103a1b1f9865170f080c623d4a37d82ab2a386bf) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: correct exposure type of useHook
+
 ## 3.0.14
 
 ### Patch Changes
