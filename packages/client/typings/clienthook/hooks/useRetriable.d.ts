@@ -45,7 +45,6 @@ export interface RetriableFailEvent<AG extends AlovaGenerics> extends AlovaError
 /**
  * useRetriableRequest返回值
  */
-// @ts-ignore
 export interface RetriableExposure<AG extends AlovaGenerics> extends UseHookExposure<AG, RetriableExposure<AG>> {
   /**
    * 停止重试，只在重试期间调用有效

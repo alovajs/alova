@@ -207,32 +207,17 @@ export interface UseHookExportedState<AG extends AlovaGenerics>
     ExportedState<Progress, AG['StatesExport']>,
     ExportedState<Progress, AG['StatesExport']>
   > {}
-export interface UseHookExposureOriginal<
-  AG extends AlovaGenerics = AlovaGenerics,
-  // @ts-ignore
-  SelfType = UseHookExposure<AG, SelfType>
-> extends UseHookExportedState<AG> {
+export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics, SelfType = unknown>
+  extends UseHookExportedState<AG> {
   abort: () => void;
   update: StateUpdater<UseHookExportedState<AG>, AG['StatesExport']>;
   send: SendHandler<AG['Responded']>;
-  onSuccess(handler: SuccessHandler<AG>): SelfType;
-  onError(handler: ErrorHandler<AG>): SelfType;
-  onComplete(handler: CompleteHandler<AG>): SelfType;
+  onSuccess(handler: SuccessHandler<AG>): IsUnknown<SelfType, this, SelfType>;
+  onError(handler: ErrorHandler<AG>): IsUnknown<SelfType, this, SelfType>;
+  onComplete(handler: CompleteHandler<AG>): IsUnknown<SelfType, this, SelfType>;
   __proxyState: ProxyStateGetter<UseHookExportedState<AG>>;
   __referingObj: ReferingObject;
 }
-
-export type UseHookExposure<AG extends AlovaGenerics = AlovaGenerics, SelfType = unknown> = IsUnknown<
-  SelfType,
-  UseHookExposureWithSelfHelper<AG>,
-  UseHookExposureOriginal<AG, SelfType>
->;
-
-// use helper for recursive type inference
-export type UseHookExposureWithSelfHelper<AG extends AlovaGenerics = AlovaGenerics> = UseHookExposureOriginal<
-  AG,
-  UseHookExposureWithSelfHelper<AG>
->;
 
 export const enum EnumHookType {
   USE_REQUEST = 1,
