@@ -1,4 +1,4 @@
-# uniapp adpater for alova
+# Process shared cache adapter for alova
 
 <p align="center">
 <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
@@ -8,12 +8,11 @@
 
 ---
 
-- Refer to [alova](https://github.com/alovajs/alova)
-- Refer to [uniapp](https://uniapp.dcloud.net.cn/)
+Refer to [alova](https://github.com/alovajs/alova)
 
 ## Usage
 
-Please to [adapter uniapp documentation](https://alova.js.org/resource/request-adapter/uniapp) for more details.
+Please to [server strategies documentation](https://alova.js.org/tutorial/server/strategy) for more details.
 
 ## Join the community
 

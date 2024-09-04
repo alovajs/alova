@@ -1,31 +1,48 @@
-# alova request strategy
+# Client request strategies for alova
 
-[![npm](https://img.shields.io/npm/v/@alova/scene-vue)](https://www.npmjs.com/package/@alova/scene)
-[![Coverage Status](https://coveralls.io/repos/github/alovajs/scene/badge.svg?branch=main)](https://coveralls.io/github/alovajs/scene?branch=main)
-[![build](https://github.com/alovajs/scene/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/scene/actions/workflows/release.yml)
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
+<p align="center">
+<img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
+</p>
 
-[alova](https://github.com/alovajs/alova) is a request strategy library, **Its mission is to make applications manage Client-Server data interaction more efficiently**, allowing developers to more elegantly implement more High performance and experience better request function. This library implements different request strategies for specific scenarios around the [core library](https://github.com/alovajs/alova). If you need to give full play to the power of alova, you can use it together with this library.
+<p align="center"><b>Workflow-Streamlined next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
-## Request Strategies
+---
 
-### Pagination request strategy
+Refer to [alova](https://github.com/alovajs/alova)
 
-Automatically manage paging data, data preloading, reduce unnecessary data refresh, improve fluency by 300%, and reduce coding difficulty by 50%.
+## Usage
 
-### Silent commit strategy
+Please to [client strategies documentation](https://alova.js.org/tutorial/client/strategy) for more details.
 
-Response upon submission, greatly reducing the impact of network fluctuations, allowing your application to remain available even when the network is unstable or even disconnected.
+## Join the community
 
-### More strategies comming soon...
+- [Follow us on X to get the latest updates](https://x.com/alovajs)
 
-## alova example
+- [Join the Discord](https://discord.gg/S47QGJgkVb)
 
-[Here are some examples that will demonstrate the power of alova](https://alova.js.org/category/%E7%A4%BA%E4%BE%8B)
+- [Join the WeChat group](https://alova.js.org/img/wechat_qrcode.jpg)
 
-## What's next?
+## We need your support
 
-As mentioned above, the mission of alova is to propose better request management solutions for different request scenarios, and solutions for specific scenarios will be found in [**alovajs/scene**](https://github.com/alovajs/scene), if you have an expected request scene, welcome to discuss it through [issue](https://github.com/alovajs/scene/issues), and welcome to contribute your ingenuity through [pull requests](https://github.com/alovajs/scene/pulls) to make alova better together.
+If you like alova, we are very grateful for giving us a star in the upper right corner, which is a recognition and encouragement for our work.
+
+## Welcome to contribute
+
+We are honored to receive active participation from developers around the world in Issues and Discussions.
+
+We hope to make alova a common project for everyone who is willing to participate, rather than the alova team. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your ideas meet the development guidelines of alova, please participate generously.
+
+Effective contributions will win you a certain reputation in the Alova community. Before contributing, please be sure to read the [Contribution Guide](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md) in detail to ensure your contribution is effective.
+
+## Changelog
+
+[Link](https://github.com/alovajs/alova/releases)
+
+## Contributors
+
+<a href="https://github.com/alovajs/alova/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=alovajs/alova&max=30&columns=10" />
+</a>
 
 ## LICENSE
 

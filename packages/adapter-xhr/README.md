@@ -1,161 +1,50 @@
-# @alova/adapter-xhr
+# XHMLHttpRequest adpater for alova
 
-XMLHttpRequest adapter for alova
+<p align="center">
+<img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
+</p>
 
-[![npm](https://img.shields.io/npm/v/@alova/adapter-xhr)](https://www.npmjs.com/package/@alova/adapter-xhr)
-[![build](https://github.com/alovajs/adapter-xhr/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/adapter-xhr/actions/workflows/main.yml)
-[![coverage status](https://coveralls.io/repos/github/alovajs/adapter-xhr/badge.svg?branch=main)](https://coveralls.io/github/alovajs/adapter-xhr?branch=main)
-![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
+<p align="center"><b>Workflow-Streamlined next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
-<p>English | <a href="./README.zh-CN.md">📑中文</a></p>
+---
 
-[website](https://alova.js.org/extension/alova-adapter-xhr) | [alova](https://github.com/alovajs/alova)
+- Refer to [alova](https://github.com/alovajs/alova)
+- Refer to [xmlhttprequest](https://developer.mozilla.org/docs/Web/API/XMLHttpRequest)
 
-## Install
+## Usage
 
-```bash
-npm install @alova/adapter-xhr --save
-```
+Please to [adapter XHMLHttpRequest documentation](https://alova.js.org/resource/request-adapter/xhr) for more details.
 
-## Instructions
+## Join the community
 
-### create alova
+- [Follow us on X to get the latest updates](https://x.com/alovajs)
 
-Use **xhrRequestAdapter** as request adapter for alova.
+- [Join the Discord](https://discord.gg/S47QGJgkVb)
 
-```javascript
-import { createAlova } from 'alova';
-import { xhrRequestAdapter } from '@alova/adapter-xhr';
+- [Join the WeChat group](https://alova.js.org/img/wechat_qrcode.jpg)
 
-const alovaInst = createAlova(
-   //...
-   requestAdapter: xhrResponseAdapter(),
-   //...
-);
-```
+## We need your support
 
-### Request
+If you like alova, we are very grateful for giving us a star in the upper right corner, which is a recognition and encouragement for our work.
 
-The XMLHttpRequest adapter provides basic configuration parameters, including `responseType`, `withCredentials`, `mimeType`, `auth`, as follows:
+## Welcome to contribute
 
-```javascript
-const list = () =>
-  alovaInst.Get('/list', {
-    /**
-     * Set the response data type
-     * Can be set to change the response type. Values are: "arraybuffer", "blob", "document", "json" and "text"
-     * defaults to "json"
-     */
-    responseType: 'text',
+We are honored to receive active participation from developers around the world in Issues and Discussions.
 
-    /**
-     * True when credentials are to be included in cross-origin requests. false when they are excluded from cross-origin requests and when cookies are ignored in their responses. Default is false
-     */
-    withCredentials: true,
+We hope to make alova a common project for everyone who is willing to participate, rather than the alova team. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your ideas meet the development guidelines of alova, please participate generously.
 
-    /**
-     * Set the mimeType of the response data
-     */
-    mimeType: 'text/plain; charset=x-user-defined',
+Effective contributions will win you a certain reputation in the Alova community. Before contributing, please be sure to read the [Contribution Guide](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md) in detail to ensure your contribution is effective.
 
-    /**
-     * auth means use HTTP Basic authentication and provide credentials.
-     * This will set an `Authorization` header, overriding any existing
-     * Custom headers for `Authorization` set using `headers`.
-     * Note that only HTTP Basic authentication can be configured via this parameter.
-     * For Bearer tokens etc., use the `Authorization` custom header instead.
-     */
-    auth: {
-      username: 'name1',
-      password: '123456'
-    }
-  });
-const { loading, data } = useRequest(list);
-// ...
-```
+## Changelog
 
-### Upload
+[Link](https://github.com/alovajs/alova/releases)
 
-Use `FormData` to upload files, and this `FormData` instance will be sent to the server through `xhr.send`.
+## Contributors
 
-```javascript
-const uploadFile = imageFile => {
-  const formData = new FormData();
-  formData.append('file', imageFile);
-  return alovaInst.Post('/uploadImg', formData, {
-    // Start upload progress
-    enableUpload: true
-  });
-};
+<a href="https://github.com/alovajs/alova/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=alovajs/alova&max=30&columns=10" />
+</a>
 
-const {
-  loading,
-  data,
-  uploading,
-  send: sendUpload
-} = useRequest(uploadFile, {
-  immediate: false
-});
+## LICENSE
 
-// Picture selection event callback
-const handleImageChoose = ({ target }) => {
-  sendUpload(target.files[0]);
-};
-```
-
-### download
-
-Point the request url to the file address to download, you can also enable the download progress by setting `enableDownload` to true.
-
-```javascript
-const downloadFile = () =>
-  alovaInst.Get('/bigImage. jpg', {
-    // Start download progress
-    enableDownload: true,
-    responseType: 'blob'
-  });
-
-const { loading, data, downloading, send, onSuccess } = useRequest(downloadFile, {
-  immediate: false
-});
-onSuccess(({ data: imageBlob }) => {
-  // download image
-  const anchor = document.createElement('a');
-  anchor.href = URL.createObjectURL(blob);
-  anchor.download = 'image.jpg';
-  anchor.click();
-  URL.revokeObjectURL(anchor.href);
-});
-const handleImageDownload = () => {
-  send();
-};
-```
-
-## Mock request adapter compatible
-
-When developing applications, we may still need to use simulated requests. Only by default, the response data of [Mock Request Adapter (@alova/mock)](https://alova.js.org/extension/alova-mock) is a `Response` instance, which is compatible with the `GlobalFetch` request adapter by default. When using the XMLHttpRequest adapter, we You need to adapt the response data of the mock request adapter to the XMLHttpRequest adapter. In this case, you need to use the `xhrMockResponse` exported in the **@alova/adapter-xhr** package as the response adapter.
-
-```javascript
-import { defineMock, createAlovaMockAdapter } from '@alova/mock';
-import { xhrRequestAdapter, xhrMockResponse } from '@alova/adapter-xhr';
-
-const mocks = defineMock({
-  //...
-});
-
-// mock data request adapter
-export default createAlovaMockAdapter([mocks], {
-  // After specifying the request adapter, requests that do not match the simulated interface will use this adapter to send requests
-  httpAdapter: xhrRequestAdapter(),
-
-  // Use xhrMockResponse to adapt the simulated data to the XMLHttpRequest adapter
-  onMockResponse: xhrMockResponse
-});
-
-export const alovaInst = createAlova({
-  //...
-  // Control whether to use the simulated request adapter through environment variables
-  requestAdapter: process.env.NODE_ENV === 'development' ? mockAdapter : xhrRequestAdapter()
-});
-```
+[MIT](https://en.wikipedia.org/wiki/MIT_License)
