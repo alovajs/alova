@@ -42,7 +42,7 @@ In addition, let's take a look at the specific features:
 
 Visit the [alova website](https://alova.js.org) for more information, or [check out the examples to try running](https://alova.js.org/category/examples).
 
-## Join the communication community
+## Join the community
 
 - [Follow us on X to get the latest updates](https://x.com/alovajs)
 
@@ -64,7 +64,7 @@ Effective contributions will win you a certain reputation in the Alova community
 
 ## Changelog
 
-[Go to view](https://github.com/alovajs/alova/releases)
+[Link](https://github.com/alovajs/alova/releases)
 
 ## Contributors
 

@@ -1,143 +1,49 @@
-# @alova/adapter-axios
+# Server request strategies for alova
 
-alova 的 axios 适配器
+<p align="center">
+<img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
+</p>
 
-[![npm](https://img.shields.io/npm/v/@alova/adapter-axios)](https://www.npmjs.com/package/@alova/adapter-axios)
-[![build](https://github.com/alovajs/adapter-axios/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/alovajs/adapter-axios/actions/workflows/main.yml)
-[![coverage status](https://coveralls.io/repos/github/alovajs/adapter-axios/badge.svg?branch=main)](https://coveralls.io/github/alovajs/adapter-axios?branch=main)
-![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
+<p align="center"><b>Workflow-Streamlined next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
-<p>English | <a href="./README.zh-CN.md">📑中文</a></p>
+---
 
-[官网](https://alova.js.org/extension/alova-adapter-axios) | [核心库 alova](https://github.com/alovajs/alova)
+Refer to [alova](https://github.com/alovajs/alova)
 
-## Instructions
+## Usage
 
-### create alova
+Please to [server strategies documentation](https://alova.js.org/tutorial/server/strategy) for more details.
 
-Use **axiosRequestAdapter** as request adapter for alova.
+## Join the community
 
-```javascript
-import { createAlova } from 'alova';
-import VueHook from 'alova/vue';
-import { axiosRequestAdapter } from '@alova/adapter-axios';
+- [Follow us on X to get the latest updates](https://x.com/alovajs)
 
-const alovaInst = createAlova(
-   baseURL: 'https://api.alovajs.org',
-   statesHook: VueHook,
-   // highlight-start
-   requestAdapter: axiosResponseAdapter(),
-   // highlight-end
-);
-```
+- [Join the Discord](https://discord.gg/S47QGJgkVb)
 
-### Request
+- [Join the WeChat group](https://alova.js.org/img/wechat_qrcode.jpg)
 
-The usage method of the request is exactly the same as that used in the web environment. Already fully compatible with **axios**, you can specify [all configuration items] supported by `axios` in _config_ of method instance creation (https://axios-http.com/docs/req_config)
+## We need your support
 
-> Take Vue as an example
+If you like alova, we are very grateful for giving us a star in the upper right corner, which is a recognition and encouragement for our work.
 
-```html
-<tempate>
-<div v-if="loading">Loading...</div>
-<div>The request data is: {{ data }}</div>
-</template>
+## Welcome to contribute
 
-<script setup>
-const list = () =>
-alovaInst. Get('/list', {
-// The set parameters will be passed to axios
-paramsSerializer: params => {
-return Qs. stringify(params, { arrayFormat: 'brackets' });
-}
-});
-const { loading, data } = useRequest(list);
-</script>
-```
+We are honored to receive active participation from developers around the world in Issues and Discussions.
 
-### Upload
+We hope to make alova a common project for everyone who is willing to participate, rather than the alova team. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your ideas meet the development guidelines of alova, please participate generously.
 
-Use `FormData` to upload files, and this `FormData` instance will be passed to axios, which is consistent with the usage of axios upload files.
+Effective contributions will win you a certain reputation in the Alova community. Before contributing, please be sure to read the [Contribution Guide](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md) in detail to ensure your contribution is effective.
 
-```javascript
-const uploadFile = imageFile => {
-  const formData = new FormData();
-  formData.append('file', imageFile);
-  return alovaInst.Post('/uploadImg', formData, {
-    // Start upload progress
-    enableUpload: true
-  });
-};
+## Changelog
 
-const {
-  loading,
-  data,
-  uploading,
-  send: sendUpload
-} = useRequest(uploadFile, {
-  immediate: false
-});
+[Link](https://github.com/alovajs/alova/releases)
 
-// Picture selection event callback
-const handleImageChoose = ({ target }) => {
-  sendUpload(target.files[0]);
-};
-```
+## Contributors
 
-### download
+<a href="https://github.com/alovajs/alova/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=alovajs/alova&max=30&columns=10" />
+</a>
 
-Point the request url to the file address to download, you can also enable the download progress by setting `enableDownload` to true.
+## LICENSE
 
-```javascript
-const downloadFile = () =>
-  alovaInst.Get('/bigImage. jpg', {
-    // Start download progress
-    enableDownload: true,
-    responseType: 'blob'
-  });
-
-const { loading, data, downloading, send, onSuccess } = useRequest(downloadFile, {
-  immediate: false
-});
-onSuccess(({ data: imageBlob }) => {
-  // download image
-  const anchor = document.createElement('a');
-  anchor.href = URL.createObjectURL(blob);
-  anchor.download = 'image.jpg';
-  anchor.click();
-  URL.revokeObjectURL(anchor.href);
-});
-const handleImageDownload = () => {
-  send();
-};
-```
-
-## Mock request adapter compatible
-
-When developing applications, we may still need to use simulated requests. Only by default, the response data of [Mock Request Adapter (@alova/mock)](/extension/alova-mock) is a `Response` instance, which is compatible with the `GlobalFetch` request adapter by default. When using the axios adapter, we The response data of the mock request adapter needs to be compatible with **AxiosResponse**, and the error instance is **AxiosError**, so you need to use `axiosMockResponse` exported from the **@alova/adapter-axios** package as the response adapter .
-
-```javascript
-import { defineMock, createAlovaMockAdapter } from '@alova/mock';
-import { axiosRequestAdapter, axiosMockResponse } from '@alova/adapter-axios';
-
-const mocks = defineMock({
-  //...
-});
-
-// mock data request adapter
-export default createAlovaMockAdapter([mocks], {
-  // After specifying the taro request adapter, requests that do not match the simulated interface will use this adapter to send requests
-  httpAdapter: axiosRequestAdapter(),
-
-  // axiosMockResponse contains onMockResponse and onMockError
-  // Used to convert mock data to AxiosResponse and AxiosError compatible format
-  ...axiosMockResponse
-});
-
-export const alovaInst = createAlova({
-  //...
-  // Control whether to use the simulated request adapter through environment variables
-  requestAdapter: process.env.NODE_ENV === 'development' ? mockAdapter : axiosRequestAdapter()
-});
-```
+[MIT](https://en.wikipedia.org/wiki/MIT_License)

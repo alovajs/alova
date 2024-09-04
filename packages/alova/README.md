@@ -2,27 +2,25 @@
 <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>Creative next-generation request tools, don't spend time on the request, leave it to us</b></p>
+<p align="center"><b>Workflow-Streamlined next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
-<p align="center">Chinese | <a href="./README.md">📑English</a></p>
+<p align="center">English | <a href="./README.zh-CN.md">Chinese</a></p>
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/alovajs/alova/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/release.yml)
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
 [![stars](https://img.shields.io/github/stars/alovajs/alova?style=social)](https://github.com/alovajs/alova)
-[![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![discord](https://img.shields.io/badge/chat-Discord-515ff1)](https://discord.gg/S47QGJgkVb)
 [![wechat](https://img.shields.io/badge/chat_with_CH-Wechat-07c160)](https://alova.js.org/img/wechat_qrcode.jpg)
-[![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## What is alova?
 
-Alova is an creative next-generation request tool. Starting from front-end and back-end collaboration and API consumption, it simplifies API consumption from 7 steps to only 1 step, saving you most of the work in requesting and making network requests very simple. Let's see how alova can help you simplify your work.
+alova(pronounced /əˈləʊva/) is a workflow-streamlined next-generation request tool. Starting from front-end and back-end collaboration and API integration, it streamline API integration workflow from 7 steps to only 1 step, extremely streamline API integration workflow and making network requests very simple. Let's see how alova can help you simplify your work.
 
-![](https://alova.js.org/img/overview_flow_cn.png)
+![](https://alova.js.org/img/overview_flow_en.png)
 
 ## Is there any difference?
 
@@ -44,13 +42,13 @@ In addition, let's take a look at the specific features:
 
 Visit the [alova website](https://alova.js.org) for more information, or [check out the examples to try running](https://alova.js.org/category/examples).
 
-## Join the communication community
+## Join the community
 
 - [Follow us on X to get the latest updates](https://x.com/alovajs)
 
-- [Join the Discord community to participate in the communication](https://discord.gg/S47QGJgkVb)
+- [Join the Discord](https://discord.gg/S47QGJgkVb)
 
-- [Join the WeChat group to participate in the communication](https://alova.js.org/img/wechat_qrcode.jpg)
+- [Join the WeChat group](https://alova.js.org/img/wechat_qrcode.jpg)
 
 ## We need your support
 
@@ -62,43 +60,11 @@ We are honored to receive active participation from developers around the world 
 
 We hope to make alova a common project for everyone who is willing to participate, rather than the alova team. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your ideas meet the development guidelines of alova, please participate generously.
 
-Alova is still a newcomer, and it still has a long way to go. Now participating in contributions can win you more effective contribution opportunities, and it can allow you to provide your value to developers around the world.
-
-We believe that contributing to Alova is not limited to code contribution, but participating in any activities that are conducive to the development of Alova is contributing to Alova, including the following 13 items, but not limited to these:
-
-1. Use Alova in the project
-
-2. Star for Alova
-
-3. Report bugs
-
-4. Provide new feature ideas
-
-5. Contribute code
-
-6. Write adapters and policy libraries based on Alova
-
-7. Participate in community exchanges and PR reviews
-
-8. Write demos
-
-9. Correct or write documents
-
-10. Translate documents
-
-11. Post articles, videos and other information that are conducive to the development of Alova on social platforms
-
-12. Project cooperation
-
-13. Project donations
-
-> And other positive development activities you can think of
-
-Effective contributions will win you a certain reputation in the Alova community. Before contributing, please be sure to read the [Contribution Guide](./CONTRIBUTING.zh-CN.md) in detail to ensure your contribution is effective.
+Effective contributions will win you a certain reputation in the Alova community. Before contributing, please be sure to read the [Contribution Guide](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md) in detail to ensure your contribution is effective.
 
 ## Changelog
 
-[Go to view](https://github.com/alovajs/alova/releases)
+[Link](https://github.com/alovajs/alova/releases)
 
 ## Contributors
 
