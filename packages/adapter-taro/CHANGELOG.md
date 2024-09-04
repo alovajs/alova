@@ -1,5 +1,14 @@
 # @alova/adapter-taro
 
+## 2.0.5
+
+### Patch Changes
+
+- [#532](https://github.com/alovajs/alova/pull/532) [`e3e125f`](https://github.com/alovajs/alova/commit/e3e125fda442d58abe534dc019f616e05de6ab19) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - modify README.md
+
+- Updated dependencies [[`e3e125f`](https://github.com/alovajs/alova/commit/e3e125fda442d58abe534dc019f616e05de6ab19)]:
+  - alova@3.0.16
+
 ## 2.0.4
 
 ### Patch Changes

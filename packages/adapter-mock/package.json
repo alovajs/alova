@@ -1,6 +1,6 @@
 {
   "name": "@alova/mock",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "mock request adapter for alova.js",
   "homepage": "https://github.com/alovajs/mock",
   "main": "dist/alova-mock.common.cjs",
@@ -39,7 +39,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.15"
+    "alova": "^3.0.16"
   },
   "devDependencies": {
     "@alova/scripts": "workspace:^",
