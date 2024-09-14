@@ -20,8 +20,8 @@ export interface WatcherHookConfig<AG extends AlovaGenerics> extends FrontReques
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useWatcher<AG extends AlovaGenerics>(
-  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useWatcher<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   watchingStates: AG['StatesExport']['Watched'][],
   config?: WatcherHookConfig<AG>
-): UseHookExposure<AG>;
+): UseHookExposure<AG, Args>;

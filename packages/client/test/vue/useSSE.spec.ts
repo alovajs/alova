@@ -48,7 +48,7 @@ describe('vue => useSSE', () => {
   // ! 无初始数据，不立即发送请求
   test('should default NOT request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
+    const poster = (data?: any) => alovaInst.Get(`/${IntervalEventName}`, data);
     const { on, onOpen, data, readyState, send, close } = useSSE(poster);
     const cb = jest.fn();
     const openCb = jest.fn();
@@ -86,7 +86,7 @@ describe('vue => useSSE', () => {
   // ! 有初始数据，不立即发送请求
   test('should get the initial data and NOT send request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const poster = (data?: any) => alovaInst.Get(`/${TriggerEventName}`, data);
     const initialData = {
       id: 9527,
       name: 'Tom',

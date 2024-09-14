@@ -49,8 +49,8 @@ const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSour
   Message: 'message'
 } as const;
 
-export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: SSEHookConfig = {}
 ) => {
   const {
@@ -274,7 +274,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   /**
    * 发送请求并初始化 eventSource
    */
-  const connect = (...args: any[]) => {
+  const connect = (...args: [...Args, ...any]) => {
     let es = eventSource.current;
     let promiseObj = sendPromiseObject.current;
     if (es && abortLast) {
@@ -337,7 +337,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   // * MARK: 初始化动作
   onMounted(() => {
     if (immediate) {
-      connect();
+      connect(...([] as unknown as [...Args, ...any[]]));
       sendPromiseObject.current?.promise.catch(() => {});
     }
   });

@@ -11,10 +11,10 @@ import {
 } from '~/typings/clienthook';
 
 interface AutoRequestHook {
-  <AG extends AlovaGenerics>(
-    handler: Method<AG> | AlovaMethodHandler<AG>,
+  <AG extends AlovaGenerics, Args extends any[] = any[]>(
+    handler: Method<AG> | AlovaMethodHandler<AG, Args>,
     config?: AutoRequestHookConfig<AG>
-  ): UseHookExposure<AG>;
+  ): UseHookExposure<AG, Args>;
   onNetwork<AG extends AlovaGenerics = AlovaGenerics>(
     notify: NotifyHandler,
     config: AutoRequestHookConfig<AG>
@@ -54,7 +54,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
   });
   const notify = () => {
     if (notifiable) {
-      states.send();
+      (states.send as any)();
       if (throttle > 0) {
         notifiable = falseValue;
         setTimeout(() => {

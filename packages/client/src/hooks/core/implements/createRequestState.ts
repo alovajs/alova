@@ -46,9 +46,13 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<AG extends AlovaGenerics, Config extends UseHookConfig<AG>>(
+export default function createRequestState<
+  AG extends AlovaGenerics,
+  Config extends UseHookConfig<AG>,
+  Args extends any[] = any[]
+>(
   hookType: EnumHookType,
-  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
+  methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   useHookConfig: Config,
   initialData?: FrontRequestHookConfig<AG>['initialData'],
   immediate = falseValue,
@@ -175,7 +179,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: (sendCallingArgs?: any[], methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs),
+    send: (sendCallingArgs?: Args, methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs),
     onSuccess(handler: SuccessHandler<AG>) {
       eventManager.on(KEY_SUCCESS, handler);
     },

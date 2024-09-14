@@ -73,7 +73,9 @@ export type StateUpdater<ExportedStates extends Record<string, any>, SE extends 
     : ExportedStates[K];
 }) => void;
 
-export type AlovaMethodHandler<AG extends AlovaGenerics = any> = (...args: any[]) => Method<AG>;
+export type AlovaMethodHandler<AG extends AlovaGenerics = any, Args extends any[] = any[]> = (
+  ...args: Args
+) => Method<AG>;
 export type SuccessHandler<AG extends AlovaGenerics> = (event: AlovaSuccessEvent<AG>) => void;
 export type ErrorHandler<AG extends AlovaGenerics> = (event: AlovaErrorEvent<AG>) => void;
 export type CompleteHandler<AG extends AlovaGenerics> = (event: AlovaCompleteEvent<AG>) => void;
@@ -120,9 +122,10 @@ export interface MiddlewareNextGuardConfig<AG extends AlovaGenerics> {
 /**
  * useRequest和useWatcher中间件的context参数
  */
-export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics> extends AlovaMiddlewareContext<AG> {
+export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics, Args extends any[]>
+  extends AlovaMiddlewareContext<AG> {
   /** 发送请求函数 */
-  send: SendHandler<AG['Responded']>;
+  send: SendHandler<Args, AG['Responded']>;
 
   /** args 响应处理回调的参数，该参数由use hooks的send传入 */
   args: any[];
@@ -148,8 +151,8 @@ export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics> extends A
 /**
  * alova useRequest/useWatcher中间件
  */
-export interface AlovaFrontMiddleware<AG extends AlovaGenerics> {
-  (context: AlovaFrontMiddlewareContext<AG>, next: AlovaGuardNext<AG>): any;
+export interface AlovaFrontMiddleware<AG extends AlovaGenerics, Args extends any[] = any[]> {
+  (context: AlovaFrontMiddlewareContext<AG, Args>, next: AlovaGuardNext<AG>): any;
 }
 
 /**
@@ -198,7 +201,7 @@ export interface AlovaGuardNext<AG extends AlovaGenerics> {
   (guardNextConfig?: MiddlewareNextGuardConfig<AG>): Promise<AG['Responded']>;
 }
 
-export type SendHandler<R> = (...args: any[]) => Promise<R>;
+export type SendHandler<Args extends any[], R> = (...args: [...Args, ...any[]]) => Promise<R>;
 export interface UseHookExportedState<AG extends AlovaGenerics>
   extends FrontRequestState<
     ExportedState<boolean, AG['StatesExport']>,
@@ -207,11 +210,14 @@ export interface UseHookExportedState<AG extends AlovaGenerics>
     ExportedState<Progress, AG['StatesExport']>,
     ExportedState<Progress, AG['StatesExport']>
   > {}
-export interface UseHookExposure<AG extends AlovaGenerics = AlovaGenerics, SelfType = unknown>
-  extends UseHookExportedState<AG> {
+export interface UseHookExposure<
+  AG extends AlovaGenerics = AlovaGenerics,
+  Args extends any[] = any[],
+  SelfType = unknown
+> extends UseHookExportedState<AG> {
   abort: () => void;
   update: StateUpdater<UseHookExportedState<AG>, AG['StatesExport']>;
-  send: SendHandler<AG['Responded']>;
+  send: SendHandler<Args, AG['Responded']>;
   onSuccess(handler: SuccessHandler<AG>): IsUnknown<SelfType, this, SelfType>;
   onError(handler: ErrorHandler<AG>): IsUnknown<SelfType, this, SelfType>;
   onComplete(handler: CompleteHandler<AG>): IsUnknown<SelfType, this, SelfType>;

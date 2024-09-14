@@ -93,7 +93,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   const { loading, fetch, abort: abortFetch, onSuccess: onFetchSuccess } = fetchStates;
   const fetchingRef = ref(loading);
 
-  const getHandlerMethod = (refreshPage = page.v) => {
+  const getHandlerMethod = (refreshPage: number | undefined = page.v) => {
     const pageSizeVal = pageSize.v;
     const handlerMethod = handler(refreshPage, pageSizeVal);
 
@@ -123,7 +123,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     (actionName: string) =>
     (...args: any[]) =>
       delegationActions.current[actionName](...args);
-  const states = useWatcher<AG>(getHandlerMethod, [...watchingStates, page.e, pageSize.e] as any, {
+  const states = useWatcher(getHandlerMethod, [...watchingStates, page.e, pageSize.e] as any, {
     __referingObj: referingObject,
     immediate,
     initialData,

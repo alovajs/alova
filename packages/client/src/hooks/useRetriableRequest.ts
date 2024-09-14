@@ -29,8 +29,8 @@ type RetryHandler<AG extends AlovaGenerics> = (event: RetriableRetryEvent<AG>) =
 type FailHandler<AG extends AlovaGenerics> = (event: RetriableFailEvent<AG>) => void;
 const hookPrefix = 'useRetriableRequest';
 const assert = createAssert(hookPrefix);
-export default <AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: RetriableHookConfig<AG> = {}
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
@@ -158,7 +158,7 @@ export default <AG extends AlovaGenerics>(
       setTimeout(() => {
         promiseObj.current = usePromise();
       });
-      nestedHookProvider.update({ error: stopManuallyError.current, loading: falseValue });
+      nestedHookProvider.update({ error: stopManuallyError.current as any, loading: falseValue as any });
       currentLoadingState.current = falseValue;
       clearTimeout(retryTimer.current); // 清除重试定时器
 

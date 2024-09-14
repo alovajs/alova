@@ -355,8 +355,8 @@ export type BeforePushQueueHandler<AG extends AlovaGenerics> = (
   event: ScopedSQEvent<AG>
 ) => void | boolean | Promise<void | boolean>;
 export type PushedQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
-export type SQHookExposure<AG extends AlovaGenerics> = Omit<
-  UseHookExposure<AG>,
+export type SQHookExposure<AG extends AlovaGenerics, Args extends any[] = any[]> = Omit<
+  UseHookExposure<AG, Args>,
   'onSuccess' | 'onError' | 'onComplete'
 > & {
   /**
@@ -458,10 +458,10 @@ export type SilentQueueMap = Record<string, SilentMethod<any>[]>;
  * 带silentQueue的request hook
  * silentQueue是实现静默提交的核心部件，其中将用于存储silentMethod实例，它们将按顺序串行发送提交
  */
-export declare function useSQRequest<AG extends AlovaGenerics>(
-  handler: AlovaMethodHandler<AG>,
+export declare function useSQRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: AlovaMethodHandler<AG, Args>,
   config?: SQRequestHookConfig<AG>
-): SQHookExposure<AG>;
+): SQHookExposure<AG, Args>;
 export declare function bootSilentFactory(options: SilentFactoryBootOptions): void;
 export declare function onSilentSubmitBoot(handler: SilentSubmitBootHandler): OffEventCallback;
 export declare function onSilentSubmitSuccess(handler: SilentSubmitSuccessHandler): OffEventCallback;

@@ -62,7 +62,7 @@ export interface SSEHookConfig {
 /**
  * useSSE() 返回类型
  */
-export interface SSEExposure<AG extends AlovaGenerics, Data> {
+export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] = any[]> {
   readyState: ExportedState<SSEHookReadyState, AG['StatesExport']>;
   data: ExportedState<Data | undefined, AG['StatesExport']>;
   eventSource: ExportedState<EventSource | undefined, AG['StatesExport']>;
@@ -70,7 +70,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data> {
    * 手动发起请求。在使用 `immediate: true` 时该方法会自动触发
    * @param args 请求参数，会传递给 method
    */
-  send(...args: any[]): Promise<void>;
+  send(...args: [...Args, ...any[]]): Promise<void>;
   /**
    * 关闭连接
    */
@@ -112,7 +112,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data> {
  * @param config 配置参数
  * @return useSSE相关数据和操作函数
  */
-export declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: SSEHookConfig
-): SSEExposure<AG, Data>;
+): SSEExposure<AG, Data, Args>;

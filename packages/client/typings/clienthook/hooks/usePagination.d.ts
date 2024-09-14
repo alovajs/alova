@@ -56,7 +56,7 @@ export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extend
   watchingStates?: AG['StatesExport']['Watched'][];
 }
 export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
-  extends Omit<UseHookExposure<AG, UsePaginationExposure<AG, ListData>>, 'update'> {
+  extends Omit<UseHookExposure<AG, [page: number, pageSize: number], UsePaginationExposure<AG, ListData>>, 'update'> {
   page: ExportedState<number, AG['StatesExport']>;
   pageSize: ExportedState<number, AG['StatesExport']>;
   data: ExportedState<

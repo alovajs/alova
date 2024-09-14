@@ -30,7 +30,7 @@ export type RequestHookConfig<AG extends AlovaGenerics> = FrontRequestHookConfig
  * @param config 配置项
  * @returns 响应式请求数据、操作函数及事件绑定函数
  */
-export declare function useRequest<AG extends AlovaGenerics>(
-  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useRequest<AG extends AlovaGenerics, Args extends any[]>(
+  methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: RequestHookConfig<AG>
-): UseHookExposure<AG>;
+): UseHookExposure<AG, Args>;

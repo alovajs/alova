@@ -45,7 +45,8 @@ export interface RetriableFailEvent<AG extends AlovaGenerics> extends AlovaError
 /**
  * useRetriableRequest返回值
  */
-export interface RetriableExposure<AG extends AlovaGenerics> extends UseHookExposure<AG, RetriableExposure<AG>> {
+export interface RetriableExposure<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends UseHookExposure<AG, Args, RetriableExposure<AG, Args>> {
   /**
    * 停止重试，只在重试期间调用有效
    * 停止后将立即触发onFail事件
@@ -83,7 +84,7 @@ export interface RetriableExposure<AG extends AlovaGenerics> extends UseHookExpo
  * @param config 配置参数
  * @return useRetriableRequest相关数据和操作函数
  */
-export declare function useRetriableRequest<AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useRetriableRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: RetriableHookConfig<AG>
-): RetriableExposure<AG>;
+): RetriableExposure<AG, Args>;

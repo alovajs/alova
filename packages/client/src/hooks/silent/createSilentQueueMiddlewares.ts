@@ -52,7 +52,10 @@ export let currentSilentMethod: SilentMethod<any> | undefined = undefinedValue;
  * @param config 配置对象
  * @returns 中间件函数
  */
-export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandler<AG>, config?: SQHookConfig<AG>) => {
+export default <AG extends AlovaGenerics, Args extends any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
+  config?: SQHookConfig<AG>
+) => {
   const { behavior = 'queue', queue = DEFAULT_QUEUE_NAME, retryError, maxRetryTimes, backoff } = config || {};
   const eventEmitter = createEventManager<ScopedSQEvents<AG>>();
   let handlerArgs: any[] | undefined;
@@ -74,7 +77,7 @@ export default <AG extends AlovaGenerics>(handler: Method<AG> | AlovaMethodHandl
   };
 
   // 装饰success/error/complete事件
-  const decorateRequestEvent = (requestExposure: UseHookExposure<AG>) => {
+  const decorateRequestEvent = (requestExposure: UseHookExposure<AG, Args>) => {
     // 设置事件回调装饰器
     requestExposure.onSuccess = decorateEvent(requestExposure.onSuccess, (handler, event) => {
       currentSilentMethod = silentMethodInstance;

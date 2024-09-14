@@ -4,8 +4,8 @@ import { AlovaGenerics, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, SQRequestHookConfig, UseHookExposure } from '~/typings/clienthook';
 import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';
 
-export default function useSQRequest<AG extends AlovaGenerics>(
-  handler: AlovaMethodHandler<AG>,
+export default function useSQRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: AlovaMethodHandler<AG, Args>,
   config: SQRequestHookConfig<AG> = {}
 ) {
   const { exposeProvider, __referingObj: referingObj } = statesHookHelper(promiseStatesHook());
@@ -25,7 +25,7 @@ export default function useSQRequest<AG extends AlovaGenerics>(
       return silentMidPromise;
     }
   });
-  decorateEvent(states as UseHookExposure<AG>);
+  decorateEvent(states as unknown as UseHookExposure<AG, Args>);
 
   return exposeProvider({
     ...states,

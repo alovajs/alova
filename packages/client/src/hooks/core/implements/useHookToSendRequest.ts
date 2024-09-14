@@ -33,9 +33,9 @@ import { getStateCache, removeStateCache, setStateCache } from './stateCache';
  * @param sendCallingArgs send函数参数
  * @returns 请求状态
  */
-export default function useHookToSendRequest<AG extends AlovaGenerics>(
+export default function useHookToSendRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   hookInstance: Hook,
-  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
+  methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   sendCallingArgs: any[] = []
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
