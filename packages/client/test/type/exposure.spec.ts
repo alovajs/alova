@@ -75,6 +75,12 @@ describe('send args', () => {
     expectAssignableBy<SendHandler<ExtendedArgs, any>>(useRequestState.send);
     // @ts-expect-error
     expectAssignableBy<SendHandler<NotMatchArgs, any>>(useRequestState.send);
+
+    // @ts-expect-error
+    useRequestState.onError(e => expectType<123>(e.args));
+    useRequestState.onError(e => expectType<Args>(e.args));
+    useRequestState.onComplete(e => expectType<Args>(e.args));
+    useRequestState.onSuccess(e => expectType<Args>(e.args));
   });
 
   test('useWatcher', () => {
@@ -86,42 +92,69 @@ describe('send args', () => {
   });
 
   test('useSSE', () => {
-    const useWatcherState = useSSE(ArgsGetter<Args, any>);
-    expectAssignableBy<SendHandler<Args, any>>(useWatcherState.send);
-    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useWatcherState.send);
+    const useSSEState = useSSE(ArgsGetter<Args, any>);
+
+    expectAssignableBy<SendHandler<Args, any>>(useSSEState.send);
+    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useSSEState.send);
     // @ts-expect-error
-    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useWatcherState.send);
+    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useSSEState.send);
+
+    // @ts-expect-error
+    useSSEState.onError(e => expectType<123>(e.args));
+
+    useSSEState.onMessage(e => expectType<Args>(e.args));
+    useSSEState.onOpen(e => expectType<Args>(e.args));
+    useSSEState.onError(e => expectType<Args>(e.args));
   });
 
   test('useForm', () => {
-    const useWatcherState = useForm((form: {}, ...args: Args) => VueAlovaInst.Get(''));
-    expectAssignableBy<SendHandler<Args, any>>(useWatcherState.send);
-    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useWatcherState.send);
+    const useFormState = useForm((form: {}, ...args: Args) => VueAlovaInst.Get(''));
+    expectAssignableBy<SendHandler<Args, any>>(useFormState.send);
+    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useFormState.send);
     // @ts-expect-error
-    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useWatcherState.send);
+    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useFormState.send);
   });
 
   test('useCaptcha', () => {
-    const useWatcherState = useCaptcha(ArgsGetter<Args, any>);
-    expectAssignableBy<SendHandler<Args, any>>(useWatcherState.send);
-    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useWatcherState.send);
+    const useCaptchaState = useCaptcha(ArgsGetter<Args, any>);
+    expectAssignableBy<SendHandler<Args, any>>(useCaptchaState.send);
+    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useCaptchaState.send);
     // @ts-expect-error
-    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useWatcherState.send);
+    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useCaptchaState.send);
   });
 
   test('useRetriable', () => {
-    const useWatcherState = useRetriableRequest(ArgsGetter<Args, any>);
-    expectAssignableBy<SendHandler<Args, any>>(useWatcherState.send);
-    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useWatcherState.send);
+    const useRetriableState = useRetriableRequest(ArgsGetter<Args, any>);
+    expectAssignableBy<SendHandler<Args, any>>(useRetriableState.send);
+    expectAssignableBy<SendHandler<ExtendedArgs, any>>(useRetriableState.send);
     // @ts-expect-error
-    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useWatcherState.send);
+    expectAssignableBy<SendHandler<NotMatchArgs, any>>(useRetriableState.send);
   });
 
   test('usePagination', () => {
-    const usePaginationState = usePagination((page, pageSize) => VueAlovaInst.Get(`${page} ${pageSize}`));
+    const usePaginationState = usePagination((page, pageSize, name?: string) =>
+      VueAlovaInst.Get(`${page} ${pageSize}`)
+    );
 
     expectAssignableBy<SendHandler<[number, number], any>>(usePaginationState.send);
+    expectAssignableBy<SendHandler<[number, number, string], any>>(usePaginationState.send);
+    expectAssignableBy<SendHandler<[number, number, string, 123, 345], any>>(usePaginationState.send);
     // @ts-expect-error
     expectAssignableBy<SendHandler<[string, number], any>>(usePaginationState.send);
+
+    usePaginationState.onFetchError(e => expectType<[number, number, name?: string | undefined]>(e.args));
+    usePaginationState.onFetchComplete(e => expectType<[number, number, name?: string | undefined]>(e.args));
+    usePaginationState.onFetchSuccess(e => expectType<[number, number, name?: string | undefined]>(e.args));
+  });
+
+  test('middleware', () => {
+    useRequest(ArgsGetter<Args, any>, {
+      middleware: (ctx, next) => {
+        expectType<Args>(ctx.args);
+        next({
+          force: event => expectType<Args>(event.args) as unknown as boolean
+        });
+      }
+    });
   });
 });

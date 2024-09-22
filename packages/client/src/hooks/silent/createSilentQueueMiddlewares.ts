@@ -83,7 +83,7 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
       currentSilentMethod = silentMethodInstance;
       handler(
         newInstance(
-          ScopedSQSuccessEvent<AG>,
+          ScopedSQSuccessEvent<AG, Args>,
           behaviorFinally,
           event.method,
           silentMethodInstance,
@@ -96,7 +96,7 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
     requestExposure.onError = decorateEvent(requestExposure.onError, (handler, event) => {
       handler(
         newInstance(
-          ScopedSQErrorEvent<AG>,
+          ScopedSQErrorEvent<AG, Args>,
           behaviorFinally,
           event.method,
           silentMethodInstance,
@@ -108,7 +108,7 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
     requestExposure.onComplete = decorateEvent(requestExposure.onComplete, (handler, event) => {
       handler(
         newInstance(
-          ScopedSQCompleteEvent<AG>,
+          ScopedSQCompleteEvent<AG, Args>,
           behaviorFinally,
           event.method,
           silentMethodInstance,
@@ -127,7 +127,7 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
    * @param next 继续执行函数
    * @returns Promise对象
    */
-  const middleware: AlovaFrontMiddleware<AG> = ({ method, args, cachedResponse, proxyStates, config }, next) => {
+  const middleware: AlovaFrontMiddleware<AG, Args> = ({ method, args, cachedResponse, proxyStates, config }, next) => {
     const { silentDefaultResponse, vDataCaptured, force = falseValue } = config;
 
     // 因为behavior返回值可能会变化，因此每次请求都应该调用它重新获取返回值
@@ -189,7 +189,7 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
         // onBeforePush和onPushed事件是同步绑定的，因此需要异步执行入队列才能正常触发事件
         promiseThen(promiseResolve(undefinedValue), async () => {
           const createPushEvent = () =>
-            newInstance(ScopedSQEvent<AG>, behaviorFinally, method, silentMethodInstance, args);
+            newInstance(ScopedSQEvent<AG, Args>, behaviorFinally, method, silentMethodInstance, args);
 
           // 将silentMethod放入队列并持久化
           const isPushed = await pushNewSilentMethod2Queue(

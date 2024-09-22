@@ -34,9 +34,9 @@ import { getStateCache, removeStateCache, setStateCache } from './stateCache';
  * @returns 请求状态
  */
 export default function useHookToSendRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
-  hookInstance: Hook,
+  hookInstance: Hook<Args>,
   methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
-  sendCallingArgs: any[] = []
+  sendCallingArgs: Args = [] as any
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
   let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);
@@ -44,7 +44,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
   const { loading: loadingState, data: dataState, error: errorState } = frontStates;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-    | FrontRequestHookConfig<AG>
+    | FrontRequestHookConfig<AG, Args>
     | FetcherHookConfig<AG>;
   const alovaInstance = getContext(methodInstance);
   const { id } = alovaInstance;
@@ -75,12 +75,12 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
     }
 
     // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
-    const guardNext: AlovaGuardNext<AG> = guardNextConfig => {
+    const guardNext: AlovaGuardNext<AG, Args> = guardNextConfig => {
       isNextCalled = trueValue;
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
         guardNextConfig || {};
       const forceRequestFinally = sloughConfig(guardNextForceRequest, [
-        newInstance(AlovaEventBase<AG>, methodInstance, sendCallingArgs)
+        newInstance(AlovaEventBase<AG, Args>, methodInstance, sendCallingArgs)
       ]);
       const progressUpdater =
         (stage: 'downloading' | 'uploading') =>
@@ -123,7 +123,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
       hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
     // 调用中间件函数
     const middlewareCompletePromise = isFetcher
-      ? (middleware as AlovaFetcherMiddleware<AG>)(
+      ? (middleware as AlovaFetcherMiddleware<AG, Args>)(
           {
             ...commonContext,
             args: sendCallingArgs,
@@ -138,11 +138,11 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
           },
           guardNext
         )
-      : (middleware as AlovaFrontMiddleware<AG>)(
+      : (middleware as AlovaFrontMiddleware<AG, Args>)(
           {
             ...commonContext,
             args: sendCallingArgs,
-            send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args),
+            send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args as any),
             proxyStates: frontStates,
             controlLoading(control = trueValue) {
               controlledLoading = control;
@@ -152,7 +152,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
         );
 
     let finallyResponse: any = undefinedValue;
-    const baseEvent = AlovaEventBase.spawn(methodInstance, sendCallingArgs);
+    const baseEvent = (AlovaEventBase<AG, Args>).spawn(methodInstance, sendCallingArgs);
     try {
       // 统一处理响应
       const middlewareReturnedData = await middlewareCompletePromise;
@@ -171,10 +171,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
           errorState.v = undefinedValue;
           // loading状态受控时将不再更改为false
           !controlledLoading && (loadingState.v = falseValue);
-          hookInstance.em.emit(KEY_SUCCESS, newInstance(AlovaSuccessEvent<AG>, baseEvent, data, fromCache()));
+          hookInstance.em.emit(KEY_SUCCESS, newInstance(AlovaSuccessEvent<AG, Args>, baseEvent, data, fromCache()));
           hookInstance.em.emit(
             KEY_COMPLETE,
-            newInstance(AlovaCompleteEvent<AG>, baseEvent, KEY_SUCCESS, data, fromCache(), undefinedValue)
+            newInstance(AlovaCompleteEvent<AG, Args>, baseEvent, KEY_SUCCESS, data, fromCache(), undefinedValue)
           );
         }
         return data;
@@ -201,10 +201,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
         errorState.v = error;
         // loading状态受控时将不再更改为false
         !controlledLoading && (loadingState.v = falseValue);
-        hookInstance.em.emit(KEY_ERROR, newInstance(AlovaErrorEvent<AG>, baseEvent, error));
+        hookInstance.em.emit(KEY_ERROR, newInstance(AlovaErrorEvent<AG, Args>, baseEvent, error));
         hookInstance.em.emit(
           KEY_COMPLETE,
-          newInstance(AlovaCompleteEvent<AG>, baseEvent, KEY_ERROR, undefinedValue, fromCache(), error)
+          newInstance(AlovaCompleteEvent<AG, Args>, baseEvent, KEY_ERROR, undefinedValue, fromCache(), error)
         );
       }
 

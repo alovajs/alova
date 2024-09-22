@@ -48,13 +48,13 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  */
 export default function createRequestState<
   AG extends AlovaGenerics,
-  Config extends UseHookConfig<AG>,
-  Args extends any[] = any[]
+  Args extends any[],
+  Config extends UseHookConfig<AG, Args>
 >(
   hookType: EnumHookType,
   methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   useHookConfig: Config,
-  initialData?: FrontRequestHookConfig<AG>['initialData'],
+  initialData?: FrontRequestHookConfig<AG, Args>['initialData'],
   immediate = falseValue,
   watchingStates?: AG['StatesExport']['Watched'][],
   debounceDelay: WatcherHookConfig<AG>['debounce'] = 0
@@ -86,7 +86,7 @@ export default function createRequestState<
           cachedResponse = data;
         }
       }
-      const forceRequestFinally = sloughConfig((useHookConfig as UseHookConfig<AG>).force ?? falseValue);
+      const forceRequestFinally = sloughConfig((useHookConfig as UseHookConfig<AG, Args>).force ?? falseValue);
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
   }
@@ -100,7 +100,7 @@ export default function createRequestState<
     loaded: 0
   };
   // 将外部传入的受监管的状态一同放到frontStates集合中
-  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG>;
+  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG, Args>;
   const managedStatesProxy = mapObject(managedStates, (state, key) => transformState2Proxy(state, key));
   const data = create((isFn(initialData) ? initialData() : initialData) as AG['Responded'], 'data');
   const loading = create(initialLoading, 'loading');
@@ -110,9 +110,9 @@ export default function createRequestState<
 
   const frontStates = objectify([data, loading, error, downloading, uploading]);
   const eventManager = createEventManager<{
-    success: AlovaSuccessEvent<AG>;
-    error: AlovaErrorEvent<AG>;
-    complete: AlovaCompleteEvent<AG>;
+    success: AlovaSuccessEvent<AG, Args>;
+    error: AlovaErrorEvent<AG, Args>;
+    complete: AlovaCompleteEvent<AG, Args>;
   }>();
 
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
@@ -128,7 +128,7 @@ export default function createRequestState<
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
-  const handleRequest = (handler: Method<AG> | AlovaMethodHandler<AG> = methodHandler, sendCallingArgs?: any[]) =>
+  const handleRequest = (handler: Method<AG> | AlovaMethodHandler<AG, Args> = methodHandler, sendCallingArgs?: Args) =>
     useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
   // 以捕获异常的方式调用handleRequest
   // 捕获异常避免异常继续向外抛出
@@ -180,16 +180,16 @@ export default function createRequestState<
      * @returns 请求promise
      */
     send: (sendCallingArgs?: Args, methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs),
-    onSuccess(handler: SuccessHandler<AG>) {
+    onSuccess(handler: SuccessHandler<AG, Args>) {
       eventManager.on(KEY_SUCCESS, handler);
     },
-    onError(handler: ErrorHandler<AG>) {
+    onError(handler: ErrorHandler<AG, Args>) {
       // will not throw error when bindError is true.
       // it will reset in `exposeProvider` so that ignore the error binding in custom use hooks.
       referingObject.bindError = trueValue;
       eventManager.on(KEY_ERROR, handler);
     },
-    onComplete(handler: CompleteHandler<AG>) {
+    onComplete(handler: CompleteHandler<AG, Args>) {
       eventManager.on(KEY_COMPLETE, handler);
     }
   });

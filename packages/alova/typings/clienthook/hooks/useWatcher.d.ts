@@ -3,7 +3,8 @@ import { AlovaMethodHandler, UseHookExposure } from '../general';
 import { FrontRequestHookConfig } from './useRequest';
 
 /** useWatcher config export type */
-export interface WatcherHookConfig<AG extends AlovaGenerics> extends FrontRequestHookConfig<AG> {
+export interface WatcherHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends FrontRequestHookConfig<AG, Args> {
   /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
   debounce?: number | number[];
   abortLast?: boolean;
@@ -23,5 +24,5 @@ export interface WatcherHookConfig<AG extends AlovaGenerics> extends FrontReques
 export declare function useWatcher<AG extends AlovaGenerics, Args extends any[] = any[]>(
   methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   watchingStates: AG['StatesExport']['Watched'][],
-  config?: WatcherHookConfig<AG>
+  config?: WatcherHookConfig<AG, Args>
 ): UseHookExposure<AG, Args>;

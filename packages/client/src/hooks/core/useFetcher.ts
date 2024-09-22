@@ -14,6 +14,7 @@ export default function useFetcher<F extends FetcherType<any>>(config: FetcherHo
     Omit<AlovaGenerics, 'StatesExport'> & {
       StatesExport: F['StatesExport'];
     },
+    any[],
     FetcherHookConfig
   >(EnumHookType.USE_FETCHER, noop as any, config);
   const { send } = props;

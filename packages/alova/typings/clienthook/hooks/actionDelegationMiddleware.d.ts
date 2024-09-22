@@ -19,7 +19,7 @@ export declare function actionDelegationMiddleware<
 >(
   id: string | number | symbol
 ): (
-  context: (AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG>) & {
+  context: (AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>) & {
     delegatingActions?: Actions;
   },
   next: AlovaGuardNext<AG>

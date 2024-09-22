@@ -36,7 +36,7 @@ export type SerialHandlers<AG extends AlovaGenerics, Args extends any[] = any[]>
  */
 export const serialMiddleware = <AG extends AlovaGenerics, Args extends any[] = any[]>(
   serialHandlers: SerialHandlers<AG, Args>,
-  hookMiddleware?: AlovaFrontMiddleware<AG>,
+  hookMiddleware?: AlovaFrontMiddleware<AG, Args>,
   serialRequestMethods: Method<AG>[] = []
 ) => {
   // 第一个handler在外部传递给了use hook，不需要再次请求

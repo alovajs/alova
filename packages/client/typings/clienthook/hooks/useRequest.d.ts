@@ -3,7 +3,7 @@ import { AlovaFrontMiddleware, AlovaMethodHandler, UseHookConfig, UseHookExposur
 
 /** useRequest和useWatcher都有的类型 */
 type InitialDataType = number | string | boolean | object;
-export interface FrontRequestHookConfig<AG extends AlovaGenerics> extends UseHookConfig<AG> {
+export interface FrontRequestHookConfig<AG extends AlovaGenerics, Args extends any[]> extends UseHookConfig<AG, Args> {
   /** 是否立即发起一次请求 */
   immediate?: boolean;
 
@@ -14,11 +14,11 @@ export interface FrontRequestHookConfig<AG extends AlovaGenerics> extends UseHoo
   managedStates?: Record<string | symbol, AG['StatesExport']['State']>;
 
   /** 中间件 */
-  middleware?: AlovaFrontMiddleware<AG>;
+  middleware?: AlovaFrontMiddleware<AG, Args>;
 }
 
 /** useRequest config export type */
-export type RequestHookConfig<AG extends AlovaGenerics> = FrontRequestHookConfig<AG>;
+export type RequestHookConfig<AG extends AlovaGenerics, Args extends any[]> = FrontRequestHookConfig<AG, Args>;
 
 /**
  * 自动管理响应状态hook
@@ -32,5 +32,5 @@ export type RequestHookConfig<AG extends AlovaGenerics> = FrontRequestHookConfig
  */
 export declare function useRequest<AG extends AlovaGenerics, Args extends any[]>(
   methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG, Args>;

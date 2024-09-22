@@ -15,7 +15,7 @@ import { assertSerialHandlers, serialMiddleware } from './general';
  */
 export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG, Args>, ...AlovaMethodHandler<any>[]],
-  config: RequestHookConfig<AG> = {} as any
+  config: RequestHookConfig<AG, Args> = {} as any
 ) => {
   assertSerialHandlers('useSerialRequest', serialHandlers);
   // eslint-disable-next-line

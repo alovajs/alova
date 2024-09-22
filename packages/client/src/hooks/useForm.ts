@@ -32,7 +32,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   const typedSharedStates = sharedStates as Record<
     ID,
     {
-      hookProvider: FormExposure<AG, any>;
+      hookProvider: FormExposure<AG, any, Args>;
       config: FormHookConfig<AG, any>;
     }
   >;

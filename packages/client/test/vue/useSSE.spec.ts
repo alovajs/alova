@@ -28,7 +28,11 @@ beforeAll(() => {
   mockServer.close();
 });
 
-type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
+type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]> = AlovaSSEMessageEvent<
+  any,
+  AG,
+  Args
+>;
 
 /**
  * 准备 Alova 实例环境，并且开始 SSE 服务器的监听

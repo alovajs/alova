@@ -6,7 +6,7 @@ import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';
 
 export default function useSQRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: AlovaMethodHandler<AG, Args>,
-  config: SQRequestHookConfig<AG> = {}
+  config: SQRequestHookConfig<AG, Args> = {}
 ) {
   const { exposeProvider, __referingObj: referingObj } = statesHookHelper(promiseStatesHook());
   const { middleware = noop } = config;

@@ -11,7 +11,7 @@ import {
 
 const actionsMap: Record<string | number | symbol, Actions[]> = {};
 const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
-  context: AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG>
+  context: AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>
 ): context is AlovaFrontMiddlewareContext<AG, Args> => !!(context as AlovaFrontMiddlewareContext<AG, Args>).send;
 
 const assert = createAssert('subscriber');
@@ -31,10 +31,10 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
 
   const delegated = ref(falseValue);
   return (
-    context: (AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG>) & {
+    context: (AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>) & {
       delegatingActions?: Actions;
     },
-    next: AlovaGuardNext<AG>
+    next: AlovaGuardNext<AG, Args>
   ) => {
     // 中间件会重复调用，已经订阅过了就无需再订阅了
     if (!delegated.current) {

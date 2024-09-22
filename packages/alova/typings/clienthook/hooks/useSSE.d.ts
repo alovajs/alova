@@ -7,22 +7,30 @@ export const enum SSEHookReadyState {
   CLOSED = 2
 }
 
-export interface AlovaSSEEvent<AG extends AlovaGenerics> extends AlovaEvent<AG> {
+export interface AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEvent<AG, Args> {
   method: Method;
   eventSource: EventSource; // eventSource实例
 }
-export interface AlovaSSEErrorEvent<AG extends AlovaGenerics> extends AlovaSSEEvent<AG> {
+export interface AlovaSSEErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends AlovaSSEEvent<AG, Args> {
   error: Error; // 错误对象
 }
-export interface AlovaSSEMessageEvent<Data, AG extends AlovaGenerics> extends AlovaSSEEvent<AG> {
+export interface AlovaSSEMessageEvent<Data, AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends AlovaSSEEvent<AG, Args> {
   data: Data; // 每次响应的，经过拦截器转换后的数据
 }
-export type SSEOnOpenTrigger<AG extends AlovaGenerics> = (event: AlovaSSEEvent<AG>) => void;
-export type SSEOnMessageTrigger<Data, AG extends AlovaGenerics> = (event: AlovaSSEMessageEvent<Data, AG>) => void;
-export type SSEOnErrorTrigger<AG extends AlovaGenerics> = (event: AlovaSSEErrorEvent<AG>) => void;
-export type SSEOn<AG extends AlovaGenerics> = <Data = any>(
+export type SSEOnOpenTrigger<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: AlovaSSEEvent<AG, Args>
+) => void;
+export type SSEOnMessageTrigger<Data, AG extends AlovaGenerics, Args extends any[]> = (
+  event: AlovaSSEMessageEvent<Data, AG, Args>
+) => void;
+export type SSEOnErrorTrigger<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: AlovaSSEErrorEvent<AG, Args>
+) => void;
+export type SSEOn<AG extends AlovaGenerics, Args extends any[] = any[]> = <Data = any>(
   eventName: string,
-  handler: (event: AlovaSSEMessageEvent<Data, AG>) => void
+  handler: (event: AlovaSSEMessageEvent<Data, AG, Args>) => void
 ) => () => void;
 
 /**
@@ -80,21 +88,21 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onOpen(callback: SSEOnOpenTrigger<AG>): this;
+  onOpen(callback: SSEOnOpenTrigger<AG, Args>): this;
 
   /**
    * 注册 EventSource message 的回调函数
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onMessage<T = Data>(callback: SSEOnMessageTrigger<T, AG>): this;
+  onMessage<T = Data>(callback: SSEOnMessageTrigger<T, AG, Args>): this;
 
   /**
    * 注册 EventSource error 的回调函数
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onError(callback: SSEOnErrorTrigger<AG>): this;
+  onError(callback: SSEOnErrorTrigger<AG, Args>): this;
 
   /**
    * @param eventName 事件名称，默认存在 `open` | `error` | `message`
