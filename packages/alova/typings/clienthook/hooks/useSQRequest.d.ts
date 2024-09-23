@@ -82,7 +82,7 @@ export interface ScopedSQEvent<AG extends AlovaGenerics, Args extends any[]> ext
   /**
    * 通过send触发请求时传入的参数
    */
-  args: Args;
+  args: [...Args, ...any[]];
 }
 /** 局部成功事件 */
 export interface ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {

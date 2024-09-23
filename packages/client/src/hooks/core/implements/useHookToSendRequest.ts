@@ -36,7 +36,7 @@ import { getStateCache, removeStateCache, setStateCache } from './stateCache';
 export default function useHookToSendRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   hookInstance: Hook<Args>,
   methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
-  sendCallingArgs: Args = [] as any
+  sendCallingArgs: [...Args, ...any[]] = [] as any
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
   let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);

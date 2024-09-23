@@ -180,9 +180,9 @@ export class ScopedSQEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
   /**
    * 通过send触发请求时传入的参数
    */
-  args: Args;
+  args: [...Args, ...any[]];
 
-  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: Args) {
+  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: [...Args, ...any[]]) {
     super(behavior, method, silentMethod);
     this.args = args;
   }
@@ -201,7 +201,7 @@ export class ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[] =
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    args: Args,
+    args: [...Args, ...any[]],
     data: AG['Responded']
   ) {
     super(behavior, method, silentMethod, args);
@@ -218,7 +218,13 @@ export class ScopedSQErrorEvent<AG extends AlovaGenerics, Args extends any[] = a
    */
   error: any;
 
-  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: Args, error: any) {
+  constructor(
+    behavior: SQHookBehavior,
+    method: Method<AG>,
+    silentMethod: SilentMethod<AG>,
+    args: [...Args, ...any[]],
+    error: any
+  ) {
     super(behavior, method, silentMethod, args);
     this.error = error;
   }
@@ -242,7 +248,7 @@ export class ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[] = a
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    args: Args,
+    args: [...Args, ...any[]],
     retryTimes: number,
     retryDelay: number
   ) {
@@ -275,7 +281,7 @@ export class ScopedSQCompleteEvent<AG extends AlovaGenerics, Args extends any[] 
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    args: Args,
+    args: [...Args, ...any[]],
     status: AlovaCompleteEvent<AG, any[]>['status'],
     data?: AG['Responded'],
     error?: any

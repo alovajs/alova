@@ -128,8 +128,10 @@ export default function createRequestState<
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
-  const handleRequest = (handler: Method<AG> | AlovaMethodHandler<AG, Args> = methodHandler, sendCallingArgs?: Args) =>
-    useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
+  const handleRequest = (
+    handler: Method<AG> | AlovaMethodHandler<AG, Args> = methodHandler,
+    sendCallingArgs?: [...Args, ...any[]]
+  ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
   // 以捕获异常的方式调用handleRequest
   // 捕获异常避免异常继续向外抛出
   const wrapEffectRequest = (ro = referingObject, handler?: Method<AG> | AlovaMethodHandler<AG>) =>
@@ -179,7 +181,8 @@ export default function createRequestState<
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: (sendCallingArgs?: Args, methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs),
+    send: (sendCallingArgs?: [...Args, ...any[]], methodInstance?: Method<AG>) =>
+      handleRequest(methodInstance, sendCallingArgs),
     onSuccess(handler: SuccessHandler<AG, Args>) {
       eventManager.on(KEY_SUCCESS, handler);
     },

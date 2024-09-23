@@ -2,11 +2,11 @@ import { AlovaGenerics, Method } from '../../alova/typings';
 import { AlovaEvent } from '../../client/typings/clienthook';
 
 export class AlovaEventBase<AG extends AlovaGenerics, Args extends any[]> implements AlovaEvent<AG, Args> {
-  readonly args: Args;
+  readonly args: [...Args, ...any[]];
 
   readonly method: Method<AG>;
 
-  constructor(method: Method<AG>, args: Args) {
+  constructor(method: Method<AG>, args: [...Args, ...any[]]) {
     this.method = method;
     this.args = args;
   }
@@ -15,7 +15,7 @@ export class AlovaEventBase<AG extends AlovaGenerics, Args extends any[]> implem
     return { ...this };
   }
 
-  static spawn<AG extends AlovaGenerics, Args extends any[]>(method: Method<AG>, args: Args) {
+  static spawn<AG extends AlovaGenerics, Args extends any[]>(method: Method<AG>, args: [...Args, ...any[]]) {
     return new AlovaEventBase<AG, Args>(method, args);
   }
 }

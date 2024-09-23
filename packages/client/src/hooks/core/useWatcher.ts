@@ -23,6 +23,6 @@ export default function useWatcher<AG extends AlovaGenerics, Args extends any[] 
   );
   const { send } = props;
   return objAssign(props, {
-    send: (...args: Args) => send(args)
+    send: (...args: [...Args, ...any[]]) => send(args)
   }) as unknown as UseHookExposure<AG, Args>;
 }

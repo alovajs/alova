@@ -68,7 +68,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper<AG>(promiseStatesHook());
 
-  const usingArgs = ref<Args>([] as any);
+  const usingArgs = ref<[...Args, ...any[]]>([] as any);
   const eventSource = ref<EventSource | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
@@ -278,7 +278,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
   /**
    * 发送请求并初始化 eventSource
    */
-  const connect = (...args: [...Args, ...any]) => {
+  const connect = (...args: [...Args, ...any[]]) => {
     let es = eventSource.current;
     let promiseObj = sendPromiseObject.current;
     if (es && abortLast) {
@@ -296,7 +296,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
         });
     }
 
-    usingArgs.current = args as unknown as Args;
+    usingArgs.current = args;
     methodInstance = getHandlerMethod(handler, args);
     // 设置响应拦截器
     setResponseHandler(methodInstance);

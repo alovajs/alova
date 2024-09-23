@@ -11,7 +11,7 @@ export type RetriableHookConfig<AG extends AlovaGenerics, Args extends any[]> = 
    * 最大重试次数，也可以设置为返回 boolean 值的函数，来动态判断是否继续重试。
    * @default 3
    */
-  retry?: number | ((error: Error, ...args: Args) => boolean);
+  retry?: number | ((error: Error, ...args: [...Args, ...any[]]) => boolean);
 
   /**
    * 避让策略

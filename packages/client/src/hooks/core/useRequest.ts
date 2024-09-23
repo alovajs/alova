@@ -12,6 +12,6 @@ export default function useRequest<AG extends AlovaGenerics, Args extends any[] 
   const props = createRequestState(EnumHookType.USE_REQUEST, handler, config, initialData, !!immediate);
   const { send } = props;
   return objAssign(props, {
-    send: (...args: Args) => send(args)
+    send: (...args: [...Args, ...any[]]) => send(args)
   }) as unknown as UseHookExposure<AG, Args>;
 }

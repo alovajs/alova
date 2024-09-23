@@ -48,7 +48,7 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
   const promiseObj = useFlag$(usePromise());
   const requestResolved = useFlag$(falseValue);
 
-  const emitOnFail = (method: Method<AG>, args: Args, error: any) => {
+  const emitOnFail = (method: Method<AG>, args: [...Args, ...any[]], error: any) => {
     if (requestResolved.current) {
       return;
     }

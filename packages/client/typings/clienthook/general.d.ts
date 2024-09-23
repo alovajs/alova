@@ -28,7 +28,7 @@ export interface AlovaEvent<AG extends AlovaGenerics, Args extends any[]> {
   /**
    * params from send function
    */
-  args: Args;
+  args: [...Args, ...any[]];
   /**
    * current method instance
    */
@@ -130,7 +130,7 @@ export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics, Args exte
   send: SendHandler<Args, AG['Responded']>;
 
   /** args 响应处理回调的参数，该参数由use hooks的send传入 */
-  args: Args;
+  args: [...Args, ...any[]];
 
   /** 前端状态集合 */
   proxyStates: FrontRequestState<
@@ -163,10 +163,10 @@ export interface AlovaFrontMiddleware<AG extends AlovaGenerics, Args extends any
 export interface AlovaFetcherMiddlewareContext<AG extends AlovaGenerics, Args extends any[]>
   extends AlovaMiddlewareContext<AG> {
   /** 数据预加载函数 */
-  fetch<Transformed>(method: Method<AG>, ...args: Args): Promise<Transformed>;
+  fetch<Transformed>(method: Method<AG>, ...args: [...Args, ...any[]]): Promise<Transformed>;
 
   /** args 响应处理回调的参数，该参数由useFetcher的fetch传入 */
-  args: Args;
+  args: [...Args, ...any[]];
 
   /** fetch状态的代理集合 */
   proxyStates: FetchRequestState<

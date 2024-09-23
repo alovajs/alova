@@ -78,9 +78,9 @@ describe('send args', () => {
 
     // @ts-expect-error
     useRequestState.onError(e => expectType<123>(e.args));
-    useRequestState.onError(e => expectType<Args>(e.args));
-    useRequestState.onComplete(e => expectType<Args>(e.args));
-    useRequestState.onSuccess(e => expectType<Args>(e.args));
+    useRequestState.onError(e => expectType<[...Args, ...any]>(e.args));
+    useRequestState.onComplete(e => expectType<[...Args, ...any]>(e.args));
+    useRequestState.onSuccess(e => expectType<[...Args, ...any]>(e.args));
   });
 
   test('useWatcher', () => {
@@ -102,9 +102,9 @@ describe('send args', () => {
     // @ts-expect-error
     useSSEState.onError(e => expectType<123>(e.args));
 
-    useSSEState.onMessage(e => expectType<Args>(e.args));
-    useSSEState.onOpen(e => expectType<Args>(e.args));
-    useSSEState.onError(e => expectType<Args>(e.args));
+    useSSEState.onMessage(e => expectType<[...Args, ...any]>(e.args));
+    useSSEState.onOpen(e => expectType<[...Args, ...any]>(e.args));
+    useSSEState.onError(e => expectType<[...Args, ...any]>(e.args));
   });
 
   test('useForm', () => {
@@ -142,17 +142,17 @@ describe('send args', () => {
     // @ts-expect-error
     expectAssignableBy<SendHandler<[string, number], any>>(usePaginationState.send);
 
-    usePaginationState.onFetchError(e => expectType<[number, number, name?: string | undefined]>(e.args));
-    usePaginationState.onFetchComplete(e => expectType<[number, number, name?: string | undefined]>(e.args));
-    usePaginationState.onFetchSuccess(e => expectType<[number, number, name?: string | undefined]>(e.args));
+    usePaginationState.onFetchError(e => expectType<[number, number, name?: string | undefined, ...any]>(e.args));
+    usePaginationState.onFetchComplete(e => expectType<[number, number, name?: string | undefined, ...any]>(e.args));
+    usePaginationState.onFetchSuccess(e => expectType<[number, number, name?: string | undefined, ...any]>(e.args));
   });
 
   test('middleware', () => {
     useRequest(ArgsGetter<Args, any>, {
       middleware: (ctx, next) => {
-        expectType<Args>(ctx.args);
+        expectType<[...Args, ...any]>(ctx.args);
         next({
-          force: event => expectType<Args>(event.args) as unknown as boolean
+          force: event => expectType<[...Args, ...any]>(event.args) as unknown as boolean
         });
       }
     });
