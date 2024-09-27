@@ -44,7 +44,7 @@ describe('l1cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
 
     // the `cacheFor` also set to an object
@@ -74,7 +74,7 @@ describe('l1cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
   });
 
@@ -102,7 +102,7 @@ describe('l1cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
 
     // the `cacheFor` also set to an object
@@ -132,7 +132,7 @@ describe('l1cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
   });
 
@@ -167,7 +167,7 @@ describe('l1cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
     expect(expireFn).toHaveBeenCalledWith(Post, 'memory');
   });
