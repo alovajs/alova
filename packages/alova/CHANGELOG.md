@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.17
+
+### Patch Changes
+
+- [#546](https://github.com/alovajs/alova/pull/546) [`800181d`](https://github.com/alovajs/alova/commit/800181d46259ba044385a4252fe7256644a39451) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - unified the request that the types contain request body to be `undefined`
+
 ## 3.0.16
 
 ### Patch Changes
