@@ -35,13 +35,13 @@ describe('l2cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
     expect(await queryCache(Post1, { policy: 'l2' })).toStrictEqual({
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
 
     // POST is cached
@@ -92,7 +92,7 @@ describe('l2cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
     expect(expireFn).toHaveBeenCalledTimes(2);
   });
@@ -120,7 +120,7 @@ describe('l2cache cache data', () => {
       path: '/unit-test',
       method: 'POST',
       params: {},
-      data: {}
+      data: ''
     });
     expect(expireFn).toHaveBeenCalledTimes(2);
   });

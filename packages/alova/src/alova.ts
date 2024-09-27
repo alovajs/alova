@@ -82,7 +82,7 @@ export class Alova<AG extends AlovaGenerics> {
 
   Post<Responded = unknown, Transformed = unknown>(
     url: string,
-    data: RequestBody = {},
+    data?: RequestBody,
     config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ) {
     return newInstance(
@@ -97,7 +97,7 @@ export class Alova<AG extends AlovaGenerics> {
 
   Delete<Responded = unknown, Transformed = unknown>(
     url: string,
-    data: RequestBody = {},
+    data?: RequestBody,
     config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ) {
     return newInstance(
@@ -112,7 +112,7 @@ export class Alova<AG extends AlovaGenerics> {
 
   Put<Responded = unknown, Transformed = unknown>(
     url: string,
-    data: RequestBody = {},
+    data?: RequestBody,
     config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ) {
     return newInstance(
@@ -134,7 +134,7 @@ export class Alova<AG extends AlovaGenerics> {
 
   Patch<Responded = unknown, Transformed = unknown>(
     url: string,
-    data: RequestBody = {},
+    data?: RequestBody,
     config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ) {
     return newInstance(

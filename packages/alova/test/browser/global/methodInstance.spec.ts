@@ -365,6 +365,32 @@ describe('method instance', () => {
     expect(res.params).toStrictEqual({ a: 'a', b: 'str' });
   });
 
+  test('should the request body will be `undefined` initially', async () => {
+    const methodGet = alova.Get('/unit-test');
+    const methodPost = alova.Post('/unit-test');
+    const methodHead = alova.Head('/unit-test');
+    const methodPut = alova.Put('/unit-test');
+    const methodDelete = alova.Delete('/unit-test');
+    const methodPatch = alova.Patch('/unit-test');
+    const methodOptions = alova.Options('/unit-test');
+    expect(methodGet.data).toBeUndefined();
+    expect(methodPost.data).toBeUndefined();
+    expect(methodHead.data).toBeUndefined();
+    expect(methodPut.data).toBeUndefined();
+    expect(methodDelete.data).toBeUndefined();
+    expect(methodPatch.data).toBeUndefined();
+    expect(methodOptions.data).toBeUndefined();
+
+    const methodPost2 = alova.Post('/unit-test', {});
+    const methodPut2 = alova.Put('/unit-test', {});
+    const methodDelete2 = alova.Delete('/unit-test', {});
+    const methodPatch2 = alova.Patch('/unit-test', {});
+    expect(methodPost2.data).toStrictEqual({});
+    expect(methodPut2.data).toStrictEqual({});
+    expect(methodDelete2.data).toStrictEqual({});
+    expect(methodPatch2.data).toStrictEqual({});
+  });
+
   test('it can customize the method key', async () => {
     const method1 = alova.Get('/unit-test');
     method1.key = 'method1-key';
