@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.18
+
+### Patch Changes
+
+- [#549](https://github.com/alovajs/alova/pull/549) [`80cdea9`](https://github.com/alovajs/alova/commit/80cdea9c820273d8fa733b19c6a69c4e410d33ad) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that cannot found alova/fetch in ts5.6
+
 ## 3.0.17
 
 ### Patch Changes
