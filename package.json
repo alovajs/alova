@@ -76,7 +76,7 @@
   },
   "files": [
     "dist",
-    "typings/*.d.ts"
+    "typings"
   ],
   "engines": {
     "node": ">= 0.12.0"
@@ -103,7 +103,10 @@
       "default": "./dist/hooks/sveltehook.esm.js"
     },
     "./GlobalFetch": {
-      "types": "./typings/globalfetch.d.ts",
+      "types": {
+        "require": "./typings/globalfetch.d.cts",
+        "default": "./typings/globalfetch.d.ts"
+      },
       "require": "./dist/adapter/globalfetch.common.cjs",
       "default": "./dist/adapter/globalfetch.esm.js"
     }
