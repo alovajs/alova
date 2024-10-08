@@ -8,4 +8,4 @@ export type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 export type FetchRequestAdapter = AlovaRequestAdapter<FetchRequestInit, Response, Headers>;
 
 declare function adapterFetch(): FetchRequestAdapter;
-export = adapterFetch;
+export default adapterFetch;

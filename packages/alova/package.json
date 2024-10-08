@@ -79,7 +79,10 @@
       "default": "./dist/serverhook/index.esm.js"
     },
     "./fetch": {
-      "types": "./typings/fetch.d.ts",
+      "types": {
+        "require": "./typings/fetch.d.cts",
+        "default": "./typings/fetch.d.ts"
+      },
       "require": "./dist/adapter/fetch.common.cjs",
       "default": "./dist/adapter/fetch.esm.js"
     },
