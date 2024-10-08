@@ -8,7 +8,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "moduleResolution": "Node",
-    "charset": "utf8",
     "noEmitOnError": false,
     "noUnusedLocals": true,
     "noUnusedParameters": false,

@@ -4,9 +4,7 @@ name: build
 on:
   push:
     branches:
-      - main
-      - alpha
-      - beta
+      - archive/v2.0
   pull_request:
     branches: ['*']
 
@@ -37,13 +35,13 @@ jobs:
 
       # 这条命令包含了测试
       - name: Unit tests
-        if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/alpha' && github.ref != 'refs/heads/beta' }}
+        if: ${{ github.ref != 'refs/heads/archive/v2.0' }}
         run: npm run test
 
   release:
     runs-on: ubuntu-latest
     needs: [quality]
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/alpha' || github.ref == 'refs/heads/beta' }}
+    if: ${{ github.ref == 'refs/heads/archive/v2.0' }}
     steps:
       # 拉取代码
       - name: Checkout
