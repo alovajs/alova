@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.20
+
+### Patch Changes
+
+- [#560](https://github.com/alovajs/alova/pull/560) [`2b5898a`](https://github.com/alovajs/alova/commit/2b5898aad1b9606342ec7813e647785ac9c16bca) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - recovery previous version
+
 ## 3.0.19
 
 ### Patch Changes
