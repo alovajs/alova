@@ -37,7 +37,7 @@
     "dist"
   ],
   "peerDependencies": {
-    "alova": "^3.0.19"
+    "alova": "^3.0.20"
   },
   "dependencies": {
     "@alova/shared": "workspace:^",
