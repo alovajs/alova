@@ -1,5 +1,11 @@
 # alova
 
+## 3.0.19
+
+### Patch Changes
+
+- [#557](https://github.com/alovajs/alova/pull/557) [`b2f5379`](https://github.com/alovajs/alova/commit/b2f5379dfa6eb8df1e284bb7253f7ce64ac7057e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - publish fetch.d.cts
+
 ## 3.0.18
 
 ### Patch Changes
