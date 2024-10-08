@@ -187,7 +187,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.6(alova@3.0.17)
+        version: 2.0.6(alova@3.0.18)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -196,7 +196,7 @@ importers:
         version: 3.2.1
       alova:
         specifier: latest
-        version: 3.0.17
+        version: 3.0.18
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -210,8 +210,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       trix:
-        specifier: ^2.1.3
-        version: 2.1.3
+        specifier: ^2.1.4
+        version: 2.1.4
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -251,13 +251,13 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.6(alova@3.0.17)
+        version: 2.0.6(alova@3.0.18)
       '@alova/psc':
         specifier: latest
-        version: 1.0.6(alova@3.0.17)(electron@30.3.1)
+        version: 1.0.6(alova@3.0.18)(electron@30.3.1)
       alova:
         specifier: latest
-        version: 3.0.17
+        version: 3.0.18
       body-parser:
         specifier: ^1.20.3
         version: 1.20.3
@@ -294,7 +294,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.6(alova@3.0.17)
+        version: 2.0.6(alova@3.0.18)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -303,7 +303,7 @@ importers:
         version: 3.2.1
       alova:
         specifier: latest
-        version: 3.0.17
+        version: 3.0.18
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -311,8 +311,8 @@ importers:
         specifier: ^4.2.18
         version: 4.2.18
       trix:
-        specifier: ^2.1.3
-        version: 2.1.3
+        specifier: ^2.1.4
+        version: 2.1.4
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.1
@@ -337,7 +337,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.6(alova@3.0.17)
+        version: 2.0.6(alova@3.0.18)
       '@nordhealth/components':
         specifier: ^3.14.1
         version: 3.14.1
@@ -346,10 +346,10 @@ importers:
         version: 3.2.1
       alova:
         specifier: latest
-        version: 3.0.17
+        version: 3.0.18
       trix:
-        specifier: ^2.1.3
-        version: 2.1.3
+        specifier: ^2.1.4
+        version: 2.1.4
       vue:
         specifier: ^3.4.33
         version: 3.4.34(typescript@5.5.4)
@@ -3034,8 +3034,8 @@ packages:
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
-  alova@3.0.17:
-    resolution: {integrity: sha512-rMT4rg2RR2u++X4wSKfUPi4LqK7DeR1X5iokwm2ruRHA8LPBfBhYtX6DXz32dB/7TdvpiUk+QGYosryhRCFrYA==}
+  alova@3.0.18:
+    resolution: {integrity: sha512-3uSTyribBoOuesRNhERmuEGrZJgtG1Iqexpt5BLLh3ufq5AdqnBSB5BoOCN4Fn/dJyueRnGnzPJDAb7kQHAakQ==}
     engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
@@ -6986,8 +6986,8 @@ packages:
     resolution: {integrity: sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA==}
     engines: {node: '>=12'}
 
-  trix@2.1.3:
-    resolution: {integrity: sha512-LqMp67LiKMQytAHKqNL1Jgmfz69ViW+WBOQTPA2BlMIuxic1mw5vHgDtOE0bvvojUdjAxh0EJtLpJn6BC/2JKw==}
+  trix@2.1.4:
+    resolution: {integrity: sha512-f0AGnqBV8J2qW+fCtVU71JmvzjcxnO5Xbbd6Cl2KrHVRpgXKDqNGTmDmQzNHWU7T2OgtwHwvNiN+OIf3Z3KmHQ==}
 
   ts-api-utils@1.3.0:
     resolution: {integrity: sha512-UQMIo7pb8WRomKR1/+MFVLTroIvDVtMX3K6OUir8ynLyzB8Jeriont2bTAtmNPa1ekAgN7YPDyf6V+ygrdU+eQ==}
@@ -7522,16 +7522,16 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alova/mock@2.0.6(alova@3.0.17)':
+  '@alova/mock@2.0.6(alova@3.0.18)':
     dependencies:
       '@alova/shared': 1.0.5
-      alova: 3.0.17
+      alova: 3.0.18
 
-  '@alova/psc@1.0.6(alova@3.0.17)(electron@30.3.1)':
+  '@alova/psc@1.0.6(alova@3.0.18)(electron@30.3.1)':
     dependencies:
       '@alova/shared': 1.0.5
       '@node-ipc/node-ipc': 11.0.3
-      alova: 3.0.17
+      alova: 3.0.18
       electron: 30.3.1
 
   '@alova/shared@1.0.5': {}
@@ -11268,7 +11268,7 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alova@3.0.17:
+  alova@3.0.18:
     dependencies:
       '@alova/shared': 1.0.5
       rate-limiter-flexible: 5.0.3
@@ -15724,7 +15724,7 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  trix@2.1.3: {}
+  trix@2.1.4: {}
 
   ts-api-utils@1.3.0(typescript@5.5.4):
     dependencies:
