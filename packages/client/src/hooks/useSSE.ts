@@ -32,15 +32,15 @@ const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
 const SSEErrorEventKey = Symbol('SSEError');
 
-export type SSEEvents<Data, AG extends AlovaGenerics> = {
-  [SSEOpenEventKey]: AlovaSSEEvent<AG>;
-  [SSEMessageEventKey]: AlovaSSEMessageEvent<AG, Data>;
-  [SSEErrorEventKey]: AlovaSSEErrorEvent<AG>;
+export type SSEEvents<Data, AG extends AlovaGenerics, Args extends any[]> = {
+  [SSEOpenEventKey]: AlovaSSEEvent<AG, Args>;
+  [SSEMessageEventKey]: AlovaSSEMessageEvent<AG, Data, Args>;
+  [SSEErrorEventKey]: AlovaSSEErrorEvent<AG, Args>;
 };
 
-type AnySSEEventType<Data, AG extends AlovaGenerics> = AlovaSSEMessageEvent<AG, Data> &
-  AlovaSSEErrorEvent<AG> &
-  AlovaSSEEvent<AG>;
+type AnySSEEventType<Data, AG extends AlovaGenerics, Args extends any[]> = AlovaSSEMessageEvent<AG, Data, Args> &
+  AlovaSSEErrorEvent<AG, Args> &
+  AlovaSSEEvent<AG, Args>;
 
 const assert = createAssert('useSSE');
 const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSourceEventMap> = {
@@ -49,8 +49,8 @@ const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSour
   Message: 'message'
 } as const;
 
-export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: SSEHookConfig = {}
 ) => {
   const {
@@ -68,7 +68,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
 
   const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper<AG>(promiseStatesHook());
 
-  const usingArgs = ref<any[]>([]);
+  const usingArgs = ref<[...Args, ...any[]]>([] as any);
   const eventSource = ref<EventSource | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
@@ -79,16 +79,16 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
 
   let responseUnified: RespondedHandler<AG> | RespondedHandlerRecord<AG> | undefined;
 
-  const eventManager = createEventManager<SSEEvents<Data, AG>>();
+  const eventManager = createEventManager<SSEEvents<Data, AG, Args>>();
   // 储存自定义事件的 useCallback 对象，其中 key 为 eventName
   const customEventMap = ref(new Map<string, ReturnType<typeof useCallback>>());
-  const onOpen = (handler: (event: AlovaSSEEvent<AG>) => void) => {
+  const onOpen = (handler: (event: AlovaSSEEvent<AG, Args>) => void) => {
     eventManager.on(SSEOpenEventKey, handler);
   };
-  const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<AG, Data>) => void) => {
+  const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<AG, Data, Args>) => void) => {
     eventManager.on(SSEMessageEventKey, handler);
   };
-  const onError = (handler: (event: AlovaSSEErrorEvent<AG>) => void) => {
+  const onError = (handler: (event: AlovaSSEErrorEvent<AG, Args>) => void) => {
     eventManager.on(SSEErrorEventKey, handler);
   };
 
@@ -142,7 +142,10 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
     assert(!!eventSource.current, 'EventSource is not initialized');
     const es = eventSource.current!;
 
-    const baseEvent = new AlovaSSEEvent(AlovaEventBase.spawn(methodInstance, usingArgs.current), es);
+    const baseEvent = new AlovaSSEEvent<AG, Args>(
+      AlovaEventBase.spawn<AG, Args>(methodInstance, usingArgs.current),
+      es
+    );
 
     if (eventFrom === MessageType.Open) {
       return Promise.resolve(baseEvent);
@@ -168,7 +171,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
     return promiseThen(
       p,
       // 得到处理好的数据（transform 之后的数据）
-      res => new AlovaSSEMessageEvent(baseEvent, res),
+      res => new AlovaSSEMessageEvent<AG, any, Args>(baseEvent, res),
       // 有错误
       error => new AlovaSSEErrorEvent(baseEvent, error)
     );
@@ -178,19 +181,20 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
    * 根据事件选择需要的触发函数。如果事件无错误则触发传传入的回调函数
    * @param callback 无错误时触发的回调函数
    */
-  const sendSSEEvent = (callback: (event: AnySSEEventType<Data, AG>) => any) => (event: AnySSEEventType<Data, AG>) => {
-    if (event.error === undefinedValue) {
-      return callback(event);
-    }
-    return eventManager.emit(SSEErrorEventKey, event);
-  };
+  const sendSSEEvent =
+    (callback: (event: AnySSEEventType<Data, AG, Args>) => any) => (event: AnySSEEventType<Data, AG, Args>) => {
+      if (event.error === undefinedValue) {
+        return callback(event);
+      }
+      return eventManager.emit(SSEErrorEventKey, event);
+    };
 
   // * MARK: EventSource 的事件处理
 
-  const onCustomEvent: SSEOn<AG> = (eventName, callbackHandler) => {
+  const onCustomEvent: SSEOn<AG, Args> = (eventName, callbackHandler) => {
     const currentMap = customEventMap.current;
     if (!currentMap.has(eventName)) {
-      const useCallbackObject = useCallback<(event: AlovaSSEEvent<AG>) => void>(callbacks => {
+      const useCallbackObject = useCallback<(event: AlovaSSEEvent<AG, Args>) => void>(callbacks => {
         if (callbacks.length === 0) {
           eventSource.current?.removeEventListener(eventName, useCallbackObject[1] as any);
           customEventMap.current.delete(eventName);
@@ -274,7 +278,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   /**
    * 发送请求并初始化 eventSource
    */
-  const connect = (...args: any[]) => {
+  const connect = (...args: [...Args, ...any[]]) => {
     let es = eventSource.current;
     let promiseObj = sendPromiseObject.current;
     if (es && abortLast) {
@@ -337,7 +341,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics>(
   // * MARK: 初始化动作
   onMounted(() => {
     if (immediate) {
-      connect();
+      connect(...([] as unknown as [...Args, ...any[]]));
       sendPromiseObject.current?.promise.catch(() => {});
     }
   });

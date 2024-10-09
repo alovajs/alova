@@ -6,23 +6,23 @@ import { RequestHookConfig } from './useRequest';
 /**
  * useRetriableRequest配置
  */
-export type RetriableHookConfig<AG extends AlovaGenerics> = {
+export type RetriableHookConfig<AG extends AlovaGenerics, Args extends any[]> = {
   /**
    * 最大重试次数，也可以设置为返回 boolean 值的函数，来动态判断是否继续重试。
    * @default 3
    */
-  retry?: number | ((error: Error, ...args: any[]) => boolean);
+  retry?: number | ((error: Error, ...args: [...Args, ...any[]]) => boolean);
 
   /**
    * 避让策略
    */
   backoff?: BackoffPolicy;
-} & RequestHookConfig<AG>;
+} & RequestHookConfig<AG, Args>;
 
 /**
  * useRetriableRequest onRetry回调事件实例
  */
-export interface RetriableRetryEvent<AG extends AlovaGenerics> extends AlovaEvent<AG> {
+export interface RetriableRetryEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEvent<AG, Args> {
   /**
    * 当前的重试次数
    */
@@ -36,7 +36,7 @@ export interface RetriableRetryEvent<AG extends AlovaGenerics> extends AlovaEven
 /**
  * useRetriableRequest onFail回调事件实例
  */
-export interface RetriableFailEvent<AG extends AlovaGenerics> extends AlovaErrorEvent<AG> {
+export interface RetriableFailEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaErrorEvent<AG, Args> {
   /**
    * 失败时的重试次数
    */
@@ -45,7 +45,8 @@ export interface RetriableFailEvent<AG extends AlovaGenerics> extends AlovaError
 /**
  * useRetriableRequest返回值
  */
-export interface RetriableExposure<AG extends AlovaGenerics> extends UseHookExposure<AG, RetriableExposure<AG>> {
+export interface RetriableExposure<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends UseHookExposure<AG, Args, RetriableExposure<AG, Args>> {
   /**
    * 停止重试，只在重试期间调用有效
    * 停止后将立即触发onFail事件
@@ -83,7 +84,7 @@ export interface RetriableExposure<AG extends AlovaGenerics> extends UseHookExpo
  * @param config 配置参数
  * @return useRetriableRequest相关数据和操作函数
  */
-export declare function useRetriableRequest<AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
-  config?: RetriableHookConfig<AG>
-): RetriableExposure<AG>;
+export declare function useRetriableRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
+  config?: RetriableHookConfig<AG, Args>
+): RetriableExposure<AG, Args>;

@@ -337,7 +337,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
             // 达到失败次数，或不匹配重试的错误信息时，触发失败回调
             methodEmitter.emit(
               'fallback',
-              newInstance(ScopedSQErrorEvent<AG>, behavior, entity, silentMethodInstance, handlerArgs, reason)
+              newInstance(ScopedSQErrorEvent<AG, any[]>, behavior, entity, silentMethodInstance, handlerArgs, reason)
             );
             globalSQEventManager.emit(
               FailEventKey,

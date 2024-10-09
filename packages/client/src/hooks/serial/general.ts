@@ -23,8 +23,8 @@ export const assertSerialHandlers = (hookName: string, serialHandlers: any) =>
     'please use an array to represent serial requests'
   );
 
-export type SerialHandlers<AG extends AlovaGenerics> = [
-  Method<AG> | AlovaMethodHandler<AG>,
+export type SerialHandlers<AG extends AlovaGenerics, Args extends any[] = any[]> = [
+  Method<AG> | AlovaMethodHandler<AG, Args>,
   ...AlovaMethodHandler<AG>[]
 ];
 
@@ -34,9 +34,9 @@ export type SerialHandlers<AG extends AlovaGenerics> = [
  * @param hookMiddleware use hook的中间件
  * @returns 串行请求中间件
  */
-export const serialMiddleware = <AG extends AlovaGenerics>(
-  serialHandlers: SerialHandlers<AG>,
-  hookMiddleware?: AlovaFrontMiddleware<AG>,
+export const serialMiddleware = <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  serialHandlers: SerialHandlers<AG, Args>,
+  hookMiddleware?: AlovaFrontMiddleware<AG, Args>,
   serialRequestMethods: Method<AG>[] = []
 ) => {
   // 第一个handler在外部传递给了use hook，不需要再次请求
@@ -59,5 +59,5 @@ export const serialMiddleware = <AG extends AlovaGenerics>(
     return serialPromise.finally(() => {
       loadingState.v = falseValue;
     });
-  }) as AlovaFrontMiddleware<AG>;
+  }) as AlovaFrontMiddleware<AG, Args>;
 };

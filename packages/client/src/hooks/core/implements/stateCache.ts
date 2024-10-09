@@ -26,11 +26,16 @@ export const getStateCache = (namespace: string, key: string) => {
  * @param key 请求key值
  * @param data 缓存数据
  */
-export const setStateCache = (namespace: string, key: string, data: MergedStatesMap, hookInstance: Hook) => {
+export const setStateCache = <Args extends any[] = any[]>(
+  namespace: string,
+  key: string,
+  data: MergedStatesMap,
+  hookInstance: Hook<Args>
+) => {
   const cachedState = (stateCache[namespace] = stateCache[namespace] || {});
   cachedState[key] = {
     s: data,
-    h: hookInstance
+    h: hookInstance as Hook<any>
   };
 };
 

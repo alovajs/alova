@@ -6,7 +6,10 @@ import { DataSerializer } from './useSQRequest';
 /**
  * useForm的handler函数类型
  */
-export type FormHookHandler<AG extends AlovaGenerics, F> = (form: F, ...args: any[]) => Method<AG>;
+export type FormHookHandler<AG extends AlovaGenerics, F, Args extends any[] = any[]> = (
+  form: F,
+  ...args: Args
+) => Method<AG>;
 
 /**
  * useForm配置
@@ -59,7 +62,8 @@ export type RestoreHandler = () => void;
 /**
  * useForm返回值
  */
-export interface FormExposure<AG extends AlovaGenerics, F> extends UseHookExposure<AG, FormExposure<AG, F>> {
+export interface FormExposure<AG extends AlovaGenerics, F, Args extends any[] = any[]>
+  extends UseHookExposure<AG, Args, FormExposure<AG, F, Args>> {
   /**
    * 表单数据
    */
@@ -94,7 +98,11 @@ export interface FormExposure<AG extends AlovaGenerics, F> extends UseHookExposu
  * @param config 配置参数
  * @return useForm相关数据和操作函数
  */
-export declare function useForm<AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
-  handler: FormHookHandler<AG, FormData>,
+export declare function useForm<
+  AG extends AlovaGenerics,
+  FormData extends Record<string | symbol, any>,
+  Args extends any[] = any[]
+>(
+  handler: FormHookHandler<AG, FormData, Args>,
   config?: FormHookConfig<AG, FormData>
-): FormExposure<AG, FormData>;
+): FormExposure<AG, FormData, Args>;

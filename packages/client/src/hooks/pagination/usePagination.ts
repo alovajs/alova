@@ -93,7 +93,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   const { loading, fetch, abort: abortFetch, onSuccess: onFetchSuccess } = fetchStates;
   const fetchingRef = ref(loading);
 
-  const getHandlerMethod = (refreshPage = page.v) => {
+  const getHandlerMethod = (refreshPage: number | undefined = page.v) => {
     const pageSizeVal = pageSize.v;
     const handlerMethod = handler(refreshPage, pageSizeVal);
 
@@ -123,44 +123,48 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     (actionName: string) =>
     (...args: any[]) =>
       delegationActions.current[actionName](...args);
-  const states = useWatcher<AG>(getHandlerMethod, [...watchingStates, page.e, pageSize.e] as any, {
-    __referingObj: referingObject,
-    immediate,
-    initialData,
-    managedStates: objectify([data, page, pageSize, total], 's'),
-    middleware(ctx, next) {
-      (middleware as any)(
-        {
-          ...ctx,
-          delegatingActions: {
-            refresh: createDelegationAction('refresh'),
-            insert: createDelegationAction('insert'),
-            remove: createDelegationAction('remove'),
-            replace: createDelegationAction('replace'),
-            reload: createDelegationAction('reload'),
-            getState: (stateKey: string) => {
-              type SE = AG['StatesExport'];
-              const states: Record<string, SE['StateExport']> = {
-                page,
-                pageSize,
-                data,
-                pageCount,
-                total,
-                // eslint-disable-next-line @typescript-eslint/no-use-before-define
-                isLastPage
-              } as Record<string, any>;
-              return states[stateKey].v;
+  const states = useWatcher<AG, [page?: number, force?: boolean]>(
+    getHandlerMethod,
+    [...watchingStates, page.e, pageSize.e] as any,
+    {
+      __referingObj: referingObject,
+      immediate,
+      initialData,
+      managedStates: objectify([data, page, pageSize, total], 's'),
+      middleware(ctx, next) {
+        (middleware as any)(
+          {
+            ...ctx,
+            delegatingActions: {
+              refresh: createDelegationAction('refresh'),
+              insert: createDelegationAction('insert'),
+              remove: createDelegationAction('remove'),
+              replace: createDelegationAction('replace'),
+              reload: createDelegationAction('reload'),
+              getState: (stateKey: string) => {
+                type SE = AG['StatesExport'];
+                const states: Record<string, SE['StateExport']> = {
+                  page,
+                  pageSize,
+                  data,
+                  pageCount,
+                  total,
+                  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+                  isLastPage
+                } as Record<string, any>;
+                return states[stateKey].v;
+              }
             }
-          }
-        },
-        promiseResolve
-      );
+          },
+          promiseResolve
+        );
 
-      return next();
-    },
-    force: event => event.args[1] || (isFn(force) ? force(event) : force),
-    ...others
-  });
+        return next();
+      },
+      force: event => event.args[1] || (isFn(force) ? (force(event) as boolean) : force),
+      ...others
+    }
+  );
   const { send } = states;
   const nestedData = states.__proxyState('data');
 

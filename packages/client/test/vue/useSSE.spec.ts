@@ -28,7 +28,11 @@ beforeAll(() => {
   mockServer.close();
 });
 
-type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
+type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]> = AlovaSSEMessageEvent<
+  any,
+  AG,
+  Args
+>;
 
 /**
  * 准备 Alova 实例环境，并且开始 SSE 服务器的监听
@@ -48,7 +52,7 @@ describe('vue => useSSE', () => {
   // ! 无初始数据，不立即发送请求
   test('should default NOT request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
+    const poster = (data?: any) => alovaInst.Get(`/${IntervalEventName}`, data);
     const { on, onOpen, data, readyState, send, close } = useSSE(poster);
     const cb = jest.fn();
     const openCb = jest.fn();
@@ -86,7 +90,7 @@ describe('vue => useSSE', () => {
   // ! 有初始数据，不立即发送请求
   test('should get the initial data and NOT send request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const poster = (data?: any) => alovaInst.Get(`/${TriggerEventName}`, data);
     const initialData = {
       id: 9527,
       name: 'Tom',
