@@ -78,28 +78,28 @@ export interface GlobalSQFailEvent<AG extends AlovaGenerics> extends GlobalSQEve
 }
 
 /** SQ局部事件 */
-export interface ScopedSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> {
+export interface ScopedSQEvent<AG extends AlovaGenerics, Args extends any[]> extends SQEvent<AG> {
   /**
    * 通过send触发请求时传入的参数
    */
-  args: any[];
+  args: [...Args, ...any[]];
 }
 /** 局部成功事件 */
-export interface ScopedSQSuccessEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
+export interface ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
   /**
    * 响应数据
    */
   data: AG['Responded'];
 }
 /** 局部失败事件 */
-export interface ScopedSQErrorEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
+export interface ScopedSQErrorEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
   /**
    * 失败时抛出的错误
    */
   error: any;
 }
 /** 局部失败事件 */
-export interface ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
+export interface ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
   /**
    * 重试次数
    */
@@ -110,7 +110,7 @@ export interface ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEv
   retryDelay: number;
 }
 /** 局部完成事件 */
-export interface ScopedSQCompleteEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> {
+export interface ScopedSQCompleteEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
   /**
    * 响应状态
    */
@@ -315,7 +315,7 @@ export interface SQHookConfig<AG extends AlovaGenerics> {
    * 场景1. 手动开关
    * 场景2. 网络状态不好时回退到static，网络状态自行判断
    */
-  behavior?: SQHookBehavior | ((event: AlovaEvent<AG>) => SQHookBehavior);
+  behavior?: SQHookBehavior | ((event: AlovaEvent<AG, any[]>) => SQHookBehavior);
 
   /** 重试错误规则
    * 当错误符合以下表达式时才进行重试
@@ -334,7 +334,7 @@ export interface SQHookConfig<AG extends AlovaGenerics> {
    * 队列名，不传时选择默认队列
    * 如需每次请求动态分配队列，可设为函数并返回队列名称
    */
-  queue?: string | ((event: AlovaEvent<AG>) => string);
+  queue?: string | ((event: AlovaEvent<AG, any[]>) => string);
 
   /** 静默提交时默认的响应数据 */
   silentDefaultResponse?: () => any;
@@ -348,15 +348,16 @@ export interface SQHookConfig<AG extends AlovaGenerics> {
   vDataCaptured?: (method: Method<AG>) => AG['Responded'] | undefined | void;
 }
 
-export type SQRequestHookConfig<AG extends AlovaGenerics> = SQHookConfig<AG> & RequestHookConfig<AG>;
+export type SQRequestHookConfig<AG extends AlovaGenerics, Args extends any[]> = SQHookConfig<AG> &
+  RequestHookConfig<AG, Args>;
 export type FallbackHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
 export type RetryHandler<AG extends AlovaGenerics> = (event: ScopedSQRetryEvent<AG>) => void;
 export type BeforePushQueueHandler<AG extends AlovaGenerics> = (
   event: ScopedSQEvent<AG>
 ) => void | boolean | Promise<void | boolean>;
 export type PushedQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
-export type SQHookExposure<AG extends AlovaGenerics> = Omit<
-  UseHookExposure<AG>,
+export type SQHookExposure<AG extends AlovaGenerics, Args extends any[] = any[]> = Omit<
+  UseHookExposure<AG, Args>,
   'onSuccess' | 'onError' | 'onComplete'
 > & {
   /**
@@ -458,10 +459,10 @@ export type SilentQueueMap = Record<string, SilentMethod<any>[]>;
  * 带silentQueue的request hook
  * silentQueue是实现静默提交的核心部件，其中将用于存储silentMethod实例，它们将按顺序串行发送提交
  */
-export declare function useSQRequest<AG extends AlovaGenerics>(
-  handler: AlovaMethodHandler<AG>,
+export declare function useSQRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: AlovaMethodHandler<AG, Args>,
   config?: SQRequestHookConfig<AG>
-): SQHookExposure<AG>;
+): SQHookExposure<AG, Args>;
 export declare function bootSilentFactory(options: SilentFactoryBootOptions): void;
 export declare function onSilentSubmitBoot(handler: SilentSubmitBootHandler): OffEventCallback;
 export declare function onSilentSubmitSuccess(handler: SilentSubmitSuccessHandler): OffEventCallback;

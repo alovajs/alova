@@ -17,28 +17,31 @@ import {
   SilentMethod
 } from '~/typings/clienthook';
 
-export class AlovaSSEEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
+export class AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEventBase<AG, Args> {
   eventSource: EventSource; // eventSource实例
 
-  constructor(base: AlovaEventBase<AG>, eventSource: EventSource) {
+  constructor(base: AlovaEventBase<AG, Args>, eventSource: EventSource) {
     super(base.method, base.args);
     this.eventSource = eventSource;
   }
 }
 
-export class AlovaSSEErrorEvent<AG extends AlovaGenerics> extends AlovaSSEEvent<AG> {
+export class AlovaSSEErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaSSEEvent<AG, Args> {
   error: Error; // 错误对象
 
-  constructor(base: AlovaSSEEvent<AG>, error: Error) {
+  constructor(base: AlovaSSEEvent<AG, Args>, error: Error) {
     super(base, base.eventSource);
     this.error = error;
   }
 }
 
-export class AlovaSSEMessageEvent<AG extends AlovaGenerics, Data> extends AlovaSSEEvent<AG> {
+export class AlovaSSEMessageEvent<AG extends AlovaGenerics, Data, Args extends any[] = any[]> extends AlovaSSEEvent<
+  AG,
+  Args
+> {
   data: Data; // 每次响应的，经过拦截器转换后的数据
 
-  constructor(base: AlovaSSEEvent<AG>, data: Data) {
+  constructor(base: AlovaSSEEvent<AG, Args>, data: Data) {
     super(base, base.eventSource);
     this.data = data;
   }
@@ -170,21 +173,24 @@ export class GlobalSQFailEvent<AG extends AlovaGenerics> extends GlobalSQEvent<A
 }
 
 /** SQ事件 */
-export class ScopedSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> implements IScopedSQEvent<AG> {
+export class ScopedSQEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends SQEvent<AG>
+  implements IScopedSQEvent<AG, Args>
+{
   /**
    * 通过send触发请求时传入的参数
    */
-  args: any[];
+  args: [...Args, ...any[]];
 
-  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: any[]) {
+  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: [...Args, ...any[]]) {
     super(behavior, method, silentMethod);
     this.args = args;
   }
 }
 
-export class ScopedSQSuccessEvent<AG extends AlovaGenerics>
-  extends ScopedSQEvent<AG>
-  implements IScopedSQSuccessEvent<AG>
+export class ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args>
+  implements IScopedSQSuccessEvent<AG, Args>
 {
   /**
    * 响应数据
@@ -195,7 +201,7 @@ export class ScopedSQSuccessEvent<AG extends AlovaGenerics>
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    args: any[],
+    args: [...Args, ...any[]],
     data: AG['Responded']
   ) {
     super(behavior, method, silentMethod, args);
@@ -203,19 +209,31 @@ export class ScopedSQSuccessEvent<AG extends AlovaGenerics>
   }
 }
 
-export class ScopedSQErrorEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> implements IScopedSQErrorEvent<AG> {
+export class ScopedSQErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args>
+  implements IScopedSQErrorEvent<AG, Args>
+{
   /**
    * 失败时抛出的错误
    */
   error: any;
 
-  constructor(behavior: SQHookBehavior, method: Method<AG>, silentMethod: SilentMethod<AG>, args: any[], error: any) {
+  constructor(
+    behavior: SQHookBehavior,
+    method: Method<AG>,
+    silentMethod: SilentMethod<AG>,
+    args: [...Args, ...any[]],
+    error: any
+  ) {
     super(behavior, method, silentMethod, args);
     this.error = error;
   }
 }
 
-export class ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEvent<AG> implements IScopedSQRetryEvent<AG> {
+export class ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args>
+  implements IScopedSQRetryEvent<AG, Args>
+{
   /**
    * 重试次数
    */
@@ -230,7 +248,7 @@ export class ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEvent<
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    args: any[],
+    args: [...Args, ...any[]],
     retryTimes: number,
     retryDelay: number
   ) {
@@ -240,14 +258,14 @@ export class ScopedSQRetryEvent<AG extends AlovaGenerics> extends ScopedSQEvent<
   }
 }
 
-export class ScopedSQCompleteEvent<AG extends AlovaGenerics>
-  extends ScopedSQEvent<AG>
-  implements IScopedSQCompleteEvent<AG>
+export class ScopedSQCompleteEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args>
+  implements IScopedSQCompleteEvent<AG, Args>
 {
   /**
    * 响应状态
    */
-  status: AlovaCompleteEvent<AG>['status'];
+  status: AlovaCompleteEvent<AG, any>['status'];
 
   /**
    * 响应数据
@@ -263,8 +281,8 @@ export class ScopedSQCompleteEvent<AG extends AlovaGenerics>
     behavior: SQHookBehavior,
     method: Method<AG>,
     silentMethod: SilentMethod<AG>,
-    args: any[],
-    status: AlovaCompleteEvent<AG>['status'],
+    args: [...Args, ...any[]],
+    status: AlovaCompleteEvent<AG, any[]>['status'],
     data?: AG['Responded'],
     error?: any
   ) {
@@ -275,9 +293,9 @@ export class ScopedSQCompleteEvent<AG extends AlovaGenerics>
   }
 }
 
-export class RetriableRetryEvent<AG extends AlovaGenerics>
-  extends AlovaEventBase<AG>
-  implements IRetriableRetryEvent<AG>
+export class RetriableRetryEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends AlovaEventBase<AG, Args>
+  implements IRetriableRetryEvent<AG, Args>
 {
   /**
    * 当前的重试次数
@@ -289,23 +307,23 @@ export class RetriableRetryEvent<AG extends AlovaGenerics>
    */
   retryDelay: number;
 
-  constructor(base: AlovaEventBase<AG>, retryTimes: number, retryDelay: number) {
+  constructor(base: AlovaEventBase<AG, Args>, retryTimes: number, retryDelay: number) {
     super(base.method, base.args);
     this.retryTimes = retryTimes;
     this.retryDelay = retryDelay;
   }
 }
 
-export class RetriableFailEvent<AG extends AlovaGenerics>
-  extends AlovaErrorEvent<AG>
-  implements IRetriableFailEvent<AG>
+export class RetriableFailEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends AlovaErrorEvent<AG, Args>
+  implements IRetriableFailEvent<AG, Args>
 {
   /**
    * 失败时的重试次数
    */
   retryTimes: number;
 
-  constructor(base: AlovaEventBase<AG>, error: any, retryTimes: number) {
+  constructor(base: AlovaEventBase<AG, Args>, error: any, retryTimes: number) {
     super(base, error);
     this.retryTimes = retryTimes;
   }

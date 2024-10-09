@@ -7,8 +7,8 @@ import { AlovaMethodHandler, CaptchaHookConfig } from '~/typings/clienthook';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
-export default <AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: CaptchaHookConfig<AG> = {}
 ) => {
   const { initialCountdown, middleware } = config;
@@ -32,7 +32,7 @@ export default <AG extends AlovaGenerics>(
   });
 
   const timer = ref(undefinedValue as NodeJS.Timeout | undefined);
-  const send = (...args: any[]) =>
+  const send = (...args: [...Args, ...any[]]) =>
     newInstance(PromiseCls, (resolve, reject) => {
       if (countdown.v <= 0) {
         requestReturned
