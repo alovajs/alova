@@ -132,7 +132,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       initialData,
       managedStates: objectify([data, page, pageSize, total], 's'),
       middleware(ctx, next) {
-        (middleware as any)(
+        middleware(
           {
             ...ctx,
             delegatingActions: {

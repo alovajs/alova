@@ -19,7 +19,8 @@ import {
 } from '../general';
 
 /**
- * 调用useFetcher时需要传入的类型，否则会导致状态类型错误
+ * specify the alova type
+ * so that it can return the right states
  */
 export type FetcherType<A extends Alova<any>> = {
   StatesExport: NonNullable<A['options']['statesHook']> extends StatesHook<infer SE> ? SE : any;
@@ -27,9 +28,13 @@ export type FetcherType<A extends Alova<any>> = {
 
 /** useFetcher config export type */
 export interface FetcherHookConfig<AG extends AlovaGenerics = AlovaGenerics> extends UseHookConfig<AG> {
-  /** 中间件 */
+  /**
+   * middleware
+   */
   middleware?: AlovaFetcherMiddleware<AG>;
-  /** fetch是否同步更新data状态 */
+  /**
+   * whether to update the corresponding states of fetching method instance
+   */
   updateState?: boolean;
 }
 

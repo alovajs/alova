@@ -62,7 +62,7 @@ describe('vue => useSQRequest', () => {
         completeMockFn(event);
       });
 
-    expect(loading.value).toBeFalsy(); // 有middleware则默认为false
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });

@@ -85,7 +85,7 @@ export type CompleteHandler<AG extends AlovaGenerics, Args extends any[]> = (
 /** common hook configuration */
 export interface UseHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]> {
   /**
-   * force request or not
+   * force request
    * @default false
    */
   force?: boolean | ((event: AlovaEvent<AG, Args>) => boolean);
@@ -102,20 +102,22 @@ export interface UseHookConfig<AG extends AlovaGenerics, Args extends any[] = an
 }
 
 export interface AlovaMiddlewareContext<AG extends AlovaGenerics> {
-  /** 当前的method对象 */
+  /** current method instance */
   method: Method<AG>;
 
-  /** 命中的缓存数据 */
+  /**
+   * cache data, only has value when hit cache
+   */
   cachedResponse: AG['Responded'] | undefined;
 
-  /** 当前的usehook配置对象 */
+  /** the config of current use hook */
   config: any;
 
-  /** 中断函数 */
+  /** abort request */
   abort: UseHookExposure['abort'];
 }
 
-/** 中间件next函数 */
+/** next function of middleware */
 export interface MiddlewareNextGuardConfig<AG extends AlovaGenerics, Args extends any[]> {
   force?: UseHookConfig<AG, Args>['force'];
   method?: Method<AG>;
@@ -126,13 +128,13 @@ export interface MiddlewareNextGuardConfig<AG extends AlovaGenerics, Args extend
  */
 export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics, Args extends any[] = any[]>
   extends AlovaMiddlewareContext<AG> {
-  /** 发送请求函数 */
+  /** handler to send request */
   send: SendHandler<Args, AG['Responded']>;
 
   /** args 响应处理回调的参数，该参数由use hooks的send传入 */
   args: [...Args, ...any[]];
 
-  /** 前端状态集合 */
+  /** state proxies set */
   proxyStates: FrontRequestState<
     FrameworkState<boolean, 'loading'>,
     FrameworkState<AG['Responded'], 'data'>,
@@ -142,33 +144,38 @@ export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics, Args exte
   >;
 
   /**
-   * 调用后将自定义控制loading的状态，内部不再触发loading状态的变更
-   * 传入control为false时将取消控制
-   *
-   * @param control 是否控制loading，默认为true
+   * custom control the state `loading` and doesn't toggle `loading` internally any more.
+   * call it with param `false` to cancel controlling.
+   * @JOU-amjs
+   * @param control whether to control loading, default is `true`
    */
   controlLoading: (control?: boolean) => void;
+
+  /**
+   * pass custom data
+   */
+  [attr: string]: any;
 }
 
 /**
- * alova useRequest/useWatcher中间件
+ * alova useRequest/useWatcher middleware
  */
 export interface AlovaFrontMiddleware<AG extends AlovaGenerics, Args extends any[] = any[]> {
   (context: AlovaFrontMiddlewareContext<AG, Args>, next: AlovaGuardNext<AG, Args>): any;
 }
 
 /**
- * useFetcher中间件的context参数
+ * the context param of middleware in useFetcher
  */
 export interface AlovaFetcherMiddlewareContext<AG extends AlovaGenerics, Args extends any[]>
   extends AlovaMiddlewareContext<AG> {
-  /** 数据预加载函数 */
+  /** fetch data */
   fetch<Transformed>(method: Method<AG>, ...args: [...Args, ...any[]]): Promise<Transformed>;
 
   /** args 响应处理回调的参数，该参数由useFetcher的fetch传入 */
   args: [...Args, ...any[]];
 
-  /** fetch状态的代理集合 */
+  /** state proxies set */
   proxyStates: FetchRequestState<
     FrameworkState<boolean, 'loading'>,
     FrameworkState<Error | undefined, 'error'>,
@@ -177,16 +184,21 @@ export interface AlovaFetcherMiddlewareContext<AG extends AlovaGenerics, Args ex
   >;
 
   /**
-   * 调用后将自定义控制fetching的状态，内部不再触发fetching状态的变更
-   * 传入control为false时将取消控制
-   *
-   * @param control 是否控制fetching，默认为true
+   * custom control the state `loading` and doesn't toggle `loading` internally any more.
+   * call it with param `false` to cancel controlling.
+   * @JOU-amjs
+   * @param control whether to control loading, default is `true`
    */
-  controlFetching: (control?: boolean) => void;
+  controlLoading: (control?: boolean) => void;
+
+  /**
+   * pass custom data
+   */
+  [attr: string]: any;
 }
 
 /**
- * alova useRequest/useWatcher中间件
+ * alova useFetcher middleware
  */
 export interface AlovaFetcherMiddleware<AG extends AlovaGenerics, Args extends any[] = any[]> {
   (context: AlovaFetcherMiddlewareContext<AG, Args>, next: AlovaGuardNext<AG, Args>): any;

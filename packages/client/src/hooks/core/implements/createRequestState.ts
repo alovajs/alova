@@ -61,14 +61,13 @@ export default function createRequestState<
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
-  const { middleware, __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
-  let initialLoading = middleware ? falseValue : !!immediate;
+  const { __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
+  let initialLoading = !!immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
   // 1. 在react下立即发送请求可以少渲染一次
   // 2. SSR渲染的html中，其初始视图为loading状态的，避免在客户端展现时的loading视图闪动
-  // 3. 如果config.middleware中设置了`controlLoading`时，需要默认为false，但这边无法确定middleware中是否有调用`controlLoading`，因此条件只能放宽点，当有`config.middleware`时则初始`loading`为false
-  if (immediate && !middleware) {
+  if (immediate) {
     // 调用getHandlerMethod时可能会报错，需要try/catch
     try {
       const methodInstance = getHandlerMethod(methodHandler, coreHookAssert(hookType));

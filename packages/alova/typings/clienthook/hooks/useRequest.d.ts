@@ -13,7 +13,7 @@ export interface FrontRequestHookConfig<AG extends AlovaGenerics, Args extends a
   /** 额外的监管状态，可通过updateState更新 */
   managedStates?: Record<string | symbol, AG['StatesExport']['State']>;
 
-  /** 中间件 */
+  /** middleware */
   middleware?: AlovaFrontMiddleware<AG, Args>;
 }
 

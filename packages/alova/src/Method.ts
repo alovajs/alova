@@ -69,6 +69,8 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   public fromCache: boolean | undefined = undefinedValue;
 
+  [Symbol.toStringTag]: 'Method';
+
   constructor(
     type: MethodType,
     context: Alova<AG>,
@@ -191,9 +193,9 @@ export default class Method<AG extends AlovaGenerics = any> {
    * @returns 返回一个Promise，用于执行任何回调
    */
   public then<TResult1 = AG['Responded'], TResult2 = never>(
-    onfulfilled?: (value: AG['Responded']) => TResult1 | PromiseLike<TResult1>,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
-  ) {
+    onfulfilled?: ((value: AG['Responded']) => TResult1 | PromiseLike<TResult1>) | null | undefined,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined
+  ): Promise<TResult1 | TResult2> {
     return promiseThen(this.send(), onfulfilled, onrejected);
   }
 
@@ -202,7 +204,9 @@ export default class Method<AG extends AlovaGenerics = any> {
    * @param onrejected 当Promise被reject时要执行的回调
    * @returns 返回一个完成回调的Promise
    */
-  public catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null) {
+  public catch<TResult = never>(
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined
+  ): Promise<AG['Responded'] | TResult> {
     return promiseCatch(this.send(), onrejected);
   }
 
@@ -211,7 +215,7 @@ export default class Method<AG extends AlovaGenerics = any> {
    * @param onfinally Promise结算（resolve或reject）时执行的回调。
    * @return 返回一个完成回调的Promise。
    */
-  public finally(onfinally?: (() => void) | undefined | null) {
+  public finally(onfinally?: (() => void) | null | undefined): Promise<AG['Responded']> {
     return promiseFinally(this.send(), onfinally);
   }
 }

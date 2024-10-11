@@ -51,6 +51,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
   // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
   const methodKey = getMethodInternalKey(methodInstance);
   const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<AG>;
+  const isFirstRequest = !hookInstance.m;
   hookInstance.m = methodInstance;
 
   return (async () => {
@@ -121,6 +122,14 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
     // 是否需要更新响应数据，以及调用响应回调
     const toUpdateResponse = () =>
       hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
+
+    const controlLoading = (control = trueValue) => {
+      // only reset loading state in first request
+      if (control && isFirstRequest) {
+        loadingState.v = falseValue;
+      }
+      controlledLoading = control;
+    };
     // 调用中间件函数
     const middlewareCompletePromise = isFetcher
       ? (middleware as AlovaFetcherMiddleware<AG, Args>)(
@@ -132,9 +141,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
               return useHookToSendRequest(hookInstance, methodInstance as Method<AG>, args);
             },
             proxyStates: omit(frontStates, 'data'),
-            controlFetching(control = trueValue) {
-              controlledLoading = control;
-            }
+            controlLoading
           },
           guardNext
         )
@@ -144,9 +151,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
             args: sendCallingArgs,
             send: (...args) => useHookToSendRequest(hookInstance, methodHandler, args as any),
             proxyStates: frontStates,
-            controlLoading(control = trueValue) {
-              controlledLoading = control;
-            }
+            controlLoading
           },
           guardNext
         );

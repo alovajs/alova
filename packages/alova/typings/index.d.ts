@@ -457,7 +457,7 @@ export interface AbortFunction {
 /**
  * 请求方法类型
  */
-export declare class Method<AG extends AlovaGenerics = any> {
+export declare class Method<AG extends AlovaGenerics = any> extends Promise<AG['Responded']> {
   constructor(
     type: MethodType,
     context: Alova<AG>,
@@ -559,33 +559,6 @@ export declare class Method<AG extends AlovaGenerics = any> {
   abort: AbortFunction;
 
   /**
-   * 绑定resolve和/或reject Promise的callback
-   * @param onfulfilled resolve Promise时要执行的回调
-   * @param onrejected 当Promise被reject时要执行的回调
-   * @returns 返回一个Promise，用于执行任何回调
-   */
-  then<TResult1 = AG['Responded'], TResult2 = never>(
-    onfulfilled?: (value: AG['Responded']) => TResult1 | PromiseLike<TResult1>,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
-  ): Promise<TResult1 | TResult2>;
-
-  /**
-   * 绑定一个仅用于reject Promise的回调
-   * @param onrejected 当Promise被reject时要执行的回调
-   * @returns 返回一个完成回调的Promise
-   */
-  catch<TResult = never>(
-    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
-  ): Promise<AG['Responded'] | TResult>;
-
-  /**
-   * 绑定一个回调，该回调在Promise结算（resolve或reject）时调用
-   * @param onfinally Promise结算（resolve或reject）时执行的回调。
-   * @return 返回一个完成回调的Promise。
-   */
-  finally(onfinally?: (() => void) | undefined | null): Promise<AG['Responded']>;
-
-  /**
    * 绑定下载进度回调函数
    * @param progressHandler 下载进度回调函数
    * @version 2.17.0
@@ -608,6 +581,7 @@ export class MethodSnapshotContainer<AG extends AlovaGenerics> {
   capacity: number;
 
   occupy: number;
+
   save(methodInstance: Method<AG>): void;
 
   /**
@@ -653,11 +627,6 @@ export interface Alova<AG extends AlovaGenerics> {
     config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
   ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Delete<Responded = unknown, Transformed = unknown>(
-    url: string,
-    data?: RequestBody,
-    config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
-  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
-  Put<Responded = unknown, Transformed = unknown>(
     url: string,
     data?: RequestBody,
     config?: AlovaMethodCreateConfig<AG, Responded, Transformed>
