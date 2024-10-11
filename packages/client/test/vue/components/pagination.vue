@@ -41,7 +41,7 @@
     </button>
     <button
       role="refresh1"
-      @click="refresh(1)">
+      @click="refreshWithCatch(1)">
       btn3
     </button>
     <button
@@ -221,7 +221,7 @@
     </button>
     <button
       role="reload1"
-      @click="reload()">
+      @click="reloadWithCatch()">
       btn1
     </button>
     <button
@@ -277,11 +277,25 @@ const runWithErrorHandling = <T extends (...args: any[]) => any>(fn: T) => {
 
 const exposure = usePagination(props.getter, props.paginationConfig);
 props.handleExposure?.(exposure);
-const { loading, data, pageCount, total, error, page, pageSize, isLastPage, update, insert, replace, remove } =
-  exposure;
+const {
+  loading,
+  data,
+  pageCount,
+  total,
+  error,
+  page,
+  pageSize,
+  isLastPage,
+  update,
+  insert,
+  replace,
+  remove,
+  refresh,
+  reload
+} = exposure;
 
 const awaitResult = ref<string | undefined>();
-const refresh = async (...args: any[]) => {
+const refreshWithCatch = async (...args: any[]) => {
   awaitResult.value = undefined;
   return exposure
     .refresh(...args)
@@ -292,7 +306,7 @@ const refresh = async (...args: any[]) => {
       awaitResult.value = 'reject';
     });
 };
-const reload = async () => {
+const reloadWithCatch = async () => {
   awaitResult.value = undefined;
   return exposure
     .reload()
