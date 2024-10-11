@@ -11,7 +11,9 @@ import {
 } from '../general';
 import { WatcherHookConfig } from './useWatcher';
 
-/** @description usePagination相关 */
+/**
+ * @description usePagination相关
+ */
 export type ArgGetter<R, LD> = (data: R) => LD | undefined;
 export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends WatcherHookConfig<AG> {
   /**
@@ -95,7 +97,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
    * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
    * @param pageOrItemPage 刷新的页码或列表项
    */
-  refresh(pageOrItemPage?: number | ListData[number]): void;
+  refresh(pageOrItemPage?: number | ListData[number]): Promise<AG['Responded']>;
 
   /**
    * 插入一条数据
@@ -124,7 +126,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   /**
    * 从第一页开始重新加载列表，并清空缓存
    */
-  reload(): void;
+  reload(): Promise<AG['Responded']>;
 }
 
 /**

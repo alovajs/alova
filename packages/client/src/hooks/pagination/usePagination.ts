@@ -9,7 +9,8 @@ import {
   isFn,
   isNumber,
   noop,
-  statesHookHelper
+  statesHookHelper,
+  usePromise
 } from '@alova/shared/function';
 import { GeneralFn } from '@alova/shared/types';
 import {
@@ -25,7 +26,6 @@ import {
   objectValues,
   promiseCatch,
   promiseResolve,
-  promiseThen,
   pushItem,
   splice,
   trueValue,
@@ -295,42 +295,54 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       }
     }
   });
-  states.onSuccess(({ data: rawData, args: [refreshPage, isRefresh], method }) => {
-    const { total: cachedTotal } = getSnapshotMethods(method) || {};
-    const typedRawData = rawData as any[];
-    total.v = cachedTotal !== undefinedValue ? cachedTotal : totalGetter(typedRawData);
-    if (!isRefresh) {
-      fetchPreviousPage(typedRawData);
-      fetchNextPage(typedRawData);
-    }
 
-    const pageSizeVal = pageSize.v;
-    const listData = listDataGetter(typedRawData); // 获取数组
-    paginationAssert(isArray(listData), 'Got wrong array, did you return the correct array of list in `data` function');
-
-    // 如果追加数据，才更新data
-    if (append) {
-      // 如果是reset则先清空数据
-      if (isReset.current) {
-        data.v = [];
+  const awaitResolve = ref(undefinedValue as GeneralFn | undefined);
+  const awaitReject = ref(undefinedValue as GeneralFn | undefined);
+  states
+    .onSuccess(({ data: rawData, args: [refreshPage, isRefresh], method }) => {
+      const { total: cachedTotal } = getSnapshotMethods(method) || {};
+      const typedRawData = rawData as any[];
+      total.v = cachedTotal !== undefinedValue ? cachedTotal : totalGetter(typedRawData);
+      if (!isRefresh) {
+        fetchPreviousPage(typedRawData);
+        fetchNextPage(typedRawData);
       }
-      if (refreshPage === undefinedValue) {
-        data.v = [...data.v, ...listData];
-      } else if (refreshPage) {
-        const rawData = [...data.v];
-        // 如果是刷新页面，则是替换那一页的数据
-        splice(rawData, (refreshPage - 1) * pageSizeVal, pageSizeVal, ...listData);
-        data.v = rawData;
-      }
-    } else {
-      data.v = listData;
-    }
-  });
 
-  // 请求成功与否，都要重置isReset
-  states.onComplete(() => {
-    isReset.current = falseValue;
-  });
+      const pageSizeVal = pageSize.v;
+      const listData = listDataGetter(typedRawData); // 获取数组
+      paginationAssert(
+        isArray(listData),
+        'Got wrong array, did you return the correct array of list in `data` function'
+      );
+
+      // 如果追加数据，才更新data
+      if (append) {
+        // 如果是reset则先清空数据
+        if (isReset.current) {
+          data.v = [];
+        }
+        if (refreshPage === undefinedValue) {
+          data.v = [...data.v, ...listData];
+        } else if (refreshPage) {
+          const rawData = [...data.v];
+          // 如果是刷新页面，则是替换那一页的数据
+          splice(rawData, (refreshPage - 1) * pageSizeVal, pageSizeVal, ...listData);
+          data.v = rawData;
+        }
+      } else {
+        data.v = listData;
+      }
+    })
+    .onSuccess(({ data }) => {
+      awaitResolve.current?.(data);
+    })
+    .onError(({ error }) => {
+      awaitReject.current?.(error);
+    })
+    .onComplete(() => {
+      // 请求成功与否，都要重置isReset
+      isReset.current = falseValue;
+    });
 
   // 获取列表项所在位置
   const getItemIndex = (item: ListData[number]) => {
@@ -347,8 +359,9 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
    * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
    * @param pageOrItemPage 刷新的页码或列表项
    */
-  const refresh = (pageOrItemPage: number | ListData[number] = page.v) => {
+  const refresh = async (pageOrItemPage: number | ListData[number] = page.v) => {
     let refreshPage = pageOrItemPage as number;
+    let awaitPromise = promiseResolve<AG['Responded']>();
     if (append) {
       if (!isNumber(pageOrItemPage)) {
         const itemIndex = getItemIndex(pageOrItemPage);
@@ -356,17 +369,16 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       }
       paginationAssert(refreshPage <= page.v, "refresh page can't greater than page");
       // 更新当前页数据
-      promiseCatch(send(refreshPage, trueValue), noop);
+      awaitPromise = send(refreshPage, trueValue);
     } else {
       paginationAssert(isNumber(refreshPage), 'unable to calculate refresh page by item in pagination mode');
       // 页数相等，则刷新当前页，否则fetch数据
-      promiseCatch(
+      awaitPromise =
         refreshPage === page.v
           ? send(undefinedValue, trueValue)
-          : fetch(handler(refreshPage, pageSize.v) as Method, trueValue),
-        noop
-      );
+          : fetch(handler(refreshPage, pageSize.v) as Method, trueValue);
     }
+    return awaitPromise;
   };
 
   // 删除除此usehook当前页和下一页的所有相关缓存
@@ -549,11 +561,14 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   /**
    * 从第${initialPage}页开始重新加载列表，并清空缓存
    */
-  const reload = () => {
-    promiseThen(invalidatePaginationCache(trueValue), () => {
-      isReset.current = trueValue;
-      page.v === initialPage ? promiseCatch(send(), noop) : (page.v = initialPage);
-    });
+  const reload = async () => {
+    await invalidatePaginationCache(trueValue);
+    isReset.current = trueValue;
+    page.v === initialPage ? promiseCatch(send(), noop) : (page.v = initialPage);
+    const { resolve, reject, promise } = usePromise<AG['Responded']>();
+    awaitResolve.current = resolve;
+    awaitReject.current = reject;
+    return promise;
   };
 
   // 兼容react，每次缓存最新的操作函数，避免闭包陷阱

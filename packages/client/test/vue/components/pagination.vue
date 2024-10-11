@@ -9,6 +9,11 @@
     <span role="response">{{ JSON.stringify(data) }}</span>
     <span role="error">{{ error?.message }}</span>
     <span role="replacedError">{{ replacedError?.message }}</span>
+    <span
+      role="awaitResult"
+      v-if="awaitResult"
+      >{{ awaitResult }}</span
+    >
     <button
       role="setPage"
       @click="update({ page: page + 1 })">
@@ -272,20 +277,30 @@ const runWithErrorHandling = <T extends (...args: any[]) => any>(fn: T) => {
 
 const exposure = usePagination(props.getter, props.paginationConfig);
 props.handleExposure?.(exposure);
-const {
-  loading,
-  data,
-  pageCount,
-  total,
-  error,
-  page,
-  pageSize,
-  isLastPage,
-  update,
-  refresh,
-  insert,
-  replace,
-  remove,
-  reload
-} = exposure;
+const { loading, data, pageCount, total, error, page, pageSize, isLastPage, update, insert, replace, remove } =
+  exposure;
+
+const awaitResult = ref<string | undefined>();
+const refresh = async (...args: any[]) => {
+  awaitResult.value = undefined;
+  return exposure
+    .refresh(...args)
+    .then(() => {
+      awaitResult.value = 'resolve';
+    })
+    .catch(() => {
+      awaitResult.value = 'reject';
+    });
+};
+const reload = async () => {
+  awaitResult.value = undefined;
+  return exposure
+    .reload()
+    .then(() => {
+      awaitResult.value = 'resolve';
+    })
+    .catch(() => {
+      awaitResult.value = 'reject';
+    });
+};
 </script>

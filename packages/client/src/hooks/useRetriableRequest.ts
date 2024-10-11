@@ -76,7 +76,7 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
             stop
           }
         } as any,
-        () => promiseResolve(undefinedValue as any)
+        () => promiseResolve()
       );
       const { proxyStates, args, send, method, controlLoading } = ctx;
       const setLoading = (loading = falseValue) => {

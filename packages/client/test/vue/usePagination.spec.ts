@@ -164,7 +164,6 @@ describe('vue => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('reload1'));
-    await delay(0);
     await waitFor(async () => {
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toBeUndefined();
@@ -305,6 +304,8 @@ describe('vue => usePagination', () => {
       return data;
     });
     fireEvent.click(screen.getByRole('refresh1')); // 在翻页模式下，不是当前页会使用fetch
+    const awaitResultEl = await screen.findByRole('awaitResult');
+    expect(awaitResultEl).toHaveTextContent('resolve');
     await waitFor(async () => {
       const cache = await queryCache(getter1(1, 10));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(9, 0, i => (i === 0 ? 100 : i)));
@@ -1376,6 +1377,8 @@ describe('vue => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('reload1'));
+    const awaitResultEl = await screen.findByRole('awaitResult');
+    expect(awaitResultEl).toHaveTextContent('resolve');
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3]));
@@ -1521,7 +1524,7 @@ describe('vue => usePagination', () => {
     });
   });
 
-  test('can resend request when encounter an error', async () => {
+  test('can be resent request when encounter an error', async () => {
     const errorFn = jest.fn();
     const completeFn = jest.fn();
     render(Pagination, {
@@ -1547,12 +1550,16 @@ describe('vue => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('reload1'));
+    const awaitResultEl = await screen.findByRole('awaitResult');
+    expect(awaitResultEl).toHaveTextContent('reject');
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(2);
       expect(completeFn).toHaveBeenCalledTimes(2);
     });
 
     fireEvent.click(screen.getByRole('reload1'));
+    const awaitResultEl2 = await screen.findByRole('awaitResult');
+    expect(awaitResultEl2).toHaveTextContent('reject');
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(3);
       expect(completeFn).toHaveBeenCalledTimes(3);
