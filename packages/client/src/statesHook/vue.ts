@@ -1,5 +1,5 @@
 import { createSyncOnceRunner } from '@alova/shared/function';
-import { forEach, PromiseCls, setTimeoutFn, trueValue } from '@alova/shared/vars';
+import { forEach, setTimeoutFn, trueValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
 import { computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 import { VueHookExportType } from '~/typings/stateshook/vue';
@@ -19,7 +19,7 @@ export default {
       onMounted(() => immediate && handler());
     } else {
       // if call outside component, run asynchronously with `Promise`
-      PromiseCls.resolve().then(() => {
+      setTimeoutFn(() => {
         immediate && handler();
       });
     }

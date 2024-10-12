@@ -15,14 +15,16 @@ import vueHook from 'alova/vue';
 import { expectAssignableBy, expectType } from 'root/testUtils';
 import { ref, Ref } from 'vue';
 
+const baseURL = process.env.NODE_BASE_URL;
 const VueAlovaInst = createAlova({
+  baseURL,
   statesHook: vueHook,
   requestAdapter: GlobalFetch()
 });
 
-const Getter = <T>() => VueAlovaInst.Get<T>('');
+const Getter = <T>() => VueAlovaInst.Get<T>('/unit-test');
 const ArgsGetter = <Args extends unknown[], R = any>(...args: Args) =>
-  VueAlovaInst.Get<R>('', {
+  VueAlovaInst.Get<R>('/unit-test', {
     params: {
       args
     }
@@ -108,7 +110,7 @@ describe('send args', () => {
   });
 
   test('useForm', () => {
-    const useFormState = useForm((form: {}, ...args: Args) => VueAlovaInst.Get(''));
+    const useFormState = useForm((form: {}, ...args: Args) => VueAlovaInst.Get('/unit-test'));
     expectAssignableBy<SendHandler<Args, any>>(useFormState.send);
     expectAssignableBy<SendHandler<ExtendedArgs, any>>(useFormState.send);
     // @ts-expect-error
@@ -133,7 +135,7 @@ describe('send args', () => {
 
   test('usePagination', () => {
     const usePaginationState = usePagination((page, pageSize, name?: string) =>
-      VueAlovaInst.Get(`${page} ${pageSize}`)
+      VueAlovaInst.Get(`/unit-test?${page} ${pageSize}`)
     );
 
     expectAssignableBy<SendHandler<[number, number], any>>(usePaginationState.send);
