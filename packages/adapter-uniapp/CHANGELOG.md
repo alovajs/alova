@@ -1,5 +1,14 @@
 # @alova/adapter-uniapp
 
+## 2.0.7
+
+### Patch Changes
+
+- [#563](https://github.com/alovajs/alova/pull/563) [`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - loading value depends on `immdediate` event if `middleware` is set
+
+- Updated dependencies [[`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c)]:
+  - @alova/shared@1.0.6
+
 ## 2.0.6
 
 ### Patch Changes
