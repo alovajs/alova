@@ -52,3 +52,7 @@ export const generateContinuousNumbers = (
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const expectType = <T>(value: T) => {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const expectTrue = <T extends true>() => {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const expectAssignableBy = <T, T2 extends T = T>(value: T2) => {};

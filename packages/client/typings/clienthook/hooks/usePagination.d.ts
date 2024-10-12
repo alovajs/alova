@@ -11,7 +11,9 @@ import {
 } from '../general';
 import { WatcherHookConfig } from './useWatcher';
 
-/** @description usePagination相关 */
+/**
+ * @description usePagination相关
+ */
 export type ArgGetter<R, LD> = (data: R) => LD | undefined;
 export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends WatcherHookConfig<AG> {
   /**
@@ -55,8 +57,11 @@ export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extend
    */
   watchingStates?: AG['StatesExport']['Watched'][];
 }
-export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[]>
-  extends Omit<UseHookExposure<AG, UsePaginationExposure<AG, ListData>>, 'update'> {
+export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[], Args extends any[]>
+  extends Omit<
+    UseHookExposure<AG, [page: number, pageSize: number, ...Args], UsePaginationExposure<AG, ListData, Args>>,
+    'update'
+  > {
   page: ExportedState<number, AG['StatesExport']>;
   pageSize: ExportedState<number, AG['StatesExport']>;
   data: ExportedState<
@@ -75,9 +80,15 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   total: ExportedComputed<number | undefined, AG['StatesExport']>;
   isLastPage: ExportedComputed<boolean, AG['StatesExport']>;
   fetching: ExportedState<boolean, AG['StatesExport']>;
-  onFetchSuccess(handler: SuccessHandler<AG>): UsePaginationExposure<AG, ListData>;
-  onFetchError(handler: ErrorHandler<AG>): UsePaginationExposure<AG, ListData>;
-  onFetchComplete(handler: CompleteHandler<AG>): UsePaginationExposure<AG, ListData>;
+  onFetchSuccess(
+    handler: SuccessHandler<AG, [page: number, pageSize: number, ...Args]>
+  ): UsePaginationExposure<AG, ListData>;
+  onFetchError(
+    handler: ErrorHandler<AG, [page: number, pageSize: number, ...Args]>
+  ): UsePaginationExposure<AG, ListData>;
+  onFetchComplete(
+    handler: CompleteHandler<AG, [page: number, pageSize: number, ...Args]>
+  ): UsePaginationExposure<AG, ListData>;
   update: StateUpdater<UsePaginationExposure<AG, ListData>, AG['StatesExport']>;
 
   /**
@@ -86,7 +97,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
    * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
    * @param pageOrItemPage 刷新的页码或列表项
    */
-  refresh(pageOrItemPage?: number | ListData[number]): void;
+  refresh(pageOrItemPage?: number | ListData[number]): Promise<AG['Responded']>;
 
   /**
    * 插入一条数据
@@ -115,7 +126,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   /**
    * 从第一页开始重新加载列表，并清空缓存
    */
-  reload(): void;
+  reload(): Promise<AG['Responded']>;
 }
 
 /**
@@ -126,7 +137,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
  * @param config pagination hook配置
  * @returns {UsePaginationExposure}
  */
-export declare function usePagination<AG extends AlovaGenerics, ListData extends unknown[]>(
-  handler: (page: number, pageSize: number) => Method<AG>,
+export declare function usePagination<AG extends AlovaGenerics, ListData extends unknown[], Args extends any[]>(
+  handler: (page: number, pageSize: number, ...args: Args) => Method<AG>,
   config?: PaginationHookConfig<AG, ListData>
-): UsePaginationExposure<AG, ListData>;
+): UsePaginationExposure<AG, ListData, Args>;

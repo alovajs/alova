@@ -393,7 +393,7 @@ describe('react => useSSE', () => {
   // ! 打开失败应该报错，不立即发送请求
   test('should throw error then try to connect a not exist url (immediate: false)', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get('/not-exist-path', data);
+    const poster = (data?: any) => alovaInst.Get('/not-exist-path', data);
 
     let recv = undefinedValue;
     const mockOpenFn = jest.fn();

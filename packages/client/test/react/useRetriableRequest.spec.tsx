@@ -102,12 +102,13 @@ describe('react => useRetriableRequest', () => {
         expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
         /**
-         * loading defaults to false (even if set immediate to true)
+         * loading defaults to true
          * 1 -> React setup
-         * 2 -> loading from false to true
-         * 3 -> loading from true to false
+         * 2 -> loading from true to false
+         *
+         * reminder: loading from true to false when call `controlLoading`, and set to true synchronously, this situation will not trigger `useEffect`
          */
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(3);
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2);
       },
       {
         timeout: 4000
@@ -495,12 +496,13 @@ describe('react => useRetriableRequest', () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
         expect(mockFailFn).toHaveBeenCalledTimes(1);
         /**
-         * loading defaults to false (even if set immediate to true)
+         * loading defaults to true
          * 1 -> React setup
-         * 2 -> loading from false to true
-         * 3 -> loading from true to false
+         * 2 -> loading from true to false
+         *
+         * reminder: loading from true to false when call `controlLoading`, and set to true synchronously, this situation will not trigger `useEffect`
          */
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(3);
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2);
       },
       {
         timeout: 4000
@@ -515,10 +517,10 @@ describe('react => useRetriableRequest', () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(4);
         expect(mockFailFn).toHaveBeenCalledTimes(2);
         /**
-         * 4 -> loading from false to true
-         * 5 -> loading from true to false
+         * 3 -> loading from false to true
+         * 4 -> loading from true to false
          */
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(5);
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(4);
       },
       {
         timeout: 4000
@@ -579,12 +581,13 @@ describe('react => useRetriableRequest', () => {
         expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(1);
         /**
-         * loading defaults to false (even if set immediate to true)
+         * loading defaults to true
          * 1 -> React setup
-         * 2 -> loading from false to true
-         * 3 -> loading from true to false
+         * 2 -> loading from true to false
+         *
+         * reminder: loading from true to false when call `controlLoading`, and set to true synchronously, this situation will not trigger `useEffect`
          */
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(3);
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2);
       },
       {
         timeout: 4000
@@ -599,7 +602,7 @@ describe('react => useRetriableRequest', () => {
         expect(mockCompleteFn).toHaveBeenCalledTimes(8);
         expect(mockSuccessFn).not.toHaveBeenCalled();
         expect(mockFailFn).toHaveBeenCalledTimes(2);
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(5);
+        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(4);
       },
       {
         timeout: 4000
