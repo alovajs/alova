@@ -870,7 +870,8 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
 
     const ctrlVal = ref(0);
-    const { data, send, onSuccess } = useWatcher(() => getGetterObj, [ctrlVal], {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { data, send, onSuccess } = useWatcher((_force: boolean) => getGetterObj, [ctrlVal], {
       force: ({ args: [force] }) => force
     });
 

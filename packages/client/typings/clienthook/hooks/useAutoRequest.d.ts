@@ -47,10 +47,10 @@ export type UnbindHandler = () => void;
  * @param config 配置参数
  * @return useAutoRequest相关数据和操作函数
  */
-export declare function useAutoRequest<AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useAutoRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: AutoRequestHookConfig<AG>
-): UseHookExposure<AG>;
+): UseHookExposure<AG, Args>;
 export declare namespace useAutoRequest {
   function onNetwork<AG extends AlovaGenerics = AlovaGenerics>(
     notify: NotifyHandler,

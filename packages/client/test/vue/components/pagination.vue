@@ -9,6 +9,11 @@
     <span role="response">{{ JSON.stringify(data) }}</span>
     <span role="error">{{ error?.message }}</span>
     <span role="replacedError">{{ replacedError?.message }}</span>
+    <span
+      role="awaitResult"
+      v-if="awaitResult"
+      >{{ awaitResult }}</span
+    >
     <button
       role="setPage"
       @click="update({ page: page + 1 })">
@@ -36,7 +41,7 @@
     </button>
     <button
       role="refresh1"
-      @click="refresh(1)">
+      @click="refreshWithCatch(1)">
       btn3
     </button>
     <button
@@ -216,7 +221,7 @@
     </button>
     <button
       role="reload1"
-      @click="reload()">
+      @click="reloadWithCatch()">
       btn1
     </button>
     <button
@@ -282,10 +287,34 @@ const {
   pageSize,
   isLastPage,
   update,
-  refresh,
   insert,
   replace,
   remove,
+  refresh,
   reload
 } = exposure;
+
+const awaitResult = ref<string | undefined>();
+const refreshWithCatch = async (...args: any[]) => {
+  awaitResult.value = undefined;
+  return exposure
+    .refresh(...args)
+    .then(() => {
+      awaitResult.value = 'resolve';
+    })
+    .catch(() => {
+      awaitResult.value = 'reject';
+    });
+};
+const reloadWithCatch = async () => {
+  awaitResult.value = undefined;
+  return exposure
+    .reload()
+    .then(() => {
+      awaitResult.value = 'resolve';
+    })
+    .catch(() => {
+      awaitResult.value = 'reject';
+    });
+};
 </script>

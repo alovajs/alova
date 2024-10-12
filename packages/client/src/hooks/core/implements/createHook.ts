@@ -4,10 +4,10 @@ import type { AlovaGenerics, FrontRequestState, Progress, ReferingObject } from 
 import { Method } from 'alova';
 import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings/clienthook';
 
-export default <AG extends AlovaGenerics>(
+export default <AG extends AlovaGenerics, Args extends any[]>(
   ht: TEnumHookType,
-  c: UseHookConfig<AG>,
-  eventManager: Hook['em'],
+  c: UseHookConfig<AG, Args>,
+  eventManager: Hook<Args>['em'],
   ro: ReferingObject
 ) =>
   ({
@@ -43,4 +43,4 @@ export default <AG extends AlovaGenerics>(
 
     /** managedStates */
     ms: {}
-  }) as Hook;
+  }) as Hook<Args>;

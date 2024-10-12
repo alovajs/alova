@@ -16,7 +16,8 @@ export type CaptchaHookConfig<AG extends AlovaGenerics> = {
 /**
  * useCaptcha返回值
  */
-export interface CaptchaExposure<AG extends AlovaGenerics> extends UseHookExposure<AG, CaptchaExposure<AG>> {
+export interface CaptchaExposure<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends UseHookExposure<AG, Args, CaptchaExposure<AG, Args>> {
   /**
    * 当前倒计时，每秒-1，当倒计时到0时可再次发送验证码
    */
@@ -29,7 +30,7 @@ export interface CaptchaExposure<AG extends AlovaGenerics> extends UseHookExposu
  * @param 配置参数
  * @return useCaptcha相关数据和操作函数
  */
-export declare function useCaptcha<AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useCaptcha<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: CaptchaHookConfig<AG>
-): CaptchaExposure<AG>;
+): CaptchaExposure<AG, Args>;

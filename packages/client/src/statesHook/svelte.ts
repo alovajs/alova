@@ -5,12 +5,13 @@ import { onDestroy, onMount } from 'svelte';
 import { derived, writable } from 'svelte/store';
 import { SvelteHookExportType } from '~/typings/stateshook/svelte';
 
+// the svelte predefined hooks
 export default {
   name: 'Svelte',
   create: data => writable(data),
   dehydrate: state => {
     let raw;
-    // 订阅时会立即执行一次函数，获取到值后立即调用解除订阅函数
+    // The function will be executed once when subscribing, and the unsubscribe function will be called immediately after the value is obtained
     state.subscribe(value => {
       raw = value;
     })();
@@ -20,7 +21,7 @@ export default {
     state.set(newVal);
   },
   effectRequest({ handler, removeStates, immediate, watchingStates }) {
-    // 组件卸载时移除对应状态
+    // Remove the corresponding state when the component is unmounted
     onDestroy(removeStates);
     onMount(() => immediate && handler());
 
@@ -29,7 +30,7 @@ export default {
     forEach(watchingStates || [], (state, i) => {
       state.subscribe(() => {
         syncRunner(() => {
-          // svelte的writable默认会触发一次，因此当immediate为false时需要过滤掉第一次触发调用
+          // Svelte's `writable` will trigger once by default, so when immediate is false, you need to filter out the first trigger call
           needEmit ? handler(i) : (needEmit = trueValue);
         });
       });

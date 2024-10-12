@@ -15,7 +15,7 @@ import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 import { accessAction, actionDelegationMiddleware } from '@/index';
 import { AlovaEventBase } from '@alova/shared/event';
 import { AlovaGenerics, createAlova } from 'alova';
-import VueHook from 'alova/vue';
+import VueHook from '@/statesHook/vue';
 import { delay, untilCbCalled } from 'root/testUtils';
 import { SQHookBehavior } from '~/typings/clienthook';
 
@@ -62,7 +62,7 @@ describe('vue => useSQRequest', () => {
         completeMockFn(event);
       });
 
-    expect(loading.value).toBeFalsy(); // 有middleware则默认为false
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });

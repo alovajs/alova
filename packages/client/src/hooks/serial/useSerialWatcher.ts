@@ -13,16 +13,16 @@ import { assertSerialHandlers, serialMiddleware } from './general';
  * @param config 配置参数
  * @return useSerialRequest相关数据和操作函数
  */
-export default <AG extends AlovaGenerics>(
-  serialHandlers: [Method<AG> | AlovaMethodHandler<AG>, ...AlovaMethodHandler<any>[]],
+export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  serialHandlers: [Method<AG> | AlovaMethodHandler<AG, Args>, ...AlovaMethodHandler<any>[]],
   watchingStates: AG['StatesExport']['Watched'][],
-  config: RequestHookConfig<AG> = {} as any
+  config: RequestHookConfig<AG, Args> = {} as any
 ) => {
   assertSerialHandlers('useSerialWatcher', serialHandlers);
   // eslint-disable-next-line
   const { ref, __referingObj } = statesHookHelper(promiseStatesHook());
   const methods = ref<Method<AG>[]>([]).current;
-  const exposures = useWatcher<AG>(serialHandlers[0], watchingStates, {
+  const exposures = useWatcher(serialHandlers[0], watchingStates, {
     ...config,
     __referingObj,
     middleware: serialMiddleware(serialHandlers, config.middleware, methods)

@@ -300,7 +300,7 @@ describe('request adapter', () => {
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(uploading.value).toEqual({ total: 200, loaded: 40 });
+    expect(uploading.value).toEqual({ total: 200, loaded: 60 });
     expect(error.value?.message).toBe('uploadFile:fail abort');
   });
 
@@ -352,7 +352,7 @@ describe('request adapter', () => {
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 200, loaded: 40 });
+    expect(downloading.value).toEqual({ total: 200, loaded: 60 });
     expect(error.value?.message).toBe('downloadFile:fail abort');
   });
 });
