@@ -69,7 +69,7 @@ export default class Method<AG extends AlovaGenerics = any> {
 
   public fromCache: boolean | undefined = undefinedValue;
 
-  [Symbol.toStringTag]: 'Method';
+  [Symbol.toStringTag]: string;
 
   constructor(
     type: MethodType,

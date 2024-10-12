@@ -85,7 +85,7 @@ export type CompleteHandler<AG extends AlovaGenerics, Args extends any[]> = (
 /** common hook configuration */
 export interface UseHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]> {
   /**
-   * force request or not
+   * force request
    * @default false
    */
   force?: boolean | ((event: AlovaEvent<AG, Args>) => boolean);
