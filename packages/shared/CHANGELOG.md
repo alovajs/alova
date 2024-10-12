@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.6
+
+### Patch Changes
+
+- [#537](https://github.com/alovajs/alova/pull/537) [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - feat: add inference for send arguments
+
 ## 1.0.5
 
 ### Patch Changes

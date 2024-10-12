@@ -1,5 +1,22 @@
 # alova
 
+## 3.1.0
+
+### Minor Changes
+
+- [#537](https://github.com/alovajs/alova/pull/537) [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - the function `refresh` and `reload` return by `usePagination` will return a promise
+
+### Patch Changes
+
+- [#537](https://github.com/alovajs/alova/pull/537) [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - loading value depends on `immdediate` event if `middleware` is set
+
+- [#537](https://github.com/alovajs/alova/pull/537) [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - feat: add inference for send arguments
+
+- [#537](https://github.com/alovajs/alova/pull/537) [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - optimize the type `Method` to extend `Promise`
+
+- Updated dependencies [[`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997)]:
+  - @alova/shared@1.0.6
+
 ## 3.0.20
 
 ### Patch Changes

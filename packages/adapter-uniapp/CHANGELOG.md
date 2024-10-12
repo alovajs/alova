@@ -1,5 +1,15 @@
 # @alova/adapter-uniapp
 
+## 3.0.0
+
+### Patch Changes
+
+- [#537](https://github.com/alovajs/alova/pull/537) [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - loading value depends on `immdediate` event if `middleware` is set
+
+- Updated dependencies [[`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997), [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997), [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997), [`b1ac36e`](https://github.com/alovajs/alova/commit/b1ac36e05d98c96f631ed68d0b831f827dc2b997)]:
+  - alova@3.1.0
+  - @alova/shared@1.0.6
+
 ## 2.0.6
 
 ### Patch Changes
