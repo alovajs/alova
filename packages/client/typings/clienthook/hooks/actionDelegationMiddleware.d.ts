@@ -22,7 +22,7 @@ export declare function actionDelegationMiddleware<
   context: (AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>) & {
     delegatingActions?: Actions;
   },
-  next: AlovaGuardNext<AG>
+  next: AlovaGuardNext<AG, Args>
 ) => Promise<any>;
 
 /**

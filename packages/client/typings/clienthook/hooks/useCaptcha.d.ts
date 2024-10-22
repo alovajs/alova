@@ -5,13 +5,13 @@ import { RequestHookConfig } from './useRequest';
 /**
  * useCaptcha配置
  */
-export type CaptchaHookConfig<AG extends AlovaGenerics> = {
+export type CaptchaHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]> = {
   /**
    * 初始倒计时，当验证码发送成功时将会以此数据来开始倒计时
    * @default 60
    */
   initialCountdown?: number;
-} & RequestHookConfig<AG>;
+} & RequestHookConfig<AG, Args>;
 
 /**
  * useCaptcha返回值
@@ -32,5 +32,5 @@ export interface CaptchaExposure<AG extends AlovaGenerics, Args extends any[] = 
  */
 export declare function useCaptcha<AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
-  config?: CaptchaHookConfig<AG>
+  config?: CaptchaHookConfig<AG, Args>
 ): CaptchaExposure<AG, Args>;

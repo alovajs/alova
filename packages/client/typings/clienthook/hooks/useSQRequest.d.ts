@@ -78,28 +78,31 @@ export interface GlobalSQFailEvent<AG extends AlovaGenerics> extends GlobalSQEve
 }
 
 /** SQ局部事件 */
-export interface ScopedSQEvent<AG extends AlovaGenerics, Args extends any[]> extends SQEvent<AG> {
+export interface ScopedSQEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends SQEvent<AG> {
   /**
    * 通过send触发请求时传入的参数
    */
   args: [...Args, ...any[]];
 }
 /** 局部成功事件 */
-export interface ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
+export interface ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args> {
   /**
    * 响应数据
    */
   data: AG['Responded'];
 }
 /** 局部失败事件 */
-export interface ScopedSQErrorEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
+export interface ScopedSQErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args> {
   /**
    * 失败时抛出的错误
    */
   error: any;
 }
 /** 局部失败事件 */
-export interface ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
+export interface ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args> {
   /**
    * 重试次数
    */
@@ -110,11 +113,12 @@ export interface ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[]
   retryDelay: number;
 }
 /** 局部完成事件 */
-export interface ScopedSQCompleteEvent<AG extends AlovaGenerics, Args extends any[]> extends ScopedSQEvent<AG, Args> {
+export interface ScopedSQCompleteEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends ScopedSQEvent<AG, Args> {
   /**
    * 响应状态
    */
-  status: AlovaCompleteEvent<AG>['status'];
+  status: AlovaCompleteEvent<AG, Args>['status'];
   /**
    * 响应数据
    */
@@ -348,14 +352,20 @@ export interface SQHookConfig<AG extends AlovaGenerics> {
   vDataCaptured?: (method: Method<AG>) => AG['Responded'] | undefined | void;
 }
 
-export type SQRequestHookConfig<AG extends AlovaGenerics, Args extends any[]> = SQHookConfig<AG> &
+export type SQRequestHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]> = SQHookConfig<AG> &
   RequestHookConfig<AG, Args>;
-export type FallbackHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
-export type RetryHandler<AG extends AlovaGenerics> = (event: ScopedSQRetryEvent<AG>) => void;
-export type BeforePushQueueHandler<AG extends AlovaGenerics> = (
-  event: ScopedSQEvent<AG>
+export type FallbackHandler<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: ScopedSQEvent<AG, Args>
+) => void;
+export type RetryHandler<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: ScopedSQRetryEvent<AG, Args>
+) => void;
+export type BeforePushQueueHandler<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: ScopedSQEvent<AG, Args>
 ) => void | boolean | Promise<void | boolean>;
-export type PushedQueueHandler<AG extends AlovaGenerics> = (event: ScopedSQEvent<AG>) => void;
+export type PushedQueueHandler<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: ScopedSQEvent<AG, Args>
+) => void;
 export type SQHookExposure<AG extends AlovaGenerics, Args extends any[] = any[]> = Omit<
   UseHookExposure<AG, Args>,
   'onSuccess' | 'onError' | 'onComplete'
@@ -372,25 +382,25 @@ export type SQHookExposure<AG extends AlovaGenerics, Args extends any[] = any[]>
    * 1. 只在重试次数达到后仍然失败时触发
    * 2. 在onComplete之前触发
    */
-  onFallback(handler: FallbackHandler<AG>): SQHookExposure<AG>;
+  onFallback(handler: FallbackHandler<AG, Args>): SQHookExposure<AG>;
 
   /** 在入队列前调用，在此可以过滤队列中重复的SilentMethod，在static行为下无效 */
-  onBeforePushQueue(handler: BeforePushQueueHandler<AG>): SQHookExposure<AG>;
+  onBeforePushQueue(handler: BeforePushQueueHandler<AG, Args>): SQHookExposure<AG>;
 
   /** 在入队列后调用，在static行为下无效 */
-  onPushedQueue(handler: PushedQueueHandler<AG>): SQHookExposure<AG>;
+  onPushedQueue(handler: PushedQueueHandler<AG, Args>): SQHookExposure<AG>;
 
   /** 重试事件绑定 */
-  onRetry(handler: RetryHandler<AG>): SQHookExposure<AG>;
+  onRetry(handler: RetryHandler<AG, Args>): SQHookExposure<AG>;
 
   /** @override 重写alova的onSuccess事件 */
-  onSuccess(handler: (event: ScopedSQSuccessEvent<AG>) => void): SQHookExposure<AG>;
+  onSuccess(handler: (event: ScopedSQSuccessEvent<AG, Args>) => void): SQHookExposure<AG>;
 
   /** @override 重写alova的onError事件 */
-  onError(handler: (event: ScopedSQErrorEvent<AG>) => void): SQHookExposure<AG>;
+  onError(handler: (event: ScopedSQErrorEvent<AG, Args>) => void): SQHookExposure<AG>;
 
   /** @override 重写alova的onComplete事件 */
-  onComplete(handler: (event: ScopedSQCompleteEvent<AG>) => void): SQHookExposure<AG>;
+  onComplete(handler: (event: ScopedSQCompleteEvent<AG, Args>) => void): SQHookExposure<AG>;
 };
 
 export interface DataSerializer {
@@ -461,7 +471,7 @@ export type SilentQueueMap = Record<string, SilentMethod<any>[]>;
  */
 export declare function useSQRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: AlovaMethodHandler<AG, Args>,
-  config?: SQRequestHookConfig<AG>
+  config?: SQRequestHookConfig<AG, Args>
 ): SQHookExposure<AG, Args>;
 export declare function bootSilentFactory(options: SilentFactoryBootOptions): void;
 export declare function onSilentSubmitBoot(handler: SilentSubmitBootHandler): OffEventCallback;

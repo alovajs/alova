@@ -17,7 +17,7 @@ import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDet
 const RestoreEventKey = Symbol('FormRestore');
 const getStoragedKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>, id?: ID) =>
   `alova/form-${id || getMethodInternalKey(methodInstance)}`;
-type ID = NonNullable<FormHookConfig<AlovaGenerics, any>['id']>;
+type ID = NonNullable<FormHookConfig<AlovaGenerics, any, any[]>['id']>;
 
 const sharedStates = {};
 const cloneFormData = <T>(form: T): T => {
@@ -27,13 +27,13 @@ const cloneFormData = <T>(form: T): T => {
 
 export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>, Args extends any[] = any[]>(
   handler: FormHookHandler<AG, FormData, Args>,
-  config: FormHookConfig<AG, FormData> = {}
+  config: FormHookConfig<AG, FormData, Args> = {}
 ): FormExposure<AG, FormData, Args> => {
   const typedSharedStates = sharedStates as Record<
     ID,
     {
       hookProvider: FormExposure<AG, any, Args>;
-      config: FormHookConfig<AG, any>;
+      config: FormHookConfig<AG, any, Args>;
     }
   >;
 

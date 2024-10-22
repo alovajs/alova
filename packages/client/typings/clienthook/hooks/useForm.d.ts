@@ -33,7 +33,7 @@ export interface StoreDetailConfig {
    */
   serializers?: Record<string | number, DataSerializer>;
 }
-export type FormHookConfig<AG extends AlovaGenerics, FormData> = {
+export type FormHookConfig<AG extends AlovaGenerics, FormData, Args extends any[]> = {
   /**
    * 初始表单数据
    */
@@ -56,7 +56,7 @@ export type FormHookConfig<AG extends AlovaGenerics, FormData> = {
    * @default false
    */
   resetAfterSubmiting?: boolean;
-} & RequestHookConfig<AG>;
+} & RequestHookConfig<AG, Args>;
 
 export type RestoreHandler = () => void;
 /**
@@ -104,5 +104,5 @@ export declare function useForm<
   Args extends any[] = any[]
 >(
   handler: FormHookHandler<AG, FormData, Args>,
-  config?: FormHookConfig<AG, FormData>
+  config?: FormHookConfig<AG, FormData, Args>
 ): FormExposure<AG, FormData, Args>;

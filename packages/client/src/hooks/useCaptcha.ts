@@ -9,7 +9,7 @@ const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
 export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
-  config: CaptchaHookConfig<AG> = {}
+  config: CaptchaHookConfig<AG, Args> = {}
 ) => {
   const { initialCountdown, middleware } = config;
   captchaAssert(initialCountdown === undefinedValue || initialCountdown > 0, 'initialCountdown must be greater than 0');

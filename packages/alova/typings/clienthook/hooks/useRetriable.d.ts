@@ -59,7 +59,7 @@ export interface RetriableExposure<AG extends AlovaGenerics, Args extends any[] 
    * 它们将在重试发起后触发
    * @param handler 重试事件回调
    */
-  onRetry(handler: (event: RetriableRetryEvent<AG>) => void): this;
+  onRetry(handler: (event: RetriableRetryEvent<AG, Args>) => void): this;
 
   /**
    * 失败事件绑定
@@ -70,7 +70,7 @@ export interface RetriableExposure<AG extends AlovaGenerics, Args extends any[] 
    *
    * @param handler 失败事件回调
    */
-  onFail(handler: (event: RetriableFailEvent<AG>) => void): this;
+  onFail(handler: (event: RetriableFailEvent<AG, Args>) => void): this;
 }
 
 /**

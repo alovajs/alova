@@ -82,7 +82,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
     offVisiblity();
     offPolling();
   });
-  return states;
+  return states as any;
 };
 
 const on = (type: string, handler: NotifyHandler) => {
