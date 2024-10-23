@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.0.7
+
+### Patch Changes
+
+- [#569](https://github.com/alovajs/alova/pull/569) [`ebb1e6e`](https://github.com/alovajs/alova/commit/ebb1e6e911a2b61353305c55c4c8fcc2e2ad270d) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: correct incorrect reference paths after `shared` package build
+
 ## 1.0.6
 
 ### Patch Changes

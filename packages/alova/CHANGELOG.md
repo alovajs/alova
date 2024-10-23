@@ -1,5 +1,14 @@
 # alova
 
+## 3.1.1
+
+### Patch Changes
+
+- [#569](https://github.com/alovajs/alova/pull/569) [`ebb1e6e`](https://github.com/alovajs/alova/commit/ebb1e6e911a2b61353305c55c4c8fcc2e2ad270d) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: correct type inconsistency between the form arg of handler and initialData in `useForm`
+
+- Updated dependencies [[`ebb1e6e`](https://github.com/alovajs/alova/commit/ebb1e6e911a2b61353305c55c4c8fcc2e2ad270d)]:
+  - @alova/shared@1.0.7
+
 ## 3.1.0
 
 ### Minor Changes
