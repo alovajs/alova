@@ -5,7 +5,7 @@ import { RequestHookConfig } from './useRequest';
 /**
  * useAutoRequest配置
  */
-export type AutoRequestHookConfig<AG extends AlovaGenerics> = {
+export type AutoRequestHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]> = {
   /**
    * 轮询事件，单位ms，0表示不开启
    * @default 0
@@ -31,7 +31,7 @@ export type AutoRequestHookConfig<AG extends AlovaGenerics> = {
    * @default 1000
    */
   throttle?: number;
-} & RequestHookConfig<AG>;
+} & RequestHookConfig<AG, Args>;
 
 export type NotifyHandler = () => void;
 export type UnbindHandler = () => void;
@@ -49,7 +49,7 @@ export type UnbindHandler = () => void;
  */
 export declare function useAutoRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
-  config?: AutoRequestHookConfig<AG>
+  config?: AutoRequestHookConfig<AG, Args>
 ): UseHookExposure<AG, Args>;
 export declare namespace useAutoRequest {
   function onNetwork<AG extends AlovaGenerics = AlovaGenerics>(

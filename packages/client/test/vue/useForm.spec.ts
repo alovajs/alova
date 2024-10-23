@@ -10,7 +10,7 @@ import { FormHookConfig } from '~/typings/clienthook';
 import CompPersistentDataReset from './components/persistent-data-reset.vue';
 import CompRestorePersistentData from './components/restore-persistent-data.vue';
 
-type ID = NonNullable<FormHookConfig<AlovaGenerics, any>['id']>;
+type ID = NonNullable<FormHookConfig<AlovaGenerics, any, any[]>['id']>;
 const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',

@@ -12,7 +12,7 @@ import { RequestHookConfig } from './useRequest';
  */
 export declare function useSerialRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG, Args>, ...AlovaMethodHandler<any>[]],
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG, Args>;
 
 /**
@@ -29,7 +29,7 @@ export declare function useSerialRequest<
   Args extends any[] = any[]
 >(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG, Args>, AlovaMethodHandler<AG2>, ...AlovaMethodHandler<any>[]],
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG2, Args>;
 
 /**
@@ -52,7 +52,7 @@ export declare function useSerialRequest<
     AlovaMethodHandler<AG3>,
     ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG3, Args>;
 
 /**
@@ -77,7 +77,7 @@ export declare function useSerialRequest<
     AlovaMethodHandler<AG4>,
     ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG4, Args>;
 
 /**
@@ -104,7 +104,7 @@ export declare function useSerialRequest<
     AlovaMethodHandler<AG5>,
     ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG5, Args>;
 
 /**
@@ -133,7 +133,7 @@ export declare function useSerialRequest<
     AlovaMethodHandler<AG6>,
     ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG6, Args>;
 
 /**
@@ -164,5 +164,5 @@ export declare function useSerialRequest<
     AlovaMethodHandler<AG7>,
     ...AlovaMethodHandler<any>[]
   ],
-  config?: RequestHookConfig<AG>
+  config?: RequestHookConfig<AG, Args>
 ): UseHookExposure<AG7, Args>;

@@ -110,7 +110,19 @@ describe('send args', () => {
   });
 
   test('useForm', () => {
-    const useFormState = useForm((form: {}, ...args: Args) => VueAlovaInst.Get('/unit-test'));
+    interface Info {
+      name: string;
+      age: number;
+    }
+    const useFormState = useForm(
+      (form, ...args: Args) => {
+        expectType<Info>(form);
+        return VueAlovaInst.Get('/unit-test');
+      },
+      {
+        initialForm: {} as Info
+      }
+    );
     expectAssignableBy<SendHandler<Args, any>>(useFormState.send);
     expectAssignableBy<SendHandler<ExtendedArgs, any>>(useFormState.send);
     // @ts-expect-error

@@ -82,14 +82,14 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   fetching: ExportedState<boolean, AG['StatesExport']>;
   onFetchSuccess(
     handler: SuccessHandler<AG, [page: number, pageSize: number, ...Args]>
-  ): UsePaginationExposure<AG, ListData>;
+  ): UsePaginationExposure<AG, ListData, Args>;
   onFetchError(
     handler: ErrorHandler<AG, [page: number, pageSize: number, ...Args]>
-  ): UsePaginationExposure<AG, ListData>;
+  ): UsePaginationExposure<AG, ListData, Args>;
   onFetchComplete(
     handler: CompleteHandler<AG, [page: number, pageSize: number, ...Args]>
-  ): UsePaginationExposure<AG, ListData>;
-  update: StateUpdater<UsePaginationExposure<AG, ListData>, AG['StatesExport']>;
+  ): UsePaginationExposure<AG, ListData, Args>;
+  update: StateUpdater<UsePaginationExposure<AG, ListData, Args>, AG['StatesExport']>;
 
   /**
    * 刷新指定页码数据，此函数将忽略缓存强制发送请求
