@@ -5,8 +5,8 @@ import { Accessor, Setter } from 'solid-js';
 export type SolidHookExportType<T> = StatesExportHelper<{
   name: 'Solid';
   State: SolidState<T>;
-  Computed: Accessor<T>;
-  Watched: T;
+  Computed: SolidState<T>;
+  Watched: Accessor<T>;
   StateExport: Accessor<T>;
   ComputedExport: Accessor<T>;
 }>;
