@@ -28,9 +28,9 @@ export default defineConfig({
       'test/ssr'
     ],
     server: {
-      // deps: {
-      //   inline: [/solid-js/]
-      // }
+      deps: {
+        inline: [/solid-js/]
+      }
     }
   }
 });

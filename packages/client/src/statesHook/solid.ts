@@ -1,7 +1,7 @@
-import { createSyncOnceRunner, isFn, noop } from '@alova/shared/function';
+import { createSyncOnceRunner, noop } from '@alova/shared/function';
 import { forEach, setTimeoutFn } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { Accessor, createEffect, createMemo, createRenderEffect, createSignal, on, onCleanup } from 'solid-js';
+import { Accessor, createEffect, createMemo, createSignal, on, onCleanup, onMount } from 'solid-js';
 import { SolidHookExportType } from '~/typings/stateshook/solid';
 
 // 定义类型
@@ -12,7 +12,7 @@ export default {
   dehydrate: state => state[0](),
   // 更新状态
   update: (newVal, state) => {
-    state[1](() => (isFn(newVal) ? newVal() : newVal)); // 确保 newVal 不是函数类型
+    state[1](newVal); // 确保 newVal 不是函数类型
   },
   effectRequest: ({ handler, removeStates, immediate, watchingStates = [] }) => {
     const syncRunner = createSyncOnceRunner();
@@ -22,7 +22,7 @@ export default {
       // 组件卸载时移除对应状态
       onCleanup(removeStates);
       // 组件挂载时立即执行 handler
-      createRenderEffect(() => {
+      onMount(() => {
         immediate && handler();
       });
     } else {
@@ -58,7 +58,7 @@ export default {
   },
 
   onMounted: callback => {
-    createEffect(callback);
+    onMount(callback);
   },
   onUnmounted: callback => {
     onCleanup(callback);
