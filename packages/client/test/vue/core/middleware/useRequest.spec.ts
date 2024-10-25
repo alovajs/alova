@@ -34,7 +34,7 @@ describe('useRequest middleware', () => {
       middleware: (_, next) => next()
     });
 
-    expect(loading.value).toBeFalsy(); // 设置了middleware后默认为false
+    expect(loading.value).toBeTruthy();
     await delay();
     expect(loading.value).toBeTruthy(); // 开始请求
     const { data: rawData } = await untilCbCalled(onSuccess);
@@ -58,9 +58,9 @@ describe('useRequest middleware', () => {
       }
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onError(mockFn);
-    expect(loading.value).toBeFalsy(); // 设置了middleware后默认为false
+    expect(loading.value).toBeTruthy();
     expect(error.value).toBeUndefined();
     await delay();
     expect(loading.value).toBeTruthy(); // 开始请求
@@ -70,7 +70,7 @@ describe('useRequest middleware', () => {
     expect(data.value).toBeUndefined();
     expect(error.value).toBe(errorObj);
     expect(error.value).toBe(errRaw);
-    const mockFn2 = jest.fn();
+    const mockFn2 = vi.fn();
     try {
       await send();
     } catch (err) {
@@ -98,7 +98,7 @@ describe('useRequest middleware', () => {
         });
       }
     });
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    expect(loading.value).toBeTruthy();
     const startTs = Date.now();
     const rawData = await untilCbCalled(onSuccess);
     const endTs = Date.now();
@@ -117,11 +117,11 @@ describe('useRequest middleware', () => {
       middleware: async () => {}
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
 
     // middleware中未调用next，因此不会发送请求
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    expect(loading.value).toBeTruthy();
     await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
@@ -160,9 +160,9 @@ describe('useRequest middleware', () => {
         });
       }
     });
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
-    expect(loading.value).toBeFalsy(); // 设置了middleware后默认为false
+    expect(loading.value).toBeTruthy();
     await delay();
     expect(loading.value).toBeTruthy(); // 开始请求
     await untilCbCalled(onSuccess);
@@ -192,14 +192,14 @@ describe('useRequest middleware', () => {
     });
 
     // 错误在middleware中捕获后，外部不再接收到错误
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeUndefined();
     expect(data.value).toBeUndefined();
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     try {
       await send();
     } catch (err) {
@@ -221,7 +221,7 @@ describe('useRequest middleware', () => {
     });
 
     // 只有在中间件中未返回数据或返回undefined时才继续获取真实的响应数据，否则使用返回数据并不再等待响应promise
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
     await untilCbCalled(onSuccess);
@@ -245,7 +245,7 @@ describe('useRequest middleware', () => {
           }, 20);
         })
     });
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    expect(loading.value).toBeTruthy();
     const { data: dataRaw } = await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({ anotherData: '123' });
@@ -268,7 +268,7 @@ describe('useRequest middleware', () => {
         });
       }
     });
-    expect(loadingFail.value).toBeFalsy(); // 设置了middleware后默认为false
+    expect(loadingFail.value).toBeTruthy();
     await delay();
     expect(loadingFail.value).toBeTruthy(); // 开始请求
     const { error: errorRaw } = await untilCbCalled(onError);
@@ -285,29 +285,29 @@ describe('useRequest middleware', () => {
     });
 
     // 调用了controlLoading后将自定义控制loading状态
-    const state1 = useRequest(getGetterObj, {
+    const { loading: loading1, onSuccess: onSuccess1 } = useRequest(getGetterObj, {
       middleware: ({ controlLoading }, next) => {
         controlLoading();
         return next();
       }
     });
-    expect(state1.loading.value).toBeFalsy(); // loading已受控
-    await untilCbCalled(state1.onSuccess);
-    expect(state1.loading.value).toBeFalsy();
+    await delay();
+    expect(loading1.value).toBeFalsy(); // loading异步受控
+    await untilCbCalled(onSuccess1);
+    expect(loading1.value).toBeFalsy();
 
-    const state2 = useRequest(getGetterObj, {
+    const { loading: loading2, onSuccess: onSuccess2 } = useRequest(getGetterObj, {
       middleware: ({ proxyStates, controlLoading }, next) => {
         controlLoading();
         proxyStates.loading.v = true;
-        expect(state2.loading.value).toBeTruthy();
+        expect(loading2.value).toBeTruthy();
         return next();
       }
     });
-    expect(state2.loading.value).toBeFalsy(); // 默认为false
     await delay();
-    expect(state2.loading.value).toBeTruthy(); // 开始请求，但loading已受控
-    await untilCbCalled(state2.onSuccess);
-    expect(state2.loading.value).toBeTruthy();
+    expect(loading2.value).toBeTruthy(); // loading在middleware中被受控，并且修改为了true
+    await untilCbCalled(onSuccess2);
+    expect(loading2.value).toBeTruthy();
   });
 
   test('should send request like send function in returns when call send in middleware', async () => {
@@ -361,7 +361,7 @@ describe('useRequest middleware', () => {
         return next();
       }
     });
-    expect(loading.value).toBeFalsy();
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
@@ -371,7 +371,7 @@ describe('useRequest middleware', () => {
     const err = await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBeInstanceOf(DOMException);
     expect(error.value).toStrictEqual(err.error);
     expect(error.value?.message).toBe('The operation was aborted.');
   });
@@ -392,7 +392,7 @@ describe('useRequest middleware', () => {
       }
     });
 
-    const errFn = jest.fn();
+    const errFn = vi.fn();
     onError(errFn);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();

@@ -3,7 +3,7 @@ import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
 import { key } from '@alova/shared/function';
-import '@testing-library/jest-dom';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
@@ -30,7 +30,7 @@ describe('useRequest hook with react', () => {
 
   test('should apply initialData with object and function', async () => {
     const alova = getAlovaInstance(ReactHook);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     function Page() {
       const { data: data1 } = useRequest(alova.Get(''), { initialData: 'test', immediate: false });
       const { data: data2 } = useRequest(alova.Get(''), {
@@ -220,7 +220,7 @@ describe('useRequest hook with react', () => {
           b: '~~'
         }
       });
-      const { loading, data, error, downloading, uploading, update } = useRequest(Get);
+      const { loading, data, error, downloading, update } = useRequest(Get);
       return (
         <div>
           <span role="loading">{loading ? 'loading...' : 'loaded'}</span>
@@ -228,9 +228,6 @@ describe('useRequest hook with react', () => {
           <span role="error">{error?.message}</span>
           <span role="downloading">
             {downloading.loaded}_{downloading.total}
-          </span>
-          <span role="uploading">
-            {uploading.loaded}_{uploading.total}
           </span>
           <button
             role="btn"
@@ -245,10 +242,6 @@ describe('useRequest hook with react', () => {
                 downloading: {
                   loaded: 1,
                   total: 1000
-                },
-                uploading: {
-                  loaded: 100,
-                  total: 2000
                 }
               })
             }>
@@ -264,7 +257,6 @@ describe('useRequest hook with react', () => {
     expect(screen.getByRole('loading')).toHaveTextContent('loading...');
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test-changed');
     expect(screen.getByRole('downloading')).toHaveTextContent('1_1000');
-    expect(screen.getByRole('uploading')).toHaveTextContent('100_2000');
   });
 
   // 如果立即发送请求，react的loading状态将初始为true
@@ -278,7 +270,7 @@ describe('useRequest hook with react', () => {
       cacheFor: 100 * 1000
     });
 
-    const renderMockFn = jest.fn();
+    const renderMockFn = vi.fn();
     function Page() {
       const { loading, data = { path: '', method: '' } } = useRequest(Get);
       renderMockFn();

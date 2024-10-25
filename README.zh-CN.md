@@ -2,25 +2,23 @@
   <img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
 </p>
 
-<p align="center"><b>创新的下一代请求工具，别再花时间在请求这件小事上了，交给我们</b></p>
+<p align="center"><b>工作流精简的下一代请求工具<br />极致地简化你的API集成工作流，仅需一步</b></p>
 
-<p align="center">中文 | <a href="./README.md">📑English</a></p>
+<p align="center"><a href="./README.md">📑English</a> | 中文</p>
 
 [![npm](https://img.shields.io/npm/v/alova)](https://www.npmjs.com/package/alova)
 [![build](https://github.com/alovajs/alova/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/alova/actions/workflows/release.yml)
 [![coverage status](https://coveralls.io/repos/github/alovajs/alova/badge.svg?branch=main)](https://coveralls.io/github/alovajs/alova?branch=main)
 [![stars](https://img.shields.io/github/stars/alovajs/alova?style=social)](https://github.com/alovajs/alova)
-[![minzipped size](https://badgen.net/bundlephobia/minzip/alova)](https://bundlephobia.com/package/alova)
 [![discord](https://img.shields.io/badge/chat-Discord-515ff1)](https://discord.gg/S47QGJgkVb)
 [![wechat](https://img.shields.io/badge/chat_with_CH-Wechat-07c160)](https://alova.js.org/img/wechat_qrcode.jpg)
-[![dependency](https://badgen.net/bundlephobia/dependency-count/alova)](https://bundlephobia.com/package/alova)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## alova 是什么？
 
-alova 是一个创新的下一代请求工具，从前后端协作和 API 消费作为出发点，将 API 的消费从 7 步简化为只有 1 步，帮你在请求方面省去大部分的工作，让网络请求变得非常简单。我们来看看 alova 是如何帮你的简化工作的。
+alova（读作/əˈləʊva/）是一个流程精简的下一代请求工具，从前后端协作和 API 集成作为出发点，将 API 集成步骤从 7 步简化为只有 1 步，极致地简化 API 集成工作流，让网络请求变得非常简单。我们来看看 alova 是如何帮你的简化工作的。
 
 ![](https://alova.js.org/img/overview_flow_cn.png)
 
@@ -59,26 +57,6 @@ alova 是一个创新的下一代请求工具，从前后端协作和 API 消费
 我们在 Issues 和 Disscussion 中收到了来自世界各地的开发者积极参与的信息，深感荣幸。
 
 我们期望将 alova 打造成每位愿意参与的人的共同项目，而不是 alova 团队的，我们以开放包容的态度鼓励每个人成为 alova 社区的贡献者，即使你是一位初级开发者，只要想法符合 alova 的发展准则，也请大方地参与进来。
-
-alova 还属于新秀，它依然还有很长一段路需要走，现在参与贡献可以为你赢得更多的有效贡献机会，它可以让你为全世界的开发者提供你的价值。
-
-我们认为贡献 alova 不局限于代码贡献，而是参与任何有利于 alova 发展的活动都属于贡献 alova，具体包括以下 13 项，但不局限于这些：
-
-1. 在项目中使用 alova
-2. 为 alova 点星
-3. 报告 bug
-4. 提供新特性想法
-5. 贡献代码
-6. 基于 alova 编写适配器和策略库
-7. 参与社区交流、PR review
-8. 编写 demo
-9. 更正或编写文档
-10. 翻译文档
-11. 在社交平台发布有利于 alova 发展的文章、视频等信息
-12. 项目合作
-13. 项目捐赠
-
-> 以及你能想到的其他正向发展的活动
 
 有效的贡献将为你赢得一定的 alova 社区名望。在参与贡献前，请务必详细阅读 [贡献指南](./CONTRIBUTING.zh-CN.md)，以保证你的有效贡献。
 

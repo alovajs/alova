@@ -14,7 +14,8 @@ const config: Config = {
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
     // fix: commonjs import will be undefined in svelte
-    'alova/fetch': '<rootDir>/node_modules/alova/dist/adapter/fetch.esm.js'
+    'alova/fetch': '<rootDir>/node_modules/alova/dist/adapter/fetch.esm.js',
+    'alova/svelte': '<rootDir>/node_modules/alova/dist/stateshook/svelte.esm.js'
   },
   transformIgnorePatterns: ['/node_modules/(?!(alova|@alova/mock))']
 };

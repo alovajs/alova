@@ -19,7 +19,8 @@ import {
 } from '../general';
 
 /**
- * 调用useFetcher时需要传入的类型，否则会导致状态类型错误
+ * specify the alova type
+ * so that it can return the right states
  */
 export type FetcherType<A extends Alova<any>> = {
   StatesExport: NonNullable<A['options']['statesHook']> extends StatesHook<infer SE> ? SE : any;
@@ -27,9 +28,13 @@ export type FetcherType<A extends Alova<any>> = {
 
 /** useFetcher config export type */
 export interface FetcherHookConfig<AG extends AlovaGenerics = AlovaGenerics> extends UseHookConfig<AG> {
-  /** 中间件 */
+  /**
+   * middleware
+   */
   middleware?: AlovaFetcherMiddleware<AG>;
-  /** fetch是否同步更新data状态 */
+  /**
+   * whether to update the corresponding states of fetching method instance
+   */
   updateState?: boolean;
 }
 
@@ -52,16 +57,16 @@ export interface UseFetchHookExposure<SE extends StatesExport> extends UseFetchE
 }
 
 /**
- * 数据预拉取
+ * prefetch data
  * @example
  * ```js
- * const { fetching, error, fetch } = useFetcher();
+ * const { loading, error, fetch } = useFetcher();
  * const handleFetch = () => {
  *   fetch(alova.Get('/api/profile'));
  * };
  * ```
- * @param config 配置项
- * @returns 响应式请求数据、操作函数及事件绑定函数
+ * @param config config
+ * @returns reactive request data、operate function and event binding function
  */
 export declare function useFetcher<F extends FetcherType<any>>(
   config?: FetcherHookConfig

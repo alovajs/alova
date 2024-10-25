@@ -1,47 +1,47 @@
 import { AlovaGenerics, Method } from '../../alova/typings';
 import { AlovaEvent } from '../../client/typings/clienthook';
 
-export class AlovaEventBase<AG extends AlovaGenerics> implements AlovaEvent<AG> {
-  readonly sendArgs: any[];
+export class AlovaEventBase<AG extends AlovaGenerics, Args extends any[]> implements AlovaEvent<AG, Args> {
+  readonly args: [...Args, ...any[]];
 
   readonly method: Method<AG>;
 
-  constructor(method: Method<AG>, sendArgs: any[]) {
+  constructor(method: Method<AG>, args: [...Args, ...any[]]) {
     this.method = method;
-    this.sendArgs = sendArgs;
+    this.args = args;
   }
 
   clone() {
     return { ...this };
   }
 
-  static spawn(method: Method, sendArgs: any[]) {
-    return new AlovaEventBase(method, sendArgs);
+  static spawn<AG extends AlovaGenerics, Args extends any[]>(method: Method<AG>, args: [...Args, ...any[]]) {
+    return new AlovaEventBase<AG, Args>(method, args);
   }
 }
 
-export class AlovaSuccessEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
+export class AlovaSuccessEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEventBase<AG, Args> {
   readonly fromCache: boolean;
 
   readonly data: AG['Responded'];
 
-  constructor(base: AlovaEventBase<AG>, data: AG['Responded'], fromCache: boolean) {
-    super(base.method, base.sendArgs);
+  constructor(base: AlovaEventBase<AG, Args>, data: AG['Responded'], fromCache: boolean) {
+    super(base.method, base.args);
     this.data = data;
     this.fromCache = fromCache;
   }
 }
 
-export class AlovaErrorEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
+export class AlovaErrorEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEventBase<AG, Args> {
   readonly error: any;
 
-  constructor(base: AlovaEventBase<AG>, error: any) {
-    super(base.method, base.sendArgs);
+  constructor(base: AlovaEventBase<AG, Args>, error: any) {
+    super(base.method, base.args);
     this.error = error;
   }
 }
 
-export class AlovaCompleteEvent<AG extends AlovaGenerics> extends AlovaEventBase<AG> {
+export class AlovaCompleteEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEventBase<AG, Args> {
   /** 响应状态 */
   status: 'success' | 'error';
 
@@ -53,13 +53,13 @@ export class AlovaCompleteEvent<AG extends AlovaGenerics> extends AlovaEventBase
   readonly error: any;
 
   constructor(
-    base: AlovaEventBase<AG>,
+    base: AlovaEventBase<AG, Args>,
     status: 'success' | 'error',
     data: AG['Responded'],
     fromCache: boolean,
     error: any
   ) {
-    super(base.method, base.sendArgs);
+    super(base.method, base.args);
     this.status = status;
     this.data = data;
     this.fromCache = status === 'error' ? false : fromCache;

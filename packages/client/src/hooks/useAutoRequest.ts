@@ -1,7 +1,7 @@
 import useRequest from '@/hooks/core/useRequest';
 import { noop, statesHookHelper } from '@alova/shared/function';
-import { falseValue, isSSR, trueValue } from '@alova/shared/vars';
-import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { falseValue, trueValue } from '@alova/shared/vars';
+import { AlovaGenerics, globalConfigMap, Method, promiseStatesHook } from 'alova';
 import {
   AlovaMethodHandler,
   AutoRequestHookConfig,
@@ -11,10 +11,10 @@ import {
 } from '~/typings/clienthook';
 
 interface AutoRequestHook {
-  <AG extends AlovaGenerics>(
-    handler: Method<AG> | AlovaMethodHandler<AG>,
+  <AG extends AlovaGenerics, Args extends any[] = any[]>(
+    handler: Method<AG> | AlovaMethodHandler<AG, Args>,
     config?: AutoRequestHookConfig<AG>
-  ): UseHookExposure<AG>;
+  ): UseHookExposure<AG, Args>;
   onNetwork<AG extends AlovaGenerics = AlovaGenerics>(
     notify: NotifyHandler,
     config: AutoRequestHookConfig<AG>
@@ -54,7 +54,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
   });
   const notify = () => {
     if (notifiable) {
-      states.send();
+      (states.send as any)();
       if (throttle > 0) {
         notifiable = falseValue;
         setTimeout(() => {
@@ -69,7 +69,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
   let offVisiblity = noop;
   let offPolling = noop;
   onMounted(() => {
-    if (!isSSR) {
+    if (!globalConfigMap.ssr) {
       offNetwork = enableNetwork ? useAutoRequest.onNetwork(notify, config) : offNetwork;
       offFocus = enableFocus ? useAutoRequest.onFocus(notify, config) : offFocus;
       offVisiblity = enableVisibility ? useAutoRequest.onVisibility(notify, config) : offVisiblity;
@@ -82,7 +82,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
     offVisiblity();
     offPolling();
   });
-  return states;
+  return states as any;
 };
 
 const on = (type: string, handler: NotifyHandler) => {

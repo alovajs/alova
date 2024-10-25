@@ -1,0 +1,115 @@
+name: "\U0001F41E 问题反馈"
+description: 使用中文报告问题，帮助 alova 变得更好
+title: '[Bug]: '
+labels:
+  - 'bug:need-confirm'
+  - 'lang:chinese'
+assignees:
+  - MeetinaXD
+body:
+  - type: markdown
+    attributes:
+      value: |
+        :wave: Hi，你好，非常感谢你对 alova 的支持，它真的很重要！
+
+        **我们期望将 alova 打造成大家共同的项目，以开放包容的态度鼓励每位开发者成为 alova 社区的贡献者，如果你愿意，可尝试通过提交 PR 参与贡献，让你的代码为全世界的开发者提供价值，具体贡献请 [参阅贡献指南](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.zh-CN.md)！**
+
+        :warning: 在报告 Bug 前，请阅读以下内容：
+        - 报告前先通过 [官方文档](https://alova.js.org) 寻找解决办法。
+        - 确认已搜索过 [历史 issue](https://github.com/alovajs/alova/issues)，并且没有发现同样的问题。
+        - 如果使用上有困惑，可移步到 [Discussions](https://github.com/alovajs/alova/discussions) 发帖讨论，这有助于作者更好地打理alova社区。
+        - 可加入 [Discord](https://discord.gg/S47QGJgkVb) 或 [微信群](https://alova.js.org/img/wechat_qrcode.jpg)在线交流。
+
+  - type: checkboxes
+    id: is-this-a-bug
+    attributes:
+      label: 这是否是一个 Bug？
+      description: ':warning: 如果你要报告一个提案，或有使用上的困惑，请返回 Issue 新建页面查看其他选项。'
+      options:
+        - label: 我已经确认我要报告的是一个 Bug
+          required: true
+
+  - type: checkboxes
+    id: have-been-report-before
+    attributes:
+      label: 这个问题是否已经存在？
+      description: ':warning: 提交前请在 Issue 中搜索你要提交的问题是否已经存在'
+      options:
+        - label: 我已经确认这个 Issue 没有被报告过
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Alova 版本
+      description: 请填写 node_modules/alova/package.json 里的版本号
+      placeholder: 比如 2.9.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: framework
+    attributes:
+      label: 前端框架
+      description: 请选择与这个问题相关的前端框架
+      multiple: false
+      options:
+        - 'React'
+        - 'Vue'
+        - 'Svelte'
+        - 'Nodejs'
+        - 'Deno'
+        - 'Bun'
+        - '其他框架'
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 详细地描述在什么情况下，遇到了什么问题。可使用 Markdown 语法提供关键代码片段。
+    validations:
+      required: true
+
+  - type: textarea
+    id: expect
+    attributes:
+      label: 期望的表现
+      description: 清晰简要地描述期望达成的效果
+
+  - type: input
+    id: reproduce
+    attributes:
+      label: 复现链接
+      description: |
+        提供一个可复现的项目有助于解决者更快地解决问题，你可以在 [官方示例集](https://alova.js.org/category/examples/) 中选择一个作为模板。
+        也可以自行在 [codesandbox](https://codesandbox.io)、[stackBlitz](https://stackblitz.com) 中复现。
+        你也可以提供 GitHub 仓库链接。
+        请不要填写无效的链接，否则 issue 会被关闭。
+
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: 复现步骤
+      description: 我们需要怎么做才能复现你遇到的问题？请提供一个最简单的操作步骤，方便我们快速复现问题
+      placeholder: |
+        例如：
+        1. 点击按钮
+        2. 请求未发出
+    validations:
+      required: true
+
+  - type: textarea
+    id: browsers
+    attributes:
+      label: 系统信息
+      description: 粘贴以下命令的输出：`npx envinfo --system --npmPackages "alova,vue,react,svelte" --binaries --browsers`
+      render: shell
+      placeholder: System, Binaries, Browsers
+
+  - type: textarea
+    id: remark
+    attributes:
+      label: 补充说明
+      description: 如出现问题的背景和其他有用上下文信息。如尝试过的解决方法

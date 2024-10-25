@@ -1,28 +1,32 @@
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaEvent, AlovaMethodHandler, ExportedState } from '../general';
 
-export const enum SSEHookReadyState {
-  CONNECTING = 0,
-  OPEN = 1,
-  CLOSED = 2
-}
+type SSEHookReadyState = 0 | 1 | 2;
 
-export interface AlovaSSEEvent<AG extends AlovaGenerics> extends AlovaEvent<AG> {
+export interface AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEvent<AG, Args> {
   method: Method;
   eventSource: EventSource; // eventSource实例
 }
-export interface AlovaSSEErrorEvent<AG extends AlovaGenerics> extends AlovaSSEEvent<AG> {
+export interface AlovaSSEErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends AlovaSSEEvent<AG, Args> {
   error: Error; // 错误对象
 }
-export interface AlovaSSEMessageEvent<Data, AG extends AlovaGenerics> extends AlovaSSEEvent<AG> {
+export interface AlovaSSEMessageEvent<Data, AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends AlovaSSEEvent<AG, Args> {
   data: Data; // 每次响应的，经过拦截器转换后的数据
 }
-export type SSEOnOpenTrigger<AG extends AlovaGenerics> = (event: AlovaSSEEvent<AG>) => void;
-export type SSEOnMessageTrigger<Data, AG extends AlovaGenerics> = (event: AlovaSSEMessageEvent<Data, AG>) => void;
-export type SSEOnErrorTrigger<AG extends AlovaGenerics> = (event: AlovaSSEErrorEvent<AG>) => void;
-export type SSEOn<AG extends AlovaGenerics> = <Data = any>(
+export type SSEOnOpenTrigger<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: AlovaSSEEvent<AG, Args>
+) => void;
+export type SSEOnMessageTrigger<Data, AG extends AlovaGenerics, Args extends any[]> = (
+  event: AlovaSSEMessageEvent<Data, AG, Args>
+) => void;
+export type SSEOnErrorTrigger<AG extends AlovaGenerics, Args extends any[] = any[]> = (
+  event: AlovaSSEErrorEvent<AG, Args>
+) => void;
+export type SSEOn<AG extends AlovaGenerics, Args extends any[] = any[]> = <Data = any>(
   eventName: string,
-  handler: (event: AlovaSSEMessageEvent<Data, AG>) => void
+  handler: (event: AlovaSSEMessageEvent<Data, AG, Args>) => void
 ) => () => void;
 
 /**
@@ -62,15 +66,15 @@ export interface SSEHookConfig {
 /**
  * useSSE() 返回类型
  */
-export interface SSEExposure<AG extends AlovaGenerics, Data> {
+export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] = any[]> {
   readyState: ExportedState<SSEHookReadyState, AG['StatesExport']>;
   data: ExportedState<Data | undefined, AG['StatesExport']>;
   eventSource: ExportedState<EventSource | undefined, AG['StatesExport']>;
   /**
    * 手动发起请求。在使用 `immediate: true` 时该方法会自动触发
-   * @param sendArgs 请求参数，会传递给 method
+   * @param args 请求参数，会传递给 method
    */
-  send(...sendArgs: any[]): Promise<void>;
+  send(...args: [...Args, ...any[]]): Promise<void>;
   /**
    * 关闭连接
    */
@@ -80,21 +84,21 @@ export interface SSEExposure<AG extends AlovaGenerics, Data> {
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onOpen(callback: SSEOnOpenTrigger<AG>): this;
+  onOpen(callback: SSEOnOpenTrigger<AG, Args>): this;
 
   /**
    * 注册 EventSource message 的回调函数
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onMessage<T = Data>(callback: SSEOnMessageTrigger<T, AG>): this;
+  onMessage<T = Data>(callback: SSEOnMessageTrigger<T, AG, Args>): this;
 
   /**
    * 注册 EventSource error 的回调函数
    * @param callback 回调函数
    * @returns 取消注册函数
    */
-  onError(callback: SSEOnErrorTrigger<AG>): this;
+  onError(callback: SSEOnErrorTrigger<AG, Args>): this;
 
   /**
    * @param eventName 事件名称，默认存在 `open` | `error` | `message`
@@ -112,7 +116,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data> {
  * @param config 配置参数
  * @return useSSE相关数据和操作函数
  */
-export declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: SSEHookConfig
-): SSEExposure<AG, Data>;
+): SSEExposure<AG, Data, Args>;

@@ -1,10 +1,10 @@
 import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
-import '@testing-library/jest-dom';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { ReactElement, useState } from 'react';
-import { Result, delay, untilCbCalled } from 'root/testUtils';
+import React, { ReactElement, useState } from 'react';
+import { Result, delay } from 'root/testUtils';
 
 describe('useWatcher hook with react', () => {
   test('should send request when change value', async () => {
@@ -21,7 +21,7 @@ describe('useWatcher hook with react', () => {
         transform: ({ data }: Result) => data,
         cacheFor: 100 * 1000
       });
-    const mockfn = jest.fn();
+    const mockfn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -54,7 +54,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -86,7 +86,7 @@ describe('useWatcher hook with react', () => {
         transform: ({ data }: Result<true>) => data,
         cacheFor: null
       });
-    const mockfn = jest.fn();
+    const mockfn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -163,8 +163,8 @@ describe('useWatcher hook with react', () => {
         },
         cacheFor: null
       });
-    const mockfn = jest.fn();
-    const mockErrorfn = jest.fn();
+    const mockfn = vi.fn();
+    const mockErrorfn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -244,7 +244,7 @@ describe('useWatcher hook with react', () => {
         transform: ({ data }: Result<true>) => data,
         cacheFor: null
       });
-    const mockfn = jest.fn();
+    const mockfn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -315,8 +315,8 @@ describe('useWatcher hook with react', () => {
         },
         transform: ({ data }: Result<true>) => data
       });
-    const mockfn = jest.fn();
-    const sendableFn = jest.fn();
+    const mockfn = vi.fn();
+    const sendableFn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -355,7 +355,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -387,9 +387,9 @@ describe('useWatcher hook with react', () => {
         },
         transform: ({ data }: Result<true>) => data
       });
-    const mockfn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const sendableFn = jest.fn();
+    const mockfn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const sendableFn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -428,7 +428,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('button'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('');
@@ -460,8 +460,8 @@ describe('useWatcher hook with react', () => {
         },
         transform: ({ data }: Result<true>) => data
       });
-    const mockfn = jest.fn();
-    const sendableFn = jest.fn();
+    const mockfn = vi.fn();
+    const sendableFn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -495,9 +495,10 @@ describe('useWatcher hook with react', () => {
     }
 
     render((<Page />) as ReactElement<any, any>);
-    await untilCbCalled(setTimeout, 100);
-    expect(screen.getByRole('status')).toHaveTextContent('loaded');
-    expect(screen.getByRole('path')).toHaveTextContent('');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('path')).toHaveTextContent('');
+    });
   });
 
   test('should send request when init', async () => {
@@ -514,7 +515,7 @@ describe('useWatcher hook with react', () => {
         transform: ({ data }: Result<true>) => data,
         cacheFor: 100 * 1000
       });
-    const mockfn = jest.fn();
+    const mockfn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -653,7 +654,7 @@ describe('useWatcher hook with react', () => {
         cacheFor: 100 * 1000
       });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -706,7 +707,7 @@ describe('useWatcher hook with react', () => {
       expect(successMockFn).not.toHaveBeenCalled();
     });
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('btn1'));
     let startTs = Date.now();
     await waitFor(() => {
@@ -759,7 +760,7 @@ describe('useWatcher hook with react', () => {
         cacheFor: 100 * 1000
       });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     function Page() {
       const [stateId1, setStateId1] = useState(0);
       const [stateId2, setStateId2] = useState(10);
@@ -812,7 +813,7 @@ describe('useWatcher hook with react', () => {
       expect(successMockFn).not.toHaveBeenCalled();
     });
 
-    await untilCbCalled(setTimeout); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
     fireEvent.click(screen.getByRole('btn1'));
     let startTs = Date.now();
     await waitFor(() => {

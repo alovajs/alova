@@ -26,6 +26,7 @@ const mocks = defineMock({
 const mockAdapter = createAlovaMockAdapter([mocks], {
   delay: 100,
   httpAdapter: axiosRequestAdapter(),
+  mockRequestLogger: false,
   ...axiosMockResponse
 });
 

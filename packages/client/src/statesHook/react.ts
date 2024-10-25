@@ -1,17 +1,16 @@
 import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
 import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
 import { StatesHook } from 'alova';
-import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ReactHookExportType } from '~/typings/stateshook/react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactHookExportType, ReactState } from '~/typings/stateshook/react';
 
-type ReactState<D> = [D, Dispatch<SetStateAction<D>>];
-const stateToData = <D>([state]: ReactState<D>) => state;
+const stateToData = <D>(reactState: ReactState<D>) => (2 in reactState ? reactState[2] : reactState[0]);
 const refCurrent = <T>(ref: MutableRefObject<T>) => ref.current;
 const setRef = <T>(ref: MutableRefObject<T>, newVal: T) => {
   ref.current = newVal;
 };
 
-// React的预定义hooks
+// the react predefined hooks
 export default {
   name: 'React',
   create: initialValue => useState(initialValue),
@@ -19,11 +18,11 @@ export default {
   dehydrate: stateToData,
   update: (newVal, state) => {
     // update value synchronously so that we can access the new value synchronously.
-    state[0] = newVal;
+    state[2] = newVal;
     state[1](newVal);
   },
   memorize: fn => {
-    // 使用useCallback使用同一个引用，同事通过useRef来引用最新函数
+    // use `useCallback` to ensure the same reference, and refer the newest function with `useRef`
     const fnRef = useRef(noop as typeof fn);
     setRef(fnRef, fn);
     return useCallback((...args: any[]) => refCurrent(fnRef)(...args), []);
@@ -34,14 +33,14 @@ export default {
     return refObj;
   },
   effectRequest({ handler, removeStates, saveStates, immediate, frontStates, watchingStates = [] }) {
-    // 当有监听状态时，状态变化再触发
+    // `handler` is called when some states change are detected
     const oldStates = useRef(watchingStates);
 
-    // 多个值同时改变只触发一次
+    // only call once when multiple values changed at the same time
     const onceRunner = refCurrent(useRef(createSyncOnceRunner()));
     useEffect(() => {
       const oldStatesValue = refCurrent(oldStates);
-      // 对比新旧状态，获取变化的状态索引
+      // compare the old and new value, and get the index of changed state
       let changedIndex: number | undefined = undefinedValue;
       for (const index in watchingStates) {
         if (!Object.is(oldStatesValue[index], watchingStates[index])) {
@@ -56,12 +55,12 @@ export default {
         }
       });
 
-      // 组件卸载时移除对应状态
+      // remove states when component is unmounted
       return removeStates;
     }, watchingStates);
 
-    // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
-    // 因此每次都需要更新管理的状态
+    // Because react will call usehook again every time it refreshes, the state cache will be invalidated every time
+    // Therefore, the managed state needs to be updated every time
     const needSave = useRef(false);
     useEffect(() => {
       refCurrent(needSave) ? saveStates(frontStates) : setRef(needSave, trueValue);
@@ -72,7 +71,7 @@ export default {
     return [memo, noop];
   },
   watch: (states, callback) => {
-    // 当有监听状态时，状态变化再触发
+    // When there is a monitoring state, the state changes and then triggers
     const needEmit = useRef(falseValue);
     useEffect(() => {
       needEmit.current ? callback() : (needEmit.current = true);

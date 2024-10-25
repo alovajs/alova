@@ -13,13 +13,16 @@ export interface Actions {
  * @param id 委托者id
  * @returns alova中间件函数
  */
-export declare function actionDelegationMiddleware<AG extends AlovaGenerics = AlovaGenerics>(
+export declare function actionDelegationMiddleware<
+  AG extends AlovaGenerics = AlovaGenerics,
+  Args extends any[] = any[]
+>(
   id: string | number | symbol
 ): (
-  context: (AlovaFrontMiddlewareContext<AG> | AlovaFetcherMiddlewareContext<AG>) & {
+  context: (AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>) & {
     delegatingActions?: Actions;
   },
-  next: AlovaGuardNext<AG>
+  next: AlovaGuardNext<AG, Args>
 ) => Promise<any>;
 
 /**

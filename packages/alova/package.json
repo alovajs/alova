@@ -1,8 +1,8 @@
 {
   "name": "alova",
-  "version": "3.0.0-beta.15",
+  "version": "3.1.1",
   "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
-  "main": "dist/alova.esm.js",
+  "main": "dist/alova.common.cjs",
   "module": "dist/alova.esm.js",
   "types": "typings/index.d.ts",
   "type": "module",
@@ -57,7 +57,7 @@
   },
   "files": [
     "dist",
-    "typings/**/*.d.ts"
+    "typings"
   ],
   "engines": {
     "node": ">= 18.0.0"
@@ -79,20 +79,31 @@
       "default": "./dist/serverhook/index.esm.js"
     },
     "./fetch": {
-      "types": "./typings/fetch.d.ts",
+      "types": {
+        "require": "./typings/fetch.d.cts",
+        "default": "./typings/fetch.d.ts"
+      },
       "require": "./dist/adapter/fetch.common.cjs",
       "default": "./dist/adapter/fetch.esm.js"
     },
     "./vue": {
       "types": "./typings/stateshook/vue.d.ts",
+      "require": "./dist/stateshook/vue.common.cjs",
       "default": "./dist/stateshook/vue.esm.js"
+    },
+    "./vue-demi": {
+      "types": "./typings/stateshook/vue-demi.d.ts",
+      "require": "./dist/stateshook/vue-demi.common.cjs",
+      "default": "./dist/stateshook/vue-demi.esm.js"
     },
     "./react": {
       "types": "./typings/stateshook/react.d.ts",
+      "require": "./dist/stateshook/react.common.cjs",
       "default": "./dist/stateshook/react.esm.js"
     },
     "./svelte": {
       "types": "./typings/stateshook/svelte.d.ts",
+      "require": "./dist/stateshook/svelte.common.cjs",
       "default": "./dist/stateshook/svelte.esm.js"
     }
   },
@@ -110,6 +121,9 @@
       "vue": [
         "typings/stateshook/vue.d.ts"
       ],
+      "vue-demi": [
+        "typings/stateshook/vue-demi.d.ts"
+      ],
       "react": [
         "typings/stateshook/react.d.ts"
       ],
@@ -119,11 +133,11 @@
     }
   },
   "dependencies": {
-    "@alova/shared": "workspace:*",
+    "@alova/shared": "workspace:^",
     "rate-limiter-flexible": "^5.0.3"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:*"
+    "@alova/scripts": "workspace:^"
   },
   "config": {
     "commitizen": {

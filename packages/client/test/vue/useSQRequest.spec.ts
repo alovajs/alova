@@ -13,9 +13,9 @@ import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
 import updateStateEffect from '@/hooks/silent/virtualResponse/updateStateEffect';
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 import { accessAction, actionDelegationMiddleware } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { AlovaEventBase } from '@alova/shared/event';
 import { AlovaGenerics, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { delay, untilCbCalled } from 'root/testUtils';
 import { SQHookBehavior } from '~/typings/clienthook';
 
@@ -46,9 +46,9 @@ describe('vue => useSQRequest', () => {
   test('request immediately with queue behavior', async () => {
     const queue = 'tb1';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
-    const beforePushMockFn = jest.fn();
-    const pushedMockFn = jest.fn();
-    const completeMockFn = jest.fn();
+    const beforePushMockFn = vi.fn();
+    const pushedMockFn = vi.fn();
+    const completeMockFn = vi.fn();
     const { loading, data, error, downloading, uploading, onSuccess } = useSQRequest(() => Get, {
       queue
     })
@@ -62,7 +62,7 @@ describe('vue => useSQRequest', () => {
         completeMockFn(event);
       });
 
-    expect(loading.value).toBeFalsy(); // 有middleware则默认为false
+    expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
@@ -81,7 +81,7 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQSuccessEvent.method).toBe(Get);
     expect(scopedSQSuccessEvent.data.total).toBe(300);
     expect(scopedSQSuccessEvent.data.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([]);
+    expect(scopedSQSuccessEvent.args).toStrictEqual([]);
     expect(!!scopedSQSuccessEvent.silentMethod).toBeTruthy();
 
     expect(beforePushMockFn).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('vue => useSQRequest', () => {
     expect(beforePushEvent.behavior).toBe('queue');
     expect(beforePushEvent.method).toBe(Get);
     expect(beforePushEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(beforePushEvent.sendArgs).toStrictEqual([]);
+    expect(beforePushEvent.args).toStrictEqual([]);
     expect(currentQueueStageBeforePush).toHaveLength(0);
 
     expect(pushedMockFn).toHaveBeenCalledTimes(1);
@@ -99,7 +99,7 @@ describe('vue => useSQRequest', () => {
     expect(pushedEvent.behavior).toBe('queue');
     expect(pushedEvent.method).toBe(Get);
     expect(pushedEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(pushedEvent.sendArgs).toStrictEqual([]);
+    expect(pushedEvent.args).toStrictEqual([]);
     expect(currentQueueStagePushed).toHaveLength(1);
     expect(currentQueueStagePushed[0]).toBe(pushedEvent.silentMethod);
 
@@ -110,7 +110,7 @@ describe('vue => useSQRequest', () => {
     expect(completedEvent.method).toBe(Get);
     expect(completedEvent.data.total).toBe(300);
     expect(completedEvent.data.list).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(completedEvent.sendArgs).toStrictEqual([]);
+    expect(completedEvent.args).toStrictEqual([]);
     expect(!!completedEvent.silentMethod).toBeTruthy();
 
     expect(Object.keys(silentQueueMap[queue])).toHaveLength(0);
@@ -119,9 +119,9 @@ describe('vue => useSQRequest', () => {
   test('should receive params when call send function by behavior `queue`', async () => {
     const queue = 'tb21';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
-    const methodHandlerMockFn = jest.fn();
-    const behaviorMockFn = jest.fn();
-    const forceMockFn = jest.fn();
+    const methodHandlerMockFn = vi.fn();
+    const behaviorMockFn = vi.fn();
+    const forceMockFn = vi.fn();
     const { send } = useSQRequest(
       (arg1, arg2) => {
         methodHandlerMockFn(arg1, arg2);
@@ -184,11 +184,11 @@ describe('vue => useSQRequest', () => {
       }
     );
 
-    const beforePushMockFn = jest.fn();
+    const beforePushMockFn = vi.fn();
     onBeforePushQueue(event => {
       beforePushMockFn(event);
     });
-    const pushedMockFn = jest.fn();
+    const pushedMockFn = vi.fn();
     onPushedQueue(event => {
       pushedMockFn(event);
     });
@@ -209,7 +209,7 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQSuccessEvent.behavior).toBe('queue');
     expect(scopedSQSuccessEvent.data.total).toBe(300);
     expect(scopedSQSuccessEvent.data.list).toStrictEqual([8, 9, 10, 11, 12, 13, 14, 15]);
-    expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([2, 8]);
+    expect(scopedSQSuccessEvent.args).toStrictEqual([2, 8]);
     expect(!!scopedSQSuccessEvent.silentMethod).toBeTruthy();
 
     expect(beforePushMockFn).toHaveBeenCalledTimes(1);
@@ -218,7 +218,7 @@ describe('vue => useSQRequest', () => {
     expect(beforePushEvent.method.url).toBe('/list');
     expect(beforePushEvent.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
     expect(beforePushEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(beforePushEvent.sendArgs).toStrictEqual([2, 8]);
+    expect(beforePushEvent.args).toStrictEqual([2, 8]);
 
     expect(pushedMockFn).toHaveBeenCalledTimes(1);
     const [pushedEvent] = pushedMockFn.mock.calls[0];
@@ -226,7 +226,7 @@ describe('vue => useSQRequest', () => {
     expect(pushedEvent.method.url).toBe('/list');
     expect(pushedEvent.method.config.params).toStrictEqual({ page: 2, pageSize: 8 });
     expect(pushedEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(pushedEvent.sendArgs).toStrictEqual([2, 8]);
+    expect(pushedEvent.args).toStrictEqual([2, 8]);
   });
 
   test('should emit onError immediately while request error and never retry', async () => {
@@ -237,7 +237,7 @@ describe('vue => useSQRequest', () => {
       queue
     });
 
-    const completeMockFn = jest.fn();
+    const completeMockFn = vi.fn();
     onComplete(event => {
       completeMockFn(event);
     });
@@ -249,7 +249,7 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQErrorEvent).toBeInstanceOf(ScopedSQErrorEvent);
     expect(scopedSQErrorEvent.behavior).toBe('queue');
     expect(scopedSQErrorEvent.error.message).toBe('server error');
-    expect(scopedSQErrorEvent.sendArgs).toStrictEqual([]);
+    expect(scopedSQErrorEvent.args).toStrictEqual([]);
     expect(scopedSQErrorEvent.silentMethod).not.toBeUndefined();
     expect(silentQueueMap[queue]).toHaveLength(0); // 在队列中移除了
 
@@ -257,13 +257,13 @@ describe('vue => useSQRequest', () => {
     expect(completedEvent).toBeInstanceOf(ScopedSQCompleteEvent);
     expect(completedEvent.behavior).toBe('queue');
     expect(completedEvent.error.message).toBe('server error');
-    expect(completedEvent.sendArgs).toStrictEqual([]);
+    expect(completedEvent.args).toStrictEqual([]);
     expect(completedEvent.silentMethod).not.toBeUndefined();
   });
 
   test('should prevent to push silentMethod when return false in certain callback of onBeforePushQueue', async () => {
     const queue = 'tb4';
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     const Get = () => alovaInst.Get<any>('/list');
     const { onBeforePushQueue } = useSQRequest(Get, {
       behavior: 'queue',
@@ -302,7 +302,7 @@ describe('vue => useSQRequest', () => {
       queue
     });
 
-    const pushMockFn = jest.fn();
+    const pushMockFn = vi.fn();
     onBeforePushQueue(pushMockFn);
     onPushedQueue(pushMockFn);
 
@@ -326,7 +326,7 @@ describe('vue => useSQRequest', () => {
       total: 300,
       list: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     });
-    expect(scopedSQSuccessEvent.sendArgs).toStrictEqual([]);
+    expect(scopedSQSuccessEvent.args).toStrictEqual([]);
     expect(scopedSQSuccessEvent.method).not.toBeUndefined();
     expect(scopedSQSuccessEvent.silentMethod).toBeUndefined();
   });
@@ -351,7 +351,7 @@ describe('vue => useSQRequest', () => {
       retryError: /.*/,
       maxRetryTimes: 2
     });
-    const fallbackMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
     onFallback(event => {
       fallbackMockFn(event);
     });
@@ -366,7 +366,7 @@ describe('vue => useSQRequest', () => {
     expect(fallbackEvent.behavior).toBe('silent');
     expect(fallbackEvent.method).not.toBeUndefined();
     expect(fallbackEvent.silentMethod).toBeInstanceOf(SilentMethod);
-    expect(fallbackEvent.sendArgs).toStrictEqual([]);
+    expect(fallbackEvent.args).toStrictEqual([]);
   });
 
   test('should be change behavior when param behavior set to a function that return different value', async () => {
@@ -383,7 +383,7 @@ describe('vue => useSQRequest', () => {
     expect(event.data).toBeInstanceOf(Undefined);
     expect(event.data[symbolVDataId]).not.toBeUndefined();
     expect(event.behavior).toBe('silent');
-    expect(event.sendArgs).toStrictEqual([]);
+    expect(event.args).toStrictEqual([]);
 
     behaviorStr = 'static';
     send(1, 2, 3);
@@ -391,7 +391,7 @@ describe('vue => useSQRequest', () => {
     expect(data.value).toStrictEqual({ id: 1 });
     expect(event.data).toStrictEqual({ id: 1 });
     expect(event.behavior).toBe('static');
-    expect(event.sendArgs).toStrictEqual([1, 2, 3]);
+    expect(event.args).toStrictEqual([1, 2, 3]);
   });
 
   test('should be intercepted when has virtual data in method instance', async () => {
@@ -483,7 +483,7 @@ describe('vue => useSQRequest', () => {
     expect(event.behavior).toBe('silent');
     expect(event.method).not.toBeUndefined();
     expect(event.silentMethod).not.toBeUndefined();
-    expect(event.sendArgs).toStrictEqual([]);
+    expect(event.args).toStrictEqual([]);
     expect(data.value[symbolVDataId]).toBeTruthy();
     expect(dehydrateVData(event.data)).toBeUndefined();
     expect(dehydrateVData(data.value)).toBeUndefined();
@@ -696,8 +696,8 @@ describe('vue => useSQRequest', () => {
       middleware: actionDelegationMiddleware('test_page')
     });
 
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     onSuccess(successFn);
     onComplete(completeFn);
 
@@ -705,7 +705,7 @@ describe('vue => useSQRequest', () => {
     expect(successFn).toHaveBeenCalledTimes(1);
     expect(completeFn).toHaveBeenCalledTimes(1);
 
-    const accessActionMockFn = jest.fn();
+    const accessActionMockFn = vi.fn();
     accessAction('test_page', handlers => {
       accessActionMockFn(handlers);
       handlers.send();

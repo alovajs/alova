@@ -1,7 +1,7 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { accessAction, actionDelegationMiddleware } from '@/index';
+import { accessAction, actionDelegationMiddleware, updateState } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
-import '@testing-library/jest-dom';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import reactHook from 'alova/react';
@@ -19,7 +19,7 @@ interface SearchListResponse {
 }
 
 type ReactPossibleState<D> = [D, Dispatch<SetStateAction<D>>] | undefined;
-jest.setTimeout(1000000);
+vi.setConfig({ testTimeout: 1000_000 });
 // reset data
 beforeEach(async () => {
   setMockListData();
@@ -318,6 +318,8 @@ describe('react => usePagination', () => {
       return data;
     });
     fireEvent.click(screen.getByRole('refresh1')); // 在翻页模式下，不是当前页会使用fetch
+    const awaitResultEl = await screen.findByRole('awaitResult');
+    expect(awaitResultEl).toHaveTextContent('resolve');
     await waitFor(async () => {
       const cache = await queryCache(getter1(1, 10));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(9, 0, i => (i === 0 ? 100 : i)));
@@ -325,7 +327,7 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data insert item with preload', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -401,7 +403,7 @@ describe('react => usePagination', () => {
 
   // 当操作了数据重新fetch但还未响应时，翻页到了fetch的页，此时也需要更新界面
   test('should update data when insert and fetch current page', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -457,7 +459,7 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data replace item', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -552,8 +554,8 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data insert item without preload', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -632,8 +634,8 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data remove item in preload mode', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -710,7 +712,7 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data remove item by another item', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(
       <Pagination
         getter={getterSearch}
@@ -757,7 +759,7 @@ describe('react => usePagination', () => {
 
   // 当操作了数据重新fetch但还未响应时，翻页到了正在fetch的页，此时也需要更新界面
   test('should update data when fetch current page', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -816,7 +818,7 @@ describe('react => usePagination', () => {
   });
 
   test('should use new total data when remove items and go to adjacent page', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     let min: ReactPossibleState<number>;
     render(
       <Pagination
@@ -929,7 +931,7 @@ describe('react => usePagination', () => {
   });
 
   test('paginated data remove short list item without preload', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={getterShort}
@@ -986,8 +988,8 @@ describe('react => usePagination', () => {
   });
 
   test('should refresh current page and will not prefetch when close cache', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={(page: number, pageSize: number) => getterShort(page, pageSize, 0)}
@@ -1060,7 +1062,7 @@ describe('react => usePagination', () => {
 
   // 下拉加载更多相关
   test('load more mode paginated data and change page/pageSize', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -1121,8 +1123,8 @@ describe('react => usePagination', () => {
   });
 
   test('load more paginated data with conditions search', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     let keyword: ReactPossibleState<string>;
     render(
       <Pagination
@@ -1286,7 +1288,7 @@ describe('react => usePagination', () => {
   });
 
   test('load more mode paginated data operate items with remove/insert/replace(open preload)', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -1336,8 +1338,8 @@ describe('react => usePagination', () => {
   });
 
   test('load more mode paginated data remove item without preload', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -1379,7 +1381,7 @@ describe('react => usePagination', () => {
   });
 
   test('load more mode reload paginated data', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(
       <Pagination
         getter={getter1}
@@ -1410,6 +1412,8 @@ describe('react => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('reload1'));
+    const awaitResultEl = await screen.findByRole('awaitResult');
+    expect(awaitResultEl).toHaveTextContent('resolve');
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3]));
@@ -1429,7 +1433,7 @@ describe('react => usePagination', () => {
   });
 
   test("load more mode paginated data don't need to preload when go to last page", async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(
       <Pagination
         getter={getterShort}
@@ -1465,7 +1469,7 @@ describe('react => usePagination', () => {
   });
 
   test('should access actions by middleware actionDelegation', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={(page: number, pageSize: number) => getterShort(page, pageSize, 0)}
@@ -1555,9 +1559,9 @@ describe('react => usePagination', () => {
     });
   });
 
-  test('can resend request when encounter an error', async () => {
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
+  test('can be resent request when encounter an error', async () => {
+    const errorFn = vi.fn();
+    const completeFn = vi.fn();
     render(
       <Pagination
         getter={(page: number, pageSize: number) =>
@@ -1582,12 +1586,16 @@ describe('react => usePagination', () => {
     });
 
     fireEvent.click(screen.getByRole('reload1'));
+    const awaitResultEl = await screen.findByRole('awaitResult');
+    expect(awaitResultEl).toHaveTextContent('reject');
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(2);
       expect(completeFn).toHaveBeenCalledTimes(2);
     });
 
     fireEvent.click(screen.getByRole('reload1'));
+    const awaitResultEl2 = await screen.findByRole('awaitResult');
+    expect(awaitResultEl2).toHaveTextContent('reject');
     await waitFor(() => {
       expect(errorFn).toHaveBeenCalledTimes(3);
       expect(completeFn).toHaveBeenCalledTimes(3);
@@ -1596,7 +1604,7 @@ describe('react => usePagination', () => {
 
   test('should use the data of last request when set `abortLast` to true', async () => {
     let keyword: ReactPossibleState<string>;
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(
       <Pagination
         getter={getterSearch}
@@ -1637,6 +1645,46 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
       expect(screen.getByRole('total')).toHaveTextContent('300');
       expect(successMockFn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  test('should update state data when call `updateState` function', async () => {
+    const initialPageSize = 4;
+    render(
+      <Pagination
+        getter={getter1}
+        paginationConfig={{
+          data: (res: any) => res.list,
+          append: true,
+          initialPageSize
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
+    });
+
+    let updated: boolean;
+    delay()
+      .then(() =>
+        updateState<number[]>(getter1(1, initialPageSize), {
+          data: list => [...list, 100, 200],
+          total: old => old + 10
+        })
+      )
+      .then(res => {
+        updated = res;
+      });
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3, 100, 200]));
+      expect(screen.getByRole('total')).toHaveTextContent('310');
+      expect(updated).toBeTruthy();
+    });
+
+    delay().then(() => updateState<number[]>(getter1(1, initialPageSize), list => [...list, 300]));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3, 100, 200, 300]));
     });
   });
 });

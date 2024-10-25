@@ -38,7 +38,7 @@ describe('silent method request in queue with queue behavior', () => {
       delay: 0
     });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     const offSuccess = onSilentSubmitSuccess(() => {
       successMockFn();
       // 卸载全局事件避免污染其他用例
@@ -58,8 +58,8 @@ describe('silent method request in queue with queue behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const queueName = 't10';
     const methodInstance = new Method('POST', alovaInst, '/detail-error', undefined, {
       id: 'aa'
@@ -90,7 +90,7 @@ describe('silent method request in queue with queue behavior', () => {
       delay: 0
     });
 
-    const errorMockFn = jest.fn();
+    const errorMockFn = vi.fn();
     onSilentSubmitError(event => {
       expect((event as any)[Symbol.toStringTag]).toBe('GlobalSQErrorEvent');
       errorMockFn();

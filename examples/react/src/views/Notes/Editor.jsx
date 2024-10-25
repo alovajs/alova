@@ -49,7 +49,7 @@ function Editor({ networkMode, queue, id }) {
         return false;
       }
     })
-    .onSuccess(async ({ silentMethod, sendArgs: [content] }) => {
+    .onSuccess(async ({ silentMethod, args: [content] }) => {
       let editingItem = undefined;
       // 步骤1：手动更新列表数据
       await setCache(methodNoteList, noteList => {

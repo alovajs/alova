@@ -56,12 +56,12 @@
 
 <script>
   on('#btnSubmit', 'click', () => {
-    const retry = toNumber(retryTimesEl.value) || 3;
-    const delay = toNumber(delayEl.value) || 1000;
-    const multiplier = toNumber(multiplierEl.value) || 1;
-    const startQuiver = toNumber(startQuiverEl.value) || 0;
-    const endQuiver = toNumber(endQuiverEl.value) || 0;
-    const apiErrorTimes = toNumber(apiErrorTimesEl.value) || 2;
+    const retry = toNumber(retryTimesEl.value) ?? 3;
+    const delay = toNumber(delayEl.value) ?? 1000;
+    const multiplier = toNumber(multiplierEl.value) ?? 1;
+    const startQuiver = toNumber(startQuiverEl.value) ?? 0;
+    const endQuiver = toNumber(endQuiverEl.value) ?? 0;
+    const apiErrorTimes = toNumber(apiErrorTimesEl.value) ?? 2;
     dashboard.innerHTML = '';
     alovaInstance
       .Post('/api/retry', {

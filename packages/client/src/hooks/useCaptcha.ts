@@ -7,9 +7,9 @@ import { AlovaMethodHandler, CaptchaHookConfig } from '~/typings/clienthook';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
-export default <AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
-  config: CaptchaHookConfig<AG> = {}
+export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
+  config: CaptchaHookConfig<AG, Args> = {}
 ) => {
   const { initialCountdown, middleware } = config;
   captchaAssert(initialCountdown === undefinedValue || initialCountdown > 0, 'initialCountdown must be greater than 0');
@@ -21,18 +21,18 @@ export default <AG extends AlovaGenerics>(
     __referingObj: referingObject
   } = statesHookHelper(promiseStatesHook());
 
+  const countdown = create(0, 'countdown');
   const requestReturned = useRequest(handler, {
     ...config,
     __referingObj: referingObject,
     immediate: falseValue,
+    managedStates: objectify([countdown], 's'),
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     middleware: middleware ? (ctx, next) => middleware({ ...ctx, send }, next) : undefinedValue
   });
 
-  const countdown = create(0, 'countdown');
-
   const timer = ref(undefinedValue as NodeJS.Timeout | undefined);
-  const send = (...args: any[]) =>
+  const send = (...args: [...Args, ...any[]]) =>
     newInstance(PromiseCls, (resolve, reject) => {
       if (countdown.v <= 0) {
         requestReturned

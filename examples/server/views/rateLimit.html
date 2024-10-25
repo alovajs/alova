@@ -58,12 +58,12 @@
 <script>
   const requestTimes = 10;
   let uid;
+  let config;
   const append2Dashboard = res => {
     const divEl = document.createElement('div');
     divEl.innerHTML = JSON.stringify(res);
     dashboard.appendChild(divEl);
   };
-
   on('#btnSubmit', 'click', async () => {
     const points = toNumber(pointsEl.value);
     const duration = toNumber(durationEl.value);
@@ -74,17 +74,17 @@
     btnReward.removeAttribute('disabled');
     btnPenalty.removeAttribute('disabled');
     btnReset.removeAttribute('disabled');
-    await alovaInstance.Put('/api/rateLimit', {
+    config = {
       points,
       duration,
       blockDuration,
       isCustomStorage
-    });
+    };
     uid = Math.floor(Math.random() * 100000);
 
     try {
       for (let i = 0; i < requestTimes; i++) {
-        const res = await alovaInstance.Get('/api/rateLimit', {
+        const res = await alovaInstance.Post('/api/rateLimit', config, {
           cacheFor: null,
           headers: { uid }
         });
@@ -101,42 +101,30 @@
 
   on('#btnReward', 'click', async () => {
     btnReward.setAttribute('disabled', 'disabled');
-    const res = await alovaInstance.Post(
-      '/api/rateLimit/reward',
-      {},
-      {
-        cacheFor: null,
-        headers: { uid }
-      }
-    );
+    const res = await alovaInstance.Post('/api/rateLimit/reward', config, {
+      cacheFor: null,
+      headers: { uid }
+    });
     append2Dashboard(res);
     btnReward.removeAttribute('disabled');
   });
 
   on('#btnPenalty', 'click', async () => {
     btnPenalty.setAttribute('disabled', 'disabled');
-    const res = await alovaInstance.Post(
-      '/api/rateLimit/penalty',
-      {},
-      {
-        cacheFor: null,
-        headers: { uid }
-      }
-    );
+    const res = await alovaInstance.Post('/api/rateLimit/penalty', config, {
+      cacheFor: null,
+      headers: { uid }
+    });
     append2Dashboard(res);
     btnPenalty.removeAttribute('disabled');
   });
 
   on('#btnReset', 'click', async () => {
     btnReset.setAttribute('disabled', 'disabled');
-    const res = await alovaInstance.Post(
-      '/api/rateLimit/delete',
-      {},
-      {
-        cacheFor: null,
-        headers: { uid }
-      }
-    );
+    const res = await alovaInstance.Post('/api/rateLimit/delete', config, {
+      cacheFor: null,
+      headers: { uid }
+    });
     append2Dashboard(res);
     btnReset.removeAttribute('disabled');
   });

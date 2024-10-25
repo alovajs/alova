@@ -1,7 +1,7 @@
 import { $self, noop } from '@alova/shared/function';
 import { falseValue } from '@alova/shared/vars';
 import { AlovaRequestAdapter, Method, StatesHook } from 'alova';
-import { GlobalFetchRequestAdapter } from 'alova/fetch';
+import { FetchRequestAdapter } from 'alova/fetch';
 import {
   AlovaRequestAdapterUnified,
   BeforeRequestType,
@@ -32,7 +32,7 @@ export const createClientTokenAuthentication = <
   SH extends StatesHook<any>,
   RA extends
     | AlovaRequestAdapter<any, any, any>
-    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = FetchRequestAdapter
 >({
   visitorMeta,
   login,
@@ -70,7 +70,7 @@ export const createClientTokenAuthentication = <
     if (!isVisitorRole && !isLoginRole) {
       await assignToken(method);
     }
-    onBeforeRequest?.(method);
+    return onBeforeRequest?.(method);
   };
 
   const onResponseRefreshToken: ResponseType<SH, AlovaRequestAdapterUnified<RA>> = originalResponded => {
@@ -100,7 +100,7 @@ export const createServerTokenAuthentication = <
   SH extends StatesHook<any>,
   RA extends
     | AlovaRequestAdapter<any, any, any>
-    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = GlobalFetchRequestAdapter
+    | ((...args: any[]) => AlovaRequestAdapter<any, any, any>) = FetchRequestAdapter
 >({
   visitorMeta,
   login,
@@ -130,7 +130,7 @@ export const createServerTokenAuthentication = <
     if (!isVisitorRole && !isLoginRole) {
       await assignToken(method);
     }
-    onBeforeRequest?.(method);
+    return onBeforeRequest?.(method);
   };
 
   const onResponseRefreshToken: ResponseType<SH, AlovaRequestAdapterUnified<RA>> = onRespondedHandlers => {

@@ -1,18 +1,48 @@
-# alova mock data adapter
+# mock adpater for alova
 
-**alova's mock data request adapter**
+<p align="center">
+<img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
+</p>
 
-[![npm](https://img.shields.io/npm/v/@alova/mock)](https://www.npmjs.com/package/@alova/mock)
-[![build](https://github.com/alovajs/mock/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/alovajs/mock/actions/workflows/main.yml)
-[![coverage status](https://coveralls.io/repos/github/alovajs/mock/badge.svg?branch=main)](https://coveralls.io/github/alovajs/mock?branch=main)
-![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
+<p align="center"><b>Workflow-Streamlined next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
 
-[alova](https://github.com/alovajs/alova) is a lightweight request strategy library, which provides targeted request strategies for different request scenarios to improve application availability, fluency, and reduce The pressure on the server side makes the application have excellent strategic thinking like a wise man.
+---
 
-## alova example
+Refer to [alova](https://github.com/alovajs/alova).
 
-[Here are some examples that demonstrate the power of alova](https://alova.js.org/category/examples) that use this mock request adapter.
+## Usage
+
+Please to [adapter mock documentation](https://alova.js.org/resource/request-adapter/alova-mock) for more details.
+
+## Join the community
+
+- [Follow us on X to get the latest updates](https://x.com/alovajs)
+
+- [Join the Discord](https://discord.gg/S47QGJgkVb)
+
+- [Join the WeChat group](https://alova.js.org/img/wechat_qrcode.jpg)
+
+## We need your support
+
+If you like alova, we are very grateful for giving us a star in the upper right corner, which is a recognition and encouragement for our work.
+
+## Welcome to contribute
+
+We are honored to receive active participation from developers around the world in Issues and Discussions.
+
+We hope to make alova a common project for everyone who is willing to participate, rather than the alova team. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your ideas meet the development guidelines of alova, please participate generously.
+
+Effective contributions will win you a certain reputation in the Alova community. Before contributing, please be sure to read the [Contribution Guide](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md) in detail to ensure your contribution is effective.
+
+## Changelog
+
+[Link](https://github.com/alovajs/alova/releases)
+
+## Contributors
+
+<a href="https://github.com/alovajs/alova/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=alovajs/alova&max=30&columns=10" />
+</a>
 
 ## LICENSE
 

@@ -116,13 +116,13 @@ describe('use useFetcher hook to fetch data', () => {
     const Get1 = createGet({ a: '1', b: '2', countKey: 'c' });
     await Get1.send();
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const {
       loading,
       fetch,
       onSuccess: onFetchSuccess
     } = useFetcher<FetcherType<typeof alova>>({
-      force({ sendArgs: [p1, p2] }) {
+      force({ args: [p1, p2] }) {
         mockFn();
         expect(p1).toBeTruthy();
         expect(p2).toBeFalsy();

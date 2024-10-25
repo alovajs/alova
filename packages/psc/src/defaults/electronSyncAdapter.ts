@@ -25,7 +25,7 @@ let hasSynchronizer = false;
 /**
  * Use this function in main process.
  */
-export function createElectronSharedCacheSynchronizer(ipcMain: IpcMain) {
+export function createElectronPSCSynchronizer(ipcMain: IpcMain) {
   if (hasSynchronizer) {
     return;
   }

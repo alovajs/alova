@@ -16,7 +16,7 @@ describe('[react]use hooks in SSR', () => {
       transform: ({ data }: Result) => data
     });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     function Page() {
       const { loading, data = { path: '', method: '' }, onSuccess } = useRequest(Get);
       onSuccess(successMockFn);

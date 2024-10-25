@@ -76,7 +76,7 @@ const {
   behavior: () => (networkMode.value === 0 ? 'queue' : 'static'),
   queue,
   initialData: [],
-  force: ({ sendArgs: [isForce] }) => !!isForce
+  force: ({ args: [isForce] }) => !!isForce
 }).onSuccess(({ data: noteListRaw }) => {
   filterSilentMethods(undefined, queue).then(noteSilentMethods => {
     console.log(noteSilentMethods);
@@ -111,7 +111,7 @@ const { loading: removing, send: removeSend } = useSQRequest(id => removeNote(id
     endQuiver: 0.5
   },
   immediate: false
-}).onSuccess(({ silentMethod, sendArgs: [removedId] }) => {
+}).onSuccess(({ silentMethod, args: [removedId] }) => {
   // setp1: update list data manually
   updateStateEffect(queryNotes(), noteList => {
     const index = noteList.findIndex(({ id }) => id === removedId);

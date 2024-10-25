@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-xhr",
-  "version": "2.0.0-beta.12",
+  "version": "2.0.9",
   "description": "XMLHttpRequest adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-xhr.common.cjs",
@@ -47,20 +47,15 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.0-beta.15"
+    "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:*"
+    "@alova/shared": "workspace:^"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:*",
-    "@alova/scripts": "workspace:*",
-    "alova": "workspace:*",
+    "@alova/mock": "workspace:^",
+    "@alova/scripts": "workspace:^",
+    "alova": "workspace:^",
     "form-data": "^4.0.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }

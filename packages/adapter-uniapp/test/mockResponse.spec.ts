@@ -24,7 +24,8 @@ const mocks = defineMock({
 const mockAdapter = createAlovaMockAdapter([mocks], {
   delay: 100,
   httpAdapter: uniappRequestAdapter,
-  onMockResponse: uniappMockResponse
+  onMockResponse: uniappMockResponse,
+  mockRequestLogger: false
 });
 
 const alovaInst = createAlova({

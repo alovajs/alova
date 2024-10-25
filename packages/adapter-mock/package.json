@@ -1,6 +1,6 @@
 {
   "name": "@alova/mock",
-  "version": "2.0.0-beta.12",
+  "version": "2.0.8",
   "description": "mock request adapter for alova.js",
   "homepage": "https://github.com/alovajs/mock",
   "main": "dist/alova-mock.common.cjs",
@@ -39,13 +39,13 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.0-beta.15"
+    "alova": "^3.0.20"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:*",
-    "alova": "workspace:*"
+    "@alova/scripts": "workspace:^",
+    "alova": "workspace:^"
   },
   "dependencies": {
-    "@alova/shared": "workspace:*"
+    "@alova/shared": "workspace:^"
   }
 }

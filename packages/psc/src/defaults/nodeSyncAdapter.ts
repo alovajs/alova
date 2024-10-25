@@ -7,7 +7,7 @@ import type { IPC } from 'node-ipc';
 // fix(type-issue): https://github.com/node-ipc/node-ipc/issues/4
 const IPCModule = IPCModule_ as unknown as typeof IPC;
 
-export const AlovaIPCID = uuid();
+export const AlovaIPCID = 'alova-default-channel';
 
 const EventName = {
   TO_MAIN: 'alova-ipc-to-main',
@@ -44,6 +44,9 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
     });
   });
 
+  // disconnect when the process is terminated.
+  process.on('SIGTERM', () => ipc.disconnect(id));
+
   return createSyncAdapter({
     send(event) {
       queue.queueCallback(() => ipc.of[id]?.emit(EventName.TO_MAIN, event));
@@ -64,7 +67,7 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
  * When running multiple synchronizers in main process, please assign `id` manually.
  * And make sure the ids are unique between synchronizers
  */
-export async function createNodeSharedCacheSynchronizer(id = AlovaIPCID) {
+export async function createNodePSCSynchronizer(id = AlovaIPCID) {
   const ipc = createIPC(id);
 
   const { promise, resolve } = usePromise<() => void>();
@@ -87,6 +90,7 @@ export async function createNodeSharedCacheSynchronizer(id = AlovaIPCID) {
   });
 
   ipc.server.start();
+  process.on('SIGTERM', () => ipc.server.stop());
 
   return promise;
 }

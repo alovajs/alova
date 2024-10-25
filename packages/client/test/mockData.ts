@@ -1,4 +1,5 @@
-import { createAlovaMockAdapter, defineMock } from '@alova/mock';
+import { createAlovaMockAdapter, defineMock, FetchRequestInit } from '@alova/mock';
+import { AlovaRequestAdapter } from 'alova';
 import { untilCbCalled } from 'root/testUtils';
 
 const total = 300;
@@ -200,4 +201,4 @@ export const mockRequestAdapter = createAlovaMockAdapter([mocks], {
   mockRequestLogger: false
 });
 
-export type MockRequestAdapter = typeof mockRequestAdapter;
+export type MockRequestAdapter = AlovaRequestAdapter<FetchRequestInit, BodyType, Record<string, string | number>>;

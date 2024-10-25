@@ -1,6 +1,6 @@
 {
   "name": "@alova/shared",
-  "version": "1.0.0-beta.11",
+  "version": "1.0.7",
   "type": "module",
   "author": "Scott Hu",
   "scripts": {
@@ -8,9 +8,8 @@
     "test": "jest",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
-    "build": "npm run clean && tsc -p tsconfig.build.json && alova-scripts build",
-    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
-    "commit": "git add . && git-cz && git push"
+    "fix:reference": "node ./fixReference.js",
+    "build": "pnpm run clean && tsc -p tsconfig.build.json && alova-scripts build"
   },
   "license": "MIT",
   "repository": {
@@ -62,10 +61,38 @@
       "default": "./dist/model/FrameworkState.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "assert": [
+        "./dist/assert.d.ts"
+      ],
+      "function": [
+        "./dist/function.d.ts"
+      ],
+      "vars": [
+        "./dist/vars.d.ts"
+      ],
+      "types": [
+        "./dist/types.d.ts"
+      ],
+      "event": [
+        "./dist/event.d.ts"
+      ],
+      "createEventManager": [
+        "./dist/createEventManager.d.ts"
+      ],
+      "queueCallback": [
+        "./dist/queueCallback.d.ts"
+      ],
+      "FrameworkState": [
+        "./dist/model/FrameworkState.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
   "devDependencies": {
-    "@alova/scripts": "workspace:*"
+    "@alova/scripts": "workspace:^"
   }
 }

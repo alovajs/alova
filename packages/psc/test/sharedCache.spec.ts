@@ -1,4 +1,4 @@
-import { ElectronSyncAdapter, NodeSyncAdapter, createNodeSharedCacheSynchronizer } from '@/index';
+import { ElectronSyncAdapter, NodeSyncAdapter, createNodePSCSynchronizer } from '@/index';
 import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
 import { key } from '@alova/shared/function';
 import { forEach } from '@alova/shared/vars';
@@ -60,14 +60,14 @@ const prepareEnv = async () => {
       id: 1
     });
 
-  const { createElectronSharedCacheSynchronizer } = await import('@/defaults/electronSyncAdapter');
+  const { createElectronPSCSynchronizer } = await import('@/defaults/electronSyncAdapter');
 
   return {
     eventEmitter,
     createSharedL1CacheAdapter,
     createSharedCacheAlova,
     createNonSharedCacheAlova,
-    createElectronSharedCacheSynchronizer
+    createElectronPSCSynchronizer
   };
 };
 
@@ -185,11 +185,11 @@ describe('shared cache', () => {
   });
 
   test('should share cache between same scope in Electron', async () => {
-    const { eventEmitter, createElectronSharedCacheSynchronizer } = await prepareEnv();
+    const { eventEmitter, createElectronPSCSynchronizer } = await prepareEnv();
     const { ipcMain, ipcRenderer } = createFakeElectronExports(eventEmitter);
 
     // simulate init operation in the main procress
-    createElectronSharedCacheSynchronizer(ipcMain);
+    createElectronPSCSynchronizer(ipcMain);
 
     const alovaA = getAlovaInstance({
       id: 1,
@@ -218,7 +218,7 @@ describe('shared cache', () => {
 
     // should be only one synchronizer in electron
     // so it takes no effect
-    createElectronSharedCacheSynchronizer(ipcMain);
+    createElectronPSCSynchronizer(ipcMain);
     await delay(10);
 
     expect(cache).not.toBeUndefined();
@@ -227,11 +227,11 @@ describe('shared cache', () => {
   });
 
   test('should set operation be a async function in electron', async () => {
-    const { eventEmitter, createElectronSharedCacheSynchronizer } = await prepareEnv();
+    const { eventEmitter, createElectronPSCSynchronizer } = await prepareEnv();
     const { ipcMain, ipcRenderer, mainMockOn } = createFakeElectronExports(eventEmitter);
 
     // simulate init operation in the main procress
-    createElectronSharedCacheSynchronizer(ipcMain);
+    createElectronPSCSynchronizer(ipcMain);
 
     const l1Cache = createPSCAdapter(ElectronSyncAdapter(ipcRenderer));
 
@@ -255,7 +255,7 @@ describe('shared cache', () => {
 
   test('should share cache between same scope in node', async () => {
     // simulate init operation in the main procress
-    const stopServer = await createNodeSharedCacheSynchronizer();
+    const stopServer = await createNodePSCSynchronizer();
 
     const stopHandler: (() => void)[] = [];
 
@@ -290,7 +290,7 @@ describe('shared cache', () => {
 
   test('should trigger event handler with expect times in node', async () => {
     // simulate init operation in the main procress
-    const stopServer = await createNodeSharedCacheSynchronizer();
+    const stopServer = await createNodePSCSynchronizer();
 
     const stopHandler: (() => void)[] = [];
     const mockSend = jest.fn();

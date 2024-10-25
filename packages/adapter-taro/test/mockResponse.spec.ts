@@ -23,7 +23,8 @@ const mocks = defineMock({
 const mockAdapter = createAlovaMockAdapter([mocks], {
   delay: 100,
   httpAdapter: taroRequestAdapter,
-  onMockResponse: taroMockResponse
+  onMockResponse: taroMockResponse,
+  mockRequestLogger: false
 });
 
 const alovaInst = createAlova({

@@ -20,35 +20,35 @@ import { AlovaMethodHandler, RetriableHookConfig } from '~/typings/clienthook';
 const RetryEventKey = Symbol('RetriableRetry');
 const FailEventKey = Symbol('RetriableFail');
 
-export type RetriableEvents<AG extends AlovaGenerics> = {
-  [RetryEventKey]: RetriableRetryEvent<AG>;
-  [FailEventKey]: RetriableFailEvent<AG>;
+export type RetriableEvents<AG extends AlovaGenerics, Args extends any[]> = {
+  [RetryEventKey]: RetriableRetryEvent<AG, Args>;
+  [FailEventKey]: RetriableFailEvent<AG, Args>;
 };
 
-type RetryHandler<AG extends AlovaGenerics> = (event: RetriableRetryEvent<AG>) => void;
-type FailHandler<AG extends AlovaGenerics> = (event: RetriableFailEvent<AG>) => void;
+type RetryHandler<AG extends AlovaGenerics, Args extends any[]> = (event: RetriableRetryEvent<AG, Args>) => void;
+type FailHandler<AG extends AlovaGenerics, Args extends any[]> = (event: RetriableFailEvent<AG, Args>) => void;
 const hookPrefix = 'useRetriableRequest';
 const assert = createAssert(hookPrefix);
-export default <AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
-  config: RetriableHookConfig<AG> = {}
+export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
+  config: RetriableHookConfig<AG, Args> = {}
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
 
   const { ref: useFlag$, exposeProvider, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
 
-  const eventManager = createEventManager<RetriableEvents<AG>>();
+  const eventManager = createEventManager<RetriableEvents<AG, Args>>();
   const retryTimes = useFlag$(0);
   const stopManuallyError = useFlag$(undefinedValue as Error | undefined); // 停止错误对象，在手动触发停止时有值
   const methodInstanceLastest = useFlag$(undefinedValue as Method<AG> | undefined);
-  const sendArgsLatest = useFlag$(undefinedValue as any[] | undefined);
+  const argsLatest = useFlag$(undefinedValue as any[] | undefined);
   const currentLoadingState = useFlag$(falseValue);
   const requesting = useFlag$(falseValue); // 是否正在请求
   const retryTimer = useFlag$(undefinedValue as string | number | NodeJS.Timeout | undefined);
   const promiseObj = useFlag$(usePromise());
   const requestResolved = useFlag$(falseValue);
 
-  const emitOnFail = (method: Method<AG>, sendArgs: any[], error: any) => {
+  const emitOnFail = (method: Method<AG>, args: [...Args, ...any[]], error: any) => {
     if (requestResolved.current) {
       return;
     }
@@ -57,7 +57,7 @@ export default <AG extends AlovaGenerics>(
     setTimeoutFn(() => {
       eventManager.emit(
         FailEventKey,
-        newInstance(RetriableFailEvent<AG>, AlovaEventBase.spawn(method, sendArgs), error, retryTimes.current)
+        newInstance(RetriableFailEvent<AG, Args>, AlovaEventBase.spawn(method, args), error, retryTimes.current)
       );
       stopManuallyError.current = undefinedValue;
       retryTimes.current = 0; // 重置已重试次数
@@ -76,7 +76,7 @@ export default <AG extends AlovaGenerics>(
             stop
           }
         } as any,
-        () => promiseResolve(undefinedValue as any)
+        () => promiseResolve()
       );
       const { proxyStates, args, send, method, controlLoading } = ctx;
       const setLoading = (loading = falseValue) => {
@@ -88,7 +88,7 @@ export default <AG extends AlovaGenerics>(
       controlLoading();
       setLoading(trueValue);
       methodInstanceLastest.current = method;
-      sendArgsLatest.current = args;
+      argsLatest.current = args;
       requesting.current = trueValue;
 
       // init the resolved flag as `false` before first request.
@@ -126,7 +126,12 @@ export default <AG extends AlovaGenerics>(
               // 触发重试事件
               eventManager.emit(
                 RetryEventKey,
-                newInstance(RetriableRetryEvent<AG>, AlovaEventBase.spawn(method, args), retryTimes.current, retryDelay)
+                newInstance(
+                  RetriableRetryEvent<AG, Args>,
+                  AlovaEventBase.spawn(method, args),
+                  retryTimes.current,
+                  retryDelay
+                )
               );
             }, retryDelay);
           } else {
@@ -158,13 +163,13 @@ export default <AG extends AlovaGenerics>(
       setTimeout(() => {
         promiseObj.current = usePromise();
       });
-      nestedHookProvider.update({ error: stopManuallyError.current, loading: falseValue });
+      nestedHookProvider.update({ error: stopManuallyError.current as any, loading: falseValue as any });
       currentLoadingState.current = falseValue;
       clearTimeout(retryTimer.current); // 清除重试定时器
 
       // raise fail event at the end, because the above process depends on `stopManuallyError`
       // emit this event will clears this variable
-      emitOnFail(methodInstanceLastest.current as any, sendArgsLatest.current as any, stopManuallyError.current);
+      emitOnFail(methodInstanceLastest.current as any, argsLatest.current as any, stopManuallyError.current);
     }
   };
 
@@ -173,7 +178,7 @@ export default <AG extends AlovaGenerics>(
    * 它们将在重试发起后触发
    * @param handler 重试事件回调
    */
-  const onRetry = (handler: RetryHandler<AG>) => {
+  const onRetry = (handler: RetryHandler<AG, Args>) => {
     eventManager.on(RetryEventKey, event => handler(event));
   };
 
@@ -186,7 +191,7 @@ export default <AG extends AlovaGenerics>(
    *
    * @param handler 失败事件回调
    */
-  const onFail = (handler: FailHandler<AG>) => {
+  const onFail = (handler: FailHandler<AG, Args>) => {
     eventManager.on(FailEventKey, event => handler(event));
   };
 

@@ -1,6 +1,5 @@
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
 import { getMethodInternalKey } from '@alova/shared/function';
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { AlovaGenerics, Method, createAlova } from 'alova';
 import VueHook from 'alova/vue';
@@ -10,7 +9,7 @@ import { FormHookConfig } from '~/typings/clienthook';
 import CompPersistentDataReset from './components/persistent-data-reset.vue';
 import CompRestorePersistentData from './components/restore-persistent-data.vue';
 
-type ID = NonNullable<FormHookConfig<AlovaGenerics, any>['id']>;
+type ID = NonNullable<FormHookConfig<AlovaGenerics, any, any[]>['id']>;
 const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
@@ -96,11 +95,11 @@ describe('vue => useForm', () => {
       store: true,
       resetAfterSubmiting: true
     });
-    const restoreMockHandler = jest.fn();
+    const restoreMockHandler = vi.fn();
     onRestore(restoreMockHandler);
 
     await untilCbCalled(setTimeout, 100);
-    expect(restoreMockHandler).not.toBeCalled(); // 没有缓存不会触发onRestore
+    expect(restoreMockHandler).not.toHaveBeenCalled(); // 没有缓存不会触发onRestore
 
     // storageKey会在useForm被调用时同步生成
     const methodStorageKey = getStoragedKey(poster(initialForm));
@@ -169,7 +168,7 @@ describe('vue => useForm', () => {
       name: 'Hong',
       age: '22'
     };
-    const { form, reset, updateForm } = useForm(poster, {
+    const { form, reset, updateForm } = useForm(form => poster(form), {
       initialForm
     });
 
@@ -251,8 +250,8 @@ describe('vue => useForm', () => {
       middleware: actionDelegationMiddleware('test_page')
     });
 
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     onSuccess(successFn);
     onComplete(completeFn);
     await untilCbCalled(onSuccess);

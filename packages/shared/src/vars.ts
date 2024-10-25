@@ -4,7 +4,7 @@ declare const Deno: any;
 const undefStr = 'undefined';
 // 以下为减少编译代码量而添加的统一处理函数或变量
 export const PromiseCls = Promise;
-export const promiseResolve = <T>(value: T) => PromiseCls.resolve(value);
+export const promiseResolve = <T = void>(value?: T) => PromiseCls.resolve(value);
 export const promiseReject = <T>(value: T) => PromiseCls.reject(value);
 export const ObjectCls = Object;
 export const RegExpCls = RegExp;
@@ -55,7 +55,8 @@ export const defineProperty = (o: object, key: string | symbol, value: any, isDe
 // 部分框架（如支付宝和 uniapp）会注入 process 对象作为全局变量使用
 // 因此使用服务端独有的 process.cwd 函数作为判断依据
 export const isSSR =
-  typeof process !== undefStr ? typeof (process as any).cwd === 'function' : typeof Deno !== undefStr;
+  typeof window === undefStr &&
+  (typeof process !== undefStr ? typeof (process as any).cwd === 'function' : typeof Deno !== undefStr);
 
 /** cache mode */
 // only cache in memory, it's default option

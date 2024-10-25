@@ -1,0 +1,38 @@
+{{> header}}
+<div class="banner">The basic GET and POST request.</div>
+<div>
+  <button id="btnGet">Start GET request</button>
+  <button id="btnPost">Start POST request</button>
+</div>
+<div id="dashboard"></div>
+
+<script>
+  const request = async (button, method) => {
+    button.setAttribute('disabled', 'disabled');
+    try {
+      const res = await method;
+      const divEl = document.createElement('div');
+      divEl.innerHTML = JSON.stringify(res);
+      dashboard.appendChild(divEl);
+    } finally {
+      button.removeAttribute('disabled');
+    }
+  };
+
+  on('#btnGet', 'click', async () => {
+    request(
+      btnGet,
+      alovaInstance.Get('/api/basic', {
+        cacheFor: null
+      })
+    );
+  });
+  on('#btnPost', 'click', async () => {
+    request(
+      btnPost,
+      alovaInstance.Post('/api/basic', {
+        cacheFor: null
+      })
+    );
+  });
+</script>

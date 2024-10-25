@@ -1,4 +1,4 @@
-import { debounce, mapObject } from '@/util/helper';
+import { debounce, EnumHookType, mapObject } from '@/util/helper';
 import createEventManager from '@alova/shared/createEventManager';
 import {
   buildNamespacedCacheKey,
@@ -12,25 +12,15 @@ import {
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
-import {
-  PromiseCls,
-  falseValue,
-  forEach,
-  isArray,
-  isSSR,
-  promiseCatch,
-  trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
-import type { AlovaGlobalCacheAdapter, FrontRequestState, Method, Progress } from 'alova';
-import { AlovaGenerics, promiseStatesHook } from 'alova';
+import { falseValue, forEach, isArray, promiseCatch, PromiseCls, trueValue, undefinedValue } from '@alova/shared/vars';
+import type { AlovaGlobalCacheAdapter, Method, Progress } from 'alova';
+import { AlovaGenerics, globalConfigMap, promiseStatesHook } from 'alova';
 import {
   AlovaCompleteEvent,
   AlovaErrorEvent,
   AlovaMethodHandler,
   AlovaSuccessEvent,
   CompleteHandler,
-  EnumHookType,
   ErrorHandler,
   FrontRequestHookConfig,
   SuccessHandler,
@@ -55,25 +45,28 @@ const refCurrent = <T>(ref: { current: T }) => ref.current;
  * @param debounceDelay 请求发起的延迟时间
  * @returns 当前的请求状态、操作函数及事件绑定函数
  */
-export default function createRequestState<AG extends AlovaGenerics, Config extends UseHookConfig<AG>>(
+export default function createRequestState<
+  AG extends AlovaGenerics,
+  Args extends any[],
+  Config extends UseHookConfig<AG, Args>
+>(
   hookType: EnumHookType,
-  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
+  methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   useHookConfig: Config,
-  initialData?: FrontRequestHookConfig<AG>['initialData'],
+  initialData?: FrontRequestHookConfig<AG, Args>['initialData'],
   immediate = falseValue,
   watchingStates?: AG['StatesExport']['Watched'][],
   debounceDelay: WatcherHookConfig<AG>['debounce'] = 0
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
-  const { middleware, __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
-  let initialLoading = middleware ? falseValue : !!immediate;
+  const { __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
+  let initialLoading = !!immediate;
 
   // 当立即发送请求时，需要通过是否强制请求和是否有缓存来确定初始loading值，这样做有以下两个好处：
   // 1. 在react下立即发送请求可以少渲染一次
   // 2. SSR渲染的html中，其初始视图为loading状态的，避免在客户端展现时的loading视图闪动
-  // 3. 如果config.middleware中设置了`controlLoading`时，需要默认为false，但这边无法确定middleware中是否有调用`controlLoading`，因此条件只能放宽点，当有`config.middleware`时则初始`loading`为false
-  if (immediate && !middleware) {
+  if (immediate) {
     // 调用getHandlerMethod时可能会报错，需要try/catch
     try {
       const methodInstance = getHandlerMethod(methodHandler, coreHookAssert(hookType));
@@ -91,7 +84,7 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
           cachedResponse = data;
         }
       }
-      const forceRequestFinally = sloughConfig((useHookConfig as UseHookConfig<AG>).force ?? falseValue);
+      const forceRequestFinally = sloughConfig((useHookConfig as UseHookConfig<AG, Args>).force ?? falseValue);
       initialLoading = !!forceRequestFinally || !cachedResponse;
     } catch (error) {}
   }
@@ -105,38 +98,38 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
     loaded: 0
   };
   // 将外部传入的受监管的状态一同放到frontStates集合中
-  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG>;
+  const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG, Args>;
+  const managedStatesProxy = mapObject(managedStates, (state, key) => transformState2Proxy(state, key));
   const data = create((isFn(initialData) ? initialData() : initialData) as AG['Responded'], 'data');
   const loading = create(initialLoading, 'loading');
   const error = create(undefinedValue as Error | undefined, 'error');
   const downloading = create({ ...progress }, 'downloading');
   const uploading = create({ ...progress }, 'uploading');
 
-  const frontStates = {
-    ...mapObject(managedStates, (state, key) => transformState2Proxy(state, key)),
-    ...objectify([data, loading, error, downloading, uploading])
-  };
+  const frontStates = objectify([data, loading, error, downloading, uploading]);
   const eventManager = createEventManager<{
-    success: AlovaSuccessEvent<AG>;
-    error: AlovaErrorEvent<AG>;
-    complete: AlovaCompleteEvent<AG>;
+    success: AlovaSuccessEvent<AG, Args>;
+    error: AlovaErrorEvent<AG, Args>;
+    complete: AlovaCompleteEvent<AG, Args>;
   }>();
 
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
 
   /**
    * ## react ##每次执行函数都需要重置以下项
-   * */
+   */
   hookInstance.fs = frontStates;
   hookInstance.em = eventManager;
   hookInstance.c = useHookConfig;
-  hookInstance.ro = referingObject;
+  hookInstance.ms = managedStatesProxy;
 
   const hasWatchingStates = watchingStates !== undefinedValue;
   // 初始化请求事件
   // 统一的发送请求函数
-  const handleRequest = (handler: Method<AG> | AlovaMethodHandler<AG> = methodHandler, sendCallingArgs?: any[]) =>
-    useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
+  const handleRequest = (
+    handler: Method<AG> | AlovaMethodHandler<AG, Args> = methodHandler,
+    sendCallingArgs?: [...Args, ...any[]]
+  ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
   // 以捕获异常的方式调用handleRequest
   // 捕获异常避免异常继续向外抛出
   const wrapEffectRequest = (ro = referingObject, handler?: Method<AG> | AlovaMethodHandler<AG>) =>
@@ -154,23 +147,23 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
    */
   const debouncingSendHandler = ref(
     debounce(
-      (delay, ro, handler) => wrapEffectRequest(ro, handler),
+      (_, ro, handler) => wrapEffectRequest(ro, handler),
       (changedIndex?: number) =>
         isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
     )
   );
 
   // 在服务端渲染时不发送请求
-  if (!isSSR) {
+  if (!globalConfigMap.ssr) {
     effectRequest({
       handler:
         // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
         hasWatchingStates
-          ? delay => debouncingSendHandler.current(delay, referingObject, methodHandler)
+          ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
           : () => wrapEffectRequest(referingObject),
       removeStates: () => forEach(hookInstance.rf, fn => fn()),
-      saveStates: (states: FrontRequestState) => forEach(hookInstance.sf, fn => fn(states)),
-      frontStates,
+      saveStates: states => forEach(hookInstance.sf, fn => fn(states)),
+      frontStates: { ...frontStates, ...managedStatesProxy },
       watchingStates,
       immediate: immediate ?? trueValue
     });
@@ -186,17 +179,18 @@ export default function createRequestState<AG extends AlovaGenerics, Config exte
      * @param isFetcher 是否为isFetcher调用
      * @returns 请求promise
      */
-    send: (sendCallingArgs?: any[], methodInstance?: Method<AG>) => handleRequest(methodInstance, sendCallingArgs),
-    onSuccess(handler: SuccessHandler<AG>) {
+    send: (sendCallingArgs?: [...Args, ...any[]], methodInstance?: Method<AG>) =>
+      handleRequest(methodInstance, sendCallingArgs),
+    onSuccess(handler: SuccessHandler<AG, Args>) {
       eventManager.on(KEY_SUCCESS, handler);
     },
-    onError(handler: ErrorHandler<AG>) {
+    onError(handler: ErrorHandler<AG, Args>) {
       // will not throw error when bindError is true.
       // it will reset in `exposeProvider` so that ignore the error binding in custom use hooks.
       referingObject.bindError = trueValue;
       eventManager.on(KEY_ERROR, handler);
     },
-    onComplete(handler: CompleteHandler<AG>) {
+    onComplete(handler: CompleteHandler<AG, Args>) {
       eventManager.on(KEY_COMPLETE, handler);
     }
   });

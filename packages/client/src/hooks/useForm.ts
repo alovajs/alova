@@ -17,7 +17,7 @@ import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDet
 const RestoreEventKey = Symbol('FormRestore');
 const getStoragedKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>, id?: ID) =>
   `alova/form-${id || getMethodInternalKey(methodInstance)}`;
-type ID = NonNullable<FormHookConfig<AlovaGenerics, any>['id']>;
+type ID = NonNullable<FormHookConfig<AlovaGenerics, any, any[]>['id']>;
 
 const sharedStates = {};
 const cloneFormData = <T>(form: T): T => {
@@ -25,15 +25,15 @@ const cloneFormData = <T>(form: T): T => {
   return walkObject(shallowClone(form), shallowClone);
 };
 
-export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>>(
-  handler: FormHookHandler<AG, FormData | undefined>,
-  config: FormHookConfig<AG, FormData> = {}
-) => {
+export default <AG extends AlovaGenerics, FormData extends Record<string | symbol, any>, Args extends any[] = any[]>(
+  handler: FormHookHandler<AG, FormData, Args>,
+  config: FormHookConfig<AG, FormData, Args> = {}
+): FormExposure<AG, FormData, Args> => {
   const typedSharedStates = sharedStates as Record<
     ID,
     {
-      hookProvider: FormExposure<AG, any>;
-      config: FormHookConfig<AG, any>;
+      hookProvider: FormExposure<AG, any, Args>;
+      config: FormHookConfig<AG, any, Args>;
     }
   >;
 
@@ -69,7 +69,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   );
   // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
   const isCreateShardState = useFlag$(false);
-  const originalHookProvider = useRequest((...args: any[]) => methodHandler(form.v, ...args), {
+  const originalHookProvider = useRequest((...args: Args) => methodHandler(form.v as FormData, ...args), {
     ...config,
     __referingObj: referingObject,
 
@@ -154,7 +154,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
         form.v = storagedForm;
         // 触发持久化数据恢复事件
         eventManager.emit(RestoreEventKey, undefinedValue);
-        enableStore && immediate && send();
+        enableStore && immediate && send(...([] as unknown as [...Args, any[]]));
       }
     }
   });

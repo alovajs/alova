@@ -146,3 +146,9 @@ export const mapObject = <T extends Record<string, any>, U>(
   }
   return ret as Record<keyof T, U>;
 };
+
+export const enum EnumHookType {
+  USE_REQUEST = 1,
+  USE_WATCHER = 2,
+  USE_FETCHER = 3
+}

@@ -169,6 +169,26 @@ describe('rateLimit', () => {
       isFirstInDuration: false
     });
   });
+
+  test('should reduce msBeforeNext', async () => {
+    jest.useFakeTimers();
+    const limiter = createRateLimiter({
+      points: 1,
+      duration: 4 * 1000 // 60 s
+    });
+
+    const limitedGetter = limiter(alova.Get('/unit-test'));
+
+    await limitedGetter.consume();
+    // have no enough points
+    await limitedGetter.consume().catch(ret => expect(ret.msBeforeNext).toBeLessThanOrEqual(4000));
+    await jest.setSystemTime(Date.now() + 1000);
+    await limitedGetter.consume().catch(ret => expect(ret.msBeforeNext).toBeLessThanOrEqual(3000));
+    await jest.setSystemTime(Date.now() + 1000);
+    await limitedGetter.consume().catch(ret => expect(ret.msBeforeNext).toBeLessThanOrEqual(2000));
+
+    jest.useRealTimers();
+  });
 });
 
 describe('reteLimit in server', () => {

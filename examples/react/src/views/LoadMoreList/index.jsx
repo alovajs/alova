@@ -10,7 +10,7 @@ function View() {
   const [studentName, setStudentName] = useState('');
   const [clsName, setClsName] = useState();
   const [detailVisible, setDetailVisible] = useState(false);
-  const selectedId = useRef();
+  const selectedItem = useRef();
 
   const {
     loading,
@@ -27,24 +27,25 @@ function View() {
     initialData: { total: 0, list: [] },
     debounce: [800],
     append: true,
+    initialPageSize: 15,
     total: res => res.total,
     data: res => res.list
   });
 
-  const editItem = id => {
+  const editItem = row => {
     setDetailVisible(true);
-    selectedId.current = id;
+    selectedItem.current = row;
   };
 
   const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
     immediate: false
-  }).onSuccess(({ sendArgs: [row] }) => {
+  }).onSuccess(({ args: [row] }) => {
     remove(row);
   });
 
   const updateList = detail => {
-    if (selectedId.current) {
-      refresh(page);
+    if (selectedItem.current) {
+      refresh(selectedItem.current);
     } else {
       insert(detail);
     }
@@ -72,7 +73,7 @@ function View() {
         <div className="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
           <nord-button
             size="s"
-            onClick={() => editItem(row.id)}>
+            onClick={() => editItem(row)}>
             Edit
           </nord-button>
           <nord-button
@@ -110,7 +111,6 @@ function View() {
   // 滚动到底部加载
   const { isBottom } = useScroll();
   useEffect(() => {
-    console.log('bottom', isBottom, loading, isLastPage, page + 1);
     if (isBottom && !loading && !isLastPage) {
       update({
         page: page + 1
@@ -167,7 +167,7 @@ function View() {
         <h3 slot="header">Student Info</h3>
         {detailVisible ? (
           <EditorModal
-            id={selectedId.current}
+            id={selectedItem.current?.id}
             onSubmit={updateList}
           />
         ) : null}

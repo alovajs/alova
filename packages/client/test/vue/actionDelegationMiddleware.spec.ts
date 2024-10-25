@@ -22,8 +22,8 @@ describe('vue => subscriber middleware', () => {
     const { loading, data, onSuccess, onComplete } = useRequest(methodInstance, {
       middleware: actionDelegationMiddleware('abc')
     });
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
@@ -59,8 +59,8 @@ describe('vue => subscriber middleware', () => {
     const { loading, data, onSuccess, onComplete } = useRequest(methodInstance, {
       middleware: actionDelegationMiddleware(sym)
     });
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
@@ -92,8 +92,8 @@ describe('vue => subscriber middleware', () => {
     const { loading, data, onSuccess, onComplete } = useRequest(methodInstance, {
       middleware: actionDelegationMiddleware(num)
     });
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
@@ -130,8 +130,8 @@ describe('vue => subscriber middleware', () => {
     });
     const data1 = state1.data;
     const data2 = state2.data;
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     state1.onSuccess(successFn);
     state1.onComplete(completeFn);
     state2.onSuccess(successFn);
@@ -166,8 +166,8 @@ describe('vue => subscriber middleware', () => {
     });
     const data1 = state1.data;
     const data2 = state2.data;
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     state1.onSuccess(successFn);
     state1.onComplete(completeFn);
     state2.onSuccess(successFn);
@@ -234,8 +234,8 @@ describe('vue => subscriber middleware', () => {
       middleware: actionDelegationMiddleware('watcher-aaa'),
       immediate: true
     });
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     await untilCbCalled(setTimeout, 50);
     expect(loading.value).toBeTruthy();
     onSuccess(successFn);
@@ -267,8 +267,8 @@ describe('vue => subscriber middleware', () => {
       middleware: actionDelegationMiddleware('fetcher-aaa')
     });
 
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     onSuccess(successFn);
     onComplete(completeFn);
     fetch(methodInstance({ fetch: 1 }));

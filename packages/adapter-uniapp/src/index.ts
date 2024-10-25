@@ -6,7 +6,6 @@ import statesHook from './statesHook';
 export { default as uniappL2CacheAdapter } from './l2CacheAdapter';
 export { default as uniappMockResponse } from './mockResponse';
 export { default as uniappRequestAdapter } from './requestAdapter';
-
 export default function AdapterUniapp({ mockRequest }: AdapterUniappOptions = {}) {
   return {
     statesHook,

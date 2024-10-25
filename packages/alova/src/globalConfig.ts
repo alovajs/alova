@@ -1,7 +1,9 @@
+import { isSSR } from '@alova/shared/vars';
 import { AlovaGlobalConfig } from '~/typings';
 
 export let globalConfigMap: Required<AlovaGlobalConfig> = {
-  autoHitCache: 'global'
+  autoHitCache: 'global',
+  ssr: isSSR
 };
 
 /**

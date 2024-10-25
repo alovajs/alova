@@ -3,7 +3,7 @@ import { removeStateCache } from '@/hooks/core/implements/stateCache';
 import { updateState, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { key } from '@alova/shared/function';
-import '@testing-library/jest-dom';
+
 import { queryCache } from 'alova';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { Ref, ref } from 'vue';
@@ -37,7 +37,7 @@ describe('update cached response data by user in vue', () => {
       transform: ({ data }: Result) => data
     });
 
-    const mockfn = jest.fn();
+    const mockfn = vi.fn();
     const updated = await updateState(Get, data => {
       mockfn();
       return data;
@@ -97,13 +97,6 @@ describe('update cached response data by user in vue', () => {
     });
     await untilCbCalled(onSuccess);
 
-    // 预设状态不能更新
-    await expect(
-      updateState(Get, {
-        loading: () => true
-      })
-    ).rejects.toThrow('can not update preset states');
-
     // 非状态数据不能更新
     await expect(
       updateState(Get, {
@@ -143,7 +136,7 @@ describe('update cached response data by user in vue', () => {
     await untilCbCalled(onSuccess);
     removeStateCache(alova.id, key(Get1));
 
-    const mockUpdateFn = jest.fn();
+    const mockUpdateFn = vi.fn();
     const updated = await updateState(Get1, (data: any) => {
       mockUpdateFn();
       return data;

@@ -1,29 +1,29 @@
 import { AlovaSSEMessageEvent } from '@/event';
 import { useSSE } from '@/index';
 import { undefinedValue } from '@alova/shared/vars';
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
 import ReactHook from 'alova/react';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
-import { ReactElement } from 'react';
+import React from 'react';
 import { delay } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
-import { SSEHookReadyState } from '~/typings/clienthook';
 // eslint-disable-next-line import/no-named-as-default
-import { usePromise } from '@alova/shared/function';
+import { SSEHookReadyState } from '@/hooks/useSSE';
+import mockServer from 'root/mockServer';
 import { getAlovaInstance } from '../utils';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
-
-afterEach(() => {
-  const { promise, resolve } = usePromise();
-  if (server.listening) {
-    server.close(resolve);
-    return promise;
-  }
+let port = 0;
+beforeAll(() => {
+  port = (server.listen().address() as AddressInfo).port;
+  // 关掉默认的server，避免抛出大量警告
+  mockServer.close();
+});
+afterAll(() => {
+  server.close();
 });
 
 type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
@@ -31,16 +31,13 @@ type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageE
 /**
  * 准备 Alova 实例环境，并且开始 SSE 服务器的监听
  */
-const prepareAlova = async () => {
-  await server.listen();
-  const { port } = server.address() as AddressInfo;
-  return createAlova({
+const prepareAlova = async () =>
+  createAlova({
     baseURL: `http://127.0.0.1:${port}`,
     statesHook: ReactHook,
     requestAdapter: GlobalFetch(),
     cacheLogger: false
   });
-};
 
 describe('react => useSSE', () => {
   // ! 无初始数据，不立即发送请求
@@ -49,8 +46,8 @@ describe('react => useSSE', () => {
     const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
 
     let recv = undefinedValue;
-    const mockOpenFn = jest.fn();
-    const mockOnFn = jest.fn((event: AnyMessageType) => {
+    const mockOpenFn = vi.fn();
+    const mockOnFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
 
@@ -83,7 +80,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
 
@@ -119,11 +116,11 @@ describe('react => useSSE', () => {
     const testDataB = 'test-data-2';
 
     let recv = undefinedValue;
-    const mockOpenFn = jest.fn();
-    const mockOnFn = jest.fn((event: AnyMessageType) => {
+    const mockOpenFn = vi.fn();
+    const mockOnFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
-    // const mockOpenFn = jest.fn();
+    // const mockOpenFn = vi.fn();
 
     const Page = () => {
       const { onMessage, onOpen, data, readyState, send } = useSSE(poster, { initialData });
@@ -149,7 +146,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
@@ -196,8 +193,8 @@ describe('react => useSSE', () => {
     const testDataA = 'test-data-1';
 
     let recv = undefinedValue;
-    const mockOpenFn = jest.fn();
-    const mockOnFn = jest.fn((event: AnyMessageType) => {
+    const mockOpenFn = vi.fn();
+    const mockOnFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
 
@@ -220,7 +217,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
 
     expect(screen.getByRole('status')).toHaveTextContent('connecting');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
@@ -248,8 +245,8 @@ describe('react => useSSE', () => {
     const testDataB = 'test-data-2';
 
     let recv = undefinedValue;
-    const mockOpenFn = jest.fn();
-    const mockOnMessageFn = jest.fn((event: AnyMessageType) => {
+    const mockOpenFn = vi.fn();
+    const mockOnMessageFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
 
@@ -282,7 +279,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     expect(screen.getByRole('status')).toHaveTextContent('connecting');
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('opened');
@@ -348,9 +345,9 @@ describe('react => useSSE', () => {
     const poster = (data: any) => alovaInst.Get('/not-exist-path', data);
 
     let recv = undefinedValue;
-    const mockOpenFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockMessageFn = jest.fn((event: AnyMessageType) => {
+    const mockOpenFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockMessageFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
 
@@ -374,7 +371,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('closed');
       expect(screen.getByRole('data')).toBeEmptyDOMElement();
@@ -388,12 +385,12 @@ describe('react => useSSE', () => {
   // ! 打开失败应该报错，不立即发送请求
   test('should throw error then try to connect a not exist url (immediate: false)', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get('/not-exist-path', data);
+    const poster = (data?: any) => alovaInst.Get('/not-exist-path', data);
 
     let recv = undefinedValue;
-    const mockOpenFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockMessageFn = jest.fn((event: AnyMessageType) => {
+    const mockOpenFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockMessageFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
 
@@ -422,7 +419,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await screen.findByText(/closed/);
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
     expect(mockOpenFn).not.toHaveBeenCalled();
@@ -442,7 +439,6 @@ describe('react => useSSE', () => {
   // ! 拦截器应该触发 (interceptByGlobalResponded: true)
   // https://alova.js.org/zh-CN/tutorial/combine-framework/response
   test('should trigger global response', async () => {
-    const { port } = server.listen().address() as AddressInfo;
     const initialData = 'initial-data';
 
     const replacedData = 'replaced-data';
@@ -450,9 +446,9 @@ describe('react => useSSE', () => {
 
     const dataThrowError = 'never-gonna-give-you-up';
 
-    const mockResponseFn = jest.fn();
-    const mockResponseErrorFn = jest.fn();
-    const mockResponseCompleteFn = jest.fn();
+    const mockResponseFn = vi.fn();
+    const mockResponseErrorFn = vi.fn();
+    const mockResponseCompleteFn = vi.fn();
 
     const alovaInst = getAlovaInstance(ReactHook, {
       baseURL: `http://localhost:${port}`,
@@ -468,10 +464,8 @@ describe('react => useSSE', () => {
 
         return data;
       },
-      resErrorExpect(err) {
+      resErrorExpect() {
         mockResponseErrorFn();
-
-        console.log(err);
         return initialData;
       },
       resCompleteExpect() {
@@ -481,9 +475,9 @@ describe('react => useSSE', () => {
     const poster = (url = `/${TriggerEventName}`) => alovaInst.Get(url);
 
     let recv = undefinedValue;
-    const mockErrorFn = jest.fn();
-    const mockOpenFn = jest.fn();
-    const mockOnMessageFn = jest.fn((event: AnyMessageType) => {
+    const mockErrorFn = vi.fn();
+    const mockOpenFn = vi.fn();
+    const mockOnMessageFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
 
@@ -525,7 +519,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
 
     expect(screen.getByRole('status')).toHaveTextContent('connecting');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
@@ -601,14 +595,13 @@ describe('react => useSSE', () => {
 
   // ! 拦截器不应该触发 (interceptByGlobalResponded: false)
   test('should NOT trigger global response', async () => {
-    const { port } = server.listen().address() as AddressInfo;
     const initialData = 'initial-data';
     const testDataA = 'test-data-1';
     const replacedData = 'replaced-data';
 
-    const mockResponseFn = jest.fn();
-    const mockResponseErrorFn = jest.fn();
-    const mockResponseCompleteFn = jest.fn();
+    const mockResponseFn = vi.fn();
+    const mockResponseErrorFn = vi.fn();
+    const mockResponseCompleteFn = vi.fn();
 
     const alovaInst = getAlovaInstance(ReactHook, {
       baseURL: `http://localhost:${port}`,
@@ -622,9 +615,9 @@ describe('react => useSSE', () => {
     const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
 
     let recv = undefinedValue;
-    const mockOpenFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockOnMessageFn = jest.fn((event: AnyMessageType) => {
+    const mockOpenFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockOnMessageFn = vi.fn((event: AnyMessageType) => {
       recv = event.data;
     });
 
@@ -652,7 +645,7 @@ describe('react => useSSE', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
 
     expect(screen.getByRole('status')).toHaveTextContent('connecting');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);

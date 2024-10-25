@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-uniapp",
-  "version": "2.0.0-beta.12",
+  "version": "2.0.8",
   "description": "uniapp adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-uniapp.common.cjs",
@@ -42,19 +42,14 @@
     "typings/*.d.ts"
   ],
   "devDependencies": {
-    "@alova/mock": "workspace:*",
-    "@alova/scripts": "workspace:*",
+    "@alova/mock": "workspace:^",
+    "@alova/scripts": "workspace:^",
     "@dcloudio/types": "^3.4.8",
     "@dcloudio/uni-app": "^3.0.0-3090920231225001",
-    "alova": "workspace:*"
+    "alova": "workspace:^"
   },
   "peerDependencies": {
-    "alova": "^3.0.0-beta.15"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
+    "alova": "^3.0.20"
   },
   "dependencies": {
     "@alova/shared": "workspace:^"

@@ -9,7 +9,7 @@
   const studentName = writable('');
   const clsName = writable('');
   let detailVisible = false;
-  let selectedId = null;
+  let selectedItem = null;
 
   const {
     loading,
@@ -26,24 +26,25 @@
     initialData: { total: 0, list: [] },
     debounce: [800],
     append: true,
+    initialPageSize: 15,
     total: res => res.total,
     data: res => res.list
   });
 
-  function editItem(id) {
+  function editItem(row) {
     detailVisible = true;
-    selectedId = id;
+    selectedItem = row;
   }
 
   const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
     immediate: false
-  }).onSuccess(({ sendArgs: [row] }) => {
+  }).onSuccess(({ args: [row] }) => {
     remove(row);
   });
 
   function updateList({ detail }) {
-    if (selectedId) {
-      refresh($page);
+    if (selectedItem) {
+      refresh(selectedItem);
     } else {
       insert(detail);
     }
@@ -88,7 +89,7 @@
 
   // 滚动到底部加载
   const { isBottom } = useScroll();
-  $: if (isBottom && !$loading && !$isLastPage) {
+  $: if ($isBottom && !$loading && !$isLastPage) {
     $page = $page + 1;
   }
 </script>
@@ -131,7 +132,7 @@
       class="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
       <nord-button
         size="s"
-        on:click={() => editItem(row.id)}>
+        on:click={() => editItem(row)}>
         Edit
       </nord-button>
       <nord-button
@@ -151,7 +152,7 @@
     <h3 slot="header">Student Info</h3>
     {#if detailVisible}
       <EditorModal
-        id={selectedId}
+        id={selectedItem?.id}
         on:submit={updateList} />
     {/if}
   </nord-modal>
