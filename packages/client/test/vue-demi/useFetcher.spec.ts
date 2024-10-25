@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
-import VueHook from 'alova/vue-demi';
 import { queryCache } from 'alova';
+import VueHook from 'alova/vue-demi';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { FetcherType } from '~/typings/clienthook';
 
@@ -116,7 +116,7 @@ describe('use useFetcher hook to fetch data', () => {
     const Get1 = createGet({ a: '1', b: '2', countKey: 'c' });
     await Get1.send();
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const {
       loading,
       fetch,

@@ -1,5 +1,5 @@
+import '@testing-library/jest-dom/vitest';
 import './jest.setup.mock';
-
 import mockServer, { baseURL } from './mockServer';
 
 process.env.NODE_BASE_URL = baseURL;

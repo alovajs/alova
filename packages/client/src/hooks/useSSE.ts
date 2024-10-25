@@ -26,11 +26,16 @@ import {
   hitCacheBySource,
   promiseStatesHook
 } from 'alova';
-import { AlovaMethodHandler, SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/clienthook';
+import { AlovaMethodHandler, SSEHookConfig, SSEOn } from '~/typings/clienthook';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
 const SSEErrorEventKey = Symbol('SSEError');
+export const enum SSEHookReadyState {
+  CONNECTING = 0,
+  OPEN = 1,
+  CLOSED = 2
+}
 
 export type SSEEvents<Data, AG extends AlovaGenerics, Args extends any[]> = {
   [SSEOpenEventKey]: AlovaSSEEvent<AG, Args>;

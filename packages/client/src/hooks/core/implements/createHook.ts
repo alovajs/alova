@@ -1,11 +1,12 @@
+import { EnumHookType } from '@/util/helper';
 import { FrameworkState } from '@alova/shared/FrameworkState';
 import { undefinedValue } from '@alova/shared/vars';
 import type { AlovaGenerics, FrontRequestState, Progress, ReferingObject } from 'alova';
 import { Method } from 'alova';
-import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings/clienthook';
+import { Hook, UseHookConfig } from '~/typings/clienthook';
 
 export default <AG extends AlovaGenerics, Args extends any[]>(
-  ht: TEnumHookType,
+  ht: EnumHookType,
   c: UseHookConfig<AG, Args>,
   eventManager: Hook<Args>['em'],
   ro: ReferingObject

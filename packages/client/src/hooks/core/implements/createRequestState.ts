@@ -1,4 +1,4 @@
-import { debounce, mapObject } from '@/util/helper';
+import { debounce, EnumHookType, mapObject } from '@/util/helper';
 import createEventManager from '@alova/shared/createEventManager';
 import {
   buildNamespacedCacheKey,
@@ -12,7 +12,7 @@ import {
   sloughConfig,
   statesHookHelper
 } from '@alova/shared/function';
-import { PromiseCls, falseValue, forEach, isArray, promiseCatch, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, forEach, isArray, promiseCatch, PromiseCls, trueValue, undefinedValue } from '@alova/shared/vars';
 import type { AlovaGlobalCacheAdapter, Method, Progress } from 'alova';
 import { AlovaGenerics, globalConfigMap, promiseStatesHook } from 'alova';
 import {
@@ -21,7 +21,6 @@ import {
   AlovaMethodHandler,
   AlovaSuccessEvent,
   CompleteHandler,
-  EnumHookType,
   ErrorHandler,
   FrontRequestHookConfig,
   SuccessHandler,
@@ -148,7 +147,7 @@ export default function createRequestState<
    */
   const debouncingSendHandler = ref(
     debounce(
-      (delay, ro, handler) => wrapEffectRequest(ro, handler),
+      (_, ro, handler) => wrapEffectRequest(ro, handler),
       (changedIndex?: number) =>
         isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
     )
@@ -160,7 +159,7 @@ export default function createRequestState<
       handler:
         // watchingStates为数组时表示监听状态（包含空数组），为undefined时表示不监听状态
         hasWatchingStates
-          ? (delay: number) => debouncingSendHandler.current(delay, referingObject, methodHandler)
+          ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
           : () => wrapEffectRequest(referingObject),
       removeStates: () => forEach(hookInstance.rf, fn => fn()),
       saveStates: states => forEach(hookInstance.sf, fn => fn(states)),

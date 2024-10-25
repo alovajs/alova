@@ -58,7 +58,7 @@ describe('useRequest middleware', () => {
       }
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onError(mockFn);
     expect(loading.value).toBeTruthy();
     expect(error.value).toBeUndefined();
@@ -70,7 +70,7 @@ describe('useRequest middleware', () => {
     expect(data.value).toBeUndefined();
     expect(error.value).toBe(errorObj);
     expect(error.value).toBe(errRaw);
-    const mockFn2 = jest.fn();
+    const mockFn2 = vi.fn();
     try {
       await send();
     } catch (err) {
@@ -117,7 +117,7 @@ describe('useRequest middleware', () => {
       middleware: async () => {}
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
 
     // middleware中未调用next，因此不会发送请求
@@ -160,7 +160,7 @@ describe('useRequest middleware', () => {
         });
       }
     });
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
     expect(loading.value).toBeTruthy();
     await delay();
@@ -199,7 +199,7 @@ describe('useRequest middleware', () => {
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeUndefined();
     expect(data.value).toBeUndefined();
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     try {
       await send();
     } catch (err) {
@@ -371,7 +371,7 @@ describe('useRequest middleware', () => {
     const err = await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeInstanceOf(Object);
+    expect(error.value).toBeInstanceOf(DOMException);
     expect(error.value).toStrictEqual(err.error);
     expect(error.value?.message).toBe('The operation was aborted.');
   });
@@ -392,7 +392,7 @@ describe('useRequest middleware', () => {
       }
     });
 
-    const errFn = jest.fn();
+    const errFn = vi.fn();
     onError(errFn);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();

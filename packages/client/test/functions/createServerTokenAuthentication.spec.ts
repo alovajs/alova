@@ -37,8 +37,8 @@ describe('createServerTokenAuthentication', () => {
     const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
       {}
     );
-    const beforeRequestFn = jest.fn();
-    const responseFn = jest.fn();
+    const beforeRequestFn = vi.fn();
+    const responseFn = vi.fn();
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -58,8 +58,8 @@ describe('createServerTokenAuthentication', () => {
     expect(beforeRequestFn).toHaveBeenCalledTimes(1);
     expect(responseFn).toHaveBeenCalledTimes(1);
 
-    const responseErrorFn = jest.fn();
-    const completeFn = jest.fn();
+    const responseErrorFn = vi.fn();
+    const completeFn = vi.fn();
     const alovaInst2 = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -143,7 +143,7 @@ describe('createServerTokenAuthentication', () => {
   });
 
   test('should emit login interceptor when set authRole to `login`', async () => {
-    const loginInterceptorFn = jest.fn();
+    const loginInterceptorFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         login(response, method) {
@@ -197,7 +197,7 @@ describe('createServerTokenAuthentication', () => {
     expect(loginInterceptorFn).toHaveBeenCalledTimes(2);
   });
   test('should emit logout interceptor when set authRole to `logout`', async () => {
-    const logoutInterceptorFn = jest.fn();
+    const logoutInterceptorFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         logout(response, method) {
@@ -305,10 +305,10 @@ describe('createServerTokenAuthentication', () => {
 
   test('should refresh token first on error event when it is expired', async () => {
     let token = '';
-    const expireFn = jest.fn();
-    const refreshTokenFn = jest.fn();
-    const beforeRequestFn = jest.fn();
-    const responseFn = jest.fn();
+    const expireFn = vi.fn();
+    const refreshTokenFn = vi.fn();
+    const beforeRequestFn = vi.fn();
+    const responseFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         refreshTokenOnError: {
@@ -352,10 +352,10 @@ describe('createServerTokenAuthentication', () => {
   });
   test('should refresh token first on success event when it is expired', async () => {
     let token = '';
-    const expireFn = jest.fn();
-    const refreshTokenFn = jest.fn();
-    const beforeRequestFn = jest.fn();
-    const responseFn = jest.fn();
+    const expireFn = vi.fn();
+    const refreshTokenFn = vi.fn();
+    const beforeRequestFn = vi.fn();
+    const responseFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         refreshTokenOnSuccess: {
@@ -403,9 +403,9 @@ describe('createServerTokenAuthentication', () => {
   });
   test('the requests should wait until token refreshed when token is refreshing', async () => {
     let token = '';
-    const expireFn = jest.fn();
-    const refreshTokenFn = jest.fn();
-    const beforeRequestFn = jest.fn();
+    const expireFn = vi.fn();
+    const refreshTokenFn = vi.fn();
+    const beforeRequestFn = vi.fn();
     const method = (a: string) =>
       alovaInst.Get(`/list-auth?a=${a}`, {
         transform: (data: number[]) => data.map(i => i + 5)
@@ -461,8 +461,8 @@ describe('createServerTokenAuthentication', () => {
   });
   test("shouldn't resend refresh request when multiple requests emit at the same time", async () => {
     let token = '';
-    const refreshTokenFn = jest.fn();
-    const beforeRequestFn = jest.fn();
+    const refreshTokenFn = vi.fn();
+    const beforeRequestFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication<
       VueHookType,
       MockRequestAdapter
@@ -508,8 +508,8 @@ describe('createServerTokenAuthentication', () => {
   });
   test("shouldn't continue run when throw error in refreshToken", async () => {
     let token = '';
-    const refreshTokenFn = jest.fn();
-    const redirectLoginFn = jest.fn();
+    const refreshTokenFn = vi.fn();
+    const redirectLoginFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createServerTokenAuthentication<
       VueHookType,
       MockRequestAdapter
@@ -553,8 +553,8 @@ describe('createServerTokenAuthentication', () => {
   });
   test('should emit bypass the token validation when set authRole to null', async () => {
     let token = '';
-    const expireFn = jest.fn();
-    const refreshTokenFn = jest.fn();
+    const expireFn = vi.fn();
+    const refreshTokenFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         refreshTokenOnError: {

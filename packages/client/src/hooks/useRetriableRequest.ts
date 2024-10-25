@@ -122,7 +122,7 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
             // 延迟对应时间重试
             retryTimer.current = setTimeoutFn(() => {
               // 如果手动停止了则不再触发重试
-              promiseCatch(send(...(args as any)), noop); // 捕获错误不再往外抛，否则重试时也会抛出错误
+              promiseCatch(send(...args), noop); // 捕获错误不再往外抛，否则重试时也会抛出错误
               // 触发重试事件
               eventManager.emit(
                 RetryEventKey,

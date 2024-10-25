@@ -1,7 +1,7 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
 import { accessAction, actionDelegationMiddleware, updateState, usePagination } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
-import '@testing-library/jest-dom';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import vueHook from 'alova/vue';
@@ -9,7 +9,7 @@ import { delay, generateContinuousNumbers } from 'root/testUtils';
 import { ref } from 'vue';
 import Pagination from './components/pagination.vue';
 
-// jest.setTimeout(1000000);
+// vi.setConfig({ testTimeout: 1000_000 });
 // reset data
 beforeEach(() => {
   setMockListData();
@@ -313,7 +313,7 @@ describe('vue => usePagination', () => {
   });
 
   test('paginated data insert item with preload', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -389,7 +389,7 @@ describe('vue => usePagination', () => {
 
   // 当操作了数据重新fetch但还未响应时，翻页到了fetch的页，此时也需要更新界面
   test('should update data when insert and fetch current page', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -444,7 +444,7 @@ describe('vue => usePagination', () => {
   });
 
   test('paginated data replace item', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -539,8 +539,8 @@ describe('vue => usePagination', () => {
   });
 
   test('paginated data insert item without preload', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -619,8 +619,8 @@ describe('vue => usePagination', () => {
   });
 
   test('paginated data remove item in preload mode', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -697,7 +697,7 @@ describe('vue => usePagination', () => {
   });
 
   test('paginated data remove item by another item', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getterSearch,
@@ -744,7 +744,7 @@ describe('vue => usePagination', () => {
 
   // 当操作了数据重新fetch但还未响应时，翻页到了正在fetch的页，此时也需要更新界面
   test('should update data when fetch current page', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -802,7 +802,7 @@ describe('vue => usePagination', () => {
   });
 
   test('should use new total data when remove items and go to adjacent page', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     const min = ref(0);
     render(Pagination, {
       props: {
@@ -908,7 +908,7 @@ describe('vue => usePagination', () => {
   });
 
   test('paginated data remove short list item without preload', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getterShort,
@@ -965,8 +965,8 @@ describe('vue => usePagination', () => {
   });
 
   test('should refresh current page and will not prefetch when close cache', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: (page: number, pageSize: number) => getterShort(page, pageSize, 0),
@@ -1039,7 +1039,7 @@ describe('vue => usePagination', () => {
 
   // 下拉加载更多相关
   test('load more mode paginated data and change page/pageSize', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -1100,8 +1100,8 @@ describe('vue => usePagination', () => {
   });
 
   test('load more paginated data with conditions search', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     const keyword = ref('');
     render(Pagination, {
       props: {
@@ -1253,7 +1253,7 @@ describe('vue => usePagination', () => {
   });
 
   test('load more mode paginated data operate items with remove/insert/replace(open preload)', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -1303,8 +1303,8 @@ describe('vue => usePagination', () => {
   });
 
   test('load more mode paginated data remove item without preload', async () => {
-    const fetchMockFn = jest.fn();
-    const successMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -1346,7 +1346,7 @@ describe('vue => usePagination', () => {
   });
 
   test('load more mode reload paginated data', async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getter1,
@@ -1398,7 +1398,7 @@ describe('vue => usePagination', () => {
   });
 
   test("load more mode paginated data don't need to preload when go to last page", async () => {
-    const fetchMockFn = jest.fn();
+    const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getterShort,
@@ -1434,7 +1434,7 @@ describe('vue => usePagination', () => {
   });
 
   test('should access actions by middleware actionDelegation', async () => {
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: (page: number, pageSize: number) => getterShort(page, pageSize, 0),
@@ -1525,8 +1525,8 @@ describe('vue => usePagination', () => {
   });
 
   test('can be resent request when encounter an error', async () => {
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
+    const errorFn = vi.fn();
+    const completeFn = vi.fn();
     render(Pagination, {
       props: {
         getter: (page: number, pageSize: number) =>
@@ -1568,7 +1568,7 @@ describe('vue => usePagination', () => {
 
   test('should use the data of last request when set `abortLast` to true', async () => {
     const keyword = ref('');
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     render(Pagination, {
       props: {
         getter: getterSearch,
@@ -1606,10 +1606,10 @@ describe('vue => usePagination', () => {
   });
 
   test('should return original return value in on events', async () => {
-    const successMockFn = jest.fn();
-    const completedMockFn = jest.fn();
-    const fetchSuccessMockFn = jest.fn();
-    const fetchCompletedMockFn = jest.fn();
+    const successMockFn = vi.fn();
+    const completedMockFn = vi.fn();
+    const fetchSuccessMockFn = vi.fn();
+    const fetchCompletedMockFn = vi.fn();
     const { loading, data, error, page, pageCount, total, pageSize, isLastPage } = usePagination(getter1, {
       total: res => res.total,
       data: res => res.list

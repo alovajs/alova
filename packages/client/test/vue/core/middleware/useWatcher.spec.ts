@@ -75,7 +75,7 @@ describe('useWatcher middleware', () => {
       immediate: true
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
     // middleware中未调用next，因此不会发送请求
     expect(loading.value).toBeTruthy();

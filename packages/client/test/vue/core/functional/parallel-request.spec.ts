@@ -35,7 +35,7 @@ describe('parallel request', () => {
     const firstState = useRequest(Getter, { immediate: false });
     const secondState = useRequest(ErrorGetter, { immediate: false });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     Promise.all([firstState.send(), secondState.send()])
       .catch(mockFn)
       .then(() => {
@@ -99,7 +99,7 @@ describe('parallel request', () => {
       secondState.onError(reject);
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     Promise.all([firstPromise, secondPromise])
       .catch(mockFn)
       .then(() => {

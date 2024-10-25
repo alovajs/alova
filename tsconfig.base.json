@@ -18,11 +18,13 @@
     "skipLibCheck": true,
     "allowJs": true,
     "skipDefaultLibCheck": false,
+    "isolatedModules": true,
     "inlineSourceMap": false,
     "importHelpers": true,
     "removeComments": false,
     "esModuleInterop": true,
     "jsx": "react",
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
     "paths": {
       "@alova/*": ["packages/*/src"],
       "root/*": ["./internal/*"]

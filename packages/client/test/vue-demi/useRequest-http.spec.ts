@@ -1,8 +1,8 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
-import VueHook from 'alova/vue-demi';
 import { AlovaEventBase } from '@alova/shared/event';
 import { queryCache, setCache } from 'alova';
+import VueHook from 'alova/vue-demi';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('use useRequest hook to send GET with vue', () => {
@@ -14,7 +14,7 @@ describe('use useRequest hook to send GET with vue', () => {
 
   test('should apply initialData with object and function', async () => {
     const alova = getAlovaInstance(VueHook);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const { data: data1 } = useRequest(alova.Get(''), { initialData: 'test', immediate: false });
     const { data: data2 } = useRequest(alova.Get(''), {
       initialData: () => {
@@ -247,7 +247,7 @@ describe('use useRequest hook to send GET with vue', () => {
     });
     const Get = alova.Get<string, Result<string>>('/will-never-request');
     const { loading, data, error, abort, onError } = useRequest(Get, { immediate: false });
-    const errFn = jest.fn();
+    const errFn = vi.fn();
     onError(errFn);
 
     expect(loading.value).toBeFalsy();
@@ -374,7 +374,7 @@ describe('use useRequest hook to send GET with vue', () => {
       immediate: false
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onError(({ error, args }) => {
       const index = args[0];
       mockFn();
@@ -404,7 +404,7 @@ describe('use useRequest hook to send GET with vue', () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const getGetterObj = alova.Get('/unit-test');
 
     const { send } = useRequest(getGetterObj, {
@@ -484,9 +484,9 @@ describe('use useRequest hook to send GET with vue', () => {
       transform: ({ data }: Result) => data
     });
 
-    const successFn = jest.fn();
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const errorFn = vi.fn();
+    const completeFn = vi.fn();
     const { loading, data, error, onSuccess } = useRequest(Get)
       .onSuccess(successFn)
       .onError(errorFn)

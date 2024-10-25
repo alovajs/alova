@@ -7,8 +7,6 @@ Object.defineProperties(globalThis, {
   TextDecoder: { value: TextDecoder },
   TextEncoder: { value: TextEncoder },
   ReadableStream: { value: ReadableStream },
-  setImmediate: { value: setTimeout },
-  clearImmediate: { value: clearTimeout },
   performance: {
     value: performance,
     writable: true
@@ -17,7 +15,7 @@ Object.defineProperties(globalThis, {
 
 // if the environment is jsdom, set process.cwd to undefined
 if (typeof window !== 'undefined') {
-  (process as any).cwd = undefined;
+  // (process as any).cwd = undefined;
 }
 
 // undici must import after defining TextDecoder and TextEncoder, otherwise it will throw error
@@ -38,13 +36,13 @@ Object.defineProperties(global, {
  *
  * `onMount` will not be called on node environment.
  */
-jest.mock('svelte', () => {
-  const originalModule = jest.requireActual('svelte');
-  const { onMount } = jest.requireActual('svelte/internal');
+// vi.mock('svelte', async () => {
+//   const originalModule = await vi.importActual('svelte');
+//   const { onMount } = await vi.importActual('svelte/internal');
 
-  return {
-    __esModule: true,
-    ...originalModule,
-    onMount
-  };
-});
+//   return {
+//     __esModule: true,
+//     ...originalModule,
+//     onMount
+//   };
+// });

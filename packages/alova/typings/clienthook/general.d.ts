@@ -240,11 +240,7 @@ export interface UseHookExposure<
   __referingObj: ReferingObject;
 }
 
-export const enum EnumHookType {
-  USE_REQUEST = 1,
-  USE_WATCHER = 2,
-  USE_FETCHER = 3
-}
+type EnumHookType = 1 | 2 | 3;
 export interface Hook<Args extends any[] = any[]> {
   /** 最后一次请求的method实例 */
   m?: Method;

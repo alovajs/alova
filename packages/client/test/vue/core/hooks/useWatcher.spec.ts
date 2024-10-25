@@ -32,7 +32,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       [mutateNum, mutateStr]
     );
 
-    const mockCallback = jest.fn(() => {});
+    const mockCallback = vi.fn(() => {});
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
@@ -84,7 +84,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       [mutateNum, mutateStr]
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
@@ -131,9 +131,9 @@ describe('use useWatcher hook to send GET with vue', () => {
       [mutateNum, mutateStr]
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
-    const mockErrorCallback = jest.fn();
+    const mockErrorCallback = vi.fn();
     onError(mockErrorCallback);
 
     expect(loading.value).toBeFalsy();
@@ -180,7 +180,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       }
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
@@ -210,7 +210,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
@@ -233,7 +233,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       }
     );
 
-    const mockCallback = jest.fn(() => {});
+    const mockCallback = vi.fn(() => {});
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
@@ -271,7 +271,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     const { loading, data, downloading, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
@@ -292,7 +292,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       }
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
@@ -331,7 +331,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     const { loading } = useWatcher(
       () =>
         alova.Get('/unit-test', {
@@ -366,7 +366,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     const { data, error, onSuccess } = useWatcher(currentGet, [mutateNum, mutateStr], {
       immediate: true
     });
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     onSuccess(successMockFn);
 
     await untilCbCalled(onSuccess);
@@ -491,7 +491,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       { debounce: 100 }
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
     await delay(10);
     const checkInitData = () => {
@@ -776,7 +776,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     const { method } = await untilCbCalled(onSuccess);
@@ -826,7 +826,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     const { method } = await untilCbCalled(onSuccess);
@@ -900,9 +900,9 @@ describe('use useWatcher hook to send GET with vue', () => {
       responseExpect: r => r.json()
     });
 
-    const successFn = jest.fn();
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const errorFn = vi.fn();
+    const completeFn = vi.fn();
     const mutateNum = ref(0);
     const mutateStr = ref('accc');
     const { loading, data, error, onSuccess } = useWatcher(
