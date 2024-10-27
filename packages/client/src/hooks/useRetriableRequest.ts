@@ -137,6 +137,9 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
           } else {
             setLoading();
             error = stopManuallyError.current || error; // 如果stopManuallyError有值表示是通过stop函数触发停止的
+            proxyStates.error.v = error;
+            currentLoadingState.current = falseValue;
+            clearTimeout(retryTimer.current); // 清除重试定时器
             emitOnFail(method, args, error);
           }
 
@@ -163,13 +166,6 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
       setTimeout(() => {
         promiseObj.current = usePromise();
       });
-      nestedHookProvider.update({ error: stopManuallyError.current as any, loading: falseValue as any });
-      currentLoadingState.current = falseValue;
-      clearTimeout(retryTimer.current); // 清除重试定时器
-
-      // raise fail event at the end, because the above process depends on `stopManuallyError`
-      // emit this event will clears this variable
-      emitOnFail(methodInstanceLastest.current as any, argsLatest.current as any, stopManuallyError.current);
     }
   };
 

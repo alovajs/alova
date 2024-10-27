@@ -63,13 +63,13 @@
     "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
     "@tarojs/shared": "^3.6.30",
     "@tarojs/taro": "^3.6.30",
-    "alova": "workspace:^"
+    "alova": "workspace:*"
   }
 }

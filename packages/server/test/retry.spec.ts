@@ -11,7 +11,7 @@ const alovaInst = createAlova({
 });
 
 describe('retry', () => {
-  const requestFn = jest.fn();
+  const requestFn = vi.fn();
   requestFn.mockImplementation(() => Promise.resolve(123));
   const method = new HookedMethod(
     alovaInst.Get('/unit-test', {
@@ -22,7 +22,7 @@ describe('retry', () => {
 
   beforeEach(() => {
     requestFn.mockClear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should not retry when request is success', async () => {
@@ -97,7 +97,7 @@ describe('retry', () => {
   });
 
   test('custom delay and multiplier', async () => {
-    const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     let counter = 0;
     requestFn.mockImplementation(() => {
       if (counter < 2) {
@@ -121,7 +121,7 @@ describe('retry', () => {
   });
 
   test('only startQuiver', async () => {
-    const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     let counter = 0;
     requestFn.mockImplementation(() => {
       if (counter < 1) {
@@ -145,7 +145,7 @@ describe('retry', () => {
   });
 
   test('only endQuiver', async () => {
-    const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     let counter = 0;
     requestFn.mockImplementation(() => {
       if (counter < 1) {
@@ -169,7 +169,7 @@ describe('retry', () => {
   });
 
   test('startQuiver and endQuiver', async () => {
-    const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     let counter = 0;
     requestFn.mockImplementation(() => {
       if (counter < 1) {

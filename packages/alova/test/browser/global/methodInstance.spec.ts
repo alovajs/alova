@@ -108,7 +108,7 @@ describe('method instance', () => {
     });
     await alovaInst.Get('/unit-test');
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alovaInst2 = getAlovaInstance({
       beforeRequestExpect(methodInstance) {
         mockFn({
@@ -137,7 +137,7 @@ describe('method instance', () => {
   });
 
   test('should receive method metadata in a shorthand', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alovaInst = getAlovaInstance({
       beforeRequestExpect(methodInstance) {
         mockFn({
@@ -180,7 +180,7 @@ describe('method instance', () => {
     await expect(alova.Get<Result>('/unit-test-error')).rejects.toThrow();
   });
   test('should send request when call `method.catch`', async () => {
-    const catchMockFn = jest.fn();
+    const catchMockFn = vi.fn();
     const errorReason = await alova.Get<Result>('/unit-test-error').catch(reason => {
       catchMockFn(reason);
       return reason;
@@ -191,8 +191,8 @@ describe('method instance', () => {
   });
 
   test('should send request when call `method.finally`', async () => {
-    const finallyMockFn = jest.fn();
-    const finallyPromiseMockFn = jest.fn();
+    const finallyMockFn = vi.fn();
+    const finallyPromiseMockFn = vi.fn();
     const rawData = await alova
       .Get('/unit-test', {
         params: { gb: 'gb', f: 'gty' },
@@ -294,9 +294,9 @@ describe('method instance', () => {
   });
 
   test('should share request when custom the same method key, event if these two methods have different request info', async () => {
-    const requestMockFn = jest.fn();
-    const beforeRequestMockFn = jest.fn();
-    const responseMockFn = jest.fn();
+    const requestMockFn = vi.fn();
+    const beforeRequestMockFn = vi.fn();
+    const responseMockFn = vi.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
       cacheFor: {
@@ -412,9 +412,9 @@ describe('method instance', () => {
   });
 
   test('should bind callback to promise instance with `then/catch/finally`', async () => {
-    const thenFn = jest.fn();
-    const catchFn = jest.fn();
-    const finallyFn = jest.fn();
+    const thenFn = vi.fn();
+    const catchFn = vi.fn();
+    const finallyFn = vi.fn();
     const innerAlova = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),

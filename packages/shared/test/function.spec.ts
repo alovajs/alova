@@ -377,7 +377,7 @@ describe('shared functions', () => {
     const runner = createSyncOnceRunner(delay);
 
     // This function will be executed by the runner
-    const testFn = jest.fn();
+    const testFn = vi.fn();
 
     // Act
     // Call the runner multiple times synchronously
@@ -496,7 +496,7 @@ describe('shared functions', () => {
     };
 
     // eslint-disable-next-line
-    const callbackSpy = jest.fn((value, _, __) => value);
+    const callbackSpy = vi.fn((value, _, __) => value);
 
     // Act
     walkObject(target, callbackSpy, true);
@@ -534,7 +534,7 @@ describe('shared functions', () => {
       e: 4
     };
     // eslint-disable-next-line
-    const callbackSpy2 = jest.fn((value, _, __) => value);
+    const callbackSpy2 = vi.fn((value, _, __) => value);
 
     // Act
     walkObject(target2, callbackSpy2, false);
@@ -570,7 +570,7 @@ describe('shared functions', () => {
       }
     };
     // eslint-disable-next-line
-    const callbackSpy3 = jest.fn((value, key, _) => {
+    const callbackSpy3 = vi.fn((value, key, _) => {
       if (key === 'c') {
         return value * 2; // Double the value of 'c'
       }

@@ -6,7 +6,7 @@ import { delay, untilCbCalled, untilReject } from 'root/testUtils';
 declare const isSSR: boolean;
 describe('mock request', () => {
   test('response with plain body data', async () => {
-    const mockApi = jest.fn();
+    const mockApi = vi.fn();
     const mocks = defineMock({
       '[POST]/detail': ({ query, params, data, headers }) => {
         mockApi();
@@ -21,7 +21,7 @@ describe('mock request', () => {
     });
 
     // 模拟数据请求适配器
-    const mockResponse = jest.fn();
+    const mockResponse = vi.fn();
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       onMockResponse: ({ status, statusText, body }, { params, query, data, headers }) => {
@@ -78,7 +78,7 @@ describe('mock request', () => {
       '[POST]/detail2': null
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
@@ -165,7 +165,7 @@ describe('mock request', () => {
       requestAdapter: mockRequestAdapter
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     try {
       await alovaInst.Post('/detail').send();
     } catch (err: any) {
@@ -356,7 +356,7 @@ describe('mock request', () => {
       requestAdapter: mockRequestAdapter
     });
 
-    const fn = jest.fn();
+    const fn = vi.fn();
     const Post = alovaInst.Post('/detail');
     Post.send().catch(err => {
       fn(err);
@@ -388,7 +388,7 @@ describe('mock request', () => {
       baseURL: 'http://xxx',
       requestAdapter: mockRequestAdapter
     });
-    const fn = jest.fn();
+    const fn = vi.fn();
     const Post = alovaInst.Post('/detail');
     Post.send().catch(err => {
       fn(err);

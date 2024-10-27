@@ -10,7 +10,7 @@ const getManager = () =>
   }>();
 
 describe('EventManager', () => {
-  it('should export with correct types', () => {
+  test('should export with correct types', () => {
     expect(typeof createEventManager).toBe('function');
     const manager = getManager();
     expect(typeof manager.emit).toBe('function');
@@ -19,15 +19,15 @@ describe('EventManager', () => {
     expect(manager.eventMap).toStrictEqual({});
   });
 
-  it('should call listener correctly', () => {
+  test('should call listener correctly', () => {
     const manager = getManager();
-    const mockFoo = jest.fn((data: string) => {
+    const mockFoo = vi.fn((data: string) => {
       expect(data).toStrictEqual('tom');
     });
-    const mockBar = jest.fn((data: number) => {
+    const mockBar = vi.fn((data: number) => {
       expect(data).toStrictEqual(9527);
     });
-    const mockBaz = jest.fn((data: boolean) => {
+    const mockBaz = vi.fn((data: boolean) => {
       expect(data).toStrictEqual(true);
     });
 
@@ -44,15 +44,15 @@ describe('EventManager', () => {
     expect(mockBaz).not.toHaveBeenCalled();
   });
 
-  it('should add to eventMap', () => {
+  test('should add to eventMap', () => {
     const manager = getManager();
-    const mockFoo = jest.fn((data: string) => {
+    const mockFoo = vi.fn((data: string) => {
       expect(data).toStrictEqual('tom');
     });
-    const mockBar = jest.fn((data: number) => {
+    const mockBar = vi.fn((data: number) => {
       expect(data).toStrictEqual(9527);
     });
-    const mockBaz = jest.fn((data: boolean) => {
+    const mockBaz = vi.fn((data: boolean) => {
       expect(data).toStrictEqual(true);
     });
 
@@ -67,9 +67,9 @@ describe('EventManager', () => {
     });
   });
 
-  it('should remove listener', () => {
+  test('should remove listener', () => {
     const manager = getManager();
-    const mockFoo = jest.fn((data: string) => {
+    const mockFoo = vi.fn((data: string) => {
       expect(data).toStrictEqual('tom');
     });
 
@@ -82,24 +82,24 @@ describe('EventManager', () => {
     expect(mockFoo).toHaveBeenCalledTimes(1);
   });
 
-  it('should emit synchronously', async () => {
+  test('should emit synchronously', async () => {
     const manager = getManager();
-    const mockFoo1 = jest.fn(async (data: string) => {
+    const mockFoo1 = vi.fn(async (data: string) => {
       expect(data).toStrictEqual('tom');
       await untilCbCalled(setTimeout, 100);
       return 'foo1';
     });
-    const mockFoo2 = jest.fn(async (data: string) => {
+    const mockFoo2 = vi.fn(async (data: string) => {
       expect(data).toStrictEqual('tom');
       await untilCbCalled(setTimeout, 200);
       return 'foo2';
     });
-    const mockFoo3 = jest.fn(async (data: string) => {
+    const mockFoo3 = vi.fn(async (data: string) => {
       expect(data).toStrictEqual('tom');
       await untilCbCalled(setTimeout, 300);
       return 'foo3';
     });
-    const mockFoo4 = jest.fn(async (data: string) => {
+    const mockFoo4 = vi.fn(async (data: string) => {
       expect(data).toStrictEqual('tom');
       await untilCbCalled(setTimeout, 400);
       return 'foo4';
@@ -125,9 +125,9 @@ describe('EventManager', () => {
     expect(result).toStrictEqual(['foo1', 'foo2', 'foo3', 'foo4']);
   });
 
-  it('should decorate event handler with `decorateEvent`', async () => {
+  test('should decorate event handler with `decorateEvent`', async () => {
     const handlers: ((event: any) => void)[] = [];
-    const handlerResFn = jest.fn();
+    const handlerResFn = vi.fn();
     let onEvent = (handler: (event: any) => void) => {
       handlers.push(handler);
     };

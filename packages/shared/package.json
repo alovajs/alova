@@ -93,6 +93,6 @@
     "dist"
   ],
   "devDependencies": {
-    "@alova/scripts": "workspace:^"
+    "@alova/scripts": "workspace:*"
   }
 }
