@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { delay, untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 
-vi.setConfig({ testTimeout: 1000000 });
+// vi.setConfig({ testTimeout: 1000000 });
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
   statesHook: ReactHook,
@@ -378,16 +378,15 @@ describe('react => useRetriableRequest', () => {
 
     const Page = () => {
       const { loading, onError, onRetry, onFail, onComplete, onSuccess, stop } = useRetriableRequest(methodInstance, {
-        retry: 4
+        retry: 4,
+        backoff: {
+          delay: 50
+        }
       });
       onRetry(mockRetryFn);
       onError(() => {
         mockErrorFn();
-        setTimeout(() => {
-          act(() => {
-            stop();
-          });
-        });
+        stop();
       });
       onComplete(mockCompleteFn);
       onSuccess(mockSuccessFn);
@@ -400,16 +399,13 @@ describe('react => useRetriableRequest', () => {
     };
 
     render(<Page />);
-    await waitFor(
-      () => {
-        expect(mockRetryFn).not.toHaveBeenCalled(); // 第一次重试前停止了重试
-        expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
-        expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
-        expect(mockSuccessFn).not.toHaveBeenCalled();
-        expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
-      },
-      { timeout: 4000 }
-    );
+    await waitFor(() => {
+      expect(mockRetryFn).not.toHaveBeenCalled(); // 第一次重试前停止了重试
+      expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
+      expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
+      expect(mockSuccessFn).not.toHaveBeenCalled();
+      expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
+    });
   });
 
   test("should throws error call stop function when isn't requesting", async () => {

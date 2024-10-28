@@ -19,8 +19,8 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "build": "npm run clean && alova-scripts build",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info"
   },

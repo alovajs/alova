@@ -20,8 +20,9 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest && npm run test:node",
-    "test:node": "jest --config jest.config.node.ts",
+    "test": "npm run test:browser && npm run test:node",
+    "test:browser": "vitest",
+    "test:node": "vitest --config vitest.config.node.ts",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build && ncp ./typings/clienthook ../alova/typings/clienthook && ncp ./typings/stateshook ../alova/typings/stateshook",

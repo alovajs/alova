@@ -35,9 +35,8 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "test": "turbo run test",
-    "test:vitest": "vitest",
-    "test:coverage": "jest --coverage",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint . --ext .js,.ts ",
     "lint:fix": "pnpm run lint -- --fix",
     "format": "prettier --check .",

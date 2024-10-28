@@ -19,7 +19,7 @@ interface SearchListResponse {
 }
 
 type ReactPossibleState<D> = [D, Dispatch<SetStateAction<D>>] | undefined;
-vi.setConfig({ testTimeout: 1000_000 });
+// vi.setConfig({ testTimeout: 1000_000 });
 // reset data
 beforeEach(async () => {
   setMockListData();

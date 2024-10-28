@@ -81,7 +81,7 @@ describe('method instance', () => {
     const Get = alova.Get('/unit-test');
     const p = Get.send(true);
     Get.abort();
-    await expect(p).rejects.toThrow('The operation was aborted.');
+    await expect(p).rejects.toThrow('This operation was aborted');
   });
 
   test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
@@ -92,7 +92,7 @@ describe('method instance', () => {
       responseExpect: r => r.json()
     }).Get('/unit-test');
     const p = Get.send(true);
-    await expect(p).rejects.toThrow('The operation was aborted.');
+    await expect(p).rejects.toThrow('This operation was aborted');
     expect(Get.fromCache).toBeFalsy();
   });
 

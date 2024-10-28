@@ -13,11 +13,6 @@ Object.defineProperties(globalThis, {
   }
 });
 
-// if the environment is jsdom, set process.cwd to undefined
-if (typeof window !== 'undefined') {
-  // (process as any).cwd = undefined;
-}
-
 // undici must import after defining TextDecoder and TextEncoder, otherwise it will throw error
 // eslint-disable-next-line
 import { Headers, Request, Response, fetch } from 'undici';
@@ -30,19 +25,3 @@ Object.defineProperties(global, {
   File: { value: File },
   isSSR: { value: typeof window === 'undefined' }
 });
-
-/**
- * fix: fix: https://github.com/testing-library/svelte-testing-library/issues/222
- *
- * `onMount` will not be called on node environment.
- */
-// vi.mock('svelte', async () => {
-//   const originalModule = await vi.importActual('svelte');
-//   const { onMount } = await vi.importActual('svelte/internal');
-
-//   return {
-//     __esModule: true,
-//     ...originalModule,
-//     onMount
-//   };
-// });

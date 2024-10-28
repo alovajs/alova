@@ -60,7 +60,7 @@ describe('useWatcher hook with svelte', () => {
     });
   });
 
-  vi.setConfig({ testTimeout: 1000_000 });
+  // vi.setConfig({ testTimeout: 1000_000 });
   test('should receive last response when set abortLast to false', async () => {
     const mockSuccessFn = vi.fn();
     render(pageAbortLast, { successFn: mockSuccessFn, abortLast: false });

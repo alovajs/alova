@@ -352,8 +352,8 @@ describe('shared cache', () => {
     expect(mockSend).toHaveBeenCalledTimes(5);
     // 3 init events + 6 set events
     expect(mockReceive).toHaveBeenCalledTimes(9);
-    expect(mockReceive.mock.lastCall[0].key).toStrictEqual('$a.2["GET","/unit-test",{"name":"test"},null,{}]');
-    expect(mockReceive.mock.lastCall[0].value[0]).toStrictEqual({
+    expect(mockReceive.mock.lastCall?.[0].key).toStrictEqual('$a.2["GET","/unit-test",{"name":"test"},null,{}]');
+    expect(mockReceive.mock.lastCall?.[0].value[0]).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: { name: 'test' }

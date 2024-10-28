@@ -11,10 +11,9 @@
   "unpkg": "dist/alova-mock.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test:browser": "jest",
-    "test:node": "jest --config=jest.config.node.ts",
+    "test:browser": "vitest",
+    "test:node": "vitest --config=vitest.config.node.ts",
     "test": "npm run test:browser && npm run test:node",
-    "test:coverage": "jest --coverage",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build",
