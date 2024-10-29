@@ -37,6 +37,7 @@ module.exports = {
     'max-classes-per-file': 'off',
     'no-await-in-loop': 'off',
     'func-names': 'off',
+    'no-empty': 'off',
 
     // jsx-a11y
     'jsx-a11y/aria-role': 'off',
@@ -46,7 +47,10 @@ module.exports = {
 
     // @typescript-eslint
     '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-unused-vars': ['error', { destructuredArrayIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { args: 'after-used', argsIgnorePattern: '^_', varsIgnorePattern: 'Unused' }
+    ],
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-var-requires': 'off',
@@ -55,6 +59,7 @@ module.exports = {
     '@typescript-eslint/no-implied-eval': 'off',
     '@typescript-eslint/no-shadow': 'off',
     '@typescript-eslint/no-loop-func': 'off',
-    'no-empty': 'off'
+    '@typescript-eslint/lines-between-class-members': 'off',
+    '@typescript-eslint/no-throw-literal': 'off'
   }
 };

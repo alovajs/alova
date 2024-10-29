@@ -10,16 +10,20 @@ import {
   useSSE,
   useWatcher
 } from 'alova/client';
-import adapterFetch from 'alova/fetch';
 import vueHook from 'alova/vue';
 import { expectAssignableBy } from 'root/testUtils';
 import { ref } from 'vue';
 
+const emptyRequestAdapter = () => ({
+  response: () => Promise.resolve({}),
+  headers: () => Promise.resolve({}),
+  abort: () => {}
+});
 const baseURL = process.env.NODE_BASE_URL;
 const VueAlovaInst = createAlova({
   baseURL,
   statesHook: vueHook,
-  requestAdapter: adapterFetch()
+  requestAdapter: emptyRequestAdapter
 });
 const ArgsGetter = <Args extends unknown[], R = any>(...args: Args) =>
   VueAlovaInst.Get<R>('/unit-test', {

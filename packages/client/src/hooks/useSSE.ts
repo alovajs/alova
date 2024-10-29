@@ -213,7 +213,6 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [onEvent] = currentMap.get(eventName)!;
 
     return onEvent(callbackHandler);

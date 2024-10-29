@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FrameworkReadableState, FrameworkState } from '@alova/shared/FrameworkState';
 import { EventManager } from '@alova/shared/createEventManager';
 import type { IsUnknown } from '@alova/shared/types';

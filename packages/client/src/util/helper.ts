@@ -42,7 +42,6 @@ export const getUniqueReferenceId = (reference: any) => {
  * @param error 错误
  */
 export const throwFn = <T>(error: T) => {
-  // eslint-disable-next-line @typescript-eslint/no-throw-literal
   throw error;
 };
 

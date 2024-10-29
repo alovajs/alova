@@ -6,6 +6,7 @@
   "main": "dist/alova-adapter-taro.common.cjs",
   "module": "dist/alova-adapter-taro.esm.js",
   "types": "typings/index.d.ts",
+  "type": "module",
   "keywords": [
     "hooks",
     "vuejs",

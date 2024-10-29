@@ -203,7 +203,6 @@ export function usePromise<T = any>(): UsePromiseExposure<T> {
     retReject = reject;
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return { promise, resolve: retResolve!, reject: retReject! };
 }
 

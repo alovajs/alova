@@ -235,7 +235,7 @@ export const hitTargetCacheWithCacheAdapter = async (
           deleteAttr(targetKeys, targetKey);
         }
       }
-    } catch (error) {
+    } catch {
       // the try-catch is used to prevent throwing error, cause throwing error in `Promise.all` below.
     }
   };

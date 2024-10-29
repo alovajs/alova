@@ -1,18 +1,21 @@
 import { createAlova } from 'alova';
 import { usePagination, useRequest } from 'alova/client';
-import adapterFetch from 'alova/fetch';
 import vueHook from 'alova/vue';
 import { Ref } from 'vue';
 
+const emptyRequestAdapter = () => ({
+  response: () => Promise.resolve({}),
+  headers: () => Promise.resolve({}),
+  abort: () => {}
+});
 const baseURL = process.env.NODE_BASE_URL;
 const VueAlovaInst = createAlova({
   baseURL,
   statesHook: vueHook,
-  requestAdapter: adapterFetch()
+  requestAdapter: emptyRequestAdapter
 });
 
 const Getter = <T>() => VueAlovaInst.Get<T>('/unit-test');
-
 describe('hook exposure', () => {
   test('useRequest', () => {
     const useHookExposure = useRequest(Getter<number>, {
@@ -33,7 +36,7 @@ describe('hook exposure', () => {
 
   test('usePagination', () => {
     const paginationExposure = usePagination(Getter<{ data: number[] }>, {
-      data: r => r.data
+      data: () => []
     });
     type PaginationExposure = typeof paginationExposure;
 

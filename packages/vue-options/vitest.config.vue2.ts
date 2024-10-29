@@ -14,7 +14,7 @@ export default mergeConfig(
       }) as Plugin
     ],
     test: {
-      name: '@alova/vue-options | vue2',
+      name: '@alova/vue-options|vue2',
       setupFiles: ['./test/setup.ts'],
       alias: {
         vue: path.resolve('./node_modules/vue2'),

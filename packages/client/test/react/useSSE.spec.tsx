@@ -10,7 +10,7 @@ import { AddressInfo } from 'net';
 import React from 'react';
 import { delay } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
-// eslint-disable-next-line import/no-named-as-default
+
 import { SSEHookReadyState } from '@/hooks/useSSE';
 import mockServer from 'root/mockServer';
 import { getAlovaInstance } from '../utils';
@@ -412,7 +412,7 @@ describe('react => useSSE', () => {
           <span role="data">{data}</span>
           <button
             role="send"
-            onClick={() => send().catch(e => console.log('fuck', e))}>
+            onClick={() => send().catch()}>
             send request
           </button>
         </div>

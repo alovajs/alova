@@ -8,7 +8,7 @@ export default mergeConfig(
   defineProject({
     plugins: [vue()],
     test: {
-      name: '@alova/vue-options | vue3'
+      name: '@alova/vue-options|vue3'
     }
   })
 );

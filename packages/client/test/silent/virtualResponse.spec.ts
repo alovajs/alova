@@ -37,7 +37,7 @@ describe('virtual response', () => {
      * Use string concatenation to make sure `valueOf` to be called.
      * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive
      */
-    // eslint-disable-next-line prefer-template, prettier/prettier
+    // eslint-disable-next-line prefer-template
     expect(vBool + 'aa').toMatch(/^\[vd:.+\]aa$/);
   });
 

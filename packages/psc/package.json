@@ -67,6 +67,6 @@
   },
   "peerDependencies": {
     "alova": "^3.0.20",
-    "electron": "^30.1.0"
+    "electron": "^30.5.1"
   }
 }

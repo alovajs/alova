@@ -73,7 +73,7 @@ describe('useRequest middleware', () => {
     const mockFn2 = vi.fn();
     try {
       await send();
-    } catch (err) {
+    } catch {
       mockFn2();
     }
     expect(mockFn2).toHaveBeenCalledTimes(1);
@@ -187,7 +187,7 @@ describe('useRequest middleware', () => {
         await delay(400);
         try {
           await next();
-        } catch (e) {}
+        } catch {}
       }
     });
 
@@ -202,7 +202,7 @@ describe('useRequest middleware', () => {
     const mockFn = vi.fn();
     try {
       await send();
-    } catch (err) {
+    } catch {
       mockFn();
     }
     expect(mockFn).toHaveBeenCalledTimes(0);
