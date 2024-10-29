@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
+import VueHook from '@/statesHook/vue-demi';
 import { queryCache } from 'alova';
-import VueHook from 'alova/vue-demi';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { FetcherType } from '~/typings/clienthook';
 

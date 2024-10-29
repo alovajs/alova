@@ -7,10 +7,10 @@ import dehydrateVData from '@/hooks/silent/virtualResponse/dehydrateVData';
 import Null from '@/hooks/silent/virtualResponse/Null';
 import Undefined from '@/hooks/silent/virtualResponse/Undefined';
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { AlovaGlobalCacheAdapter, createAlova, Method } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import VueHook from 'alova/vue';
 
 // 虚拟响应测试
 describe('serialized storage with virtual response', () => {

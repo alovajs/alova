@@ -1,6 +1,6 @@
 import { accessAction, actionDelegationMiddleware, useFetcher, useRequest, useWatcher } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { ref } from 'vue';
 import { mockRequestAdapter } from '~/test/mockData';

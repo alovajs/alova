@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import vueHook from '@/statesHook/vue';
 import { createAlova } from 'alova';
 import {
   SendHandler,
@@ -10,7 +11,6 @@ import {
   useSSE,
   useWatcher
 } from 'alova/client';
-import vueHook from 'alova/vue';
 import { expectAssignableBy } from 'root/testUtils';
 import { ref } from 'vue';
 

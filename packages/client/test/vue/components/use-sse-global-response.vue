@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { useSSE } from '@/index';
-import VueHook from 'alova/vue';
+import VueHook from '@/statesHook/vue';
 import { computed, ref } from 'vue';
 import { getAlovaInstance } from '~/test/utils';
 

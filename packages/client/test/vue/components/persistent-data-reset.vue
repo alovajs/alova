@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { useForm } from '@/index';
 import { createAlova } from 'alova';
-import VueHook from 'alova/vue';
+import VueHook from '@/statesHook/vue';
 import { ref } from 'vue';
 import { mockRequestAdapter } from '~/test/mockData';
 

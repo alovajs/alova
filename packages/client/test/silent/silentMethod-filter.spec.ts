@@ -3,9 +3,9 @@ import { bootSilentFactory, onSilentSubmitBoot } from '@/hooks/silent/silentFact
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import { push2PersistentSilentQueue } from '@/hooks/silent/storage/silentMethodStorage';
 import { filterSilentMethods, getSilentMethod } from '@/hooks/silent/virtualResponse/filterSilentMethods';
+import vueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { Method, createAlova } from 'alova';
-import vueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '../mockData';
 

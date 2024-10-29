@@ -1,6 +1,6 @@
+import vueHook from '@/statesHook/vue';
 import { createAlova } from 'alova';
 import { usePagination, useRequest } from 'alova/client';
-import vueHook from 'alova/vue';
 import { Ref } from 'vue';
 
 const emptyRequestAdapter = () => ({

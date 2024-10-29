@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import { useRequest } from '@/index';
+import VueHook, { type VueHookType } from '@/statesHook/vue';
 import type { Equal } from '@alova/shared/types';
 import { Alova, createAlova, Method } from 'alova';
 import adapterFetch from 'alova/fetch';
-import VueHook, { type VueHookType } from 'alova/vue';
 import { delay } from 'msw';
 import { generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
 import type { Ref } from 'vue';

@@ -1,9 +1,9 @@
 import { useSerialRequest } from '@/index';
 import { undefinedValue } from '@alova/shared/vars';
 
+import ReactHook from '@/statesHook/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Method, createAlova } from 'alova';
-import ReactHook from 'alova/react';
 import { ReactElement, useState } from 'react';
 import { mockRequestAdapter } from '~/test/mockData';
 

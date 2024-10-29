@@ -1,13 +1,12 @@
 import { AlovaSSEMessageEvent } from '@/event';
 import { useSSE } from '@/index';
+import ReactHook from '@/statesHook/react';
 import { undefinedValue } from '@alova/shared/vars';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import ReactHook from 'alova/react';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
-import React from 'react';
 import { delay } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
 

@@ -2,7 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import { AlovaEventBase } from '@alova/shared/event';
 import { queryCache, setCache } from 'alova';
-import VueHook from 'alova/vue-demi';
+import VueHook from '@/statesHook/vue-demi';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
 describe('use useRequest hook to send GET with vue', () => {

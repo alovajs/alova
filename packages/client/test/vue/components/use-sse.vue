@@ -22,7 +22,7 @@
 import { useSSE } from '@/index';
 import { createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import VueHook from 'alova/vue';
+import VueHook from '@/statesHook/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

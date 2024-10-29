@@ -3,10 +3,10 @@ import { bootSilentFactory } from '@/hooks/silent/silentFactory';
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { usePromise } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
-import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '../mockData';
 
