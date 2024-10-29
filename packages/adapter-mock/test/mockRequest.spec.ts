@@ -1,5 +1,4 @@
-import createAlovaMockAdapter from '@/createAlovaMockAdapter';
-import defineMock from '@/defineMock';
+import { createAlovaMockAdapter, defineMock } from '@/index';
 import { createAlova } from 'alova';
 import { delay, untilCbCalled, untilReject } from 'root/testUtils';
 

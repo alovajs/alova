@@ -1,41 +1,9 @@
 import { createAssert } from '@alova/shared/assert';
-import { instanceOf, isFn, isNumber, noop, uuid } from '@alova/shared/function';
+import { instanceOf, isFn, isNumber, noop } from '@alova/shared/function';
 import { GeneralFn } from '@alova/shared/types';
-import {
-  clearTimeoutTimer,
-  falseValue,
-  filterItem,
-  forEach,
-  nullValue,
-  setTimeoutFn,
-  undefinedValue
-} from '@alova/shared/vars';
+import { clearTimeoutTimer, filterItem, forEach, nullValue, setTimeoutFn } from '@alova/shared/vars';
 import { Method } from 'alova';
 import { AlovaMethodHandler } from '~/typings/clienthook';
-
-const referenceList = [] as { id: string; ref: any }[];
-/**
- * 获取唯一的引用类型id，如果是非引用类型则返回自身
- * @param 引用类型数据
- * @returns uniqueId
- */
-export const getUniqueReferenceId = (reference: any) => {
-  const refType = typeof reference;
-  if (!['object', 'function', 'symbol'].includes(refType)) {
-    return reference;
-  }
-
-  let existedRef = referenceList.find(({ ref }) => ref === reference);
-  if (!existedRef) {
-    const uniqueId = uuid();
-    existedRef = {
-      id: uniqueId,
-      ref: reference
-    };
-    referenceList.push(existedRef);
-  }
-  return existedRef.id;
-};
 
 /**
  * 兼容函数，抛出参数
@@ -44,11 +12,6 @@ export const getUniqueReferenceId = (reference: any) => {
 export const throwFn = <T>(error: T) => {
   throw error;
 };
-
-export const valueObject = <T>(value: T, writable = falseValue) => ({
-  value,
-  writable
-});
 
 export function useCallback<Fn extends GeneralFn = GeneralFn>(onCallbackChange: (callbacks: Fn[]) => void = noop) {
   let callbacks: Fn[] = [];
@@ -98,20 +61,6 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
       bindFn();
     }
   };
-};
-
-/**
- * 批量执行事件回调函数，并将args作为参数传入
- * @param handlers 事件回调数组
- * @param args 函数参数
- */
-export const runArgsHandler = (handlers: GeneralFn[], ...args: any[]) => {
-  let ret: any = undefinedValue;
-  forEach(handlers, handler => {
-    const retInner = handler(...args);
-    ret = retInner !== undefinedValue ? retInner : ret;
-  });
-  return ret;
 };
 
 /**

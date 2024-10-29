@@ -4,6 +4,7 @@
   * Copyright 2024 Scott hu. All Rights Reserved
   * Licensed under MIT (https://github.com/alovajs/alova/blob/main/LICENSE)
 */
+
 import { AlovaGenerics, Method, AlovaGlobalCacheAdapter } from 'alova';
 import { RateLimiterRes, IRateLimiterStoreOptions } from 'rate-limiter-flexible';
 import RateLimiterStoreAbstract from 'rate-limiter-flexible/lib/RateLimiterStoreAbstract.js';

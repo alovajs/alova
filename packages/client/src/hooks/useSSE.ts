@@ -1,11 +1,11 @@
 import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
-import { buildCompletedURL } from '@/functions/sendRequest';
 import { getHandlerMethod, throwFn, useCallback } from '@/util/helper';
 import { createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import { AlovaEventBase } from '@alova/shared/event';
 import {
   $self,
+  buildCompletedURL,
   getConfig,
   getOptions,
   isFn,
