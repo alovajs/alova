@@ -7,8 +7,6 @@ import globals from 'globals';
 const { dirname } = import.meta;
 const compat = new FlatCompat({
   baseDirectory: dirname
-  // recommendedConfig: js.configs.recommended,
-  // allConfig: js.configs.all
 });
 
 export default [

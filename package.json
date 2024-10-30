@@ -43,7 +43,6 @@
     "lint:fix": "pnpm lint --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "format:turbo": "turbo run format",
     "prepare": "husky",
     "commit": "git-cz && git push",
     "coveralls": "pnpm run test:coverage && coveralls < coverage/lcov.info",
