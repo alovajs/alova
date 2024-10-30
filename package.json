@@ -36,7 +36,7 @@
   ],
   "packageManager": "pnpm@9.1.0",
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --filter=./packages/*",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint",
@@ -132,7 +132,7 @@
     "typescript": "^5.6.3",
     "vite-plugin-solid": "^2.10.2",
     "vitest": "^2.1.3",
-    "vue": "^3.5.12",
+    "vue": "^3.4.38",
     "vue-demi": "^0.14.10"
   },
   "config": {

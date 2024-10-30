@@ -4,7 +4,6 @@ import path from 'node:path';
 import { defineProject, mergeConfig, Plugin } from 'vitest/config';
 import vitestConfigBase from '../../vitest.config.base';
 
-process.env.VUE_VERSION = 'v2';
 export default mergeConfig(
   vitestConfigBase,
   defineProject({
@@ -15,6 +14,9 @@ export default mergeConfig(
     ],
     test: {
       name: '@alova/vue-options|vue2',
+      env: {
+        VUE_VERSION: 'v2'
+      },
       setupFiles: ['./test/setup.ts'],
       alias: {
         vue: path.resolve('./node_modules/vue2'),
