@@ -1,8 +1,8 @@
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { getMethodInternalKey } from '@alova/shared/function';
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { AlovaGenerics, Method, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 import { FormHookConfig } from '~/typings/clienthook';

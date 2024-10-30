@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { delay } from 'root/testUtils';
 import TestWatcher from './components/TestWatcher.vue';
@@ -7,8 +6,8 @@ import { createTestAlova, eventObj } from './utils';
 const alovaInst = createTestAlova();
 describe('vue options watcher hook', () => {
   test('should request when watching states are changed', async () => {
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     render(TestWatcher, {
       props: {
         methodHandler: (state1: number, state2: string) =>

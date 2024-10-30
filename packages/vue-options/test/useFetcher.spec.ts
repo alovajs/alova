@@ -1,14 +1,12 @@
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
-import { delay } from 'root/testUtils';
 import TestFetcher from './components/TestFetcher.vue';
 import { createTestAlova, eventObj } from './utils';
 
 const alovaInst = createTestAlova();
 describe('vue options fetcher hook', () => {
   test('should request when watching states are changed', async () => {
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     render(TestFetcher, {
       props: {
         method: alovaInst.Get('/unit-test', {
@@ -25,7 +23,6 @@ describe('vue options fetcher hook', () => {
       })
     });
 
-    await delay(100);
     expect(screen.getByRole('loading')).toHaveTextContent('fetched');
     expect(screen.getByRole('error')).toHaveTextContent('');
     expect(screen.getByRole('data')).toHaveTextContent('{}');

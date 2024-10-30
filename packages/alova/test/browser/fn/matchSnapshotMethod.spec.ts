@@ -89,7 +89,7 @@ describe('matchSnapshotMethod', () => {
     matchedMethod = alova.snapshots.match('get-method555', false);
     expect(matchedMethod).toBeUndefined();
     // 匹配不到，filter不会被调用
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     matchedMethod = alova.snapshots.match(
       {
         name: 'get-method555',
@@ -164,7 +164,7 @@ describe('matchSnapshotMethod', () => {
     matchedMethod = alova.snapshots.match(/get-method555/, false);
     expect(matchedMethod).toBeUndefined();
     // 匹配不到，filter不会被调用
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     matchedMethod = alova.snapshots.match(
       {
         name: /get-method555/,

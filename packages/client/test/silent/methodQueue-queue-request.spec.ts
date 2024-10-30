@@ -1,10 +1,10 @@
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { bootSilentFactory, onSilentSubmitError, onSilentSubmitSuccess } from '@/hooks/silent/silentFactory';
 import { pushNewSilentMethod2Queue, silentQueueMap } from '@/hooks/silent/silentQueue';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { usePromise } from '@alova/shared/function';
 import { Method, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { ScopedSQEvents } from '~/typings/clienthook';
 import { mockRequestAdapter } from '../mockData';
 

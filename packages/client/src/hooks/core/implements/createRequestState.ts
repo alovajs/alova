@@ -86,7 +86,7 @@ export default function createRequestState<
       }
       const forceRequestFinally = sloughConfig((useHookConfig as UseHookConfig<AG, Args>).force ?? falseValue);
       initialLoading = !!forceRequestFinally || !cachedResponse;
-    } catch (error) {}
+    } catch {}
   }
 
   const { create, effectRequest, ref, objectify, exposeProvider, transformState2Proxy } = statesHookHelper<AG>(

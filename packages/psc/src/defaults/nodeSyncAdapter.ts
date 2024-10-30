@@ -49,7 +49,9 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
 
   return createSyncAdapter({
     send(event) {
-      queue.queueCallback(() => ipc.of[id]?.emit(EventName.TO_MAIN, event));
+      queue.queueCallback(() => {
+        ipc.of[id]?.emit(EventName.TO_MAIN, event);
+      });
     },
     receive(handler) {
       queue.queueCallback(() => {

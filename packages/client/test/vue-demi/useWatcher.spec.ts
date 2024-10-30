@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
+import VueHook from '@/statesHook/vue-demi';
 import { queryCache, setCache } from 'alova';
-import VueHook from 'alova/vue-demi';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { computed, reactive, ref } from 'vue';
 
@@ -870,7 +870,6 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
 
     const ctrlVal = ref(0);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, send, onSuccess } = useWatcher((_force: boolean) => getGetterObj, [ctrlVal], {
       force: ({ args: [force] }) => force
     });

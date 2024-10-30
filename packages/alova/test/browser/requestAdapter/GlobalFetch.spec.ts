@@ -6,7 +6,7 @@ describe('request adapter GlobalFetch', () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const Get = alova.Get('/unit-test', {
       cacheFor: 100 * 1000,
       transform: ({ data }: Result, headers) => {
@@ -79,7 +79,7 @@ describe('request adapter GlobalFetch', () => {
   });
 
   test('should console error that the fetch api does not support uploading progress', async () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });

@@ -24,7 +24,7 @@
   "unpkg": "dist/alova-adapter-xhr.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
+    "test": "vitest run",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build",
@@ -50,12 +50,12 @@
     "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
-    "alova": "workspace:^",
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*",
     "form-data": "^4.0.0"
   }
 }

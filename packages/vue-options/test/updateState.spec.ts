@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/vue';
 import { updateState } from 'alova/client';
 import { Result, delay } from 'root/testUtils';
@@ -29,7 +28,7 @@ describe('vue options updateState outside component', () => {
       );
     });
 
-    const updateFn = jest.fn();
+    const updateFn = vi.fn();
     updateState(Get, oldVal => {
       oldVal.data.path = '/unit-test-updated';
       oldVal.data.params = {};

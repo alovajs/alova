@@ -1,16 +1,15 @@
 import { AlovaSSEMessageEvent } from '@/event';
 import { useSSE } from '@/index';
+import ReactHook from '@/statesHook/react';
 import { undefinedValue } from '@alova/shared/vars';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import ReactHook from 'alova/react';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
-import React from 'react';
 import { delay } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
-// eslint-disable-next-line import/no-named-as-default
+
 import { SSEHookReadyState } from '@/hooks/useSSE';
 import mockServer from 'root/mockServer';
 import { getAlovaInstance } from '../utils';
@@ -412,7 +411,7 @@ describe('react => useSSE', () => {
           <span role="data">{data}</span>
           <button
             role="send"
-            onClick={() => send().catch(e => console.log('fuck', e))}>
+            onClick={() => send().catch()}>
             send request
           </button>
         </div>

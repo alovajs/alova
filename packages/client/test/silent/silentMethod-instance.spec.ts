@@ -2,9 +2,9 @@ import { bootSilentFactory } from '@/hooks/silent/silentFactory';
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import loadSilentQueueMapFromStorage from '@/hooks/silent/storage/loadSilentQueueMapFromStorage';
+import vueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { createAlova, Method } from 'alova';
-import vueHook from 'alova/vue';
 import { mockRequestAdapter } from '../mockData';
 
 const alovaInst = createAlova({

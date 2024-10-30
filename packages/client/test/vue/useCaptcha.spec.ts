@@ -1,6 +1,6 @@
 import { accessAction, actionDelegationMiddleware, useCaptcha } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 

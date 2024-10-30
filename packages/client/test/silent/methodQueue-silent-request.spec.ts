@@ -10,10 +10,10 @@ import {
 } from '@/hooks/silent/silentFactory';
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { usePromise } from '@alova/shared/function';
 import { Method, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
 import { ScopedSQEvents } from '~/typings/clienthook';
 

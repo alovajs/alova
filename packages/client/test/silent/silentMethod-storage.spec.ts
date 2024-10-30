@@ -4,9 +4,9 @@ import { clearSilentQueueMap, pushNewSilentMethod2Queue, silentQueueMap } from '
 import loadSilentQueueMapFromStorage from '@/hooks/silent/storage/loadSilentQueueMapFromStorage';
 import { silentMethodIdQueueMapStorageKey, silentMethodStorageKeyPrefix } from '@/hooks/silent/storage/performers';
 import { spliceStorageSilentMethod } from '@/hooks/silent/storage/silentMethodStorage';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { AlovaGlobalCacheAdapter, Method, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { mockRequestAdapter } from '../mockData';
 
 beforeEach(clearSilentQueueMap); // 每次清除队列，保证测试数据正确

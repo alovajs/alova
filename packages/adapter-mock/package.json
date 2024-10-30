@@ -11,10 +11,7 @@
   "unpkg": "dist/alova-mock.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test:browser": "jest",
-    "test:node": "jest --config=jest.config.node.ts",
-    "test": "npm run test:browser && npm run test:node",
-    "test:coverage": "jest --coverage",
+    "test": "vitest run",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build",
@@ -42,10 +39,10 @@
     "alova": "^3.0.20"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:^",
-    "alova": "workspace:^"
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   }
 }

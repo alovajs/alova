@@ -12,8 +12,8 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "test": "pnpm run test:vue3 && pnpm run test:vue2",
-    "test:vue3": "jest",
-    "test:vue2": "jest --config=jest.config.vue2.ts --runInBand",
+    "test:vue3": "vitest run",
+    "test:vue2": "vitest --config vitest.config.vue2.ts",
     "build": "npm run clean && alova-scripts build"
   },
   "publishConfig": {
@@ -36,14 +36,15 @@
     "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
     "@testing-library/vue2": "npm:@testing-library/vue@^5.9.0",
-    "@vue/vue2-jest": "^29.2.6",
-    "alova": "workspace:^",
+    "@vitejs/plugin-vue2": "^2.3.1",
+    "@vue2/compiler-sfc": "npm:@vue/compiler-sfc@^2.7.16",
+    "alova": "workspace:*",
     "vue2": "npm:vue@^2.7.16"
   }
 }

@@ -2,9 +2,9 @@ import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMock
 import { accessAction, actionDelegationMiddleware, updateState, usePagination } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
 
+import vueHook from '@/statesHook/vue';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { createAlova, invalidateCache, queryCache } from 'alova';
-import vueHook from 'alova/vue';
 import { delay, generateContinuousNumbers } from 'root/testUtils';
 import { ref } from 'vue';
 import Pagination from './components/pagination.vue';

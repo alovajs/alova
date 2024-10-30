@@ -20,8 +20,7 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest && npm run test:node",
-    "test:node": "jest --config jest.config.node.ts",
+    "test": "vitest run",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build && ncp ./typings/clienthook ../alova/typings/clienthook && ncp ./typings/stateshook ../alova/typings/stateshook",
@@ -40,13 +39,13 @@
     "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
     "@types/eventsource": "^1.1.15",
-    "alova": "workspace:^",
+    "alova": "workspace:*",
     "eventsource": "^2.0.2"
   },
   "config": {

@@ -1,6 +1,5 @@
 import { VueOptionsHook } from '@/index';
 import { GeneralFn } from '@alova/shared/types';
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import { generateContinuousNumbers } from 'root/testUtils';
@@ -12,7 +11,7 @@ import {
 } from '../../client/test/mockData';
 import Pagination from './components/Pagination.vue';
 
-// jest.setTimeout(1000000);
+// vi.setTimeout(1000000);
 // reset data
 beforeEach(() => {
   setMockListData();

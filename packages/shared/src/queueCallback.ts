@@ -1,4 +1,4 @@
-export type CallbackFn = () => void;
+export type CallbackFn = () => void | Promise<void>;
 
 export class QueueCallback {
   private callbackQueue: CallbackFn[] = [];

@@ -4,7 +4,7 @@ import { createAlova, invalidateCache } from 'alova';
 import AdapterTaro from '../src/adapterReact';
 import { mockStorageContainer } from './utils';
 
-jest.mock('@tarojs/taro');
+vi.mock('@tarojs/taro');
 const alovaInst = createAlova({
   baseURL: 'http://xxx',
   responded(data) {

@@ -203,8 +203,8 @@ describe('request adapter', () => {
       timeout: 5000
     });
 
-    const axiosRequestFn = jest.fn();
-    const axiosResponseFn = jest.fn();
+    const axiosRequestFn = vi.fn();
+    const axiosResponseFn = vi.fn();
     newAxiosInst.interceptors.request.use(config => {
       axiosRequestFn();
       return config;

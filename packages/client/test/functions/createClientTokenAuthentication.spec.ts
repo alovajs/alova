@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import { useRequest } from '@/index';
+import VueHook, { type VueHookType } from '@/statesHook/vue';
 import type { Equal } from '@alova/shared/types';
 import { Alova, createAlova, Method } from 'alova';
 import adapterFetch from 'alova/fetch';
-import VueHook, { type VueHookType } from 'alova/vue';
 import { delay } from 'msw';
 import { generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
 import type { Ref } from 'vue';
@@ -19,9 +19,9 @@ describe('createClientTokenAuthentication', () => {
   test('type check', async () => {
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<VueHookType>({});
 
-    onResponseRefreshToken((response, method) => {
+    onResponseRefreshToken((response, _method) => {
       type Response = typeof response;
-      type Method = typeof method;
+      type Method = typeof _method;
 
       expect<ReturnType<Response['json']> extends Promise<any> ? true : never>(true);
       expect<Response['status'] extends number ? true : never>(true);
@@ -29,8 +29,8 @@ describe('createClientTokenAuthentication', () => {
       expect<Method['context'] extends Alova<any> ? true : never>(true);
     });
 
-    onAuthRequired(method => {
-      type Method = typeof method;
+    onAuthRequired(_method => {
+      type Method = typeof _method;
       expect<Method['context'] extends Alova<any> ? true : never>(true);
     });
   });
@@ -281,7 +281,7 @@ describe('createClientTokenAuthentication', () => {
     loginMethod.meta = {
       authRole: 'login'
     };
-    const { onSuccess, data } = useRequest(loginMethod);
+    const { onSuccess, data: dataUnused } = useRequest(loginMethod);
     onSuccess(() => {
       orderAry.push('useHook.onSuccess');
     });
@@ -302,7 +302,7 @@ describe('createClientTokenAuthentication', () => {
 
     await untilCbCalled(onLogoutSuccess);
     expect(orderAry).toStrictEqual(['logout', 'global.onSuccess', 'useHook.onSuccess']);
-    expect<Equal<typeof data, Ref<ListResponse>>>(true);
+    expect<Equal<typeof dataUnused, Ref<ListResponse>>>(true);
   });
 
   test('should refresh token first when it is expired', async () => {

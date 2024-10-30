@@ -12,10 +12,10 @@ import { deepReplaceVData, pushNewSilentMethod2Queue, silentQueueMap } from '@/h
 import { push2PersistentSilentQueue } from '@/hooks/silent/storage/silentMethodStorage';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { usePromise } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
-import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
 import { ScopedSQEvents } from '~/typings/clienthook';
 
