@@ -6,6 +6,7 @@ export default mergeConfig(
   vitestConfigBase,
   defineProject({
     test: {
+      name: '[Server]alova',
       include: ['test/server/**/*.{test,spec}.ts'],
       environment: 'node'
     }

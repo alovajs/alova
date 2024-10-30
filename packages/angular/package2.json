@@ -24,8 +24,8 @@
   "unpkg": "dist/alova-adapter-axios.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test:browser": "vitest",
-    "test:node": "vitest --config vitest.config.node.ts",
+    "test:browser": "vitest run",
+    "test:node": "vitest run --config vitest.config.node.ts",
     "test": "npm run test:browser && npm run test:node",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint --ext .ts,.js src/**",

@@ -1,7 +1,7 @@
 import { StatesExportHelper, StatesHook } from 'alova';
 import { ComputedRef, Ref, WatchSource } from 'vue-demi';
 
-export type VueHookExportType<T> = StatesExportHelper<{
+export type VueDemiHookExportType<T> = StatesExportHelper<{
   name: 'VueDemi';
   State: Ref<T>;
   Computed: ComputedRef<T>;
@@ -10,7 +10,7 @@ export type VueHookExportType<T> = StatesExportHelper<{
   ComputedExport: ComputedRef<T>;
 }>;
 
-export type VueHookType = StatesHook<VueHookExportType<unknown>>;
+export type VueHookType = StatesHook<VueDemiHookExportType<unknown>>;
 declare const vueHook: VueHookType;
 
 export default vueHook;

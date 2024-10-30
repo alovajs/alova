@@ -25,5 +25,5 @@
       "dependsOn": ["^build"]
     }
   },
-  "globalDependencies": [".editorconfig", ".eslintrc.cjs", ".prettierrc.cjs", "tsconfig.base.json", "tsconfig.json"]
+  "globalDependencies": [".editorconfig", "eslint.config.js", ".prettierrc.cjs", "tsconfig.base.json", "tsconfig.json"]
 }

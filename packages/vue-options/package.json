@@ -12,7 +12,7 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "test": "pnpm run test:vue3 && pnpm run test:vue2",
-    "test:vue3": "vitest",
+    "test:vue3": "vitest run",
     "test:vue2": "vitest --config vitest.config.vue2.ts",
     "build": "npm run clean && alova-scripts build"
   },

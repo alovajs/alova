@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "./dist"
   },
-  "include": ["internal", "scripts", "packages/**/*", "*.ts", ".eslintrc.cjs", "*.cjs", "examples"]
+  "include": ["internal", "scripts", "packages/**/*", "*.ts", "examples"]
 }

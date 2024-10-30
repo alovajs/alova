@@ -31,7 +31,7 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "vitest",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",

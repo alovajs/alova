@@ -29,9 +29,7 @@
   "unpkg": "dist/alova.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test:browser": "vitest",
-    "test:node": "vitest --config vitest.config.node.ts",
-    "test": "npm run test:browser && npm run test:node",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "release": "semantic-release",
     "lint": "eslint --ext .ts,.js src",

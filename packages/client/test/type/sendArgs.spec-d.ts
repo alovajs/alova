@@ -23,6 +23,7 @@ const baseURL = process.env.NODE_BASE_URL;
 const VueAlovaInst = createAlova({
   baseURL,
   statesHook: vueHook,
+  cacheFor: null,
   requestAdapter: emptyRequestAdapter
 });
 const ArgsGetter = <Args extends unknown[], R = any>(...args: Args) =>

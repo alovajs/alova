@@ -5,6 +5,7 @@ export default mergeConfig(
   vitestConfigBase,
   defineProject({
     test: {
+      name: '[Server]@alova/mock',
       environment: 'node'
     }
   })
