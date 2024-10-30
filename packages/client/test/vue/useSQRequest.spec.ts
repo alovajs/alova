@@ -13,9 +13,9 @@ import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
 import updateStateEffect from '@/hooks/silent/virtualResponse/updateStateEffect';
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 import { accessAction, actionDelegationMiddleware } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { AlovaEventBase } from '@alova/shared/event';
 import { AlovaGenerics, createAlova } from 'alova';
-import VueHook from '@/statesHook/vue';
 import { delay, untilCbCalled } from 'root/testUtils';
 import { SQHookBehavior } from '~/typings/clienthook';
 
@@ -46,9 +46,9 @@ describe('vue => useSQRequest', () => {
   test('request immediately with queue behavior', async () => {
     const queue = 'tb1';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
-    const beforePushMockFn = jest.fn();
-    const pushedMockFn = jest.fn();
-    const completeMockFn = jest.fn();
+    const beforePushMockFn = vi.fn();
+    const pushedMockFn = vi.fn();
+    const completeMockFn = vi.fn();
     const { loading, data, error, downloading, uploading, onSuccess } = useSQRequest(() => Get, {
       queue
     })
@@ -119,9 +119,9 @@ describe('vue => useSQRequest', () => {
   test('should receive params when call send function by behavior `queue`', async () => {
     const queue = 'tb21';
     const Get = alovaInst.Get<{ total: number; list: number[] }>('/list');
-    const methodHandlerMockFn = jest.fn();
-    const behaviorMockFn = jest.fn();
-    const forceMockFn = jest.fn();
+    const methodHandlerMockFn = vi.fn();
+    const behaviorMockFn = vi.fn();
+    const forceMockFn = vi.fn();
     const { send } = useSQRequest(
       (arg1, arg2) => {
         methodHandlerMockFn(arg1, arg2);
@@ -184,11 +184,11 @@ describe('vue => useSQRequest', () => {
       }
     );
 
-    const beforePushMockFn = jest.fn();
+    const beforePushMockFn = vi.fn();
     onBeforePushQueue(event => {
       beforePushMockFn(event);
     });
-    const pushedMockFn = jest.fn();
+    const pushedMockFn = vi.fn();
     onPushedQueue(event => {
       pushedMockFn(event);
     });
@@ -237,7 +237,7 @@ describe('vue => useSQRequest', () => {
       queue
     });
 
-    const completeMockFn = jest.fn();
+    const completeMockFn = vi.fn();
     onComplete(event => {
       completeMockFn(event);
     });
@@ -263,7 +263,7 @@ describe('vue => useSQRequest', () => {
 
   test('should prevent to push silentMethod when return false in certain callback of onBeforePushQueue', async () => {
     const queue = 'tb4';
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     const Get = () => alovaInst.Get<any>('/list');
     const { onBeforePushQueue } = useSQRequest(Get, {
       behavior: 'queue',
@@ -302,7 +302,7 @@ describe('vue => useSQRequest', () => {
       queue
     });
 
-    const pushMockFn = jest.fn();
+    const pushMockFn = vi.fn();
     onBeforePushQueue(pushMockFn);
     onPushedQueue(pushMockFn);
 
@@ -351,7 +351,7 @@ describe('vue => useSQRequest', () => {
       retryError: /.*/,
       maxRetryTimes: 2
     });
-    const fallbackMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
     onFallback(event => {
       fallbackMockFn(event);
     });
@@ -696,8 +696,8 @@ describe('vue => useSQRequest', () => {
       middleware: actionDelegationMiddleware('test_page')
     });
 
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     onSuccess(successFn);
     onComplete(completeFn);
 
@@ -705,7 +705,7 @@ describe('vue => useSQRequest', () => {
     expect(successFn).toHaveBeenCalledTimes(1);
     expect(completeFn).toHaveBeenCalledTimes(1);
 
-    const accessActionMockFn = jest.fn();
+    const accessActionMockFn = vi.fn();
     accessAction('test_page', handlers => {
       accessActionMockFn(handlers);
       handlers.send();

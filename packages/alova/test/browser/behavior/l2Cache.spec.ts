@@ -68,7 +68,7 @@ describe('l2cache cache data', () => {
   });
 
   test('should set the memory and restore cache to the different cached time globally', async () => {
-    const expireFn = jest.fn();
+    const expireFn = vi.fn();
     const alova = getAlovaInstance({
       cacheFor: {
         POST: {
@@ -102,7 +102,7 @@ describe('l2cache cache data', () => {
       responseExpect: r => r.json()
     });
 
-    const expireFn = jest.fn();
+    const expireFn = vi.fn();
     const Post1 = alova.Post('/unit-test', undefined, {
       cacheFor: {
         mode: 'restore',

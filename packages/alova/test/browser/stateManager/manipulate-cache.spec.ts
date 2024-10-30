@@ -119,7 +119,7 @@ describe('manipulate cache', () => {
     });
 
     // 更新以上两个请求的缓存
-    const mockfn = jest.fn();
+    const mockfn = vi.fn();
     await setCache([Get1, Get2], cache => {
       if (!cache) {
         return;
@@ -162,7 +162,7 @@ describe('manipulate cache', () => {
     });
 
     // 更新函数返回undefined时，表示中断更新
-    const mockfn = jest.fn();
+    const mockfn = vi.fn();
     setCache(Get1, () => {
       mockfn();
     });

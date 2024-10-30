@@ -5,7 +5,7 @@ import { storageGetItem } from '@/hooks/silent/storage/performers';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import updateState from '@/updateState';
 import { AlovaGlobalCacheAdapter, createAlova } from 'alova';
-import VueHook from 'alova/vue';
+import VueHook from '@/statesHook/vue';
 import { untilCbCalled } from 'root/testUtils';
 
 // 响应数据持久化时，自动转换虚拟数据和匹配序列化器的数据

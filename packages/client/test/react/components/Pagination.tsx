@@ -1,6 +1,6 @@
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PaginationHookConfig } from '~/typings/clienthook';
 import { ReactHookExportType } from '~/typings/stateshook/react';
 

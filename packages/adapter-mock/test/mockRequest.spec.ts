@@ -1,12 +1,11 @@
-import createAlovaMockAdapter from '@/createAlovaMockAdapter';
-import defineMock from '@/defineMock';
+import { createAlovaMockAdapter, defineMock } from '@/index';
 import { createAlova } from 'alova';
 import { delay, untilCbCalled, untilReject } from 'root/testUtils';
 
 declare const isSSR: boolean;
 describe('mock request', () => {
   test('response with plain body data', async () => {
-    const mockApi = jest.fn();
+    const mockApi = vi.fn();
     const mocks = defineMock({
       '[POST]/detail': ({ query, params, data, headers }) => {
         mockApi();
@@ -21,7 +20,7 @@ describe('mock request', () => {
     });
 
     // 模拟数据请求适配器
-    const mockResponse = jest.fn();
+    const mockResponse = vi.fn();
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       onMockResponse: ({ status, statusText, body }, { params, query, data, headers }) => {
@@ -78,7 +77,7 @@ describe('mock request', () => {
       '[POST]/detail2': null
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     // 模拟数据请求适配器
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
@@ -165,7 +164,7 @@ describe('mock request', () => {
       requestAdapter: mockRequestAdapter
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     try {
       await alovaInst.Post('/detail').send();
     } catch (err: any) {
@@ -314,7 +313,7 @@ describe('mock request', () => {
     await expect(() => alovaInst.Post('/detail').send()).rejects.toThrow('new error:network error');
   });
 
-  (isSSR ? xtest : test)("shouldn't throw error when has no being request", async () => {
+  test.skipIf(isSSR)("shouldn't throw error when has no being request", async () => {
     const mocks = defineMock({
       '[POST]/detail': async () => []
     });
@@ -340,7 +339,7 @@ describe('mock request', () => {
     await expect(Post).rejects.toThrow('The user abort request');
   });
 
-  (isSSR ? xtest : test)('should abort request when call abort manually', async () => {
+  test.skipIf(isSSR)('should abort request when call abort manually', async () => {
     const mocks = defineMock({
       '[POST]/detail': async () => []
     });
@@ -356,7 +355,7 @@ describe('mock request', () => {
       requestAdapter: mockRequestAdapter
     });
 
-    const fn = jest.fn();
+    const fn = vi.fn();
     const Post = alovaInst.Post('/detail');
     Post.send().catch(err => {
       fn(err);
@@ -368,7 +367,7 @@ describe('mock request', () => {
     expect(fn.mock.calls[0][0].message).toBe('The user abort request');
   });
 
-  (isSSR ? xtest : test)('should abort request even if delay in mock function', async () => {
+  test.skipIf(isSSR)('should abort request even if delay in mock function', async () => {
     const mocks = defineMock({
       '[POST]/detail': async () => {
         await new Promise(resolve => {
@@ -388,7 +387,7 @@ describe('mock request', () => {
       baseURL: 'http://xxx',
       requestAdapter: mockRequestAdapter
     });
-    const fn = jest.fn();
+    const fn = vi.fn();
     const Post = alovaInst.Post('/detail');
     Post.send().catch(err => {
       fn(err);
@@ -400,7 +399,7 @@ describe('mock request', () => {
     expect(fn.mock.calls[0][0].message).toBe('The user abort request');
   });
 
-  (isSSR ? xtest : test)('should throw timeout error when timeout', async () => {
+  test.skipIf(isSSR)('should throw timeout error when timeout', async () => {
     const mocks = defineMock({
       '[POST]/detail': async () => []
     });
@@ -421,7 +420,7 @@ describe('mock request', () => {
     expect(error.message).toBe('request timeout');
   });
 
-  (isSSR ? xtest : test)('should timeout even if delay in mock function', async () => {
+  test.skipIf(isSSR)('should timeout even if delay in mock function', async () => {
     const mocks = defineMock({
       '[POST]/detail': async () => {
         await new Promise(resolve => {

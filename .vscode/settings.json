@@ -8,7 +8,6 @@
     "source.fixAll.eslint": "explicit"
   },
   "typescript.tsdk": "node_modules/typescript/lib",
-  "jest.runMode": "deferred",
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"
   }

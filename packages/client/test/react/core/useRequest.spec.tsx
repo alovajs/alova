@@ -3,9 +3,9 @@ import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
 import { key } from '@alova/shared/function';
-import '@testing-library/jest-dom';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { ReactElement, StrictMode } from 'react';
+import { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
 
 const StrictModeReact = StrictMode as any;
@@ -30,7 +30,7 @@ describe('useRequest hook with react', () => {
 
   test('should apply initialData with object and function', async () => {
     const alova = getAlovaInstance(ReactHook);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     function Page() {
       const { data: data1 } = useRequest(alova.Get(''), { initialData: 'test', immediate: false });
       const { data: data2 } = useRequest(alova.Get(''), {
@@ -270,7 +270,7 @@ describe('useRequest hook with react', () => {
       cacheFor: 100 * 1000
     });
 
-    const renderMockFn = jest.fn();
+    const renderMockFn = vi.fn();
     function Page() {
       const { loading, data = { path: '', method: '' } } = useRequest(Get);
       renderMockFn();

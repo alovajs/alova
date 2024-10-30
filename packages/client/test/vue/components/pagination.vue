@@ -248,7 +248,7 @@
 <script setup lang="ts">
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
-import { VueHookExportType } from 'alova/vue';
+import { VueHookExportType } from '@/statesHook/vue';
 import { ref } from 'vue';
 import { PaginationHookConfig } from '~/typings/clienthook';
 

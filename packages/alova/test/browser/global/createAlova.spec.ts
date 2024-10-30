@@ -79,7 +79,7 @@ describe('createAlova', () => {
   });
 
   test('`beforeRequest` hook will receive the request params', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
@@ -191,7 +191,7 @@ describe('createAlova', () => {
   });
 
   test('`responded-onSuccess` hook will receive the requesting method instance', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         expect(method).toBeInstanceOf(Method);
@@ -221,7 +221,7 @@ describe('createAlova', () => {
   });
 
   test('You can also use `responded` to handle global response success event', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = createAlova({
       baseURL: 'http://localhost:3000',
       cacheLogger: null,
@@ -254,7 +254,7 @@ describe('createAlova', () => {
   });
 
   test('`responded-onError` hook will receive the requesting method instance', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         method.meta = {
@@ -314,7 +314,7 @@ describe('createAlova', () => {
   });
 
   test("shouldn't call global error callback when responded callback throws an error", async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       responseExpect: () => {
         throw new Error('test error from responded');
@@ -331,7 +331,7 @@ describe('createAlova', () => {
   });
 
   test("shouldn't emit global error callback when responded callback return rejected Promise", async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       responseExpect: () => Promise.reject(new Error('test error from responded')),
       resErrorExpect: () => {
@@ -350,7 +350,7 @@ describe('createAlova', () => {
   });
 
   test('should emit global onError when request error', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       responseExpect: () => {
         mockFn();
@@ -370,7 +370,7 @@ describe('createAlova', () => {
   });
 
   test('`responded-onComplete` hook will receive the requesting method instance', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       beforeRequestExpect: method => {
         method.meta = {
@@ -397,7 +397,7 @@ describe('createAlova', () => {
   });
 
   test('should emit onComplete when hit response cache', async () => {
-    const MockFn = jest.fn();
+    const MockFn = vi.fn();
     const alova = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),
@@ -420,7 +420,7 @@ describe('createAlova', () => {
   });
 
   test('should throws an async error in `responded-onComplete` hook', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alova = getAlovaInstance({
       resErrorExpect: () => 'error response',
       resCompleteExpect: () => {
@@ -433,9 +433,9 @@ describe('createAlova', () => {
   });
 
   test('should print cache hit message default when hit response cache', async () => {
-    const logConsoleMockFn = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const groupCollapsedMockFn = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
-    const groupEndMockFn = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
+    const logConsoleMockFn = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const groupCollapsedMockFn = vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    const groupEndMockFn = vi.spyOn(console, 'groupEnd').mockImplementation(() => {});
     const alova1 = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),
@@ -522,7 +522,7 @@ describe('createAlova', () => {
   });
 
   test("shouldn't print cache hit message when set cacheLogger to false or null", async () => {
-    const logConsoleMockFn = jest.fn();
+    const logConsoleMockFn = vi.fn();
     // eslint-disable-next-line
     console.log = logConsoleMockFn; // Rewrite for monitoring
     const alova1 = createAlova({
@@ -562,7 +562,7 @@ describe('createAlova', () => {
   });
 
   test('should emit custom cacheLogger function when set cacheLogger to a custom function', async () => {
-    const loggerMockFn = jest.fn();
+    const loggerMockFn = vi.fn();
     const alova1 = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),

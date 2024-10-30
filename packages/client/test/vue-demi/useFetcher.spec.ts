@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { useFetcher, useRequest } from '@/index';
-import VueHook from 'alova/vue-demi';
+import VueHook from '@/statesHook/vue-demi';
 import { queryCache } from 'alova';
 import { Result, untilCbCalled } from 'root/testUtils';
 import { FetcherType } from '~/typings/clienthook';
@@ -116,7 +116,7 @@ describe('use useFetcher hook to fetch data', () => {
     const Get1 = createGet({ a: '1', b: '2', countKey: 'c' });
     await Get1.send();
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const {
       loading,
       fetch,
@@ -179,11 +179,11 @@ describe('use useFetcher hook to fetch data', () => {
   });
 
   test('should update states when call update returns in useFetcher', async () => {
-    const alova = getAlovaInstance(VueHook, {
+    const alovaUnused = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
 
-    const { loading, error, update } = useFetcher<FetcherType<typeof alova>>();
+    const { loading, error, update } = useFetcher<FetcherType<typeof alovaUnused>>();
     update({
       loading: true,
       error: new Error('custom fetch error')

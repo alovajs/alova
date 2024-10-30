@@ -12,10 +12,10 @@ import { deepReplaceVData, pushNewSilentMethod2Queue, silentQueueMap } from '@/h
 import { push2PersistentSilentQueue } from '@/hooks/silent/storage/silentMethodStorage';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { usePromise } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
-import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
 import { ScopedSQEvents } from '~/typings/clienthook';
 
@@ -98,7 +98,7 @@ describe('boot silent queue', () => {
     const silentMethodInstance2 = new SilentMethod(methodInstance2, 'silent', emitter, 'zzxxx');
     await pushNewSilentMethod2Queue(silentMethodInstance2, false, targetQueueName);
 
-    const bootMockFn = jest.fn();
+    const bootMockFn = vi.fn();
     await new Promise<void>(resolve => {
       onSilentSubmitBoot(() => {
         bootMockFn();
@@ -126,11 +126,11 @@ describe('boot silent queue', () => {
       cacheLogger: false
     });
 
-    const methodResolveFn = jest.fn();
-    const methodRejectFn = jest.fn();
-    const methodFallbackFn = jest.fn();
-    const successMockFn = jest.fn();
-    const beforeMockFn = jest.fn();
+    const methodResolveFn = vi.fn();
+    const methodRejectFn = vi.fn();
+    const methodFallbackFn = vi.fn();
+    const successMockFn = vi.fn();
+    const beforeMockFn = vi.fn();
 
     const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse({ id: 'loading...' });

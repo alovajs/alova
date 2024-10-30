@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FrameworkReadableState, FrameworkState } from '@alova/shared/FrameworkState';
 import { EventManager } from '@alova/shared/createEventManager';
 import type { IsUnknown } from '@alova/shared/types';
@@ -13,13 +12,17 @@ import {
   StatesExport
 } from 'alova';
 import { ReactHookExportType } from '../stateshook/react';
+import { SolidHookExportType } from '../stateshook/solid';
 import { SvelteHookExportType } from '../stateshook/svelte';
 import { VueHookExportType } from '../stateshook/vue';
+import { VueDemiHookExportType } from '../stateshook/vue-demi';
 
 export interface StateMap<T> {
   Vue: VueHookExportType<T>;
+  Solid: SolidHookExportType<T>;
   React: ReactHookExportType<T>;
   Svelte: SvelteHookExportType<T>;
+  VueDemi: VueDemiHookExportType<T>;
 }
 /**
  * alova base event
@@ -240,11 +243,7 @@ export interface UseHookExposure<
   __referingObj: ReferingObject;
 }
 
-export const enum EnumHookType {
-  USE_REQUEST = 1,
-  USE_WATCHER = 2,
-  USE_FETCHER = 3
-}
+type EnumHookType = 1 | 2 | 3;
 export interface Hook<Args extends any[] = any[]> {
   /** 最后一次请求的method实例 */
   m?: Method;

@@ -19,7 +19,7 @@ describe('useFetcher middleware', () => {
     });
 
     fetch(getGetterObj);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
     await untilCbCalled(setTimeout, 10);
     expect(loading.value).toBeTruthy();
@@ -63,7 +63,7 @@ describe('useFetcher middleware', () => {
     });
 
     fetch(getGetterObj);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
     // middleware中未调用next，因此不会发送请求
     expect(loading.value).toBeFalsy();

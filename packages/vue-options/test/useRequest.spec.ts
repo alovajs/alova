@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { delay } from 'root/testUtils';
 import { mapAlovaHook } from '../src';
@@ -29,8 +28,8 @@ describe('vue options request hook', () => {
   });
 
   test('request success useRequestOptions', async () => {
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     render(TestRequest as any, {
       props: {
         method: alovaInst.Get('/unit-test', {
@@ -69,8 +68,8 @@ describe('vue options request hook', () => {
   });
 
   test('request error useRequestOptions', async () => {
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
+    const errorFn = vi.fn();
+    const completeFn = vi.fn();
     render(TestRequest as any, {
       props: {
         method: alovaInst.Get('/unit-test-error')
@@ -100,8 +99,8 @@ describe('vue options request hook', () => {
   });
 
   test('should send request when call xxx$send', async () => {
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     render(TestRequest as any, {
       props: {
         method: alovaInst.Get('/unit-test'),
@@ -174,7 +173,7 @@ describe('vue options request hook', () => {
   });
 
   test('watch the hook state', async () => {
-    const watchFn = jest.fn();
+    const watchFn = vi.fn();
     render(TestRequest, {
       props: {
         method: alovaInst.Get('/unit-test', {

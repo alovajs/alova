@@ -1,11 +1,7 @@
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaEvent, AlovaMethodHandler, ExportedState } from '../general';
 
-export const enum SSEHookReadyState {
-  CONNECTING = 0,
-  OPEN = 1,
-  CLOSED = 2
-}
+type SSEHookReadyState = 0 | 1 | 2;
 
 export interface AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEvent<AG, Args> {
   method: Method;

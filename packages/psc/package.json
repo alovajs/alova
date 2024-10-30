@@ -31,12 +31,11 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build",
-    "release": "semantic-release",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
     "commit": "git add . && git-cz && git push"
@@ -57,17 +56,17 @@
     "dist"
   ],
   "dependencies": {
-    "@alova/shared": "workspace:^",
+    "@alova/shared": "workspace:*",
     "@node-ipc/node-ipc": "^11.0.3"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:^",
+    "@alova/scripts": "workspace:*",
     "@types/node-ipc": "^9.2.3",
-    "alova": "workspace:^",
-    "electron": "^30.1.0"
+    "alova": "workspace:*",
+    "electron": "^30.5.1"
   },
   "peerDependencies": {
     "alova": "^3.0.20",
-    "electron": "^30.1.0"
+    "electron": "^30.5.1"
   }
 }

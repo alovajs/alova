@@ -137,7 +137,7 @@ describe('l1cache cache data', () => {
   });
 
   test('should use the return value to be expired time when set method type to a function', async () => {
-    const expireFn = jest.fn();
+    const expireFn = vi.fn();
     const alova = getAlovaInstance({
       cacheFor: {
         POST: {

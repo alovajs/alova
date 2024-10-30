@@ -10,10 +10,10 @@ import {
 } from '@/hooks/silent/silentFactory';
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { usePromise } from '@alova/shared/function';
 import { Method, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
 import { ScopedSQEvents } from '~/typings/clienthook';
 
@@ -28,8 +28,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail');
 
     const { promise: pms, resolve } = usePromise<void>();
@@ -61,7 +61,7 @@ describe('silent method request in queue with silent behavior', () => {
       delay: 0
     });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     const offSuccess = onSilentSubmitSuccess(event => {
       successMockFn(event);
       // 卸载全局事件避免污染其他用例
@@ -92,8 +92,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail-error', undefined, {
       id: 'a',
       failTimes: 1
@@ -128,7 +128,7 @@ describe('silent method request in queue with silent behavior', () => {
       delay: 0
     });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     onSilentSubmitSuccess(() => {
       successMockFn();
     });
@@ -150,8 +150,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const executeOrder = [] as string[]; // 用于记录执行顺序，后续验证
     const methodInstance = new Method('POST', alovaInst, '/detail-error', {}, { id: 'b' });
     const { promise: pms, resolve } = usePromise<void>();
@@ -199,7 +199,7 @@ describe('silent method request in queue with silent behavior', () => {
       delay: 0
     });
 
-    const errorMockFn = jest.fn();
+    const errorMockFn = vi.fn();
     const offError = onSilentSubmitError(event => {
       errorMockFn();
       expect(event.queueName).toBe('t2');
@@ -209,7 +209,7 @@ describe('silent method request in queue with silent behavior', () => {
       expect(event.silentMethod).toBeInstanceOf(SilentMethod);
       expect(event.retryTimes).toBeLessThanOrEqual(2);
     });
-    const failMockFn = jest.fn();
+    const failMockFn = vi.fn();
     const offFail = onSilentSubmitFail(event => {
       failMockFn();
       expect(event.queueName).toBe('t2');
@@ -241,8 +241,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail-error', {}, { id: 'c' });
     const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
@@ -289,8 +289,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
@@ -336,8 +336,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail-error');
     const { promise: pms, resolve } = usePromise<void>();
     const virtualResponse = createVirtualResponse({
@@ -376,8 +376,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const methodInstance = new Method(
       'POST',
       alovaInst,
@@ -420,8 +420,8 @@ describe('silent method request in queue with silent behavior', () => {
       cacheLogger: false
     });
 
-    const fallbackMockFn = jest.fn();
-    const retryMockFn = jest.fn();
+    const fallbackMockFn = vi.fn();
+    const retryMockFn = vi.fn();
     const methodInstance = new Method('POST', alovaInst, '/detail-error', {}, { id: 'g' });
     const { promise: pms, resolve } = usePromise<void>();
     const emitter = createEventManager<ScopedSQEvents<any>>();

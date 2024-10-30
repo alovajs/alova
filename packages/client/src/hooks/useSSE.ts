@@ -1,11 +1,11 @@
 import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
-import { buildCompletedURL } from '@/functions/sendRequest';
 import { getHandlerMethod, throwFn, useCallback } from '@/util/helper';
 import { createAssert } from '@alova/shared/assert';
 import createEventManager from '@alova/shared/createEventManager';
 import { AlovaEventBase } from '@alova/shared/event';
 import {
   $self,
+  buildCompletedURL,
   getConfig,
   getOptions,
   isFn,
@@ -26,11 +26,16 @@ import {
   hitCacheBySource,
   promiseStatesHook
 } from 'alova';
-import { AlovaMethodHandler, SSEHookConfig, SSEHookReadyState, SSEOn } from '~/typings/clienthook';
+import { AlovaMethodHandler, SSEHookConfig, SSEOn } from '~/typings/clienthook';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
 const SSEErrorEventKey = Symbol('SSEError');
+export const enum SSEHookReadyState {
+  CONNECTING = 0,
+  OPEN = 1,
+  CLOSED = 2
+}
 
 export type SSEEvents<Data, AG extends AlovaGenerics, Args extends any[]> = {
   [SSEOpenEventKey]: AlovaSSEEvent<AG, Args>;
@@ -208,7 +213,6 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [onEvent] = currentMap.get(eventName)!;
 
     return onEvent(callbackHandler);

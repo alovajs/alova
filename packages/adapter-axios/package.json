@@ -24,9 +24,7 @@
   "unpkg": "dist/alova-adapter-axios.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test:browser": "jest",
-    "test:node": "jest --config=jest.config.node.ts",
-    "test": "npm run test:browser",
+    "test": "vitest run",
     "build": "npm run clean && alova-scripts build",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0"
@@ -52,12 +50,12 @@
     "axios": ">=0.4.0"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
-    "alova": "workspace:^",
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*",
     "form-data": "^4.0.0"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   }
 }

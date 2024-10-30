@@ -3,16 +3,16 @@ import { bootSilentFactory } from '@/hooks/silent/silentFactory';
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import VueHook from '@/statesHook/vue';
 import createEventManager from '@alova/shared/createEventManager';
 import { usePromise } from '@alova/shared/function';
 import { createAlova, Method } from 'alova';
-import VueHook from 'alova/vue';
 import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '../mockData';
 
 // 每次需重置状态，因为上一个用例可能因为失败而被设置为2，导致下面的用例不运行
 beforeEach(() => setSilentFactoryStatus(0));
-// jest.setTimeout(1000000);
+// vi.setConfig({ testTimeout: 1000_000 });
 describe('silent method request in queue with silent behavior', () => {
   test('silentMethods in default queue should delay request when set `requestWait` to a number', async () => {
     const alovaInst = createAlova({

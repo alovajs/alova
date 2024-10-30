@@ -1,3 +1,4 @@
+import { EnumHookType } from '@/util/helper';
 import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@alova/shared/event';
 import {
   getContext,
@@ -15,7 +16,6 @@ import {
   AlovaFrontMiddleware,
   AlovaGuardNext,
   AlovaMethodHandler,
-  EnumHookType,
   FetcherHookConfig,
   FrontRequestHookConfig,
   Hook,

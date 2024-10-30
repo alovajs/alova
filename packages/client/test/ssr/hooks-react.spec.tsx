@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { delay, Result } from 'root/testUtils';
 
@@ -16,7 +16,7 @@ describe('[react]use hooks in SSR', () => {
       transform: ({ data }: Result) => data
     });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     function Page() {
       const { loading, data = { path: '', method: '' }, onSuccess } = useRequest(Get);
       onSuccess(successMockFn);

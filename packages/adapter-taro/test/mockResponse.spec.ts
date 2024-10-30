@@ -2,6 +2,7 @@ import AdapterTaro, { taroMockResponse, taroRequestAdapter } from '@/adapterReac
 import { createAlovaMockAdapter, defineMock } from '@alova/mock';
 import { createAlova, invalidateCache } from 'alova';
 
+vi.mock('@tarojs/taro');
 const mocks = defineMock({
   '/unit-test': () => ({
     id: 1

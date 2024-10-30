@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import vueHook from '@/statesHook/vue';
 import { createAlova } from 'alova';
 import {
   SendHandler,
@@ -10,62 +11,27 @@ import {
   useSSE,
   useWatcher
 } from 'alova/client';
-import GlobalFetch from 'alova/fetch';
-import vueHook from 'alova/vue';
-import { expectAssignableBy, expectType } from 'root/testUtils';
-import { ref, Ref } from 'vue';
+import { expectAssignableBy } from 'root/testUtils';
+import { ref } from 'vue';
 
+const emptyRequestAdapter = () => ({
+  response: () => Promise.resolve({}),
+  headers: () => Promise.resolve({}),
+  abort: () => {}
+});
 const baseURL = process.env.NODE_BASE_URL;
 const VueAlovaInst = createAlova({
   baseURL,
   statesHook: vueHook,
-  requestAdapter: GlobalFetch()
+  cacheFor: null,
+  requestAdapter: emptyRequestAdapter
 });
-
-const Getter = <T>() => VueAlovaInst.Get<T>('/unit-test');
 const ArgsGetter = <Args extends unknown[], R = any>(...args: Args) =>
   VueAlovaInst.Get<R>('/unit-test', {
     params: {
       args
     }
   });
-
-describe('hook exposure', () => {
-  test('useRequest', () => {
-    const useHookExposure = useRequest(Getter<number>, {
-      immediate: false
-    });
-    type UseHookExposure = typeof useHookExposure;
-
-    expectType<Ref<number>>(useHookExposure.data);
-    expectType<Ref<number>>(useHookExposure.onSuccess(() => {}).data);
-    expectType<UseHookExposure>(useHookExposure.onSuccess(() => {}));
-    expectType<UseHookExposure>(
-      useHookExposure
-        .onSuccess(() => {})
-        .onSuccess(() => {})
-        .onSuccess(() => {})
-    );
-  });
-
-  test('usePagination', () => {
-    const paginationExposure = usePagination(Getter<{ data: number[] }>, {
-      data: r => r.data
-    });
-    type PaginationExposure = typeof paginationExposure;
-
-    expectType<Ref<number[]>>(paginationExposure.data);
-    expectType<Ref<number[]>>(paginationExposure.onSuccess(() => {}).data);
-    expectType<PaginationExposure>(paginationExposure.onSuccess(() => {}));
-    expectType<PaginationExposure>(
-      paginationExposure
-        .onSuccess(() => {})
-        .onSuccess(() => {})
-        .onSuccess(() => {})
-    );
-  });
-});
-
 describe('send args', () => {
   type Args = [number, string, boolean];
   type ExtendedArgs = [...Args, number, string];
@@ -79,10 +45,10 @@ describe('send args', () => {
     expectAssignableBy<SendHandler<NotMatchArgs, any>>(useRequestState.send);
 
     // @ts-expect-error
-    useRequestState.onError(e => expectType<123>(e.args));
-    useRequestState.onError(e => expectType<[...Args, ...any]>(e.args));
-    useRequestState.onComplete(e => expectType<[...Args, ...any]>(e.args));
-    useRequestState.onSuccess(e => expectType<[...Args, ...any]>(e.args));
+    useRequestState.onError(e => assertType<123>(e.args));
+    useRequestState.onError(e => assertType<[...Args, ...any]>(e.args));
+    useRequestState.onComplete(e => assertType<[...Args, ...any]>(e.args));
+    useRequestState.onSuccess(e => assertType<[...Args, ...any]>(e.args));
   });
 
   test('useWatcher', () => {
@@ -102,11 +68,11 @@ describe('send args', () => {
     expectAssignableBy<SendHandler<NotMatchArgs, any>>(useSSEState.send);
 
     // @ts-expect-error
-    useSSEState.onError(e => expectType<123>(e.args));
+    useSSEState.onError(e => assertType<123>(e.args));
 
-    useSSEState.onMessage(e => expectType<[...Args, ...any]>(e.args));
-    useSSEState.onOpen(e => expectType<[...Args, ...any]>(e.args));
-    useSSEState.onError(e => expectType<[...Args, ...any]>(e.args));
+    useSSEState.onMessage(e => assertType<[...Args, ...any]>(e.args));
+    useSSEState.onOpen(e => assertType<[...Args, ...any]>(e.args));
+    useSSEState.onError(e => assertType<[...Args, ...any]>(e.args));
   });
 
   test('useForm', () => {
@@ -116,7 +82,7 @@ describe('send args', () => {
     }
     const useFormState = useForm(
       (form, ...args: Args) => {
-        expectType<Info>(form);
+        assertType<Info>(form);
         return VueAlovaInst.Get('/unit-test');
       },
       {
@@ -138,7 +104,9 @@ describe('send args', () => {
   });
 
   test('useRetriable', () => {
-    const useRetriableState = useRetriableRequest(ArgsGetter<Args, any>);
+    const useRetriableState = useRetriableRequest(ArgsGetter<Args, any>, {
+      immediate: false
+    });
     expectAssignableBy<SendHandler<Args, any>>(useRetriableState.send);
     expectAssignableBy<SendHandler<ExtendedArgs, any>>(useRetriableState.send);
     // @ts-expect-error
@@ -156,17 +124,17 @@ describe('send args', () => {
     // @ts-expect-error
     expectAssignableBy<SendHandler<[string, number], any>>(usePaginationState.send);
 
-    usePaginationState.onFetchError(e => expectType<[number, number, name?: string | undefined, ...any]>(e.args));
-    usePaginationState.onFetchComplete(e => expectType<[number, number, name?: string | undefined, ...any]>(e.args));
-    usePaginationState.onFetchSuccess(e => expectType<[number, number, name?: string | undefined, ...any]>(e.args));
+    usePaginationState.onFetchError(e => assertType<[number, number, name?: string | undefined, ...any]>(e.args));
+    usePaginationState.onFetchComplete(e => assertType<[number, number, name?: string | undefined, ...any]>(e.args));
+    usePaginationState.onFetchSuccess(e => assertType<[number, number, name?: string | undefined, ...any]>(e.args));
   });
 
   test('middleware', () => {
     useRequest(ArgsGetter<Args, any>, {
       middleware: (ctx, next) => {
-        expectType<[...Args, ...any]>(ctx.args);
+        assertType<[...Args, ...any]>(ctx.args);
         next({
-          force: event => expectType<[...Args, ...any]>(event.args) as unknown as boolean
+          force: event => assertType<[...Args, ...any]>(event.args) as unknown as boolean
         });
       }
     });

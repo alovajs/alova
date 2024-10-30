@@ -111,7 +111,7 @@ describe('rateLimit', () => {
   });
 
   test('should be rejected and blocked when consumed more than points', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const limitedGetter = limiter(alova.Get('/unit-test'));
 
     await expect(() => limitedGetter.consume()).not.toThrow();
@@ -126,11 +126,11 @@ describe('rateLimit', () => {
     expect(consumeRes.msBeforeNext).toBeGreaterThanOrEqual(99 * 1000);
 
     // Fast forward to after the block duration
-    await jest.setSystemTime(Date.now() + 100 * 1000);
+    await vi.setSystemTime(Date.now() + 100 * 1000);
 
     // unblock now
     await expect(limitedGetter.get()).resolves.toBeNull();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('use key function', async () => {
@@ -171,7 +171,7 @@ describe('rateLimit', () => {
   });
 
   test('should reduce msBeforeNext', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const limiter = createRateLimiter({
       points: 1,
       duration: 4 * 1000 // 60 s
@@ -182,17 +182,17 @@ describe('rateLimit', () => {
     await limitedGetter.consume();
     // have no enough points
     await limitedGetter.consume().catch(ret => expect(ret.msBeforeNext).toBeLessThanOrEqual(4000));
-    await jest.setSystemTime(Date.now() + 1000);
+    await vi.setSystemTime(Date.now() + 1000);
     await limitedGetter.consume().catch(ret => expect(ret.msBeforeNext).toBeLessThanOrEqual(3000));
-    await jest.setSystemTime(Date.now() + 1000);
+    await vi.setSystemTime(Date.now() + 1000);
     await limitedGetter.consume().catch(ret => expect(ret.msBeforeNext).toBeLessThanOrEqual(2000));
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
 describe('reteLimit in server', () => {
-  jest.useRealTimers();
+  vi.useRealTimers();
   const baseURL = 'http://localhost:9527';
   let alova = getAlovaInstance(baseURL);
   let limiter = createDefaultRateLimiter();

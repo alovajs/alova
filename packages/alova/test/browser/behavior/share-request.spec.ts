@@ -4,9 +4,9 @@ import { Result, delay, untilReject } from 'root/testUtils';
 
 describe('Request shared', () => {
   test('should share request when use usehooks', async () => {
-    const requestMockFn = jest.fn();
-    const beforeRequestMockFn = jest.fn();
-    const responseMockFn = jest.fn();
+    const requestMockFn = vi.fn();
+    const beforeRequestMockFn = vi.fn();
+    const responseMockFn = vi.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
       cacheFor: {
@@ -182,7 +182,7 @@ describe('Request shared', () => {
   });
 
   test("shouldn't share request when close in global config", async () => {
-    const requestMockFn = jest.fn();
+    const requestMockFn = vi.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
       cacheFor: {
@@ -216,7 +216,7 @@ describe('Request shared', () => {
   });
 
   test("shouldn't share request when close in method config", async () => {
-    const requestMockFn = jest.fn();
+    const requestMockFn = vi.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
       cacheFor: {

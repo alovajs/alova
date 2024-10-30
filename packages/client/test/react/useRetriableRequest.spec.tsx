@@ -1,12 +1,12 @@
 import { accessAction, actionDelegationMiddleware, useRetriableRequest } from '@/index';
-import '@testing-library/jest-dom';
+import ReactHook from '@/statesHook/react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
-import ReactHook from 'alova/react';
-import React, { ReactElement, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { delay, untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 
+// vi.setConfig({ testTimeout: 1000000 });
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
   statesHook: ReactHook,
@@ -16,11 +16,11 @@ const alovaInst = createAlova({
 describe('react => useRetriableRequest', () => {
   test('should not retry when request is success', async () => {
     const methodInstance = alovaInst.Post('/detail');
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
 
     const Page = () => {
       const { loading, error, onError, onComplete, onSuccess, onRetry, onFail } = useRetriableRequest(methodInstance);
@@ -38,7 +38,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(() => {
       expect(mockRetryFn).not.toHaveBeenCalled();
       expect(mockErrorFn).not.toHaveBeenCalled();
@@ -53,12 +53,12 @@ describe('react => useRetriableRequest', () => {
       id: 'a',
       failTimes: 5
     });
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
-    const mockLoadingChangeFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
+    const mockLoadingChangeFn = vi.fn();
 
     const Page = () => {
       const { loading, error, onError, onComplete, onSuccess, onRetry, onFail } = useRetriableRequest(methodInstance);
@@ -92,7 +92,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
 
     await waitFor(
       () => {
@@ -121,11 +121,11 @@ describe('react => useRetriableRequest', () => {
       id: 'aa',
       failTimes: 1
     });
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
 
     const Page = () => {
       const { loading, error, onError, onRetry, onFail, onComplete, onSuccess } = useRetriableRequest(methodInstance);
@@ -143,7 +143,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(
       () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(1);
@@ -163,11 +163,11 @@ describe('react => useRetriableRequest', () => {
       id: 'b',
       failTimes: 5
     });
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
 
     const Page = () => {
       const { loading, error, onError, onRetry, onFail, onComplete, onSuccess } = useRetriableRequest(methodInstance, {
@@ -193,7 +193,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(
       () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
@@ -213,11 +213,11 @@ describe('react => useRetriableRequest', () => {
       id: 'c',
       failTimes: 5
     });
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
 
     let retryTimesCount = 0;
     const Page = () => {
@@ -248,7 +248,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(
       () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
@@ -268,7 +268,7 @@ describe('react => useRetriableRequest', () => {
       id: 'd',
       failTimes: 5
     });
-    const mockRetryFn = jest.fn();
+    const mockRetryFn = vi.fn();
 
     const Page = () => {
       const { loading, error, onRetry } = useRetriableRequest(methodInstance, {
@@ -295,7 +295,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(
       () => {
         expect(mockRetryFn).toHaveBeenCalledTimes(2);
@@ -309,11 +309,11 @@ describe('react => useRetriableRequest', () => {
       id: 'f',
       failTimes: 5
     });
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
 
     const Page = () => {
       const { loading, onError, onRetry, onFail, onComplete, onSuccess, send } = useRetriableRequest(methodInstance, {
@@ -341,7 +341,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await untilCbCalled(setTimeout, 200);
     await screen.findByText(/loaded/);
     expect(mockRetryFn).not.toHaveBeenCalled();
@@ -370,22 +370,23 @@ describe('react => useRetriableRequest', () => {
       id: 'i',
       failTimes: 5
     });
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
 
     const Page = () => {
       const { loading, onError, onRetry, onFail, onComplete, onSuccess, stop } = useRetriableRequest(methodInstance, {
-        retry: 4
+        retry: 4,
+        backoff: {
+          delay: 50
+        }
       });
       onRetry(mockRetryFn);
       onError(() => {
         mockErrorFn();
-        act(() => {
-          stop();
-        });
+        stop();
       });
       onComplete(mockCompleteFn);
       onSuccess(mockSuccessFn);
@@ -397,17 +398,14 @@ describe('react => useRetriableRequest', () => {
       return <span role="status">{loading ? 'loading' : 'loaded'}</span>;
     };
 
-    render((<Page />) as ReactElement<any, any>);
-    await waitFor(
-      () => {
-        expect(mockRetryFn).not.toHaveBeenCalled(); // 第一次重试前停止了重试
-        expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
-        expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
-        expect(mockSuccessFn).not.toHaveBeenCalled();
-        expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
-      },
-      { timeout: 4000 }
-    );
+    render(<Page />);
+    await waitFor(() => {
+      expect(mockRetryFn).not.toHaveBeenCalled(); // 第一次重试前停止了重试
+      expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
+      expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
+      expect(mockSuccessFn).not.toHaveBeenCalled();
+      expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
+    });
   });
 
   test("should throws error call stop function when isn't requesting", async () => {
@@ -436,13 +434,11 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
     });
-    delay(200).then(() => {
-      fireEvent.click(screen.getByRole('btnStop'));
-    });
+    fireEvent.click(screen.getByRole('btnStop'));
     await waitFor(() => {
       expect(screen.getByRole('error')).toHaveTextContent('there is no requests being retried');
     });
@@ -453,24 +449,30 @@ describe('react => useRetriableRequest', () => {
       id: 'k',
       failTimes: 6
     });
-    const mockRetryFn = jest.fn();
-    const mockFailFn = jest.fn();
-    const mockLoadingChangeFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockFailFn = vi.fn();
+    const mockLoadingChangeFn = vi.fn();
 
     const Page = () => {
-      const { loading, stop, send, error, onFail, onRetry } = useRetriableRequest(methodInstance);
-      onRetry(event => {
-        mockRetryFn();
-        expect(event.retryTimes).toBeLessThanOrEqual(2);
-        // 每次在第二次重试发出后停止第三次重试
-        if (event.retryTimes === 2) {
-          stop();
+      const { loading, stop, send, error } = useRetriableRequest(methodInstance, {
+        backoff: {
+          delay: 50
         }
-      });
-      onFail(event => {
-        mockFailFn();
-        expect(event.retryTimes).toBe(2);
-      });
+      })
+        .onRetry(event => {
+          mockRetryFn();
+          expect(event.retryTimes).toBeLessThanOrEqual(2);
+          // 每次在第二次重试发出后停止第三次重试
+          if (event.retryTimes === 2) {
+            setTimeout(() => {
+              stop();
+            });
+          }
+        })
+        .onFail(event => {
+          mockFailFn();
+          expect(event.retryTimes).toBe(2);
+        });
       useEffect(() => {
         mockLoadingChangeFn();
       }, [loading]);
@@ -488,57 +490,47 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
-    await waitFor(
-      () => {
-        expect(screen.getByRole('status')).toHaveTextContent('loaded');
-        expect(screen.getByRole('error')).toHaveTextContent('stop retry manually');
-        expect(mockRetryFn).toHaveBeenCalledTimes(2);
-        expect(mockFailFn).toHaveBeenCalledTimes(1);
-        /**
-         * loading defaults to true
-         * 1 -> React setup
-         * 2 -> loading from true to false
-         *
-         * reminder: loading from true to false when call `controlLoading`, and set to true synchronously, this situation will not trigger `useEffect`
-         */
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2);
-      },
-      {
-        timeout: 4000
-      }
-    );
+    render(<Page />);
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('error')).toHaveTextContent('stop retry manually');
+      expect(mockRetryFn).toHaveBeenCalledTimes(2);
+      expect(mockFailFn).toHaveBeenCalledTimes(1);
+      /**
+       * loading defaults to true
+       * 1 -> React setup
+       * 2 -> loading from true to false
+       *
+       * reminder: loading from true to false when call `controlLoading`, and set to true synchronously, this situation will not trigger `useEffect`
+       */
+      expect(mockLoadingChangeFn).toHaveBeenCalledTimes(2);
+    });
 
     fireEvent.click(screen.getByRole('btnSend'));
-    await waitFor(
-      () => {
-        expect(screen.getByRole('status')).toHaveTextContent('loaded');
-        expect(screen.getByRole('error')).toHaveTextContent('stop retry manually');
-        expect(mockRetryFn).toHaveBeenCalledTimes(4);
-        expect(mockFailFn).toHaveBeenCalledTimes(2);
-        /**
-         * 3 -> loading from false to true
-         * 4 -> loading from true to false
-         */
-        expect(mockLoadingChangeFn).toHaveBeenCalledTimes(4);
-      },
-      {
-        timeout: 4000
-      }
-    );
-  }, 10000);
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+      expect(screen.getByRole('error')).toHaveTextContent('stop retry manually');
+      expect(mockRetryFn).toHaveBeenCalledTimes(4);
+      expect(mockFailFn).toHaveBeenCalledTimes(2);
+      /**
+       * 3 -> loading from false to true
+       * 4 -> loading from true to false
+       */
+      expect(mockLoadingChangeFn).toHaveBeenCalledTimes(4);
+    });
+  });
 
   test('should reset retry times when send request again', async () => {
     const methodInstance = alovaInst.Post('/detail-error', {
       id: 'j',
       failTimes: 8
     });
-    const mockRetryFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
-    const mockFailFn = jest.fn();
-    const mockLoadingChangeFn = jest.fn();
+    const mockRetryFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
+    const mockFailFn = vi.fn();
+    const mockLoadingChangeFn = vi.fn();
 
     const Page = () => {
       const { loading, error, onError, onComplete, onSuccess, onRetry, onFail, send } =
@@ -572,7 +564,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(
       () => {
         expect(mockErrorFn).toHaveBeenCalledTimes(4);
@@ -612,8 +604,8 @@ describe('react => useRetriableRequest', () => {
 
   test('should access actions by middleware actionDelegation', async () => {
     const methodInstance = alovaInst.Post('/detail');
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
 
     const Page = () => {
       const { loading, error, onComplete, onSuccess } = useRetriableRequest(methodInstance, {
@@ -644,7 +636,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('loaded');
       expect(mockSuccessFn).toHaveBeenCalledTimes(1);
@@ -661,8 +653,8 @@ describe('react => useRetriableRequest', () => {
 
   test('should stop before response', async () => {
     const methodInstance = alovaInst.Get('/query-1s');
-    const mockFailFn = jest.fn();
-    const mockSuccessFn = jest.fn();
+    const mockFailFn = vi.fn();
+    const mockSuccessFn = vi.fn();
 
     const Page = () => {
       const { loading, stop, send, onFail, onSuccess, error } = useRetriableRequest(methodInstance);
@@ -696,7 +688,7 @@ describe('react => useRetriableRequest', () => {
       );
     };
 
-    render((<Page />) as ReactElement<any, any>);
+    render(<Page />);
     delay(100).then(() => {
       fireEvent.click(screen.getByRole('btnStop'));
     });

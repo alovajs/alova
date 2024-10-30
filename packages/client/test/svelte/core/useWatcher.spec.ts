@@ -1,11 +1,11 @@
+import page from '#/svelte/components/page-useWatcher.svelte';
+
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { delay } from 'root/testUtils';
 import pageAbortLast from '../components/page-useWatcher-abortLast.svelte';
 import pageDebounceImmediate from '../components/page-useWatcher-debounce-immediate.svelte';
 import pageDifferentDebounce from '../components/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '../components/page-useWatcher-immediate.svelte';
-import page from '#/svelte/components/page-useWatcher.svelte';
-import '@testing-library/jest-dom';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import { delay } from 'root/testUtils';
 import pageSendable from '../components/page-useWatcher-sendable.svelte';
 
 describe('useWatcher hook with svelte', () => {
@@ -26,7 +26,7 @@ describe('useWatcher hook with svelte', () => {
   });
 
   test('should get the response that request at last when change value', async () => {
-    const mockSuccessFn = jest.fn();
+    const mockSuccessFn = vi.fn();
     render(pageAbortLast, { successFn: mockSuccessFn });
     // 需要暂停一段时间再触发事件和检查响应数据
     await delay(10);
@@ -42,8 +42,8 @@ describe('useWatcher hook with svelte', () => {
   });
 
   test('should ignore the error which is not the last request', async () => {
-    const mockSuccessFn = jest.fn();
-    const mockErrorFn = jest.fn();
+    const mockSuccessFn = vi.fn();
+    const mockErrorFn = vi.fn();
     render(pageAbortLast, { successFn: mockSuccessFn, throwError: true, errorFn: mockErrorFn });
     // 需要暂停一段时间再触发事件和检查响应数据
     await delay(10);
@@ -60,9 +60,9 @@ describe('useWatcher hook with svelte', () => {
     });
   });
 
-  jest.setTimeout(100000);
+  // vi.setConfig({ testTimeout: 1000_000 });
   test('should receive last response when set abortLast to false', async () => {
-    const mockSuccessFn = jest.fn();
+    const mockSuccessFn = vi.fn();
     render(pageAbortLast, { successFn: mockSuccessFn, abortLast: false });
     // 需要暂停一段时间再触发事件和检查响应数据
     await delay(10);
@@ -78,7 +78,7 @@ describe('useWatcher hook with svelte', () => {
   });
 
   test('should not send request when change value but returns false in sentable', async () => {
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     render(pageSendable, { sendableFn } as any);
 
     // 需要暂停一段时间再触发事件和检查响应数据
@@ -99,7 +99,7 @@ describe('useWatcher hook with svelte', () => {
   });
 
   test('should not send request when change value but throws error in sendable', async () => {
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     render(pageSendable, {
       sendableFn,
       errorInSendable: true
@@ -123,7 +123,7 @@ describe('useWatcher hook with svelte', () => {
   });
 
   test('the loading state should be recovered to false when send request immediately', async () => {
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     render(pageSendable, {
       sendableFn,
       immediate: true

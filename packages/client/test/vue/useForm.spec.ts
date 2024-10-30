@@ -1,9 +1,8 @@
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { getMethodInternalKey } from '@alova/shared/function';
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { AlovaGenerics, Method, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 import { FormHookConfig } from '~/typings/clienthook';
@@ -96,7 +95,7 @@ describe('vue => useForm', () => {
       store: true,
       resetAfterSubmiting: true
     });
-    const restoreMockHandler = jest.fn();
+    const restoreMockHandler = vi.fn();
     onRestore(restoreMockHandler);
 
     await untilCbCalled(setTimeout, 100);
@@ -251,8 +250,8 @@ describe('vue => useForm', () => {
       middleware: actionDelegationMiddleware('test_page')
     });
 
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     onSuccess(successFn);
     onComplete(completeFn);
     await untilCbCalled(onSuccess);

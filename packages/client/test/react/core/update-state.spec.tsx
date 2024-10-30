@@ -3,9 +3,9 @@ import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { updateState, useRequest, useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
 import { key } from '@alova/shared/function';
-import '@testing-library/jest-dom';
+
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Result, delay } from 'root/testUtils';
 
 describe('update cached response data by user in react', () => {
@@ -154,7 +154,7 @@ describe('update cached response data by user in react', () => {
         transform: ({ data }: Result) => data
       });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     function Page() {
       const [strState, setStrState] = useState('a');
       const { data, loading, onSuccess } = useWatcher(() => getter(strState), [strState], {
@@ -223,7 +223,7 @@ describe('update cached response data by user in react', () => {
         transform: ({ data }: Result) => data
       });
 
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     function Page() {
       const [strState, setStrState] = useState('a');
       const { data, loading, onSuccess } = useWatcher(() => getter(strState), [strState], {
