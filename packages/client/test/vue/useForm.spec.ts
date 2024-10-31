@@ -46,18 +46,80 @@ describe('vue => useForm', () => {
       name: 'Ming',
       age: '18'
     };
-    const { form, loading, onSuccess } = useForm(poster, {
+    const {
+      form: form1,
+      loading: loading1,
+      data: data1,
+      onSuccess: onSuccess1
+    } = useForm(poster, {
       initialForm: newForm,
       immediate: true
     });
-    expect(form.value).toStrictEqual(newForm);
-    expect(loading.value).toBeTruthy();
+    expect(form1.value).toStrictEqual(newForm);
+    expect(loading1.value).toBeTruthy();
+
+    const { data: dataRaw1 } = await untilCbCalled(onSuccess1);
+    // 提交后表单数据不重置
+    expect(dataRaw1).toStrictEqual({
+      code: 200,
+      data: newForm
+    });
+    expect(data1.value).toStrictEqual({
+      code: 200,
+      data: newForm
+    });
+
+    const {
+      form: form2,
+      loading: loading2,
+      data: data2,
+      onSuccess: onSuccess2
+    } = useForm(poster, {
+      initialForm: newForm,
+      immediate: true,
+      store: true
+    });
+    expect(form2.value).toStrictEqual(newForm);
+    expect(loading2.value).toBeFalsy(); // 在恢复数据后才请求
+
+    const { data: dataRaw2 } = await untilCbCalled(onSuccess2);
+    // 提交后表单数据不重置
+    expect(dataRaw2).toStrictEqual({
+      code: 200,
+      data: newForm
+    });
+    expect(data2.value).toStrictEqual({
+      code: 200,
+      data: newForm
+    });
+  });
+
+  test('should restore data first and request immediately', async () => {
+    const poster = (form: any) => alovaInst.Post('/saveData', form);
+    const initialForm = {
+      name: '',
+      age: ''
+    };
+    const storagedForm = {
+      name: 'Ming',
+      age: '20'
+    };
+
+    // 预先存储数据，模拟刷新恢复持久化数据
+    const methodStorageKey = getStoragedKey(poster(initialForm));
+    alovaInst.l2Cache.set(methodStorageKey, storagedForm);
+
+    const { form, onSuccess } = useForm(poster, {
+      initialForm,
+      immediate: true,
+      store: true
+    });
 
     const { data } = await untilCbCalled(onSuccess);
     // 提交后表单数据不重置
     expect(data).toStrictEqual({
       code: 200,
-      data: newForm
+      data: form.value
     });
   });
 
