@@ -1,7 +1,7 @@
 import { createSyncOnceRunner, forEach, noop } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { Accessor, createEffect, createMemo, createSignal, on, onCleanup, onMount } from 'solid-js';
-import { SolidHookExportType } from '~/typings/stateshook/solid';
+import type { SolidHookExportType } from '~/typings/stateshook/solid';
 
 // solid hooks predefined
 export default {

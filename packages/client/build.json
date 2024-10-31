@@ -45,5 +45,16 @@
     },
     "formats": ["cjs", "esm"],
     "output": "../alova/dist/stateshook/svelte.{suffix}.{ext}"
+  },
+  "solid": {
+    "packageName": "solidHook",
+    "input": "src/statesHook/solid.ts",
+    "external": {
+      "solid-js": "Solid",
+      "@alova/shared/function": null,
+      "@alova/shared/vars": null,
+      "@alova/shared/assert": null
+    },
+    "output": "../alova/dist/stateshook/solid.{suffix}.{ext}"
   }
 }

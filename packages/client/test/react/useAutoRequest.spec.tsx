@@ -1,7 +1,7 @@
 import { useAutoRequest } from '@/index';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
-import ReactHook from '@/statesHook/react';
+import ReactHook from 'alova/react';
 import { ReactElement } from 'react';
 import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';

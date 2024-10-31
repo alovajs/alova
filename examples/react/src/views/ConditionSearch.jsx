@@ -35,6 +35,7 @@ function View() {
           class="mr-4"
           value={clsName}
           hide-label
+          placeholder="not selected"
           onInput={({ target }) => setClsName(target.value)}
           placeholder="Select class">
           <option value="class1">class 1</option>

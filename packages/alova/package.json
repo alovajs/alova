@@ -103,6 +103,11 @@
       "types": "./typings/stateshook/svelte.d.ts",
       "require": "./dist/stateshook/svelte.common.cjs",
       "default": "./dist/stateshook/svelte.esm.js"
+    },
+    "./solid": {
+      "types": "./typings/stateshook/solid.d.ts",
+      "require": "./dist/stateshook/solid.common.cjs",
+      "default": "./dist/stateshook/solid.esm.js"
     }
   },
   "typesVersions": {
@@ -127,6 +132,9 @@
       ],
       "svelte": [
         "typings/stateshook/svelte.d.ts"
+      ],
+      "solid": [
+        "typings/stateshook/solid.d.ts"
       ]
     }
   },

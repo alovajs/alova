@@ -53,6 +53,7 @@
     <nord-select
       label="Select City"
       value={$form.city}
+      placeholder="not selected"
       on:input={({ target }) => {
         $form.city = target.value;
         send();

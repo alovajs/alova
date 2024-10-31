@@ -1,5 +1,4 @@
 import { useSerialRequest } from '@/index';
-
 import ReactHook from '@/statesHook/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Method, createAlova } from 'alova';
