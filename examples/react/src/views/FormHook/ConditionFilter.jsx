@@ -53,6 +53,7 @@ export default function ConditionFilter() {
         <nord-select
           label="Select City"
           value={form.city}
+          placeholder="not selected"
           onInput={({ target }) => {
             updateForm({ city: target.value });
             send();

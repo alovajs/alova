@@ -71,7 +71,8 @@
   let retryMsgs = [];
 
   const pushMsg = msg => {
-    retryMsgs = [...retryMsgs, `[${formatDate(new Date())}] ${msg}`];
+    msg.content = `[${formatDate(new Date())}] ${msg.content}`;
+    retryMsgs = [...retryMsgs, msg];
   };
 
   const { data, loading, error, send, stop } = useRetriableRequest(() => getRetryData({ id, errTimes }), {
@@ -80,20 +81,28 @@
     backoff
   })
     .onError(() => {
-      pushMsg('Request error, Waiting for next retry');
+      pushMsg({
+        className: 'text-red-500',
+        content: 'Request error, waiting for next retry'
+      });
     })
     .onRetry(event => {
       const numSuffix = ['', 'st', 'nd', 'rd'];
-      pushMsg(
-        `Delayed ${event.retryDelay / 1000} seconds, in the ${event.retryTimes}${numSuffix[event.retryTimes] || 'th'} retrying...`
-      );
+      pushMsg({
+        content: `Delayed ${event.retryDelay / 1000} seconds, in the ${event.retryTimes}${numSuffix[event.retryTimes] || 'th'} retrying...`
+      });
     })
     .onFail(event => {
       if (event.error.message.includes('manually')) {
-        pushMsg('Stopped manually');
+        pushMsg({
+          className: 'text-gray-500',
+          content: 'Stoped manually'
+        });
         return;
       }
-      pushMsg(`Reached maximum retry times of ${event.retryTimes}, retry failed`);
+      pushMsg({
+        content: `Reached maximum retry times of ${event.retryTimes}, retry failed`
+      });
     });
 
   const handleSend = () => {
@@ -134,8 +143,8 @@
           <strong>Retry Info</strong>
         </div>
         <div class="flex flex-col leading-6">
-          {#each retryMsgs as msg (msg)}
-            <span>{msg}</span>
+          {#each retryMsgs as msg (msg.content)}
+            <span class={msg.className}>{msg.content}</span>
           {/each}
         </div>
       </nord-banner>

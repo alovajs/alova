@@ -14,6 +14,7 @@
         @blur="send" />
       <nord-select
         label="Select City"
+        placeholder="not selected"
         v-model="form.city"
         @input="send">
         <option
@@ -71,7 +72,7 @@ const {
 } = useForm(getCityArea, {
   initialForm: {
     search: '',
-    city: ''
+    city: undefined
   },
   initialData: [],
   immediate: true,

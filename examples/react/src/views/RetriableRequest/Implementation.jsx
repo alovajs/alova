@@ -71,7 +71,8 @@ function RetriableRequest({ id }) {
   const { title, retry, backoff, apiErrorTimes: errTimes, stopManually } = retryTypes[id];
   const [retryMsgs, setRetryMsgs] = useState([]);
   const pushMsg = msg => {
-    setRetryMsgs(prev => [...prev, `[${formatDate(new Date())}] ${msg}`]);
+    msg.content = `[${formatDate(new Date())}] ${msg.content}`;
+    setRetryMsgs(prev => [...prev, msg]);
   };
 
   const { data, loading, error, send, stop } = useRetriableRequest(() => getRetryData({ id, errTimes }), {
@@ -80,20 +81,28 @@ function RetriableRequest({ id }) {
     backoff
   })
     .onError(() => {
-      pushMsg('Request error, Waiting for next retry');
+      pushMsg({
+        className: 'text-red-500',
+        content: 'Request error, waiting for next retry'
+      });
     })
     .onRetry(event => {
       const numSuffix = ['', 'st', 'nd', 'rd'];
-      pushMsg(
-        `Delayed ${event.retryDelay / 1000} seconds, in the ${event.retryTimes}${numSuffix[event.retryTimes] || 'th'} retring...`
-      );
+      pushMsg({
+        content: `Delayed ${event.retryDelay / 1000} seconds, in the ${event.retryTimes}${numSuffix[event.retryTimes] || 'th'} retrying...`
+      });
     })
     .onFail(event => {
       if (event.error.message.indexOf('manually') >= 0) {
-        pushMsg('Stoped manually');
+        pushMsg({
+          className: 'text-gray-500',
+          content: 'Stoped manually'
+        });
         return;
       }
-      pushMsg(`Reached maximum retry times of ${event.retryTimes}, retry failed`);
+      pushMsg({
+        content: `Reached maximum retry times of ${event.retryTimes}, retry failed`
+      });
     });
 
   const handleSend = () => {
@@ -133,8 +142,12 @@ function RetriableRequest({ id }) {
               <strong>Retry Info</strong>
             </div>
             <div className="flex flex-col leading-6">
-              {retryMsgs.map(msg => (
-                <span key={msg}>{msg}</span>
+              {retryMsgs.map(({ content, className }) => (
+                <span
+                  key={content}
+                  className={className}>
+                  {content}
+                </span>
               ))}
             </div>
           </nord-banner>
