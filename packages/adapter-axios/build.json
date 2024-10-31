@@ -4,8 +4,6 @@
   "packageName": "AlovaAdapterAxios",
   "external": {
     "axios": "axios",
-    "@alova/shared/function": null,
-    "@alova/shared/vars": null,
-    "@alova/shared/assert": null
+    "@alova/shared": null
   }
 }

@@ -1,4 +1,4 @@
-import { noop } from '@alova/shared/function';
+import { noop } from '@alova/shared';
 import Taro from '@tarojs/taro';
 import { mockStorageContainer, taroDownloadConfig, taroRequestConfig, taroUploadConfig } from '../../test/utils';
 

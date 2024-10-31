@@ -4,18 +4,14 @@
     "input": "src/index.ts",
     "output": "dist/alova.{suffix}.{ext}",
     "external": {
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     }
   },
   "fetch": {
     "packageName": "alovaFetch",
     "input": "src/predefine/adapterFetch.ts",
     "external": {
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     },
     "output": "./dist/adapter/fetch.{suffix}.{ext}"
   }

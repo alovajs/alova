@@ -1,16 +1,19 @@
 import useRequest from '@/hooks/core/useRequest';
+import { statesHookHelper } from '@/util/helper';
 import createSerializerPerformer from '@/util/serializer';
-import createEventManager from '@alova/shared/createEventManager';
 import {
   $self,
+  createEventManager,
+  falseValue,
   getContext,
   getMethodInternalKey,
+  isArray,
   isPlainObject,
   sloughConfig,
-  statesHookHelper,
+  trueValue,
+  undefinedValue,
   walkObject
-} from '@alova/shared/function';
-import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/clienthook';
 

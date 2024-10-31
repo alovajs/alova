@@ -1,4 +1,4 @@
-import { deleteAttr } from '@alova/shared/vars';
+import { deleteAttr } from '@alova/shared';
 import type { MergedStatesMap } from 'alova';
 import { Hook } from '~/typings/clienthook';
 

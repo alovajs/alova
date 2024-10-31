@@ -14,9 +14,9 @@ const basePath = process.cwd();
 const pkgPath = resolve(basePath, './package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, { encoding: 'utf-8' }).toString());
 const { author } = pkg;
-const repository = pkg.repository.url.replace('git', 'https').replace('.git', '');
+const repository = pkg.repository.url.replace('.git', '');
 
-/** @typedef {'cjs' | 'esm' | 'umd'} BuildFormat 目标格式 */
+/** @typedef {'cjs' | 'esm' | 'umd'} BuildFormat target format */
 /**
  * @typedef {Object} BuildOptions
  * @property {import('rollup').ModuleFormat} format
@@ -28,8 +28,8 @@ const repository = pkg.repository.url.replace('git', 'https').replace('.git', ''
 const defaultBuildFormats = ['cjs', 'esm', 'umd'];
 
 /**
- * 输入 build 配置，生成对应的 rollup 配置
- * @param {import('./index').BuildOptions} bundleConfig build.json 中的编译字段
+ * input build config, and generate corresponding rollup config
+ * @param {import('./index').BuildOptions} bundleConfig config in build.json
  * @param {string} version
  * @returns {import('.').MergedRollupBuildOptions[]}
  */
@@ -104,29 +104,30 @@ module.exports = function createRollupConfig(bundleConfig, version) {
      * @returns {string[]}
      */
     function resolveExternal(treeShakenDeps = []) {
-      const externalPackages = [];
-      // 当 external 的属性值设为 null 或 undefined 时，在 umd 中不会作为外部依赖
-
+      let externalPackages = [
+        ...Object.keys(pkg.dependencies || {}),
+        ...Object.keys(pkg.peerDependencies || {}),
+        ...['path', 'url', 'stream'],
+        ...treeShakenDeps
+      ];
+      // when key `external` is null, the umd format file doesn't as an external dep
       if (!env) {
-        // 如果 env 为空，则在 build.json中设置的 external 全部都添加到 externals 中
+        // if env is empty, add all external to externals in build.json
         externalPackages.push(...Object.keys(globalPackages));
       } else {
-        // 否则，仅添加值不为 null 的包到 external 中
+        // otherwise only add key `external` whose value is not null
         Object.keys(globalPackages).forEach(key => {
           const value = globalPackages[key];
           if (value) {
             externalPackages.push(key);
+          } else if (isBrowser) {
+            // remove current package from externalPackages
+            externalPackages = externalPackages.filter(item => item !== key);
           }
         });
       }
 
-      return [
-        ...Object.keys(pkg.dependencies || {}),
-        ...Object.keys(pkg.peerDependencies || {}),
-        ...['path', 'url', 'stream'],
-        ...externalPackages,
-        ...treeShakenDeps
-      ];
+      return externalPackages;
     }
 
     function resolveReplacePlugin() {
@@ -208,7 +209,6 @@ module.exports = function createRollupConfig(bundleConfig, version) {
    */
   function createDTSConfig(output) {
     const configForDTSGenerate = createConfig(output);
-
     configForDTSGenerate.inputOptions.plugins = [
       alias({
         entries
@@ -232,12 +232,9 @@ module.exports = function createRollupConfig(bundleConfig, version) {
   const buildFormats = bundleConfig.formats ?? defaultBuildFormats;
   const outputOptionsArray = buildFormats.map(format => outputConfigs[format]).flat();
 
-  const rollupConfigs = outputOptionsArray.map(config => {
-    if (config.prod) {
-      return createProdConfig(config);
-    }
-    return createDevConfig(config);
-  });
+  const rollupConfigs = outputOptionsArray.map(config =>
+    config.prod ? createProdConfig(config) : createDevConfig(config)
+  );
 
   if (rollupConfigs.length && bundleConfig.withDTS) {
     rollupConfigs.push(createDTSConfig(outputConfigs.esm[0]));

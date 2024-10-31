@@ -1,4 +1,4 @@
-import { trueValue } from '@alova/shared/vars';
+import { trueValue } from '@alova/shared';
 import stringifyVData from './stringifyVData';
 
 /**

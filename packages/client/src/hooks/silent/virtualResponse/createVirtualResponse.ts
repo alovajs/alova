@@ -1,5 +1,14 @@
-import { isPlainObject, newInstance, uuid, walkObject } from '@alova/shared/function';
-import { ObjectCls, defineProperty, isArray, nullValue, undefinedValue } from '@alova/shared/vars';
+import {
+  ObjectCls,
+  defineProperty,
+  isArray,
+  isPlainObject,
+  newInstance,
+  nullValue,
+  undefinedValue,
+  uuid,
+  walkObject
+} from '@alova/shared';
 import { STR_VALUE_OF } from '../globalVariables';
 import Null from './Null';
 import Undefined from './Undefined';

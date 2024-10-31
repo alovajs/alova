@@ -1,7 +1,7 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
 import { accessAction, actionDelegationMiddleware, updateState } from '@/index';
 import reactHook from '@/statesHook/react';
-import { GeneralFn } from '@alova/shared/types';
+import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import { Dispatch, SetStateAction, act, useState } from 'react';

@@ -1,4 +1,4 @@
-import { forEach, objectKeys, setTimeoutFn, undefinedValue } from '@alova/shared/vars';
+import { forEach, objectKeys, setTimeoutFn, undefinedValue } from '@alova/shared';
 import {
   BeforeSilentSubmitHandler,
   SilentFactoryBootOptions,

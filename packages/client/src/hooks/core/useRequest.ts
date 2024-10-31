@@ -1,6 +1,5 @@
 import { EnumHookType } from '@/util/helper';
-import { objAssign } from '@alova/shared/function';
-import { trueValue } from '@alova/shared/vars';
+import { objAssign, trueValue } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaMethodHandler, RequestHookConfig, UseHookExposure } from '~/typings/clienthook';
 import createRequestState from './implements/createRequestState';

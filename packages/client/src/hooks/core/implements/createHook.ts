@@ -1,6 +1,5 @@
 import { EnumHookType } from '@/util/helper';
-import { FrameworkState } from '@alova/shared/FrameworkState';
-import { undefinedValue } from '@alova/shared/vars';
+import { FrameworkState, undefinedValue } from '@alova/shared';
 import type { AlovaGenerics, FrontRequestState, Progress, ReferingObject } from 'alova';
 import { Method } from 'alova';
 import { Hook, UseHookConfig } from '~/typings/clienthook';

@@ -1,5 +1,11 @@
 import { mockRequestAdapter } from '#/mockData';
-import { ScopedSQCompleteEvent, ScopedSQErrorEvent, ScopedSQEvent, ScopedSQSuccessEvent } from '@/event';
+import {
+  AlovaEventBase,
+  ScopedSQCompleteEvent,
+  ScopedSQErrorEvent,
+  ScopedSQEvent,
+  ScopedSQSuccessEvent
+} from '@/event';
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { setSilentFactoryStatus } from '@/hooks/silent/globalVariables';
 import { bootSilentFactory, onSilentSubmitSuccess } from '@/hooks/silent/silentFactory';
@@ -14,7 +20,6 @@ import updateStateEffect from '@/hooks/silent/virtualResponse/updateStateEffect'
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 import { accessAction, actionDelegationMiddleware } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { AlovaEventBase } from '@alova/shared/event';
 import { AlovaGenerics, createAlova } from 'alova';
 import { delay, untilCbCalled } from 'root/testUtils';
 import { SQHookBehavior } from '~/typings/clienthook';

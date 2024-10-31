@@ -1,5 +1,4 @@
-import { instanceOf, isObject, walkObject } from '@alova/shared/function';
-import { isArray, nullValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import { instanceOf, isArray, isObject, nullValue, trueValue, undefinedValue, walkObject } from '@alova/shared';
 import Null from './Null';
 import Undefined from './Undefined';
 import { vDataCollectUnified } from './helper';

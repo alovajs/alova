@@ -1,7 +1,7 @@
 import { SSEHookReadyState } from '@/hooks/useSSE';
 import { useSSE } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { GeneralFn } from '@alova/shared/types';
+import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';

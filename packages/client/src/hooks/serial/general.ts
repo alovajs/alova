@@ -1,5 +1,5 @@
-import { createAssert } from '@alova/shared/assert';
 import {
+  createAssert,
   falseValue,
   isArray,
   len,
@@ -8,7 +8,7 @@ import {
   pushItem,
   trueValue,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings/clienthook';
 

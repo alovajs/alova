@@ -1,4 +1,4 @@
-import { createAssert } from '@alova/shared/assert';
+import { createAssert } from '@alova/shared';
 
 // import { get } from '@alova/shared';
 

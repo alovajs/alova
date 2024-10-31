@@ -1,5 +1,4 @@
-import { isPlainObject } from '@alova/shared/function';
-import { ObjectCls, trueValue } from '@alova/shared/vars';
+import { isPlainObject, ObjectCls, trueValue } from '@alova/shared';
 import { computed, reactive, version } from 'vue';
 import { UseHookCallers, UseHookMapGetter, VueHookMapperMixin } from '~/typings';
 import { classifyHookExposure, extractWatches } from './helper';

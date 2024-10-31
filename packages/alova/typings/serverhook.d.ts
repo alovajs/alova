@@ -1,14 +1,14 @@
 /**
-  * @alova/server 1.0.0-beta.3 (https://alova.js.org)
+  * @alova/server 1.0.0 (https://alova.js.org)
   * Document https://alova.js.org
   * Copyright 2024 Scott hu. All Rights Reserved
-  * Licensed under MIT (https://github.com/alovajs/alova/blob/main/LICENSE)
+  * Licensed under MIT (git://github.com/alovajs/alova/blob/main/LICENSE)
 */
 
 import { AlovaGenerics, Method, AlovaGlobalCacheAdapter } from 'alova';
 import { RateLimiterRes, IRateLimiterStoreOptions } from 'rate-limiter-flexible';
 import RateLimiterStoreAbstract from 'rate-limiter-flexible/lib/RateLimiterStoreAbstract.js';
-import { BackoffPolicy } from '@alova/shared/types';
+import { BackoffPolicy } from '@alova/shared';
 
 type RequestHandler<Responded> = (forceRequest?: boolean) => Promise<Responded>;
 declare class HookedMethod<AG extends AlovaGenerics> extends Method<AG> {

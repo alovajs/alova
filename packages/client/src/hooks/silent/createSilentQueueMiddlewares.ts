@@ -1,18 +1,28 @@
-import { ScopedSQCompleteEvent, ScopedSQErrorEvent, ScopedSQEvent, ScopedSQSuccessEvent } from '@/event';
-import createEventManager, { decorateEvent } from '@alova/shared/createEventManager';
-import { AlovaEventBase } from '@alova/shared/event';
-import { getConfig, isFn, newInstance, sloughConfig, walkObject } from '@alova/shared/function';
+import {
+  AlovaEventBase,
+  ScopedSQCompleteEvent,
+  ScopedSQErrorEvent,
+  ScopedSQEvent,
+  ScopedSQSuccessEvent
+} from '@/event';
 import {
   PromiseCls,
+  createEventManager,
+  decorateEvent,
   falseValue,
+  getConfig,
+  isFn,
   len,
+  newInstance,
   objectKeys,
   promiseResolve,
   promiseThen,
   regexpTest,
+  sloughConfig,
   trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
+  undefinedValue,
+  walkObject
+} from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import {
   AlovaFrontMiddleware,

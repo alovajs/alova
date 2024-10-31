@@ -1,5 +1,15 @@
-import { isFn, isNumber, isString, newInstance, usePromise } from '@alova/shared/function';
-import { falseValue, promiseReject, promiseResolve, trueValue, undefinedValue } from '@alova/shared/vars';
+import {
+  falseValue,
+  isFn,
+  isNumber,
+  isString,
+  newInstance,
+  promiseReject,
+  promiseResolve,
+  trueValue,
+  undefinedValue,
+  usePromise
+} from '@alova/shared';
 import type { AlovaGenerics, Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit } from '~/typings';
 import consoleRequestInfo from './consoleRequestInfo';

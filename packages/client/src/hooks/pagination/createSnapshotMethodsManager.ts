@@ -1,5 +1,4 @@
-import { getMethodInternalKey, instanceOf } from '@alova/shared/function';
-import { falseValue } from '@alova/shared/vars';
+import { falseValue, getMethodInternalKey, instanceOf } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 
 interface SnapshotValue<AG extends AlovaGenerics> {

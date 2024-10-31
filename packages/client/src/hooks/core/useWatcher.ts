@@ -1,6 +1,5 @@
 import { EnumHookType } from '@/util/helper';
-import { objAssign } from '@alova/shared/function';
-import { len } from '@alova/shared/vars';
+import { len, objAssign } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaMethodHandler, UseHookExposure, WatcherHookConfig } from '~/typings/clienthook';
 import { watcherHookAssert } from './implements/assert';

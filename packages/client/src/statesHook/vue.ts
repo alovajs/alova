@@ -1,5 +1,4 @@
-import { createSyncOnceRunner } from '@alova/shared/function';
-import { forEach, setTimeoutFn, trueValue } from '@alova/shared/vars';
+import { createSyncOnceRunner, forEach, setTimeoutFn, trueValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 import { VueHookExportType } from '~/typings/stateshook/vue';

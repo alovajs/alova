@@ -13,8 +13,7 @@ import { push2PersistentSilentQueue } from '@/hooks/silent/storage/silentMethodS
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
 import VueHook from '@/statesHook/vue';
-import createEventManager from '@alova/shared/createEventManager';
-import { usePromise } from '@alova/shared/function';
+import { createEventManager, usePromise } from '@alova/shared';
 import { createAlova, Method } from 'alova';
 import { delay } from 'root/testUtils';
 import { ScopedSQEvents } from '~/typings/clienthook';

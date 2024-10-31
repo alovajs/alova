@@ -1,4 +1,4 @@
-import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared';
 import { StatesExportHelper, StatesHook } from 'alova';
 import {
   ComputedRef,

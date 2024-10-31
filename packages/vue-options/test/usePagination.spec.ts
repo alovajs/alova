@@ -1,5 +1,5 @@
 import { VueOptionsHook } from '@/index';
-import { GeneralFn } from '@alova/shared/types';
+import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import { generateContinuousNumbers } from 'root/testUtils';

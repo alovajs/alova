@@ -1,4 +1,4 @@
-import { BackoffPolicy } from '@alova/shared/types';
+import type { BackoffPolicy } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaErrorEvent, AlovaEvent, AlovaMethodHandler, UseHookExposure } from '../general';
 import { RequestHookConfig } from './useRequest';

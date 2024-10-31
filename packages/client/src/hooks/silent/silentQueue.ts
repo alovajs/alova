@@ -8,30 +8,28 @@ import {
 } from '@/event';
 import updateState from '@/updateState';
 import {
+  PromiseCls,
+  RegExpCls,
   delayWithBackoff,
+  falseValue,
+  forEach,
   instanceOf,
   isObject,
   isString,
-  newInstance,
-  noop,
-  sloughConfig,
-  walkObject
-} from '@alova/shared/function';
-import {
-  PromiseCls,
-  RegExpCls,
-  falseValue,
-  forEach,
   len,
   mapItem,
+  newInstance,
+  noop,
   objectKeys,
   promiseThen,
   pushItem,
   regexpTest,
   setTimeoutFn,
   shift,
-  trueValue
-} from '@alova/shared/vars';
+  sloughConfig,
+  trueValue,
+  walkObject
+} from '@alova/shared';
 import { AlovaGenerics, Method, setCache } from 'alova';
 import { RetryErrorDetailed, SilentMethod, SilentQueueMap, UpdateStateCollection } from '~/typings/clienthook';
 import {

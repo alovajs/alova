@@ -1,5 +1,4 @@
-import { EventManager } from '@alova/shared/createEventManager';
-import { FrameworkState } from '@alova/shared/FrameworkState';
+import { EventManager, FrameworkState, IsAny } from '@alova/shared';
 
 export interface AlovaGenerics<
   R = any,
@@ -52,7 +51,7 @@ export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' 
  * 1. meta: custom metadata type.
  * 2. statesHook: custom the global states hook type.
  */
-interface AlovaCustomTypes {
+export interface AlovaCustomTypes {
   [customKey: string]: any;
 }
 
@@ -168,7 +167,7 @@ export type AlovaMethodConfig<AG extends AlovaGenerics, Responded, Transformed> 
    * method元数据
    */
   meta?: AlovaCustomTypes['meta'];
-} & AG['RequestConfig'];
+} & IsAny<AG['RequestConfig'], {}, AG['RequestConfig']>;
 export type AlovaMethodCreateConfig<AG extends AlovaGenerics, Responded, Transformed> = Partial<MethodRequestConfig> &
   AlovaMethodConfig<AG, Responded, Transformed>;
 

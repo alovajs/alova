@@ -1,6 +1,6 @@
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { getMethodInternalKey } from '@alova/shared/function';
+import { getMethodInternalKey } from '@alova/shared';
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { AlovaGenerics, Method, createAlova } from 'alova';
 import { untilCbCalled } from 'root/testUtils';

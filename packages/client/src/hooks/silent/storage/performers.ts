@@ -1,6 +1,17 @@
 import createSerializerPerformer from '@/util/serializer';
-import { globalToString, instanceOf, isObject, walkObject } from '@alova/shared/function';
-import { falseValue, forEach, includes, isArray, len, objectKeys, undefinedValue } from '@alova/shared/vars';
+import {
+  falseValue,
+  forEach,
+  globalToString,
+  includes,
+  instanceOf,
+  isArray,
+  isObject,
+  len,
+  objectKeys,
+  undefinedValue,
+  walkObject
+} from '@alova/shared';
 import { AlovaGlobalCacheAdapter } from 'alova';
 import { customSerializers, dependentAlovaInstance, silentAssert } from '../globalVariables';
 import createVirtualResponse from '../virtualResponse/createVirtualResponse';

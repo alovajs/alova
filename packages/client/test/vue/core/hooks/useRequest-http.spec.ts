@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
+import { AlovaEventBase } from '@/event';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { AlovaEventBase } from '@alova/shared/event';
 import { queryCache, setCache } from 'alova';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 

@@ -1,4 +1,4 @@
-import { len, objectKeys, pushItem, splice } from '@alova/shared/vars';
+import { len, objectKeys, pushItem, splice } from '@alova/shared';
 import { AlovaGenerics } from 'alova';
 import type { SilentMethod } from '../SilentMethod';
 import {

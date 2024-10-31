@@ -1,4 +1,4 @@
-import { ObjectCls, nullValue, valueObject } from '@alova/shared/vars';
+import { ObjectCls, nullValue, valueObject } from '@alova/shared';
 import { STR_VALUE_OF } from '../globalVariables';
 import { stringifyWithThis } from './stringifyVData';
 

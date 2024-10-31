@@ -1,25 +1,23 @@
 import {
+  deleteAttr,
+  falseValue,
+  forEach,
   getConfig,
   getContextOptions,
   getMethodInternalKey,
   instanceOf,
+  isArray,
   isPlainObject,
   key,
-  noop
-} from '@alova/shared/function';
-import {
-  deleteAttr,
-  falseValue,
-  forEach,
-  isArray,
   len,
   mapItem,
+  noop,
   promiseCatch,
   promiseFinally,
   promiseThen,
   pushItem,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import {
   AbortFunction,
   Alova,

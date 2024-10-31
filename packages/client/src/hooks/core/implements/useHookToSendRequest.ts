@@ -1,15 +1,20 @@
+import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@/event';
 import { EnumHookType } from '@/util/helper';
-import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@alova/shared/event';
 import {
+  falseValue,
   getContext,
   getHandlerMethod,
   getMethodInternalKey,
   newInstance,
   noop,
   omit,
-  sloughConfig
-} from '@alova/shared/function';
-import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+  promiseResolve,
+  promiseThen,
+  pushItem,
+  sloughConfig,
+  trueValue,
+  undefinedValue
+} from '@alova/shared';
 import { AlovaGenerics, Method, Progress, queryCache } from 'alova';
 import {
   AlovaFetcherMiddleware,

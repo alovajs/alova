@@ -1,5 +1,4 @@
-import { getConfig, instanceOf } from '@alova/shared/function';
-import { falseValue, regexpTest, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, getConfig, instanceOf, regexpTest, trueValue, undefinedValue } from '@alova/shared';
 import { SilentQueueMap } from '~/typings/clienthook';
 import { SilentMethod } from '../SilentMethod';
 import { DEFAULT_QUEUE_NAME, silentFactoryStatus } from '../globalVariables';

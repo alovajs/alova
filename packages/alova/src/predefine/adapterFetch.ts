@@ -1,14 +1,16 @@
-import { isSpecialRequestBody, isString, newInstance } from '@alova/shared/function';
 import {
   JSONStringify,
   ObjectCls,
   clearTimeoutTimer,
   falseValue,
+  isSpecialRequestBody,
+  isString,
+  newInstance,
   promiseReject,
   setTimeoutFn,
   trueValue,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaRequestAdapter } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;

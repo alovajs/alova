@@ -1,53 +1,11 @@
 {
-  "assert": {
-    "packageName": "AlovaSharedAssert",
-    "input": "src/assert.ts",
-    "output": "dist/assert.{ext}",
-    "formats": ["esm", "cjs"]
+  "input": "src/index.ts",
+  "output": "dist/alova-shared.{suffix}.{ext}",
+  "packageName": "alovaShared",
+  "formats": ["esm", "cjs"],
+  "external": {
+    "alova": null
   },
-  "function": {
-    "packageName": "AlovaSharedFunction",
-    "input": "src/function.ts",
-    "output": "dist/function.{ext}",
-    "formats": ["esm", "cjs"]
-  },
-  "vars": {
-    "packageName": "AlovaSharedVars",
-    "input": "src/vars.ts",
-    "output": "dist/vars.{ext}",
-    "formats": ["esm", "cjs"]
-  },
-  "types": {
-    "packageName": "AlovaSharedTypes",
-    "input": "src/types.ts",
-    "output": "dist/types.{ext}",
-    "formats": ["esm", "cjs"]
-  },
-  "event": {
-    "packageName": "AlovaSharedEvent",
-    "input": "src/event.ts",
-    "output": "dist/event.{ext}",
-    "formats": ["esm", "cjs"],
-    "external": {
-      "alova": null
-    }
-  },
-  "createEventManager": {
-    "packageName": "AlovaSharedEventManager",
-    "input": "src/createEventManager.ts",
-    "output": "dist/createEventManager.{ext}",
-    "formats": ["esm", "cjs"]
-  },
-  "queueCallback": {
-    "packageName": "AlovaSharedQueueCallback",
-    "input": "src/queueCallback.ts",
-    "output": "dist/queueCallback.{ext}",
-    "formats": ["esm", "cjs"]
-  },
-  "FrameworkState": {
-    "packageName": "AlovaSharedFrameworkState",
-    "input": "src/model/FrameworkState.ts",
-    "output": "dist/model/FrameworkState.{ext}",
-    "formats": ["esm", "cjs"]
-  }
+  "withDTS": true,
+  "dtsOutput": "typings/alova-shared.d.ts"
 }

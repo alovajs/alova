@@ -1,4 +1,4 @@
-import { PromiseCls, forEach, mapItem, objectKeys, pushItem } from '@alova/shared/vars';
+import { PromiseCls, forEach, mapItem, objectKeys, pushItem } from '@alova/shared';
 import { SilentQueueMap } from '~/typings/clienthook';
 import convertPayload2SilentMethod from './convertPayload2SilentMethod';
 import {

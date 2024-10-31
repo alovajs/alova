@@ -3,7 +3,12 @@ import { getRawWithCacheAdapter, getWithCacheAdapter, setWithCacheAdapter } from
 import cloneMethod from '@/utils/cloneMethod';
 import {
   $self,
+  MEMORY,
+  PromiseCls,
+  STORAGE_RESTORE,
   buildCompletedURL,
+  deleteAttr,
+  falseValue,
   getConfig,
   getContext,
   getLocalCacheConfigParam,
@@ -14,20 +19,13 @@ import {
   isSpecialRequestBody,
   newInstance,
   noop,
-  sloughFunction
-} from '@alova/shared/function';
-import {
-  MEMORY,
-  PromiseCls,
-  STORAGE_RESTORE,
-  deleteAttr,
-  falseValue,
   promiseFinally,
   promiseReject,
   promiseThen,
+  sloughFunction,
   trueValue,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import {
   AlovaGenerics,
   AlovaRequestAdapter,

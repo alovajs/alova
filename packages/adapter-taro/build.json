@@ -7,9 +7,7 @@
       "alova": "alova",
       "alova/react": null,
       "@tarojs/taro": null,
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     }
   },
   "vue": {
@@ -20,9 +18,7 @@
       "alova": "alova",
       "alova/vue": null,
       "@tarojs/taro": null,
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     }
   }
 }

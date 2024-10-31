@@ -1,4 +1,4 @@
-import { IsUnknown } from '@alova/shared/types';
+import type { IsUnknown } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import {
   CompleteHandler,

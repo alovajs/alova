@@ -7,8 +7,6 @@
     "alova/vue": null,
     "vue": null,
     "@dcloudio/uni-app": null,
-    "@alova/shared/function": null,
-    "@alova/shared/vars": null,
-    "@alova/shared/assert": null
+    "@alova/shared": null
   }
 }

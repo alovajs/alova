@@ -1,5 +1,15 @@
-import { getContext, getMethodInternalKey, isFn, isObject } from '@alova/shared/function';
-import { falseValue, forEach, isArray, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
+import {
+  falseValue,
+  forEach,
+  getContext,
+  getMethodInternalKey,
+  isArray,
+  isFn,
+  isObject,
+  objectKeys,
+  trueValue,
+  undefinedValue
+} from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook, setCache } from 'alova';
 import { UpdateStateCollection } from '~/typings/clienthook';
 import { coreAssert } from './hooks/core/implements/assert';
