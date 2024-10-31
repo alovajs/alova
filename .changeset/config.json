@@ -7,7 +7,7 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "minor",
-  "ignore": ["@alova/client", "@alova/server", "react-demo", "vue-demo", "svelte-demo", "server-demo"],
+  "ignore": ["@alova/client", "@alova/server", "react-demo", "vue-demo", "svelte-demo", "solid-demo", "server-demo"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
   }

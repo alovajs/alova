@@ -16,6 +16,9 @@ export default mergeConfig(
       react(),
       svelte()
     ],
+    resolve: {
+      conditions: ['development', 'browser']
+    },
     test: {
       exclude: [
         '**/node_modules/**',
@@ -24,7 +27,12 @@ export default mergeConfig(
         '**/.{idea,git,cache,output,temp}/**',
         '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
         'test/ssr'
-      ]
+      ],
+      server: {
+        deps: {
+          inline: [/solid-js/]
+        }
+      }
     }
   })
 );

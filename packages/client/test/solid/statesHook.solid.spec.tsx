@@ -6,7 +6,6 @@ import { renderHook, waitFor } from '@solidjs/testing-library';
 import { ReferingObject } from 'alova';
 import { delay, Result, untilCbCalled } from 'root/testUtils';
 import { createRoot, createSignal } from 'solid-js';
-import { vi } from 'vitest';
 
 const referingObject: ReferingObject = {
   trackedKeys: {},
@@ -39,6 +38,24 @@ describe('Solid statesHook', () => {
     expect(loading()).toBeFalsy();
   });
 
+  test('should request outside component', async () => {
+    const { loading, data, onSuccess } = useRequest(alova.Get<Result>('/unit-test'));
+
+    expect(loading()).toBeTruthy();
+    expect(data()).toBeUndefined();
+    await untilCbCalled(onSuccess);
+    expect(data()).toStrictEqual({
+      code: 200,
+      data: {
+        method: 'GET',
+        params: {},
+        path: '/unit-test'
+      },
+      msg: ''
+    });
+    expect(loading()).toBeFalsy();
+  });
+
   test('computed states', async () =>
     createRoot(dispose => {
       const [count, setCount] = createSignal(1);
@@ -52,30 +69,32 @@ describe('Solid statesHook', () => {
       dispose();
     }));
 
-  test('states should be removed from cache when component is unmounted', async () => {
-    // test onCleanup in effectRequest
-    const alova = getAlovaInstance(Solidhook, {
-      responseExpect: r => r.json()
-    });
-    const Get = alova.Get('unit-test', {
-      transform: ({ data }: Result) => data
-    });
+  test('states should be removed from cache when component is unmounted', async () =>
+    createRoot(async dispose => {
+      // test onCleanup in effectRequest
+      const alova = getAlovaInstance(Solidhook, {
+        responseExpect: r => r.json()
+      });
+      const Get = alova.Get('unit-test', {
+        transform: ({ data }: Result) => data
+      });
 
-    const {
-      result: { data: rrr, onSuccess },
-      cleanup
-    } = renderHook(useRequest, {
-      initialProps: [Get]
-    });
+      const {
+        result: { data: rrr, onSuccess },
+        cleanup
+      } = renderHook(useRequest, {
+        initialProps: [Get]
+      });
 
-    await untilCbCalled(onSuccess);
-    expect(rrr().method).toBe('GET');
-    const { s: { data } = { data: null } } = getStateCache(alova.id, Get.key);
-    expect(data?.v.path).toBe('/unit-test');
-    cleanup();
-    // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
-    expect(getStateCache(alova.id, Get.key)).toStrictEqual({});
-  });
+      await untilCbCalled(onSuccess);
+      expect(rrr().method).toBe('GET');
+      const { s: { data } = { data: null } } = getStateCache(alova.id, Get.key);
+      expect(data?.v.path).toBe('/unit-test');
+      cleanup();
+      // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
+      expect(getStateCache(alova.id, Get.key)).toStrictEqual({});
+      dispose();
+    }));
 
   test('test update function', async () => {
     // test dehydrate
@@ -293,27 +312,32 @@ describe('Solid statesHook', () => {
     // mounted钩子只能在组件挂载时调用一次，监听数据变化不会再调用，而unmounted钩子只能在组件卸载时调用一次
     const mountedMockFn = vi.fn();
     const unmountMockFn = vi.fn();
-    const { result: setCount, cleanup } = renderHook(() => {
-      const [count, setCount] = createSignal(0);
-      Solidhook.onMounted(() => {
-        count();
-        mountedMockFn();
-      }, referingObject);
-      Solidhook.onUnmounted(() => {
-        count();
-        unmountMockFn();
-      }, referingObject);
-      return setCount;
+    return createRoot(async dispose => {
+      const { result: setCount, cleanup } = renderHook(() => {
+        const [count, setCount] = createSignal(0);
+        Solidhook.onMounted(() => {
+          count();
+          mountedMockFn();
+        }, referingObject);
+        Solidhook.onUnmounted(() => {
+          count();
+          unmountMockFn();
+        }, referingObject);
+        return setCount;
+      });
+
+      await delay();
+      expect(mountedMockFn).toHaveBeenCalledTimes(1);
+      setCount(1);
+      await delay();
+      expect(mountedMockFn).toHaveBeenCalledTimes(1);
+      expect(unmountMockFn).not.toHaveBeenCalled();
+      cleanup();
+      await delay(100);
+      expect(mountedMockFn).toHaveBeenCalledTimes(1);
+      expect(unmountMockFn).toHaveBeenCalledTimes(1);
+
+      dispose();
     });
-    await delay();
-    expect(mountedMockFn).toHaveBeenCalledTimes(1);
-    setCount(1);
-    await delay();
-    expect(mountedMockFn).toHaveBeenCalledTimes(1);
-    expect(unmountMockFn).not.toHaveBeenCalled();
-    cleanup();
-    await delay();
-    expect(mountedMockFn).toHaveBeenCalledTimes(1);
-    expect(unmountMockFn).toHaveBeenCalledTimes(1);
   });
 });
