@@ -1,4 +1,4 @@
-import { isPlainObject, noop } from '@alova/shared/function';
+import { isPlainObject, noop } from '@alova/shared';
 import Taro from '@tarojs/taro';
 import { Arg, ProgressUpdater } from 'alova';
 import { TaroRequestAdapter } from '~/typings';

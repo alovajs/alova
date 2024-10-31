@@ -8,7 +8,7 @@ import Null from '@/hooks/silent/virtualResponse/Null';
 import Undefined from '@/hooks/silent/virtualResponse/Undefined';
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 import VueHook from '@/statesHook/vue';
-import createEventManager from '@alova/shared/createEventManager';
+import { createEventManager } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, createAlova, Method } from 'alova';
 import GlobalFetch from 'alova/fetch';
 

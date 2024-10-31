@@ -1,7 +1,7 @@
 import { AlovaSSEMessageEvent } from '@/event';
 import { useSSE } from '@/index';
 import ReactHook from '@/statesHook/react';
-import { undefinedValue } from '@alova/shared/vars';
+import { undefinedValue } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';

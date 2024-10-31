@@ -1,18 +1,23 @@
-import { debounce, EnumHookType, mapObject } from '@/util/helper';
-import createEventManager from '@alova/shared/createEventManager';
+import { debounce, EnumHookType, mapObject, statesHookHelper } from '@/util/helper';
 import {
   buildNamespacedCacheKey,
+  createEventManager,
+  falseValue,
+  forEach,
   getContext,
   getHandlerMethod,
   getMethodInternalKey,
   getTime,
   instanceOf,
+  isArray,
   isFn,
   isNumber,
+  promiseCatch,
+  PromiseCls,
   sloughConfig,
-  statesHookHelper
-} from '@alova/shared/function';
-import { falseValue, forEach, isArray, promiseCatch, PromiseCls, trueValue, undefinedValue } from '@alova/shared/vars';
+  trueValue,
+  undefinedValue
+} from '@alova/shared';
 import type { AlovaGlobalCacheAdapter, Method, Progress } from 'alova';
 import { AlovaGenerics, globalConfigMap, promiseStatesHook } from 'alova';
 import {

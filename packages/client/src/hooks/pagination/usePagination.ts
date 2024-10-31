@@ -1,27 +1,24 @@
 import useFetcher from '@/hooks/core/useFetcher';
 import useWatcher from '@/hooks/core/useWatcher';
-import { createAssert } from '@alova/shared/assert';
+import { statesHookHelper } from '@/util/helper';
 import {
-  createAsyncQueue,
-  getLocalCacheConfigParam,
-  getMethodInternalKey,
-  getTime,
-  isFn,
-  isNumber,
-  noop,
-  statesHookHelper,
-  usePromise
-} from '@alova/shared/function';
-import { GeneralFn } from '@alova/shared/types';
-import {
+  GeneralFn,
   MEMORY,
+  createAssert,
+  createAsyncQueue,
   falseValue,
   filterItem,
   forEach,
+  getLocalCacheConfigParam,
+  getMethodInternalKey,
+  getTime,
   includes,
   isArray,
+  isFn,
+  isNumber,
   len,
   mapItem,
+  noop,
   objectKeys,
   objectValues,
   promiseCatch,
@@ -29,8 +26,9 @@ import {
   pushItem,
   splice,
   trueValue,
-  undefinedValue
-} from '@alova/shared/vars';
+  undefinedValue,
+  usePromise
+} from '@alova/shared';
 import { Alova, AlovaGenerics, Method, invalidateCache, promiseStatesHook, queryCache, setCache } from 'alova';
 import { FetcherType, PaginationHookConfig } from '~/typings/clienthook';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';

@@ -1,6 +1,4 @@
-import { EventManager } from '@alova/shared/createEventManager';
-import { uuid } from '@alova/shared/function';
-import { isArray, splice, undefinedValue } from '@alova/shared/vars';
+import { EventManager, isArray, splice, undefinedValue, uuid } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import type {
   BackoffPolicy,

@@ -1,6 +1,5 @@
 import updateState from '@/updateState';
-import { isFn } from '@alova/shared/function';
-import { objectKeys, undefinedValue } from '@alova/shared/vars';
+import { isFn, objectKeys, undefinedValue } from '@alova/shared';
 import { currentSilentMethod } from '../createSilentQueueMiddlewares';
 
 /**

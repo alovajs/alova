@@ -1,4 +1,4 @@
-import { falseValue, regexpTest } from '@alova/shared/vars';
+import { falseValue, regexpTest } from '@alova/shared';
 import stringifyVData from './stringifyVData';
 import { regVDataId } from './variables';
 

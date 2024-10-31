@@ -1,16 +1,19 @@
-import { buildNamespacedCacheKey, getTime, instanceOf, newInstance } from '@alova/shared/function';
 import {
   PromiseCls,
   RegExpCls,
+  buildNamespacedCacheKey,
   deleteAttr,
   filterItem,
   forEach,
+  getTime,
+  instanceOf,
   len,
   mapItem,
+  newInstance,
   objectKeys,
   pushItem,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaGenerics, AlovaGlobalCacheAdapter, AlovaMethodConfig, DetailCacheConfig, Method } from '~/typings';
 
 type UniqueKeyPromised = Record<string, 0>;

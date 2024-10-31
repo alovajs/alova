@@ -1,5 +1,4 @@
-import { newInstance } from '@alova/shared/function';
-import { pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+import { newInstance, pushItem, trueValue, undefinedValue } from '@alova/shared';
 import {
   AlovaDefaultCacheAdapter,
   AlovaGenerics,

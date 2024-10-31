@@ -11,8 +11,7 @@ import {
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import VueHook from '@/statesHook/vue';
-import createEventManager from '@alova/shared/createEventManager';
-import { usePromise } from '@alova/shared/function';
+import { createEventManager, usePromise } from '@alova/shared';
 import { Method, createAlova } from 'alova';
 import { delay } from 'root/testUtils';
 import { ScopedSQEvents } from '~/typings/clienthook';

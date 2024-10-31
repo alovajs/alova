@@ -1,4 +1,4 @@
-import { EventManager } from '@alova/shared/createEventManager';
+import type { EventManager } from '@alova/shared';
 import { Alova, AlovaGenerics, Method } from 'alova';
 import { AlovaCompleteEvent, AlovaEvent, AlovaMethodHandler, UseHookExposure } from '../general';
 import { updateState } from './updateState';

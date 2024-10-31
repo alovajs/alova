@@ -1,5 +1,4 @@
-import { $self, noop } from '@alova/shared/function';
-import { falseValue } from '@alova/shared/vars';
+import { $self, falseValue, noop } from '@alova/shared';
 import { AlovaRequestAdapter, Method, StatesHook } from 'alova';
 import { FetchRequestAdapter } from 'alova/fetch';
 import {

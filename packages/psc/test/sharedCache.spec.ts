@@ -1,7 +1,6 @@
 import { ElectronSyncAdapter, NodeSyncAdapter, createNodePSCSynchronizer } from '@/index';
 import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
-import { key } from '@alova/shared/function';
-import { forEach } from '@alova/shared/vars';
+import { forEach, key } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, createAlova, queryCache } from 'alova';
 import GlobalFetch from 'alova/fetch';
 import { IpcMain, IpcRenderer } from 'electron';

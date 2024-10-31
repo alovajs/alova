@@ -1,5 +1,4 @@
-import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
-import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import { createSyncOnceRunner, falseValue, isNumber, noop, trueValue, undefinedValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactHookExportType, ReactState } from '~/typings/stateshook/react';

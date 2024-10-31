@@ -1,6 +1,16 @@
 import myAssert from '@/utils/myAssert';
-import { getConfig, instanceOf, isFn, isPlainObject, isString, newInstance } from '@alova/shared/function';
-import { RegExpCls, filterItem, forEach, objectKeys } from '@alova/shared/vars';
+import {
+  RegExpCls,
+  filterItem,
+  forEach,
+  getConfig,
+  instanceOf,
+  isFn,
+  isPlainObject,
+  isString,
+  newInstance,
+  objectKeys
+} from '@alova/shared';
 import { AlovaGenerics, Method, MethodDetaiedFilter, MethodFilter, MethodFilterHandler } from '~/typings';
 
 const SetCls = Set;

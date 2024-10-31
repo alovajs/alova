@@ -1,5 +1,4 @@
-import { isObject } from '@alova/shared/function';
-import { ObjectCls, trueValue } from '@alova/shared/vars';
+import { isObject, ObjectCls, trueValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { VueOptionExportType } from '~/typings';
 

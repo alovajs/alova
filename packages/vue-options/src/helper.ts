@@ -1,6 +1,4 @@
-import { isFn } from '@alova/shared/function';
-import { GeneralFn } from '@alova/shared/types';
-import { ObjectCls, objectKeys } from '@alova/shared/vars';
+import { GeneralFn, isFn, ObjectCls, objectKeys } from '@alova/shared';
 import { OptionsComputed, OptionsState } from '~/typings';
 
 /**

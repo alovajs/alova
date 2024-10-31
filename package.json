@@ -36,7 +36,7 @@
   ],
   "packageManager": "pnpm@9.1.0",
   "scripts": {
-    "build": "turbo run build --filter=./packages/*",
+    "build": "turbo run build --filter=./packages/client",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint",
@@ -124,7 +124,7 @@
     "rimraf": "5.0.9",
     "rollup": "^4.22.4",
     "rollup-plugin-dts": "^6.1.1",
-    "solid-js": "^1.8.19",
+    "solid-js": "^1.9.3",
     "svelte": "^3.59.2",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",

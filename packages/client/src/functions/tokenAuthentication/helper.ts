@@ -1,5 +1,18 @@
-import { instanceOf, isFn, isPlainObject, newInstance, noop } from '@alova/shared/function';
-import { PromiseCls, falseValue, forEach, len, pushItem, splice, trueValue, undefinedValue } from '@alova/shared/vars';
+import {
+  PromiseCls,
+  falseValue,
+  forEach,
+  instanceOf,
+  isFn,
+  isPlainObject,
+  len,
+  newInstance,
+  noop,
+  pushItem,
+  splice,
+  trueValue,
+  undefinedValue
+} from '@alova/shared';
 import {
   AlovaRequestAdapter,
   Method,

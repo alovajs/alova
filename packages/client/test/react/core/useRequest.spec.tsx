@@ -2,8 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
-import { key } from '@alova/shared/function';
-
+import { key } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';

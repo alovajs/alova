@@ -1,6 +1,6 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
 import AdapterUniapp from '@/index';
-import { noop } from '@alova/shared/function';
+import { noop } from '@alova/shared';
 import { createAlova } from 'alova';
 import { useRequest } from 'alova/client';
 import { delay, untilCbCalled } from 'root/testUtils';

@@ -15,7 +15,7 @@ export interface EventManager<E extends object> {
 type EventMap<E extends object> = {
   [K in keyof E]?: ((event: E[K]) => void)[];
 };
-const createEventManager = <E extends object>() => {
+export const createEventManager = <E extends object>() => {
   const eventMap: EventMap<E> = {};
   return {
     eventMap,
@@ -45,8 +45,6 @@ const createEventManager = <E extends object>() => {
     }
   } as EventManager<E>;
 };
-
-export default createEventManager;
 
 export const decorateEvent = <OnEvent extends (handler: (event: any) => void) => any>(
   onEvent: OnEvent,

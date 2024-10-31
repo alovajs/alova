@@ -1,6 +1,4 @@
-import createEventManager from '@alova/shared/createEventManager';
-import { newInstance } from '@alova/shared/function';
-import { forEach, includes, objectKeys, trueValue } from '@alova/shared/vars';
+import { createEventManager, forEach, includes, newInstance, objectKeys, trueValue } from '@alova/shared';
 import { Method } from 'alova';
 import { ScopedSQEvents } from '~/typings/clienthook';
 import { SerializedSilentMethod, SilentMethod } from '../SilentMethod';

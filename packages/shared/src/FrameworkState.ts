@@ -1,4 +1,4 @@
-import { GeneralState } from '../types';
+import { GeneralState } from './types';
 
 type UpdateFn<Data> = (state: GeneralState<Data>, newValue: Data) => void;
 type DehydrateFn<Data> = (state: GeneralState<Data>) => Data;

@@ -1,7 +1,6 @@
 import HookedMethod from '@/HookedMethod';
 import { createServerHook } from '@/helper';
-import { createAssert } from '@alova/shared/assert';
-import { getOptions, isFn, uuid } from '@alova/shared/function';
+import { createAssert, getOptions, isFn, uuid } from '@alova/shared';
 import { AlovaGenerics, AlovaGlobalCacheAdapter, Method } from 'alova';
 import { IRateLimiterStoreOptions, RateLimiterRes } from 'rate-limiter-flexible';
 import RateLimiterStoreAbstract from 'rate-limiter-flexible/lib/RateLimiterStoreAbstract.js';

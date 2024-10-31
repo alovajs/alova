@@ -1,4 +1,4 @@
-import { JSONStringify, undefinedValue } from '@alova/shared/vars';
+import { JSONStringify, undefinedValue } from '@alova/shared';
 import { AlovaXHRResponseHeaders } from '~/typings';
 
 /**

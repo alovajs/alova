@@ -2,7 +2,7 @@
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import { useRequest } from '@/index';
 import VueHook, { type VueHookType } from '@/statesHook/vue';
-import type { Equal } from '@alova/shared/types';
+import type { Equal } from '@alova/shared';
 import { Alova, createAlova, Method } from 'alova';
 import adapterFetch from 'alova/fetch';
 import { delay } from 'msw';

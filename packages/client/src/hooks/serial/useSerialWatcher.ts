@@ -1,7 +1,6 @@
 import useWatcher from '@/hooks/core/useWatcher';
-import { decorateEvent } from '@alova/shared/createEventManager';
-import { statesHookHelper } from '@alova/shared/function';
-import { len } from '@alova/shared/vars';
+import { statesHookHelper } from '@/util/helper';
+import { decorateEvent, len } from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, RequestHookConfig } from '~/typings/clienthook';
 import { assertSerialHandlers, serialMiddleware } from './general';

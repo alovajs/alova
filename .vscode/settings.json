@@ -10,5 +10,8 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"
-  }
+  },
+  "commentTranslate.multiLineMerge": true,
+  "commentTranslate.browse.mode": "contrast",
+  "commentTranslate.targetLanguage": "en"
 }

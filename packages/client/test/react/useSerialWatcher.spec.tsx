@@ -1,6 +1,5 @@
 import { useSerialWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
-import { undefinedValue } from '@alova/shared/vars';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Method, createAlova } from 'alova';
 import { ReactElement, useState } from 'react';
@@ -16,7 +15,7 @@ describe('react => useSerialWatcher', () => {
   test("should throws a error when don't pass a method handlers array", async () => {
     const methodInstance = alovaInst.Post('/detail');
     const Page = () => {
-      const [error, setError] = useState(undefinedValue as Error | undefined);
+      const [error, setError] = useState(undefined as Error | undefined);
       try {
         useSerialWatcher(methodInstance as any, []);
       } catch (err: any) {

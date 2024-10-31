@@ -1,4 +1,4 @@
-import { GeneralFn } from '@alova/shared/types';
+import { GeneralFn } from '@alova/shared';
 import { StatesExportHelper, StatesHook } from 'alova';
 
 export interface OptionsState<T> {

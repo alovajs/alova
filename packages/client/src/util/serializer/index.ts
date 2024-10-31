@@ -1,5 +1,4 @@
-import { isObject, walkObject } from '@alova/shared/function';
-import { ObjectCls, falseValue, isArray, len, objectKeys, undefinedValue } from '@alova/shared/vars';
+import { ObjectCls, falseValue, isArray, isObject, len, objectKeys, undefinedValue, walkObject } from '@alova/shared';
 import { DataSerializer } from '~/typings/clienthook';
 import dateSerializer from './date';
 import regexpSerializer from './regexp';

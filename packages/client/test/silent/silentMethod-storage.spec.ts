@@ -5,7 +5,7 @@ import loadSilentQueueMapFromStorage from '@/hooks/silent/storage/loadSilentQueu
 import { silentMethodIdQueueMapStorageKey, silentMethodStorageKeyPrefix } from '@/hooks/silent/storage/performers';
 import { spliceStorageSilentMethod } from '@/hooks/silent/storage/silentMethodStorage';
 import VueHook from '@/statesHook/vue';
-import createEventManager from '@alova/shared/createEventManager';
+import { createEventManager } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, Method, createAlova } from 'alova';
 import { mockRequestAdapter } from '../mockData';
 

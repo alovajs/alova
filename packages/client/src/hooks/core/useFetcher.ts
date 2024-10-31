@@ -1,6 +1,5 @@
 import { EnumHookType } from '@/util/helper';
-import { noop, objAssign } from '@alova/shared/function';
-import { deleteAttr } from '@alova/shared/vars';
+import { deleteAttr, noop, objAssign } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import type { FetcherHookConfig, FetcherType } from '~/typings/clienthook';
 import { assertMethod, fetcherHookAssert } from './implements/assert';

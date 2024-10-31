@@ -1,4 +1,4 @@
-import { isSpecialRequestBody } from '@alova/shared/function';
+import { isSpecialRequestBody } from '@alova/shared';
 import { MockResponse } from '~/typings';
 
 /**

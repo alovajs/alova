@@ -1,7 +1,6 @@
 import useRequest from '@/hooks/core/useRequest';
-import { AlovaError, createAssert } from '@alova/shared/assert';
-import { newInstance, statesHookHelper } from '@alova/shared/function';
-import { PromiseCls, falseValue, undefinedValue } from '@alova/shared/vars';
+import { statesHookHelper } from '@/util/helper';
+import { AlovaError, PromiseCls, createAssert, falseValue, newInstance, undefinedValue } from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, CaptchaHookConfig } from '~/typings/clienthook';
 

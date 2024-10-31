@@ -1,21 +1,23 @@
-import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
-import { getHandlerMethod, throwFn, useCallback } from '@/util/helper';
-import { createAssert } from '@alova/shared/assert';
-import createEventManager from '@alova/shared/createEventManager';
-import { AlovaEventBase } from '@alova/shared/event';
+import { AlovaEventBase, AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
+import { getHandlerMethod, statesHookHelper, throwFn, useCallback } from '@/util/helper';
 import {
   $self,
+  UsePromiseExposure,
   buildCompletedURL,
+  createAssert,
+  createEventManager,
+  falseValue,
   getConfig,
   getOptions,
   isFn,
   isPlainObject,
   noop,
-  statesHookHelper,
+  promiseFinally,
+  promiseThen,
+  trueValue,
+  undefinedValue,
   usePromise
-} from '@alova/shared/function';
-import { UsePromiseExposure } from '@alova/shared/types';
-import { falseValue, promiseFinally, promiseThen, trueValue, undefinedValue } from '@alova/shared/vars';
+} from '@alova/shared';
 import {
   AlovaGenerics,
   Method,

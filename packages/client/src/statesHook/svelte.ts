@@ -1,5 +1,4 @@
-import { createSyncOnceRunner } from '@alova/shared/function';
-import { falseValue, forEach, trueValue } from '@alova/shared/vars';
+import { createSyncOnceRunner, falseValue, forEach, trueValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { onDestroy, onMount } from 'svelte';
 import { derived, writable } from 'svelte/store';
@@ -23,7 +22,9 @@ export default {
   effectRequest({ handler, removeStates, immediate, watchingStates }) {
     // Remove the corresponding state when the component is unmounted
     onDestroy(removeStates);
-    onMount(() => immediate && handler());
+    onMount(() => {
+      immediate && handler();
+    });
 
     let needEmit = falseValue;
     const syncRunner = createSyncOnceRunner(10);

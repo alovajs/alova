@@ -1,4 +1,4 @@
-import { undefinedValue } from '@alova/shared/vars';
+import { undefinedValue } from '@alova/shared';
 import { vDataIdCollectBasket } from '../globalVariables';
 import { symbolVDataId } from './variables';
 

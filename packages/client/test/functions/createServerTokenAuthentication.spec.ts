@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createServerTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import VueHook, { type VueHookType } from '@/statesHook/vue';
-import type { Equal } from '@alova/shared/types';
+import type { Equal } from '@alova/shared';
 import { Alova, createAlova, Method } from 'alova';
 import { useRequest } from 'alova/client';
 import adapterFetch from 'alova/fetch';

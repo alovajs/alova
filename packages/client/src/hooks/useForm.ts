@@ -1,16 +1,19 @@
 import useRequest from '@/hooks/core/useRequest';
+import { statesHookHelper } from '@/util/helper';
 import createSerializerPerformer from '@/util/serializer';
-import createEventManager from '@alova/shared/createEventManager';
 import {
   $self,
+  createEventManager,
+  falseValue,
   getContext,
   getMethodInternalKey,
+  isArray,
   isPlainObject,
   sloughConfig,
-  statesHookHelper,
+  trueValue,
+  undefinedValue,
   walkObject
-} from '@alova/shared/function';
-import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/clienthook';
 
@@ -41,10 +44,10 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   let { memorize } = promiseStatesHook();
   memorize ??= $self;
   const {
-    create: $,
+    create,
     ref: useFlag$,
-    onMounted: onMounted$,
-    watch: watch$,
+    onMounted,
+    watch,
     objectify,
     exposeProvider,
     __referingObj: referingObject
@@ -54,7 +57,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   // 如果config中的id也有对应的共享状态，则也会返回它
   // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
   const sharedState = id ? typedSharedStates[id] : undefinedValue;
-  const form = $(cloneFormData(initialForm), 'form');
+  const form = create(cloneFormData(initialForm), 'form');
   const methodHandler = handler;
   const eventManager = createEventManager<{
     [RestoreEventKey]: void;
@@ -136,13 +139,13 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     // 只保存创建hook的共享状态
     if (isCreateShardState.current) {
       typedSharedStates[id] = {
-        hookProvider: hookProvider as any,
+        hookProvider: hookProvider as FormExposure<AG, FormData, Args>,
         config
       };
     }
   }
   const { send, onSuccess } = hookProvider;
-  onMounted$(() => {
+  onMounted(() => {
     // 需要持久化时更新data
     if (enableStore && !sharedState) {
       // 获取存储并更新data
@@ -154,13 +157,13 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
         form.v = storagedForm;
         // 触发持久化数据恢复事件
         eventManager.emit(RestoreEventKey, undefinedValue);
-        enableStore && immediate && send(...([] as unknown as [...Args, any[]]));
       }
+      enableStore && immediate && send(...([] as unknown as [...Args, any[]]));
     }
   });
 
   // 监听变化同步存储，如果是reset触发的则不需要再序列化
-  watch$([form], () => {
+  watch([form], () => {
     if (reseting.current || !enableStore) {
       reseting.current = falseValue;
       return;

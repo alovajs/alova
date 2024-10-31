@@ -1,5 +1,5 @@
 import AdapterTaro from '@/adapterVue';
-import { noop } from '@alova/shared/function';
+import { noop } from '@alova/shared';
 import Taro from '@tarojs/taro';
 import { createAlova } from 'alova';
 import { useRequest } from 'alova/client';

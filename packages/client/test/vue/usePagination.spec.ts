@@ -1,6 +1,6 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
 import { accessAction, actionDelegationMiddleware, updateState, usePagination } from '@/index';
-import { GeneralFn } from '@alova/shared/types';
+import { GeneralFn } from '@alova/shared';
 
 import vueHook from '@/statesHook/vue';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';

@@ -1,6 +1,4 @@
-import { createAssert } from '@alova/shared/assert';
-import createEventManager from '@alova/shared/createEventManager';
-import { isArray } from '@alova/shared/vars';
+import { createAssert, createEventManager, isArray } from '@alova/shared';
 import { Alova, AlovaGenerics } from 'alova';
 import {
   DataSerializer,
