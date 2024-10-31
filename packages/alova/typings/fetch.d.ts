@@ -3,7 +3,7 @@ import { AlovaRequestAdapter } from '.';
 export type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 
 /**
- * adapterFetch请求适配器
+ * fetch request adapter
  */
 export type FetchRequestAdapter = AlovaRequestAdapter<FetchRequestInit, Response, Headers>;
 

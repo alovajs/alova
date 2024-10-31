@@ -12,7 +12,7 @@ import { createEventManager } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, createAlova, Method } from 'alova';
 import GlobalFetch from 'alova/fetch';
 
-// 虚拟响应测试
+// virtual response test
 describe('serialized storage with virtual response', () => {
   test('add custom serializers', () => {
     setCustomSerializers({
@@ -22,7 +22,7 @@ describe('serialized storage with virtual response', () => {
       }
     });
 
-    // 新增一个自定义序列化器
+    // Add a custom serializer
     expect(Object.keys(customSerializers)).toHaveLength(1);
   });
 
@@ -96,7 +96,7 @@ describe('serialized storage with virtual response', () => {
     const serializedObj = mockStorage[storageKey] as SerializedSilentMethod;
     expect(typeof serializedObj.id).toBe('string');
 
-    // 序列化的内容需要和原始数据一致，包括虚拟数据id
+    // The serialized content needs to be consistent with the original data, including virtual data ID
     expect(serializedObj.behavior).toBe('silent');
     expect(serializedObj.entity.config).toStrictEqual({
       cacheFor: {

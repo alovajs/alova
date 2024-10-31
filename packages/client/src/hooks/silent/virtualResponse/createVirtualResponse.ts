@@ -16,8 +16,8 @@ import { stringifyWithThis } from './stringifyVData';
 import { symbolOriginal, symbolVDataId } from './variables';
 
 /**
- * 创建虚拟响应数据
- * @returns 虚拟响应数据代理实例
+ * Create dummy response data
+ * @returns Virtual response data proxy instance
  */
 export default (structure: any, vDataId = uuid()) => {
   const transform2VData = (value: any, vDataIdInner = uuid()) => {

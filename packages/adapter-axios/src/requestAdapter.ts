@@ -4,7 +4,7 @@ import axios, { AxiosResponseHeaders } from 'axios';
 import { AdapterCreateOptions, AxiosRequestAdapter } from '~/typings';
 
 /**
- * axios请求适配器
+ * axios request adapter
  */
 export default function requestAdapter(options: AdapterCreateOptions = {}) {
   const adaptedAxiosInstance = options.axios || axios;
@@ -21,14 +21,14 @@ export default function requestAdapter(options: AdapterCreateOptions = {}) {
       timeout: timeout || method.config.timeout,
       data: method.data,
       signal: controller.signal,
-      // `onUploadProgress` 允许为上传处理进度事件
+      // `onUploadProgress` allows handling progress events for uploads
       onUploadProgress:
         process.env.NODE_ENV !== 'test'
           ? event => {
               uploadHandler(event.loaded, event.total || 1);
             }
           : undefinedValue,
-      // `onDownloadProgress` 允许为下载处理进度事件
+      // `onDownloadProgress` allows handling progress events for downloads
       onDownloadProgress: event => {
         downloadHandler(event.loaded, event.total || 1);
       },

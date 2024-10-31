@@ -18,7 +18,7 @@ Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
 let port = 0;
 beforeAll(() => {
   port = (server.listen().address() as AddressInfo).port;
-  // 关掉默认的server，避免抛出大量警告
+  // Turn off the default server to avoid throwing a lot of warnings
   mockServer.close();
 });
 afterAll(() => {
@@ -28,7 +28,7 @@ afterAll(() => {
 type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
 
 /**
- * 准备 Alova 实例环境，并且开始 SSE 服务器的监听
+ * Prepare the Alova instance environment and start monitoring the SSE server
  */
 const prepareAlova = async () =>
   createAlova({
@@ -39,7 +39,7 @@ const prepareAlova = async () =>
   });
 
 describe('react => useSSE', () => {
-  // ! 无初始数据，不立即发送请求
+  // ! No initial data, do not send request immediately
   test('should default not request immediately', async () => {
     const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
@@ -83,7 +83,7 @@ describe('react => useSSE', () => {
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
 
-    // 如果 immediate 有问题，1000ms 内就会得到至少一个 interval 消息
+    // If there is a problem with immediate, you will get at least one interval message within 1000ms.
     await delay(1000);
 
     expect(screen.getByRole('status')).toHaveTextContent('closed');
@@ -106,7 +106,7 @@ describe('react => useSSE', () => {
     expect(screen.getByRole('status')).toHaveTextContent('closed');
   });
 
-  // ! 有初始数据，不立即发送请求
+  // ! There is initial data and the request is not sent immediately
   test('should get the initial data and NOT send request immediately', async () => {
     const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
@@ -149,7 +149,7 @@ describe('react => useSSE', () => {
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
-    // 如果 immediate 有问题，1000ms 内就会得到至少一个 interval 消息
+    // If there is a problem with immediate, you will get at least one interval message within 1000ms.
     await delay(1000);
 
     expect(screen.getByRole('status')).toHaveTextContent('closed');
@@ -158,17 +158,17 @@ describe('react => useSSE', () => {
     expect(mockOpenFn).not.toHaveBeenCalled();
     expect(mockOnFn).not.toHaveBeenCalled();
 
-    // 服务器发送信息
+    // Server sends information
     await serverSend(testDataA);
     await delay(300);
 
-    // 此时还没有调用 send，不应该收到信息
+    // Send has not been called at this time and the message should not be received.
     expect(screen.getByRole('status')).toHaveTextContent('closed');
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
     expect(mockOnFn).not.toHaveBeenCalled();
     expect(mockOpenFn).not.toHaveBeenCalled();
 
-    // 调用 send 连接服务器，并使服务器发送信息
+    // Call send to connect to the server and let the server send information
     fireEvent.click(screen.getByRole('btn'));
     delay(300).then(() => {
       serverSend(testDataB);
@@ -184,7 +184,7 @@ describe('react => useSSE', () => {
     );
   });
 
-  // ! 有初始数据，立即发送请求
+  // ! With initial data, send the request immediately
   test('should get the initial data and send request immediately', async () => {
     const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
@@ -236,7 +236,7 @@ describe('react => useSSE', () => {
     );
   });
 
-  // ! 测试关闭后重新连接
+  // !Test reconnect after closing
   test('should not trigger handler after close', async () => {
     const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
@@ -285,7 +285,7 @@ describe('react => useSSE', () => {
       expect(screen.getByRole('data')).toBeEmptyDOMElement();
     });
 
-    // 测试发送数据 A
+    // Test sending data A
     await serverSend(testDataA);
     await waitFor(() => {
       expect(mockOnMessageFn).toHaveBeenCalledTimes(1);
@@ -294,13 +294,13 @@ describe('react => useSSE', () => {
       expect(screen.getByRole('data')).toHaveTextContent(testDataA);
     });
 
-    // 关闭连接
+    // close connection
     fireEvent.click(screen.getByRole('close'));
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('closed');
     });
 
-    // 测试发送数据 B，连接已经关闭，不应该触发事件，数据也应该不变
+    // Test sending data B, the connection has been closed, the event should not be triggered, and the data should remain unchanged.
     await serverSend(testDataB);
     await waitFor(() => {
       expect(mockOnMessageFn).toHaveBeenCalledTimes(1);
@@ -308,7 +308,7 @@ describe('react => useSSE', () => {
       expect(screen.getByRole('data')).toHaveTextContent(testDataA);
     });
 
-    // 重新连接若干次。。。
+    // Reconnect several times. . .
     const reconnect = async () => {
       fireEvent.click(screen.getByRole('send'));
       await delay(100);
@@ -328,17 +328,17 @@ describe('react => useSSE', () => {
       expect(screen.getByRole('data')).toHaveTextContent(testDataA);
     });
 
-    // 测试发送数据 B
+    // Test sending data B
     await serverSend(testDataB);
     await waitFor(() => {
-      // abortLast 为 true（默认）时，调用 send 会断开之前建立的连接
+      // When abortLast is true (default), calling send will disconnect the previously established connection.
       expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
       expect(recv).toStrictEqual(testDataB);
       expect(screen.getByRole('data')).toHaveTextContent(testDataB);
     });
   });
 
-  // ! 打开失败应该报错，立即发送请求
+  // ! If the opening fails, an error should be reported and the request will be sent immediately.
   test('should throw error then try to connect a not exist url', async () => {
     const alovaInst = await prepareAlova();
     const poster = (data: any) => alovaInst.Get('/not-exist-path', data);
@@ -381,7 +381,7 @@ describe('react => useSSE', () => {
     });
   });
 
-  // ! 打开失败应该报错，不立即发送请求
+  // ! If the opening fails, an error should be reported and the request will not be sent immediately.
   test('should throw error then try to connect a not exist url (immediate: false)', async () => {
     const alovaInst = await prepareAlova();
     const poster = (data?: any) => alovaInst.Get('/not-exist-path', data);
@@ -435,7 +435,7 @@ describe('react => useSSE', () => {
     expect(mockErrorFn).toHaveBeenCalled();
   });
 
-  // ! 拦截器应该触发 (interceptByGlobalResponded: true)
+  // ! The interceptor should fire (interceptByGlobalResponded: true)
   // https://alova.js.org/zh-CN/tutorial/combine-framework/response
   test('should trigger global response', async () => {
     const initialData = 'initial-data';
@@ -527,7 +527,7 @@ describe('react => useSSE', () => {
     expect(mockResponseFn).not.toHaveBeenCalled();
     expect(mockResponseErrorFn).not.toHaveBeenCalled();
 
-    // 这个数据会被响应拦截器替换掉
+    // This data will be replaced by the response interceptor
     await serverSend(dataReplaceMe);
     await waitFor(
       () => {
@@ -543,43 +543,43 @@ describe('react => useSSE', () => {
       { timeout: 4000 }
     );
 
-    // 连接到不存在的地址
+    // Connecting to a non-existent address
     fireEvent.click(screen.getByRole('send-to-not-exist'));
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('connecting');
     });
     await waitFor(() => {
-      // 因为目标不存在，所以：
-      // 1. resErrorExpect 会触发
-      // 2. onMessage, responseExpect 不会被触发，触发次数和上面一样；onError不被触发，因为被 onError 拦截
-      // 3. resCompleteExpect 会被触发
+      // Because the target does not exist, so:
+      // 1. resErrorExpect will trigger
+      // 2. onMessage, responseExpect will not be triggered, and the number of triggers is the same as above; onError will not be triggered because it is intercepted by onError
+      // 3. resCompleteExpect will be triggered
 
-      // 全局错误拦截器会返回 initialData
+      // The global error interceptor will return initialData
       expect(recv).toEqual(initialData);
       expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
       expect(mockErrorFn).toHaveBeenCalledTimes(0);
       expect(mockResponseFn).toHaveBeenCalledTimes(1);
 
-      // 因为错误被全局拦截器拦截，所以 会调用 onMessage
+      // Because the error is intercepted by the global interceptor, onMessage will be called
       expect(mockOnMessageFn).toHaveBeenCalledTimes(2);
       expect(mockResponseErrorFn).toHaveBeenCalledTimes(1);
       expect(mockResponseCompleteFn).toHaveBeenCalledTimes(2);
     });
 
-    // ! 测试抛出错误
+    // ! Test throws error
 
-    // 连接到正常地址
+    // Connect to normal address
     fireEvent.click(screen.getByRole('send'));
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent('opened');
     });
 
-    // 这个数据会导致抛出异常
-    // 触发responseExpect 和 onError
+    // This data will cause an exception to be thrown
+    // Trigger responseExpect and onError
     await serverSend(dataThrowError);
     await waitFor(() => {
-      // 全局错误拦截器会返回 initialData
+      // The global error interceptor will return initialData
       expect(recv).toEqual(initialData);
       expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
@@ -592,7 +592,7 @@ describe('react => useSSE', () => {
     });
   });
 
-  // ! 拦截器不应该触发 (interceptByGlobalResponded: false)
+  // ! The interceptor should not fire (interceptByGlobalResponded: false)
   test('should NOT trigger global response', async () => {
     const initialData = 'initial-data';
     const testDataA = 'test-data-1';

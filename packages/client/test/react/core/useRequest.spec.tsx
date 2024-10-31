@@ -195,14 +195,14 @@ describe('useRequest hook with react', () => {
     }
     const { unmount } = render((<Page />) as ReactElement<any, any>);
 
-    // useRequest内会缓存状态
+    // The status will be cached in the Use request.
     await waitFor(() => {
       const { s: { data } = { data: null } } = getStateCache(alova.id, key(Get));
       expect(data?.v.path).toBe('/unit-test');
     });
     unmount();
     await waitFor(() => {
-      // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
+      // When the data console component is unloaded, the state cache will be cleared synchronously to avoid memory leaks. An empty object indicates that no match was found.
       expect(getStateCache(alova.id, key(Get))).toStrictEqual({});
     });
   });
@@ -258,7 +258,7 @@ describe('useRequest hook with react', () => {
     expect(screen.getByRole('downloading')).toHaveTextContent('1_1000');
   });
 
-  // 如果立即发送请求，react的loading状态将初始为true
+  // If the request is sent immediately, react's loading status will initially be true
   test('should render twice instead of third', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()

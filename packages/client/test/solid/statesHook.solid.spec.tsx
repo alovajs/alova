@@ -91,7 +91,7 @@ describe('Solid statesHook', () => {
       const { s: { data } = { data: null } } = getStateCache(alova.id, Get.key);
       expect(data?.v.path).toBe('/unit-test');
       cleanup();
-      // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
+      // When the data console component is unloaded, the state cache will be cleared synchronously to avoid memory leaks. An empty object indicates that no match was found.
       expect(getStateCache(alova.id, Get.key)).toStrictEqual({});
       dispose();
     }));
@@ -309,7 +309,7 @@ describe('Solid statesHook', () => {
 
   test('should call mounted and unmounted hooks when component is mounted or unmounted', async () => {
     // test mounted and unmounted
-    // mounted钩子只能在组件挂载时调用一次，监听数据变化不会再调用，而unmounted钩子只能在组件卸载时调用一次
+    // The mounted hook can only be called once when the component is mounted and will not be called again when monitoring data changes, while the unmounted hook can only be called once when the component is unloaded.
     const mountedMockFn = vi.fn();
     const unmountMockFn = vi.fn();
     return createRoot(async dispose => {

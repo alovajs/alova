@@ -2,7 +2,7 @@ import { isSpecialRequestBody } from '@alova/shared';
 import { MockResponse } from '~/typings';
 
 /**
- * 默认的响应数据拦截器，并返回Response数据
+ * The default response data interceptor and returns Response data
  */
 export const defaultMockResponse: MockResponse<any, any, any> = ({
   status = 200,
@@ -18,8 +18,8 @@ export const defaultMockResponse: MockResponse<any, any, any> = ({
 });
 
 /**
- * 返回错误信息本身
- * @param error 错误信息
- * @returns 本身
+ * Return the error message itself
+ * @param error error message
+ * @returns itself
  */
 export const defaultMockError = (error: any) => error;

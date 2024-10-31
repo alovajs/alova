@@ -25,19 +25,19 @@ const typeOptions = 'OPTIONS';
 
 const defaultAlovaOptions: Partial<AlovaOptions<AlovaGenerics>> = {
   /**
-   * GET请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+   * GET requests are cached for 5 minutes (300000 milliseconds) by default, and other requests are not cached by default.
    */
   cacheFor: {
     [typeGet]: 300000
   },
 
   /**
-   * 共享请求默认为true
+   * Share requests default to true
    */
   shareRequest: trueValue,
 
   /**
-   * method快照数量，默认为1000
+   * Number of method snapshots, default is 1000
    */
   snapshots: 1000
 };
@@ -57,11 +57,11 @@ export class Alova<AG extends AlovaGenerics> {
   constructor(options: AlovaOptions<AG>) {
     const instance = this;
     instance.id = (options.id || (idCount += 1)).toString();
-    // 如果storage未指定，则默认使用localStorage
+    // If storage is not specified, local storage is used by default.
     instance.l1Cache = options.l1Cache || memoryAdapter();
     instance.l2Cache = options.l2Cache || localStorageAdapter();
 
-    // 合并默认options
+    // Merge default options
     instance.options = {
       ...(defaultAlovaOptions as Partial<AlovaOptions<AG>>),
       ...options

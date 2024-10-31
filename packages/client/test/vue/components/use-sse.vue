@@ -20,9 +20,9 @@
 
 <script setup lang="ts">
 import { useSSE } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import VueHook from '@/statesHook/vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
@@ -63,9 +63,9 @@ onError(() => {
 });
 
 const getStatusText = computed(() => {
-  if (readyState.value === 1 /** SSEHookReadyState.OPEN */) {
+  if (readyState.value === 1 /** Sse hook ready state.open */) {
     return 'opened';
-  } else if (readyState.value === 2 /** SSEHookReadyState.CLOSED */) {
+  } else if (readyState.value === 2 /** Sse hook ready state.closed */) {
     return 'closed';
   } else {
     return 'connecting';

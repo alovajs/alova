@@ -21,7 +21,7 @@ const mocks = defineMock({
 const mockRequestAdapter = createAlovaMockAdapter([mocks], {
   delay: 50,
   onMockResponse: ({ status, statusText, body }) => {
-    // 当status为错误码时，如果包含notError则以body的形式返回错误信息
+    // When status is an error code, if it contains not error, the error message will be returned in the form of body.
     if (status >= 300) {
       if (!/notError/.test(statusText)) {
         const err = new Error(statusText);

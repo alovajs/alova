@@ -3,7 +3,7 @@ import { useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Result, delay } from 'root/testUtils';
 
 describe('useWatcher hook with react', () => {
@@ -54,7 +54,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('button'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -130,7 +130,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('button1'));
     delay().then(() => {
       fireEvent.click(screen.getByRole('button2'));
@@ -140,7 +140,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockfn).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
+      expect(mockfn).toHaveBeenCalledTimes(1); // The request has been sent, but the data is only updated with the latest
     });
   });
 
@@ -214,7 +214,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('button1'));
     delay().then(() => {
       fireEvent.click(screen.getByRole('button2'));
@@ -224,9 +224,9 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('2');
       expect(screen.getByRole('id2')).toHaveTextContent('12');
-      expect(mockfn).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
-      expect(mockErrorfn).not.toHaveBeenCalled(); // unit-test-1s因为后面才响应，不会触发回调
-      expect(screen.getByRole('error')).toHaveTextContent(''); // 对应的error也不会有值
+      expect(mockfn).toHaveBeenCalledTimes(1); // The request has been sent, but the data is only updated with the latest
+      expect(mockErrorfn).not.toHaveBeenCalled(); // Unit test 1s will not trigger the callback because it responds later.
+      expect(screen.getByRole('error')).toHaveTextContent(''); // The corresponding error will also have no value.
     });
   });
 
@@ -289,7 +289,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('button1'));
     delay().then(() => {
       fireEvent.click(screen.getByRole('button2'));
@@ -299,7 +299,7 @@ describe('useWatcher hook with react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-1s');
       expect(screen.getByRole('id1')).toHaveTextContent('3');
       expect(screen.getByRole('id2')).toHaveTextContent('13');
-      expect(mockfn).toHaveBeenCalledTimes(2); // 请求已发出，但数据只更新最新的
+      expect(mockfn).toHaveBeenCalledTimes(2); // The request has been sent, but the data is only updated with the latest
     });
   });
 
@@ -355,7 +355,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('button'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -428,7 +428,7 @@ describe('useWatcher hook with react', () => {
     expect(screen.getByRole('status')).toHaveTextContent('loaded');
     expect(screen.getByRole('path')).toHaveTextContent('');
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('button'));
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('');
@@ -574,7 +574,7 @@ describe('useWatcher hook with react', () => {
     expect(mockfn).toHaveBeenCalledTimes(3);
 
     fireEvent.click(screen.getByRole('btn2'));
-    // 将会命中缓存，因此不能再使用await screen.findByText('loaded')判断请求成功了
+    // The cache will be hit, so await screen.findByText('loaded') can no longer be used to determine whether the request is successful.
     await delay(100);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
     expect(screen.getByRole('id1')).toHaveTextContent('2');
@@ -700,18 +700,18 @@ describe('useWatcher hook with react', () => {
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      // 暂没发送请求
+      // No request sent yet
       expect(screen.getByRole('path')).toHaveTextContent('');
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
       expect(successMockFn).not.toHaveBeenCalled();
     });
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('btn1'));
     let startTs = Date.now();
     await waitFor(() => {
-      // 请求已响应
+      // Request responded
       const endTs = Date.now();
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('1');
@@ -724,7 +724,7 @@ describe('useWatcher hook with react', () => {
     startTs = Date.now();
     await waitFor(() => {
       const endTs = Date.now();
-      // 请求已响应
+      // Request responded
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
@@ -732,7 +732,7 @@ describe('useWatcher hook with react', () => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
     });
 
-    // 同时改变，以后一个为准
+    // If changed at the same time, the later one shall prevail.
     fireEvent.click(screen.getByRole('btn1'));
     fireEvent.click(screen.getByRole('btn2'));
     startTs = Date.now();
@@ -806,14 +806,14 @@ describe('useWatcher hook with react', () => {
 
     render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
-      // 暂没发送请求
+      // No request sent yet
       expect(screen.getByRole('path')).toHaveTextContent('');
       expect(screen.getByRole('id1')).toHaveTextContent('');
       expect(screen.getByRole('id2')).toHaveTextContent('');
       expect(successMockFn).not.toHaveBeenCalled();
     });
 
-    await delay(); // 由于reactHook中异步更改触发条件，因此需要异步改变状态才可以触发请求
+    await delay(); // Since the trigger condition is changed asynchronously in react hook, the state needs to be changed asynchronously to trigger the request.
     fireEvent.click(screen.getByRole('btn1'));
     let startTs = Date.now();
     await waitFor(() => {
@@ -830,14 +830,14 @@ describe('useWatcher hook with react', () => {
     startTs = Date.now();
     await waitFor(() => {
       const endTs = Date.now();
-      // 第二个值未设置防抖，请求将很快响应
+      // The second value does not set anti-shake and the request will be responded to very quickly
       expect(screen.getByRole('id1')).toHaveTextContent('1');
       expect(screen.getByRole('id2')).toHaveTextContent('11');
       expect(endTs - startTs).toBeLessThan(100);
       expect(successMockFn).toHaveBeenCalledTimes(2);
     });
 
-    // 同时改变，以后一个为准
+    // If changed at the same time, the later one shall prevail.
     fireEvent.click(screen.getByRole('btn1'));
     fireEvent.click(screen.getByRole('btn2'));
     startTs = Date.now();

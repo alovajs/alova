@@ -79,7 +79,7 @@
     <button
       role="insert1"
       @click="
-        // 插入数据，插入时不会刷新数据
+        // Insert data, the data will not be refreshed when inserting
         insert(100, 0)
       ">
       btn3
@@ -114,7 +114,7 @@
     <button
       role="replace2"
       @click="
-        // 正向顺序替换
+        // Forward sequence replacement
         replace(400, 8)
       ">
       btn3
@@ -122,7 +122,7 @@
     <button
       role="replace3"
       @click="
-        // 逆向顺序替换
+        // Reverse order replacement
         replace(500, -4)
       ">
       btn3
@@ -158,7 +158,7 @@
     <button
       role="batchRemove1"
       @click="
-        // 删除第二项，将会用下一页的数据补位，并重新拉取上下一页的数据
+        // Deleting the second item will fill the space with the data from the next page and re-fetch the data from the previous and next pages.
         remove(1, 2)
       ">
       btn3
@@ -181,7 +181,7 @@
     <button
       role="batchRemove2"
       @click="
-        // 同步操作的项数超过pageSize时，移除的数据将被恢复，并重新请求当前页数据
+        // When the number of synchronization operations exceeds the page size, the removed data will be restored and the current page data will be requested again.
         remove(0, 1, 2, 3, 4)
       ">
       btn3
@@ -248,9 +248,9 @@
 <script setup lang="ts">
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
-import { VueHookExportType } from '@/statesHook/vue';
 import { ref } from 'vue';
 import { PaginationHookConfig } from '~/typings/clienthook';
+import { VueHookExportType } from '~/typings/stateshook/vue';
 
 type CollapsedAlovaGenerics = Omit<AlovaGenerics, 'StatesExport'> & {
   StatesExport: VueHookExportType<unknown>;

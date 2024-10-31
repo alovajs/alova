@@ -43,7 +43,7 @@ describe('useFetcher middleware', () => {
     });
     fetch(getGetterObj);
 
-    expect(loading.value).toBeFalsy(); // 延迟1秒发送请求，表示异步发送请求，因此loading为false
+    expect(loading.value).toBeFalsy(); // Delaying the request for 1 second means sending the request asynchronously, so loading is false.
     const startTs = Date.now();
     const rawData = await untilCbCalled(onSuccess);
     const endTs = Date.now();
@@ -65,7 +65,7 @@ describe('useFetcher middleware', () => {
     fetch(getGetterObj);
     const mockFn = vi.fn();
     onSuccess(mockFn);
-    // middleware中未调用next，因此不会发送请求
+    // next is not called in Middleware, so the request will not be sent
     expect(loading.value).toBeFalsy();
     await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
@@ -89,7 +89,7 @@ describe('useFetcher middleware', () => {
       transform: ({ data }: Result) => data
     });
 
-    expect(fetchInMiddleware).toBeUndefined(); // 未发起请求时不会调用middleware
+    expect(fetchInMiddleware).toBeUndefined(); // Middleware will not be called when no request is made
     fetch(getGetterObj);
     await untilCbCalled(setTimeout, 10);
     expect(loading.value).toBeTruthy();

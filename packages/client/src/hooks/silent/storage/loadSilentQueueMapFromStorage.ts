@@ -9,8 +9,8 @@ import {
 } from './performers';
 
 /**
- * 从storage中载入静默队列数据
- * @returns 所有队列数据
+ * Load silent queue data from storage
+ * @returns All queue data
  */
 export default async () => {
   const silentMethodIdQueueMap = ((await storageGetItem(silentMethodIdQueueMapStorageKey)) ||

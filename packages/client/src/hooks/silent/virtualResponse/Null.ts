@@ -10,7 +10,7 @@ interface NullInterface {
 }
 
 /**
- * Null包装类实现
+ * Null wrapper class implementation
  */
 const Null = function Null(this: NullInterface) {} as unknown as NullConstructor;
 Null.prototype = ObjectCls.create(nullValue, {

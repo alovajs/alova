@@ -52,15 +52,15 @@ import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
 
 /**
- * 全局的silentMethod实例，它将在第一个成功事件触发前到最后一个成功事件触发后有值（同步时段）
- * 通过此方式让onSuccess中的updateStateEffect内获得当前的silentMethod实例
+ * A global silentMethod instance that will have a value from before the first success event is triggered to after the last success event is triggered (synchronization period)
+ * In this way, the current silentMethod instance can be obtained in updateStateEffect in onSuccess.
  */
 export let currentSilentMethod: SilentMethod<any> | undefined = undefinedValue;
 
 /**
- * 创建SilentQueue中间件函数
- * @param config 配置对象
- * @returns 中间件函数
+ * Create SilentQueue middleware function
+ * @param config Configuration object
+ * @returns middleware function
  */
 export default <AG extends AlovaGenerics, Args extends any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
@@ -75,9 +75,9 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
   let silentMethodInstance: SilentMethod<AG>;
 
   /**
-   * method实例创建函数
-   * @param args 调用send传入的函数
-   * @returns method实例
+   * method instance creation function
+   * @param args Call the function passed in by send
+   * @returns method instance
    */
   const createMethod = (...args: any[]) => {
     silentAssert(isFn(handler), 'method handler must be a function. eg. useSQRequest(() => method)');
@@ -86,9 +86,9 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
     return (handler as MethodHandler<AG>)(...args);
   };
 
-  // 装饰success/error/complete事件
+  // Decorate success/error/complete event
   const decorateRequestEvent = (requestExposure: UseHookExposure<AG, Args>) => {
-    // 设置事件回调装饰器
+    // Set event callback decorator
     requestExposure.onSuccess = decorateEvent(requestExposure.onSuccess, (handler, event) => {
       currentSilentMethod = silentMethodInstance;
       handler(
@@ -132,27 +132,27 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
   };
 
   /**
-   * 中间件函数
-   * @param context 请求上下文，包含请求相关的值
-   * @param next 继续执行函数
-   * @returns Promise对象
+   * middleware function
+   * @param context Request context, containing request-related values
+   * @param next continue executing function
+   * @returns Promise object
    */
   const middleware: AlovaFrontMiddleware<AG, Args> = ({ method, args, cachedResponse, proxyStates, config }, next) => {
     const { silentDefaultResponse, vDataCaptured, force = falseValue } = config;
 
-    // 因为behavior返回值可能会变化，因此每次请求都应该调用它重新获取返回值
+    // Because the behavior return value may change, it should be called for each request to re-obtain the return value.
     const baseEvent = AlovaEventBase.spawn(method, args);
     behaviorFinally = sloughConfig(behavior, [baseEvent]);
     queueFinally = sloughConfig(queue, [baseEvent]);
     forceRequest = sloughConfig(force, [baseEvent]);
 
-    // 置空临时收集变量
-    // 返回前都需要置空它们
+    // Empty temporary collection variables
+    // They need to be cleared before returning
     const resetCollectBasket = () => {
       setVDataIdCollectBasket((handlerArgs = undefinedValue));
     };
 
-    // 如果设置了vDataCaptured，则先判断请求相关的数据是否包含虚拟数据
+    // If v data captured is set, first determine whether the request-related data contains virtual data.
     if (isFn(vDataCaptured)) {
       let hasVData = vDataIdCollectBasket && len(objectKeys(vDataIdCollectBasket)) > 0;
       if (!hasVData) {
@@ -166,16 +166,16 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
         });
       }
 
-      // 如果vDataCaptured有返回数据，则使用它作为响应数据，否则继续请求
+      // If v data captured has return data, use it as the response data, otherwise continue the request
       const customResponse = hasVData ? vDataCaptured(method) : undefinedValue;
       if (customResponse !== undefinedValue) {
-        resetCollectBasket(); // 被vDataCaptured捕获时的重置
+        resetCollectBasket(); // Reset when captured by v data captured
         return promiseResolve(customResponse);
       }
     }
 
     if (behaviorFinally !== BEHAVIOR_STATIC) {
-      // 等待队列中的method执行完毕
+      // Wait for the method in the queue to complete execution
       const createSilentMethodPromise = () => {
         const queueResolvePromise = newInstance(PromiseCls, (resolveHandler, rejectHandler) => {
           silentMethodInstance = newInstance(
@@ -193,26 +193,26 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
             handlerArgs,
             vDataIdCollectBasket && objectKeys(vDataIdCollectBasket)
           );
-          resetCollectBasket(); // behavior为queue和silent时的重置
+          resetCollectBasket(); // Reset when Behavior is queue and silent
         });
 
-        // onBeforePush和onPushed事件是同步绑定的，因此需要异步执行入队列才能正常触发事件
+        // On before push and on pushed events are bound synchronously, so they need to be queued asynchronously to trigger the event normally.
         promiseThen(promiseResolve(undefinedValue), async () => {
           const createPushEvent = () =>
             newInstance(ScopedSQEvent<AG, Args>, behaviorFinally, method, silentMethodInstance, args);
 
-          // 将silentMethod放入队列并持久化
+          // Put the silent method into the queue and persist it
           const isPushed = await pushNewSilentMethod2Queue(
             silentMethodInstance,
-            // onFallback绑定了事件后，即使是silent行为模式也不再存储
-            // onFallback会同步调用，因此需要异步判断是否存在fallbackHandlers
+            // After the onFallback event is bound, even the silent behavior mode is no longer stored.
+            // onFallback will be called synchronously, so it needs to be determined asynchronously whether there are fallbackHandlers
             len(eventEmitter.eventMap.fallback || []) <= 0 && behaviorFinally === BEHAVIOR_SILENT,
             queueFinally,
 
-            // 执行放入队列前回调，如果返回false则阻止放入队列
+            // Execute the callback before putting it into the queue. If false is returned, it will prevent putting it into the queue.
             () => eventEmitter.emit('beforePushQueue', createPushEvent())
           );
-          // 只有在放入队列后，才执行放入队列后的回调
+          // Only after putting it into the queue, the callback after putting it into the queue will be executed.
           isPushed && eventEmitter.emit('pushedQueue', createPushEvent());
         });
 
@@ -220,31 +220,31 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
       };
 
       if (behaviorFinally === BEHAVIOR_QUEUE) {
-        // 强制请求，或命中缓存时需要更新loading状态
+        // Forced request, or loading status needs to be updated when cache is hit
         const needSendRequest = forceRequest || !cachedResponse;
         if (needSendRequest) {
-          // 手动设置为true
+          // Manually set to true
           proxyStates.loading.v = trueValue;
         }
 
-        // 当使用缓存时，直接使用缓存，否则再进入请求队列
+        // When using the cache, use the cache directly, otherwise enter the request queue
         return needSendRequest ? createSilentMethodPromise() : promiseThen(promiseResolve(cachedResponse));
       }
 
       const silentMethodPromise = createSilentMethodPromise();
-      // 在silent模式下创建虚拟响应数据，虚拟响应数据可生成任意的虚拟数据
+      // Create virtual response data in silent mode. Virtual response data can generate arbitrary virtual data.
       const virtualResponse = (silentMethodInstance.virtualResponse = createVirtualResponse(
         isFn(silentDefaultResponse) ? silentDefaultResponse() : undefinedValue
       ));
       promiseThen<any>(silentMethodPromise, realResponse => {
-        // 获取到真实数据后更新过去
+        // Update after obtaining real data
         proxyStates.data.v = realResponse;
       });
 
-      // silent模式下，先立即返回虚拟响应值，然后当真实数据返回时再更新
+      // In Silent mode, the virtual response value is returned immediately, and then updated when the real data is returned.
       return promiseResolve(virtualResponse);
     }
-    resetCollectBasket(); // behavior为static时的重置
+    resetCollectBasket(); // Reset when Behavior is static
     return next();
   };
 
@@ -253,35 +253,35 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
     m: middleware,
     d: decorateRequestEvent,
 
-    // 事件绑定函数
+    // event binding function
     b: {
       /**
-       * 绑定回退事件
-       * @param handler 回退事件回调
+       * Bind fallback event
+       * @param handler Fallback event callback
        */
       onFallback: (handler: FallbackHandler<AG>) => {
         eventEmitter.on('fallback', handler);
       },
 
       /**
-       * 绑定入队列前事件
-       * @param handler 入队列前的事件回调
+       * Event before binding to queue
+       * @param handler Event callback before enqueuing
        */
       onBeforePushQueue: (handler: BeforePushQueueHandler<AG>) => {
         eventEmitter.on('beforePushQueue', handler);
       },
 
       /**
-       * 绑定入队列后事件
-       * @param handler 入队列后的事件回调
+       * Event after binding to queue
+       * @param handler Event callback after being queued
        */
       onPushedQueue: (handler: PushedQueueHandler<AG>) => {
         eventEmitter.on('pushedQueue', handler);
       },
 
       /**
-       * 重试事件
-       * @param handler 重试事件回调
+       * retry event
+       * @param handler Retry event callback
        */
       onRetry: (handler: RetryHandler<AG>) => {
         eventEmitter.on('retry', handler);

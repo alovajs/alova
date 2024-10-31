@@ -2,7 +2,7 @@ import { deleteAttr } from '@alova/shared';
 import type { MergedStatesMap } from 'alova';
 import { Hook } from '~/typings/clienthook';
 
-// 状态数据缓存
+// State data cache
 interface CacheItem {
   s: MergedStatesMap;
   h: Hook;
@@ -10,10 +10,10 @@ interface CacheItem {
 const stateCache: Record<string, Record<string, CacheItem>> = {};
 
 /**
- * @description 获取State缓存数据
- * @param baseURL 基础URL
- * @param key 请求key值
- * @returns 缓存的响应数据，如果没有则返回{}
+ * @description Get State cache data
+ * @param baseURL Base URL
+ * @param key Request key value
+ * @returns Cached response data, if not returned {}
  */
 export const getStateCache = (namespace: string, key: string) => {
   const cachedState = stateCache[namespace] || {};
@@ -21,10 +21,10 @@ export const getStateCache = (namespace: string, key: string) => {
 };
 
 /**
- * @description 设置State缓存数据
- * @param baseURL 基础URL
- * @param key 请求key值
- * @param data 缓存数据
+ * @description Set State cache data
+ * @param baseURL Base URL
+ * @param key Request key value
+ * @param data cache data
  */
 export const setStateCache = <Args extends any[] = any[]>(
   namespace: string,
@@ -40,9 +40,9 @@ export const setStateCache = <Args extends any[] = any[]>(
 };
 
 /**
- * @description 清除State缓存数据
- * @param baseURL 基础URL
- * @param key 请求key值
+ * @description Clear State cache data
+ * @param baseURL Base URL
+ * @param key Request key value
  */
 export const removeStateCache = (namespace: string, key: string) => {
   const cachedState = stateCache[namespace];

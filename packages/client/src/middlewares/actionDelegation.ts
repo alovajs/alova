@@ -27,12 +27,12 @@ const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics, Args
 const assert = createAssert('subscriber');
 
 /**
- * 操作函数委托中间件
- * 使用此中间件后可通过accessAction调用委托的函数
- * 可以委托多个相同id
- * 以此来消除组件的层级限制
- * @param id 委托者id
- * @returns alova中间件函数
+ * Operation function delegation middleware
+ * After using this middleware, you can call the delegated function through accessAction.
+ * Can delegate multiple identical IDs
+ * In order to eliminate the hierarchical restrictions of components
+ * @param id Client ID
+ * @returns alova middleware function
  */
 export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
   id: string | number | symbol
@@ -46,7 +46,7 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
     },
     next: AlovaGuardNext<AG, Args>
   ) => {
-    // 中间件会重复调用，已经订阅过了就无需再订阅了
+    // The middleware will be called repeatedly. If you have already subscribed, you do not need to subscribe again.
     if (!delegated.current) {
       const { abort, proxyStates, delegatingActions = {} } = context;
       const update = (newStates: Record<string, any>) => {
@@ -55,7 +55,7 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
           proxyStates[key as ProxyStateKeys] && (proxyStates[key as ProxyStateKeys].v = newStates[key]);
         }
       };
-      // 相同id的将以数组形式保存在一起
+      // Those with the same ID will be saved together in the form of an array
       const handlersItems = (actionsMap[id] = actionsMap[id] || []);
       handlersItems.push(
         isFrontMiddlewareContext(context)
@@ -80,10 +80,10 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
 };
 
 /**
- * 访问操作函数，如果匹配多个则会以此调用onMatch
- * @param id 委托者id，或正则表达式
- * @param onMatch 匹配的订阅者
- * @param silent 默认为 false。如果为 true，不匹配时将不会报错
+ * Access the operation function, if there are multiple matches, onMatch will be called with this
+ * @param id Delegator id, or regular expression
+ * @param onMatch matching subscribers
+ * @param silent Default is false. If true, no error will be reported if there is no match
  */
 export const accessAction = (
   id: string | number | symbol | RegExp,

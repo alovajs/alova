@@ -5,7 +5,7 @@ import { Result } from 'root/testUtils';
 import { AlovaGlobalCacheAdapter } from '~/typings';
 
 const baseURL = process.env.NODE_BASE_URL as string;
-// 每次处理前清空缓存，避免互相影响
+// Clear cache before each processing to avoid mutual influence
 beforeEach(async () => {
   await invalidateCache();
 });
@@ -99,7 +99,7 @@ describe('auto invalitate cached response data', () => {
       hitSource: ['a1', /^a2/, alova.Post('/unit-test', { a: 1 })]
     });
 
-    // 发送请求并保存快照和缓存
+    // Send request and save snapshot and cache
     await targetGet;
     let sourcePost = alova.Post(
       '/unit-test',
@@ -111,7 +111,7 @@ describe('auto invalitate cached response data', () => {
     await sourcePost;
     expect(await queryCache(targetGet)).toBeUndefined();
 
-    // 再次请求并生成缓存
+    // Request again and generate cache
     await targetGet;
     sourcePost = alova.Post(
       '/unit-test',
@@ -123,7 +123,7 @@ describe('auto invalitate cached response data', () => {
     await sourcePost;
     expect(await queryCache(targetGet)).toBeUndefined();
 
-    // 再次请求并生成缓存
+    // Request again and generate cache
     await targetGet;
     sourcePost = alova.Post('/unit-test', { a: 1 });
     await sourcePost;
@@ -135,22 +135,22 @@ describe('auto invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
 
-    // 设置一个存储在 L2 缓存中的请求
+    // Set up a request to be stored in the L2 cache
     const targetGetFromL2Cache = alova.Get('/unit-test', {
       hitSource: 'get-l2cache',
       cacheFor: {
-        expire: 60 * 60 * 1000, // 1 小时
-        mode: 'restore' // 存储在 L2 缓存中
+        expire: 60 * 60 * 1000, // 1 hour
+        mode: 'restore' // Stored in L2 cache
       }
     });
     await targetGetFromL2Cache;
     expect(await queryCache(targetGetFromL2Cache)).not.toBeUndefined();
 
-    // 发送一个会使 L2 缓存失效的请求
+    // Send a request that will invalidate the L2 cache
     const sourcePost = alova.Post('/unit-test', { a: 1 }, { name: 'get-l2cache' });
     await sourcePost;
 
-    // 期望 L2 缓存被失效
+    // Expect L2 cache to be invalidated
     expect(await queryCache(targetGetFromL2Cache)).toBeUndefined();
   });
 
@@ -181,11 +181,11 @@ describe('auto invalitate cached response data', () => {
 
     const sourcePost = alova.Post('/unit-test', { a: 1 });
 
-    // 在 alova1 实例中设置一个带缓存的请求
+    // Set up a cached request in the alova1 instance
     const targetGet1 = alova.Get('/unit-test', {
       hitSource: ['poster-abc', /^abc$ig/, sourcePost]
     });
-    // 在 alova1 实例中设置一个带缓存的请求
+    // Set up a cached request in the alova1 instance
     const targetGet2 = alova.Get('/unit-test', {
       params: {
         abge: 1
@@ -209,7 +209,7 @@ describe('auto invalitate cached response data', () => {
   });
 
   test('should default invalidate cache from another alova instance', async () => {
-    // 创建两个独立的 Alova 实例
+    // Create two independent Alova instances
     const alova1 = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -218,17 +218,17 @@ describe('auto invalitate cached response data', () => {
     });
     const sourcePost = alova2.Post('/unit-test', { a: 1 });
 
-    // 在 alova1 实例中设置一个带缓存的请求
+    // Set up a cached request in the alova1 instance
     const targetGet = alova1.Get('/unit-test', {
       hitSource: [sourcePost]
     });
     await targetGet;
     expect(await queryCache(targetGet)).not.toBeUndefined();
 
-    // 在 alova2 实例中发送一个会使缓存失效的请求
+    // Sending a cache-invalidating request to the alova2 instance
     await sourcePost;
 
-    // 期望 alova1 实例中的缓存被失效
+    // Expect cache in alova1 instance to be invalidated
     expect(await queryCache(targetGet)).toBeUndefined();
   });
 
@@ -253,7 +253,7 @@ describe('auto invalitate cached response data', () => {
       } as AlovaGlobalCacheAdapter;
     };
 
-    // 创建两个独立的 Alova 实例
+    // Create two independent Alova instances
     const alova1 = createAlova({
       baseURL,
       requestAdapter: adapterFetch(),
@@ -267,7 +267,7 @@ describe('auto invalitate cached response data', () => {
       l1Cache: l1CacheAdapter()
     });
 
-    // 在 alova1 实例中发送一个会使缓存失效的请求
+    // Sending a cache-invalidating request to the alova1 instance
     const sourcePostInAlova1 = alova1.Post(
       '/unit-test',
       { a: 1 },
@@ -276,14 +276,14 @@ describe('auto invalitate cached response data', () => {
       }
     );
 
-    // 在 alova1 实例中设置一个带缓存的请求
+    // Set up a cached request in the alova1 instance
     const targetGetInAlova1 = alova1.Get('/unit-test', {
       hitSource: ['source-post567']
     });
     await targetGetInAlova1;
     expect(await queryCache(targetGetInAlova1)).not.toBeUndefined();
 
-    // 在 alova2 实例中设置一个带缓存的请求
+    // Set up a cached request in the alova2 instance
     const targetGetInAlova2 = alova2.Get('/unit-test', {
       hitSource: ['source-post567']
     });
@@ -292,19 +292,19 @@ describe('auto invalitate cached response data', () => {
 
     await sourcePostInAlova1;
 
-    // 期望 alova1 实例中的缓存被失效
+    // Expect cache in alova1 instance to be invalidated
     expect(await queryCache(targetGetInAlova1)).toBeUndefined();
-    // 期望 alova2 实例中的缓存未被失效
+    // Expect cache in alova2 instance not to be invalidated
     expect(await queryCache(targetGetInAlova2)).not.toBeUndefined();
   });
 
   test("shouldn't invalidate any cache when set `autoHitCache` to `close`", async () => {
     globalConfig({
-      // 关闭自动失效缓存功能
+      // Turn off automatic cache invalidation
       autoHitCache: 'close'
     });
 
-    // 创建两个独立的 Alova 实例
+    // Create two independent Alova instances
     const alova1 = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -312,19 +312,19 @@ describe('auto invalitate cached response data', () => {
       responseExpect: r => r.json()
     });
 
-    // 在 alova1 实例中设置一个带缓存的请求
+    // Set up a cached request in the alova1 instance
     const targetGetInAlova1 = alova1.Get('/unit-test');
     await targetGetInAlova1;
     expect(await queryCache(targetGetInAlova1)).not.toBeUndefined();
 
-    // 在 alova2 实例中设置一个带缓存的请求
+    // Set up a cached request in the alova2 instance
     const targetGetInAlova2 = alova2.Get('/unit-test', {
       params: { a: '123' }
     });
     await targetGetInAlova2;
     expect(await queryCache(targetGetInAlova2)).not.toBeUndefined();
 
-    // 在 alova1 实例中发送一个原本会使缓存失效的请求
+    // Sending a request in the alova1 instance that would otherwise invalidate the cache
     const sourcePostInAlova1 = alova1.Post(
       '/unit-test',
       { a: 1 },
@@ -334,7 +334,7 @@ describe('auto invalitate cached response data', () => {
     );
     await sourcePostInAlova1;
 
-    // 在 alova2 实例中发送一个原本会使缓存失效的请求
+    // Sending a request in the alova2 instance that would otherwise invalidate the cache
     const sourcePostInAlova2 = alova2.Post(
       '/unit-test',
       { a: 555 },
@@ -344,7 +344,7 @@ describe('auto invalitate cached response data', () => {
     );
     await sourcePostInAlova2;
 
-    // 期望两个实例中的缓存都未被失效
+    // It is expected that the cache in both instances has not been invalidated
     expect(await queryCache(targetGetInAlova1)).not.toBeUndefined();
     expect(await queryCache(targetGetInAlova2)).not.toBeUndefined();
   });

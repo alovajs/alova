@@ -17,7 +17,7 @@ const SetCls = Set;
 
 export default class MethodSnapshotContainer<AG extends AlovaGenerics> {
   /**
-   * method实例快照集合，发送过请求的method实例将会被保存
+   * Method instance snapshot collection, method instances that have sent requests will be saved
    */
   records: Record<string, Set<Method<AG>>> = {};
 
@@ -31,29 +31,29 @@ export default class MethodSnapshotContainer<AG extends AlovaGenerics> {
   }
 
   /**
-   * 保存method实例快照
-   * @param methodInstance method实例
+   * Save method instance snapshot
+   * @param methodInstance method instance
    */
   save(methodInstance: Method<AG>) {
     const { name } = getConfig(methodInstance);
     const { records, occupy, capacity } = this;
     if (name && occupy < capacity) {
-      // 以method的name为key，将method实例保存到快照中
+      // Using the name of the method as the key, save the method instance to the snapshot
       const targetSnapshots = (records[name] = records[name] || newInstance(SetCls));
       targetSnapshots.add(methodInstance);
 
-      // 统计数量
+      // Statistical quantity
       this.occupy += 1;
     }
   }
 
   /**
-   * 获取Method实例快照，它将根据matcher来筛选出对应的Method实例
-   * @param matcher 匹配的快照名称，可以是字符串或正则表达式、或带过滤函数的对象
-   * @returns 匹配到的Method实例快照数组
+   * Get a Method instance snapshot, which will filter out the corresponding Method instance based on the matcher
+   * @param matcher Matching snapshot name, which can be a string or regular expression, or an object with a filter function
+   * @returns Array of matched Method instance snapshots
    */
   match<M extends boolean = true>(matcher: MethodFilter<AG>, matchAll: M = true as M) {
-    // 将filter参数统一解构为nameMatcher和matchHandler
+    // Unify the filter parameters into name matcher and match handler
     let nameString: string | undefined;
     let nameReg: RegExp | undefined;
     let matchHandler: MethodFilterHandler<AG> | undefined;
@@ -70,10 +70,10 @@ export default class MethodSnapshotContainer<AG extends AlovaGenerics> {
     }
 
     const { records } = this;
-    // 通过解构的nameMatcher和filterHandler，获取对应的Method实例快照
+    // Get the corresponding method instance snapshot through the deconstructed name matcher and filter handler
     let matches = newInstance(SetCls<Method<AG>>);
 
-    // 如果有提供namespace参数则只在这个namespace中查找，否则在所有缓存数据中查找
+    // If the namespace parameter is provided, it will only be searched in this namespace, otherwise it will be searched in all cached data.
     if (nameString) {
       matches = records[nameString] || matches;
     } else if (nameReg) {

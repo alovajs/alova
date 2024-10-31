@@ -13,9 +13,9 @@ import { AlovaGenerics, Method } from 'alova';
 import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings/clienthook';
 
 /**
- * 断言serialHandlers
+ * Assert serialHandlers
  * @param hookName hook name
- * @param serialHandlers 串行请求method获取函数
+ * @param serialHandlers Serial request method acquisition function
  */
 export const assertSerialHandlers = (hookName: string, serialHandlers: any) =>
   createAssert(hookName)(
@@ -29,17 +29,17 @@ export type SerialHandlers<AG extends AlovaGenerics, Args extends any[] = any[]>
 ];
 
 /**
- * 创建串行请求中间件
- * @param serialHandlers 串行请求method获取函数
- * @param hookMiddleware use hook的中间件
- * @returns 串行请求中间件
+ * Create serial request middleware
+ * @param serialHandlers Serial request method acquisition function
+ * @param hookMiddleware use hook middleware
+ * @returns Serial request middleware
  */
 export const serialMiddleware = <AG extends AlovaGenerics, Args extends any[] = any[]>(
   serialHandlers: SerialHandlers<AG, Args>,
   hookMiddleware?: AlovaFrontMiddleware<AG, Args>,
   serialRequestMethods: Method<AG>[] = []
 ) => {
-  // 第一个handler在外部传递给了use hook，不需要再次请求
+  // The first handler is passed to the use hook externally and does not need to be requested again.
   serialHandlers.shift();
   return ((ctx, next) => {
     hookMiddleware?.(ctx, () => promiseResolve(undefinedValue as any));

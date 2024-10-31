@@ -97,33 +97,33 @@ export const refreshTokenIfExpired = async (
   },
   tokenRefreshing?: boolean
 ) => {
-  // 当handleParams数量大于2时，说明是从响应中调用此函数的，此时需要重新请求原接口
+  // When the number of handle params is greater than 2, it means that this function is called from the response, and the original interface needs to be requested again.
   const fromResponse = len(handlerParams) >= 2;
   let isExpired = refreshToken?.isExpired(...handlerParams);
-  // 兼容处理同步函数和异步函数
+  // Compatible with synchronous and asynchronous functions
   if (instanceOf(isExpired, PromiseCls)) {
     isExpired = await isExpired;
   }
 
   if (isExpired) {
     try {
-      // 在响应中再次判断，防止请求多次刷新token，把在token刷新完成前发送的拦截并等待
+      // Make another judgment in the response to prevent multiple requests to refresh the token, intercept and wait for the token sent before the token refresh is completed.
       let intentToRefreshToken = trueValue;
       if (fromResponse && tokenRefreshing) {
-        intentToRefreshToken = falseValue; // 在此等待的请求表示token刷新中，当它们通过后不再需要再次刷新token了
+        intentToRefreshToken = falseValue; // The requests waiting here indicate that the token is being refreshed. When they pass, there is no need to refresh the token again.
         await waitForTokenRefreshed(method, waitingList);
       }
 
       if (intentToRefreshToken) {
         updateRefreshStatus(trueValue);
-        // 调用刷新token
+        // Call refresh token
         await refreshToken?.handler(...handlerParams);
         updateRefreshStatus(falseValue);
-        // 刷新token完成后，通知等待列表中的请求
+        // After the token refresh is completed, the requests in the waiting list are notified.
         forEach(waitingList, ({ resolve }) => resolve());
       }
       if (fromResponse) {
-        // 这里因为是重新请求原接口，与上一次请求叠加会导致重复调用transform，因此需要将transform置空去除一次调用
+        // Because the original interface is being requested again, superposition with the previous request will result in repeated calls to transform, so it is necessary to leave transform empty to remove one call.
         const { config } = method;
         const methodTransformData = config.transform;
         config.transform = undefinedValue;
@@ -133,7 +133,7 @@ export const refreshTokenIfExpired = async (
       }
     } finally {
       updateRefreshStatus(falseValue);
-      splice(waitingList, 0, len(waitingList)); // 清空waitingList
+      splice(waitingList, 0, len(waitingList)); // Clear waiting list
     }
   }
 };

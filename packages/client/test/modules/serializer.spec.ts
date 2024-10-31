@@ -29,7 +29,7 @@ describe('serializers', () => {
         reg: ['regexp', 'abc_([0-9])+$']
       }
     });
-    // 原数据不变
+    // Original data remains unchanged
     expect(originalPayload).toStrictEqual({
       date: dateObj,
       reg: regObj,

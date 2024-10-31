@@ -281,7 +281,7 @@ describe('react => useAutoRequest', () => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag }));
     });
 
-    // 默认1000ms内只有第一次会触发请求
+    // By default, only the first request will be triggered within 1000ms.
     tag = 'online';
     mockGlobalEventEmit('online');
     delay(100)

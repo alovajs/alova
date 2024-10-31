@@ -3,31 +3,31 @@ import { AlovaMethodHandler, UseHookExposure } from '../general';
 import { RequestHookConfig } from './useRequest';
 
 /**
- * useAutoRequest配置
+ * useAutoRequest configuration
  */
 export type AutoRequestHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]> = {
   /**
-   * 轮询事件，单位ms，0表示不开启
+   * Polling event, unit ms, 0 means not enabled
    * @default 0
    */
   pollingTime?: number;
   /**
-   * 浏览器显示隐藏或tab切换
+   * Browser display hide or tab switch
    * @default true
    */
   enableVisibility?: boolean;
   /**
-   * 浏览器聚焦
+   * Browser spotlight
    * @default true
    */
   enableFocus?: boolean;
   /**
-   * 开启网络重连
+   * Enable network reconnection
    * @default true
    */
   enableNetwork?: boolean;
   /**
-   * 节流时间，单位ms，表示在节流时间内多次触发只会发送1次请求
+   * Throttle time, unit ms, means that only one request will be sent if triggered multiple times within the throttling time.
    * @default 1000
    */
   throttle?: number;
@@ -37,15 +37,15 @@ export type NotifyHandler = () => void;
 export type UnbindHandler = () => void;
 
 /**
- * 在一定条件下可以自动重新拉取数据，从而刷新页面，使用场景有：
- * 1. 浏览器 tab 切换时拉取最新数据
- * 2. 浏览器聚焦时拉取最新数据
- * 3. 网络重连时拉取最新数据
- * 4. 轮询请求
- * 可同时配置以上的一个或多个触发条件，也可以配置节流时间来防止短时间内触发多次请求，例如 1 秒内只允许触发一次。
- * @param handler method实例或获取函数
- * @param config 配置参数
- * @return useAutoRequest相关数据和操作函数
+ * Under certain conditions, data can be automatically re-pulled to refresh the page. Usage scenarios include:
+ * 1. Pull the latest data when the browser tab is switched
+ * 2. Pull the latest data when the browser is focused
+ * 3. Pull the latest data when the network is reconnected
+ * 4. Polling request
+ * One or more of the above trigger conditions can be configured at the same time, and the throttling time can also be configured to prevent multiple requests from being triggered in a short period of time. For example, only one trigger is allowed within 1 second.
+ * @param handler method instance or get function
+ * @param config Configuration parameters
+ * @return useAutoRequest related data and operation functions
  */
 export declare function useAutoRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,

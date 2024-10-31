@@ -22,7 +22,7 @@ export type SerializedSilentMethodIdQueueMap = Record<string, string[]>;
 const vDataKey = '__$k';
 const vDataValueKey = '__$v';
 const getAlovaStorage = () => {
-  // 未启动silentFactory时提供提示
+  // Provide prompt when silent factory is not started
   silentAssert(
     !!dependentAlovaInstance,
     'alova instance is not found, Do you forget to set `alova` or call `bootSilentFactory`?'
@@ -31,12 +31,12 @@ const getAlovaStorage = () => {
 };
 
 let serializerPerformer: ReturnType<typeof createSerializerPerformer> | undefined = undefinedValue;
-export const silentMethodIdQueueMapStorageKey = 'alova.SQ'; // silentMethod实例id组成的队列集合缓存key
-export const silentMethodStorageKeyPrefix = 'alova.SM.'; // silentMethod实例缓存key前缀
+export const silentMethodIdQueueMapStorageKey = 'alova.SQ'; // Queue collection cache key composed of Silent method instance id
+export const silentMethodStorageKeyPrefix = 'alova.SM.'; // silentMethod instance cache key prefix
 /**
- * 持久化带虚拟数据和可序列化的数据集合
- * @param key 持久化key
- * @param payload 持久化数据
+ * Persistence of data collections with dummy data and serializable data
+ * @param key persistence key
+ * @param payload Persistent data
  */
 export const storageSetItem = async (key: string, payload: any) => {
   const storage = getAlovaStorage();
@@ -46,14 +46,14 @@ export const storageSetItem = async (key: string, payload: any) => {
         return value;
       }
 
-      // 如果序列化的是silentMethod实例，则过滤掉alova实例
+      // If a silent method instance is serialized, the alova instance is filtered out
       if (key === 'context' && value?.constructor?.name === 'Alova') {
         return undefinedValue;
       }
       const vDataId = value?.[symbolVDataId];
       let primitiveValue = dehydrateVDataUnified(value, falseValue);
 
-      // 需要用原始值判断，否则像new Number(1)等包装类也会是[object Object]
+      // You need to use the original value to judge, otherwise packaging classes such as new Number(1) will also be [object Object]
       const toStringTag = globalToString(primitiveValue);
       if (toStringTag === '[object Object]') {
         value = { ...value };
@@ -67,18 +67,18 @@ export const storageSetItem = async (key: string, payload: any) => {
         const valueWithVData = {
           [vDataKey]: vDataId,
 
-          // 对于对象和数组来说，它内部的属性会全部通过`...value`放到外部，因此内部的不需要再进行遍历转换了
-          // 因此将数组或对象置空，这样既避免了重复转换，又避免了污染原对象
+          // For objects and arrays, all their internal properties will be put to the outside through `...value`, so the internal ones do not need to be traversed and converted.
+          // Therefore, empty the array or object to avoid repeated conversions and contamination of the original object.
           [vDataValueKey]: primitiveValue,
           ...value
         };
-        // 如果是String类型，将会有像数组一样的如0、1、2为下标，值为字符的项，需将他们过滤掉
+        // If it is a string type, there will be items like arrays such as 0, 1, and 2 as subscripts and values ​​as characters, and they need to be filtered out.
         if (instanceOf(value, String)) {
           for (let i = 0; i < len(value as string); i += 1) {
             delete valueWithVData?.[i];
           }
         }
-        // 如果转换成了虚拟数据，则将转换值赋给它内部，并在下面逻辑中统一由value处理
+        // If it is converted into virtual data, the converted value is assigned to it internally, and is uniformly processed by value in the following logic.
         value = valueWithVData;
       }
       return value;
@@ -88,8 +88,8 @@ export const storageSetItem = async (key: string, payload: any) => {
   await storage.set(key, serializerPerformer.serialize(payload));
 };
 /**
- * 取出持久化数据，并将数据转换为虚拟数据和已序列化数据
- * @param key 持久化数据的key
+ * Take out the persistent data and convert the data into virtual data and serialized data
+ * @param key Key to persistent data
  */
 export const storageGetItem = async (key: string) => {
   const storagedResponse = await getAlovaStorage().get(key);
@@ -98,7 +98,7 @@ export const storageGetItem = async (key: string) => {
     ? walkObject(
         serializerPerformer.deserialize(storagedResponse),
         value => {
-          // 将虚拟数据格式转换回虚拟数据实例
+          // Convert virtual data format back to virtual data instance
           if (isObject(value) && value?.[vDataKey]) {
             const vDataId = value[vDataKey];
             const vDataValue = createVirtualResponse(value[vDataValueKey], vDataId);
@@ -116,8 +116,8 @@ export const storageGetItem = async (key: string) => {
     : storagedResponse;
 };
 /**
- * 移除持久化数据
- * @param key 持久化数据的key
+ * Remove persistent data
+ * @param key Key to persistent data
  */
 export const storageRemoveItem = async (key: string) => {
   await getAlovaStorage().remove(key);

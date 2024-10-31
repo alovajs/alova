@@ -2,13 +2,13 @@ import { trueValue } from '@alova/shared';
 import stringifyVData from './stringifyVData';
 
 /**
- * 以兼容虚拟数据的方式判断两个值是否相等
- * @param prevValue 前项值
- * @param nextValue 后项值
- * @returns 是否相等
+ * Determine whether two values ​​are equal in a way that is compatible with virtual data
+ * @param prevValue Antecedent value
+ * @param nextValue consequent value
+ * @returns Are they equal?
  */
 export default (prevValue: any, nextValue: any) => {
-  // 如果相等则直接返回
+  // If equal, return directly
   if (prevValue === nextValue) {
     return trueValue;
   }

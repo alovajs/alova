@@ -137,7 +137,8 @@ describe('shared functions', () => {
     expect(isSpecialRequestBody(new FormData())).toBeTruthy();
     // Note: ReadableStream is an abstract class and can't be instantiated directly in a test environment.
     // You might need to use a polyfill or a mock implementation for testing.
-    // expect(isSpecialRequestBody(new ReadableStream())).toBeTruthy(); // Uncomment if you have a mock or polyfill
+    // expect(isSpecialRequestBody(new ReadableStream())).toBeTruthy();
+    // Uncomment if you have a mock or polyfill
     expect(isSpecialRequestBody(new URLSearchParams())).toBeTruthy();
     expect(isSpecialRequestBody(new ArrayBuffer(100))).toBeTruthy();
 
@@ -431,10 +432,10 @@ describe('shared functions', () => {
     // should handle an empty queue gracefully
     const { addQueue: addToQueue2 } = createAsyncQueue();
 
-    // 添加空操作
+    // Add no-op
     const results2 = await addToQueue2(async () => Promise.resolve('Empty'));
 
-    // 不应该抛出任何错误
+    // should not throw any errors
     expect(results2).toBe('Empty');
 
     // should reject the promise when async function fails and catchError is false

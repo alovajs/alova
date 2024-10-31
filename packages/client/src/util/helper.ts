@@ -30,8 +30,8 @@ import type { AlovaGenerics, EffectRequestParams, ReferingObject, StatesExport, 
 import type { AlovaMethodHandler, ExportedComputed, ExportedState } from '~/typings/clienthook';
 
 /**
- * 兼容函数，抛出参数
- * @param error 错误
+ * Compatible functions, throwing parameters
+ * @param error mistake
  */
 export const throwFn = <T>(error: T) => {
   throw error;
@@ -45,7 +45,7 @@ export function useCallback<Fn extends GeneralFn = GeneralFn>(onCallbackChange: 
       callbacks.push(fn);
       onCallbackChange(callbacks);
     }
-    // 返回取消注册函数
+    // Return unregister function
     return () => {
       callbacks = filterItem(callbacks, e => e !== fn);
       onCallbackChange(callbacks);
@@ -67,11 +67,11 @@ export function useCallback<Fn extends GeneralFn = GeneralFn>(onCallbackChange: 
 }
 
 /**
- * 创建防抖函数，当delay为0时立即触发函数
- * 场景：在调用useWatcher并设置了immediate为true时，首次调用需立即执行，否则会造成延迟调用
- * @param {GeneralFn} fn 回调函数
- * @param {number|(...args: any[]) => number} delay 延迟描述，设置为函数时可实现动态的延迟
- * @returns 延迟后的回调函数
+ * Create an anti-shake function and trigger the function immediately when delay is 0
+ * Scenario: When calling useWatcher and setting immediate to true, the first call must be executed immediately, otherwise it will cause a delayed call
+ * @param {GeneralFn} fn callback function
+ * @param {number|(...args: any[]) => number} delay Delay description, dynamic delay can be achieved when set as a function
+ * @returns Delayed callback function
  */
 export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => number)) => {
   let timer: any = nullValue;
@@ -88,10 +88,10 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
 };
 
 /**
- * 获取请求方法对象
- * @param methodHandler 请求方法句柄
- * @param args 方法调用参数
- * @returns 请求方法对象
+ * Get the request method object
+ * @param methodHandler Request method handle
+ * @param args Method call parameters
+ * @returns request method object
  */
 export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler, args: any[] = []) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
@@ -103,10 +103,10 @@ export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler, arg
 };
 
 /**
- * 转换对象的每一项值，并返回新的对象
- * @param obj 对象
- * @param callback 回调函数
- * @returns 转换后的对象
+ * Convert each value of the object and return the new object
+ * @param obj object
+ * @param callback callback function
+ * @returns converted object
  */
 export const mapObject = <T extends Record<string, any>, U>(
   obj: T,

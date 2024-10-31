@@ -27,7 +27,7 @@ describe('update cached response data by user in svelte', () => {
     const methodKey1 = screen.getByRole('methodKey').innerHTML;
     expect(getStateCache(alovaId, methodKey1)).not.toBeUndefined();
 
-    // 需要暂停一段时间再触发事件和检查响应数据
+    // It is necessary to pause for a period of time before triggering the event and checking the response data.
     fireEvent.click(screen.getByRole('button'));
     await delay(100);
     expect(screen.getByRole('path')).toHaveTextContent('/unit-test');
@@ -36,10 +36,10 @@ describe('update cached response data by user in svelte', () => {
     const methodKey2 = screen.getByRole('methodKey').innerHTML;
     expect(getStateCache(alovaId, methodKey2)).not.toBeUndefined();
 
-    // 组件卸载后，对应缓存状态会被删除
+    // After the component is uninstalled, the corresponding cache status will be deleted.
     unmount();
     await waitFor(() => {
-      // 空对象表示未匹配到状态缓存
+      // An empty object indicates that the state cache is not matched.
       expect(getStateCache(alovaId, methodKey1)).toStrictEqual({});
       expect(getStateCache(alovaId, methodKey2)).toStrictEqual({});
     });

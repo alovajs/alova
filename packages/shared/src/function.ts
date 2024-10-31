@@ -33,44 +33,36 @@ export const noop = () => {};
  */
 export const $self = <T>(arg: T) => arg;
 /**
- * Determine whether the parameter is a function
- * @param fn any parameter
+ * Determine whether the parameter is a function any parameter
  * @returns Whether the parameter is a function
  */
 export const isFn = (arg: any): arg is GeneralFn => typeOf(arg) === 'function';
 /**
- * Determine whether the parameter is a number
- * @param arg any parameter
+ * Determine whether the parameter is a number any parameter
  * @returns Whether the parameter is a number
  */
 export const isNumber = (arg: any): arg is number => typeOf(arg) === 'number' && !Number.isNaN(arg);
 /**
- * Determine whether the parameter is a string
- * @param arg any parameter
+ * Determine whether the parameter is a string any parameter
  * @returns Whether the parameter is a string
  */
 export const isString = (arg: any): arg is string => typeOf(arg) === 'string';
 /**
- * Determine whether the parameter is an object
- * @param arg any parameter
+ * Determine whether the parameter is an object any parameter
  * @returns Whether the parameter is an object
  */
 export const isObject = <T = any>(arg: any): arg is T => arg !== nullValue && typeOf(arg) === 'object';
 /**
- * Global toString
- * @param arg any parameter
- * @returns stringified parameters
+ * Global toString any parameter stringified parameters
  */
 export const globalToString = (arg: any) => ObjectCls.prototype.toString.call(arg);
 /**
- * Determine whether it is a normal object
- * @param arg any parameter
+ * Determine whether it is a normal object any parameter
  * @returns Judgment result
  */
 export const isPlainObject = (arg: any): arg is Record<any, any> => globalToString(arg) === '[object Object]';
 /**
- * Determine whether it is an instance of a certain class
- * @param arg any parameter
+ * Determine whether it is an instance of a certain class any parameter
  * @returns Judgment result
  */
 export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is T => arg instanceof cls;
@@ -80,8 +72,7 @@ export const instanceOf = <T>(arg: any, cls: new (...args: any[]) => T): arg is 
  */
 export const getTime = (date?: Date) => (date ? date.getTime() : Date.now());
 /**
- * Get the alova instance through the method instance
- * @returns alova example
+ * Get the alova instance through the method instance alova example
  */
 export const getContext = <T extends { context: any }>(methodInstance: T): T['context'] => methodInstance.context;
 /**
@@ -90,13 +81,11 @@ export const getContext = <T extends { context: any }>(methodInstance: T): T['co
  */
 export const getConfig = <T extends { config: any }>(methodInstance: T): T['config'] => methodInstance.config;
 /**
- * Get alova configuration data
- * @returns alova configuration object
+ * Get alova configuration data alova configuration object
  */
 export const getContextOptions = <T extends { options: any }>(alovaInstance: T): T['options'] => alovaInstance.options;
 /**
- * Get alova configuration data through method instance
- * @returns alova configuration object
+ * Get alova configuration data through method instance alova configuration object
  */
 export const getOptions = <T extends { context: any }>(methodInstance: T) =>
   getContextOptions(getContext(methodInstance));
@@ -120,8 +109,7 @@ export const key = <
 };
 
 /**
- * Create uuid simple version
- * @returns uuid
+ * Create uuid simple version uuid
  */
 export const uuid = () => {
   const timestamp = new Date().getTime();
@@ -129,8 +117,7 @@ export const uuid = () => {
 };
 
 /**
- * Get the key value of the method instance
- * @param methodInstance method instance
+ * Get the key value of the method instance method instance
  * @returns The key value of this method instance
  */
 export const getMethodInternalKey = <T extends { key: string }>(methodInstance: T): T['key'] => methodInstance.key;
@@ -138,8 +125,7 @@ export const getMethodInternalKey = <T extends { key: string }>(methodInstance: 
 /**
  * Get the request method object
  * @param methodHandler Request method handle
- * @param args Method call parameters
- * @returns request method object
+ * @param args Method call parameters request method object
  */
 export const getHandlerMethod = <T extends { key: string }>(
   methodHandler: T | ((...args: any[]) => T),
@@ -171,10 +157,8 @@ export const objAssign = <T extends Record<string, any>, U extends Record<string
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 /**
- * Excludes specified attributes from a data collection and returns a new data collection
- * @param obj data collection
- * @param keys Excluded keys
- * @returns new data collection
+ * Excludes specified attributes from a data collection and returns a new data collection data collection
+ * @param keys Excluded keys new data collection
  */
 export const omit = <T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]) => {
   const result = {} as Pick<T, Exclude<keyof T, K>>;
@@ -202,8 +186,7 @@ export function usePromise<T = any>(): UsePromiseExposure<T> {
 }
 
 /**
- * Get cached configuration parameters, fixedly returning an object in the format { e: function, c: any, f: any, m: number, s: boolean, t: string }
- * e is the abbreviation of expire, which returns the cache expiration time point (timestamp) in milliseconds.
+ * Get cached configuration parameters, fixedly returning an object in the format { e: function, c: any, f: any, m: number, s: boolean, t: string } e is the abbreviation of expire, which returns the cache expiration time point (timestamp) in milliseconds.
  * c is controlled, indicating whether it is a controlled cache
  * f is the original value of cacheFor, which is used to call to obtain cached data when c is true.
  * m is the abbreviation of mode, storage mode
@@ -247,8 +230,7 @@ export const getLocalCacheConfigParam = <T extends { config: any }>(methodInstan
 /**
  * Create class instance
  * @param Cls Constructor
- * @param args Constructor parameters
- * @returns class instance
+ * @param args Constructor parameters class instance
  */
 export const newInstance = <T extends { new (...args: any[]): InstanceType<T> }>(
   Cls: T,
@@ -280,8 +262,7 @@ export const createSyncOnceRunner = (delay = 0) => {
 };
 
 /**
- * Create an asynchronous function queue, the asynchronous function will be executed serially
- * @returns queue add function
+ * Create an asynchronous function queue, the asynchronous function will be executed serially queue add function
  */
 export const createAsyncQueue = (catchError = falseValue) => {
   type AsyncFunction<T = any> = (...args: any[]) => Promise<T>;
@@ -323,8 +304,7 @@ export const createAsyncQueue = (catchError = falseValue) => {
 };
 
 /**
- * Traverse the target object deeply
- * @param target target audience
+ * Traverse the target object deeply target audience
  * @param callback Traversal callback
  * @param preorder Whether to traverse in preorder, the default is true
  * @param key The currently traversed key
@@ -355,7 +335,7 @@ export const walkObject = (
       }
     }
   }
-  // Postorder traversal
+  // Postal order traversal
   !preorder && callCallback();
   return target;
 };
@@ -367,8 +347,7 @@ const cacheKeyPrefix = '$a.';
 export const buildNamespacedCacheKey = (namespace: string, key: string) => cacheKeyPrefix + namespace + key;
 
 /**
- * Calculate retry delay time based on avoidance strategy and number of retries
- * @param backoff avoid parameters
+ * Calculate retry delay time based on avoidance strategy and number of retries avoid parameters
  * @param retryTimes Number of retries
  * @returns Retry delay time
  */
@@ -388,11 +367,7 @@ export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => 
 };
 
 /**
- * Build the complete url
- * @param base baseURL
- * @param url path
- * @param params url parameters
- * @returns complete url
+ * Build the complete url baseURL path url parameters complete url
  */
 export const buildCompletedURL = (baseURL: string, url: string, params: Record<string, any>) => {
   // If the Base url ends with /, remove /

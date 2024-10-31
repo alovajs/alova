@@ -65,8 +65,7 @@ export const queryCache = async <Responded>(
 
 /**
  * Manually set cache response data. If the corresponding methodInstance sets persistent storage, the cache in the persistent storage will also be checked out.
- * @param matcher Method instance matcher
- * @param data cache data
+ * @param matcher Method instance matcher cache data
  */
 export const setCache = async <Responded>(
   matcher: Method<AlovaGenerics<Responded>> | Method<AlovaGenerics<Responded>>[],

@@ -9,7 +9,7 @@ import { createAlova, Method } from 'alova';
 import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '../mockData';
 
-// 每次需重置状态，因为上一个用例可能因为失败而被设置为2，导致下面的用例不运行
+// The status needs to be reset each time because the previous test may have been set to 2 due to failure, causing the following tests to not run.
 beforeEach(() => setSilentFactoryStatus(0));
 // vi.setConfig({ testTimeout: 1000_000 });
 describe('silent method request in queue with silent behavior', () => {
@@ -61,7 +61,7 @@ describe('silent method request in queue with silent behavior', () => {
     await pushNewSilentMethod2Queue(silentMethodInstance, false);
     await pushNewSilentMethod2Queue(silentMethodInstance2, false);
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0,
@@ -69,7 +69,7 @@ describe('silent method request in queue with silent behavior', () => {
     });
 
     await pms;
-    // 延迟请求1000毫秒，请求时间50毫秒，因此检测点是1050毫秒
+    // The delay request is 1000 milliseconds and the request time is 50 milliseconds, so the detection point is 1050 milliseconds
     expect(delayRequestTs[0]).toBeGreaterThanOrEqual(1050);
     expect(delayRequestTs[1]).toBeGreaterThanOrEqual(1050);
   });
@@ -123,7 +123,7 @@ describe('silent method request in queue with silent behavior', () => {
     await pushNewSilentMethod2Queue(silentMethodInstance, false, queueName);
     await pushNewSilentMethod2Queue(silentMethodInstance2, false, queueName);
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0,
@@ -136,7 +136,7 @@ describe('silent method request in queue with silent behavior', () => {
     });
 
     await pms;
-    // 延迟请求1000毫秒，请求时间50毫秒，因此检测点是1050毫秒
+    // The delay request is 1000 milliseconds and the request time is 50 milliseconds, so the detection point is 1050 milliseconds
     expect(delayRequestTs[0]).toBeGreaterThanOrEqual(1050);
     expect(delayRequestTs[1]).toBeGreaterThanOrEqual(1050);
   });
@@ -195,7 +195,7 @@ describe('silent method request in queue with silent behavior', () => {
     await pushNewSilentMethod2Queue(silentMethodInstance2, false, 'ttt4');
     await pushNewSilentMethod2Queue(silentMethodInstance3, false, 'ttt5');
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0,
@@ -203,7 +203,7 @@ describe('silent method request in queue with silent behavior', () => {
         {
           queue: /^ttt/,
 
-          // 对url为/detail2的请求等待500毫秒，对其他请求等待1000毫秒
+          // Wait 500 milliseconds for requests with URL /detail2 and 1000 milliseconds for other requests.
           wait: (silentMethod, queueName) => {
             if (queueName === 'ttt3') {
               expect(silentMethod).toBe(silentMethodInstance);
@@ -221,7 +221,7 @@ describe('silent method request in queue with silent behavior', () => {
     });
 
     await delay(1500);
-    // 模拟请求需要50毫秒，需要加上
+    // The simulated request takes 50 milliseconds, which needs to be added
     expect(delayRequestTs[0]).toBeGreaterThanOrEqual(50);
     expect(delayRequestTs[1]).toBeGreaterThanOrEqual(550);
     expect(delayRequestTs[2]).toBeGreaterThanOrEqual(1050);
@@ -276,17 +276,17 @@ describe('silent method request in queue with silent behavior', () => {
     await pushNewSilentMethod2Queue(silentMethodInstance, false, queueName);
     await pushNewSilentMethod2Queue(silentMethodInstance2, false, queueName);
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0,
 
-      // 注意：这边未指定queue名为ttt2的请求延迟，因此会立即请求
+      // Note: The request delay for the queue named ttt2 is not specified here, so the request will be made immediately.
       requestWait: 1000
     });
 
     await pms;
-    // 未指定ttt2队列的延迟请求，因此会立即请求,100毫秒为请求延迟
+    // The delay request of the ttt2 queue is not specified, so the request will be made immediately, with 100 milliseconds as the request delay.
     expect(delayRequestTs[0]).toBeLessThanOrEqual(100);
     expect(delayRequestTs[1]).toBeLessThanOrEqual(100);
   });

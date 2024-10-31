@@ -59,10 +59,10 @@ export class AlovaErrorEvent<AG extends AlovaGenerics, Args extends any[]> exten
 }
 
 export class AlovaCompleteEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEventBase<AG, Args> {
-  /** 响应状态 */
+  /** response status */
   status: 'success' | 'error';
 
-  /** data数据是否来自缓存，当status为error时，fromCache始终为false */
+  /** Whether the Data data comes from the cache, when the status is error, from cache is always false */
   readonly fromCache: boolean;
 
   readonly data: AG['Responded'];
@@ -86,7 +86,7 @@ export class AlovaCompleteEvent<AG extends AlovaGenerics, Args extends any[]> ex
 
 // extend event
 export class AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEventBase<AG, Args> {
-  eventSource: EventSource; // eventSource实例
+  eventSource: EventSource; // EventSource instance
 
   constructor(base: AlovaEventBase<AG, Args>, eventSource: EventSource) {
     super(base.method, base.args);
@@ -95,7 +95,7 @@ export class AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
 }
 
 export class AlovaSSEErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaSSEEvent<AG, Args> {
-  error: Error; // 错误对象
+  error: Error; // error object
 
   constructor(base: AlovaSSEEvent<AG, Args>, error: Error) {
     super(base, base.eventSource);
@@ -107,7 +107,7 @@ export class AlovaSSEMessageEvent<AG extends AlovaGenerics, Data, Args extends a
   AG,
   Args
 > {
-  data: Data; // 每次响应的，经过拦截器转换后的数据
+  data: Data; // Data converted by the interceptor for each response
 
   constructor(base: AlovaSSEEvent<AG, Args>, data: Data) {
     super(base, base.eventSource);
@@ -115,20 +115,20 @@ export class AlovaSSEMessageEvent<AG extends AlovaGenerics, Data, Args extends a
   }
 }
 
-/** SQ顶层事件 */
+/** Sq top level events */
 export class SQEvent<AG extends AlovaGenerics> implements ISQEvent<AG> {
   /**
-   * 事件对应的请求行为
+   * Request behavior corresponding to the event
    */
   behavior: SQHookBehavior;
 
   /**
-   * 当前的method实例
+   * the current method instance
    */
   method: Method<AG>;
 
   /**
-   * 当前的silentMethod实例，当behavior为static时没有值
+   * The current silentMethod instance has no value when the behavior is static
    */
   silentMethod?: SilentMethod<AG>;
 
@@ -139,16 +139,16 @@ export class SQEvent<AG extends AlovaGenerics> implements ISQEvent<AG> {
   }
 }
 
-/** SQ全局事件 */
+/** Sq global events */
 export class GlobalSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> implements IGlobalSQEvent<AG> {
   // entity, behavior, silentMethodInstance, queueName, retryTimes
   /**
-   * 重试次数，在beforePush和pushed事件中没有值
+   * Number of retries, no value in beforePush and pushed events
    */
   retryTimes: number;
 
   /**
-   * silentMethod所在的队列名
+   * The queue name where silentMethod is located
    */
   queueName: string;
 
@@ -170,13 +170,13 @@ export class GlobalSQSuccessEvent<AG extends AlovaGenerics>
   implements IGlobalSQSuccessEvent<AG>
 {
   /**
-   * 响应数据
+   * response data
    */
   data: any;
 
   /**
-   * 虚拟数据和实际值的集合
-   * 里面只包含你已用到的虚拟数据的实际值
+   * A collection of dummy data and actual values
+   * It only contains the actual values of the dummy data you have used.
    */
   vDataResponse: Record<string, any>;
 
@@ -197,12 +197,12 @@ export class GlobalSQSuccessEvent<AG extends AlovaGenerics>
 
 export class GlobalSQErrorEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> implements IGlobalSQErrorEvent<AG> {
   /**
-   * 失败时抛出的错误
+   * Error thrown on failure
    */
   error: any;
 
   /**
-   * 下次重试间隔时间（毫秒）
+   * Next retry interval (milliseconds)
    */
   retryDelay?: number;
 
@@ -223,7 +223,7 @@ export class GlobalSQErrorEvent<AG extends AlovaGenerics> extends GlobalSQEvent<
 
 export class GlobalSQFailEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> implements IGlobalSQFailEvent<AG> {
   /**
-   * 失败时抛出的错误
+   * Error thrown on failure
    */
   error: any;
 
@@ -240,13 +240,13 @@ export class GlobalSQFailEvent<AG extends AlovaGenerics> extends GlobalSQEvent<A
   }
 }
 
-/** SQ事件 */
+/** Sq event */
 export class ScopedSQEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
   extends SQEvent<AG>
   implements IScopedSQEvent<AG, Args>
 {
   /**
-   * 通过send触发请求时传入的参数
+   * The parameters passed in when triggering the request through send
    */
   args: [...Args, ...any[]];
 
@@ -261,7 +261,7 @@ export class ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[] =
   implements IScopedSQSuccessEvent<AG, Args>
 {
   /**
-   * 响应数据
+   * response data
    */
   data: AG['Responded'];
 
@@ -282,7 +282,7 @@ export class ScopedSQErrorEvent<AG extends AlovaGenerics, Args extends any[] = a
   implements IScopedSQErrorEvent<AG, Args>
 {
   /**
-   * 失败时抛出的错误
+   * Error thrown on failure
    */
   error: any;
 
@@ -303,12 +303,12 @@ export class ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[] = a
   implements IScopedSQRetryEvent<AG, Args>
 {
   /**
-   * 重试次数
+   * Number of retries
    */
   retryTimes: number;
 
   /**
-   * 重试间隔时间（毫秒）
+   * Retry interval (milliseconds)
    */
   retryDelay: number;
 
@@ -331,17 +331,17 @@ export class ScopedSQCompleteEvent<AG extends AlovaGenerics, Args extends any[] 
   implements IScopedSQCompleteEvent<AG, Args>
 {
   /**
-   * 响应状态
+   * response status
    */
   status: AlovaCompleteEvent<AG, any>['status'];
 
   /**
-   * 响应数据
+   * response data
    */
   data?: AG['Responded'];
 
   /**
-   * 失败时抛出的错误
+   * Error thrown on failure
    */
   error?: any;
 
@@ -366,12 +366,12 @@ export class RetriableRetryEvent<AG extends AlovaGenerics, Args extends any[] = 
   implements IRetriableRetryEvent<AG, Args>
 {
   /**
-   * 当前的重试次数
+   * Current number of retries
    */
   retryTimes: number;
 
   /**
-   * 本次重试的延迟时间
+   * Delay time for this retry
    */
   retryDelay: number;
 
@@ -387,7 +387,7 @@ export class RetriableFailEvent<AG extends AlovaGenerics, Args extends any[] = a
   implements IRetriableFailEvent<AG, Args>
 {
   /**
-   * 失败时的重试次数
+   * Number of retries on failure
    */
   retryTimes: number;
 

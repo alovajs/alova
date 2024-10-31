@@ -77,7 +77,7 @@ describe('useWatcher middleware', () => {
 
     const mockFn = vi.fn();
     onSuccess(mockFn);
-    // middleware中未调用next，因此不会发送请求
+    // next is not called in Middleware, so the request will not be sent
     expect(loading.value).toBeTruthy();
     await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);

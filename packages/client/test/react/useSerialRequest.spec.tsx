@@ -240,7 +240,7 @@ describe('react => useSerialRequest', () => {
       expect(mockErrorFn).toHaveBeenCalledTimes(1);
       expect(mockCompleteFn).toHaveBeenCalledTimes(1);
       expect(mockSuccessFn).not.toBeCalled();
-      expect(methodHandlerMockFn).toHaveBeenCalledTimes(1); // 错误了就不会再继续往下执行了
+      expect(methodHandlerMockFn).toHaveBeenCalledTimes(1); // If there is an error, the execution will not continue.
       expect(screen.getByRole('error')).toHaveTextContent('server error');
       expect(screen.getByRole('data')).toHaveTextContent('');
     });

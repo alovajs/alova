@@ -61,7 +61,7 @@ describe('usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
@@ -89,7 +89,7 @@ describe('usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(3, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(59, 40));
@@ -97,7 +97,7 @@ describe('usePagination', () => {
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19));
     });
 
-    // 最后一页
+    // last page
     fireEvent.click(screen.getByRole('setLastPage'));
     await waitFor(async () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('true');

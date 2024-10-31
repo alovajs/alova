@@ -4,11 +4,11 @@ import { RequestHookConfig } from './useRequest';
 
 /**
  * useSerialRequest
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialRequest相关数据和操作函数
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: Serial request for a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialRequest related data and operation functions
  */
 export declare function useSerialRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG, Args>, ...AlovaMethodHandler<any>[]],
@@ -16,12 +16,12 @@ export declare function useSerialRequest<AG extends AlovaGenerics, Args extends 
 ): UseHookExposure<AG, Args>;
 
 /**
- * useSerialRequest(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialRequest相关数据和操作函数
+ * useSerialRequest(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: Serial request for a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialRequest related data and operation functions
  */
 export declare function useSerialRequest<
   AG extends AlovaGenerics,
@@ -33,12 +33,12 @@ export declare function useSerialRequest<
 ): UseHookExposure<AG2, Args>;
 
 /**
- * useSerialRequest(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialRequest相关数据和操作函数
+ * useSerialRequest(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: Serial request for a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialRequest related data and operation functions
  */
 export declare function useSerialRequest<
   AG extends AlovaGenerics,
@@ -56,12 +56,12 @@ export declare function useSerialRequest<
 ): UseHookExposure<AG3, Args>;
 
 /**
- * useSerialRequest(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialRequest相关数据和操作函数
+ * useSerialRequest(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: Serial request for a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialRequest related data and operation functions
  */
 export declare function useSerialRequest<
   AG extends AlovaGenerics,
@@ -81,12 +81,12 @@ export declare function useSerialRequest<
 ): UseHookExposure<AG4, Args>;
 
 /**
- * useSerialRequest(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialRequest相关数据和操作函数
+ * useSerialRequest(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: Serial request for a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialRequest related data and operation functions
  */
 export declare function useSerialRequest<
   AG extends AlovaGenerics,
@@ -108,12 +108,12 @@ export declare function useSerialRequest<
 ): UseHookExposure<AG5, Args>;
 
 /**
- * useSerialRequest(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialRequest相关数据和操作函数
+ * useSerialRequest(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: Serial request for a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialRequest related data and operation functions
  */
 export declare function useSerialRequest<
   AG extends AlovaGenerics,
@@ -137,12 +137,12 @@ export declare function useSerialRequest<
 ): UseHookExposure<AG6, Args>;
 
 /**
- * useSerialRequest(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialRequest相关数据和操作函数
+ * useSerialRequest(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: Serial request for a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialRequest related data and operation functions
  */
 export declare function useSerialRequest<
   AG extends AlovaGenerics,

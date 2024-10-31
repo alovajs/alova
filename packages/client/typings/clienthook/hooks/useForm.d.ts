@@ -4,7 +4,7 @@ import { RequestHookConfig } from './useRequest';
 import { DataSerializer } from './useSQRequest';
 
 /**
- * useForm的handler函数类型
+ * useForm's handler function type
  */
 export type FormHookHandler<AG extends AlovaGenerics, F, Args extends any[] = any[]> = (
   form: F,
@@ -12,47 +12,47 @@ export type FormHookHandler<AG extends AlovaGenerics, F, Args extends any[] = an
 ) => Method<AG>;
 
 /**
- * useForm配置
+ * useForm configuration
  */
 export interface StoreDetailConfig {
   /**
-   * 是否启用持久化数据
+   * Whether to enable persistent data
    */
   enable: boolean;
 
   /**
-   * 序列化器集合，用于自定义转换为序列化时某些不能直接转换的数据
-   * 集合的key作为它的名字进行序列化，当反序列化时会将对应名字的值传入backward函数中
-   * 因此，在forward中序列化时需判断是否为指定的数据，并返回转换后的数据，否则返回undefined或不返回
-   * 而在backward中可通过名字来识别，因此只需直接反序列化即可
-   * 内置的序列化器：
-   * 1. date序列化器用于转换日期
-   * 2. regexp序列化器用于转化正则表达式
+   * Serializer collection, used to customize certain data that cannot be converted directly when converted to serialization
+   * The key of the collection is serialized as its name. When deserializing, the value of the corresponding name will be passed into the backward function.
+   * Therefore, when serializing in forward, it is necessary to determine whether it is the specified data and return the converted data, otherwise it will return undefined or not return
+   * In backward, it can be identified by name, so you only need to deserialize it directly.
+   * Built-in serializer:
+   * 1. Date serializer is used to convert dates
+   * 2. The regexp serializer is used to convert regular expressions
    *
-   * >>> 可以通过设置同名序列化器来覆盖内置序列化器
+   * >>> You can override the built-in serializer by setting a serializer with the same name
    */
   serializers?: Record<string | number, DataSerializer>;
 }
 export type FormHookConfig<AG extends AlovaGenerics, FormData, Args extends any[]> = {
   /**
-   * 初始表单数据
+   * Initial form data
    */
   initialForm?: FormData;
 
   /**
-   * form id，相同id的data数据是同一份引用，可以用于在多页表单时共用同一份表单数据
-   * 单页表单不需要指定id
+   * form id, data data with the same id is the same reference, and can be used to share the same form data in multi-page forms.
+   * Single-page forms do not need to specify an id
    */
   id?: string | number;
 
   /**
-   * 是否持久化保存数据，设置为true后将实时持久化未提交的数据
+   * Whether to persist data. If set to true, uncommitted data will be persisted in real time.
    * @default false
    */
   store?: boolean | StoreDetailConfig;
 
   /**
-   * 提交后重置数据
+   * Reset data after submission
    * @default false
    */
   resetAfterSubmiting?: boolean;
@@ -60,43 +60,43 @@ export type FormHookConfig<AG extends AlovaGenerics, FormData, Args extends any[
 
 export type RestoreHandler = () => void;
 /**
- * useForm返回值
+ * useForm return value
  */
 export interface FormExposure<AG extends AlovaGenerics, F, Args extends any[] = any[]>
   extends UseHookExposure<AG, Args, FormExposure<AG, F, Args>> {
   /**
-   * 表单数据
+   * form data
    */
   form: ExportedState<F, AG['StatesExport']>;
 
   /**
-   * 持久化数据恢复事件绑定，数据恢复后触发
+   * Persistent data recovery event binding, triggered after data recovery
    */
   onRestore(handler: RestoreHandler): this;
 
   /**
-   * 更新表单数据，可传入
-   * @param newForm 新表单数据
+   * Update form data, which can be passed in
+   * @param newForm new form data
    */
   updateForm(newForm: Partial<F> | ((oldForm: F) => F)): void;
 
   /**
-   * 重置为初始化数据，如果有持久化数据则清空
+   * Reset to initialization data, clear if there is persistent data
    */
   reset(): void;
 }
 
 /**
  * useForm
- * 表单的提交hook，具有草稿功能，以及多页表单的数据同步功能
+ * Form submission hook, draft function, and data synchronization function for multi-page forms
  *
- * 适用场景：
- * 1. 单表单/多表单提交、草稿数据持久化、数据更新和重置
- * 2. 条件搜索输入项，可持久化搜索条件，可立即发送表单数据
+ * Applicable scenarios:
+ * 1. Single form/multiple form submission, draft data persistence, data update and reset
+ * 2. Conditional search input items can persist search conditions and send form data immediately
  *
- * @param handler method获取函数，只需要获取同步数据时可传id
- * @param config 配置参数
- * @return useForm相关数据和操作函数
+ * @param handler method gets the function, you only need to pass the id when getting the synchronized data
+ * @param config Configuration parameters
+ * @return useForm related data and operation functions
  */
 export declare function useForm<
   AG extends AlovaGenerics,

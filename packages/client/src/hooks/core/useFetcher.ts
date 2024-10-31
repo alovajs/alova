@@ -6,8 +6,7 @@ import { assertMethod, fetcherHookAssert } from './implements/assert';
 import createRequestState from './implements/createRequestState';
 
 /**
- * Fetch request data and cache
- * @param method request method object
+ * Fetch request data and cache request method object
  */
 export default function useFetcher<F extends FetcherType<any>>(config: FetcherHookConfig = {}) {
   const props = createRequestState<
@@ -21,8 +20,7 @@ export default function useFetcher<F extends FetcherType<any>>(config: FetcherHo
   deleteAttr(props, 'send');
   return objAssign(props, {
     /**
-     * Fetch data
-     * fetch will definitely send a request, and if the currently requested data has a corresponding management state, this state will be updated.
+     * Fetch data fetch will definitely send a request, and if the currently requested data has a corresponding management state, this state will be updated.
      * @param matcher Method object
      */
     fetch: <Responded>(matcher: Method<AlovaGenerics<any, any, any, any, Responded>>, ...args: any[]) => {

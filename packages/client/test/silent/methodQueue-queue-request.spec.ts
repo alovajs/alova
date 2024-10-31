@@ -31,7 +31,7 @@ describe('silent method request in queue with queue behavior', () => {
     );
     await pushNewSilentMethod2Queue(silentMethodInstance, false);
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0
@@ -40,7 +40,7 @@ describe('silent method request in queue with queue behavior', () => {
     const successMockFn = vi.fn();
     const offSuccess = onSilentSubmitSuccess(() => {
       successMockFn();
-      // 卸载全局事件避免污染其他用例
+      // Offload global events to avoid polluting other use cases
       offSuccess();
     });
 
@@ -81,9 +81,9 @@ describe('silent method request in queue with queue behavior', () => {
       value => resolve(value),
       reason => resolve(reason)
     );
-    await pushNewSilentMethod2Queue(silentMethodInstance, false, queueName); // 多个用例需要分别放到不同队列，否则会造成冲突
+    await pushNewSilentMethod2Queue(silentMethodInstance, false, queueName); // Multiple use cases need to be placed in different queues, otherwise conflicts will occur
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0
@@ -99,9 +99,9 @@ describe('silent method request in queue with queue behavior', () => {
     expect(reason).toBeInstanceOf(Error);
     expect(reason.name).toBe('403');
     expect(reason.message).toBe('no permission');
-    expect(silentQueueMap[queueName]).toHaveLength(0); // queue行为下，即使失败也将被移除
+    expect(silentQueueMap[queueName]).toHaveLength(0); // Under Queue behavior, even if it fails, it will be removed.
 
-    // queue行为下，onFallback和onRetry，以及全局的silentSubmit事件都不会触发
+    // Under the Queue behavior, on fallback, on retry, and the global silent submit event will not be triggered.
     expect(fallbackMockFn).toHaveBeenCalledTimes(0);
     expect(retryMockFn).toHaveBeenCalledTimes(0);
     expect(errorMockFn).toHaveBeenCalledTimes(0);

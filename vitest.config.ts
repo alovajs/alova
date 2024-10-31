@@ -4,8 +4,7 @@ export default defineConfig({
   test: {
     coverage: {
       include: ['packages/*/src/**/*'],
-      reporter: ['lcov', 'html'],
-      reportOnFailure: true
+      reporter: ['lcov', 'html']
     }
   }
 });

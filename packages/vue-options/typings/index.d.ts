@@ -25,7 +25,7 @@ export type FlattenObjectKeys<T extends Record<string, unknown>, K = keyof T> = 
     : K
   : never;
 
-/** vue mixin */
+/** vUE superstitious */
 export interface VueHookMapperMixin<UHC extends UseHookCallers> {
   created(): void;
   data(): {
@@ -37,9 +37,9 @@ export interface VueHookMapperMixin<UHC extends UseHookCallers> {
 }
 
 /**
- * 将useHook的返回值和操作函数动态映射到vueComponent上
- * @param mapGetter usehook映射函数，它将返回映射的集合
- * @returns vue mixins数组
+ * Dynamically map the return value and operation function of useHook to vueComponent
+ * @param mapGetter usehook mapping function which will return a mapped collection
+ * @returns vue mixins array
  */
 export declare function mapAlovaHook<UHM extends UseHookCallers>(
   mapGetter: UseHookMapGetter<UHM>

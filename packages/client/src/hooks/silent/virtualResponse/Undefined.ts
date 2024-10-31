@@ -10,7 +10,7 @@ interface UndefinedInterface {
 }
 
 /**
- * Undefined包装类实现
+ * Undefined wrapper class implementation
  */
 const Undefined = function Undefined(this: UndefinedInterface) {} as unknown as UndefinedConstructor;
 Undefined.prototype = ObjectCls.create(nullValue, {

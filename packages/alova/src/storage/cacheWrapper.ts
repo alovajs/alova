@@ -28,12 +28,12 @@ const addItem = (obj: UniqueKeyPromised, item: string) => {
 
 /**
  * set or update cache
- * @param namespace 命名空间
- * @param key 存储的key
- * @param response 存储的响应内容
- * @param expireTimestamp 过期时间点的时间戳表示
- * @param storage 存储对象
- * @param tag 存储标签，用于区分不同的存储标记
+ * @param namespace namespace
+ * @param key stored key
+ * @param response Stored response content
+ * @param expireTimestamp Timestamp representation of expiration time point
+ * @param storage storage object
+ * @param tag Storage tags, used to distinguish different storage tags
  */
 export const setWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGenerics>(
   namespace: string,
@@ -109,7 +109,7 @@ export const setWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGeneri
         // save the regexp source if regexp exists.
         if (len(hitSourceRegexpSources)) {
           const regexpList = (await cacheAdapter.get<string[]>(unifiedHitSourceRegexpCacheKey)) || [];
-          // TODO: hitSourceRegexpSources 需要去重
+          // TODO: hitSourceRegexpSources needs to be deduplicated
           pushItem(regexpList, ...hitSourceRegexpSources);
           await cacheAdapter.set(unifiedHitSourceRegexpCacheKey, regexpList);
         }
@@ -122,10 +122,10 @@ export const setWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGeneri
 };
 
 /**
- * 删除存储的响应数据
- * @param namespace 命名空间
- * @param key 存储的key
- * @param storage 存储对象
+ * Delete stored response data
+ * @param namespace namespace
+ * @param key stored key
+ * @param storage storage object
  */
 export const removeWithCacheAdapter = async (namespace: string, key: string, cacheAdapter: AlovaGlobalCacheAdapter) => {
   const methodStoreKey = buildNamespacedCacheKey(namespace, key);
@@ -133,11 +133,11 @@ export const removeWithCacheAdapter = async (namespace: string, key: string, cac
 };
 
 /**
- * 获取存储的响应数据
- * @param namespace 命名空间
- * @param key 存储的key
- * @param storage 存储对象
- * @param tag 存储标签，标记改变了数据将会失效
+ * Get stored response data
+ * @param namespace namespace
+ * @param key stored key
+ * @param storage storage object
+ * @param tag Store tags. If the tag changes, the data will become invalid.
  */
 export const getRawWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGenerics>(
   namespace: string,
@@ -149,23 +149,23 @@ export const getRawWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGen
     buildNamespacedCacheKey(namespace, key)
   );
   if (storagedData) {
-    // eslint-disable-next-line
-    const [_, expireTimestamp, storedTag] = storagedData;
-    // 如果没有过期时间则表示数据永不过期，否则需要判断是否过期
+    // Eslint disable next line
+    const [dataUnused, expireTimestamp, storedTag] = storagedData;
+    // If there is no expiration time, it means that the data will never expire. Otherwise, you need to determine whether it has expired.
     if (storedTag === tag && (!expireTimestamp || expireTimestamp > getTime())) {
       return storagedData;
     }
-    // 如果过期，则删除缓存
+    // If expired, delete cache
     await removeWithCacheAdapter(namespace, key, cacheAdapter);
   }
 };
 
 /**
- * 获取存储的响应数据
- * @param namespace 命名空间
- * @param key 存储的key
- * @param storage 存储对象
- * @param tag 存储标签，标记改变了数据将会失效
+ * Get stored response data
+ * @param namespace namespace
+ * @param key stored key
+ * @param storage storage object
+ * @param tag Store tags. If the tag changes, the data will become invalid.
  */
 export const getWithCacheAdapter = async <AG extends AlovaGenerics = AlovaGenerics>(
   namespace: string,

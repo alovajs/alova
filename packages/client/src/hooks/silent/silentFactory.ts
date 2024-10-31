@@ -24,49 +24,49 @@ import { bootSilentQueue, merge2SilentQueueMap, silentQueueMap } from './silentQ
 import loadSilentQueueMapFromStorage from './storage/loadSilentQueueMapFromStorage';
 
 /**
- * 绑定silentSubmit启动事件
- * @param {SilentSubmitBootHandler} handler 事件回调函数
- * @returns 解绑函数
+ * Bind silentSubmit startup event
+ * @param {SilentSubmitBootHandler} handler event callback function
+ * @returns unbind function
  */
 export const onSilentSubmitBoot = (handler: SilentSubmitBootHandler) => globalSQEventManager.on(BootEventKey, handler);
 
 /**
- * 绑定silentSubmit成功事件
- * @param {SilentSubmitSuccessHandler} handler 事件回调函数
- * @returns 解绑函数
+ * Bind silentSubmit success event
+ * @param {SilentSubmitSuccessHandler} handler event callback function
+ * @returns unbind function
  */
 export const onSilentSubmitSuccess = (handler: SilentSubmitSuccessHandler) =>
   globalSQEventManager.on(SuccessEventKey, handler);
 
 /**
- * 绑定silentSubmit错误事件
- * 每次请求错误，触发错误回调
- * @param {SilentSubmitErrorHandler} handler 事件回调函数
- * @returns 解绑函数
+ * Bind silentSubmit error event
+ * Every time there is a request error, an error callback is triggered.
+ * @param {SilentSubmitErrorHandler} handler event callback function
+ * @returns unbind function
  */
 export const onSilentSubmitError = (handler: SilentSubmitErrorHandler) =>
   globalSQEventManager.on(ErrorEventKey, handler);
 
 /**
- * 绑定silentSubmit失败事件
- * 失败事件将在最大请求次数到达，或不匹配错误信息时触发
- * @param {SilentSubmitFailHandler} handler 事件回调函数
- * @returns 解绑函数
+ * Binding silentSubmit failure event
+ * The failure event will be triggered when the maximum number of requests is reached, or when the error message does not match
+ * @param {SilentSubmitFailHandler} handler event callback function
+ * @returns unbind function
  */
 export const onSilentSubmitFail = (handler: SilentSubmitFailHandler) => globalSQEventManager.on(FailEventKey, handler);
 
 /**
- * 绑定silentSubmit发起请求前事件
- * @param {BeforeSilentSubmitHandler} handler 事件回调函数
- * @returns 解绑函数
+ * Bind silentSubmit to initiate a pre-request event
+ * @param {BeforeSilentSubmitHandler} handler event callback function
+ * @returns unbind function
  */
 export const onBeforeSilentSubmit = (handler: BeforeSilentSubmitHandler) =>
   globalSQEventManager.on(BeforeEventKey, handler);
 
 /**
- * 启动静默提交，它将载入缓存中的静默方法，并开始静默提交
- * 如果未传入延迟时间，则立即同步启动
- * @param {SilentFactoryBootOptions} options 延迟毫秒数
+ * Start silent submission, which will load the silent method in the cache and start silent submission
+ * If no delay time is passed in, the sync starts immediately
+ * @param {SilentFactoryBootOptions} options Delay in milliseconds
  */
 export const bootSilentFactory = (options: SilentFactoryBootOptions) => {
   if (silentFactoryStatus === 0) {
@@ -75,14 +75,14 @@ export const bootSilentFactory = (options: SilentFactoryBootOptions) => {
     setCustomSerializers(options.serializers);
     setQueueRequestWaitSetting(options.requestWait);
     setTimeoutFn(async () => {
-      // 延时加载，让页面的queue放在最前面
+      // Delayed loading puts the page’s queue at the front
       merge2SilentQueueMap(await loadSilentQueueMapFromStorage());
-      // 循环启动队列静默提交
-      // 多条队列是并行执行的
+      // Loop start queue silent submission
+      // Multiple queues are executed in parallel
       forEach(objectKeys(silentQueueMap), queueName => {
         bootSilentQueue(silentQueueMap[queueName], queueName);
       });
-      setSilentFactoryStatus(1); // 设置状态为已启动
+      setSilentFactoryStatus(1); // Set status to Started
       globalSQEventManager.emit(BootEventKey, undefinedValue);
     }, delay);
   }

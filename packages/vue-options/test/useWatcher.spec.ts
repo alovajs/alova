@@ -25,7 +25,7 @@ describe('vue options watcher hook', () => {
       })
     });
 
-    await delay(100); // 默认不发出请求，100毫秒后也是初始值
+    await delay(100); // By default, no request is issued, and it is also the initial value after 100 milliseconds.
     expect(screen.getByRole('loading')).toHaveTextContent('loaded');
     expect(screen.getByRole('error')).toHaveTextContent('');
     expect(screen.getByRole('data')).toHaveTextContent('{}');

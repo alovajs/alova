@@ -37,15 +37,15 @@ import {
 } from '~/typings';
 import { hitCacheBySource } from './manipulateCache';
 
-// 请求适配器返回信息暂存，用于实现请求共享
+// The request adapter returns information temporarily, which is used to implement request sharing.
 type RequestAdapterReturnType = ReturnType<AlovaRequestAdapter<any, any, any>>;
 const adapterReturnMap: Record<string, Record<string, RequestAdapterReturnType>> = {};
 
 /**
- * 实际的请求函数
- * @param method 请求方法对象
- * @param forceRequest 忽略缓存
- * @returns 响应数据
+ * actual request function
+ * @param method request method object
+ * @param forceRequest Ignore cache
+ * @returns response data
  */
 export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Method<AG>, forceRequest: boolean) {
   let fromCache = trueValue;
@@ -59,20 +59,20 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
 
     const { s: toStorage, t: tag, m: cacheMode, e: expireMilliseconds } = getLocalCacheConfigParam(methodInstance);
     const { id, l1Cache, l2Cache, snapshots } = getContext(methodInstance);
-    // 获取受控缓存或非受控缓存
+    // Get controlled cache or uncontrolled cache
     const { cacheFor } = getConfig(methodInstance);
     const { hitSource: methodHitSource } = methodInstance;
 
-    // 如果当前method设置了受控缓存，则看是否有自定义的数据
+    // If the current method sets a controlled cache, check whether there is custom data
     let cachedResponse = await (isFn(cacheFor)
       ? cacheFor()
-      : // 如果是强制请求的，则跳过从缓存中获取的步骤
-        // 否则判断是否使用缓存数据
+      : // If it is a forced request, skip the step of getting it from the cache
+        // Otherwise, determine whether to use cached data
         forceRequest
         ? undefinedValue
         : getWithCacheAdapter(id, methodKey, l1Cache));
 
-    // 如果是STORAGE_RESTORE模式，且缓存没有数据时，则需要将持久化数据恢复到缓存中，过期时间要使用缓存的
+    // If it is storage restore mode and there is no data in the cache, the persistent data needs to be restored to the cache, and the cached expiration time must be used.
     if (cacheMode === STORAGE_RESTORE && !cachedResponse) {
       const rawL2CacheData = await getRawWithCacheAdapter(id, methodKey, l2Cache, tag);
       if (rawL2CacheData) {
@@ -82,12 +82,12 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       }
     }
 
-    // 克隆method作为参数传给beforeRequest，防止多次使用原method实例请求时产生副作用
-    // 放在` let cachedResponse = await ...`之后，解决在method.send中先赋值promise给method实例的问题，否则在clonedMethod中promise为undefined
+    // Clone the method as a parameter and pass it to beforeRequest to prevent side effects when using the original method instance request multiple times.
+    // Place it after `let cachedResponse = await...` to solve the problem of first assigning promise to the method instance in method.send, otherwise the promise will be undefined in clonedMethod.
     const clonedMethod = cloneMethod(methodInstance);
 
-    // 发送请求前调用钩子函数
-    // beforeRequest支持同步函数和异步函数
+    // Call the hook function before sending the request
+    // beforeRequest supports synchronous functions and asynchronous functions
     await beforeRequest(clonedMethod);
     const { baseURL, url: newUrl, type, data } = clonedMethod;
     const { params = {}, headers = {}, transform = $self, shareRequest } = getConfig(clonedMethod);
@@ -106,11 +106,11 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       responseErrorHandler = isFn(errorHandler) ? errorHandler : responseErrorHandler;
       responseCompleteHandler = isFn(completeHandler) ? completeHandler : responseCompleteHandler;
     }
-    // 如果没有缓存则发起请求
+    // If there is no cache, make a request
     if (cachedResponse !== undefinedValue) {
-      requestAdapterCtrlsPromiseResolveFn(); // 遇到缓存将不传入ctrls
+      requestAdapterCtrlsPromiseResolveFn(); // Ctrls will not be passed in when cache is encountered
 
-      // 打印缓存日志
+      // Print cache log
       sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod as any, cacheMode, tag);
       responseCompleteHandler(clonedMethod);
       return cachedResponse;
@@ -118,7 +118,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
     fromCache = falseValue;
 
     if (!shareRequest || !requestAdapterCtrls) {
-      // 请求数据
+      // Request data
       const ctrls = requestAdapter(
         {
           url: buildCompletedURL(baseURL, newUrl, params),
@@ -130,35 +130,35 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       );
       requestAdapterCtrls = namespacedAdapterReturnMap[methodKey] = ctrls;
     }
-    // 将requestAdapterCtrls传到promise中供onDownload、onUpload及abort中使用
+    // Pass request adapter ctrls to promise for use in on download, on upload and abort
     requestAdapterCtrlsPromiseResolveFn(requestAdapterCtrls);
 
     /**
-     * 处理响应任务，失败时不缓存数据
-     * @param responsePromise 响应promise实例
-     * @param responseHeaders 请求头
-     * @param callInSuccess 是否在成功回调中调用
-     * @returns 处理后的response
+     * Process response tasks and do not cache data on failure
+     * @param responsePromise Respond to promise instances
+     * @param responseHeaders Request header
+     * @param callInSuccess Whether to call in success callback
+     * @returns Processed response
      */
     const handleResponseTask = async (handlerReturns: any, responseHeaders: any, callInSuccess = trueValue) => {
       const responseData = await handlerReturns;
       const transformedData = await transform(responseData, responseHeaders || {});
       snapshots.save(methodInstance);
 
-      // 即使缓存操作失败，也正常返回响应结构，避免因缓存操作问题导致请求错误
-      // 缓存操作结果，可通过`cacheAdapter.emitter.on('success' | 'fail', event => {})`监听获取
+      // Even if the cache operation fails, the response structure will be returned normally to avoid request errors caused by cache operation problems.
+      // The cache operation results can be obtained through `cacheAdapter.emitter.on('success' | 'fail', event => {})`
       try {
-        // 自动失效缓存
+        // Automatic cache invalidation
         await hitCacheBySource(clonedMethod);
       } catch {}
 
-      // 当requestBody为特殊数据时不保存缓存
-      // 原因1：特殊数据一般是提交特殊数据，需要和服务端交互
-      // 原因2：特殊数据不便于生成缓存key
+      // Do not save cache when requestBody is special data
+      // Reason 1: Special data is generally submitted and requires interaction with the server.
+      // Reason 2: Special data is not convenient for generating cache keys
       const requestBody = clonedMethod.data;
       const toCache = !requestBody || !isSpecialRequestBody(requestBody);
 
-      // 使用响应后最新的过期时间来缓存数据，避免因响应时间过长导致过期时间流失的问题
+      // Use the latest expiration time after the response to cache data to avoid the problem of expiration time loss due to too long response time
       if (toCache && callInSuccess) {
         try {
           await PromiseCls.all([
@@ -183,15 +183,15 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       promiseThen(
         PromiseCls.all([requestAdapterCtrls.response(), requestAdapterCtrls.headers()]),
         ([rawResponse, rawHeaders]) => {
-          // 无论请求成功、失败，都需要首先移除共享的请求
+          // Regardless of whether the request succeeds or fails, the shared request needs to be removed first
           deleteAttr(namespacedAdapterReturnMap, methodKey);
           return handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), rawHeaders);
         },
         (error: any) => {
-          // 无论请求成功、失败，都需要首先移除共享的请求
+          // Regardless of whether the request succeeds or fails, the shared request needs to be removed first
           deleteAttr(namespacedAdapterReturnMap, methodKey);
           return isFn(responseErrorHandler)
-            ? // 响应错误时，如果未抛出错误也将会处理响应成功的流程，但不缓存数据
+            ? // When responding to an error, if no error is thrown, the successful response process will be processed, but the data will not be cached.
               handleResponseTask(responseErrorHandler(error, clonedMethod), undefinedValue, falseValue)
             : promiseReject(error);
         }
@@ -203,7 +203,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
   };
 
   return {
-    // 请求中断函数
+    // request interrupt function
     abort: () => {
       promiseThen(
         requestAdapterCtrlsPromise,

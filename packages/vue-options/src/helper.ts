@@ -2,9 +2,9 @@ import { GeneralFn, isFn, ObjectCls, objectKeys } from '@alova/shared';
 import { OptionsComputed, OptionsState } from '~/typings';
 
 /**
- * 将useHook的暴露项进行分类
- * @param useHookExposure useHook的返回对象
- * @returns 拆分后的对象
+ * Classify useHook's exposure items
+ * @param useHookExposure useHook return object
+ * @returns split object
  */
 export const classifyHookExposure = (useHookExposure: Record<string, any>) => {
   const states = {} as Record<string, any>;
@@ -25,12 +25,12 @@ export const classifyHookExposure = (useHookExposure: Record<string, any>) => {
 
 const getPrototypeOf = (obj: any) => ObjectCls.getPrototypeOf(obj);
 /**
- * 提取出容器实例需要的watch集合，并将watch函数通过apply将this指向外层vue实例
- * @param targetNamespace 命名空间，对应useHook的接收key
- * @param outerVueInstance 外层vue实例
- * @param states 容器实例的states
- * @param computeds 容器实例的computeds
- * @returns 容器实例中需要的watch集合
+ * Extract the watch collection required by the container instance, and use the watch function to point this to the outer vue instance through apply.
+ * @param targetNamespace Namespace, corresponding to the receiving key of useHook
+ * @param outerVueInstance Outer vue instance
+ * @param states Container instance states
+ * @param computeds Computeds of container instances
+ * @returns The watch collection required in the container instance
  */
 export const extractWatches = (
   targetNamespace: string,
@@ -40,7 +40,7 @@ export const extractWatches = (
 ) => {
   const watches = outerVueInstance.$options.watch || {};
 
-  // 在浏览器环境下`instance.$options.watch`为组件watch对象，但在test环境下，watch对象在`instance.$options.watch`的原型链上，因此需要做判断
+  // In the browser environment, `instance.$options.watch` is the component watch object, but in the test environment, the watch object is on the prototype chain of `instance.$options.watch`, so judgment needs to be made
   const outerWatchHandlers: Record<string, any> =
     getPrototypeOf(watches) === getPrototypeOf({}) ? watches : getPrototypeOf(watches);
   return objectKeys(outerWatchHandlers).reduce(

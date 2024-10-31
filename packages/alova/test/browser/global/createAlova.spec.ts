@@ -523,7 +523,7 @@ describe('createAlova', () => {
 
   test("shouldn't print cache hit message when set cacheLogger to false or null", async () => {
     const logConsoleMockFn = vi.fn();
-    // eslint-disable-next-line
+    // Eslint disable next line
     console.log = logConsoleMockFn; // Rewrite for monitoring
     const alova1 = createAlova({
       baseURL,

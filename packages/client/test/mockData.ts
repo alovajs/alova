@@ -95,7 +95,7 @@ const mocks = defineMock({
   }),
   '[POST]/detail-error': ({ data = {} }) => {
     const { id, failTimes = 3 } = data;
-    // 根据id判断是否需要重置detailErrorTimes
+    // Determine whether detailed error times need to be reset based on ID
     if (id !== detailErrorId) {
       detailErrorTimes = 0;
       detailErrorId = id;
@@ -176,11 +176,11 @@ interface BodyType {
   [k: string]: any;
 }
 
-// 模拟数据请求适配器
+// Mock Data Request Adapter
 export const mockRequestAdapter = createAlovaMockAdapter([mocks], {
   delay: 50,
   onMockResponse: ({ status, statusText, body }) => {
-    // 当status为错误码时，如果包含notError则以body的形式返回错误信息
+    // When status is an error code, if it contains not error, the error message will be returned in the form of body.
     if (status >= 300) {
       if (!/notError/.test(statusText)) {
         const err = new Error(statusText);

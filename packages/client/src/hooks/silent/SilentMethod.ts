@@ -17,8 +17,8 @@ export type MaxRetryTimes = NonNullable<SilentMethodInterface['maxRetryTimes']>;
 export type RetryError = NonNullable<SilentMethodInterface['retryError']>;
 
 /**
- * 定位silentMethod实例所在的位置
- * @param silentMethodInstance silentMethod实例
+ * Locate the location of the silentMethod instance
+ * @param silentMethodInstance silentMethod instance
  */
 const getBelongQueuePosition = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>) => {
   let queue: SilentQueueMap[string] | undefined = undefinedValue;
@@ -36,65 +36,65 @@ const getBelongQueuePosition = <AG extends AlovaGenerics>(silentMethodInstance: 
 };
 
 /**
- * silentMethod实例
- * 需要进入silentQueue的请求都将被包装成silentMethod实例，它将带有请求策略的各项参数
+ * silentMethod instance
+ * Requests that need to enter silentQueue will be packaged into silentMethod instances, which will carry various parameters of the request strategy.
  */
 export class SilentMethod<AG extends AlovaGenerics> {
   public id: string;
 
-  /** 是否为持久化实例 */
+  /** Whether it is a persistent instance */
   public cache: boolean;
 
-  /** 实例的行为，queue或silent */
+  /** The behavior of the instance, queue or silent */
   public behavior: SQHookBehavior;
 
-  /** method实例 */
+  /** Method instance */
   public entity: Method<AG>;
 
-  /** 重试错误规则 */
+  /** Retry error rules */
   public retryError?: RetryError;
 
-  /** 重试次数 */
+  /** Number of retries */
   public maxRetryTimes?: MaxRetryTimes;
 
-  /** 避让策略 */
+  /** avoidance strategy */
   public backoff?: BackoffPolicy;
 
-  /** Promise的resolve函数，调用将通过对应的promise对象 */
+  /** Promise's resolve function, the call will pass the corresponding promise object */
   public resolveHandler?: PromiseExecuteParameter['0'];
 
-  /** Promise的reject函数，调用将失败对应的promise对象 */
+  /** Promise's reject function, calling the corresponding promise object will fail */
   public rejectHandler?: PromiseExecuteParameter['1'];
 
-  /** 虚拟响应数据，通过updateStateEffect保存到此 */
+  /** Virtual response data is saved here through update state effect */
   public virtualResponse?: any;
 
   /**
-   * methodHandler的调用参数
-   * 如果其中有虚拟数据也将在请求被响应后被实际数据替换
+   * methodHandler call parameters
+   * If there is dummy data, it will be replaced by actual data after the request is responded to.
    */
   public handlerArgs?: any[];
 
-  /** method创建时所使用的虚拟数据id */
+  /** The virtual data id used when creating Method */
   public vDatas?: string[];
 
   /**
-   * 状态更新所指向的method实例
-   * 当调用updateStateEffect时将会更新状态的目标method实例保存在此
-   * 目的是为了让刷新页面后，提交数据也还能找到需要更新的状态
+   * The method instance pointed to by the status update
+   * The target method instance that will update the state when calling updateStateEffect is stored here.
+   * The purpose is to allow the submitted data to still find the status that needs to be updated after refreshing the page.
    */
   public targetRefMethod?: Method<AG>;
 
-  /** 调用updateStateEffect更新了哪些状态 */
+  /** Which states are updated by calling update state effect? */
   public updateStates?: string[];
 
-  /** 事件管理器 */
+  /** event manager */
   public emitter: EventManager<ScopedSQEvents<AG>>;
 
-  /** 当前是否正在请求中 */
+  /** Is it currently being requested? */
   public active?: boolean;
 
-  /** 是否强制 */
+  /** Is it mandatory? */
   public force: boolean;
 
   constructor(
@@ -127,16 +127,16 @@ export class SilentMethod<AG extends AlovaGenerics> {
   }
 
   /**
-   * 允许缓存时持久化更新当前实例
+   * Allow cache-time persistent updates to the current instance
    */
   public async save() {
     this.cache && (await persistSilentMethod(this));
   }
 
   /**
-   * 在队列中使用一个新的silentMethod实例替换当前实例
-   * 如果有持久化缓存也将会更新缓存
-   * @param newSilentMethod 新的silentMethod实例
+   * Replace the current instance with a new silentMethod instance in the queue
+   * If there is a persistent cache, the cache will also be updated.
+   * @param newSilentMethod new silentMethod instance
    */
   public async replace(newSilentMethod: SilentMethod<AG>) {
     const targetSilentMethod = this;
@@ -152,7 +152,7 @@ export class SilentMethod<AG extends AlovaGenerics> {
   }
 
   /**
-   * 移除当前实例，如果有持久化数据，也会同步移除
+   * Remove the current instance. If there is persistent data, it will also be removed synchronously.
    */
   public async remove() {
     const targetSilentMethod = this;
@@ -164,11 +164,11 @@ export class SilentMethod<AG extends AlovaGenerics> {
   }
 
   /**
-   * 设置延迟更新状态对应的method实例以及对应的状态名
-   * 它将在此silentMethod响应后，找到对应的状态数据并将vData更新为实际数据
+   * Set the method instance corresponding to the delayed update status and the corresponding status name
+   * It will find the corresponding status data and update vData to the actual data after responding to this silentMethod
    *
-   * @param method method实例
-   * @param updateStateName 更新的状态名，默认为data，也可以设置多个
+   * @param method method instance
+   * @param updateStateName Updated status name, the default is data, you can also set multiple
    */
   public setUpdateState(method: Method<AG>, updateStateName: string | string[] = 'data') {
     if (method) {

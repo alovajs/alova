@@ -36,13 +36,14 @@
   ],
   "packageManager": "pnpm@9.1.0",
   "scripts": {
-    "build": "turbo run build --filter=./packages/client",
+    "build": "turbo run build --filter=./packages/*",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
+    "typecheck": "tsc --noEmit",
     "prepare": "husky",
     "commit": "git-cz && git push",
     "coveralls": "pnpm run test:coverage && coveralls < coverage/lcov.info",
@@ -51,7 +52,7 @@
     "changeset:beta": "changeset pre enter beta",
     "changeset:pre.exit": "changeset pre exit",
     "changeset:version": "changeset version",
-    "release": "pnpm run build && pnpm run coveralls && pnpm --filter=@alova/shared fix:reference && changeset publish"
+    "release": "pnpm run build && pnpm run coveralls && changeset publish"
   },
   "author": "Scott Hu",
   "license": "MIT",

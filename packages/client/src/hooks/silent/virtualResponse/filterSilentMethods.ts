@@ -6,11 +6,11 @@ import { silentQueueMap } from '../silentQueue';
 import loadSilentQueueMapFromStorage from '../storage/loadSilentQueueMapFromStorage';
 
 /**
- * 按method名称或正则表达式筛选满足条件的所有silentMethod实例
- * @param methodNameMatcher method名称匹配器
- * @param queueName 查找队列名，默认为default队列
- * @param filterActive 是否过滤掉激活状态的实例
- * @returns silentMethod实例数组
+ * Filter all silentMethod instances that meet the criteria by method name or regular expression
+ * @param methodNameMatcher method name matcher
+ * @param queueName Find the queue name, the default is default queue
+ * @param filterActive Whether to filter out active instances
+ * @returns array of silentMethod instances
  */
 export const filterSilentMethods = async (
   methodNameMatcher?: string | number | RegExp,
@@ -32,17 +32,17 @@ export const filterSilentMethods = async (
   return [
     ...matchSilentMethods(silentQueueMap[queueName]),
 
-    // 如果当前未启动silentFactory，则还需要去持久化存储中匹配silentMethods
+    // If the silent factory is not currently started, you also need to match the silent methods in the persistent storage.
     ...(silentFactoryStatus === 0 ? matchSilentMethods((await loadSilentQueueMapFromStorage())[queueName]) : [])
   ];
 };
 
 /**
- * 按method名称或正则表达式查找第一个满足条件的silentMethod实例
- * @param methodNameMatcher method名称匹配器
- * @param queueName 查找队列名，默认为default队列
- * @param filterActive 是否过滤掉激活状态的实例
- * @returns silentMethod实例，未找到时为undefined
+ * Find the first silentMethod instance that meets the condition by method name or regular expression
+ * @param methodNameMatcher method name matcher
+ * @param queueName Find the queue name, the default is default queue
+ * @param filterActive Whether to filter out active instances
+ * @returns silentMethod instance, undefined when not found
  */
 export const getSilentMethod = async (
   methodNameMatcher?: string | number | RegExp,

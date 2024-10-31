@@ -17,7 +17,7 @@ describe('matchSnapshotMethod', () => {
     alova1.snapshots.save(Get1);
     alova1.snapshots.save(Get2);
 
-    // 由于限制为了0个，不能匹配到
+    // Since the limit is 0, it cannot be matched.
     expect(alova1.snapshots.match('limitation-method-test')).toHaveLength(0);
     expect(alova1.snapshots.match('limitation-method-test', false)).toBeUndefined();
 
@@ -27,7 +27,7 @@ describe('matchSnapshotMethod', () => {
     });
     alova2.snapshots.save(Get1);
     alova2.snapshots.save(Get2);
-    // 由于限制为了1个，只能匹配到1个
+    // Since the limit is 1, only 1 can be matched.
     expect(alova2.snapshots.match('limitation-method-test')).toHaveLength(1);
     expect(alova2.snapshots.match('limitation-method-test', false)).toBe(Get1);
   });
@@ -53,13 +53,13 @@ describe('matchSnapshotMethod', () => {
     alova.snapshots.save(Get2);
     alova.snapshots.save(Get3);
 
-    // 匹配到前两个
+    // Match the first two
     let matchedMethods = alova.snapshots.match('get-method');
     expect(matchedMethods).toHaveLength(2);
     expect(matchedMethods[0]).toBe(Get1);
     expect(matchedMethods[1]).toBe(Get2);
 
-    // 匹配到两个，并筛选出最后一个
+    // Matches two and filters out the last one
     matchedMethods = alova.snapshots.match({
       name: 'get-method',
       filter: (_, index, methods) => index === methods.length - 1
@@ -67,15 +67,15 @@ describe('matchSnapshotMethod', () => {
     expect(matchedMethods).toHaveLength(1);
     expect(matchedMethods[0]).toBe(Get2);
 
-    // 匹配不到
+    // No match found
     matchedMethods = alova.snapshots.match('get-method555');
     expect(matchedMethods).toHaveLength(0);
 
-    // 匹配到两个，但默认取第一个
+    // Two matches are matched, but the first one is taken by default.
     let matchedMethod = alova.snapshots.match('get-method', false);
     expect(matchedMethod).toBe(Get1);
 
-    // 匹配到两个，并筛选出最后一个
+    // Matches two and filters out the last one
     matchedMethod = alova.snapshots.match(
       {
         name: 'get-method',
@@ -85,10 +85,10 @@ describe('matchSnapshotMethod', () => {
     );
     expect(matchedMethod).toBe(Get2);
 
-    // 匹配不到
+    // No match found
     matchedMethod = alova.snapshots.match('get-method555', false);
     expect(matchedMethod).toBeUndefined();
-    // 匹配不到，filter不会被调用
+    // If no match is found, the filter will not be called.
     const mockFn = vi.fn();
     matchedMethod = alova.snapshots.match(
       {
@@ -125,11 +125,11 @@ describe('matchSnapshotMethod', () => {
     alova.snapshots.save(Get2);
     alova.snapshots.save(Get3);
 
-    // 匹配到当前alova的3个
+    // Match 3 of the current alova
     let matchedMethods = alova.snapshots.match(/^get-method/);
     expect(matchedMethods).toHaveLength(3);
 
-    // 匹配到两个，并筛选出最后一个
+    // Matches two and filters out the last one
     matchedMethods = alova.snapshots.match({
       name: /get-method1/,
       filter: (_, index, methods) => index === methods.length - 1
@@ -137,11 +137,11 @@ describe('matchSnapshotMethod', () => {
     expect(matchedMethods).toHaveLength(1);
     expect(matchedMethods[0]).toBe(Get2);
 
-    // 匹配不到
+    // No match found
     matchedMethods = alova.snapshots.match(/get-method555/);
     expect(matchedMethods).toHaveLength(0);
 
-    // 匹配到三个，但默认取第一个
+    // Three matches are matched, but the first one is taken by default.
     let matchedMethod = alova.snapshots.match(
       {
         name: /get-method/
@@ -150,7 +150,7 @@ describe('matchSnapshotMethod', () => {
     );
     expect(matchedMethod).toBe(Get1);
 
-    // 匹配到两个，并筛选出最后一个
+    // Matches two and filters out the last one
     matchedMethod = alova.snapshots.match(
       {
         name: /get-method1/,
@@ -160,10 +160,10 @@ describe('matchSnapshotMethod', () => {
     );
     expect(matchedMethod).toBe(Get2);
 
-    // 匹配不到
+    // No match found
     matchedMethod = alova.snapshots.match(/get-method555/, false);
     expect(matchedMethod).toBeUndefined();
-    // 匹配不到，filter不会被调用
+    // If no match is found, the filter will not be called.
     const mockFn = vi.fn();
     matchedMethod = alova.snapshots.match(
       {

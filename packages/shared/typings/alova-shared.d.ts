@@ -6,16 +6,16 @@
  */
 
 /**
- * alova错误类
+ * alova error class
  */
 declare class AlovaError extends Error {
   constructor(prefix: string, message: string, errorCode?: number);
 }
 /**
- * 自定义断言函数，表达式为false时抛出错误
- * 当传入了errorCode时，将提供链接到错误文档，引导用户改正
- * @param expression 判断表达式，true或false
- * @param message 断言消息
+ * Custom assertion function that throws an error when the expression is false
+ * When errorCode is passed in, a link to the error document will be provided to guide the user to correct it.
+ * @param expression Judgment expression, true or false
+ * @param message Assert message
  */
 declare const createAssert: (prefix?: string) => (expression: boolean, message: string, errorCode?: number) => void;
 
@@ -115,11 +115,11 @@ declare class FrameworkState<Data, Key extends string> extends FrameworkReadable
 }
 
 /**
- * 请求缓存设置
- * expire: 过期时间
- *  1. 当设置为数字时：如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期；
- *  2. 当设置为Date对象时，表示
- * mode: 缓存模式，可选值为memory、restore
+ * Request cache settings
+ * expire: expiration time
+ *  1. When set to a number: if it is greater than 0, the cached data will be returned first, the expiration time unit is milliseconds, if it is less than or equal to 0, it will not be cached, and Infinity will never expire;
+ *  2. When set to a Date object, it means
+ * mode: cache mode, optional values ​​are memory, restore
  */
 type CacheExpire = number | Date | null;
 type CacheMode = 'memory' | 'restore';
@@ -136,44 +136,36 @@ declare const noop: () => void;
  */
 declare const $self: <T>(arg: T) => T;
 /**
- * Determine whether the parameter is a function
- * @param fn any parameter
+ * Determine whether the parameter is a function any parameter
  * @returns Whether the parameter is a function
  */
 declare const isFn: (arg: any) => arg is GeneralFn;
 /**
- * Determine whether the parameter is a number
- * @param arg any parameter
+ * Determine whether the parameter is a number any parameter
  * @returns Whether the parameter is a number
  */
 declare const isNumber: (arg: any) => arg is number;
 /**
- * Determine whether the parameter is a string
- * @param arg any parameter
+ * Determine whether the parameter is a string any parameter
  * @returns Whether the parameter is a string
  */
 declare const isString: (arg: any) => arg is string;
 /**
- * Determine whether the parameter is an object
- * @param arg any parameter
+ * Determine whether the parameter is an object any parameter
  * @returns Whether the parameter is an object
  */
 declare const isObject: <T = any>(arg: any) => arg is T;
 /**
- * Global toString
- * @param arg any parameter
- * @returns stringified parameters
+ * Global toString any parameter stringified parameters
  */
 declare const globalToString: (arg: any) => string;
 /**
- * Determine whether it is a normal object
- * @param arg any parameter
+ * Determine whether it is a normal object any parameter
  * @returns Judgment result
  */
 declare const isPlainObject: (arg: any) => arg is Record<any, any>;
 /**
- * Determine whether it is an instance of a certain class
- * @param arg any parameter
+ * Determine whether it is an instance of a certain class any parameter
  * @returns Judgment result
  */
 declare const instanceOf: <T>(arg: any, cls: new (...args: any[]) => T) => arg is T;
@@ -183,8 +175,7 @@ declare const instanceOf: <T>(arg: any, cls: new (...args: any[]) => T) => arg i
  */
 declare const getTime: (date?: Date) => number;
 /**
- * Get the alova instance through the method instance
- * @returns alova example
+ * Get the alova instance through the method instance alova example
  */
 declare const getContext: <
   T extends {
@@ -205,8 +196,7 @@ declare const getConfig: <
   methodInstance: T
 ) => T['config'];
 /**
- * Get alova configuration data
- * @returns alova configuration object
+ * Get alova configuration data alova configuration object
  */
 declare const getContextOptions: <
   T extends {
@@ -216,8 +206,7 @@ declare const getContextOptions: <
   alovaInstance: T
 ) => T['options'];
 /**
- * Get alova configuration data through method instance
- * @returns alova configuration object
+ * Get alova configuration data through method instance alova configuration object
  */
 declare const getOptions: <
   T extends {
@@ -241,13 +230,11 @@ declare const key: <
   methodInstance: T
 ) => string;
 /**
- * Create uuid simple version
- * @returns uuid
+ * Create uuid simple version uuid
  */
 declare const uuid: () => string;
 /**
- * Get the key value of the method instance
- * @param methodInstance method instance
+ * Get the key value of the method instance method instance
  * @returns The key value of this method instance
  */
 declare const getMethodInternalKey: <
@@ -260,8 +247,7 @@ declare const getMethodInternalKey: <
 /**
  * Get the request method object
  * @param methodHandler Request method handle
- * @param args Method call parameters
- * @returns request method object
+ * @param args Method call parameters request method object
  */
 declare const getHandlerMethod: <
   T extends {
@@ -284,10 +270,8 @@ declare const objAssign: <T extends Record<string, any>, U extends Record<string
 ) => T & U[number];
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /**
- * Excludes specified attributes from a data collection and returns a new data collection
- * @param obj data collection
- * @param keys Excluded keys
- * @returns new data collection
+ * Excludes specified attributes from a data collection and returns a new data collection data collection
+ * @param keys Excluded keys new data collection
  */
 declare const omit: <T extends Record<string, any>, K extends keyof T>(
   obj: T,
@@ -299,8 +283,7 @@ declare const omit: <T extends Record<string, any>, K extends keyof T>(
  */
 declare function usePromise<T = any>(): UsePromiseExposure<T>;
 /**
- * Get cached configuration parameters, fixedly returning an object in the format { e: function, c: any, f: any, m: number, s: boolean, t: string }
- * e is the abbreviation of expire, which returns the cache expiration time point (timestamp) in milliseconds.
+ * Get cached configuration parameters, fixedly returning an object in the format { e: function, c: any, f: any, m: number, s: boolean, t: string } e is the abbreviation of expire, which returns the cache expiration time point (timestamp) in milliseconds.
  * c is controlled, indicating whether it is a controlled cache
  * f is the original value of cacheFor, which is used to call to obtain cached data when c is true.
  * m is the abbreviation of mode, storage mode
@@ -326,8 +309,7 @@ declare const getLocalCacheConfigParam: <
 /**
  * Create class instance
  * @param Cls Constructor
- * @param args Constructor parameters
- * @returns class instance
+ * @param args Constructor parameters class instance
  */
 declare const newInstance: <
   T extends {
@@ -349,16 +331,14 @@ declare const sloughFunction: <T, U>(arg: T | undefined, defaultFn: U) => (() =>
  */
 declare const createSyncOnceRunner: (delay?: number) => (fn: () => void) => void;
 /**
- * Create an asynchronous function queue, the asynchronous function will be executed serially
- * @returns queue add function
+ * Create an asynchronous function queue, the asynchronous function will be executed serially queue add function
  */
 declare const createAsyncQueue: (catchError?: boolean) => {
   addQueue: <T>(asyncFunc: (...args: any[]) => Promise<T>) => Promise<T>;
   onComplete: (fn: GeneralFn) => void;
 };
 /**
- * Traverse the target object deeply
- * @param target target audience
+ * Traverse the target object deeply target audience
  * @param callback Traversal callback
  * @param preorder Whether to traverse in preorder, the default is true
  * @param key The currently traversed key
@@ -376,18 +356,13 @@ declare const walkObject: (
  */
 declare const buildNamespacedCacheKey: (namespace: string, key: string) => string;
 /**
- * Calculate retry delay time based on avoidance strategy and number of retries
- * @param backoff avoid parameters
+ * Calculate retry delay time based on avoidance strategy and number of retries avoid parameters
  * @param retryTimes Number of retries
  * @returns Retry delay time
  */
 declare const delayWithBackoff: (backoff: BackoffPolicy, retryTimes: number) => number;
 /**
- * Build the complete url
- * @param base baseURL
- * @param url path
- * @param params url parameters
- * @returns complete url
+ * Build the complete url baseURL path url parameters complete url
  */
 declare const buildCompletedURL: (baseURL: string, url: string, params: Record<string, any>) => string;
 
