@@ -4,7 +4,7 @@ import VueHook from '@/statesHook/vue';
 import { Method, queryCache } from 'alova';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
-// 其他请求方式测试
+// Testing other request methods
 describe('Test other methods without GET', () => {
   test('send POST with cache', async () => {
     const alova = getAlovaInstance(VueHook, {
@@ -64,7 +64,7 @@ describe('Test other methods without GET', () => {
     expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
     expect(error.value).toBeUndefined();
 
-    // 缓存有值
+    // Cache has value
     const cacheData = await queryCache(Post);
     expect(cacheData).not.toBeUndefined();
   });
@@ -122,7 +122,7 @@ describe('Test other methods without GET', () => {
     expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
     expect(error.value).toBeUndefined();
 
-    // 缓存有值
+    // Cache has value
     const cacheData = await queryCache(Delete);
     expect(cacheData).not.toBeUndefined();
   });
@@ -180,7 +180,7 @@ describe('Test other methods without GET', () => {
     expect(data.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
     expect(error.value).toBeUndefined();
 
-    // 缓存有值
+    // Cache has value
     const cacheData = await queryCache(Put);
     expect(cacheData).not.toBeUndefined();
   });
@@ -213,7 +213,7 @@ describe('Test other methods without GET', () => {
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({});
     expect(error.value).toBeUndefined();
-    // 没有缓存值
+    // no cached value
     const cacheData = await queryCache(Head);
     expect(cacheData).toBeUndefined();
   });
@@ -245,7 +245,7 @@ describe('Test other methods without GET', () => {
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({});
     expect(error.value).toBeUndefined();
-    // 没有缓存值
+    // no cached value
     const cacheData = await queryCache(Options);
     expect(cacheData).toBeUndefined();
   });
@@ -283,7 +283,7 @@ describe('Test other methods without GET', () => {
     expect(data.value.params).toStrictEqual({ a: 'a', b: 'str' });
     expect(data.value.data).toStrictEqual({ patch1: 'p' });
     expect(error.value).toBeUndefined();
-    // 没有缓存值
+    // no cached value
     const cacheData = await queryCache(Patch);
     expect(cacheData).toBeUndefined();
   });
@@ -302,11 +302,11 @@ describe('Test other methods without GET', () => {
     expect(downloading.value).toStrictEqual({ total: 250569, loaded: 250569 });
     expect(error.value).toBeUndefined();
 
-    // 上传/下载回调解绑会在事件响应后触发，所以等10ms再验证是否解绑
+    // Upload/download callback mediation and binding will be triggered after the event response, so wait for 10ms before verifying whether to unbind.
     await delay(10);
     expect(Get.dhs).toHaveLength(0);
 
-    // 有缓存的情况下，不再有下载信息
+    // When there is cache, there is no more download information.
     const { downloading: downloading2, onSuccess: onSuccess2 } = useRequest(Get);
     await untilCbCalled(onSuccess2);
     expect(downloading2.value).toStrictEqual({ total: 0, loaded: 0 });

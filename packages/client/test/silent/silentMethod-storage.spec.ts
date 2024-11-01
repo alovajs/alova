@@ -5,11 +5,11 @@ import loadSilentQueueMapFromStorage from '@/hooks/silent/storage/loadSilentQueu
 import { silentMethodIdQueueMapStorageKey, silentMethodStorageKeyPrefix } from '@/hooks/silent/storage/performers';
 import { spliceStorageSilentMethod } from '@/hooks/silent/storage/silentMethodStorage';
 import VueHook from '@/statesHook/vue';
-import createEventManager from '@alova/shared/createEventManager';
+import { createEventManager } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, Method, createAlova } from 'alova';
 import { mockRequestAdapter } from '../mockData';
 
-beforeEach(clearSilentQueueMap); // 每次清除队列，保证测试数据正确
+beforeEach(clearSilentQueueMap); // Clear the queue every time to ensure that the test data is correct
 describe('manipulate silent method storage', () => {
   test('should persist when cache is true', async () => {
     const storageMock = {} as Record<string, any>;
@@ -30,7 +30,7 @@ describe('manipulate silent method storage', () => {
         }
       } as AlovaGlobalCacheAdapter
     });
-    // 设置依赖的alova实例
+    // Set the dependent alova instance
     setDependentAlova(alovaInst);
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const silentMethodInstance = new SilentMethod(
@@ -71,7 +71,7 @@ describe('manipulate silent method storage', () => {
         }
       } as AlovaGlobalCacheAdapter
     });
-    // 设置依赖的alova实例
+    // Set the dependent alova instance
     setDependentAlova(alovaInst);
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const silentMethodInstance = new SilentMethod(
@@ -97,12 +97,12 @@ describe('manipulate silent method storage', () => {
       /.*/,
       2
     );
-    await pushNewSilentMethod2Queue(silentMethodInstance, true); // cache为true，会持久化
-    await pushNewSilentMethod2Queue(silentMethodInstance2, false); // cache为false，不会持久化
+    await pushNewSilentMethod2Queue(silentMethodInstance, true); // Cache is true and will be persisted
+    await pushNewSilentMethod2Queue(silentMethodInstance2, false); // Cache is false and will not be persisted
 
-    // 从存储中加载
+    // Load from storage
     const loadedSilentQueueMap = await loadSilentQueueMapFromStorage();
-    // 只有一个default队列，且default队列中只有一个项
+    // There is only one default queue, and there is only one item in the default queue
     expect(Object.keys(loadedSilentQueueMap)).toHaveLength(1);
     expect(loadedSilentQueueMap.default).toHaveLength(1);
   });
@@ -126,7 +126,7 @@ describe('manipulate silent method storage', () => {
         }
       } as AlovaGlobalCacheAdapter
     });
-    // 设置依赖的alova实例
+    // Set the dependent alova instance
     setDependentAlova(alovaInst);
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const silentMethodInstance = new SilentMethod(
@@ -165,7 +165,7 @@ describe('manipulate silent method storage', () => {
     loadedSilentQueueMap = await loadSilentQueueMapFromStorage();
     expect(Object.keys(loadedSilentQueueMap)).toHaveLength(1);
     expect(loadedSilentQueueMap.default).toHaveLength(1);
-    expect(storageMock[silentMethodStorageKeyPrefix + silentMethodInstance.id]).toBeUndefined(); // 检查存储中的silentMethod
+    expect(storageMock[silentMethodStorageKeyPrefix + silentMethodInstance.id]).toBeUndefined(); // Check the silent method in storage
 
     await spliceStorageSilentMethod(DEFAULT_QUEUE_NAME, silentMethodInstance2.id);
     loadedSilentQueueMap = await loadSilentQueueMapFromStorage();

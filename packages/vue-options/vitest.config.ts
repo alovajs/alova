@@ -10,7 +10,7 @@ export default mergeConfig(
       env: {
         VUE_VERSION: 'v3'
       },
-      name: '@alova/vue-options|vue3'
+      name: '[vue3]vue-options'
     }
   })
 );

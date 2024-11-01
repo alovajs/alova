@@ -2,7 +2,7 @@
 const { rollup } = require('rollup');
 const ora = require('ora');
 const createConfig = require('./rollup.config.js');
-const { resolve } = require('path');
+const { resolve } = require('node:path');
 
 /**
  * @typedef {Object} BuildOptions

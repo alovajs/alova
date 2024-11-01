@@ -116,7 +116,7 @@ describe('vue options request hook', () => {
       })
     });
 
-    await delay(100); // 100毫秒后仍然还是初始化状态
+    await delay(100); // It is still in the initialized state after 100 milliseconds.
     expect(screen.getByRole('loading')).toHaveTextContent('loaded');
     expect(screen.getByRole('error')).toHaveTextContent('');
     expect(screen.getByRole('data')).toHaveTextContent('{}');
@@ -224,7 +224,7 @@ describe('vue options request hook', () => {
           params: { aa: 'a' }
         })
       );
-      expect(screen.getByRole('extraData')).toHaveTextContent(''); // 暂时无法访问到managedStates中的数据
+      expect(screen.getByRole('extraData')).toHaveTextContent(''); // Data in managed states is temporarily unavailable
     });
   });
 

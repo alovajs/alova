@@ -1,5 +1,11 @@
 import { mockRequestAdapter } from '#/mockData';
-import { ScopedSQCompleteEvent, ScopedSQErrorEvent, ScopedSQEvent, ScopedSQSuccessEvent } from '@/event';
+import {
+  AlovaEventBase,
+  ScopedSQCompleteEvent,
+  ScopedSQErrorEvent,
+  ScopedSQEvent,
+  ScopedSQSuccessEvent
+} from '@/event';
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { setSilentFactoryStatus } from '@/hooks/silent/globalVariables';
 import { bootSilentFactory, onSilentSubmitSuccess } from '@/hooks/silent/silentFactory';
@@ -14,7 +20,6 @@ import updateStateEffect from '@/hooks/silent/virtualResponse/updateStateEffect'
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 import { accessAction, actionDelegationMiddleware } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { AlovaEventBase } from '@alova/shared/event';
 import { AlovaGenerics, createAlova } from 'alova';
 import { delay, untilCbCalled } from 'root/testUtils';
 import { SQHookBehavior } from '~/typings/clienthook';
@@ -24,15 +29,15 @@ const alovaInst = createAlova({
   statesHook: VueHook,
   requestAdapter: mockRequestAdapter,
   cacheFor: {
-    // 不设置缓存，否则有些会因为缓存而不延迟50毫秒，而导致结果不一致
+    // Do not set the cache, otherwise some will not be delayed by 50 milliseconds due to caching, resulting in inconsistent results.
     GET: 0
   }
 });
 
 let testNum = 0;
 beforeEach(() => {
-  // 每次运行用例前将状态重置为1，否则上面的请求错误会将状态改为2而不再执行下面的silentMethod了
-  // 第一次因为还未启动，则不需要重置
+  // Reset the status to 1 before each use case is run, otherwise the above request error will change the status to 2 and the following silentMethod will no longer be executed.
+  // Since it has not been started for the first time, there is no need to reset it.
   testNum > 0 && setSilentFactoryStatus(1);
   testNum += 1;
 });
@@ -67,7 +72,7 @@ describe('vue => useSQRequest', () => {
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    // 通过decorateEvent将成功回调参数改为事件对象了，因此强转为此对象
+    // The success callback parameter is changed to the event object through decorate event, so it is forced to this object.
     const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(loading.value).toBeFalsy();
     expect(data.value.total).toBe(300);
@@ -193,12 +198,12 @@ describe('vue => useSQRequest', () => {
       pushedMockFn(event);
     });
 
-    send(2, 8); // 发送请求
+    send(2, 8); // Send request
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(uploading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    // decorateEvent
+    // Decorate event
     const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(data.value.total).toBe(300);
     expect(data.value.list).toStrictEqual([8, 9, 10, 11, 12, 13, 14, 15]);
@@ -241,7 +246,7 @@ describe('vue => useSQRequest', () => {
     onComplete(event => {
       completeMockFn(event);
     });
-    // decorateEvent
+    // Decorate event
     const scopedSQErrorEvent = (await untilCbCalled(onError)) as unknown as ScopedSQErrorEvent<AlovaGenerics>;
     expect(data.value).toBeUndefined();
     expect(error.value?.message).toBe('server error');
@@ -251,7 +256,7 @@ describe('vue => useSQRequest', () => {
     expect(scopedSQErrorEvent.error.message).toBe('server error');
     expect(scopedSQErrorEvent.args).toStrictEqual([]);
     expect(scopedSQErrorEvent.silentMethod).not.toBeUndefined();
-    expect(silentQueueMap[queue]).toHaveLength(0); // 在队列中移除了
+    expect(silentQueueMap[queue]).toHaveLength(0); // removed from queue
 
     const [completedEvent] = completeMockFn.mock.calls[0];
     expect(completedEvent).toBeInstanceOf(ScopedSQCompleteEvent);
@@ -307,12 +312,12 @@ describe('vue => useSQRequest', () => {
     onPushedQueue(pushMockFn);
 
     await delay(0);
-    // static行为模式下不会进入队列，需异步检查
+    // In Static behavior mode, it will not enter the queue and needs to be checked asynchronously.
     expect(silentQueueMap.a10).toBeUndefined();
 
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
-    // decorateEvent
+    // Decorate event
     const scopedSQSuccessEvent = (await untilCbCalled(onSuccess)) as unknown as ScopedSQSuccessEvent<AlovaGenerics>;
     expect(pushMockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
@@ -344,7 +349,7 @@ describe('vue => useSQRequest', () => {
     let persistentSilentQueueMap = await loadSilentQueueMapFromStorage();
     expect(persistentSilentQueueMap[queue]).toHaveLength(1);
 
-    // 第二个请求
+    // second request
     const { onFallback } = useSQRequest(() => alovaInst.Get<any>('/list-error'), {
       behavior: () => 'silent',
       queue,
@@ -359,7 +364,7 @@ describe('vue => useSQRequest', () => {
     await delay(0);
     expect(silentQueueMap[queue].length).toBe(2);
     persistentSilentQueueMap = await loadSilentQueueMapFromStorage();
-    expect(persistentSilentQueueMap[queue].length).toBe(1); // 绑定了onFallback时不会持久化
+    expect(persistentSilentQueueMap[queue].length).toBe(1); // It will not be persisted when on fallback is bound.
     await untilCbCalled(onFallback);
 
     const [fallbackEvent] = fallbackMockFn.mock.calls[0];
@@ -415,7 +420,7 @@ describe('vue => useSQRequest', () => {
     expect(event.data).toStrictEqual({ localData: 'abc' });
     expect(data.value).toStrictEqual({ localData: 'abc' });
 
-    // 第二：测试未设置vDataCaptured的情况，将发送请求
+    // Second: Test the situation where v data captured is not set and a request will be sent.
     const { data: data2, onSuccess: onSuccess2 } = useSQRequest(() => poster(vDataId), {
       behavior: 'queue',
       queue
@@ -433,7 +438,7 @@ describe('vue => useSQRequest', () => {
         id: `id is ${stringifyVData(id)}`
       });
     const { data, onSuccess } = useSQRequest(() => poster(vDataId), {
-      behavior: 'static', // vDataCaptured在任何行为模式下都有效
+      behavior: 'static', // V data captured is valid in any behavior mode
       queue,
       vDataCaptured() {
         return {
@@ -506,7 +511,7 @@ describe('vue => useSQRequest', () => {
   });
 
   test('should be delay update states when call `updateStateEffect` in onSuccess handler', async () => {
-    // 获取列表
+    // Get list
     const queue = 'tb12';
     const getter = () => alovaInst.Get<any>('/info-list');
     const { data: listData, onSuccess } = useSQRequest(getter, {
@@ -528,7 +533,7 @@ describe('vue => useSQRequest', () => {
       }
     ]);
 
-    // 提交数据并立即更新
+    // Submit data and update immediately
     const poster = () => alovaInst.Post<any>('/detail');
     const { data: postRes, onSuccess: onPostSuccess } = useSQRequest(poster, {
       behavior: 'silent',
@@ -539,10 +544,10 @@ describe('vue => useSQRequest', () => {
     });
     onPostSuccess(async event => {
       const { data } = event;
-      expect(postRes.value[symbolVDataId]).toBeTruthy(); // 此时还是虚拟响应数据
+      expect(postRes.value[symbolVDataId]).toBeTruthy(); // At this time it is still virtual response data
 
-      // 调用updateStateEffect后将首先立即更新虚拟数据到listData中
-      // 等到请求响应后再次更新实际数据到listData中
+      // After calling updateStateEffect, the virtual data will be updated immediately into listData.
+      // Wait until the request responds and update the actual data to listData again.
       const updated = await updateStateEffect(getter(), listDataRaw => {
         listDataRaw.push({
           id: data.id,
@@ -554,7 +559,7 @@ describe('vue => useSQRequest', () => {
 
       const listDataLastItem = listData.value[listData.value.length - 1];
       expect(stringifyVData(listDataLastItem?.id)).toBe(stringifyVData(data.id));
-      expect(dehydrateVData(listDataLastItem?.id)).toBe('--'); // 虚拟数据默认值
+      expect(dehydrateVData(listDataLastItem?.id)).toBe('--'); // Dummy data default value
       expect(listDataLastItem?.text).toBe('abc');
     });
 
@@ -565,10 +570,10 @@ describe('vue => useSQRequest', () => {
         }
       });
     });
-    // 已替换为实际数据
+    // Replaced with actual data
     expect(postRes.value).toStrictEqual({ id: 1 });
 
-    // listData也被替换为实际数据
+    // List data is also replaced with actual data
     expect(listData.value).toStrictEqual([
       {
         id: 10,
@@ -590,7 +595,7 @@ describe('vue => useSQRequest', () => {
   });
 
   test('should replace virtual data to real value that method instances after requesting method instance', async () => {
-    // 提交数据并立即更新
+    // Submit data and update immediately
     const queue = 'tb13';
     const poster = (data: Record<string, any>) => alovaInst.Post<any>('/detail2', data);
     const { onSuccess: onPostSuccess } = useSQRequest(
@@ -662,7 +667,7 @@ describe('vue => useSQRequest', () => {
       queue
     });
 
-    // 使用全局事件来检查上面的请求数据
+    // Use global events to check the above request data
     onSilentSubmitSuccess(event => {
       if (event.method.type === 'DELETE' && event.behavior === 'queue') {
         expect(event.method.url).toBe('/detail/1010');

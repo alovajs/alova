@@ -1,5 +1,4 @@
-import { instanceOf, newInstance } from '@alova/shared/function';
-import { undefinedValue } from '@alova/shared/vars';
+import { instanceOf, newInstance, undefinedValue } from '@alova/shared';
 import { DataSerializer } from '~/typings/clienthook';
 
 export default {

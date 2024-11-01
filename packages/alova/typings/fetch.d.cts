@@ -4,7 +4,7 @@ declare namespace FetchTypes {
   type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 
   /**
-   * adapterFetch请求适配器
+   * fetch request adapter
    */
   type FetchRequestAdapter = AlovaRequestAdapter<FetchRequestInit, Response, Headers>;
 }

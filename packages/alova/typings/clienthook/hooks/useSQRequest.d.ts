@@ -1,130 +1,130 @@
-import { EventManager } from '@alova/shared/createEventManager';
+import type { EventManager } from '@alova/shared';
 import { Alova, AlovaGenerics, Method } from 'alova';
 import { AlovaCompleteEvent, AlovaEvent, AlovaMethodHandler, UseHookExposure } from '../general';
 import { updateState } from './updateState';
 import { RequestHookConfig } from './useRequest';
 
 // =========================
-/** 静默提交事件 */
-// 事件：
-// 全局的：
-//  [GlobalSQEvent]请求事件：behavior、silentMethod实例、method实例、retryTimes
-//  [GlobalSQSuccessEvent]成功：behavior、silentMethod实例、method实例、retryTimes、响应数据、虚拟数据和实际值的集合
-//  [GlobalSQErrorEvent]错误：behavior、silentMethod实例、method实例、retryTimes、错误对象、[?]下次重试间隔时间
-//  [GlobalSQFailEvent]失败事件：behavior、silentMethod实例、method实例、retryTimes、错误对象
+/** Silently commit events */
+// event:
+// Globally:
+//  [GlobalSQEvent] Request events: behavior, silentMethod instance, method instance, retryTimes
+//  [GlobalSQSuccessEvent] Success events: collection of behavior, silentMethod instance, method instance, retryTimes, response data, virtual data and actual values
+//  [GlobalSQErrorEvent] Error events: behavior, silentMethod instance, method instance, retryTimes, error object, [?] next retry interval
+//  [GlobalSQFailEvent] Failure event: behavior, silentMethod instance, method instance, retryTimes, error object
 
-// 局部的：
-//  [ScopedSQSuccessEvent]成功：behavior、silentMethod实例、method实例、retryTimes、send参数、响应数据
-//  [ScopedSQErrorEvent]失败：behavior、silentMethod实例、method实例、retryTimes、send参数、错误对象
-//  [ScopedSQErrorEvent]回退：behavior、silentMethod实例、method实例、retryTimes、send参数、错误对象
-//  [ScopedSQSuccessEvent | ScopedSQErrorEvent]完成事件：behavior、silentMethod实例、method实例、retryTimes、send参数、[?]错误对象
-//  [ScopedSQEvent]入队列前：behavior、silentMethod实例、method实例、send参数
-//  [ScopedSQEvent]入队列后：behavior、silentMethod实例、method实例、send参数
-/** SQ顶层事件 */
+// Local:
+//  [ScopedSQSuccessEvent] Success events: behavior, silentMethod instance, method instance, retryTimes, send parameter, response data
+//  [ScopedSQErrorEvent] Failure events: behavior, silentMethod instance, method instance, retryTimes, send parameter, error object
+//  [ScopedSQErrorEvent] Fallback events: behavior, silentMethod instance, method instance, retryTimes, send parameter, error object
+//  [ScopedSQSuccessEvent | ScopedSQErrorEvent] Completion event: behavior, silentMethod instance, method instance, retryTimes, send parameter, [?] error object
+//  [ScopedSQEvent] Before entering the queue: behavior, silentMethod instance, method instance, send parameter
+//  [ScopedSQEvent] After entering the queue: behavior, silentMethod instance, method instance, send parameter
+/** SQ top level events */
 export interface SQEvent<AG extends AlovaGenerics> {
   /**
-   * 事件对应的请求行为
+   * Request behavior corresponding to the event
    */
   behavior: SQHookBehavior;
   /**
-   * 当前的method实例
+   * the current method instance
    */
   method: Method<AG>;
   /**
-   * 当前的silentMethod实例，当behavior为static时没有值
+   * The current silentMethod instance has no value when the behavior is static
    */
   silentMethod?: SilentMethod<AG>;
 }
-/** SQ全局事件 */
+/** Sq global events */
 export interface GlobalSQEvent<AG extends AlovaGenerics> extends SQEvent<AG> {
   /**
-   * 重试次数，在beforePush和pushed事件中没有值
+   * Number of retries, no value in beforePush and pushed events
    */
   retryTimes: number;
 
   /**
-   * silentMethod所在的队列名
+   * The queue name where silentMethod is located
    */
   queueName: string;
 }
-/** SQ全局成功事件 */
+/** Sq global success event */
 export interface GlobalSQSuccessEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> {
   /**
-   * 响应数据
+   * response data
    */
   data: any;
   /**
-   * 虚拟数据和实际值的集合
-   * 里面只包含你已用到的虚拟数据的实际值
+   * A collection of dummy data and actual values
+   * It only contains the actual values of the dummy data you have used.
    */
   vDataResponse: Record<string, any>;
 }
-/** SQ全局失败事件 */
+/** Sq global failure event */
 export interface GlobalSQErrorEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> {
   /**
-   * 失败时抛出的错误
+   * Error thrown on failure
    */
   error: any;
 
   /**
-   * 下次重试间隔时间（毫秒）
+   * Next retry interval (milliseconds)
    */
   retryDelay?: number;
 }
-/** SQ全局失败事件 */
+/** Sq global failure event */
 export interface GlobalSQFailEvent<AG extends AlovaGenerics> extends GlobalSQEvent<AG> {
-  /** 失败时抛出的错误 */
+  /** Error thrown on failure */
   error: any;
 }
 
-/** SQ局部事件 */
+/** Sq local event */
 export interface ScopedSQEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends SQEvent<AG> {
   /**
-   * 通过send触发请求时传入的参数
+   * The parameters passed in when triggering the request through send
    */
   args: [...Args, ...any[]];
 }
-/** 局部成功事件 */
+/** partial success event */
 export interface ScopedSQSuccessEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
   extends ScopedSQEvent<AG, Args> {
   /**
-   * 响应数据
+   * response data
    */
   data: AG['Responded'];
 }
-/** 局部失败事件 */
+/** local failure event */
 export interface ScopedSQErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
   extends ScopedSQEvent<AG, Args> {
   /**
-   * 失败时抛出的错误
+   * Error thrown on failure
    */
   error: any;
 }
-/** 局部失败事件 */
+/** local failure event */
 export interface ScopedSQRetryEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
   extends ScopedSQEvent<AG, Args> {
   /**
-   * 重试次数
+   * Number of retries
    */
   retryTimes: number;
   /**
-   * 重试间隔时间（毫秒）
+   * Retry interval (milliseconds)
    */
   retryDelay: number;
 }
-/** 局部完成事件 */
+/** partial completion event */
 export interface ScopedSQCompleteEvent<AG extends AlovaGenerics, Args extends any[] = any[]>
   extends ScopedSQEvent<AG, Args> {
   /**
-   * 响应状态
+   * response status
    */
   status: AlovaCompleteEvent<AG, Args>['status'];
   /**
-   * 响应数据
+   * response data
    */
   data?: AG['Responded'];
   /**
-   * 失败时抛出的错误
+   * Error thrown on failure
    */
   error?: any;
 }
@@ -136,29 +136,29 @@ export interface RetryErrorDetailed {
 
 export interface BackoffPolicy {
   /**
-   * 再次请求的延迟时间，单位毫秒
+   * Delay time for requesting again, in milliseconds
    * @default 1000
    */
   delay?: number;
   /**
-   * 指定延迟倍数，例如把multiplier设置为1.5，delay为2秒，则第一次重试为2秒，第二次为3秒，第三次为4.5秒
+   * Specify the delay multiplier. For example, if the multiplier is set to 1.5 and the delay is 2 seconds, the first retry will be 2 seconds, the second retry will be 3 seconds, and the third retry will be 4.5 seconds.
    * @default 0
    */
   multiplier?: number;
 
   /**
-   * 延迟请求的抖动起始百分比值，范围为0-1
-   * 当只设置了startQuiver时，endQuiver默认为1
-   * 例如设置为0.5，它将在当前延迟时间上增加50%到100%的随机时间
-   * 如果endQuiver有值，则延迟时间将增加startQuiver和endQuiver范围的随机值
+   * Jitter starting percentage value for delayed requests, ranging from 0-1
+   * When only startQuiver is set, endQuiver defaults to 1
+   * For example, set to 0.5, it will add 50% to 100% random time to the current delay time
+   * If endQuiver has a value, the delay time will be increased by a random value in the range of startQuiver and endQuiver
    */
   startQuiver?: number;
 
   /**
-   * 延迟请求的抖动结束百分比值，范围为0-1
-   * 当只设置了endQuiver时，startQuiver默认为0
-   * 例如设置为0.5，它将在当前延迟时间上增加0%到50%的随机时间
-   * 如果startQuiver有值，则延迟时间将增加startQuiver和endQuiver范围的随机值
+   * Jitter end percentage value for delayed requests, ranging from 0-1
+   * When only endQuiver is set, startQuiver defaults to 0
+   * For example, set to 0.5, it will add a random time of 0% to 50% to the current delay time
+   * If startQuiver has a value, the delay time will be increased by a random value in the range of startQuiver and endQuiver
    */
   endQuiver?: number;
 }
@@ -171,183 +171,183 @@ export type ScopedSQEvents<AG extends AlovaGenerics> = {
 };
 
 /**
- * silentMethod实例
- * 需要进入silentQueue的请求都将被包装成silentMethod实例，它将带有请求策略的各项参数
+ * silentMethod instance
+ * Requests that need to enter silentQueue will be packaged into silentMethod instances, which will carry various parameters of the request strategy.
  */
 export interface SilentMethod<AG extends AlovaGenerics = AlovaGenerics> {
   /**
-   * silentMethod实例id
+   * silentMethod instance id
    */
   readonly id: string;
   /**
-   * 实例的行为，queue或silent
+   * The behavior of the instance, queue or silent
    */
   readonly behavior: SQHookBehavior;
   /**
-   * method实例
+   * method instance
    */
   readonly entity: Method<AG>;
 
   /**
-   * 是否为持久化实例
+   * Whether it is a persistent instance
    */
   cache: boolean;
 
   /**
-   * 重试错误规则
-   * 当错误符合以下表达式时才进行重试
-   * 当值为正则表达式时，它将匹配错误对象的message
-   * 当值为对象时，可设定匹配的是错误对象的name、或者message，如果两者都有设定，将以或的形式匹配
+   * Retry error rules
+   * Retries only when the error matches the following expression
+   * When the value is a regular expression, it will match the message of the error object
+   * When the value is an object, it can be set to match the name or message of the error object. If both are set, it will be matched in the form of or
    *
-   * 未设置时，默认所有错误都进行重试
+   * When not set, all errors will be retried by default.
    */
   readonly retryError?: RegExp | RetryErrorDetailed;
   /**
-   * 重试次数
+   * Number of retries
    */
   readonly maxRetryTimes?: number;
   /**
-   * 避让策略
+   * avoidance strategy
    */
   readonly backoff?: BackoffPolicy;
 
   /**
-   * 回退事件回调，当重试次数达到上限但仍然失败时，此回调将被调用
+   * Fallback event callback, this callback will be called when the number of retries reaches the upper limit but still fails.
    */
   readonly emitter: EventManager<ScopedSQEvents<AG>>;
 
   /**
-   * Promise的resolve函数，调用将通过对应的promise对象
+   * Promise's resolve function, the call will pass the corresponding promise object
    */
   readonly resolveHandler?: Parameters<ConstructorParameters<typeof Promise<any>>['0']>['0'];
 
   /**
-   * Promise的reject函数，调用将失败对应的promise对象
+   * Promise's reject function, calling the corresponding promise object will fail
    */
   readonly rejectHandler?: Parameters<ConstructorParameters<typeof Promise<any>>['0']>['1'];
 
   /**
-   * methodHandler的调用参数
-   * 如果其中有虚拟数据也将在请求被响应后被实际数据替换
+   * methodHandler call parameters
+   * If there is dummy data, it will be replaced by actual data after the request is responded to.
    */
   readonly handlerArgs?: any[];
 
   /**
-   * method创建时所使用的虚拟数据id
+   * The virtual data id used when creating the method
    */
   readonly vDatas?: string[];
 
   /**
-   * 虚拟响应数据，通过delayUpdateState保存到此
+   * Virtual response data is saved here through delayUpdateState
    */
   virtualResponse?: any;
 
   /**
-   * 调用updateStateEffect更新了哪些状态
+   * Which states are updated by calling updateStateEffect
    */
   updateStates?: string[];
 
   /**
-   * 静默提交状态更新数据
-   * 当静默提交数据后，我们还需要将提交数据手动更新到其他状态中以达到立即展示提交信息的目的
-   * 为了让更新的数据在重新加载页面后还能获取到，我们可以用此字段保存并随着silentMethod一同持久化
-   * 你可以在需要使用到这些数据的地方再次获取到并展示到界面上
+   * Submitting status update data silently
+   * When the data is submitted silently, we also need to manually update the submitted data to other states to achieve the purpose of immediately displaying the submitted information.
+   * In order to make the updated data available after reloading the page, we can use this field to save and persist it with the silentMethod.
+   * You can obtain this data again wherever you need to use it and display it on the interface.
    *
-   * 注意：一般而言，你可以以任意属性名保存持久化数据，但在typescript中会报错，因此为你指定了reviewData作为静默提交状态数据的保存属性
+   * Note: Generally speaking, you can save persistent data with any attribute name, but an error will be reported in typescript, so reviewData is specified for you as the saving attribute of silent submission status data.
    */
   reviewData?: any;
 
   /**
-   * 静默提交时的额外持久化数据
-   * 当静默提交后数据真正提交前，我们可能需要访问这条新数据
-   * 当提交的数据不满足界面渲染所需的数据时，我们可以在提交时将额外的数据保存到extraData字段中，保证下次可以获取到它
+   * Additional persistent data during silent commit
+   * When the data is actually submitted after silent submission, we may need to access this new data
+   * When the submitted data does not meet the data required for interface rendering, we can save the additional data to the extraData field when submitting to ensure that it can be obtained next time
    *
-   * 注意：一般而言，你可以以任意属性名保存持久化数据，但在typescript中会报错，因此为你指定了extraData作为以上作用的字段
+   * Note: Generally speaking, you can save persistent data with any attribute name, but an error will be reported in typescript, so extraData is specified for you as the field for the above function.
    */
   extraData?: any;
 
   /**
-   * 状态更新所指向的method实例
-   * 当调用updateStateEffect时将会更新状态的目标method实例保存在此
-   * 目的是为了让刷新页面后，提交数据也还能找到需要更新的状态
+   * The method instance pointed to by the status update
+   * The target method instance that will update the state when calling updateStateEffect is stored here.
+   * The purpose is to allow the submitted data to still find the status that needs to be updated after refreshing the page.
    */
   targetRefMethod?: Method<AG>;
 
-  /** 当前是否正在请求中 */
+  /** Is it currently being requested? */
   active?: boolean;
 
-  /** 是否强制请求 */
+  /** Whether to force the request */
   force: boolean;
 
   /**
-   * 允许缓存时持久化更新当前实例
+   * Allow cache-time persistent updates to the current instance
    */
   save(): Promise<void>;
 
   /**
-   * 在队列中使用一个新的silentMethod实例替换当前实例
-   * 如果有持久化缓存也将会更新缓存
-   * @param newSilentMethod 新的silentMethod实例
+   * Replace the current instance with a new silentMethod instance in the queue
+   * If there is a persistent cache, the cache will also be updated.
+   * @param newSilentMethod new silentMethod instance
    */
   replace(newSilentMethod: SilentMethod<AG>): Promise<void>;
 
   /**
-   * 移除当前实例，它将在持久化存储中同步移除
+   * Remove the current instance, it will be removed synchronously in the persistent storage
    */
   remove(): Promise<void>;
 
   /**
-   * 设置延迟更新状态对应的method实例以及对应的状态名
-   * 它将在此silentMethod响应后，找到对应的状态数据并将vData更新为实际数据
+   * Set the method instance corresponding to the delayed update status and the corresponding status name
+   * It will find the corresponding status data and update vData to the actual data after responding to this silentMethod
    *
-   * @param matcher method实例匹配器
-   * @param updateStateName 更新的状态名，默认为data，也可以设置多个
+   * @param matcher method instance matcher
+   * @param updateStateName Updated status name, the default is data, you can also set multiple
    */
   setUpdateState(matcher: Method<AG>, updateStateName?: string | string[]): void;
 }
 
-// 静默队列hooks相关
+// Silent queue hooks related
 export type SQHookBehavior = 'static' | 'queue' | 'silent';
 export interface SQHookConfig<AG extends AlovaGenerics> {
   /**
-   * hook行为，可选值为silent、queue、static，默认为queue
-   * 可以设置为可选值，或一个带返回可选值的回调函数
-   * silent：静默提交，方法实例会进入队列并持久化，然后立即触发onSuccess
-   * queue: 队列请求，方法实例会进入队列但不持久化，onSuccess、onError正常触发
-   * static：静态请求，和普通的useRequest一样
+   * Hook behavior, optional values are silent, queue, static, default is queue
+   * Can be set to an optional value, or a callback function that returns an optional value
+   * silent: Submit silently, the method instance will enter the queue and be persisted, and then trigger onSuccess immediately
+   * queue: Queue request, the method instance will enter the queue but will not be persisted, onSuccess and onError are triggered normally
+   * static: static request, the same as ordinary useRequest
    *
-   * 场景1. 手动开关
-   * 场景2. 网络状态不好时回退到static，网络状态自行判断
+   * Scenario 1. Manual switch
+   * Scenario 2. When the network status is not good, fall back to static and determine the network status by yourself.
    */
   behavior?: SQHookBehavior | ((event: AlovaEvent<AG, any[]>) => SQHookBehavior);
 
-  /** 重试错误规则
-   * 当错误符合以下表达式时才进行重试
-   * 当值为正则表达式时，它将匹配错误对象的message
-   * 当值为对象时，可设定匹配的是错误对象的name、或者message，如果两者都有设定，将以或的形式匹配
+  /** Retry error rules
+   * Retry only when the error matches the following expression
+   * When the value is a regular expression, it will match the message of the error object
+   * When the value is an object, it can be set to match the name or message of the error object. If both are set, it will be matched in the form of or
    */
   retryError?: NonNullable<SilentMethod['retryError']>;
 
-  /** 重试最大次数 */
+  /** Maximum number of retries */
   maxRetryTimes?: NonNullable<SilentMethod['maxRetryTimes']>;
 
-  /** 避让策略 */
+  /** avoidance strategy */
   backoff?: NonNullable<SilentMethod['backoff']>;
 
   /**
-   * 队列名，不传时选择默认队列
-   * 如需每次请求动态分配队列，可设为函数并返回队列名称
+   * Queue name. If not passed, the default queue will be selected.
+   * If you need to dynamically allocate the queue for each request, you can set it to a function and return the queue name.
    */
   queue?: string | ((event: AlovaEvent<AG, any[]>) => string);
 
-  /** 静默提交时默认的响应数据 */
+  /** Default response data when submitting silently */
   silentDefaultResponse?: () => any;
 
   /**
-   * 它将在捕获到method中带有虚拟数据时调用
-   * 当此捕获回调返回了数据时将会以此数据作为响应数据处理，而不再发送请求
-   * @param {Method} method method实例
-   * @returns {R} 与响应数据相同格式的数据
+   * It will be called when capturing with dummy data in method
+   * When this capture callback returns data, this data will be processed as response data instead of sending a request.
+   * @param {Method} method method instance
+   * @returns {R} Data in the same format as the response data
    */
   vDataCaptured?: (method: Method<AG>) => AG['Responded'] | undefined | void;
 }
@@ -371,35 +371,35 @@ export type SQHookExposure<AG extends AlovaGenerics, Args extends any[] = any[]>
   'onSuccess' | 'onError' | 'onComplete'
 > & {
   /**
-   * 回退事件绑定函数，它将在以下情况触发：
-   * 1. 重试指定次数都无响应而停止继续请求后
-   * 2. 因断网、服务端相应错误而停止请求后
+   * Fallback event binding function, which will be triggered in the following situations:
+   * 1. After retrying the specified number of times without response and stopping continuing the request
+   * 2. After stopping the request due to network disconnection or corresponding error on the server side
    *
-   * 绑定此事件后，请求持久化将失效，这意味着刷新即丢失静默提交的项
-   * 它只在silent行为下有效
+   * After binding this event, request persistence will be invalid, which means that silently submitted items will be lost on refresh
+   * It only works under silent behavior
    *
-   * 和onComplete事件对比：
-   * 1. 只在重试次数达到后仍然失败时触发
-   * 2. 在onComplete之前触发
+   * Compare with onComplete event:
+   * 1. Only triggered when the number of retries is reached and the failure still occurs.
+   * 2. Triggered before onComplete
    */
   onFallback(handler: FallbackHandler<AG, Args>): SQHookExposure<AG>;
 
-  /** 在入队列前调用，在此可以过滤队列中重复的SilentMethod，在static行为下无效 */
+  /** Called before entering the queue, you can filter duplicate silent methods in the queue. It is invalid under static behavior. */
   onBeforePushQueue(handler: BeforePushQueueHandler<AG, Args>): SQHookExposure<AG>;
 
-  /** 在入队列后调用，在static行为下无效 */
+  /** Called after being queued, invalid under static behavior */
   onPushedQueue(handler: PushedQueueHandler<AG, Args>): SQHookExposure<AG>;
 
-  /** 重试事件绑定 */
+  /** Retry event binding */
   onRetry(handler: RetryHandler<AG, Args>): SQHookExposure<AG>;
 
-  /** @override 重写alova的onSuccess事件 */
+  /** @override Rewrite alova's on success event */
   onSuccess(handler: (event: ScopedSQSuccessEvent<AG, Args>) => void): SQHookExposure<AG>;
 
-  /** @override 重写alova的onError事件 */
+  /** @override Rewrite alova's on error event */
   onError(handler: (event: ScopedSQErrorEvent<AG, Args>) => void): SQHookExposure<AG>;
 
-  /** @override 重写alova的onComplete事件 */
+  /** @override Override alova's on complete event */
   onComplete(handler: (event: ScopedSQCompleteEvent<AG, Args>) => void): SQHookExposure<AG>;
 };
 
@@ -412,47 +412,47 @@ export interface QueueRequestWaitSetting {
   queue: string | RegExp;
   wait: number | ((silentMethod: SilentMethod, queueName: string) => number | undefined);
 }
-/** SilentFactory启动选项 */
+/** Silent factory startup options */
 export interface SilentFactoryBootOptions {
   /**
-   * silentMethod依赖的alova实例
-   * alova实例的存储适配器、请求适配器等将用于存取SilentMethod实例，以及发送静默提交
+   * alova instance that silentMethod depends on
+   * The storage adapter, request adapter, etc. of the alova instance will be used to access the SilentMethod instance and send silent commits
    */
   alova: Alova<AlovaGenerics>;
 
-  /** 延迟毫秒数，不传时默认延迟2000ms */
+  /** Delay in milliseconds, default delay is 2000ms when not transmitting */
   delay?: number;
 
   /**
-   * 序列化器集合，用于自定义转换为序列化时某些不能直接转换的数据
-   * 集合的key作为它的名字进行序列化，当反序列化时会将对应名字的值传入backward函数中
-   * 因此，在forward中序列化时需判断是否为指定的数据，并返回转换后的数据，否则返回undefined或不返回
-   * 而在backward中可通过名字来识别，因此只需直接反序列化即可
-   * 内置的序列化器：
-   * 1. date序列化器用于转换日期
-   * 2. regexp序列化器用于转化正则表达式
+   * Serializer collection, used to customize certain data that cannot be converted directly when converted to serialization
+   * The key of the collection is serialized as its name. When deserializing, the value of the corresponding name will be passed into the backward function.
+   * Therefore, when serializing in forward, it is necessary to determine whether it is the specified data and return the converted data, otherwise it will return undefined or not return
+   * In backward, it can be identified by name, so you only need to deserialize it directly.
+   * Built-in serializer:
+   * 1. Date serializer is used to convert dates
+   * 2. The regexp serializer is used to convert regular expressions
    *
-   * >>> 可以通过设置同名序列化器来覆盖内置序列化器
+   * >>> You can override the built-in serializer by setting a serializer with the same name
    */
   serializers?: Record<string | number, DataSerializer>;
 
   /**
-   * silentQueue内的请求等待时间，单位为毫秒（ms）
-   * 它表示即将发送请求的silentMethod的等待时间
-   * 如果未设置，或设置为0表示立即触发silentMethod请求
+   * The request waiting time in silentQueue, in milliseconds (ms)
+   * It indicates the waiting time of the silentMethod that is about to send the request
+   * If not set, or set to 0, the silentMethod request is triggered immediately
    *
    * Tips:
-   * 1. 直接设置时默认对default queue有效
-   * 2. 如果需要对其他queue设置可指定为对象，如：
+   * 1. When set directly, it is effective for the default queue by default.
+   * 2. If you need to set other queue settings, you can specify them as objects, such as:
    * [
-   *   表示对名为customName的队列设置请求等待5000ms
+   *   Indicates waiting 5000ms for the queue setting request named customName
    *   { queue: 'customName', wait: 5000 },
    *
-   *   // 表示前缀为prefix的所有队列中，method实例名为xxx的请求设置等待5000ms
+   *   //Indicates that in all queues with the prefix prefix, the request setting with method instance name xxx is set to wait 5000ms
    *   { queue: /^prefix/, wait: silentMethod => silentMethod.entity.config.name === 'xxx' ? 5000 : 0 },
    * ]
    *
-   * >>> 它只在请求成功时起作用，如果失败则会使用重试策略参数
+   * >>> It only works if the request succeeds, if it fails it will use the retry policy parameters
    */
   requestWait?: QueueRequestWaitSetting[] | QueueRequestWaitSetting['wait'];
 }
@@ -466,8 +466,8 @@ export type OffEventCallback = () => void;
 export type SilentQueueMap = Record<string, SilentMethod<any>[]>;
 
 /**
- * 带silentQueue的request hook
- * silentQueue是实现静默提交的核心部件，其中将用于存储silentMethod实例，它们将按顺序串行发送提交
+ * request hook with silentQueue
+ * silentQueue is the core component to implement silent submission, which will be used to store silentMethod instances, and they will send submissions serially in order
  */
 export declare function useSQRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: AlovaMethodHandler<AG, Args>,

@@ -1,4 +1,4 @@
-import { objAssign } from '@alova/shared/function';
+import { objAssign } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 
 type RequestHandler<Responded> = (forceRequest?: boolean) => Promise<Responded>;

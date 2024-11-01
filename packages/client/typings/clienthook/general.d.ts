@@ -1,6 +1,4 @@
-import { FrameworkReadableState, FrameworkState } from '@alova/shared/FrameworkState';
-import { EventManager } from '@alova/shared/createEventManager';
-import type { IsUnknown } from '@alova/shared/types';
+import type { EventManager, FrameworkReadableState, FrameworkState, IsUnknown } from '@alova/shared';
 import {
   AlovaGenerics,
   FetchRequestState,
@@ -41,27 +39,27 @@ export interface AlovaEvent<AG extends AlovaGenerics, Args extends any[]> {
  * success event object
  */
 export interface AlovaSuccessEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEvent<AG, Args> {
-  /** data数据是否来自缓存 */
+  /** Whether data from cache */
   fromCache: boolean;
   data: AG['Responded'];
 }
-/** 错误事件对象 */
+/** error event object */
 export interface AlovaErrorEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEvent<AG, Args> {
   error: any;
 }
-/** 完成事件对象 */
+/** completion event object */
 export interface AlovaCompleteEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEvent<AG, Args> {
-  /** 响应状态 */
+  /** response status */
   status: 'success' | 'error';
-  /** data数据是否来自缓存，当status为error时，fromCache始终为false */
+  /** Whether the data from the cache, when the status is error, from cache is always false */
   fromCache: boolean;
   data?: AG['Responded'];
   error?: any;
 }
 
 /**
- * 以支持React和Vue的方式定义类型，后续需要其他类型再在这个基础上变化
- * 使用不同库的特征作为父类进行判断
+ * Define the type in a way that supports React and Vue. Other types will be needed later and then change on this basis.
+ * Use the characteristics of different libraries as parent classes for judgment
  */
 export type ExportedState<Responded, SE extends StatesExport<any>> = SE['name'] extends keyof StateMap<any>
   ? StateMap<Responded>[SE['name']]['StateExport']
@@ -127,14 +125,14 @@ export interface MiddlewareNextGuardConfig<AG extends AlovaGenerics, Args extend
 }
 
 /**
- * useRequest和useWatcher中间件的context参数
+ * context parameters of useRequest and useWatcher middleware
  */
 export interface AlovaFrontMiddlewareContext<AG extends AlovaGenerics, Args extends any[] = any[]>
   extends AlovaMiddlewareContext<AG> {
   /** handler to send request */
   send: SendHandler<Args, AG['Responded']>;
 
-  /** args 响应处理回调的参数，该参数由use hooks的send传入 */
+  /** args response processing callback parameters, which are passed in by send of use hooks */
   args: [...Args, ...any[]];
 
   /** state proxies set */
@@ -175,7 +173,7 @@ export interface AlovaFetcherMiddlewareContext<AG extends AlovaGenerics, Args ex
   /** fetch data */
   fetch<Transformed>(method: Method<AG>, ...args: [...Args, ...any[]]): Promise<Transformed>;
 
-  /** args 响应处理回调的参数，该参数由useFetcher的fetch传入 */
+  /** args response processing callback parameters, which are passed in by useFetcher’s fetch */
   args: [...Args, ...any[]];
 
   /** state proxies set */
@@ -245,16 +243,16 @@ export interface UseHookExposure<
 
 type EnumHookType = 1 | 2 | 3;
 export interface Hook<Args extends any[] = any[]> {
-  /** 最后一次请求的method实例 */
+  /** The method instance of the last request */
   m?: Method;
 
-  /** saveStatesFns */
+  /** Save states fns */
   sf: ((frontStates: MergedStatesMap) => void)[];
 
-  /** removeStatesFns */
+  /** Remove states fns */
   rf: (() => void)[];
 
-  /** frontStates */
+  /** Front states */
   fs: FrontRequestState<
     FrameworkState<boolean, 'loading'>,
     FrameworkState<any, 'data'>,

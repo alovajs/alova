@@ -1,10 +1,10 @@
-import { JSONStringify, undefinedValue } from '@alova/shared/vars';
+import { JSONStringify, undefinedValue } from '@alova/shared';
 import { AlovaXHRResponseHeaders } from '~/typings';
 
 /**
- * 将对象转换为queryString字符串
- * 支持任意层级的数组或对象
- * @param data 转换的data实例
+ * Convert object to queryString string
+ * Supports arrays or objects at any level
+ * @param data Converted data instance
  */
 export const data2QueryString = (data: Record<string, any>) => {
   const ary: string[] = [];
@@ -12,26 +12,26 @@ export const data2QueryString = (data: Record<string, any>) => {
   let index = 0;
   let refValueAttrCount = 0;
 
-  // 利用JSON.stringify来深度遍历数据
+  // Use json.stringify to deeply traverse data
   JSONStringify(data, (key, value) => {
     if (key !== '') {
-      // 如果是引用类型（数组或对象）则进入记录路径
+      // If it is a reference type (array or object), enter the record path
       if (typeof value === 'object' && value !== null) {
         paths.push(key);
-        // 记录接下来路径的使用次数
-        // 需要使用累加的方式，原因如下:
+        // Record the number of times the next path is used
+        // It is necessary to use the accumulation method for the following reasons:
         /**
          * { a: [1, { b: 2 }] }
          */
-        // 在数组中又包含数组或对象，此时refValueAttrCount还需要给{ b: 2 }使用一次，因此是累加的方式
+        // If the array contains an array or object, then refValueAttrCount needs to be used once for { b: 2 }, so it is an accumulation method.
         refValueAttrCount += Object.keys(value).length;
       } else if (value !== undefinedValue) {
-        // 值为undefined不被加入到query string中
+        // values of undefined are not added to the query string.
         const pathsTransformed = [...paths, key].map((val, i) => (i > 0 ? `[${val}]` : val)).join('');
         ary.push(`${pathsTransformed}=${value}`);
 
-        // 路径次数使用完了，重置标记信息
-        // 否则index++来记录当前使用的次数
+        // The number of paths has been used up. Reset the mark information.
+        // Otherwise, index++ is used to record the current number of uses.
         if (index >= refValueAttrCount - 1) {
           paths = [];
           index = 0;
@@ -46,9 +46,9 @@ export const data2QueryString = (data: Record<string, any>) => {
   return ary.join('&');
 };
 /**
- * 解析响应头
- * @param headerString 响应头字符串
- * @returns 响应头对象
+ * Parse response headers
+ * @param headerString Response header string
+ * @returns Response header object
  */
 export const parseResponseHeaders = (headerString: string) => {
   const headersAry = headerString.trim().split(/[\r\n]+/);

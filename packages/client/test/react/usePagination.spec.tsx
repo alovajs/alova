@@ -1,7 +1,7 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
 import { accessAction, actionDelegationMiddleware, updateState } from '@/index';
 import reactHook from '@/statesHook/react';
-import { GeneralFn } from '@alova/shared/types';
+import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import { Dispatch, SetStateAction, act, useState } from 'react';
@@ -70,7 +70,7 @@ const getterShort = (page: number, pageSize: number, cacheFor?: number) => {
   return alovaInst.Get<ListResponse>('/list-short', config);
 };
 describe('react => usePagination', () => {
-  // 分页相关测试
+  // Pagination related tests
   test('load paginated data and change page/pageSize', async () => {
     render(
       <Pagination
@@ -93,7 +93,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
@@ -121,7 +121,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(3, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(59, 40));
@@ -129,7 +129,7 @@ describe('react => usePagination', () => {
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19));
     });
 
-    // 最后一页
+    // last page
     fireEvent.click(screen.getByRole('setLastPage'));
     await waitFor(async () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('true');
@@ -163,7 +163,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
@@ -197,7 +197,7 @@ describe('react => usePagination', () => {
     });
   });
 
-  // 不立即发送请求
+  // Do not send request immediately
   test('should not load paginated data when set `immediate` to false', async () => {
     render(
       <Pagination
@@ -299,7 +299,7 @@ describe('react => usePagination', () => {
     );
 
     setMockListData(data => {
-      // 修改第3页第1条数据
+      // Modify the first data on page 3
       data.splice(20, 1, 200);
       return data;
     });
@@ -311,12 +311,12 @@ describe('react => usePagination', () => {
       );
     });
 
-    // 修改第1页数据
+    // Modify data on page 1
     setMockListData(data => {
       data.splice(0, 1, 100);
       return data;
     });
-    fireEvent.click(screen.getByRole('refresh1')); // 在翻页模式下，不是当前页会使用fetch
+    fireEvent.click(screen.getByRole('refresh1')); // In page turning mode, fetch will be used instead of the current page.
     const awaitResultEl = await screen.findByRole('awaitResult');
     expect(awaitResultEl).toHaveTextContent('resolve');
     await waitFor(async () => {
@@ -332,7 +332,7 @@ describe('react => usePagination', () => {
         getter={getter1}
         paginationConfig={{
           data: (res: any) => res.list,
-          initialPage: 2 // 默认从第2页开始
+          initialPage: 2 // Starts on page 2 by default
         }}
         handleExposure={(exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
@@ -343,7 +343,7 @@ describe('react => usePagination', () => {
     const page = 2;
     const pageSize = 10;
     let total = 300;
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(29, 20));
@@ -364,14 +364,14 @@ describe('react => usePagination', () => {
       );
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
-      // 检查当前页缓存
+      // Check current page cache
       let cache = await queryCache(getter1(page, pageSize));
       expect(cache?.list).toStrictEqual([300, ...generateContinuousNumbers(18, 10)]);
 
-      // insert时不会重新fetch后一页的数据
+      // When inserting, the data on the next page will not be fetched again.
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       cache = await queryCache(getter1(page + 1, pageSize));
-      // insert时会将缓存末尾去掉，因此还是剩下10项
+      // When inserting, the end of the cache will be removed, so there are still 10 items left.
       expect(cache?.list).toEqual(generateContinuousNumbers(28, 19));
     });
 
@@ -382,14 +382,14 @@ describe('react => usePagination', () => {
       const curData = [400, 300, 500, ...generateContinuousNumbers(15, 10), 600];
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(curData));
 
-      // 当前页缓存要保持一致
+      // The current page cache must be consistent
       const cache = await queryCache(getter1(page, pageSize));
       expect(cache?.list).toStrictEqual(curData);
 
-      expect(fetchMockFn).toHaveBeenCalledTimes(2); // insert不会触发下一页预加载
+      expect(fetchMockFn).toHaveBeenCalledTimes(2); // Insert does not trigger next page preloading
     });
 
-    // 翻到最后一页后，再插入数据不会再去除一条数据
+    // After turning to the last page, inserting data will not remove another piece of data.
     fireEvent.click(screen.getByRole('pageToLast'));
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([299]));
@@ -400,7 +400,7 @@ describe('react => usePagination', () => {
     });
   });
 
-  // 当操作了数据重新fetch但还未响应时，翻页到了fetch的页，此时也需要更新界面
+  // When the data is fetched again but it has not yet responded, the page is turned to the fetch page. At this time, the interface also needs to be updated.
   test('should update data when insert and fetch current page', async () => {
     const fetchMockFn = vi.fn();
     render(
@@ -408,7 +408,7 @@ describe('react => usePagination', () => {
         getter={getter1}
         paginationConfig={{
           data: (res: any) => res.list,
-          initialPage: 2, // 默认从第2页开始
+          initialPage: 2, // Starts on page 2 by default
           initialPageSize: 4
         }}
         handleExposure={(exposure: any) => {
@@ -421,7 +421,7 @@ describe('react => usePagination', () => {
     const pageSize = 4;
     let total = 300;
 
-    // 通过检查缓存数据表示预加载数据成功
+    // Indicates successful preloading of data by checking cached data
     await waitFor(async () => {
       let cache = await queryCache(getter1(page - 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(3));
@@ -432,25 +432,25 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('batchInsert1'));
     total += 2;
-    // 模拟数据中同步删除，这样fetch的数据校验才正常
+    // Synchronously delete the simulated data so that the fetch data verification is normal.
     setMockListData(data => {
       data.splice(5, 0, 1000, 1001);
       return data;
     });
 
-    // 正在重新fetch下一页数据，但还没响应，此时翻页到下一页
+    // The next page of data is being fetched again, but there is no response yet. At this time, the page is turned to the next page.
     delay(20).then(() => {
       fireEvent.click(screen.getByRole('setPage'));
     });
-    // 等待fetch
+    // waiting for fetch
     await waitFor(() => {
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 6))); // 有两项被挤到后面一页了
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 6))); // There are two items that have been pushed to the back of the page.
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
-      // 5次来源分别是：初始化时2次、翻页时1次（翻页后上一页数据已有不再fetch）
+      // The five sources are: 2 times during initialization and 1 time when turning the page (the data on the previous page is no longer fetched after turning the page)
       expect(fetchMockFn).toHaveBeenCalledTimes(3);
     });
 
-    // 再次返回前一页，移除的数据不应该存在
+    // Return to the previous page again, the removed data should not exist
     fireEvent.click(screen.getByRole('subtractPage'));
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 1000, 1001, 5]));
@@ -485,34 +485,34 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('replace1'));
     await waitFor(async () => {
-      // 第一项被替换了
+      // The first item was replaced
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300 }))
       );
 
-      // 检查当前页缓存
+      // Check current page cache
       expect((await queryCache(getter1(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300 }));
     });
 
-    // 正向顺序替换
+    // Forward sequence replacement
     fireEvent.click(screen.getByRole('replace2'));
     await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }))
       );
 
-      // 检查当前页缓存
+      // Check current page cache
       expect((await queryCache(getter1(1, 10)))?.list).toEqual(generateContinuousNumbers(9, 0, { 0: 300, 8: 400 }));
     });
 
-    // 逆向顺序替换
+    // Reverse order replacement
     fireEvent.click(screen.getByRole('replace3'));
     await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(
         JSON.stringify(generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 }))
       );
 
-      // 检查当前页缓存
+      // Check current page cache
       expect((await queryCache(getter1(1, 10)))?.list).toEqual(
         generateContinuousNumbers(9, 0, { 0: 300, 8: 400, 6: 500 })
       );
@@ -562,7 +562,7 @@ describe('react => usePagination', () => {
           data: (res: any) => res.list,
           preloadNextPage: false,
           preloadPreviousPage: false,
-          initialPage: 2 // 默认从第2页开始
+          initialPage: 2 // Starts on page 2 by default
         }}
         handleExposure={(exposure: any) => {
           exposure.onFetchSuccess(fetchMockFn);
@@ -577,7 +577,7 @@ describe('react => usePagination', () => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     let cache = await queryCache(getter1(page + 1, pageSize));
     expect(cache).toBeUndefined();
     cache = await queryCache(getter1(page - 1, pageSize));
@@ -590,7 +590,7 @@ describe('react => usePagination', () => {
       );
     });
 
-    // 预加载设置为false了，因此不会fetch前后一页的数据
+    // Preloading is set to false, so the data on the previous and next pages will not be fetched.
     await delay(100);
     cache = await queryCache(getter1(page + 1, pageSize));
     expect(cache).toBeUndefined();
@@ -640,7 +640,7 @@ describe('react => usePagination', () => {
         getter={getter1}
         paginationConfig={{
           data: (res: any) => res.list,
-          initialPage: 2, // 默认从第2页开始
+          initialPage: 2, // Starts on page 2 by default
           initialPageSize: 4
         }}
         handleExposure={(exposure: any) => {
@@ -654,45 +654,45 @@ describe('react => usePagination', () => {
     const pageSize = 4;
     let total = 300;
     await waitFor(async () => {
-      // 检查预加载缓存
+      // Check preload cache
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(!!cache).toBeTruthy();
       cache = await queryCache(getter1(page - 1, pageSize));
       expect(!!cache).toBeTruthy();
     });
-    expect(fetchMockFn).toHaveBeenCalledTimes(2); // 初始化时2次
+    expect(fetchMockFn).toHaveBeenCalledTimes(2); // 2 times during initialization
 
-    // 删除第二项，将会用下一页的数据补位，并重新拉取上下一页的数据
+    // Deleting the second item will fill the space with the data from the next page and re-fetch the data from the previous and next pages.
     fireEvent.click(screen.getByRole('batchRemove1'));
     setMockListData(data => {
-      // 模拟数据中同步删除，这样fetch的数据校验才正常
+      // Synchronously delete the simulated data so that the fetch data verification is normal.
       data.splice(5, 2);
       return data;
     });
     total -= 2;
-    // 下一页缓存已经被使用了2项
+    // The next page cache has been used for 2 items
     expect((await queryCache(getter1(page + 1, pageSize)))?.list).toStrictEqual([10, 11]);
     await waitFor(async () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
-      // 当前页缓存要保持一致
+      // The current page cache must be consistent
       expect((await queryCache(getter1(page, pageSize)))?.list).toStrictEqual([4, 7, 8, 9]);
     });
 
-    // 等待删除后重新fetch下一页完成再继续
+    // Wait for deletion and then re-fetch the next page to complete before continuing.
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(3);
     });
 
-    // 请求发送了，但还没响应（响应有50ms延迟），此时再一次删除，期望还可以使用原缓存且中断请求
+    // The request is sent, but there is no response yet (the response is delayed by 50ms). At this time, it is deleted again. It is expected that the original cache can still be used and the request is interrupted.
     fireEvent.click(screen.getByRole('remove2'));
     setMockListData(data => {
       data.splice(6, 1);
       return data;
     });
     total -= 1;
-    // 下一页缓存又被使用了1项
+    // The next page cache is used by 1 more items
     expect((await queryCache(getter1(page + 1, pageSize)))?.list).toStrictEqual([11, 12, 13]);
     await waitFor(() => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 9, 10]));
@@ -700,7 +700,7 @@ describe('react => usePagination', () => {
       expect(fetchMockFn).toHaveBeenCalledTimes(3);
     });
 
-    // 检查是否重新fetch了前后一页的数据
+    // Check whether the data of the previous and previous pages has been fetched again
     await waitFor(async () => {
       expect(fetchMockFn).toHaveBeenCalledTimes(4);
       let cache = await queryCache(getter1(page - 1, pageSize));
@@ -756,7 +756,7 @@ describe('react => usePagination', () => {
     });
   });
 
-  // 当操作了数据重新fetch但还未响应时，翻页到了正在fetch的页，此时也需要更新界面
+  // When the data is fetched again but there is no response, the page is turned to the page being fetched. At this time, the interface also needs to be updated.
   test('should update data when fetch current page', async () => {
     const fetchMockFn = vi.fn();
     render(
@@ -764,7 +764,7 @@ describe('react => usePagination', () => {
         getter={getter1}
         paginationConfig={{
           data: (res: any) => res.list,
-          initialPage: 2, // 默认从第2页开始
+          initialPage: 2, // Starts on page 2 by default
           initialPageSize: 4
         }}
         handleExposure={(exposure: any) => {
@@ -777,7 +777,7 @@ describe('react => usePagination', () => {
     const pageSize = 4;
     let total = 300;
     await waitFor(async () => {
-      // 检查预加载缓存
+      // Check preload cache
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(!!cache).toBeTruthy();
       cache = await queryCache(getter1(page - 1, pageSize));
@@ -788,30 +788,30 @@ describe('react => usePagination', () => {
     fireEvent.click(screen.getByRole('batchRemove1'));
     total -= 2;
     setMockListData(data =>
-      // 模拟数据中同步删除，这样fetch的数据校验才正常
+      // Synchronously delete the simulated data so that the fetch data verification is normal.
       data.filter((i: number) => ![5, 6].includes(i))
     );
 
-    // 正在重新fetch下一页数据，但还没响应（响应有50ms延迟），此时翻页到下一页
+    // The next page of data is being fetched again, but there is no response yet (the response is delayed by 50ms). At this time, the page is turned to the next page.
     delay(10).then(() => {
       fireEvent.click(screen.getByRole('setPage'));
     });
     await waitFor(() => {
-      // 有两项用于填补前一页数据了
+      // There are two items used to fill in the data on the previous page.
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([10, 11]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
-    // fetch响应后
+    // After Fetch response
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(4); // 初始化2次 + 删除fetch重新fetch1次 + 翻页后fetch下一页1次
+      expect(fetchMockFn).toHaveBeenCalledTimes(4); // Initialize 2 times + delete fetch and re-fetch 1 time + fetch next page 1 time after turning the page
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([10, 11, 12, 13]));
     });
 
-    // 再次返回前一页，移除的数据不应该存在
+    // Return to the previous page again, the removed data should not exist
     fireEvent.click(screen.getByRole('subtractPage'));
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(4); // 前后一页都有缓存，不fetch
+      expect(fetchMockFn).toHaveBeenCalledTimes(4); // Both the previous and next pages are cached, no fetch is required.
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
     });
   });
@@ -827,7 +827,7 @@ describe('react => usePagination', () => {
           return {
             data: (res: any) => res.list,
             watchingStates: [min[0]],
-            initialPage: 2, // 默认从第2页开始
+            initialPage: 2, // Starts on page 2 by default
             initialPageSize: 4
           };
         }}
@@ -840,7 +840,7 @@ describe('react => usePagination', () => {
     const page = 2;
     const pageSize = 4;
     let total = 300;
-    // 等待预加载数据完成
+    // Wait for preloading data to complete
     await waitFor(async () => {
       let cache = await queryCache(
         getter1(page + 1, pageSize, {
@@ -857,73 +857,73 @@ describe('react => usePagination', () => {
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
     });
 
-    // 删除两项，前后页的total也会同步更新
+    // Delete two items, and the total of the previous and next pages will be updated simultaneously.
     fireEvent.click(screen.getByRole('batchRemove1'));
     total -= 2;
     setMockListData(data =>
-      // 模拟数据中同步删除，这样fetch的数据校验才正常
+      // Synchronously delete the simulated data so that the fetch data verification is normal.
       data.filter((i: number) => ![5, 6].includes(i))
     );
     await waitFor(() => {
-      // 有两项用于填补前一页数据了
+      // There are two items used to fill in the data on the previous page.
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
-      expect(fetchMockFn).toHaveBeenCalledTimes(2); // 还未触发预加载下一页
+      expect(fetchMockFn).toHaveBeenCalledTimes(2); // Preloading the next page has not been triggered yet
     });
 
-    await delay(10); // 发起了预加载后再继续
+    await delay(10); // Initiate preloading before continuing
     fireEvent.click(screen.getByRole('subtractPage'));
-    // 等待fetch完成后检查total是否正确
+    // Wait for fetch to complete and check whether total is correct
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(3); // 初始化2次、删除后1次、翻到第1页无fetch（第1页不触发上一页预加载，且下一页有缓存）
+      expect(fetchMockFn).toHaveBeenCalledTimes(3); // Initialization twice, deletion once, no fetch when turning to the first page (the first page does not trigger the preloading of the previous page, and the next page is cached)
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
     fireEvent.click(screen.getByRole('setPage2'));
-    // 等待fetch完成后检查total是否正确
+    // Wait for fetch to complete and check whether total is correct
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(4); // 再次翻页+1次下一页fetch
+      expect(fetchMockFn).toHaveBeenCalledTimes(4); // Turn the page again + fetch the next page 1 time
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([10, 11, 12, 13]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
-    // 改变筛选条件将使用最新的total
-    // 注意：改变监听条件后会自动重置为page=initialPage(2)
+    // Changing the filter will use the latest total
+    // Note: After changing the listening conditions, it will be automatically reset to page=initialPage(2)
     act(() => {
       min?.[1](100);
     });
     let totalBackup = total;
     total = 200;
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(6); // 改变筛选条件（自动重置第initialPage页）+2次
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([104, 105, 106, 107])); // 重置到第initialPage页
+      expect(fetchMockFn).toHaveBeenCalledTimes(6); // Change filter conditions (automatically reset initial page) +2 times
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([104, 105, 106, 107])); // Reset to initial page
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
-    // 删除一条
+    // Delete one
     fireEvent.click(screen.getByRole('remove2'));
     total -= 1;
     totalBackup -= 1;
     setMockListData(data =>
-      // 模拟数据中同步删除，这样fetch的数据校验才正常
+      // Synchronously delete the simulated data so that the fetch data verification is normal.
       data.filter((i: number) => ![106].includes(i))
     );
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(7); // 预加载下一页+1
+      expect(fetchMockFn).toHaveBeenCalledTimes(7); // Preload next page +1
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([104, 105, 107, 108]));
-      // 再次看total是否正确
+      // Check again whether total is correct
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
-    // 条件改回去，需要延迟一会儿再继续操作
+    // If the conditions are changed back, you need to delay for a while before continuing the operation.
     await delay(10);
     act(() => {
       min?.[1](0);
     });
     total = totalBackup;
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(9); // 条件重置了，预加载了前后一页数+2（当前第initialPage页）
+      expect(fetchMockFn).toHaveBeenCalledTimes(9); // The condition is reset, and the number of previous and previous pages + 2 (current initial page) is preloaded.
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 7, 8, 9]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
@@ -937,7 +937,7 @@ describe('react => usePagination', () => {
         paginationConfig={{
           data: (res: any) => res.list,
           total: (res: any) => res.total,
-          initialPage: 3, // 默认从第3页开始
+          initialPage: 3, // Starts on page 3 by default
           initialPageSize: 4,
           preloadNextPage: false,
           preloadPreviousPage: false
@@ -952,23 +952,23 @@ describe('react => usePagination', () => {
     const pageSize = 4;
     let total = 10;
 
-    // 等待请求成功
+    // Wait for request to succeed
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
     });
     fireEvent.click(screen.getByRole('remove1'));
     total -= 1;
     setMockShortListData(data =>
-      // 模拟数据中同步删除，这样fetch的数据校验才正常
+      // Synchronously delete the simulated data so that the fetch data verification is normal.
       data.filter((i: number) => ![9].includes(i))
     );
 
     await waitFor(async () => {
-      // 有两项用于填补前一页数据了
+      // There are two items used to fill in the data on the previous page.
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([8]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
 
-      // 当前页缓存要保持一致
+      // The current page cache must be consistent
       const cache = await queryCache(getterShort(page, pageSize));
       expect(cache?.list).toStrictEqual([8]);
     });
@@ -977,7 +977,7 @@ describe('react => usePagination', () => {
     total -= 1;
     setMockShortListData(data => data.filter((i: number) => ![8].includes(i)));
 
-    // 当最后一页没数据后，会自动切换到上一页
+    // When the last page has no data, it will automatically switch to the previous page.
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('page')).toHaveTextContent('2');
@@ -1009,16 +1009,16 @@ describe('react => usePagination', () => {
     const pageSize = 4;
     let total = 10;
 
-    // 等待请求成功
+    // Wait for request to succeed
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
-    // 删除数据
+    // Delete data
     fireEvent.click(screen.getByRole('remove1'));
     total -= 1;
     setMockShortListData(data =>
-      // 模拟数据中同步删除，这样fetch的数据校验才正常
+      // Synchronously delete the simulated data so that the fetch data verification is normal.
       data.filter((i: number) => ![5].includes(i))
     );
 
@@ -1026,11 +1026,11 @@ describe('react => usePagination', () => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 6, 7, 8]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
-      // 当前缓存已关闭
+      // Caching is currently closed
       expect(await queryCache(getterShort(page, pageSize))).toBeUndefined();
     });
 
-    // 插入数据，插入时不会刷新数据
+    // Insert data, the data will not be refreshed when inserting
     fireEvent.click(screen.getByRole('insert1'));
     total += 1;
     setMockShortListData(data => {
@@ -1044,7 +1044,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
 
-    // 替换数据
+    // Replace data
     fireEvent.click(screen.getByRole('replace4'));
     setMockShortListData(data => {
       data.splice(5, 1, 200);
@@ -1055,11 +1055,11 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 200, 6, 7]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
     });
-    // method没有设置缓存时，不会触发数据拉取
+    // When Method does not set a cache, data fetching will not be triggered.
     expect(fetchMockFn).not.toHaveBeenCalled();
   });
 
-  // 下拉加载更多相关
+  // Pull down to load more related
   test('load more mode paginated data and change page/pageSize', async () => {
     const successMockFn = vi.fn();
     render(
@@ -1081,7 +1081,7 @@ describe('react => usePagination', () => {
     let page = 1;
     const pageSize = 10;
 
-    // 等待请求成功
+    // Wait for request to succeed
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('page')).toHaveTextContent(page.toString());
@@ -1092,7 +1092,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await delay(100);
     expect((await queryCache(getter1(page + 1, pageSize)))?.list).toBeUndefined();
 
@@ -1102,7 +1102,7 @@ describe('react => usePagination', () => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('page')).toHaveTextContent(page.toString());
       expect(screen.getByRole('pageSize')).toHaveTextContent(pageSize.toString());
-      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19))); // 翻页数据追加到尾部
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19))); // Page turning data is appended to the end
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(screen.getByRole('pageCount')).toHaveTextContent('');
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
@@ -1111,7 +1111,7 @@ describe('react => usePagination', () => {
     await delay(100);
     expect((await queryCache(getter1(page + 1, pageSize)))?.list).toBeUndefined();
 
-    // 翻页到没有数据的一页，没有提供total时，数据少于pageSize条时将会把isLastPage判断为true
+    // Turn the page to a page with no data. When total is not provided and the data is less than page size bar, is last page will be judged as true.
     fireEvent.click(screen.getByRole('toNoDataPage'));
     page = 31;
     await waitFor(() => {
@@ -1158,7 +1158,7 @@ describe('react => usePagination', () => {
       );
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(successMockFn).toHaveBeenCalledTimes(1);
-      expect(fetchMockFn).toHaveBeenCalledTimes(1); // 只预加载下一页
+      expect(fetchMockFn).toHaveBeenCalledTimes(1); // Preload only next page
     });
 
     fireEvent.click(screen.getByRole('setPage'));
@@ -1176,7 +1176,7 @@ describe('react => usePagination', () => {
       );
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(successMockFn).toHaveBeenCalledTimes(2);
-      expect(fetchMockFn).toHaveBeenCalledTimes(2); // 预加载下一页+1
+      expect(fetchMockFn).toHaveBeenCalledTimes(2); // Preload next page +1
     });
 
     act(() => {
@@ -1187,8 +1187,8 @@ describe('react => usePagination', () => {
         const responseWords = JSON.parse(screen.getByRole('response').textContent || '[]').map(({ word }: any) => word);
         expect(responseWords.join('')).toMatch(/^b+$/);
         expect(screen.getByRole('total')).toHaveTextContent('');
-        expect(successMockFn).toHaveBeenCalledTimes(3); // 返回第一页
-        expect(fetchMockFn).toHaveBeenCalledTimes(3); // 预加载下一页+1
+        expect(successMockFn).toHaveBeenCalledTimes(3); // Return to first page
+        expect(fetchMockFn).toHaveBeenCalledTimes(3); // Preload next page +1
       },
       {
         timeout: 500
@@ -1224,7 +1224,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('replacedError')).toHaveTextContent("refresh page can't greater than page");
     });
 
-    // 手动改变一下接口数据，让刷新后能看出效果
+    // Manually change the interface data so that the effect can be seen after refreshing
     setMockListData(data => {
       data.splice(0, 1, 100);
       return data;
@@ -1295,7 +1295,7 @@ describe('react => usePagination', () => {
           total: () => undefined,
           data: (res: any) => res.list,
           append: true,
-          initialPage: 2, // 默认从第2页开始
+          initialPage: 2, // Starts on page 2 by default
           initialPageSize: 4
         }}
         handleExposure={(exposure: any) => {
@@ -1304,17 +1304,17 @@ describe('react => usePagination', () => {
       />
     );
 
-    // 等待fetch完成
+    // Wait for fetch to complete
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(screen.getByRole('pageCount')).toHaveTextContent('');
     });
 
-    // 混合同步操作
+    // Mixed sync operations
     fireEvent.click(screen.getByRole('mixedOperate'));
     setMockListData(data => {
-      // 模拟数据中同步删除，这样fetch的数据校验才正常
+      // Synchronously delete the simulated data so that the fetch data verification is normal.
       data.splice(5, 2);
       data.splice(4, 0, 100);
       data.splice(6, 1, 200);
@@ -1324,7 +1324,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 4, 200, 8]));
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(screen.getByRole('pageCount')).toHaveTextContent('');
-      expect(fetchMockFn).toHaveBeenCalledTimes(3); // 多次同步操作只会触发一次预加载
+      expect(fetchMockFn).toHaveBeenCalledTimes(3); // Multiple sync operations will only trigger preloading once
     });
 
     fireEvent.click(screen.getByRole('setPage'));
@@ -1332,7 +1332,7 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 4, 200, 8, 9, 10, 11, 12]));
       expect(screen.getByRole('total')).toHaveTextContent('');
       expect(screen.getByRole('pageCount')).toHaveTextContent('');
-      expect(fetchMockFn).toHaveBeenCalledTimes(4); // 翻页只预加载下一页
+      expect(fetchMockFn).toHaveBeenCalledTimes(4); // Page turning only preloads the next page
     });
   });
 
@@ -1362,10 +1362,10 @@ describe('react => usePagination', () => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
     });
 
-    // 下一页没有缓存的情况下，将会重新请求刷新列表
+    // If the next page is not cached, a new request will be made to refresh the list.
     fireEvent.click(screen.getByRole('batchRemove1'));
     setMockListData(data => {
-      // 模拟数据中同步删除
+      // Synchronous deletion in simulated data
       data.splice(1, 2);
       return data;
     });
@@ -1396,15 +1396,15 @@ describe('react => usePagination', () => {
       />
     );
 
-    // 等待fetch完成
+    // Wait for fetch to complete
     await waitFor(() => {
-      // 第一页时只有下一页会被预加载
+      // On the first page, only the next page will be preloaded
       expect(fetchMockFn).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3]));
       expect(screen.getByRole('pageCount')).toHaveTextContent('');
     });
 
-    // 手动改变一下接口数据，让刷新后能看出效果
+    // Manually change the interface data so that the effect can be seen after refreshing
     setMockListData(data => {
       data.splice(0, 1, 100);
       return data;
@@ -1420,7 +1420,7 @@ describe('react => usePagination', () => {
 
     fireEvent.click(screen.getByRole('setPage'));
     await waitFor(() => {
-      expect(fetchMockFn).toHaveBeenCalledTimes(3); // 上一页已有缓存不会再被预加载
+      expect(fetchMockFn).toHaveBeenCalledTimes(3); // The previous page has been cached and will not be preloaded again.
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([100, 1, 2, 3, 4, 5, 6, 7]));
     });
 
@@ -1451,7 +1451,7 @@ describe('react => usePagination', () => {
 
     let page = 2;
     const pageSize = 4;
-    // 等待fetch完成
+    // Wait for fetch to complete
     await waitFor(() => {
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 5, 6, 7]));
@@ -1460,7 +1460,7 @@ describe('react => usePagination', () => {
     fireEvent.click(screen.getByRole('setPage'));
     page += 1;
     await waitFor(async () => {
-      // 已经到最后一页了，不需要再预加载下一页数据了，同时上一页也有缓存不会触发预加载
+      // We have reached the last page. There is no need to preload the next page of data. At the same time, the previous page is also cached and will not trigger preloading.
       expect(fetchMockFn).toHaveBeenCalledTimes(2);
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9, 4)));
       expect(await queryCache(getterShort(page + 1, pageSize))).toBeUndefined();

@@ -1,15 +1,20 @@
+import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@/event';
 import { EnumHookType } from '@/util/helper';
-import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@alova/shared/event';
 import {
+  falseValue,
   getContext,
   getHandlerMethod,
   getMethodInternalKey,
   newInstance,
   noop,
   omit,
-  sloughConfig
-} from '@alova/shared/function';
-import { falseValue, promiseResolve, promiseThen, pushItem, trueValue, undefinedValue } from '@alova/shared/vars';
+  promiseResolve,
+  promiseThen,
+  pushItem,
+  sloughConfig,
+  trueValue,
+  undefinedValue
+} from '@alova/shared';
 import { AlovaGenerics, Method, Progress, queryCache } from 'alova';
 import {
   AlovaFetcherMiddleware,
@@ -27,11 +32,11 @@ import { assertMethod, coreHookAssert } from './assert';
 import { getStateCache, removeStateCache, setStateCache } from './stateCache';
 
 /**
- * 统一处理useRequest/useWatcher/useFetcher等请求钩子函数的请求逻辑
- * @param hookInstance hook实例
- * @param methodHandler 请求方法对象或获取函数
- * @param sendCallingArgs send函数参数
- * @returns 请求状态
+ * Unified processing of request logic for useRequest/useWatcher/useFetcher and other request hook functions
+ * @param hookInstance hook instance
+ * @param methodHandler Request method object or get function
+ * @param sendCallingArgs send function parameters
+ * @returns Request status
  */
 export default function useHookToSendRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
   hookInstance: Hook<Args>,
@@ -48,14 +53,14 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
     | FetcherHookConfig<AG>;
   const alovaInstance = getContext(methodInstance);
   const { id } = alovaInstance;
-  // 如果是静默请求，则请求后直接调用onSuccess，不触发onError，然后也不会更新progress
+  // If it is a silent request, on success will be called directly after the request, on error will not be triggered, and progress will not be updated.
   const methodKey = getMethodInternalKey(methodInstance);
   const { abortLast = trueValue } = useHookConfig as WatcherHookConfig<AG>;
   const isFirstRequest = !hookInstance.m;
   hookInstance.m = methodInstance;
 
   return (async () => {
-    // 初始化状态数据，在拉取数据时不需要加载，因为拉取数据不需要返回data数据
+    // Initialize status data, which does not need to be loaded when pulling data, because pulling data does not require returning data.
     let removeStates = noop;
     let saveStates = noop as Hook['sf'][number];
     let isNextCalled = falseValue;
@@ -64,18 +69,18 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
     let offUploadEvent = noop;
     const cachedResponse = await queryCache(methodInstance as Method);
     let fromCache = () => !!cachedResponse;
-    // 是否为受控的loading状态，当为true时，响应处理中将不再设置loading为false
+    // Whether it is a controlled loading state. When it is true, loading will no longer be set to false in response processing.
     let controlledLoading = falseValue;
     if (!isFetcher) {
-      // 将初始状态存入缓存以便后续更新
+      // Store the initial state in cache for subsequent updates
       saveStates = frontStates => setStateCache(id, methodKey, frontStates, hookInstance);
       saveStates({ ...frontStates, ...managedStates });
 
-      // 设置状态移除函数，将会传递给hook内的effectRequest，它将被设置在组件卸载时调用
+      // Setting the state removal function will be passed to the effect request in the hook, and it will be set to be called when the component is unloaded.
       removeStates = () => removeStateCache(id, methodKey);
     }
 
-    // 中间件函数next回调函数，允许修改强制请求参数，甚至替换即将发送请求的Method实例
+    // The middleware function next callback function allows you to modify mandatory request parameters and even replace the method instance that is about to send the request.
     const guardNext: AlovaGuardNext<AG, Args> = guardNextConfig => {
       isNextCalled = trueValue;
       const { force: guardNextForceRequest = forceRequest, method: guardNextReplacingMethod = methodInstance } =
@@ -93,17 +98,17 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
         };
 
       methodInstance = guardNextReplacingMethod;
-      // 每次发送请求都需要保存最新的控制器
+      // The latest controller needs to be saved every time a request is sent
       pushItem(hookInstance.sf, saveStates);
       pushItem(hookInstance.rf, removeStates);
 
-      // loading状态受控时将不更改loading
-      // 未命中缓存，或强制请求时需要设置loading为true
+      // Loading will not be changed when the loading state is controlled
+      // The cache is missed, or loading needs to be set to true when forcing a request.
       if (!controlledLoading) {
         loadingState.v = !!forceRequestFinally || !cachedResponse;
       }
 
-      // 根据downloading、uploading的追踪状态来判断是否触发进度更新
+      // Determine whether to trigger a progress update based on the tracking status of downloading and uploading
       const { downloading: enableDownload, uploading: enableUpload } = hookInstance.ro.trackedKeys;
       offDownloadEvent = enableDownload ? methodInstance.onDownload(progressUpdater('downloading')) : offDownloadEvent;
       offUploadEvent = enableUpload ? methodInstance.onUpload(progressUpdater('uploading')) : offUploadEvent;
@@ -112,14 +117,14 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
       return responseHandlePromise;
     };
 
-    // 调用中间件函数
+    // Call middleware function
     const commonContext = {
       method: methodInstance,
       cachedResponse,
       config: useHookConfig,
       abort: () => methodInstance.abort()
     };
-    // 是否需要更新响应数据，以及调用响应回调
+    // Whether it is necessary to update the response data and call the response callback
     const toUpdateResponse = () =>
       hookType !== EnumHookType.USE_WATCHER || !abortLast || hookInstance.m === methodInstance;
 
@@ -130,7 +135,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
       }
       controlledLoading = control;
     };
-    // 调用中间件函数
+    // Call middleware function
     const middlewareCompletePromise = isFetcher
       ? (middleware as AlovaFetcherMiddleware<AG, Args>)(
           {
@@ -159,22 +164,22 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
     let finallyResponse: any = undefinedValue;
     const baseEvent = (AlovaEventBase<AG, Args>).spawn(methodInstance, sendCallingArgs);
     try {
-      // 统一处理响应
+      // Unified processing of responses
       const middlewareReturnedData = await middlewareCompletePromise;
       const afterSuccess = (data: any) => {
-        // 更新缓存响应数据
+        // Update cached response data
         if (!isFetcher) {
           toUpdateResponse() && (dataState.v = data);
         } else if (hookInstance.c.updateState !== falseValue) {
-          // 更新缓存内的状态，一般为useFetcher中进入
+          // Update the status in the cache, usually entered in use fetcher
           const cachedState = getStateCache(id, methodKey).s;
           cachedState && (cachedState.data.v = data);
         }
 
-        // 如果需要更新响应数据，则在请求后触发对应回调函数
+        // If the response data needs to be updated, the corresponding callback function is triggered after the request.
         if (toUpdateResponse()) {
           errorState.v = undefinedValue;
-          // loading状态受控时将不再更改为false
+          // Loading status will no longer change to false when controlled
           !controlledLoading && (loadingState.v = falseValue);
           hookInstance.em.emit(KEY_SUCCESS, newInstance(AlovaSuccessEvent<AG, Args>, baseEvent, data, fromCache()));
           hookInstance.em.emit(
@@ -186,25 +191,25 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
       };
 
       finallyResponse =
-        // 中间件中未返回数据或返回undefined时，去获取真实的响应数据
-        // 否则使用返回数据并不再等待响应promise，此时也需要调用响应回调
+        // When no data is returned or undefined is returned in the middleware, get the real response data
+        // Otherwise, use the returned data and no longer wait for the response promise. At this time, you also need to call the response callback.
         middlewareReturnedData !== undefinedValue
           ? afterSuccess(middlewareReturnedData)
           : isNextCalled
-            ? // 当middlewareCompletePromise为resolve时有两种可能
-              // 1. 请求正常
-              // 2. 请求错误，但错误被中间件函数捕获了，此时也将调用成功回调，即afterSuccess(undefinedValue)
+            ? // There are two possibilities when middlewareCompletePromise is resolve
+              // 1. The request is normal
+              // 2. The request is incorrect, but the error is captured by the middleware function. At this time, the success callback will also be called, that is, afterSuccess(undefinedValue)
               await promiseThen(responseHandlePromise, afterSuccess, () => afterSuccess(undefinedValue))
-            : // 如果isNextCalled未被调用，则不返回数据
+            : // If is next called is not called, no data is returned
               undefinedValue;
 
-      // 未调用next函数时，更新loading为false
+      // When the next function is not called, update loading to false.
       !isNextCalled && !controlledLoading && (loadingState.v = falseValue);
     } catch (error: any) {
       if (toUpdateResponse()) {
-        // 控制在输出错误消息
+        // Controls the output of error messages
         errorState.v = error;
-        // loading状态受控时将不再更改为false
+        // Loading status will no longer change to false when controlled
         !controlledLoading && (loadingState.v = falseValue);
         hookInstance.em.emit(KEY_ERROR, newInstance(AlovaErrorEvent<AG, Args>, baseEvent, error));
         hookInstance.em.emit(
@@ -215,7 +220,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
 
       throw error;
     }
-    // 响应后解绑下载和上传事件
+    // Unbind download and upload events after responding
     offDownloadEvent();
     offUploadEvent();
     return finallyResponse;

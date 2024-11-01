@@ -1,7 +1,7 @@
 import { StatesExportHelper, StatesHook } from 'alova';
 import { Accessor, Setter } from 'solid-js';
 
-// 定义 Solid Hook 导出的类型
+// define SolidHooks export type
 export type SolidHookExportType<T> = StatesExportHelper<{
   name: 'Solid';
   State: SolidState<T>;
@@ -11,12 +11,10 @@ export type SolidHookExportType<T> = StatesExportHelper<{
   ComputedExport: Accessor<T>;
 }>;
 
-// 定义 Solid 状态的类型
+// solid state type
 export type SolidState<D> = [Accessor<D>, Setter<D>];
-// 定义 Solid Hook 的类型
+// solid hook type
 export type SolidHookType = StatesHook<SolidHookExportType<unknown>>;
 
-// 声明 Solid Hook
 declare const solidHook: SolidHookType;
-
 export default solidHook;

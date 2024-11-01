@@ -3,7 +3,7 @@ import Null from '@/hooks/silent/virtualResponse/Null';
 import Undefined from '@/hooks/silent/virtualResponse/Undefined';
 import { symbolVDataId } from '@/hooks/silent/virtualResponse/variables';
 
-// 虚拟响应测试
+// virtual response test
 describe('virtual response', () => {
   test('undefined virtual data', () => {
     const undef = createVirtualResponse(undefined);
@@ -18,7 +18,7 @@ describe('virtual response', () => {
   });
 
   test('create virtual response with primitive type', () => {
-    // 基本类型包装对象拥有和基本类型一样的表现
+    // Primitive type wrapper objects have the same behavior as primitive types
     const vNumber = createVirtualResponse(1);
     expect(vNumber).toBeInstanceOf(Number);
     expect(vNumber.toFixed(1)).toBe('1.0');

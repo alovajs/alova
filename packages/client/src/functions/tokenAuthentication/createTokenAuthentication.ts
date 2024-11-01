@@ -1,5 +1,4 @@
-import { $self, noop } from '@alova/shared/function';
-import { falseValue } from '@alova/shared/vars';
+import { $self, falseValue, noop } from '@alova/shared';
 import { AlovaRequestAdapter, Method, StatesHook } from 'alova';
 import { FetchRequestAdapter } from 'alova/fetch';
 import {
@@ -24,9 +23,9 @@ import {
 } from './helper';
 
 /**
- * 创建客户端的token认证拦截器
- * @param options 配置参数
- * @returns token认证拦截器函数
+ * Create a client-side token authentication interceptor
+ * @param options Configuration parameters
+ * @returns token authentication interceptor function
  */
 export const createClientTokenAuthentication = <
   SH extends StatesHook<any>,
@@ -45,13 +44,13 @@ export const createClientTokenAuthentication = <
   const onAuthRequired: BeforeRequestType<SH, AlovaRequestAdapterUnified<RA>> = onBeforeRequest => async method => {
     const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
     const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
-    // 被忽略的、登录、刷新token的请求不进行token认证
+    // Ignored, login, and token refresh requests do not perform token authentication.
     if (
       !isVisitorRole &&
       !isLoginRole &&
       !checkMethodRole(method, (refreshToken as PosibbleAuthMap)?.metaMatches || defaultRefreshTokenMeta)
     ) {
-      // 如果正在刷新token，则等待刷新完成后再发请求
+      // If the token is being refreshed, wait for the refresh to complete before sending a request.
       if (tokenRefreshing) {
         await waitForTokenRefreshed(method, waitingList);
       }
@@ -66,7 +65,7 @@ export const createClientTokenAuthentication = <
       );
     }
 
-    // 非访客和登录角色的请求会进入赋值token函数
+    // Requests from non-guest and logged-in roles will enter the assignment token function
     if (!isVisitorRole && !isLoginRole) {
       await assignToken(method);
     }
@@ -92,9 +91,9 @@ export const createClientTokenAuthentication = <
 };
 
 /**
- * 创建服务端的token认证拦截器
- * @param options 配置参数
- * @returns token认证拦截器函数
+ * Create a server-side token authentication interceptor
+ * @param options Configuration parameters
+ * @returns token authentication interceptor function
  */
 export const createServerTokenAuthentication = <
   SH extends StatesHook<any>,
@@ -115,14 +114,14 @@ export const createServerTokenAuthentication = <
   const onAuthRequired: BeforeRequestType<SH, AlovaRequestAdapterUnified<RA>> = onBeforeRequest => async method => {
     const isVisitorRole = checkMethodRole(method, visitorMeta || defaultVisitorMeta);
     const isLoginRole = checkMethodRole(method, (login as PosibbleAuthMap)?.metaMatches || defaultLoginMeta);
-    // 被忽略的、登录、刷新token的请求不进行token认证
+    // Ignored, login, and token refresh requests do not perform token authentication.
     if (
       !isVisitorRole &&
       !isLoginRole &&
       !checkMethodRole(method, (refreshTokenOnSuccess as PosibbleAuthMap)?.metaMatches || defaultRefreshTokenMeta) &&
       !checkMethodRole(method, (refreshTokenOnError as PosibbleAuthMap)?.metaMatches || defaultRefreshTokenMeta)
     ) {
-      // 如果正在刷新token，则等待刷新完成后再发请求
+      // If the token is being refreshed, wait for the refresh to complete before sending a request.
       if (tokenRefreshing) {
         await waitForTokenRefreshed(method, waitingList);
       }

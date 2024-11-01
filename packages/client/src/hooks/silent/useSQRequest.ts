@@ -1,5 +1,6 @@
 import useRequest from '@/hooks/core/useRequest';
-import { noop, statesHookHelper } from '@alova/shared/function';
+import { statesHookHelper } from '@/util/helper';
+import { noop } from '@alova/shared';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, SQRequestHookConfig, UseHookExposure } from '~/typings/clienthook';
 import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';

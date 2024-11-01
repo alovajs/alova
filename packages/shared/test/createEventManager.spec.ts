@@ -1,4 +1,4 @@
-import createEventManager, { decorateEvent } from '@/createEventManager';
+import { createEventManager, decorateEvent } from '@/createEventManager';
 import { untilCbCalled } from 'root/testUtils';
 
 const getManager = () =>

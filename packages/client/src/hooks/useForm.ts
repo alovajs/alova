@@ -1,16 +1,19 @@
 import useRequest from '@/hooks/core/useRequest';
+import { statesHookHelper } from '@/util/helper';
 import createSerializerPerformer from '@/util/serializer';
-import createEventManager from '@alova/shared/createEventManager';
 import {
   $self,
+  createEventManager,
+  falseValue,
   getContext,
   getMethodInternalKey,
+  isArray,
   isPlainObject,
   sloughConfig,
-  statesHookHelper,
+  trueValue,
+  undefinedValue,
   walkObject
-} from '@alova/shared/function';
-import { falseValue, isArray, trueValue, undefinedValue } from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/clienthook';
 
@@ -41,25 +44,25 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   let { memorize } = promiseStatesHook();
   memorize ??= $self;
   const {
-    create: $,
+    create,
     ref: useFlag$,
-    onMounted: onMounted$,
-    watch: watch$,
+    onMounted,
+    watch,
     objectify,
     exposeProvider,
     __referingObj: referingObject
   } = statesHookHelper(promiseStatesHook());
   const isStoreObject = isPlainObject(store);
   const enableStore = isStoreObject ? (store as StoreDetailConfig).enable : store;
-  // 如果config中的id也有对应的共享状态，则也会返回它
-  // 继续往下执行是为了兼容react的hook执行数不能变的问题，否则会抛出"Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
+  // If the id in config also has a corresponding shared state, it will also be returned.
+  // The reason for continuing the execution is to be compatible with the problem that the number of hook executions in react cannot be changed, otherwise it will throw "Rendered fewer hooks than expected. This may be caused by an accidental early return statement."
   const sharedState = id ? typedSharedStates[id] : undefinedValue;
-  const form = $(cloneFormData(initialForm), 'form');
+  const form = create(cloneFormData(initialForm), 'form');
   const methodHandler = handler;
   const eventManager = createEventManager<{
     [RestoreEventKey]: void;
   }>();
-  // 使用计算属性，避免每次执行此use hook都调用一遍methodHandler
+  // Use computed properties to avoid calling methodHandler every time this use hook is executed.
   const initialMethodInstance = useFlag$(sloughConfig(methodHandler, [form.v]));
   const storageContext = getContext(initialMethodInstance.current).l2Cache;
   const storagedKey = getStoragedKey(initialMethodInstance.current, id);
@@ -67,13 +70,13 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   const serializerPerformer = useFlag$(
     createSerializerPerformer(isStoreObject ? (store as StoreDetailConfig).serializers : undefinedValue)
   );
-  // 是否由当前hook发起创建的共享状态，发起创建的hook需要返回最新的状态，否则会因为在react中hook被调用，导致发起获得的hook中无法获得最新的状态
+  // Whether the shared state created by the current hook is initiated. The hook that initiates the creation needs to return the latest state. Otherwise, because the hook is called in react, the latest state cannot be obtained from the hook initiated.
   const isCreateShardState = useFlag$(false);
   const originalHookProvider = useRequest((...args: Args) => methodHandler(form.v as FormData, ...args), {
     ...config,
     __referingObj: referingObject,
 
-    // 中间件函数，也支持subscriberMiddleware
+    // Middleware function, also supports subscriber middleware
     middleware: middleware
       ? (ctx, next) =>
           middleware(
@@ -86,13 +89,13 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
           )
       : undefinedValue,
 
-    // 1. 当需要持久化时，将在数据恢复后触发
-    // 2. 当已有共享状态时，表示之前已有初始化（无论有无立即发起请求），后面的不再自动发起请求，这是为了兼容多表单立即发起请求时，重复发出请求的问题
+    // 1. When persistence is required, it will be triggered after data recovery
+    // 2. When there is a shared state, it means that it has been initialized before (regardless of whether there is an immediate request), and subsequent requests will no longer be automatically initiated. This is to be compatible with the issue of repeated requests when multiple forms initiate requests immediately.
     immediate: enableStore || sharedState ? falseValue : immediate
   });
 
   /**
-   * 重置form数据
+   * Reset form data
    */
   const reset = () => {
     reseting.current = trueValue;
@@ -102,8 +105,8 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   };
 
   /**
-   * 更新form数据
-   * @param newForm 新表单数据
+   * Update form data
+   * @param newForm new form data
    */
   const updateForm = (newForm: Partial<FormData> | ((oldForm: FormData) => FormData)) => {
     form.v = {
@@ -113,66 +116,66 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   };
 
   const hookProvider = exposeProvider({
-    // 第一个参数固定为form数据
+    // The first parameter is fixed to form data
     ...originalHookProvider,
     ...objectify([form]),
     updateForm,
     reset,
 
-    // 持久化数据恢复事件绑定
+    // Persistent data recovery event binding
     onRestore(handler: RestoreHandler) {
       eventManager.on(RestoreEventKey, handler);
     }
   });
 
-  // 有id时，才保存到sharedStates中
-  // 在react中，因为更新form后会产生新的form，因此需要每次调用重新保存
+  // Only when there is an id, it is saved to sharedStates.
+  // In react, because a new form will be generated after updating the form, it needs to be resaved every time it is called.
   if (id) {
-    // 还没有共享状态则表示当前hook是创建的hook
+    // If there is no shared status yet, it means that the current hook is a created hook.
     if (!sharedState) {
       isCreateShardState.current = trueValue;
     }
 
-    // 只保存创建hook的共享状态
+    // Only the shared state of the created hook is saved
     if (isCreateShardState.current) {
       typedSharedStates[id] = {
-        hookProvider: hookProvider as any,
+        hookProvider: hookProvider as FormExposure<AG, FormData, Args>,
         config
       };
     }
   }
   const { send, onSuccess } = hookProvider;
-  onMounted$(() => {
-    // 需要持久化时更新data
+  onMounted(() => {
+    // Update data when persistence is required
     if (enableStore && !sharedState) {
-      // 获取存储并更新data
-      // 需要在onMounted中调用，否则会导致在react中重复被调用
+      // Get storage and update data
+      // It needs to be called in onMounted, otherwise it will cause it to be called repeatedly in react.
       const storagedForm = serializerPerformer.current.deserialize(storageContext.get(storagedKey));
 
-      // 有草稿数据时，异步恢复数据，否则无法正常绑定onRetore事件
+      // When there is draft data, the data is restored asynchronously, otherwise the on restore event cannot be bound normally.
       if (storagedForm) {
         form.v = storagedForm;
-        // 触发持久化数据恢复事件
+        // Trigger persistent data recovery event
         eventManager.emit(RestoreEventKey, undefinedValue);
-        enableStore && immediate && send(...([] as unknown as [...Args, any[]]));
       }
+      enableStore && immediate && send(...([] as unknown as [...Args, any[]]));
     }
   });
 
-  // 监听变化同步存储，如果是reset触发的则不需要再序列化
-  watch$([form], () => {
+  // Monitor changes and store them synchronously. If it is triggered by reset, no further serialization is required.
+  watch([form], () => {
     if (reseting.current || !enableStore) {
       reseting.current = falseValue;
       return;
     }
     storageContext.set(storagedKey, serializerPerformer.current.serialize(form.v));
   });
-  // 如果在提交后需要清除数据，则调用reset
+  // If data needs to be cleared after submission, call reset
   onSuccess(() => {
     resetAfterSubmiting && reset();
   });
 
-  // 有已保存的sharedState，则返回它
-  // 如果是当前hook创建的共享状态，则返回最新的而非缓存的
+  // If there is a saved sharedState, return it
+  // If it is the shared state created by the current hook, the latest one is returned instead of the cached one.
   return sharedState && !isCreateShardState.current ? sharedState.hookProvider : hookProvider;
 };

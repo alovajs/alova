@@ -1,5 +1,4 @@
-import { EventManager } from '@alova/shared/createEventManager';
-import { FrameworkState } from '@alova/shared/FrameworkState';
+import { EventManager, FrameworkState } from '@alova/shared';
 
 export interface AlovaGenerics<
   R = any,
@@ -25,7 +24,7 @@ type Arg = Record<string, any>;
 export type RequestBody = Arg | string | FormData | Blob | ArrayBuffer | URLSearchParams | ReadableStream;
 
 /**
- * 请求要素，发送请求必备的信息
+ * Request elements, information necessary to send a request
  */
 export interface RequestElements {
   readonly url: string;
@@ -52,7 +51,7 @@ export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' 
  * 1. meta: custom metadata type.
  * 2. statesHook: custom the global states hook type.
  */
-interface AlovaCustomTypes {
+export interface AlovaCustomTypes {
   [customKey: string]: any;
 }
 
@@ -96,11 +95,11 @@ export interface AlovaDefaultCacheAdapter extends AlovaGlobalCacheAdapter {
 }
 
 /**
- * 请求缓存设置
- * expire: 过期时间
- *  1. 当设置为数字时：如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期；
- *  2. 当设置为Date对象时，表示
- * mode: 缓存模式，可选值为memory、restore
+ * Request cache settings
+ * expire: expiration time
+ *  1. When set to a number: if it is greater than 0, the cached data will be returned first, the expiration time unit is milliseconds, if it is less than or equal to 0, it will not be cached, and Infinity will never expire;
+ *  2. When set to a Date object, it means
+ * mode: cache mode, optional values are memory, restore
  */
 export type CacheExpire = number | Date | null;
 export type CacheMode = 'memory' | 'restore';
@@ -112,60 +111,60 @@ export type DetailCacheConfig<AG extends AlovaGenerics> = {
   expire: CacheExpire | CacheExpireGetter<AG>;
   mode?: CacheMode;
 
-  /** 持久化缓存标签，标签改变后原有持久化数据将会失效 */
+  /** Persistent cache tags, the original persistent data will be invalid after the tag is changed. */
   tag?: string | number;
 };
 export type CacheConfig<AG extends AlovaGenerics> = CacheExpire | DetailCacheConfig<AG>;
 export type CacheController<Responded> = () => Responded | undefined | Promise<Responded | undefined>;
 export interface MethodRequestConfig {
   /**
-   * url参数
+   * url parameters
    */
   params: Arg;
 
   /**
-   * 请求头
+   * Request header
    */
   headers: Arg;
 }
 export type AlovaMethodConfig<AG extends AlovaGenerics, Responded, Transformed> = {
   /**
-   * method对象名称，在updateState、invalidateCache、setCache、以及fetch函数中可以通过名称或通配符获取对应method对象
+   * The name of the method object. The corresponding method object can be obtained by name or wildcard in the updateState, invalidateCache, setCache, and fetch functions.
    */
   name?: string | number;
 
   /**
-   * 当前中断时间
+   * current outage time
    */
   timeout?: number;
 
   /**
-   * 响应数据在缓存时间内则不再次请求。get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+   * The response data will not be requested again within the cache time. Get requests are cached for 5 minutes (300000 milliseconds) by default, and other requests are not cached by default.
    */
   cacheFor?: CacheConfig<RespondedAlovaGenerics<AG, Responded, Transformed>> | CacheController<Responded>;
 
   /**
-   * 打击源方法实例，当源方法实例请求成功时，当前方法实例的缓存将被失效
-   * 作为自动失效功能，只需设置打击源即可，而不需要手动调用invalidateCache失效缓存
-   * 同时，此功能在错综复杂的失效关系中比invalidateCache方法更简洁
-   * 该字段值可设置为method实例、其他method实例的name、name正则匹配，或者它们的数组
+   * Hit the source method instance. When the source method instance request is successful, the cache of the current method instance will be invalidated.
+   * As an automatic invalidation function, you only need to set the hit source instead of manually calling invalidateCache to invalidate the cache.
+   * At the same time, this function is more concise than the invalidateCache method in complex invalidation relationships.
+   * The value of this field can be set to the method instance, the name of other method instances, name regular matching, or their array
    */
   hitSource?: string | RegExp | Method | (string | RegExp | Method)[];
 
   /**
-   * 响应数据转换，转换后的数据将转换为data状态，没有转换数据则直接用响应数据作为data状态
+   * Response data conversion. The converted data will be converted into data state. If there is no converted data, the response data will be used directly as data state.
    */
   transform?: (data: Transformed, headers: AG['ResponseHeader']) => Responded | Promise<Responded>;
 
   /**
-   * 请求级共享请求开关
-   * 开启共享请求后，同时发起相同请求时将共用同一个请求
-   * 当这边设置后将覆盖全局的设置
+   * Request level sharing request switch
+   * After the sharing request is enabled, the same request will be shared when the same request is initiated at the same time.
+   * When set here, it will overwrite the global settings.
    */
   shareRequest?: boolean;
 
   /**
-   * method元数据
+   * method metadata
    */
   meta?: AlovaCustomTypes['meta'];
 } & AG['RequestConfig'];
@@ -180,20 +179,20 @@ export type ResponseErrorHandler<AG extends AlovaGenerics> = (
 export type ResponseCompleteHandler<AG extends AlovaGenerics> = (methodInstance: Method<AG>) => any;
 export type RespondedHandlerRecord<AG extends AlovaGenerics> = {
   /**
-   * 全局的请求成功钩子函数
-   * 如果在全局onSuccess中抛出错误不会触发全局onError，而是会触发请求位置的onError
+   * Global request success hook function
+   * If an error is thrown in global onSuccess, the global onError will not be triggered, but the onError of the requested location will be triggered.
    */
   onSuccess?: RespondedHandler<AG>;
 
   /**
-   * 全局的请求错误钩子函数，请求错误是指网络请求失败，服务端返回404、500等错误代码不会进入此钩子函数
-   * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
+   * Global request error hook function. Request error refers to a network request failure. Error codes such as 404 and 500 returned by the server will not enter this hook function.
+   * When the global onError is specified to capture the error, if no error is thrown, the onSuccess of the requested location will be triggered.
    */
   onError?: ResponseErrorHandler<AG>;
 
   /**
-   * 请求完成钩子函数
-   * 请求成功、缓存匹配成功、请求失败都将触发此钩子函数
+   * Request completion hook function
+   * This hook function will be triggered if the request is successful, the cache match is successful, or the request fails.
    */
   onComplete?: ResponseCompleteHandler<AG>;
 };
@@ -243,9 +242,9 @@ export interface StatesExport<T = any> {
 export interface StatesHook<SE extends StatesExport<any>> {
   name: SE['name'];
   /**
-   * 创建状态
-   * @param initialValue 初始数据
-   * @returns 状态值
+   * Create status
+   * @param initialValue initial data
+   * @returns status value
    */
   create: (initialValue: any, key: string, referingObject: ReferingObject) => SE['State'];
 
@@ -263,48 +262,48 @@ export interface StatesHook<SE extends StatesExport<any>> {
   ) => SE['Computed'];
 
   /**
-   * 导出给开发者使用的值
-   * @param state 状态值
-   * @param referingObject refering object
-   * @returns 导出的值
+   * Values exported for use by developers
+   * @param state status value
+   * @param referingObject referring object
+   * @returns exported value
    */
   export?: (state: SE['State'], referingObject: ReferingObject) => SE['StateExport'] | SE['ComputedExport'];
 
-  /** 将状态转换为普通数据 */
+  /** Convert state to normal data */
   dehydrate: (state: SE['State'], key: string, referingObject: ReferingObject) => any;
 
   /**
-   * 更新状态值
-   * @param newVal 新的数据集合
-   * @param state 原状态值
+   * Update status value
+   * @param newVal new data collection
+   * @param state original state value
    * @param key attribute name
-   * @param @param referingObject refering object
+   * @param @param referingObject referring object
    */
   update: (newVal: any, state: SE['State'], key: string, referingObject: ReferingObject) => void;
 
   /**
-   * 控制执行请求的函数，此函数将在useRequest、useWatcher被调用时执行一次
-   * 在useFetcher中的fetch函数中执行一次
-   * 当watchingStates为空数组时，执行一次handleRequest函数
-   * 当watchingStates为非空数组时，当状态变化时调用，immediate为true时，需立即调用一次
-   * hook是use hook的实例，每次use hook调用时都将生成一个hook实例
-   * 在vue中直接执行即可，而在react中需要在useEffect中执行
-   * removeStates函数为清除当前状态的函数，应该在组件卸载时调用
+   * Controls the function that executes the request. This function will be executed once when useRequest and useWatcher are called.
+   * Execute once in the fetch function in useFetcher
+   * When watchingStates is an empty array, execute the handleRequest function once
+   * When watchingStates is a non-empty array, it is called when the state changes. When immediate is true, it needs to be called immediately.
+   * Hook is an instance of use hook. Each time use hook is called, a hook instance will be generated.
+   * It can be executed directly in vue, but in react it needs to be executed in useEffect
+   * The removeStates function is a function that clears the current state and should be called when the component is unloaded.
    */
   effectRequest: (effectParams: EffectRequestParams<any>, referingObject: ReferingObject) => void;
 
   /**
-   * 包装send、abort等use hooks操作函数
-   * 这主要用于优化在react中，每次渲染都会生成新函数的问题，优化性能
-   * @param fn use hook操作函数
-   * @returns 包装后的操作函数
+   * Packaging use hooks operation functions such as send and abort
+   * This is mainly used to optimize the problem that new functions will be generated every time rendering in react to optimize performance.
+   * @param fn use hook operation function
+   * @returns Wrapped operation function
    */
   memorize?: <Callback extends (...args: any[]) => any>(fn: Callback) => Callback;
 
   /**
-   * 创建引用对象
-   * @param initialValue 初始值
-   * @returns 包含初始值的引用对象
+   * Create reference object
+   * @param initialValue initial value
+   * @returns a reference object containing the initial value
    */
   ref?: <D>(initialValue: D) => { current: D };
 
@@ -339,21 +338,20 @@ export type CacheLoggerHandler<AG extends AlovaGenerics> = (
   tag: DetailCacheConfig<AG>['tag']
 ) => void | Promise<void>;
 /**
- * 泛型类型解释：
- * State: create函数创建的状态组的类型
- * Computed: computed函数创建的计算属性值
- * Watched: 监听器类型
- * Export: export函数返回的状态组的类型
- * RequestConfig: requestAdapter的请求配置类型，自动推断
- * Response: 类型requestAdapter的响应配置类型，自动推断
- * ResponseHeader: requestAdapter的响应头类型，自动推断
+ * Generic type explanation:
+ * State: The type of state group created by the create function
+ * Computed: The computed property value created by the computed function
+ * Watched: listener type
+ * Export: The type of status group returned by the export function
+ * RequestConfig: the request configuration type of requestAdapter, automatically inferred
+ * Response: response configuration type of type requestAdapter, automatically inferred
+ * ResponseHeader: response header type of requestAdapter, automatically inferred
  */
 export interface AlovaOptions<AG extends AlovaGenerics> {
   /**
    * custom alova id
    *
-   * **Recommend to custom it in multiple server scenarios**
-   * @default increase from 0 in creating order
+   * **Recommend to custom it in multiple server scenarios**from 0 in creating order
    */
   id?: number | string;
 
@@ -363,7 +361,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
   baseURL?: string;
 
   /**
-   * 状态hook函数，用于定义和更新指定MVVM库的状态
+   * State hook function, used to define and update the state of the specified MVVM library
    */
   statesHook?: StatesHook<AG['StatesExport']>;
 
@@ -379,10 +377,10 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
   timeout?: number;
 
   /**
-   * 全局的请求本地缓存设置
-   * expire: 过期时间，如果大于0则首先返回缓存数据，过期时间单位为毫秒，小于等于0不缓存，Infinity为永不过期
-   * mode: 缓存模式，可选值为memory、restore
-   * get请求默认缓存5分钟（300000毫秒），其他请求默认不缓存
+   * Global request local cache settings
+   * expire: Expiration time. If it is greater than 0, the cached data will be returned first. The expiration time unit is milliseconds. If it is less than or equal to 0, it will not be cached. Infinity will never expire.
+   * mode: cache mode, optional values are memory, restore
+   * Get requests are cached for 5 minutes (300000 milliseconds) by default, and other requests are not cached by default.
    * @default { GET: 300000 }
    */
   cacheFor?: GlobalCacheConfig<AG>;
@@ -398,8 +396,8 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
   /**
    * restore mode cache adapter. it will be used when persist data.
    * default behavior:
-   * - browser/deno: localStorage.
-   * - nodejs/bun: no adapter.(you can use @alova/cache-file).
+   * -browser/deno: localStorage.
+   * -nodejs/bun: no adapter.(you can use @alova/cache-file).
    * see [https://alova.js.org/tutorial/custom/custom-storage-adapter]
    */
   l2Cache?: AG['L2Cache'];
@@ -410,25 +408,25 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
   beforeRequest?: (method: Method<AG>) => void | Promise<void>;
 
   /**
-   * 全局的响应钩子，可传一个也可以设置为带onSuccess,onError,onComplete的对象，表示请求成功和请求错误的钩子
-   * 如果在全局onSuccess中抛出错误不会触发全局onError，而是会触发请求位置的onError
-   * 当指定了全局onError捕获错误时，如果没有抛出错误则会触发请求位置的onSuccess
+   * A global response hook, which can be passed or set as an object with onSuccess, onError, and onComplete, to represent the request success and request error hooks.
+   * If an error is thrown in global onSuccess, the global onError will not be triggered, but the onError of the requested location will be triggered.
+   * When the global onError is specified to capture the error, if no error is thrown, the onSuccess of the requested location will be triggered.
    * @version 2.1.0
    */
   responded?: RespondedHandler<AG> | RespondedHandlerRecord<AG>;
 
   /**
-   * 全局的共享请求开关
-   * 开启共享请求后，同时发起相同请求时将共用同一个请求
+   * Global sharing request switch
+   * After the sharing request is enabled, the same request will be shared when the same request is initiated at the same time.
    * @default true
    */
   shareRequest?: boolean;
 
   /**
-   * 缓存日志打印
-   * 当命中响应缓存时将默认在控制台打印匹配的缓存信息，以提醒开发者
-   * 设置为false、null值时将不打印日志
-   * 设置为自定义函数时将自定义接管缓存匹配的任务
+   * Cache log printing
+   * When the response cache is hit, matching cache information will be printed on the console by default to remind developers
+   * When set to false or null, the log will not be printed.
+   * When set as a custom function, it will custom take over the task of cache matching.
    * @version 2.8.0
    * @default true
    */
@@ -442,7 +440,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
   snapshots?: number;
 }
 
-/** 进度信息 */
+/** progress information */
 export type Progress = {
   total: number;
   loaded: number;
@@ -455,7 +453,7 @@ export interface AbortFunction {
 }
 
 /**
- * 请求方法类型
+ * Request method type
  */
 export declare class Method<AG extends AlovaGenerics = any> extends Promise<AG['Responded']> {
   constructor(
@@ -472,105 +470,105 @@ export declare class Method<AG extends AlovaGenerics = any> extends Promise<AG['
   baseURL: string;
 
   /**
-   * 请求地址
+   * Request url
    */
   url: string;
 
   /**
-   * 请求类型
+   * Request type
    */
   type: MethodType;
 
   /**
-   * method配置
+   * method configuration
    */
   config: MethodRequestConfig & AlovaMethodConfig<AG, AG['Responded'], AG['Transformed']>;
 
   /**
-   * 请求体
+   * Request body
    */
   data?: RequestBody;
 
   /**
-   * 缓存打击源
+   * Cache hit source
    */
   hitSource?: (string | RegExp)[];
 
   /**
-   * alova实例
+   * alova example
    */
   context: Alova<AG>;
 
   /**
-   * 存储key
+   * storage key
    */
   key: string;
 
   /**
-   * 下载事件
+   * download event
    * @version 2.17.0
    */
   dhs: ProgressHandler[];
 
   /**
-   * 上传事件
+   * Upload event
    * @version 2.17.0
    */
   uhs: ProgressHandler[];
 
   /**
-   * 本次响应数据是否来自缓存
+   * Whether this response data comes from cache
    * @version 2.17.0
    */
   fromCache: boolean | undefined;
 
   /**
-   * 用于在全局的request和response钩子函数中传递额外信息所用
-   * js项目中可使用任意字段
+   * Used to pass additional information in global request and response hook functions
+   * Any field can be used in js projects
    */
   meta?: AlovaCustomTypes['meta'];
 
   /**
-   * 请求Promise实例
+   * Request a Promise instance
    */
   promise?: Promise<AG['Responded']>;
 
   /**
-   * 使用此method实例直接发送请求
-   * @param forceRequest 强制请求
-   * @returns 请求Promise实例
+   * Use this method instance to send the request directly
+   * @param forceRequest mandatory request
+   * @returns Request a Promise instance
    */
   send(forceRequest?: boolean): Promise<AG['Responded']>;
 
   /**
-   * 设置名称
-   * @param name 名称
+   * Set name
+   * @param name name
    */
   setName(name: string | number): void;
 
   /**
-   * 生成当前method的key
+   * Generate the key of the current method
    */
   generateKey(): string;
 
   /**
-   * 中断此method实例直接发送的请求
+   * Interrupt requests sent directly by this method instance
    */
   abort: AbortFunction;
 
   /**
-   * 绑定下载进度回调函数
-   * @param progressHandler 下载进度回调函数
+   * Bind download progress callback function
+   * @param progressHandler Download progress callback function
    * @version 2.17.0
-   * @return 解绑函数
+   * @return unbind function
    */
   onDownload(progressHandler: ProgressHandler): () => void;
 
   /**
-   * 绑定上传进度回调函数
-   * @param progressHandler 上传进度回调函数
+   * Bind upload progress callback function
+   * @param progressHandler Upload progress callback function
    * @version 2.17.0
-   * @return 解绑函数
+   * @return unbind function
    */
   onUpload(progressHandler: ProgressHandler): () => void;
 }
@@ -663,9 +661,9 @@ export interface AlovaGlobalConfig {
   /**
    * switch of auto hit cache.
    * here is three options:
-   * - global: invalidate cache cross alova instances.
-   * - self: only invalidate cache from the same alova instance.
-   * - close: don't auto invalidate cache any more.
+   * -global: invalidate cache cross alova instances.
+   * -self: only invalidate cache from the same alova instance.
+   * -close: don't auto invalidate cache any more.
    * @default 'global'
    */
   autoHitCache?: 'global' | 'self' | 'close';
@@ -708,7 +706,7 @@ export declare function createAlova<
  * // invalidate all cache.
  * invalidateCache();
  * ```
- * @param matcher method实例数组或method匹配器参数
+ * @param matcher Array of method instances or method matcher parameters
  */
 export declare function invalidateCache(matcher?: Method | Method[]): Promise<void>;
 
@@ -719,9 +717,9 @@ export interface UpdateOptions {
 export interface CacheSetOptions {
   /**
    * cache policy.
-   * - l1: only set l1 cache.
-   * - l2: only set l2 cache.
-   * - all: set l1 cache and set l2 cache(method cache mode need to be 'restore').
+   * -l1: only set l1 cache.
+   * -l2: only set l2 cache.
+   * -all: set l1 cache and set l2 cache(method cache mode need to be 'restore').
    * @default 'all'
    */
   policy?: 'l1' | 'l2' | 'all';
@@ -758,9 +756,9 @@ export declare function setCache<AG extends AlovaGenerics>(
 export interface CacheQueryOptions {
   /**
    * cache policy.
-   * - l1: only query l1 cache.
-   * - l2: only query l2 cache.
-   * - all: query l1 cache first and query l2 cache if l1 cache not found(method cache mode need to be 'restore').
+   * -l1: only query l1 cache.
+   * -l2: only query l2 cache.
+   * -all: query l1 cache first and query l2 cache if l1 cache not found(method cache mode need to be 'restore').
    * @default 'all'
    */
   policy?: 'l1' | 'l2' | 'all';
@@ -793,8 +791,7 @@ export declare function hitCacheBySource<AG extends AlovaGenerics>(sourceMethod:
 export declare const globalConfigMap: Required<AlovaGlobalConfig>;
 
 /**
- * Set global configuration
- * @param config configuration
+ * Set global configuration configuration
  */
 export declare function globalConfig(config: AlovaGlobalConfig): void;
 

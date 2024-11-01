@@ -2,8 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { updateState, useRequest, useWatcher } from '@/index';
 import ReactHook from '@/statesHook/react';
-import { key } from '@alova/shared/function';
-
+import { key } from '@alova/shared';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactElement, useState } from 'react';
 import { Result, delay } from 'root/testUtils';
@@ -39,7 +38,7 @@ describe('update cached response data by user in react', () => {
     render((<Page />) as ReactElement<any, any>);
     await screen.findByText(/unit-test/);
 
-    // 延迟检查页面是否有更新
+    // Delay checking if page has been updated
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/unit-test-updated');
     });
@@ -77,7 +76,7 @@ describe('update cached response data by user in react', () => {
     render((<Page />) as ReactElement<any, any>);
     await screen.findByText(/unit-test/);
 
-    // useRequest返回的状态未改变，此时看看还能不能通过updateState改变来渲染页面
+    // The status returned by Use request has not changed. At this time, see if you can still render the page by updating the state.
     fireEvent.click(screen.getByRole('count'));
     await screen.findByText('1');
 
@@ -119,21 +118,21 @@ describe('update cached response data by user in react', () => {
     render((<Page />) as ReactElement<any, any>);
     await screen.findByText(/unit-test/);
 
-    // 非状态数据不能更新
+    // Non-state data cannot be updated
     await expect(() =>
       updateState(Get, {
         extraData2: () => 1
       })
     ).rejects.toThrow();
 
-    // 未找到状态抛出错误
+    // Status not found throws error
     await expect(() =>
       updateState(Get, {
         extraData3: () => 1
       })
     ).rejects.toThrow();
 
-    // 更新成功
+    // Update successful
     delay().then(() => {
       updateState(Get, {
         extraData: () => 1
@@ -184,7 +183,7 @@ describe('update cached response data by user in react', () => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
     });
 
-    // 执行了两次不同参数的请求后，验证两次请求是否缓存了相同的states
+    // After executing two requests with different parameters, verify whether the same states are cached in the two requests.
     delay().then(() => {
       updateState(getter('a'), {
         data: d => ({
@@ -207,7 +206,7 @@ describe('update cached response data by user in react', () => {
     await waitFor(() => {
       expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');
 
-      // 两处缓存的状态应该都是最新值
+      // The status of both caches should be the latest value
       expect(getStateCache(alova.id, key(getter('a'))).s.data.v.path).toBe('/path-str-b');
       expect(getStateCache(alova.id, key(getter('b'))).s.data.v.path).toBe('/path-str-b');
     });
@@ -256,10 +255,10 @@ describe('update cached response data by user in react', () => {
       expect(getStateCache(alova.id, key(getter('b')))).not.toBeUndefined();
     });
 
-    // 组件卸载后，对应缓存状态会被删除
+    // After the component is uninstalled, the corresponding cache status will be deleted.
     unmount();
     await waitFor(() => {
-      // 空对象表示未匹配到
+      // An empty object indicates that no match was found
       expect(getStateCache(alova.id, key(getter('a')))).toStrictEqual({});
       expect(getStateCache(alova.id, key(getter('b')))).toStrictEqual({});
     });

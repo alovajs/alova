@@ -1,6 +1,4 @@
 import { useSerialRequest } from '@/index';
-import { undefinedValue } from '@alova/shared/vars';
-
 import ReactHook from '@/statesHook/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Method, createAlova } from 'alova';
@@ -17,7 +15,7 @@ describe('react => useSerialRequest', () => {
   test("should throws a error when don't pass a method handlers array", async () => {
     const methodInstance = alovaInst.Post('/detail');
     const Page = () => {
-      const [error, setError] = useState(undefinedValue as Error | undefined);
+      const [error, setError] = useState(undefined as Error | undefined);
       try {
         useSerialRequest(methodInstance as any);
       } catch (err: any) {
@@ -242,7 +240,7 @@ describe('react => useSerialRequest', () => {
       expect(mockErrorFn).toHaveBeenCalledTimes(1);
       expect(mockCompleteFn).toHaveBeenCalledTimes(1);
       expect(mockSuccessFn).not.toBeCalled();
-      expect(methodHandlerMockFn).toHaveBeenCalledTimes(1); // 错误了就不会再继续往下执行了
+      expect(methodHandlerMockFn).toHaveBeenCalledTimes(1); // If there is an error, the execution will not continue.
       expect(screen.getByRole('error')).toHaveTextContent('server error');
       expect(screen.getByRole('data')).toHaveTextContent('');
     });

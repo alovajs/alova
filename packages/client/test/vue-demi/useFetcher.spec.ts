@@ -26,7 +26,7 @@ describe('use useFetcher hook to fetch data', () => {
     const Get1 = createGet({ a: '1', b: '2', countKey: 'a' });
     const { data, onSuccess } = useRequest(Get1);
 
-    // fetcher默认不强制请求，会命中缓存
+    // Fetcher does not force requests by default and will hit the cache.
     const { loading, downloading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>();
     expect(loading.value).toBeFalsy();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
@@ -34,12 +34,12 @@ describe('use useFetcher hook to fetch data', () => {
 
     await untilCbCalled(onSuccess);
     expect(data.value.params.count).toBe(0);
-    // 缓存有值
+    // Cache has value
     let cacheData = await queryCache(Get1);
     expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'a', count: 0 });
 
     fetch(Get1);
-    // 缓存会被命中，不会发出请求
+    // The cache will be hit and the request will not be made
     expect(loading.value).toBeFalsy();
     expect(downloading.value).toEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
@@ -72,19 +72,19 @@ describe('use useFetcher hook to fetch data', () => {
 
     const Get1 = createGet({ a: '1', b: '2', countKey: 'b' });
     const { data, onSuccess } = useRequest(Get1);
-    const { loading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>({ force: true }); // 忽略缓存强制请求
+    const { loading, error, fetch, onSuccess: onFetchSuccess } = useFetcher<FetcherType<typeof alova>>({ force: true }); // Ignore cache enforcement requests
     expect(loading.value).toBeFalsy();
     expect(error.value).toBeUndefined();
 
     await untilCbCalled(onSuccess);
     expect(data.value.params.count).toBe(0);
-    // 缓存有值
+    // Cache has value
     let cacheData = await queryCache(Get1);
     expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'b', count: 0 });
 
     fetch(Get1);
     await untilCbCalled(setTimeout, 10);
-    // 因强制请求，请求会被发出并且缓存重新被更新
+    // Due to the forced request, the request will be issued and the cache will be updated again.
     expect(loading.value).toBeTruthy();
     expect(error.value).toBeUndefined();
 
@@ -129,13 +129,13 @@ describe('use useFetcher hook to fetch data', () => {
         return true;
       }
     });
-    // 缓存有值
+    // Cache has value
     let cacheData = await queryCache(Get1);
     expect(cacheData?.params).toEqual({ a: '1', b: '2', countKey: 'c', count: 0 });
 
     fetch(Get1, true, false);
     await untilCbCalled(setTimeout, 10);
-    // 因强制请求，请求会被发出并且缓存重新被更新
+    // Due to the forced request, the request will be issued and the cache will be updated again.
     expect(loading.value).toBeTruthy();
 
     await untilCbCalled(onFetchSuccess);

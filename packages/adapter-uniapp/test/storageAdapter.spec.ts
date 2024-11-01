@@ -1,6 +1,6 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
 import AdapterUniapp from '@/index';
-import { buildNamespacedCacheKey } from '@alova/shared/function';
+import { buildNamespacedCacheKey } from '@alova/shared';
 import { createAlova, invalidateCache } from 'alova';
 import { mockStorageContainer } from './utils';
 

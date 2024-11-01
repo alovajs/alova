@@ -6,12 +6,12 @@ export interface Actions {
 }
 
 /**
- * 操作函数委托中间件
- * 使用此中间件后可通过accessAction调用委托的函数
- * 可以委托多个相同id
- * 以此来消除组件的层级限制
- * @param id 委托者id
- * @returns alova中间件函数
+ * Operation function delegation middleware
+ * After using this middleware, you can call the delegated function through accessAction.
+ * Can delegate multiple identical IDs
+ * In order to eliminate the hierarchical restrictions of components
+ * @param id Client ID
+ * @returns alova middleware function
  */
 export declare function actionDelegationMiddleware<
   AG extends AlovaGenerics = AlovaGenerics,
@@ -26,9 +26,9 @@ export declare function actionDelegationMiddleware<
 ) => Promise<any>;
 
 /**
- * 访问操作函数，如果匹配多个则会以此调用onMatch
- * @param id 委托者id，或正则表达式
- * @param onMatch 匹配的订阅者
+ * Access the operation function, if there are multiple matches, onMatch will be called with this
+ * @param id Delegator id, or regular expression
+ * @param onMatch matching subscribers
  */
 export declare function accessAction(
   id: string | number | symbol | RegExp,

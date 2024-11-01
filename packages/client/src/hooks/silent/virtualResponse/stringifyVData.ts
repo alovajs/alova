@@ -1,12 +1,12 @@
-import { trueValue, undefinedValue } from '@alova/shared/vars';
+import { trueValue, undefinedValue } from '@alova/shared';
 import { vDataCollectUnified } from './helper';
 import { symbolVDataId } from './variables';
 
 /**
- * 虚拟数据字符串化，如果参数不是虚拟数据则返回原数据
- * @param target 虚拟数据
- * @param returnOriginalIfNotVData 如果不是虚拟数据则返回原值
- * @returns 虚拟数据id或原数据
+ * Dummy data is stringified. If the parameter is not dummy data, the original data is returned.
+ * @param target dummy data
+ * @param returnOriginalIfNotVData If it is not virtual data, return the original value.
+ * @returns Virtual data id or original data
  */
 const stringifyVData = (target: any, returnOriginalIfNotVData = trueValue) => {
   vDataCollectUnified(target);
@@ -17,9 +17,9 @@ const stringifyVData = (target: any, returnOriginalIfNotVData = trueValue) => {
 export default stringifyVData;
 
 /**
- * 创建虚拟数据id收集的getter函数
- * @param valueReturnFn 返回值函数
- * @returns getter函数
+ * Create a getter function for virtual data id collection
+ * @param valueReturnFn return value function
+ * @returns getter function
  */
 export function stringifyWithThis(this: any) {
   return stringifyVData(this);

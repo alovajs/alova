@@ -122,7 +122,7 @@ describe('method instance', () => {
     };
     (Get2 as any).showMsg = false;
 
-    // 从beforeRequest中抛出json字符串
+    // Throw json string from before request
     await Get2;
     expect(mockFn.mock.calls[0][0]).toStrictEqual({
       meta: {
@@ -149,7 +149,7 @@ describe('method instance', () => {
         b: 2
       }
     });
-    // 从beforeRequest中抛出json字符串
+    // Throw json string from before request
     await Get;
     expect(mockFn.mock.calls[0][0].meta).toStrictEqual({
       a: 1,
@@ -157,7 +157,7 @@ describe('method instance', () => {
     });
   });
 
-  // 2.16.0+ 已将method实例转换为PromiseLike
+  // 2.16.0+ has converted method instances to PromiseLike
   test('should send request when call `method.then` or await method instance', async () => {
     const rawData = await alova.Get('/unit-test', {
       params: { e: 'e', f: 'gty' },

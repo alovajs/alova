@@ -8,30 +8,28 @@ import {
 } from '@/event';
 import updateState from '@/updateState';
 import {
+  PromiseCls,
+  RegExpCls,
   delayWithBackoff,
+  falseValue,
+  forEach,
   instanceOf,
   isObject,
   isString,
-  newInstance,
-  noop,
-  sloughConfig,
-  walkObject
-} from '@alova/shared/function';
-import {
-  PromiseCls,
-  RegExpCls,
-  falseValue,
-  forEach,
   len,
   mapItem,
+  newInstance,
+  noop,
   objectKeys,
   promiseThen,
   pushItem,
   regexpTest,
   setTimeoutFn,
   shift,
-  trueValue
-} from '@alova/shared/vars';
+  sloughConfig,
+  trueValue,
+  walkObject
+} from '@alova/shared';
 import { AlovaGenerics, Method, setCache } from 'alova';
 import { RetryErrorDetailed, SilentMethod, SilentQueueMap, UpdateStateCollection } from '~/typings/clienthook';
 import {
@@ -54,12 +52,12 @@ import {
 import stringifyVData from './virtualResponse/stringifyVData';
 import { regVDataId } from './virtualResponse/variables';
 
-/** 静默方法队列集合 */
+/** Silent method queue collection */
 export let silentQueueMap = {} as SilentQueueMap;
 
 /**
- * 合并queueMap到silentMethod队列集合
- * @param queueMap silentMethod队列集合
+ * Merge queueMap into silentMethod queue collection
+ * @param queueMap silentMethod queue collection
  */
 export const merge2SilentQueueMap = (queueMap: SilentQueueMap) => {
   forEach(objectKeys(queueMap), targetQueueName => {
@@ -69,25 +67,25 @@ export const merge2SilentQueueMap = (queueMap: SilentQueueMap) => {
 };
 
 /**
- * 清除silentQueue内所有项（测试使用）
+ * Clear all items in silentQueue (used for testing)
  */
 export const clearSilentQueueMap = () => {
   silentQueueMap = {};
 };
 
 /**
- * 深层遍历目标数据，并将虚拟数据替换为实际数据
- * @param target 目标数据
- * @param vDataResponse 虚拟数据和实际数据的集合
- * @returns 是否有替换数据
+ * Deeply traverse the target data and replace dummy data with real data
+ * @param target target data
+ * @param vDataResponse Collection of dummy data and real data
+ * @returns Is there any replacement data?
  */
 export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>) => {
-  // 搜索单一值并将虚拟数据对象或虚拟数据id替换为实际值
+  // Search for a single value and replace a dummy data object or dummy data id with an actual value
   const replaceVData = (value: any) => {
     const vData = stringifyVData(value);
-    // 如果直接是虚拟数据对象并且在vDataResponse中，则使用vDataResponse中的值替换Map
-    // 如果是字符串，则里面可能包含虚拟数据id并且在vDataResponse中，也需将它替换为实际值Map
-    // 不在本次vDataResponse中的虚拟数据将不变，它可能是下一次请求的虚拟数据Map
+    // If directly a dummy data object and in a vDataResponse, replace the Map with the value in the vDataResponse
+    // If it is a string, it may contain virtual data id and in vDataResponse, it also needs to be replaced with the actual value Map
+    // The virtual data not in this vDataResponse will remain unchanged. It may be the virtual data Map requested next time.
     if (vData in vDataResponse) {
       return vDataResponse[vData];
     }
@@ -107,25 +105,25 @@ export const deepReplaceVData = (target: any, vDataResponse: Record<string, any>
 };
 
 /**
- * 更新队列内的method实例，将虚拟数据替换为实际数据
- * @param vDataResponse 虚拟id和对应真实数据的集合
- * @param targetQueue 目标队列
+ * Update the method instance in the queue and replace the dummy data with actual data
+ * @param vDataResponse A collection of virtual IDs and corresponding real data
+ * @param targetQueue target queue
  */
 const updateQueueMethodEntities = (vDataResponse: Record<string, any>, targetQueue: SilentQueueMap[string]) =>
   PromiseCls.all(
     mapItem(targetQueue, async silentMethodItem => {
-      // 深层遍历entity对象，如果发现有虚拟数据或虚拟数据id，则替换为实际数据
+      // Traverse the entity object deeply. If virtual data or virtual data ID is found, replace it with actual data.
       deepReplaceVData(silentMethodItem.entity, vDataResponse);
-      // 如果method实例有更新，则重新持久化此silentMethod实例
+      // If the method instance is updated, re-persist this silent method instance
       silentMethodItem.cache && (await persistSilentMethod(silentMethodItem));
     })
   );
 
 /**
- * 使用响应数据替换虚拟数据
- * @param response 真实响应数据
- * @param virtualResponse 虚拟响应数据
- * @returns 虚拟数据id所构成的对应真实数据集合
+ * Replace dummy data with response data
+ * @param response real response data
+ * @param virtualResponse dummy response data
+ * @returns The corresponding real data set composed of virtual data id
  */
 const replaceVirtualResponseWithResponse = (virtualResponse: any, response: any) => {
   let vDataResponse = {} as Record<string, any>;
@@ -144,13 +142,13 @@ const replaceVirtualResponseWithResponse = (virtualResponse: any, response: any)
 };
 
 /**
- * 启动SilentMethod队列
- * 1. 静默提交将会放入队列中，并按顺序发送请求，只有等到前一个请求响应后才继续发送后面的请求
- * 2. 重试次数只有在未响应时才触发，在服务端响应错误或断网情况下，不会重试
- * 3. 在达到重试次数仍未成功时，当设置了nextRound（下一轮）时延迟nextRound指定的时间后再次请求，否则将在刷新后再次尝试
- * 4. 如果有resolveHandler和rejectHandler，将在请求完成后（无论成功还是失败）调用，通知对应的请求继续响应
+ * Start the SilentMethod queue
+ * 1. Silent submission will be put into the queue and requests will be sent in order. Only after the previous request responds will it continue to send subsequent requests.
+ * 2. The number of retries is only triggered when there is no response. If the server responds incorrectly or is disconnected, it will not retry.
+ * 3. When the number of retries is reached and still fails, when nextRound (next round) is set, delay the time specified by nextRound and then request again, otherwise it will try again after refreshing.
+ * 4. If there is resolveHandler and rejectHandler, they will be called after the request is completed (whether successful or failed) to notify the corresponding request to continue responding.
  *
- * @param queue SilentMethod队列
+ * @param queue SilentMethodqueue
  */
 const setSilentMethodActive = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>, active: boolean) => {
   if (active) {
@@ -163,9 +161,9 @@ const setSilentMethodActive = <AG extends AlovaGenerics>(silentMethodInstance: S
 const defaultBackoffDelay = 1000;
 export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string) => {
   /**
-   * 根据请求等待参数控制回调函数的调用，如果未设置或小于等于0则立即触发
-   * @param queueName 队列名称
-   * @param callback 回调函数
+   * The callback function is controlled by waiting parameters according to the request. If it is not set or is less than or equal to 0, it will be triggered immediately.
+   * @param queueName queue name
+   * @param callback callback function
    */
   const emitWithRequestDelay = (queueName: string) => {
     const nextSilentMethod = queue[0];
@@ -181,12 +179,12 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
   };
 
   /**
-   * 运行单个silentMethod实例
-   * @param silentMethodInstance silentMethod实例
-   * @param retryTimes 重试的次数
+   * Run a single silentMethod instance
+   * @param silentMethodInstance silentMethod instance
+   * @param retryTimes Number of retries
    */
   const silentMethodRequest = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>, retryTimes = 0) => {
-    // 将当前silentMethod实例设置活跃状态
+    // Set the current silent method instance to active status
     setSilentMethodActive(silentMethodInstance, trueValue);
     const {
       cache,
@@ -204,7 +202,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
       force
     } = silentMethodInstance;
 
-    // 触发请求前事件
+    // Trigger pre-request event
     globalSQEventManager.emit(
       BeforeEventKey,
       newInstance(GlobalSQEvent<AG>, behavior, entity, silentMethodInstance, queueName, retryTimes)
@@ -212,40 +210,40 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
     promiseThen(
       entity.send(force),
       async data => {
-        // 请求成功，移除成功的silentMethod实力，并继续下一个请求
+        // The request is successful, remove the successful silent method, and continue with the next request
         shift(queue);
-        // 请求成功，把成功的silentMethod实例在storage中移除，并继续下一个请求
+        // If the request is successful, remove the successful silent method instance from storage and continue with the next request.
         cache && (await spliceStorageSilentMethod(queueName, id));
-        // 如果有resolveHandler则调用它通知外部
+        // If there is a resolve handler, call it to notify the outside
         resolveHandler(data);
 
-        // 有virtualResponse时才遍历替换虚拟数据，且触发全局事件
-        // 一般为silent behavior，而queue behavior不需要
+        // Only when there is a virtualResponse, virtual data is traversed and replaced, and global events are triggered.
+        // Generally, it is silent behavior, but queue behavior is not required.
         if (behavior === BEHAVIOR_SILENT) {
-          // 替换队列中后面方法实例中的虚拟数据为真实数据
-          // 开锁后才能正常访问virtualResponse的层级结构
+          // Replace dummy data in subsequent method instances in the queue with real data
+          // Only after unlocking can you access the hierarchical structure of virtualResponse normally.
           const vDataResponse = replaceVirtualResponseWithResponse(virtualResponse, data);
-          const { targetRefMethod, updateStates } = silentMethodInstance; // 实时获取才准确
-          // 如果此silentMethod带有targetRefMethod，则再次调用updateState更新数据
-          // 此为延迟数据更新的实现
+          const { targetRefMethod, updateStates } = silentMethodInstance; // It is accurate to obtain it in real time
+          // If this silentMethod has targetRefMethod, call updateState again to update the data
+          // This is an implementation of delayed data updates
           if (instanceOf(targetRefMethod, Method) && updateStates && len(updateStates) > 0) {
             const updateStateCollection: UpdateStateCollection<any> = {};
             forEach(updateStates, stateName => {
-              // 请求成功后，将带有虚拟数据的数据替换为实际数据
+              // After the request is successful, replace the data with dummy data with real data
               updateStateCollection[stateName] = dataRaw => deepReplaceVData(dataRaw, vDataResponse);
             });
             const updated = updateState(targetRefMethod, updateStateCollection);
 
-            // 修改状态不成功，则去修改缓存数据
+            // If the status modification is unsuccessful, modify the cached data.
             if (!updated) {
               await setCache(targetRefMethod, (dataRaw: any) => deepReplaceVData(dataRaw, vDataResponse));
             }
           }
 
-          // 对当前队列的后续silentMethod实例进行虚拟数据替换
+          // Perform dummy data replacement on subsequent silent method instances of the current queue
           await updateQueueMethodEntities(vDataResponse, queue);
 
-          // 触发全局的成功事件
+          // Trigger global success event
           globalSQEventManager.emit(
             SuccessEventKey,
             newInstance(
@@ -261,20 +259,20 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           );
         }
 
-        // 设为非激活状态
+        // Set to inactive state
         setSilentMethodActive(silentMethodInstance, falseValue);
 
-        // 继续下一个silentMethod的处理
+        // Continue to the next silent method processing
         emitWithRequestDelay(queueName);
       },
       reason => {
         if (behavior !== BEHAVIOR_SILENT) {
-          // 当behavior不为silent时，请求失败就触发rejectHandler
-          // 且在队列中移除，并不再重试
+          // When the behavior is not silent and the request fails, rejectHandler is triggered.
+          // and removed from the queue and will not be retried.
           shift(queue);
           rejectHandler(reason);
         } else {
-          // 每次请求错误都将触发错误回调
+          // Each request error will trigger an error callback
           const runGlobalErrorEvent = (retryDelay?: number) =>
             globalSQEventManager.emit(
               ErrorEventKey,
@@ -290,8 +288,8 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
               )
             );
 
-          // 在silent行为模式下，判断是否需要重试
-          // 重试只有在响应错误符合retryError正则匹配时有效
+          // In silent behavior mode, determine whether retry is needed
+          // Retry is only effective when the response error matches the retryError regular match
           const { name: errorName = '', message: errorMsg = '' } = reason || {};
           let regRetryErrorName: RegExp | undefined;
           let regRetryErrorMsg: RegExp | undefined;
@@ -305,9 +303,9 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
           const matchRetryError =
             (regRetryErrorName && regexpTest(regRetryErrorName, errorName)) ||
             (regRetryErrorMsg && regexpTest(regRetryErrorMsg, errorMsg));
-          // 如果还有重试次数则进行重试
+          // If there are still retry times, try again
           if (retryTimes < maxRetryTimes && matchRetryError) {
-            // 需要使用下次的retryTimes来计算延迟时间，因此这边需+1
+            // The next retry times need to be used to calculate the delay time, so +1 is needed here.
             const retryDelay = delayWithBackoff(backoff, retryTimes + 1);
             runGlobalErrorEvent(retryDelay);
             setTimeoutFn(
@@ -328,13 +326,13 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
                   )
                 );
               },
-              // 还有重试次数时使用timeout作为下次请求时间
+              // When there are still retry times, use timeout as the next request time.
               retryDelay
             );
           } else {
             setSilentFactoryStatus(2);
             runGlobalErrorEvent();
-            // 达到失败次数，或不匹配重试的错误信息时，触发失败回调
+            // When the number of failures is reached, or the error message does not match the retry, the failure callback is triggered.
             methodEmitter.emit(
               'fallback',
               newInstance(ScopedSQErrorEvent<AG, any[]>, behavior, entity, silentMethodInstance, handlerArgs, reason)
@@ -345,7 +343,7 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
             );
           }
         }
-        // 设为非激活状态
+        // Set to inactive state
         setSilentMethodActive(silentMethodInstance, falseValue);
       }
     );
@@ -354,11 +352,11 @@ export const bootSilentQueue = (queue: SilentQueueMap[string], queueName: string
 };
 
 /**
- * 将新的silentMethod实例放入队列中
- * @param silentMethodInstance silentMethod实例
- * @param cache silentMethod是否有缓存
- * @param targetQueueName 目标队列名
- * @param onBeforePush silentMethod实例push前的事件
+ * Put a new silentMethod instance into the queue
+ * @param silentMethodInstance silentMethod instance
+ * @param cache Does silentMethod have cache?
+ * @param targetQueueName target queue name
+ * @param onBeforePush Events before silentMethod instance push
  */
 export const pushNewSilentMethod2Queue = async <AG extends AlovaGenerics>(
   silentMethodInstance: SilentMethod<AG>,
@@ -373,12 +371,12 @@ export const pushNewSilentMethod2Queue = async <AG extends AlovaGenerics>(
   const beforePushReturns = await Promise.all(onBeforePush());
   const isPush2Queue = !beforePushReturns.some(returns => returns === falseValue);
 
-  // silent行为下，如果没有绑定fallback事件回调，则持久化
-  // 如果在onBeforePushQueue返回false，也不再放入队列中
+  // Under silent behavior, if there is no fallback event callback bound, it will be persisted.
+  // If false is returned in onBeforePushQueue, it will no longer be placed in the queue.
   if (isPush2Queue) {
     cache && (await push2PersistentSilentQueue(silentMethodInstance, targetQueueName));
     pushItem(currentQueue, silentMethodInstance);
-    // 如果是新的队列且状态为已启动，则执行它
+    // If it is a new queue and the status is started, execute it
     isNewQueue && silentFactoryStatus === 1 && bootSilentQueue(currentQueue, targetQueueName);
   }
   return isPush2Queue;

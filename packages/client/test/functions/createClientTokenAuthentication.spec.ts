@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import { useRequest } from '@/index';
-import VueHook, { type VueHookType } from '@/statesHook/vue';
-import type { Equal } from '@alova/shared/types';
+import VueHook from '@/statesHook/vue';
+import type { Equal } from '@alova/shared';
 import { Alova, createAlova, Method } from 'alova';
 import adapterFetch from 'alova/fetch';
 import { delay } from 'msw';
 import { generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
 import type { Ref } from 'vue';
+import { type VueHookType } from '~/typings/stateshook/vue';
 import { MockRequestAdapter, mockRequestAdapter } from '../mockData';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -289,7 +290,7 @@ describe('createClientTokenAuthentication', () => {
     await untilCbCalled(onSuccess);
     expect(orderAry).toStrictEqual(['login', 'global.onSuccess', 'useHook.onSuccess']);
 
-    // 测试logout
+    // test logout
     orderAry = [];
     const logoutMethod = alovaInst.Get<ListResponse>('/list');
     logoutMethod.meta = {
@@ -359,7 +360,7 @@ describe('createClientTokenAuthentication', () => {
             refreshToken: true
           };
           token = (await refreshMethod).token;
-          expect(waitingList).toHaveLength(1); // 等待列表中有一个请求
+          expect(waitingList).toHaveLength(1); // There is a request in the waiting list
           refreshTokenFn();
         },
         metaMatches: {
@@ -390,9 +391,9 @@ describe('createClientTokenAuthentication', () => {
     const [list, list2] = await Promise.all([method, method]);
     expect(list).toStrictEqual(generateContinuousNumbers(10, 5));
     expect(list2).toStrictEqual(generateContinuousNumbers(10, 5));
-    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // 多次请求，只会刷新一次token
-    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // 两次list-auth，1次refresh-token
-    expect(waitingList).toHaveLength(0); // 等待列表中的请求已发出
+    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // Multiple requests will only refresh the token once.
+    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // List auth twice, refresh token once
+    expect(waitingList).toHaveLength(0); // The request in the waiting list has been issued
   });
   test("shouldn't continue run when throw error in refreshToken", async () => {
     let token = '';
@@ -413,7 +414,7 @@ describe('createClientTokenAuthentication', () => {
           refreshTokenFn();
           try {
             token = (await refreshMethod).token;
-            expect(waitingList).toHaveLength(1); // 等待列表中有一个请求
+            expect(waitingList).toHaveLength(1); // There is a request in the waiting list
           } catch (error) {
             redirectLoginFn();
             throw error;
@@ -439,7 +440,7 @@ describe('createClientTokenAuthentication', () => {
     await expect(method).rejects.toThrow();
     expect(refreshTokenFn).toHaveBeenCalledTimes(1);
     expect(redirectLoginFn).toHaveBeenCalledTimes(1);
-    expect(waitingList).toHaveLength(0); // refreshToken.handler中抛出错误，也会清空等待列表
+    expect(waitingList).toHaveLength(0); // An error is thrown in Refresh token.handler and the waiting list will also be cleared.
   });
   test('should emit bypass the token validation when set authRole to null', async () => {
     let token = '';
@@ -473,7 +474,7 @@ describe('createClientTokenAuthentication', () => {
       cacheFor: null,
       beforeRequest: onAuthRequired(),
       responded: onResponseRefreshToken((response, method) => {
-        expect(method.config.headers.Authorization).toBeUndefined(); // 绕过了token验证阶段，因此发送请求时不会带token
+        expect(method.config.headers.Authorization).toBeUndefined(); // The token verification phase is bypassed, so the token will not be included when sending the request.
         return response;
       })
     });
@@ -483,10 +484,10 @@ describe('createClientTokenAuthentication', () => {
     };
     const { list } = await method;
     expect(list).toStrictEqual(generateContinuousNumbers(9));
-    expect(refreshTokenFn).not.toHaveBeenCalled(); // authRole=null会直接放行
+    expect(refreshTokenFn).not.toHaveBeenCalled(); // Auth role=null will be released directly.
     expect(expireFn).not.toHaveBeenCalled();
 
-    // 自定义忽略method规则
+    // Customize ignore method rules
     const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
       createClientTokenAuthentication<VueHookType, MockRequestAdapter>({
         visitorMeta: {
@@ -517,7 +518,7 @@ describe('createClientTokenAuthentication', () => {
       cacheFor: null,
       beforeRequest: onAuthRequired2(),
       responded: onResponseRefreshToken2((response, method) => {
-        expect(method.config.headers.Authorization).toBeUndefined(); // 绕过了token验证阶段，因此发送请求时不会带token
+        expect(method.config.headers.Authorization).toBeUndefined(); // The token verification phase is bypassed, so the token will not be included when sending the request.
         return response;
       })
     });
@@ -527,7 +528,7 @@ describe('createClientTokenAuthentication', () => {
     };
     const { list: list2 } = await method2;
     expect(list2).toStrictEqual(generateContinuousNumbers(9));
-    expect(refreshTokenFn).not.toHaveBeenCalled(); // authRole=null会直接放行
+    expect(refreshTokenFn).not.toHaveBeenCalled(); // Auth role=null will be released directly.
     expect(expireFn).not.toHaveBeenCalled();
   });
 });

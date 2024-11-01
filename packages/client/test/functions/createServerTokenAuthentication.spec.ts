@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createServerTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
-import VueHook, { type VueHookType } from '@/statesHook/vue';
-import type { Equal } from '@alova/shared/types';
+import VueHook from '@/statesHook/vue';
+import type { Equal } from '@alova/shared';
 import { Alova, createAlova, Method } from 'alova';
 import { useRequest } from 'alova/client';
 import adapterFetch from 'alova/fetch';
 import { delay, generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
 import type { Ref } from 'vue';
+import { type VueHookType } from '~/typings/stateshook/vue';
 import { MockRequestAdapter, mockRequestAdapter } from '../mockData';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -287,7 +288,7 @@ describe('createServerTokenAuthentication', () => {
     await untilCbCalled(onSuccess);
     expect(orderAry).toStrictEqual(['login', 'global.onSuccess', 'useHook.onSuccess']);
 
-    // 测试logout
+    // test logout
     orderAry = [];
     const logoutMethod = alovaInst.Get<ListResponse>('/list');
     logoutMethod.meta = {
@@ -346,9 +347,9 @@ describe('createServerTokenAuthentication', () => {
     const list = await alovaInst.Get<number[]>('/list-auth');
     expect(list).toStrictEqual(generateContinuousNumbers(5));
     expect(refreshTokenFn).toHaveBeenCalledTimes(1);
-    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // list-auth两次，refreshToken一次
-    expect(responseFn).toHaveBeenCalledTimes(2); // refreshToken和list-auth各进入一次
-    expect(expireFn).toHaveBeenCalledTimes(1); // 只有list-auth在报错时进入一次，refreshToken不进入
+    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // List auth twice, refresh token once
+    expect(responseFn).toHaveBeenCalledTimes(2); // Refresh token and list auth enter once each
+    expect(expireFn).toHaveBeenCalledTimes(1); // Only list auth is entered once when an error is reported, and refresh token is not entered.
   });
   test('should refresh token first on success event when it is expired', async () => {
     let token = '';
@@ -391,15 +392,15 @@ describe('createServerTokenAuthentication', () => {
       })
     });
 
-    // 设置notError=1，当遇到错误时不抛出错误，而是以错误格式返回
+    // Set not error=1, when an error is encountered, an error will not be thrown, but will be returned in error format.
     const list = await alovaInst.Get('/list-auth?notError=1', {
       transform: (data: number[]) => data.map(i => i + 5)
     });
     expect(list).toStrictEqual(generateContinuousNumbers(10, 5));
     expect(refreshTokenFn).toHaveBeenCalledTimes(1);
-    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // list-auth两次，refreshToken一次
-    expect(responseFn).toHaveBeenCalledTimes(2); // refreshToken和list-auth各进入一次
-    expect(expireFn).toHaveBeenCalledTimes(2); // list-auth进入两次，refreshToken不进入
+    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // List auth twice, refresh token once
+    expect(responseFn).toHaveBeenCalledTimes(2); // Refresh token and list auth enter once each
+    expect(expireFn).toHaveBeenCalledTimes(2); // List auth is entered twice, refresh token is not entered
   });
   test('the requests should wait until token refreshed when token is refreshing', async () => {
     let token = '';
@@ -425,7 +426,7 @@ describe('createServerTokenAuthentication', () => {
             refreshToken: true
           };
 
-          // 当tokenRefreshing为true时又发出了请求时，会等待token刷新再发出，因此可以正常请求到数据
+          // When token refreshing is true and a request is sent again, it will wait for the token to refresh before sending, so the data can be requested normally.
           method('2').then(list => {
             expect(list).toStrictEqual(generateContinuousNumbers(10, 5));
           });
@@ -454,10 +455,10 @@ describe('createServerTokenAuthentication', () => {
     });
     const list = await method('1');
     expect(list).toStrictEqual(generateContinuousNumbers(10, 5));
-    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // 多次请求，只会刷新一次token
-    expect(beforeRequestFn).toHaveBeenCalledTimes(4); // 三次list-auth，1次refresh-token
-    expect(expireFn).toHaveBeenCalledTimes(1); // list-auth在401时进入1次，另外两次进入了onSuccess，refreshToken不进入
-    expect(waitingList).toHaveLength(0); // 等待列表中的请求已发出
+    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // Multiple requests will only refresh the token once.
+    expect(beforeRequestFn).toHaveBeenCalledTimes(4); // List auth three times, refresh token once
+    expect(expireFn).toHaveBeenCalledTimes(1); // List auth was entered once when 401 was entered, and the other two were entered on success, and the refresh token was not entered.
+    expect(waitingList).toHaveLength(0); // The request in the waiting list has been issued
   });
   test("shouldn't resend refresh request when multiple requests emit at the same time", async () => {
     let token = '';
@@ -502,9 +503,9 @@ describe('createServerTokenAuthentication', () => {
     const [list, list2] = await Promise.all([method('1'), method('2')]);
     expect(list).toStrictEqual(generateContinuousNumbers(10, 5));
     expect(list2).toStrictEqual(generateContinuousNumbers(10, 5));
-    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // 多次请求，只会刷新一次token
-    expect(beforeRequestFn).toHaveBeenCalledTimes(5); // 分别是两次失败和两次重新请求后成功的list-auth，1次refresh-token
-    expect(waitingList).toHaveLength(0); // 等待列表中的请求已发出
+    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // Multiple requests will only refresh the token once.
+    expect(beforeRequestFn).toHaveBeenCalledTimes(5); // They are list auth that failed twice, succeeded after two re-requests, and refresh token once.
+    expect(waitingList).toHaveLength(0); // The request in the waiting list has been issued
   });
   test("shouldn't continue run when throw error in refreshToken", async () => {
     let token = '';
@@ -524,7 +525,7 @@ describe('createServerTokenAuthentication', () => {
           refreshTokenFn();
           try {
             token = (await refreshMethod).token;
-            expect(waitingList).toHaveLength(1); // 等待列表中有一个请求
+            expect(waitingList).toHaveLength(1); // There is a request in the waiting list
           } catch (error) {
             redirectLoginFn();
             throw error;
@@ -549,7 +550,7 @@ describe('createServerTokenAuthentication', () => {
     await expect(method).rejects.toThrow();
     expect(refreshTokenFn).toHaveBeenCalledTimes(1);
     expect(redirectLoginFn).toHaveBeenCalledTimes(1);
-    expect(waitingList).toHaveLength(0); // refreshToken.handler中抛出错误，也会清空等待列表
+    expect(waitingList).toHaveLength(0); // An error is thrown in Refresh token.handler and the waiting list will also be cleared.
   });
   test('should emit bypass the token validation when set authRole to null', async () => {
     let token = '';
@@ -582,7 +583,7 @@ describe('createServerTokenAuthentication', () => {
       cacheFor: null,
       beforeRequest: onAuthRequired(),
       responded: onResponseRefreshToken((response, method) => {
-        expect(method.config.headers.Authorization).toBeUndefined(); // 绕过了token验证阶段，因此发送请求时不会带token
+        expect(method.config.headers.Authorization).toBeUndefined(); // The token verification phase is bypassed, so the token will not be included when sending the request.
         return response;
       })
     });
@@ -592,10 +593,10 @@ describe('createServerTokenAuthentication', () => {
     };
     const { list } = await method;
     expect(list).toStrictEqual(generateContinuousNumbers(9));
-    expect(refreshTokenFn).not.toHaveBeenCalled(); // authRole=null会直接放行
+    expect(refreshTokenFn).not.toHaveBeenCalled(); // Auth role=null will be released directly.
     expect(expireFn).not.toHaveBeenCalled();
 
-    // 自定义忽略method规则;
+    // Customize ignore method rules;
     const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
       createServerTokenAuthentication<VueHookType, MockRequestAdapter>({
         visitorMeta: {
@@ -626,7 +627,7 @@ describe('createServerTokenAuthentication', () => {
       cacheFor: null,
       beforeRequest: onAuthRequired2(),
       responded: onResponseRefreshToken2((response, method) => {
-        expect(method.config.headers.Authorization).toBeUndefined(); // 绕过了token验证阶段，因此发送请求时不会带token
+        expect(method.config.headers.Authorization).toBeUndefined(); // The token verification phase is bypassed, so the token will not be included when sending the request.
         return response;
       })
     });
@@ -636,7 +637,7 @@ describe('createServerTokenAuthentication', () => {
     };
     const { list: list2 } = await method2;
     expect(list2).toStrictEqual(generateContinuousNumbers(9));
-    expect(refreshTokenFn).not.toHaveBeenCalled(); // authRole=null会直接放行
+    expect(refreshTokenFn).not.toHaveBeenCalled(); // Auth role=null will be released directly.
     expect(expireFn).not.toHaveBeenCalled();
   });
 });

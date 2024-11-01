@@ -1,4 +1,4 @@
-import { len } from '@alova/shared/vars';
+import { len } from '@alova/shared';
 import VueHook from 'alova/vue';
 
 export default {

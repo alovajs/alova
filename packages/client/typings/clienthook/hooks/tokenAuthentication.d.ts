@@ -2,7 +2,7 @@ import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } 
 import adapterFetch from 'alova/fetch';
 
 /**
- * 统一获取AlovaRequestAdapter的类型
+ * Unifiedly obtain the type of AlovaRequestAdapter
  */
 export type AlovaRequestAdapterUnified<
   RA extends
@@ -42,40 +42,40 @@ export type RequestHandler<RA extends AlovaRequestAdapter<any, any, any>, RESULT
 
 export interface TokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any>> {
   /**
-   * 忽略拦截的method
+   * Ignore intercepted methods
    */
   visitorMeta?: MetaMatches;
   /**
-   * 登录请求拦截器
+   * Login request interceptor
    */
   login?: ResponseAuthorizationInterceptor<RA>;
 
   /**
-   * 登出请求拦截器
+   * Logout request interceptor
    */
   logout?: ResponseAuthorizationInterceptor<RA>;
   /**
-   * 赋值token回调函数，登录标识和访客标识的请求不会触发此函数
-   * @param method method实例
+   * Assign token callback function, requests for login ID and visitor ID will not trigger this function
+   * @param method method instance
    */
   assignToken?: <AG extends AlovaGenerics>(method: Method<AG>) => void | Promise<void>;
 }
 export interface ClientTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any>>
   extends TokenAuthenticationOptions<RA> {
   /**
-   * 在请求前的拦截器中判断token是否过期，并刷新token
+   * Determine whether the token has expired in the interceptor before the request, and refresh the token
    */
   refreshToken?: {
     /**
-     * 判断token是否过期
+     * Determine whether the token has expired
      */
     isExpired: RequestHandler<RA, boolean | Promise<boolean>>;
     /**
-     * 刷新token
+     * Refresh token
      */
     handler: RequestHandler<RA>;
     /**
-     * 自定义匹配刷新token的method meta
+     * Customize the method meta that matches the refresh token
      */
     metaMatches?: MetaMatches;
   };
@@ -104,44 +104,44 @@ export interface TokenAuthenticationResult<SH extends StatesHook<any>, RA extend
 export interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter<any, any, any>>
   extends TokenAuthenticationOptions<RA> {
   /**
-   * 在请求成功拦截器中判断token是否过期，并刷新token
+   * Determine whether the token has expired in the request success interceptor and refresh the token
    */
   refreshTokenOnSuccess?: {
     /**
-     * 判断token是否过期
+     * Determine whether the token has expired
      */
     isExpired: ResponseInterceptHandler<RA, boolean | Promise<boolean>>;
     /**
-     * 刷新token
+     * Refresh token
      */
     handler: ResponseInterceptHandler<RA>;
     /**
-     * 自定义匹配刷新token的method meta
+     * Customize the method meta that matches the refresh token
      */
     metaMatches?: MetaMatches;
   };
 
   /**
-   * 在请求失败拦截器中判断token是否过期，并刷新token
+   * Determine whether the token has expired in the request failure interceptor and refresh the token
    */
   refreshTokenOnError?: {
     /**
-     * 判断token是否过期
+     * Determine whether the token has expired
      */
     isExpired: ResponseErrorInterceptHandler<RA, boolean | Promise<boolean>>;
     /**
-     * 刷新token
+     * Refresh token
      */
     handler: ResponseErrorInterceptHandler<RA>;
     /**
-     * 自定义匹配刷新token的method meta
+     * Customize the method meta that matches the refresh token
      */
     metaMatches?: MetaMatches;
   };
 }
 
 /**
- * 创建客户端的token认证拦截器
+ * Create a client-side token authentication interceptor
  * @example
  * ```js
  * const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication(\/* ... *\/);
@@ -160,8 +160,8 @@ export interface ServerTokenAuthenticationOptions<RA extends AlovaRequestAdapter
  *   })
  * });
  * ```
- * @param options 配置参数
- * @returns token认证拦截器函数
+ * @param options Configuration parameters
+ * @returns token authentication interceptor function
  */
 export declare function createClientTokenAuthentication<
   SH extends StatesHook<any>,
@@ -173,7 +173,7 @@ export declare function createClientTokenAuthentication<
 ): TokenAuthenticationResult<SH, AlovaRequestAdapterUnified<RA>>;
 
 /**
- * 创建服务端的token认证拦截器
+ * Create a server-side token authentication interceptor
  * @example
  * ```js
  * const { onAuthRequired, onResponseRefreshToken } = createServerTokenAuthentication(\/* ... *\/);
@@ -192,8 +192,8 @@ export declare function createClientTokenAuthentication<
  *   })
  * });
  * ```
- * @param options 配置参数
- * @returns token认证拦截器函数
+ * @param options Configuration parameters
+ * @returns token authentication interceptor function
  */
 export declare function createServerTokenAuthentication<
   SH extends StatesHook<any>,

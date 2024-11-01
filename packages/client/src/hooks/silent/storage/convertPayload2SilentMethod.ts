@@ -1,15 +1,13 @@
-import createEventManager from '@alova/shared/createEventManager';
-import { newInstance } from '@alova/shared/function';
-import { forEach, includes, objectKeys, trueValue } from '@alova/shared/vars';
+import { createEventManager, forEach, includes, newInstance, objectKeys, trueValue } from '@alova/shared';
 import { Method } from 'alova';
 import { ScopedSQEvents } from '~/typings/clienthook';
 import { SerializedSilentMethod, SilentMethod } from '../SilentMethod';
 import { dependentAlovaInstance } from '../globalVariables';
 
 /**
- * 反序列化silentMethod实例，根据序列化器的名称进行反序列化
- * @param methodInstance 请求方法实例
- * @returns 请求方法实例
+ * Deserialize the silentMethod instance according to the name of the serializer.
+ * @param methodInstance Request method instance
+ * @returns Request method instance
  */
 export default (payload: SerializedSilentMethod) => {
   const {
@@ -26,7 +24,7 @@ export default (payload: SerializedSilentMethod) => {
     force
   } = payload;
 
-  // method类实例化
+  // Method class instantiation
   const deserializeMethod = (methodPayload: SerializedSilentMethod['entity']) => {
     const { type, url, config, data } = methodPayload;
     return newInstance(Method, type, dependentAlovaInstance, url, config, data);
@@ -48,12 +46,12 @@ export default (payload: SerializedSilentMethod) => {
   );
   silentMethodInstance.cache = trueValue;
 
-  // targetRefMethod反序列化
+  // Target ref method deserialization
   if (targetRefMethod) {
     silentMethodInstance.targetRefMethod = deserializeMethod(targetRefMethod);
   }
 
-  // 将额外的内容放到silentMethod实例上
+  // Put extra content on the silent method instance
   forEach(objectKeys(payload), key => {
     if (
       !includes(

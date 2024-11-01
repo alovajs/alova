@@ -400,11 +400,11 @@ describe('react => useRetriableRequest', () => {
 
     render(<Page />);
     await waitFor(() => {
-      expect(mockRetryFn).not.toHaveBeenCalled(); // 第一次重试前停止了重试
-      expect(mockErrorFn).toHaveBeenCalledTimes(1); // 请求失败一次
-      expect(mockCompleteFn).toHaveBeenCalledTimes(1); // 请求失败一次
+      expect(mockRetryFn).not.toHaveBeenCalled(); // Retry stopped before first retry
+      expect(mockErrorFn).toHaveBeenCalledTimes(1); // The request failed once
+      expect(mockCompleteFn).toHaveBeenCalledTimes(1); // The request failed once
       expect(mockSuccessFn).not.toHaveBeenCalled();
-      expect(mockFailFn).toHaveBeenCalledTimes(1); // 手动停止重试也将会立即触发fail事件
+      expect(mockFailFn).toHaveBeenCalledTimes(1); // Manually stopping the retry will also trigger the fail event immediately.
     });
   });
 
@@ -462,7 +462,7 @@ describe('react => useRetriableRequest', () => {
         .onRetry(event => {
           mockRetryFn();
           expect(event.retryTimes).toBeLessThanOrEqual(2);
-          // 每次在第二次重试发出后停止第三次重试
+          // Stop third retry every time after second retry is issued
           if (event.retryTimes === 2) {
             setTimeout(() => {
               stop();

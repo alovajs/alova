@@ -1,6 +1,4 @@
-import { createAssert } from '@alova/shared/assert';
-import createEventManager from '@alova/shared/createEventManager';
-import { isArray } from '@alova/shared/vars';
+import { createAssert, createEventManager, isArray } from '@alova/shared';
 import { Alova, AlovaGenerics } from 'alova';
 import {
   DataSerializer,
@@ -18,30 +16,30 @@ export const BEHAVIOR_SILENT = 'silent';
 export const BEHAVIOR_QUEUE = 'queue';
 export const BEHAVIOR_STATIC = 'static';
 /**
- * 全局的虚拟数据收集数组
- * 它只会在method创建时为数组，其他时间为undefined
+ * Global virtual data collection array
+ * It will only be an array when the method is created, and undefined at other times
  *
- * 解释：收集虚拟数据的目的为了判断某个method实例内是否使用了虚拟数据
- * 包括以下形式：
- * useSQRequest((vDataId) => createMethod({ vDataId }) // 引用函数参数
- * useSQRequest(() => createMethod({ vDataId }) // 直接引用作用域参数
+ * Explanation: The purpose of collecting virtual data is to determine whether virtual data is used in a method instance.
+ * Includes the following forms:
+ * useSQRequest((vDataId) => createMethod({ vDataId }) //Reference function parameters
+ * useSQRequest(() => createMethod({ vDataId }) //Directly reference scope parameters
  *
- * 甚至是：
+ * Or even:
  * function createMethod(obj) {
  *   return alovaInst.Get('/list', {
  *     params: { status: obj.vDataId ? 1 : 0 }
  *   })
  * }
- * useSQRequest(() => createMethod(obj) // 直接引用作用域参数
+ * useSQRequest(() => createMethod(obj) //Directly reference scope parameters
  *
- * 使用虚拟数据的方式包含：
- * 1. 直接作为参数赋值
- * 2. 使用虚拟数据id
- * 3. 间接使用虚拟数据，如
+ * Ways to use dummy data include:
+ * 1. Directly assign values as parameters
+ * 2. Use dummy data id
+ * 3. Indirect use of virtual data, such as
  *    vData ? 1 : 0
  *    !!vData
- *    vData + 1
- *    等作为计算参数参与的形式
+ *    vData+1
+ *    etc. as calculation parameters.
  */
 export let vDataIdCollectBasket: Record<string, undefined> | undefined;
 export const setVDataIdCollectBasket = (value: typeof vDataIdCollectBasket) => {
@@ -49,7 +47,7 @@ export const setVDataIdCollectBasket = (value: typeof vDataIdCollectBasket) => {
 };
 
 /**
- * 依赖的alova实例，它的存储适配器、请求适配器等将用于存取SilentMethod实例，以及发送静默提交
+ * The dependent alova instance, its storage adapter, request adapter, etc. will be used to access the SilentMethod instance and send silent submissions
  */
 export let dependentAlovaInstance: Alova<AlovaGenerics>;
 export const setDependentAlova = (alovaInst: Alova<AlovaGenerics>) => {
@@ -57,7 +55,7 @@ export const setDependentAlova = (alovaInst: Alova<AlovaGenerics>) => {
 };
 
 /**
- * 设置自定义的序列化器
+ * Set up a custom serializer
  */
 export let customSerializers: Record<string | number, DataSerializer> = {};
 export const setCustomSerializers = (serializers: typeof customSerializers = {}) => {
@@ -65,10 +63,10 @@ export const setCustomSerializers = (serializers: typeof customSerializers = {})
 };
 
 /**
- * silentFactory状态
- * 0表示未启动
- * 1表示进行中，调用bootSilentFactory后变更
- * 2表示请求失败，即按重试规则请求达到最大次数时，或不匹配重试规则时变更
+ * silentFactory status
+ * 0 means not started
+ * 1 means in progress, changed after calling bootSilentFactory
+ * 2 indicates that the request failed, that is, when the maximum number of requests is reached according to the retry rules, or when the retry rules are not matched, the request is changed.
  */
 export let silentFactoryStatus = 0;
 export const setSilentFactoryStatus = (status: 0 | 1 | 2) => {
@@ -76,22 +74,22 @@ export const setSilentFactoryStatus = (status: 0 | 1 | 2) => {
 };
 
 /**
- * silentQueue内的请求等待时间，单位为毫秒（ms）
- * 它表示即将发送请求的silentMethod的等待时间
- * 如果未设置，或设置为0表示立即触发silentMethod请求
+ * The request waiting time in silentQueue, in milliseconds (ms)
+ * It indicates the waiting time of the silentMethod that is about to send the request
+ * If not set, or set to 0, the silentMethod request is triggered immediately
  *
  * Tips:
- * 1. 直接设置时默认对default queue有效
- * 2. 如果需要对其他queue设置可指定为对象，如：
+ * 1. When set directly, it is effective for the default queue by default.
+ * 2. If you need to set other queue settings, you can specify them as objects, such as:
  * [
- *   表示对名为customName的队列设置请求等待5000ms
+ *   Indicates waiting 5000ms for the queue setting request named customName
  *   { name: 'customName', wait: 5000 },
  *
- *   // 表示前缀为prefix的所有队列中，method实例名为xxx的请求设置等待5000ms
+ *   //Indicates that in all queues with the prefix prefix, the request setting with method instance name xxx is set to wait 5000ms
  *   { name: /^prefix/, wait: silentMethod => silentMethod.entity.config.name === 'xxx' ? 5000 : 0 },
  * ]
  *
- * >>> 它只在请求成功时起作用，如果失败则会使用重试策略参数
+ * >>> It only works if the request succeeds, if it fails it will use the retry policy parameters
  */
 export let queueRequestWaitSetting: QueueRequestWaitSetting[] = [];
 export const setQueueRequestWaitSetting = (
@@ -121,8 +119,8 @@ export type GlobalSQEvents = {
   [FailEventKey]: GlobalSQFailEvent<any>;
 };
 
-/** 全局的silent事件管理对象 */
+/** Global silent event management object */
 export const globalSQEventManager = createEventManager<GlobalSQEvents>();
 
-/** silentAssert */
+/** Silent assert */
 export const silentAssert = createAssert('useSQRequest');

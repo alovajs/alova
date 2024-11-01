@@ -1,6 +1,5 @@
 import myAssert from '@/utils/myAssert';
-import createEventManager from '@alova/shared/createEventManager';
-import { JSONParse, JSONStringify, deleteAttr } from '@alova/shared/vars';
+import { createEventManager, deleteAttr, JSONParse, JSONStringify } from '@alova/shared';
 import { AlovaDefaultCacheAdapter, CacheEvent } from '~/typings';
 
 // local storage will not fail the operation.

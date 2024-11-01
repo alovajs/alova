@@ -3,9 +3,9 @@ import { createAlova } from 'alova';
 import adapterFetch from 'alova/fetch';
 
 /**
- * 根据不同vue版本号返回对应的事件集合
- * @param events 事件集合
- * @returns 对应vue版本支持的事件集合
+ * Return the corresponding event collection according to different vue version numbers
+ * @param events event collection
+ * @returns Corresponding event collection supported by vue version
  */
 const isVue3 = process.env.VUE_VERSION === 'v3';
 export const eventObj = (events: Record<string, any>) => ({

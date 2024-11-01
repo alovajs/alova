@@ -15,9 +15,9 @@ describe('Initial data before request', () => {
     const { data, onSuccess } = useRequest(Get, {
       initialData: { method: 'NO' }
     });
-    expect(data.value).toEqual({ method: 'NO' }); // 先指定了initialData，所以直接带出了initialData
+    expect(data.value).toEqual({ method: 'NO' }); // The initial data is specified first, so the initial data is directly brought out
     await untilCbCalled(onSuccess);
-    expect(data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} }); // 因为有持久化数据，因此直接带出了持久化的数据
+    expect(data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} }); // Because there is persistent data, the persistent data is directly brought out
   });
 
   test('[useWatcher]should assign the initial data to state `data`', async () => {
@@ -32,8 +32,8 @@ describe('Initial data before request', () => {
       initialData: { method: 'NO' },
       immediate: true
     });
-    expect(data.value).toEqual({ method: 'NO' }); // 先指定了initialData，所以直接带出了initialData
+    expect(data.value).toEqual({ method: 'NO' }); // The initial data is specified first, so the initial data is directly brought out
     await untilCbCalled(onSuccess);
-    expect(data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} }); // 因为有持久化数据，因此直接带出了持久化的数据
+    expect(data.value).toEqual({ path: '/unit-test', method: 'GET', params: {} }); // Because there is persistent data, the persistent data is directly brought out
   });
 });

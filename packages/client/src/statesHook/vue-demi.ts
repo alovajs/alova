@@ -1,4 +1,4 @@
-import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared/vars';
+import { forEach, trueValue } from '@alova/shared';
 import { StatesExportHelper, StatesHook } from 'alova';
 import {
   ComputedRef,
@@ -21,7 +21,7 @@ export type VueDemiHookExportType<T> = StatesExportHelper<{
   ComputedExport: ComputedRef<T>;
 }>;
 
-// Vue的预定义hooks
+// Vue’s predefined hooks
 export default {
   name: 'VueDemi',
   create: data => ref(data),
@@ -30,27 +30,17 @@ export default {
     state.value = newVal;
   },
   effectRequest({ handler, removeStates, immediate, watchingStates }) {
-    // 当在组件内部使用时，组件卸载时移除对应状态
+    // When used inside a component, the corresponding state is removed when the component is unloaded.
     if (getCurrentInstance()) {
       onUnmounted(removeStates);
-      onMounted(() => immediate && handler());
-    } else {
-      // 在非组件内部使用时，使用定时器延迟执行
-      setTimeoutFn(() => {
-        immediate && handler();
-      });
     }
+    immediate && handler();
 
-    let timer: any;
     forEach(watchingStates || [], (state, i) => {
       watch(
         state,
         () => {
-          timer && clearTimeoutTimer(timer);
-          timer = setTimeoutFn(() => {
-            handler(i);
-            timer = undefinedValue;
-          });
+          handler(i);
         },
         { deep: trueValue }
       );

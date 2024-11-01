@@ -1,5 +1,5 @@
 import type { MockError, MockResponse } from '@alova/mock';
-import { undefinedValue } from '@alova/shared/vars';
+import { undefinedValue } from '@alova/shared';
 import { AxiosError, AxiosHeaders, AxiosResponse, AxiosResponseHeaders } from 'axios';
 import { AlovaAxiosRequestConfig } from '~/typings';
 

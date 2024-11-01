@@ -1,7 +1,6 @@
 import HookedMethod from '@/HookedMethod';
 import { createServerHook } from '@/helper';
-import { delayWithBackoff, isNumber } from '@alova/shared/function';
-import { BackoffPolicy } from '@alova/shared/types';
+import { BackoffPolicy, delayWithBackoff, isNumber } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 
 export interface RetryOptions {

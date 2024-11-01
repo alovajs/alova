@@ -101,9 +101,9 @@ onError(() => {
 });
 
 const getStatusText = computed(() => {
-  if (readyState.value === 1 /** SSEHookReadyState.OPEN */) {
+  if (readyState.value === 1 /** Sse hook ready state.open */) {
     return 'opened';
-  } else if (readyState.value === 2 /** SSEHookReadyState.CLOSED */) {
+  } else if (readyState.value === 2 /** Sse hook ready state.closed */) {
     return 'closed';
   } else {
     return 'connecting';

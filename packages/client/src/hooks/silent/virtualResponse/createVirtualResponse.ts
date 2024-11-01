@@ -1,5 +1,14 @@
-import { isPlainObject, newInstance, uuid, walkObject } from '@alova/shared/function';
-import { ObjectCls, defineProperty, isArray, nullValue, undefinedValue } from '@alova/shared/vars';
+import {
+  ObjectCls,
+  defineProperty,
+  isArray,
+  isPlainObject,
+  newInstance,
+  nullValue,
+  undefinedValue,
+  uuid,
+  walkObject
+} from '@alova/shared';
 import { STR_VALUE_OF } from '../globalVariables';
 import Null from './Null';
 import Undefined from './Undefined';
@@ -7,8 +16,8 @@ import { stringifyWithThis } from './stringifyVData';
 import { symbolOriginal, symbolVDataId } from './variables';
 
 /**
- * 创建虚拟响应数据
- * @returns 虚拟响应数据代理实例
+ * Create dummy response data
+ * @returns Virtual response data proxy instance
  */
 export default (structure: any, vDataId = uuid()) => {
   const transform2VData = (value: any, vDataIdInner = uuid()) => {

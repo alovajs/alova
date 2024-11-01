@@ -1,12 +1,11 @@
-import { isObject, walkObject } from '@alova/shared/function';
-import { ObjectCls, falseValue, isArray, len, objectKeys, undefinedValue } from '@alova/shared/vars';
+import { ObjectCls, falseValue, isArray, isObject, len, objectKeys, undefinedValue, walkObject } from '@alova/shared';
 import { DataSerializer } from '~/typings/clienthook';
 import dateSerializer from './date';
 import regexpSerializer from './regexp';
 
 const createSerializerPerformer = (customSerializers: Record<string | number, DataSerializer> = {}) => {
   /**
-   * 合并内置序列化器和自定义序列化器
+   * Merge built-in serializers and custom serializers
    */
   const serializers = {
     date: dateSerializer,
@@ -15,13 +14,13 @@ const createSerializerPerformer = (customSerializers: Record<string | number, Da
   } as typeof customSerializers;
 
   /**
-   * 序列化数据
+   * serialized data
    */
   const serialize = (payload: any) => {
     if (isObject(payload)) {
       payload = walkObject(isArray(payload) ? [...payload] : { ...payload }, value => {
         let finallyApplySerializerName = undefinedValue as string | undefined;
-        // 找到匹配的序列化器并进行值的序列化，未找到则返回原值
+        // Find a matching serializer and serialize the value. If not found, return the original value.
         const serializedValue = objectKeys(serializers).reduce((currentValue, serializerName) => {
           if (!finallyApplySerializerName) {
             const serializedValueItem = serializers[serializerName].forward(currentValue);
@@ -33,7 +32,7 @@ const createSerializerPerformer = (customSerializers: Record<string | number, Da
           return currentValue;
         }, value);
 
-        // 需要用原始值判断，否则像new Number(1)等包装类也会是[object Object]
+        // You need to use the original value to judge, otherwise packaging classes such as new Number(1) will also be [object Object]
         const toStringTag = ObjectCls.prototype.toString.call(value);
         if (toStringTag === '[object Object]') {
           value = { ...value };
@@ -47,7 +46,7 @@ const createSerializerPerformer = (customSerializers: Record<string | number, Da
   };
 
   /**
-   * 反序列化数据
+   * Deserialize data
    */
   const deserialize = (payload: any) =>
     isObject(payload)

@@ -42,7 +42,7 @@ export const server = http.createServer((req, res) => {
     res.write('\n\n');
 
     // but not sending any message...
-    // res.write() <--- Trigger manually later
+    // res.write() <---Trigger manually later
     return;
   }
 

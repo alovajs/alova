@@ -2,7 +2,7 @@ import { getAlovaInstance } from '#/utils';
 import { removeStateCache } from '@/hooks/core/implements/stateCache';
 import { updateState, useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { key } from '@alova/shared/function';
+import { key } from '@alova/shared';
 
 import { queryCache } from 'alova';
 import { Result, untilCbCalled } from 'root/testUtils';
@@ -67,13 +67,13 @@ describe('update cached response data by user in vue', () => {
     const { onSuccess: get2OnSuccess, data: get2Data } = useRequest(Get2);
     await Promise.all([untilCbCalled(get1OnSuccess), untilCbCalled(get2OnSuccess)]);
 
-    // 不会匹配任何一个method实例
+    // Will not match any method instance
     await updateState(alova.Get(''), (data: any) => {
       data.path = '/unit-test-updated';
       return data;
     });
 
-    // 匹配到多个method实例，只会更新第一个
+    // If multiple method instances are matched, only the first one will be updated.
     expect(get1Data.value.path).toBe('/unit-test');
     expect(get2Data.value.path).toBe('/unit-test');
   });
@@ -97,27 +97,27 @@ describe('update cached response data by user in vue', () => {
     });
     await untilCbCalled(onSuccess);
 
-    // 非状态数据不能更新
+    // Non-state data cannot be updated
     await expect(
       updateState(Get, {
         extraData2: () => 1
       })
     ).rejects.toThrow("Cannot create property 'value' on number '1'");
 
-    // 未找到状态抛出错误
+    // Status not found throws error
     await expect(
       updateState(Get, {
         extraData3: () => 1
       })
     ).rejects.toThrow('state named `extraData3` is not found');
 
-    // 更新成功
+    // Update successful
     await updateState(Get, {
       extraData: () => 1
     });
     expect(extraData.value).toBe(1);
 
-    // 更新额外管理的状态时，不会涉及它的缓存
+    // When updating the state of additional management, its cache will not be involved
     expect(await queryCache(Get)).toStrictEqual(data.value);
   });
 

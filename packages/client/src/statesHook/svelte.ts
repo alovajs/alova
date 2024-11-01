@@ -1,5 +1,4 @@
-import { createSyncOnceRunner } from '@alova/shared/function';
-import { falseValue, forEach, trueValue } from '@alova/shared/vars';
+import { createSyncOnceRunner, falseValue, forEach, trueValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { onDestroy, onMount } from 'svelte';
 import { derived, writable } from 'svelte/store';
@@ -23,16 +22,15 @@ export default {
   effectRequest({ handler, removeStates, immediate, watchingStates }) {
     // Remove the corresponding state when the component is unmounted
     onDestroy(removeStates);
-    onMount(() => immediate && handler());
+    onMount(() => {
+      immediate && handler();
+    });
 
-    let needEmit = falseValue;
-    const syncRunner = createSyncOnceRunner(10);
     forEach(watchingStates || [], (state, i) => {
+      let needEmit = falseValue;
       state.subscribe(() => {
-        syncRunner(() => {
-          // Svelte's `writable` will trigger once by default, so when immediate is false, you need to filter out the first trigger call
-          needEmit ? handler(i) : (needEmit = trueValue);
-        });
+        // Svelte's `writable` will trigger once by default, so when immediate is false, you need to filter out the first trigger call
+        needEmit ? handler(i) : (needEmit = trueValue);
       });
     });
   },

@@ -1,5 +1,4 @@
-import { createSyncOnceRunner } from '@alova/shared/function';
-import { forEach, setTimeoutFn, trueValue } from '@alova/shared/vars';
+import { forEach, setTimeoutFn, trueValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 import { VueHookExportType } from '~/typings/stateshook/vue';
@@ -16,22 +15,14 @@ export default {
     // if call in component, remove current hook states when unmounting component
     if (getCurrentInstance()) {
       onUnmounted(removeStates);
-      onMounted(() => immediate && handler());
-    } else {
-      // if call outside component, run asynchronously with `Promise`
-      setTimeoutFn(() => {
-        immediate && handler();
-      });
     }
+    immediate && handler();
 
-    const syncRunner = createSyncOnceRunner();
     forEach(watchingStates || [], (state, i) => {
       watch(
         state,
         () => {
-          syncRunner(() => {
-            handler(i);
-          });
+          handler(i);
         },
         { deep: trueValue }
       );

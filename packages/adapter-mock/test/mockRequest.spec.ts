@@ -19,7 +19,7 @@ describe('mock request', () => {
       }
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockResponse = vi.fn();
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
@@ -78,7 +78,7 @@ describe('mock request', () => {
     });
 
     const mockFn = vi.fn();
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       onMockResponse: (responseData, _, method) => {
@@ -144,7 +144,7 @@ describe('mock request', () => {
       })
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false,
@@ -180,7 +180,7 @@ describe('mock request', () => {
       '[POST]/detail': () => null
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false,
@@ -204,7 +204,7 @@ describe('mock request', () => {
       '[POST]/detail': () => undefined
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false
@@ -228,7 +228,7 @@ describe('mock request', () => {
       }
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false,
@@ -261,7 +261,7 @@ describe('mock request', () => {
       })
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       onMockResponse: ({ body }) => ({
@@ -287,7 +287,7 @@ describe('mock request', () => {
       }
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false,
@@ -317,7 +317,7 @@ describe('mock request', () => {
     const mocks = defineMock({
       '[POST]/detail': async () => []
     });
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       mockRequestLogger: false,
       onMockResponse: ({ body }) => ({
@@ -344,7 +344,7 @@ describe('mock request', () => {
       '[POST]/detail': async () => []
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 1000,
       mockRequestLogger: false
@@ -377,7 +377,7 @@ describe('mock request', () => {
       }
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false
@@ -404,7 +404,7 @@ describe('mock request', () => {
       '[POST]/detail': async () => []
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 1000,
       mockRequestLogger: false
@@ -430,7 +430,7 @@ describe('mock request', () => {
       }
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false
@@ -452,7 +452,7 @@ describe('mock request', () => {
       }
     });
 
-    // 模拟数据请求适配器
+    // Mock Data Request Adapter
     const mockRequestAdapter = createAlovaMockAdapter([mocks], {
       delay: 10,
       mockRequestLogger: false,

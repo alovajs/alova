@@ -1,4 +1,4 @@
-import { buildNamespacedCacheKey } from '@alova/shared/function';
+import { buildNamespacedCacheKey } from '@alova/shared';
 import Taro from '@tarojs/taro';
 import { createAlova, invalidateCache } from 'alova';
 import AdapterTaro from '../src/adapterReact';

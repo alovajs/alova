@@ -1,6 +1,6 @@
 import { MockRequestLoggerAdapter } from '~/typings';
 
-// 预定义的样式和固定文本
+// Predefined styles and fixed text
 const mockLabel = 'mock';
 const mockLabelColor = '#64bde8';
 const mockLabelBg = '#ccefff';
@@ -18,7 +18,7 @@ const transform2TableData = (obj: AnyObject) => {
 };
 
 type AnyObject = Record<string, any>;
-// 打印请求信息，模拟数据请求专用
+// Print request information, dedicated to simulated data requests
 const consoleRequestInfo: MockRequestLoggerAdapter = ({
   isMock,
   url,
@@ -36,10 +36,10 @@ const consoleRequestInfo: MockRequestLoggerAdapter = ({
     url
   );
 
-  // 请求方法
+  // Request method
   cole.log('%c[Method]', titleStyle, method.toUpperCase());
 
-  // 输出Request Headers
+  // OutputRequestHeaders
   cole.log('%c[Request Headers]', titleStyle);
   cole.table(transform2TableData(headers));
 
@@ -47,12 +47,12 @@ const consoleRequestInfo: MockRequestLoggerAdapter = ({
   cole.log('%c[Query String Parameters]', titleStyle);
   cole.table(transform2TableData(query));
 
-  // 输出request body
+  // Output request body
   cole.log('%c[Request Body]', titleStyle, data || '');
 
-  // 输出response body
+  // Output response body
   if (isMock) {
-    // 响应头有数据时，输出Response Headers
+    // When the response header has data, output Response Headers
     if (Object.keys(responseHeaders).length > 0) {
       cole.log('%c[Response Headers]', titleStyle);
       cole.table(transform2TableData(responseHeaders));

@@ -55,3 +55,5 @@ export interface BackoffPolicy {
    */
   endQuiver?: number;
 }
+
+export const type = {};

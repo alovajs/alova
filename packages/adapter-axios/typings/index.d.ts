@@ -3,7 +3,7 @@ import { AlovaRequestAdapter } from 'alova';
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders } from 'axios';
 
 /**
- * axios请求配置参数
+ * axios request configuration parameters
  */
 export type AlovaAxiosRequestConfig = Omit<
   AxiosRequestConfig,
@@ -20,7 +20,7 @@ export type AlovaAxiosRequestConfig = Omit<
 >;
 
 /**
- * axios请求适配器
+ * axios request adapter
  */
 export type AxiosRequestAdapter = AlovaRequestAdapter<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponseHeaders>;
 
@@ -28,13 +28,13 @@ export interface AdapterCreateOptions {
   axios?: AxiosInstance;
 }
 /**
- * axios请求适配器
- * @param options 选项参数
+ * axios request adapter
+ * @param options option parameters
  */
 export declare function axiosRequestAdapter(options?: AdapterCreateOptions): AxiosRequestAdapter;
 
 /**
- * 模拟响应适配器，它用于@alova/mock中，让模拟请求时也能返回axios响应数据兼容的格式
+ * Mock response adapter, which is used in @alova/mock to allow axios response data to be returned in a compatible format when simulating requests.
  * @example
  * ```js
  * import { axiosRequestAdapter, axiosMockResponse } from '@alova/adapter-axios';

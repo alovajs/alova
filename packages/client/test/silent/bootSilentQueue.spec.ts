@@ -13,8 +13,7 @@ import { push2PersistentSilentQueue } from '@/hooks/silent/storage/silentMethodS
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
 import stringifyVData from '@/hooks/silent/virtualResponse/stringifyVData';
 import VueHook from '@/statesHook/vue';
-import createEventManager from '@alova/shared/createEventManager';
-import { usePromise } from '@alova/shared/function';
+import { createEventManager, usePromise } from '@alova/shared';
 import { createAlova, Method } from 'alova';
 import { delay } from 'root/testUtils';
 import { ScopedSQEvents } from '~/typings/clienthook';
@@ -48,7 +47,7 @@ describe('boot silent queue', () => {
       whole: { id: 1 }
     });
 
-    // 不存在虚拟数据
+    // No dummy data exists
     const methodInstance2 = new Method(
       'DELETE',
       createAlova({
@@ -82,13 +81,13 @@ describe('boot silent queue', () => {
       cacheLogger: false
     });
     const targetQueueName = 'tt2';
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0
     });
 
-    // 模拟数据创建
+    // Simulation data creation
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const emitter = createEventManager();
     const silentMethodInstance = new SilentMethod(methodInstance, 'silent', emitter, 'abcdef');
@@ -107,14 +106,14 @@ describe('boot silent queue', () => {
     });
 
     const targetQueue = silentQueueMap[targetQueueName];
-    // silentMethodInstance2会先进入队列
-    // 而持久化的silentMethodInstance将会在bootSilentFactory时异步合并到队列中
+    // silentMethodInstance2 will enter the queue first
+    // The persistent silentMethodInstance will be asynchronously merged into the queue when bootSilentFactory
     expect(targetQueue[0]).toBe(silentMethodInstance2);
-    expect(targetQueue[1].id).toBe(silentMethodInstance.id); // silentMethodInstance因为会持久化再读取，因此只能通过id对比是否一致
+    expect(targetQueue[1].id).toBe(silentMethodInstance.id); // Silent method instance will be persisted and then read, so it can only be compared by ID to see if it is consistent.
 
     expect(bootMockFn).toHaveBeenCalled();
 
-    // 需要延迟一下让本用例的两次请求走完，否则会影响下个用例的数据
+    // It is necessary to delay the two requests of this use case to complete, otherwise it will affect the data of the next use case.
     await delay(1000);
   });
 
@@ -136,7 +135,7 @@ describe('boot silent queue', () => {
     const virtualResponse = createVirtualResponse({ id: 'loading...' });
     const vid = virtualResponse.id;
 
-    // 模拟数据创建
+    // Simulation data creation
     const methodInstance = new Method(
       'POST',
       alovaInst,
@@ -169,7 +168,7 @@ describe('boot silent queue', () => {
     );
     silentMethodInstance.virtualResponse = virtualResponse;
 
-    // 模拟数据删除
+    // Simulate data deletion
     const methodInstance2 = new Method(
       'DELETE',
       alovaInst,
@@ -208,7 +207,7 @@ describe('boot silent queue', () => {
       undefined,
       [vid]
     );
-    // 构造虚拟数据和实际值的映射集合
+    // Construct a mapping collection of virtual data and actual values
     const vDataResponsePayload = {
       [stringifyVData(virtualResponse)]: { id: 1 },
       [stringifyVData(vid)]: 1
@@ -237,7 +236,7 @@ describe('boot silent queue', () => {
     let successCallIndex = 0;
     onSilentSubmitSuccess(event => {
       successMockFn();
-      // 验证event内的数据
+      // Verify data in event
       expect(event.queueName).toBe(DEFAULT_QUEUE_NAME);
       expect(event).toBeInstanceOf(GlobalSQSuccessEvent);
       expect(event.behavior).toBe('silent');
@@ -260,7 +259,7 @@ describe('boot silent queue', () => {
       successCallIndex += 1;
     });
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0
@@ -269,14 +268,14 @@ describe('boot silent queue', () => {
     await pms;
     await delay(200);
 
-    // 局部调用情况
+    // Local call situation
     expect(methodResolveFn).toHaveBeenCalledTimes(2);
     expect(methodRejectFn).toHaveBeenCalledTimes(0);
     expect(methodFallbackFn).toHaveBeenCalledTimes(0);
     expect(beforeMockFn).toHaveBeenCalledTimes(2);
 
-    // 全局回调调用情况
-    expect(successMockFn).toHaveBeenCalledTimes(2); // 两个silentMethod分别触发一次
+    // Global callback call status
+    expect(successMockFn).toHaveBeenCalledTimes(2); // The two silent methods are triggered once each
   });
 
   test('execute queue that the first is undefined response', async () => {
@@ -289,7 +288,7 @@ describe('boot silent queue', () => {
     const { promise: pms, resolve } = usePromise();
     const virtualResponse = createVirtualResponse({ id: undefined, other: undefined });
     const methodInstance = new Method('POST', alovaInst, '/detail', {
-      transform: () => undefined // 响应数据最终为undefined
+      transform: () => undefined // The response data ends up being undefined
     });
     const emitter = createEventManager<ScopedSQEvents<any>>();
     const silentMethodInstance = new SilentMethod(methodInstance, 'silent', emitter, 'abcdef', undefined, /.*/, 2, {
@@ -335,7 +334,7 @@ describe('boot silent queue', () => {
     await pushNewSilentMethod2Queue(silentMethodInstance, false);
     await pushNewSilentMethod2Queue(silentMethodInstance2, false);
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0
@@ -397,7 +396,7 @@ describe('boot silent queue', () => {
     await pushNewSilentMethod2Queue(silentMethodInstance, false);
     await pushNewSilentMethod2Queue(silentMethodInstance2, false);
 
-    // 启动silentFactory
+    // Start silent factory
     bootSilentFactory({
       alova: alovaInst,
       delay: 0

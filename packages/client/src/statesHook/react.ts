@@ -1,5 +1,4 @@
-import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
-import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, isNumber, noop, trueValue, undefinedValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactHookExportType, ReactState } from '~/typings/stateshook/react';
@@ -36,8 +35,6 @@ export default {
     // `handler` is called when some states change are detected
     const oldStates = useRef(watchingStates);
 
-    // only call once when multiple values changed at the same time
-    const onceRunner = refCurrent(useRef(createSyncOnceRunner()));
     useEffect(() => {
       const oldStatesValue = refCurrent(oldStates);
       // compare the old and new value, and get the index of changed state
@@ -49,11 +46,9 @@ export default {
         }
       }
       setRef(oldStates, watchingStates);
-      onceRunner(() => {
-        if (immediate || isNumber(changedIndex)) {
-          handler(changedIndex);
-        }
-      });
+      if (immediate || isNumber(changedIndex)) {
+        handler(changedIndex);
+      }
 
       // remove states when component is unmounted
       return removeStates;

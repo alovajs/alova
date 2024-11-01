@@ -5,9 +5,7 @@
   "formats": ["esm", "cjs"],
   "external": {
     "alova": "alova",
-    "@alova/shared/function": null,
-    "@alova/shared/vars": null,
-    "@alova/shared/assert": null
+    "@alova/shared": null
   },
   "withDTS": true,
   "dtsOutput": "../alova/typings/serverhook.d.ts"

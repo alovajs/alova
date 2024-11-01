@@ -1,8 +1,7 @@
-import { createSyncOnceRunner, noop } from '@alova/shared/function';
-import { forEach } from '@alova/shared/vars';
+import { createSyncOnceRunner, forEach, noop } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { Accessor, createEffect, createMemo, createSignal, on, onCleanup, onMount } from 'solid-js';
-import { SolidHookExportType } from '~/typings/stateshook/solid';
+import type { SolidHookExportType } from '~/typings/stateshook/solid';
 
 // solid hooks predefined
 export default {
@@ -14,22 +13,17 @@ export default {
     state[1](newVal);
   },
   effectRequest: ({ handler, removeStates, immediate, watchingStates = [] }) => {
-    const syncRunner = createSyncOnceRunner();
     // remove states when component unmounted
     onCleanup(removeStates);
-    // Execute handler immediately upon component mounting
-    onMount(() => {
-      immediate && handler();
-    });
+    immediate && handler();
 
     forEach(watchingStates, (state: Accessor<unknown>, i) => {
       createEffect(
         on(
           state,
-          () =>
-            syncRunner(() => {
-              handler(i);
-            }),
+          () => {
+            handler(i);
+          },
           { defer: true }
         )
       );

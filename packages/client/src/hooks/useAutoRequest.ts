@@ -1,6 +1,6 @@
 import useRequest from '@/hooks/core/useRequest';
-import { noop, statesHookHelper } from '@alova/shared/function';
-import { falseValue, trueValue } from '@alova/shared/vars';
+import { statesHookHelper } from '@/util/helper';
+import { falseValue, noop, trueValue } from '@alova/shared';
 import { AlovaGenerics, globalConfigMap, Method, promiseStatesHook } from 'alova';
 import {
   AlovaMethodHandler,

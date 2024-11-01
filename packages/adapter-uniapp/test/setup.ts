@@ -1,5 +1,4 @@
-import { noop } from '@alova/shared/function';
-import { GeneralFn } from '@alova/shared/types';
+import { GeneralFn, noop } from '@alova/shared';
 import { mockStorageContainer, uniDownloadConfig, uniRequestConfig, uniUploadConfig } from './utils';
 
 interface UniMockMap {

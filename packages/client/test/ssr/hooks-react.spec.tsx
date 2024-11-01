@@ -5,7 +5,7 @@ import { ReactElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { delay, Result } from 'root/testUtils';
 
-// use hook在服务端不再发送请求
+// use hook no longer sends requests on the server side
 describe('[react]use hooks in SSR', () => {
   test("shouldn't request but loading is true", async () => {
     const alova = getAlovaInstance(ReactHook, {
@@ -33,7 +33,7 @@ describe('[react]use hooks in SSR', () => {
     expect(html).toMatch('<span role="path"></span>');
     expect(html).toMatch('<span role="method"></span>');
 
-    // 200ms后依然为请求前状态
+    // It will still be in the pre-request state after 200ms.
     await delay(200);
     expect(successMockFn).not.toHaveBeenCalled();
   });

@@ -44,14 +44,14 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "prepare": "husky",
-    "commit": "git-cz && git push",
+    "commit": "node scripts/index.js bump && git-cz && git push",
     "coveralls": "pnpm run test:coverage && coveralls < coverage/lcov.info",
     "changeset": "changeset",
     "changeset:alpha": "changeset pre enter alpha",
     "changeset:beta": "changeset pre enter beta",
     "changeset:pre.exit": "changeset pre exit",
     "changeset:version": "changeset version",
-    "release": "pnpm run build && pnpm run coveralls && pnpm --filter=@alova/shared fix:reference && changeset publish"
+    "release": "pnpm run build && pnpm run coveralls && changeset publish"
   },
   "author": "Scott Hu",
   "license": "MIT",
@@ -124,7 +124,7 @@
     "rimraf": "5.0.9",
     "rollup": "^4.22.4",
     "rollup-plugin-dts": "^6.1.1",
-    "solid-js": "^1.8.19",
+    "solid-js": "^1.9.3",
     "svelte": "^3.59.2",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
@@ -132,12 +132,15 @@
     "typescript": "^5.6.3",
     "vite-plugin-solid": "^2.10.2",
     "vitest": "^2.1.3",
-    "vue": "^3.4.38",
+    "vue": "^3.5.12",
     "vue-demi": "^0.14.10"
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "@testing-library/user-event": "^14.5.2"
   }
 }

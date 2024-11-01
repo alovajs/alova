@@ -1,6 +1,5 @@
 import { EnumHookType } from '@/util/helper';
-import { FrameworkState } from '@alova/shared/FrameworkState';
-import { undefinedValue } from '@alova/shared/vars';
+import { FrameworkState, undefinedValue } from '@alova/shared';
 import type { AlovaGenerics, FrontRequestState, Progress, ReferingObject } from 'alova';
 import { Method } from 'alova';
 import { Hook, UseHookConfig } from '~/typings/clienthook';
@@ -12,7 +11,7 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
   ro: ReferingObject
 ) =>
   ({
-    /** 最后一次请求的method实例 */
+    /** The method instance of the last request */
     m: undefinedValue as unknown as Method,
 
     /** saveStatesFns */

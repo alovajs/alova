@@ -1,25 +1,23 @@
 import {
+  deleteAttr,
+  falseValue,
+  forEach,
   getConfig,
   getContextOptions,
   getMethodInternalKey,
   instanceOf,
+  isArray,
   isPlainObject,
   key,
-  noop
-} from '@alova/shared/function';
-import {
-  deleteAttr,
-  falseValue,
-  forEach,
-  isArray,
   len,
   mapItem,
+  noop,
   promiseCatch,
   promiseFinally,
   promiseThen,
   pushItem,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import {
   AbortFunction,
   Alova,
@@ -63,7 +61,7 @@ export default class Method<AG extends AlovaGenerics = any> {
   public promise?: Promise<AG['Responded']>;
 
   /**
-   * 请求中断函数，每次请求都会更新这个函数
+   * Request interrupt function, this function will be updated with each request
    */
   public abort: AbortFunction;
 
@@ -91,7 +89,7 @@ export default class Method<AG extends AlovaGenerics = any> {
     instance.type = type;
     instance.context = context;
 
-    // 将请求相关的全局配置合并到Method对象中
+    // Merge request-related global configuration into the method object
     const contextConcatConfig: any = {};
     const mergedLocalCacheKey = 'cacheFor';
     const globalLocalCache = isPlainObject(contextOptions[mergedLocalCacheKey])
@@ -99,19 +97,19 @@ export default class Method<AG extends AlovaGenerics = any> {
       : undefinedValue;
     const hitSource = config && config.hitSource;
 
-    // 合并参数
+    // Merge parameters
     forEach(['timeout', 'shareRequest'] as const, mergedKey => {
       if (contextOptions[mergedKey] !== undefinedValue) {
         contextConcatConfig[mergedKey] = contextOptions[mergedKey];
       }
     });
 
-    // 合并localCache
+    // Merge local cache
     if (globalLocalCache !== undefinedValue) {
       contextConcatConfig[mergedLocalCacheKey] = globalLocalCache;
     }
 
-    // 将hitSource统一处理成数组，且当有method实例时将它们转换为methodKey
+    // Unify hit sources into arrays and convert them into method keys when there are method instances
     if (hitSource) {
       instance.hitSource = mapItem(isArray(hitSource) ? hitSource : [hitSource], sourceItem =>
         instanceOf(sourceItem, Method) ? getMethodInternalKey(sourceItem) : (sourceItem as string | RegExp)
@@ -127,16 +125,16 @@ export default class Method<AG extends AlovaGenerics = any> {
     instance.data = data;
     instance.meta = config ? config.meta : instance.meta;
 
-    // 在外部需要使用原始的key，而不是实时生成key
-    // 原因是，method的参数可能传入引用类型值，但引用类型值在外部改变时，实时生成的key也随之改变，因此使用最开始的key更准确
+    // The original key needs to be used externally instead of generating the key in real time.
+    // The reason is that the parameters of the method may pass in reference type values, but when the reference type value changes externally, the key generated in real time also changes, so it is more accurate to use the initial key.
     instance.key = instance.generateKey();
   }
 
   /**
-   * 绑定下载进度回调函数
-   * @param progressHandler 下载进度回调函数
+   * Bind download progress callback function
+   * @param progressHandler Download progress callback function
    * @version 2.17.0
-   * @return 解绑函数
+   * @return unbind function
    */
   public onDownload(downloadHandler: ProgressHandler) {
     pushItem(this.dhs, downloadHandler);
@@ -144,10 +142,10 @@ export default class Method<AG extends AlovaGenerics = any> {
   }
 
   /**
-   * 绑定上传进度回调函数
-   * @param progressHandler 上传进度回调函数
+   * Bind upload progress callback function
+   * @param progressHandler Upload progress callback function
    * @version 2.17.0
-   * @return 解绑函数
+   * @return unbind function
    */
   public onUpload(uploadHandler: ProgressHandler) {
     pushItem(this.uhs, uploadHandler);
@@ -155,7 +153,7 @@ export default class Method<AG extends AlovaGenerics = any> {
   }
 
   /**
-   * 通过method实例发送请求，返回promise对象
+   * Send a request through a method instance and return a promise object
    */
   public send(forceRequest = falseValue): Promise<AG['Responded']> {
     const instance = this;
@@ -164,7 +162,7 @@ export default class Method<AG extends AlovaGenerics = any> {
       onDownload((loaded, total) => forEach(instance.dhs, handler => handler({ loaded, total })));
     len(instance.uhs) > 0 && onUpload((loaded, total) => forEach(instance.uhs, handler => handler({ loaded, total })));
 
-    // 每次请求时将中断函数绑定给method实例，使用者也可通过methodInstance.abort()来中断当前请求
+    // The interrupt function is bound to the method instance for each request. The user can also interrupt the current request through method instance.abort()
     instance.abort.a = abort;
     instance.fromCache = undefinedValue;
     instance.promise = promiseThen(response(), r => {
@@ -175,8 +173,8 @@ export default class Method<AG extends AlovaGenerics = any> {
   }
 
   /**
-   * 设置方法名称，如果已有名称将被覆盖
-   * @param name 方法名称
+   * Set the method name, if there is already a name it will be overwritten
+   * @param name method name
    */
   public setName(name: string | number) {
     getConfig(this).name = name;
@@ -187,10 +185,10 @@ export default class Method<AG extends AlovaGenerics = any> {
   }
 
   /**
-   * 绑定resolve和/或reject Promise的callback
-   * @param onfulfilled resolve Promise时要执行的回调
-   * @param onrejected 当Promise被reject时要执行的回调
-   * @returns 返回一个Promise，用于执行任何回调
+   * Bind callbacks for resolve and/or reject Promise
+   * @param onfulfilled The callback to be executed when resolving the Promise
+   * @param onrejected The callback to be executed when the Promise is rejected
+   * @returns Returns a Promise for executing any callbacks
    */
   public then<TResult1 = AG['Responded'], TResult2 = never>(
     onfulfilled?: ((value: AG['Responded']) => TResult1 | PromiseLike<TResult1>) | null | undefined,
@@ -200,9 +198,9 @@ export default class Method<AG extends AlovaGenerics = any> {
   }
 
   /**
-   * 绑定一个仅用于reject Promise的回调
-   * @param onrejected 当Promise被reject时要执行的回调
-   * @returns 返回一个完成回调的Promise
+   * Bind a callback only for reject Promise
+   * @param onrejected The callback to be executed when the Promise is rejected
+   * @returns Returns a Promise that completes the callback
    */
   public catch<TResult = never>(
     onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined
@@ -211,9 +209,9 @@ export default class Method<AG extends AlovaGenerics = any> {
   }
 
   /**
-   * 绑定一个回调，该回调在Promise结算（resolve或reject）时调用
-   * @param onfinally Promise结算（resolve或reject）时执行的回调。
-   * @return 返回一个完成回调的Promise。
+   * Bind a callback that is called when the Promise is resolved (resolve or reject)
+   * @param onfinally Callback executed when Promise is resolved (resolve or reject).
+   * @return Returns a Promise that completes the callback.
    */
   public finally(onfinally?: (() => void) | null | undefined): Promise<AG['Responded']> {
     return promiseFinally(this.send(), onfinally);

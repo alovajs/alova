@@ -1,7 +1,7 @@
 import { useAutoRequest } from '@/index';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
-import ReactHook from '@/statesHook/react';
+import ReactHook from 'alova/react';
 import { ReactElement } from 'react';
 import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
@@ -281,7 +281,7 @@ describe('react => useAutoRequest', () => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag }));
     });
 
-    // 默认1000ms内只有第一次会触发请求
+    // By default, only the first request will be triggered within 1000ms.
     tag = 'online';
     mockGlobalEventEmit('online');
     delay(100)

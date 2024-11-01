@@ -1,6 +1,5 @@
 import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
-import { usePromise, uuid } from '@alova/shared/function';
-import { QueueCallback } from '@alova/shared/queueCallback';
+import { QueueCallback, usePromise, uuid } from '@alova/shared';
 import { IPCModule as IPCModule_ } from '@node-ipc/node-ipc';
 import type { IPC } from 'node-ipc';
 
