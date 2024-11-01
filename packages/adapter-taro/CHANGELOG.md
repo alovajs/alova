@@ -1,5 +1,12 @@
 # @alova/adapter-taro
 
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [[`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9)]:
+  - @alova/shared@1.1.0
+
 ## 2.0.7
 
 ### Patch Changes

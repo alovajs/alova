@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.1.0
+
+### Minor Changes
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - move `statesHookHelper` to client, @alova/shared is refactored to build a single file
+
 ## 1.0.7
 
 ### Patch Changes

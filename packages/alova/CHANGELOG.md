@@ -1,5 +1,20 @@
 # alova
 
+## 3.2.0
+
+### Minor Changes
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - add solid statesHook, and now solidjs is supported
+
+### Patch Changes
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that not request immediately when set `immediate` and `store` to true
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - move the debounce function of all statesHook to unified place.
+
+- Updated dependencies [[`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9)]:
+  - @alova/shared@1.1.0
+
 ## 3.1.1
 
 ### Patch Changes
