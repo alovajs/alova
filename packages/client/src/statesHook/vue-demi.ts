@@ -1,4 +1,4 @@
-import { clearTimeoutTimer, forEach, setTimeoutFn, trueValue, undefinedValue } from '@alova/shared';
+import { forEach, trueValue } from '@alova/shared';
 import { StatesExportHelper, StatesHook } from 'alova';
 import {
   ComputedRef,
@@ -33,24 +33,14 @@ export default {
     // When used inside a component, the corresponding state is removed when the component is unloaded.
     if (getCurrentInstance()) {
       onUnmounted(removeStates);
-      onMounted(() => immediate && handler());
-    } else {
-      // When used inside a non-component, use a timer to delay execution.
-      setTimeoutFn(() => {
-        immediate && handler();
-      });
     }
+    immediate && handler();
 
-    let timer: any;
     forEach(watchingStates || [], (state, i) => {
       watch(
         state,
         () => {
-          timer && clearTimeoutTimer(timer);
-          timer = setTimeoutFn(() => {
-            handler(i);
-            timer = undefinedValue;
-          });
+          handler(i);
         },
         { deep: trueValue }
       );

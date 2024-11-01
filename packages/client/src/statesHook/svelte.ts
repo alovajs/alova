@@ -26,14 +26,11 @@ export default {
       immediate && handler();
     });
 
-    let needEmit = falseValue;
-    const syncRunner = createSyncOnceRunner(10);
     forEach(watchingStates || [], (state, i) => {
+      let needEmit = falseValue;
       state.subscribe(() => {
-        syncRunner(() => {
-          // Svelte's `writable` will trigger once by default, so when immediate is false, you need to filter out the first trigger call
-          needEmit ? handler(i) : (needEmit = trueValue);
-        });
+        // Svelte's `writable` will trigger once by default, so when immediate is false, you need to filter out the first trigger call
+        needEmit ? handler(i) : (needEmit = trueValue);
       });
     });
   },

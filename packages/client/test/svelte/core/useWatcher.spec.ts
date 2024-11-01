@@ -1,5 +1,3 @@
-import page from '../components/page-useWatcher.svelte';
-
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { delay } from 'root/testUtils';
 import pageAbortLast from '../components/page-useWatcher-abortLast.svelte';
@@ -7,6 +5,7 @@ import pageDebounceImmediate from '../components/page-useWatcher-debounce-immedi
 import pageDifferentDebounce from '../components/page-useWatcher-different-debounce.svelte';
 import pageImmediate from '../components/page-useWatcher-immediate.svelte';
 import pageSendable from '../components/page-useWatcher-sendable.svelte';
+import page from '../components/page-useWatcher.svelte';
 
 describe('useWatcher hook with svelte', () => {
   test('should send request when change value', async () => {

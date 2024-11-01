@@ -67,7 +67,7 @@ export function useCallback<Fn extends GeneralFn = GeneralFn>(onCallbackChange: 
 }
 
 /**
- * Create an anti-shake function and trigger the function immediately when delay is 0
+ * Create a debounce function and trigger the function immediately when delay is 0
  * Scenario: When calling useWatcher and setting immediate to true, the first call must be executed immediately, otherwise it will cause a delayed call
  * @param {GeneralFn} fn callback function
  * @param {number|(...args: any[]) => number} delay Delay description, dynamic delay can be achieved when set as a function
@@ -217,6 +217,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       statesHook.watch(mapDeps(source), callback, referingObject),
     onMounted: (callback: () => void) => statesHook.onMounted(callback, referingObject),
     onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, referingObject),
+    memorize,
 
     /**
      * refering object that sharing some value with this object.

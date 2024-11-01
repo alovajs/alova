@@ -13,22 +13,17 @@ export default {
     state[1](newVal);
   },
   effectRequest: ({ handler, removeStates, immediate, watchingStates = [] }) => {
-    const syncRunner = createSyncOnceRunner();
     // remove states when component unmounted
     onCleanup(removeStates);
-    // Execute handler immediately upon component mounting
-    onMount(() => {
-      immediate && handler();
-    });
+    immediate && handler();
 
     forEach(watchingStates, (state: Accessor<unknown>, i) => {
       createEffect(
         on(
           state,
-          () =>
-            syncRunner(() => {
-              handler(i);
-            }),
+          () => {
+            handler(i);
+          },
           { defer: true }
         )
       );
