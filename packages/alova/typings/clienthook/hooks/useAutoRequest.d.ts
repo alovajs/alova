@@ -7,7 +7,7 @@ import { RequestHookConfig } from './useRequest';
  */
 export type AutoRequestHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]> = {
   /**
-   * Polling event, unit ms, 0 means not enabled
+   * Polling event, unit is `ms`, 0 means not enabled
    * @default 0
    */
   pollingTime?: number;

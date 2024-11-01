@@ -12,47 +12,47 @@ import {
 import { WatcherHookConfig } from './useWatcher';
 
 /**
- * @description usePagination相关
+ * @description usePagination related
  */
 export type ArgGetter<R, LD> = (data: R) => LD | undefined;
 export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends WatcherHookConfig<AG> {
   /**
-   * 是否预加载上一页
+   * Whether to preload the previous page
    * @default true
    */
   preloadPreviousPage?: boolean;
   /**
-   * 是否预加载下一页
+   * Whether to preload the next page
    * @default true
    */
   preloadNextPage?: boolean;
   /**
-   * 指定数据总数量值
+   * Specify the total amount of data
    * @default response => response.total
    */
   total?: ArgGetter<AG['Responded'], number>;
   /**
-   * 指定分页的数组数据
+   * Specify paginated array data
    * @default response => response.data
    */
   data?: ArgGetter<AG['Responded'], ListData>;
   /**
-   * 是否开启追加模式
+   * Whether to enable append mode
    * @default false
    */
   append?: boolean;
   /**
-   * 初始页码
+   * Initial page number
    * @default 1
    */
   initialPage?: number;
   /**
-   * 初始每页数据条数
+   * Initial number of data items per page
    * @default 10
    */
   initialPageSize?: number;
   /**
-   * 状态监听触发请求，使用 useWatcher 实现
+   * State monitoring triggers requests, implemented using useWatcher
    * @default [page, pageSize]
    */
   watchingStates?: AG['StatesExport']['Watched'][];
@@ -92,49 +92,49 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   update: StateUpdater<UsePaginationExposure<AG, ListData, Args>, AG['StatesExport']>;
 
   /**
-   * 刷新指定页码数据，此函数将忽略缓存强制发送请求
-   * 如果未传入页码则会刷新当前页
-   * 如果传入一个列表项，将会刷新此列表项所在页，只对append模式有效
-   * @param pageOrItemPage 刷新的页码或列表项
+   * Refresh the specified page number data. This function will ignore the cache and force the request to be sent.
+   * If no page number is passed in, the current page will be refreshed.
+   * If a list item is passed in, the page where the list item is located will be refreshed, which is only valid in append mode.
+   * @param pageOrItemPage Refreshed page number or list item
    */
   refresh(pageOrItemPage?: number | ListData[number]): Promise<AG['Responded']>;
 
   /**
-   * 插入一条数据
-   * 如果未传入index，将默认插入到最前面
-   * 如果传入一个列表项，将插入到这个列表项的后面，如果列表项未在列表数据中将会抛出错误
-   * @param item 插入项
-   * @param position 插入位置（索引）或列表项
+   * Insert a piece of data
+   * If no index is passed in, it will be inserted at the front by default.
+   * If a list item is passed in, it will be inserted after the list item. If the list item is not in the list data, an error will be thrown.
+   * @param item insert
+   * @param position Insert position (index) or list item
    */
   insert(item: ListData extends any[] ? ListData[number] : any, position?: number | ListData[number]): Promise<void>;
 
   /**
-   * 移除一条数据
-   * 如果传入的是列表项，将移除此列表项，如果列表项未在列表数据中将会抛出错误
-   * @param position 移除的索引或列表项
+   * Remove a piece of data
+   * If a list item is passed in, the list item will be removed. If the list item is not in the list data, an error will be thrown.
+   * @param position Removed index or list item
    */
   remove(...positions: (number | ListData[number])[]): Promise<void>;
 
   /**
-   * 替换一条数据
-   * 如果position传入的是列表项，将替换此列表项，如果列表项未在列表数据中将会抛出错误
-   * @param item 替换项
-   * @param position 替换位置（索引）或列表项
+   * Replace a piece of data
+   * If the position passed in is a list item, this list item will be replaced. If the list item is not in the list data, an error will be thrown.
+   * @param item replacement
+   * @param position Replace position (index) or list item
    */
   replace(item: ListData extends any[] ? ListData[number] : any, position: number | ListData[number]): void;
 
   /**
-   * 从第一页开始重新加载列表，并清空缓存
+   * Reload the list starting from the first page and clear the cache
    */
   reload(): Promise<AG['Responded']>;
 }
 
 /**
- * alova分页hook
- * 分页相关状态自动管理、前后一页预加载、自动维护数据的新增/编辑/移除
+ * anova paging hook
+ * Automatic management of paging related status, preloading of previous and next pages, automatic maintenance of data addition/editing/removal
  *
- * @param handler method创建函数
- * @param config pagination hook配置
+ * @param handler methodCreate function
+ * @param config pagination hook configuration
  * @returns {UsePaginationExposure}
  */
 export declare function usePagination<AG extends AlovaGenerics, ListData extends unknown[], Args extends any[]>(

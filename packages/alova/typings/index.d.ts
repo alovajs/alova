@@ -1,4 +1,4 @@
-import { EventManager, FrameworkState, IsAny } from '@alova/shared';
+import { EventManager, FrameworkState } from '@alova/shared';
 
 export interface AlovaGenerics<
   R = any,
@@ -99,7 +99,7 @@ export interface AlovaDefaultCacheAdapter extends AlovaGlobalCacheAdapter {
  * expire: expiration time
  *  1. When set to a number: if it is greater than 0, the cached data will be returned first, the expiration time unit is milliseconds, if it is less than or equal to 0, it will not be cached, and Infinity will never expire;
  *  2. When set to a Date object, it means
- * mode: cache mode, optional values ​​are memory, restore
+ * mode: cache mode, optional values are memory, restore
  */
 export type CacheExpire = number | Date | null;
 export type CacheMode = 'memory' | 'restore';
@@ -167,7 +167,7 @@ export type AlovaMethodConfig<AG extends AlovaGenerics, Responded, Transformed> 
    * method metadata
    */
   meta?: AlovaCustomTypes['meta'];
-} & IsAny<AG['RequestConfig'], {}, AG['RequestConfig']>;
+} & AG['RequestConfig'];
 export type AlovaMethodCreateConfig<AG extends AlovaGenerics, Responded, Transformed> = Partial<MethodRequestConfig> &
   AlovaMethodConfig<AG, Responded, Transformed>;
 
@@ -262,7 +262,7 @@ export interface StatesHook<SE extends StatesExport<any>> {
   ) => SE['Computed'];
 
   /**
-   * Values ​​exported for use by developers
+   * Values exported for use by developers
    * @param state status value
    * @param referingObject referring object
    * @returns exported value
@@ -379,7 +379,7 @@ export interface AlovaOptions<AG extends AlovaGenerics> {
   /**
    * Global request local cache settings
    * expire: Expiration time. If it is greater than 0, the cached data will be returned first. The expiration time unit is milliseconds. If it is less than or equal to 0, it will not be cached. Infinity will never expire.
-   * mode: cache mode, optional values ​​are memory, restore
+   * mode: cache mode, optional values are memory, restore
    * Get requests are cached for 5 minutes (300000 milliseconds) by default, and other requests are not cached by default.
    * @default { GET: 300000 }
    */

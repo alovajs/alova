@@ -72,7 +72,7 @@ export const storageSetItem = async (key: string, payload: any) => {
           [vDataValueKey]: primitiveValue,
           ...value
         };
-        // If it is a string type, there will be items like arrays such as 0, 1, and 2 as subscripts and values ​​as characters, and they need to be filtered out.
+        // If it is a string type, there will be items like arrays such as 0, 1, and 2 as subscripts and values as characters, and they need to be filtered out.
         if (instanceOf(value, String)) {
           for (let i = 0; i < len(value as string); i += 1) {
             delete valueWithVData?.[i];

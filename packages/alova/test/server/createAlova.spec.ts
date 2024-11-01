@@ -27,7 +27,7 @@ describe('createAlova', () => {
 
   test('cache logger in server', async () => {
     const logConsoleMockFn = vi.fn();
-    // Eslint disable next line
+    // eslint-disable-next-line
     console.log = logConsoleMockFn; // Rewritten to listen
     const alova = createAlova({
       baseURL,

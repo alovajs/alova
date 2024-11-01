@@ -26,7 +26,7 @@ export const data2QueryString = (data: Record<string, any>) => {
         // If the array contains an array or object, then refValueAttrCount needs to be used once for { b: 2 }, so it is an accumulation method.
         refValueAttrCount += Object.keys(value).length;
       } else if (value !== undefinedValue) {
-        // values ​​of undefined are not added to the query string.
+        // values of undefined are not added to the query string.
         const pathsTransformed = [...paths, key].map((val, i) => (i > 0 ? `[${val}]` : val)).join('');
         ary.push(`${pathsTransformed}=${value}`);
 

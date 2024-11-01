@@ -8,7 +8,7 @@ export interface AlovaXHRRequestConfig {
   /**
    * Set the response data type.
    *
-   * Change response type can be set. values ​​are: "arraybuffer", "blob", "document", "json", and "text".
+   * Change response type can be set. values are: "arraybuffer", "blob", "document", "json", and "text".
    * Setting 1: If the current global object is not a Window object, the setting to "Document" is ignored.
    * Setup 2: Throw an "InvalidStateError" DOMException if the state is loading or completing.
    * Setting 3: If the synchronization flag is set and the current global object is a Window object, an "InvalidAccessError" DOMException is thrown.

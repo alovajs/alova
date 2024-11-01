@@ -290,8 +290,8 @@ const {
   insert,
   replace,
   remove,
-  refresh,
-  reload
+  refresh
+  // reload
 } = exposure;
 
 const awaitResult = ref<string | undefined>();

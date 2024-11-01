@@ -1,4 +1,4 @@
-import page from '#/svelte/components/page-useWatcher.svelte';
+import page from '../components/page-useWatcher.svelte';
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { delay } from 'root/testUtils';

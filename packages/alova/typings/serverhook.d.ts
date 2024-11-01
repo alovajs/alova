@@ -19,43 +19,43 @@ declare class HookedMethod<AG extends AlovaGenerics> extends Method<AG> {
 
 type StoreResult = [points: number, expireTime: number];
 interface LimitHandlerOptions<AG extends AlovaGenerics> {
-    /** 存储key */
+    /** storage key */
     key?: string | ((method: Method<AG>) => string);
 }
 /**
- * 速率限制，在[duration]秒内最大只能有[points]个请求
+ * Rate limit, there can only be a maximum of [points] requests within [duration] seconds
  *
- * 使用场景：
- * 1. 请求限制，例如node作为中间层请求下游服务时，在资源消耗严重的api下，通过ip进行限制以免消耗下游服务器资源
- * 2. 防止密码暴力破解，下游服务器连续多次抛出登录错误时，通过ip或用户名进行限制
- * 3. 作为sendCaptcha的发送限制，防止用户频繁发送验证码
+ * Usage scenarios:
+ * 1. Request restrictions. For example, when node acts as an intermediate layer to request downstream services, under an API with serious resource consumption, it is restricted through IP to avoid consuming downstream server resources.
+ * 2. Prevent password brute force cracking. When the downstream server throws login errors multiple times in a row, restrict it by IP or user name.
+ * 3. As a sending limit for sendCaptcha, it prevents users from frequently sending verification codes.
  */
 interface RateLimitOptions {
     /**
-     * duration内可消耗的最大数量
+     * The maximum quantity that can be consumed within the duration
      * @default 4
      */
     points?: number;
     /**
-     * 点数重置的时间，单位ms
+     * Points reset time, unit ms
      * @default 4000
      */
     duration?: number;
     /**
-     * 命名空间，多个限制器使用相同存储介质时，防止冲突
+     * Namespace, prevents conflicts when multiple limiters use the same storage medium
      */
     keyPrefix?: string;
     /**
-     * 以下两个参数为消耗间隔时间控制
+     * The following two parameters are consumption interval control
      * */
     execEvenly?: boolean;
     execEvenlyMinDelayMs?: number;
     /**
-     * 到达速率限制后，将延长[blockDuration]ms，例如1小时内密码错误5次，则锁定24小时，这个24小时就是此参数
+     * After reaching the rate limit, [blockDuration]ms will be extended. For example, if the password is incorrect 5 times within 1 hour, it will be locked for 24 hours. This 24 hours is this parameter.
      */
     blockDuration?: number;
     /**
-     * 自定义的存储适配器，未设置时默认使用methodObj.context.l2Cache
+     * Custom storage adapter, defaults to methodObj.context.l2Cache if not set
      */
     storage?: AlovaGlobalCacheAdapter;
 }
@@ -77,8 +77,8 @@ declare class RateLimiterStore extends RateLimiterStoreAbstract {
     _delete(key: string | number): Promise<boolean>;
 }
 /**
- * rateLimit修饰的method实例，它的扩展方法对应rate-limit-flexible中创建实例的方法，key为调用rateLimit指定的key。
- * AlovaServerHook目前只能返回未扩展的method类型，还没改为可自定义返回扩展的method类型
+ * The method instance modified by rateLimit, its extension method corresponds to the method of creating an instance in rate-limit-flexible, and the key is the key specified by calling rateLimit.
+ * AlovaServerHook can currently only return unextended method types. It has not been changed to customizable returned extended method types.
  */
 declare class LimitedMethod<AG extends AlovaGenerics> extends HookedMethod<AG> {
     protected limiter: RateLimiterStore;

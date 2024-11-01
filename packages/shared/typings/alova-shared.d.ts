@@ -119,7 +119,7 @@ declare class FrameworkState<Data, Key extends string> extends FrameworkReadable
  * expire: expiration time
  *  1. When set to a number: if it is greater than 0, the cached data will be returned first, the expiration time unit is milliseconds, if it is less than or equal to 0, it will not be cached, and Infinity will never expire;
  *  2. When set to a Date object, it means
- * mode: cache mode, optional values ​​are memory, restore
+ * mode: cache mode, optional values are memory, restore
  */
 type CacheExpire = number | Date | null;
 type CacheMode = 'memory' | 'restore';

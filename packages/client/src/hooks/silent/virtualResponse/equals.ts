@@ -2,7 +2,7 @@ import { trueValue } from '@alova/shared';
 import stringifyVData from './stringifyVData';
 
 /**
- * Determine whether two values ​​are equal in a way that is compatible with virtual data
+ * Determine whether two values are equal in a way that is compatible with virtual data
  * @param prevValue Antecedent value
  * @param nextValue consequent value
  * @returns Are they equal?

@@ -33,7 +33,7 @@ export const BEHAVIOR_STATIC = 'static';
  * useSQRequest(() => createMethod(obj) //Directly reference scope parameters
  *
  * Ways to use dummy data include:
- * 1. Directly assign values ​​as parameters
+ * 1. Directly assign values as parameters
  * 2. Use dummy data id
  * 3. Indirect use of virtual data, such as
  *    vData ? 1 : 0

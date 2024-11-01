@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createServerTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
-import VueHook, { type VueHookType } from '@/statesHook/vue';
+import VueHook from '@/statesHook/vue';
 import type { Equal } from '@alova/shared';
 import { Alova, createAlova, Method } from 'alova';
 import { useRequest } from 'alova/client';
 import adapterFetch from 'alova/fetch';
 import { delay, generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
 import type { Ref } from 'vue';
+import { type VueHookType } from '~/typings/stateshook/vue';
 import { MockRequestAdapter, mockRequestAdapter } from '../mockData';
 
 const baseURL = process.env.NODE_BASE_URL as string;

@@ -4,11 +4,11 @@ import { WatcherHookConfig } from './useWatcher';
 
 /**
  * useSerialWatcher
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：监听状态变化后，串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialWatcher相关数据和操作函数
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: After monitoring status changes, serially request a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialWatcher related data and operation functions
  */
 export declare function useSerialWatcher<AG extends AlovaGenerics, Args extends any[] = any[]>(
   serialHandlers: [Method<AG> | AlovaMethodHandler<AG, Args>, ...AlovaMethodHandler<any>[]],
@@ -17,12 +17,12 @@ export declare function useSerialWatcher<AG extends AlovaGenerics, Args extends 
 ): UseHookExposure<AG, Args>;
 
 /**
- * useSerialWatcher(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：监听状态变化后，串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialWatcher相关数据和操作函数
+ * useSerialWatcher(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: After monitoring status changes, serially request a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialWatcher related data and operation functions
  */
 export declare function useSerialWatcher<
   AG extends AlovaGenerics,
@@ -35,12 +35,12 @@ export declare function useSerialWatcher<
 ): UseHookExposure<AG2, Args>;
 
 /**
- * useSerialWatcher(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：监听状态变化后，串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialWatcher相关数据和操作函数
+ * useSerialWatcher(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: After monitoring status changes, serially request a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialWatcher related data and operation functions
  */
 export declare function useSerialWatcher<
   AG extends AlovaGenerics,
@@ -59,12 +59,12 @@ export declare function useSerialWatcher<
 ): UseHookExposure<AG3, Args>;
 
 /**
- * useSerialWatcher(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：监听状态变化后，串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialWatcher相关数据和操作函数
+ * useSerialWatcher(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: After monitoring status changes, serially request a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialWatcher related data and operation functions
  */
 export declare function useSerialWatcher<
   AG extends AlovaGenerics,
@@ -85,12 +85,12 @@ export declare function useSerialWatcher<
 ): UseHookExposure<AG4, Args>;
 
 /**
- * useSerialWatcher(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：监听状态变化后，串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialWatcher相关数据和操作函数
+ * useSerialWatcher(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: After monitoring status changes, serially request a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialWatcher related data and operation functions
  */
 export declare function useSerialWatcher<
   AG extends AlovaGenerics,
@@ -113,12 +113,12 @@ export declare function useSerialWatcher<
 ): UseHookExposure<AG5, Args>;
 
 /**
- * useSerialWatcher(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：监听状态变化后，串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialWatcher相关数据和操作函数
+ * useSerialWatcher(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: After monitoring status changes, serially request a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialWatcher related data and operation functions
  */
 export declare function useSerialWatcher<
   AG extends AlovaGenerics,
@@ -143,12 +143,12 @@ export declare function useSerialWatcher<
 ): UseHookExposure<AG6, Args>;
 
 /**
- * useSerialWatcher(重载)
- * 串行请求hook，handlers中将接收上一个请求的结果
- * 适用场景：监听状态变化后，串行请求一组接口
- * @param serialHandlers 串行请求回调数组
- * @param config 配置参数
- * @return useSerialWatcher相关数据和操作函数
+ * useSerialWatcher(overload)
+ * Serial request hook, the handlers will receive the result of the previous request
+ * Applicable scenario: After monitoring status changes, serially request a set of interfaces
+ * @param serialHandlers Serial request callback array
+ * @param config Configuration parameters
+ * @return useSerialWatcher related data and operation functions
  */
 export declare function useSerialWatcher<
   AG extends AlovaGenerics,

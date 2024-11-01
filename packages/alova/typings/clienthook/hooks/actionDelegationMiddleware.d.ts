@@ -6,7 +6,7 @@ export interface Actions {
 }
 
 /**
- * actions delegation middleware
+ * Operation function delegation middleware
  * After using this middleware, you can call the delegated function through accessAction.
  * Can delegate multiple identical IDs
  * In order to eliminate the hierarchical restrictions of components
@@ -26,7 +26,7 @@ export declare function actionDelegationMiddleware<
 ) => Promise<any>;
 
 /**
- * Access the actions, if there are multiple matches, onMatch will be called with this
+ * Access the operation function, if there are multiple matches, onMatch will be called with this
  * @param id Delegator id, or regular expression
  * @param onMatch matching subscribers
  */

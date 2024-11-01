@@ -2,7 +2,7 @@ import { AlovaGenerics, AlovaOptions, AlovaRequestAdapter, Method, StatesHook } 
 import adapterFetch from 'alova/fetch';
 
 /**
- * Unifiedly get the type of AlovaRequestAdapter
+ * Unifiedly obtain the type of AlovaRequestAdapter
  */
 export type AlovaRequestAdapterUnified<
   RA extends

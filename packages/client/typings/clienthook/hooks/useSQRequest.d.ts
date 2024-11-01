@@ -55,7 +55,7 @@ export interface GlobalSQSuccessEvent<AG extends AlovaGenerics> extends GlobalSQ
   data: any;
   /**
    * A collection of dummy data and actual values
-   * It only contains the actual values ​​of the dummy data you have used.
+   * It only contains the actual values of the dummy data you have used.
    */
   vDataResponse: Record<string, any>;
 }
@@ -310,7 +310,7 @@ export interface SilentMethod<AG extends AlovaGenerics = AlovaGenerics> {
 export type SQHookBehavior = 'static' | 'queue' | 'silent';
 export interface SQHookConfig<AG extends AlovaGenerics> {
   /**
-   * Hook behavior, optional values ​​are silent, queue, static, default is queue
+   * Hook behavior, optional values are silent, queue, static, default is queue
    * Can be set to an optional value, or a callback function that returns an optional value
    * silent: Submit silently, the method instance will enter the queue and be persisted, and then trigger onSuccess immediately
    * queue: Queue request, the method instance will enter the queue but will not be persisted, onSuccess and onError are triggered normally
