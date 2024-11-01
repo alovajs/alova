@@ -18,7 +18,7 @@ export default mergeConfig(
       svelte()
     ] as Plugin[],
     test: {
-      name: '[SSR]@alova/client',
+      name: '[SSR]client',
       environment: 'node',
       include: ['test/ssr/**/*.{test,spec}.ts(x)?']
     }

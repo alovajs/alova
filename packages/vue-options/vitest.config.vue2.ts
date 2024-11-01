@@ -13,7 +13,7 @@ export default mergeConfig(
       }) as Plugin
     ],
     test: {
-      name: '@alova/vue-options|vue2',
+      name: '[vue2]vue-options',
       env: {
         VUE_VERSION: 'v2'
       },

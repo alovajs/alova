@@ -13,7 +13,7 @@
     "clean": "rimraf ./dist",
     "test": "pnpm run test:vue3 && pnpm run test:vue2",
     "test:vue3": "vitest run",
-    "test:vue2": "vitest --config vitest.config.vue2.ts",
+    "test:vue2": "vitest run --config vitest.config.vue2.ts",
     "build": "npm run clean && alova-scripts build"
   },
   "publishConfig": {
@@ -33,8 +33,7 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.20",
-    "vue": "^2.7.0"
+    "alova": "^3.0.20"
   },
   "dependencies": {
     "@alova/shared": "workspace:*"
