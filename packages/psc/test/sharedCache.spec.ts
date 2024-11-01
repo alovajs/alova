@@ -287,7 +287,7 @@ describe('shared cache', () => {
     stopServer();
   });
 
-  test.skip('should trigger event handler with expect times in node', async () => {
+  test('should trigger event handler with expect times in node', async () => {
     // simulate init operation in the main procress
     const stopServer = await createNodePSCSynchronizer();
 
