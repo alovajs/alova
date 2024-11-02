@@ -1,6 +1,6 @@
 import { accessAction, actionDelegationMiddleware, useCaptcha } from '@/index';
+import VueHook from '@/statesHook/vue';
 import { createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 
@@ -31,36 +31,36 @@ describe('vue => useCaptcha', () => {
       initialCountdown: 5
     });
 
-    // 默认不发送请求
+    // No request is sent by default
     expect(loading.value).toBeFalsy();
     expect(countdown.value).toBe(0);
     expect(data.value).toBeUndefined();
 
     const setTimeoutFn = setTimeout;
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const promise = send();
     await untilCbCalled(setTimeoutFn, 10);
     expect(loading.value).toBeTruthy();
     expect(countdown.value).toBe(0);
 
-    await untilCbCalled(setTimeoutFn, 10); // 使用备份的setTimeout来延迟
-    jest.runAllTimers();
+    await untilCbCalled(setTimeoutFn, 10); // Use backup set timeout to delay
+    vi.runAllTimers();
     await promise;
     expect(countdown.value).toBe(5);
     await expect(send()).rejects.toThrow(/the countdown is not over yet/);
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(countdown.value).toBe(4);
 
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(countdown.value).toBe(3);
 
-    jest.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(3000);
     expect(countdown.value).toBe(0);
 
-    // 倒计时完成了，即使再过段时间倒计时也还是停留在0
-    jest.advanceTimersByTime(3000);
+    // The countdown is completed, and the countdown will still stay at 0 even after a while.
+    vi.advanceTimersByTime(3000);
     expect(countdown.value).toBe(0);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test("shouldn't start countdown when request error", async () => {
@@ -86,22 +86,22 @@ describe('vue => useCaptcha', () => {
       middleware: actionDelegationMiddleware('test_page')
     });
 
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     onSuccess(successFn);
     onComplete(completeFn);
 
     const setTimeoutFn = setTimeout;
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     let promise = send();
-    await untilCbCalled(setTimeoutFn, 10); // 使用备份的setTimeout来延迟
-    jest.runOnlyPendingTimers();
+    await untilCbCalled(setTimeoutFn, 10); // Use backup set timeout to delay
+    vi.runOnlyPendingTimers();
     await promise;
 
     expect(successFn).toHaveBeenCalledTimes(1);
     expect(completeFn).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(6000); // 让倒计时完成
+    vi.advanceTimersByTime(6000); // Let the countdown complete
     accessAction('test_page', handlers => {
       expect(handlers.send).toBeInstanceOf(Function);
       expect(handlers.abort).toBeInstanceOf(Function);
@@ -109,11 +109,11 @@ describe('vue => useCaptcha', () => {
     });
 
     await untilCbCalled(setTimeoutFn, 10);
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     await promise;
     expect(successFn).toHaveBeenCalledTimes(2);
     expect(completeFn).toHaveBeenCalledTimes(2);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

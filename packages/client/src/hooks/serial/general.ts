@@ -1,5 +1,5 @@
-import { createAssert } from '@alova/shared/assert';
 import {
+  createAssert,
   falseValue,
   isArray,
   len,
@@ -8,14 +8,14 @@ import {
   pushItem,
   trueValue,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaFrontMiddleware, AlovaMethodHandler } from '~/typings/clienthook';
 
 /**
- * 断言serialHandlers
+ * Assert serialHandlers
  * @param hookName hook name
- * @param serialHandlers 串行请求method获取函数
+ * @param serialHandlers Serial request method acquisition function
  */
 export const assertSerialHandlers = (hookName: string, serialHandlers: any) =>
   createAssert(hookName)(
@@ -23,23 +23,23 @@ export const assertSerialHandlers = (hookName: string, serialHandlers: any) =>
     'please use an array to represent serial requests'
   );
 
-export type SerialHandlers<AG extends AlovaGenerics> = [
-  Method<AG> | AlovaMethodHandler<AG>,
+export type SerialHandlers<AG extends AlovaGenerics, Args extends any[] = any[]> = [
+  Method<AG> | AlovaMethodHandler<AG, Args>,
   ...AlovaMethodHandler<AG>[]
 ];
 
 /**
- * 创建串行请求中间件
- * @param serialHandlers 串行请求method获取函数
- * @param hookMiddleware use hook的中间件
- * @returns 串行请求中间件
+ * Create serial request middleware
+ * @param serialHandlers Serial request method acquisition function
+ * @param hookMiddleware use hook middleware
+ * @returns Serial request middleware
  */
-export const serialMiddleware = <AG extends AlovaGenerics>(
-  serialHandlers: SerialHandlers<AG>,
-  hookMiddleware?: AlovaFrontMiddleware<AG>,
+export const serialMiddleware = <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  serialHandlers: SerialHandlers<AG, Args>,
+  hookMiddleware?: AlovaFrontMiddleware<AG, Args>,
   serialRequestMethods: Method<AG>[] = []
 ) => {
-  // 第一个handler在外部传递给了use hook，不需要再次请求
+  // The first handler is passed to the use hook externally and does not need to be requested again.
   serialHandlers.shift();
   return ((ctx, next) => {
     hookMiddleware?.(ctx, () => promiseResolve(undefinedValue as any));
@@ -59,5 +59,5 @@ export const serialMiddleware = <AG extends AlovaGenerics>(
     return serialPromise.finally(() => {
       loadingState.v = falseValue;
     });
-  }) as AlovaFrontMiddleware<AG>;
+  }) as AlovaFrontMiddleware<AG, Args>;
 };

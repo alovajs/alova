@@ -3,25 +3,26 @@ import { AlovaMethodHandler, UseHookExposure } from '../general';
 import { FrontRequestHookConfig } from './useRequest';
 
 /** useWatcher config export type */
-export interface WatcherHookConfig<AG extends AlovaGenerics> extends FrontRequestHookConfig<AG> {
-  /** 请求防抖时间（毫秒），传入数组时可按watchingStates的顺序单独设置防抖时间 */
+export interface WatcherHookConfig<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends FrontRequestHookConfig<AG, Args> {
+  /** Request anti-shake time (milliseconds). When passing in the array, you can set the anti-shake time individually in the order of watching states. */
   debounce?: number | number[];
   abortLast?: boolean;
 }
 
 /**
- * 监听特定状态值变化后请求
+ * Request after monitoring specific status value changes
  * @example
  * ```js
  *  const { data, loading, error, send, onSuccess } = useWatcher(() => alova.Get('/api/user-list'), [keywords])
  * ```
- * @param methodHandler method实例或获取函数
- * @param watchingStates 监听状态数组
- * @param config 配置项
- * @returns 响应式请求数据、操作函数及事件绑定函数
+ * @param methodHandler method instance or get function
+ * @param watchingStates Listening status array
+ * @param config Configuration items
+ * @returns Responsive request data, operation functions and event binding functions
  */
-export declare function useWatcher<AG extends AlovaGenerics>(
-  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
+export declare function useWatcher<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
   watchingStates: AG['StatesExport']['Watched'][],
-  config?: WatcherHookConfig<AG>
-): UseHookExposure<AG>;
+  config?: WatcherHookConfig<AG, Args>
+): UseHookExposure<AG, Args>;

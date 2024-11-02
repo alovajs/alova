@@ -1,7 +1,6 @@
 import { ElectronSyncAdapter, NodeSyncAdapter, createNodePSCSynchronizer } from '@/index';
 import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
-import { key } from '@alova/shared/function';
-import { forEach } from '@alova/shared/vars';
+import { forEach, key } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, createAlova, queryCache } from 'alova';
 import GlobalFetch from 'alova/fetch';
 import { IpcMain, IpcRenderer } from 'electron';
@@ -9,7 +8,7 @@ import EventEmitter from 'events';
 import { Result, delay } from 'root/testUtils';
 
 beforeEach(() => {
-  jest.resetModules();
+  vi.resetModules();
 });
 
 const getAlovaInstance = ({ id, l1Cache }: { id?: number; l1Cache?: AlovaGlobalCacheAdapter }) =>
@@ -72,15 +71,15 @@ const prepareEnv = async () => {
 };
 
 const createFakeElectronExports = (eventEmitter: EventEmitter) => {
-  const mainMockOn = jest.fn();
-  const clientMockOn = jest.fn();
+  const mainMockOn = vi.fn();
+  const clientMockOn = vi.fn();
   const ipcMain = {
     on: (name: string, handler: any) =>
       eventEmitter.on(name, (...args) => {
         handler(...args);
         mainMockOn();
       }),
-    emit: jest.fn((name, payload) => eventEmitter.emit(name, { sender: ipcMain }, payload))
+    emit: vi.fn((name, payload) => eventEmitter.emit(name, { sender: ipcMain }, payload))
   } as unknown as IpcMain;
   const ipcRenderer = {
     on: (name: string, handler: any) =>
@@ -88,8 +87,8 @@ const createFakeElectronExports = (eventEmitter: EventEmitter) => {
         handler(...args);
         clientMockOn();
       }),
-    emit: jest.fn((name, payload) => eventEmitter.emit(name, { sender: ipcRenderer }, payload)),
-    invoke: jest.fn(async (name, payload) => eventEmitter.emit(name, { sender: ipcMain }, payload))
+    emit: vi.fn((name, payload) => eventEmitter.emit(name, { sender: ipcRenderer }, payload)),
+    invoke: vi.fn(async (name, payload) => eventEmitter.emit(name, { sender: ipcMain }, payload))
   } as unknown as IpcRenderer;
 
   return {
@@ -293,8 +292,8 @@ describe('shared cache', () => {
     const stopServer = await createNodePSCSynchronizer();
 
     const stopHandler: (() => void)[] = [];
-    const mockSend = jest.fn();
-    const mockReceive = jest.fn();
+    const mockSend = vi.fn();
+    const mockReceive = vi.fn();
 
     const createMockNodeSyncAdapter = () => {
       const rawAdapter = NodeSyncAdapter(stop => stopHandler.push(stop));
@@ -352,8 +351,8 @@ describe('shared cache', () => {
     expect(mockSend).toHaveBeenCalledTimes(5);
     // 3 init events + 6 set events
     expect(mockReceive).toHaveBeenCalledTimes(9);
-    expect(mockReceive.mock.lastCall[0].key).toStrictEqual('$a.2["GET","/unit-test",{"name":"test"},null,{}]');
-    expect(mockReceive.mock.lastCall[0].value[0]).toStrictEqual({
+    expect(mockReceive.mock.lastCall?.[0].key).toStrictEqual('$a.2["GET","/unit-test",{"name":"test"},null,{}]');
+    expect(mockReceive.mock.lastCall?.[0].value[0]).toStrictEqual({
       path: '/unit-test',
       method: 'GET',
       params: { name: 'test' }

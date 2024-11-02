@@ -1,5 +1,15 @@
-import { isFn, isNumber, isString, newInstance, usePromise } from '@alova/shared/function';
-import { falseValue, promiseReject, promiseResolve, trueValue, undefinedValue } from '@alova/shared/vars';
+import {
+  falseValue,
+  isFn,
+  isNumber,
+  isString,
+  newInstance,
+  promiseReject,
+  promiseResolve,
+  trueValue,
+  undefinedValue,
+  usePromise
+} from '@alova/shared';
 import type { AlovaGenerics, Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit } from '~/typings';
 import consoleRequestInfo from './consoleRequestInfo';
@@ -15,7 +25,7 @@ type MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = MockRequ
 };
 export default function MockRequest<RequestConfig, Response, ResponseHeader>(
   {
-    // 此enable为总开关
+    // This enable is the main switch
     enable = trueValue,
     delay = 2000,
     httpAdapter,
@@ -30,7 +40,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
     elements: RequestElements,
     method: Method<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader>>
   ) => {
-    // 获取当前请求的模拟数据集合，如果enable为false，则不返回模拟数据
+    // Get the simulation data collection of the current request. If enable is false, no simulation data will be returned.
     mock = (enable && mock) || {};
 
     const { url, data, type, headers: requestHeaders } = elements;
@@ -44,19 +54,19 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
     const params: Record<string, string> = {};
     const pathnameSplited = pathname.split('/');
     const foundMockDataKeys = Object.keys(mock).filter(key => {
-      // 如果key的前面是-，表示忽略此模拟数据，此时也返回false
+      // If the key is preceded by , it means that this simulation data is ignored, and false is also returned at this time.
       if (key.startsWith('-')) {
         return falseValue;
       }
 
-      // 匹配请求方法
+      // Match request method
       let methodType = 'GET';
       key = key.replace(/^\[(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE|CONNECT)\]/i, (_, $1) => {
         methodType = $1.toUpperCase();
         return '';
       });
 
-      // 请求方法不匹配，返回false
+      // The request method does not match and returns false.
       if (methodType !== type.toUpperCase()) {
         return falseValue;
       }
@@ -66,8 +76,8 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
         return falseValue;
       }
 
-      // 通过相同下标匹配来判断是否匹配该路径
-      // 如果遇到通配符则直接通过
+      // Determine whether the path matches by matching with the same subscript
+      // If a wildcard is encountered, pass it directly
       for (const i in keySplited) {
         const keySplitedItem = keySplited[i];
         const matchedParamKey = (keySplitedItem.match(/^\{(.*)\}$/) || ['', ''])[1];
@@ -82,12 +92,12 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
       return trueValue;
     });
 
-    // 如果匹配了多个，则优先使用没有通配符的，如果都有通配符则使用第一个匹配到的
+    // If there are multiple matches, the one without wildcards will be used first. If there are both wildcards, the first matched one will be used.
     let finalKey = foundMockDataKeys.find(key => !/\{.*\}/.test(key));
     finalKey = finalKey || foundMockDataKeys.shift();
     const mockDataRaw = finalKey ? mock[finalKey] : undefinedValue;
 
-    // 如果没有匹配到模拟数据，则表示要发起请求使用httpAdapter来发送请求
+    // If no simulated data is matched, it means that a request is to be initiated and the http adapter is used to send the request.
     if (mockDataRaw === undefinedValue) {
       if (httpAdapter) {
         isFn(mockRequestLogger) &&
@@ -117,7 +127,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
     }
 
     const timer = setTimeout(() => {
-      // response支持返回promise对象
+      // Response supports returning promise objects
       try {
         const res = isFn(mockDataRaw)
           ? mockDataRaw({
@@ -128,7 +138,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
             })
           : mockDataRaw;
 
-        // 这段代码表示，将内部reject赋值到外部，如果超时了则立即触发reject，或者等待res（如果res为promise）resolve
+        // This code means that the internal reject is assigned to the outside, and if the timeout occurs, the reject is triggered immediately, or waits for res (if res is a promise) to resolve
         resolve(
           newInstance(Promise<any>, (resolveInner, rejectInner) => {
             reject = rejectInner;
@@ -147,18 +157,18 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
         let responseHeaders = {};
         let body = undefinedValue;
 
-        // 如果没有返回值则认为404
+        // If there is no return value, it is considered 404
         if (response === undefinedValue) {
           status = 404;
           statusText = 'api not found';
         } else if (response && isNumber(response.status) && isString(response.statusText)) {
-          // 返回了自定义状态码和状态文本，将它作为响应信息
+          // Returned a custom status code and status text as the response message
           status = response.status;
           statusText = response.statusText;
           responseHeaders = response.responseHeaders || responseHeaders;
           body = response.body;
         } else {
-          // 否则，直接将response作为响应数据
+          // Otherwise, use response directly as response data
           body = response;
         }
 
@@ -179,7 +189,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
             reject(error);
           }
         }).then(response => {
-          // 打印模拟数据请求信息
+          // Print simulation data request information
           isFn(mockRequestLogger) &&
             mockRequestLogger({
               isMock: trueValue,
@@ -197,7 +207,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
       })
       .catch(error => promiseReject(onMockError(error, method)));
 
-    // 返回响应数据
+    // Return response data
     return {
       response: () =>
         resonpsePromise.then(({ response }) =>

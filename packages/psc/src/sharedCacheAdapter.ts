@@ -1,8 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { createAssert } from '@alova/shared/assert';
-import { isPlainObject, usePromise, uuid } from '@alova/shared/function';
-import { QueueCallback } from '@alova/shared/queueCallback';
-import { deleteAttr, objectKeys } from '@alova/shared/vars';
+import { createAssert, deleteAttr, isPlainObject, objectKeys, QueueCallback, usePromise, uuid } from '@alova/shared';
 import { AlovaGlobalCacheAdapter } from 'alova';
 
 export type SharedCacheEvent = {

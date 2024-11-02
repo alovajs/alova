@@ -1,6 +1,6 @@
 import useRequest from '@/hooks/core/useRequest';
-import { noop, statesHookHelper } from '@alova/shared/function';
-import { falseValue, trueValue } from '@alova/shared/vars';
+import { statesHookHelper } from '@/util/helper';
+import { falseValue, noop, trueValue } from '@alova/shared';
 import { AlovaGenerics, globalConfigMap, Method, promiseStatesHook } from 'alova';
 import {
   AlovaMethodHandler,
@@ -11,10 +11,10 @@ import {
 } from '~/typings/clienthook';
 
 interface AutoRequestHook {
-  <AG extends AlovaGenerics>(
-    handler: Method<AG> | AlovaMethodHandler<AG>,
+  <AG extends AlovaGenerics, Args extends any[] = any[]>(
+    handler: Method<AG> | AlovaMethodHandler<AG, Args>,
     config?: AutoRequestHookConfig<AG>
-  ): UseHookExposure<AG>;
+  ): UseHookExposure<AG, Args>;
   onNetwork<AG extends AlovaGenerics = AlovaGenerics>(
     notify: NotifyHandler,
     config: AutoRequestHookConfig<AG>
@@ -54,7 +54,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
   });
   const notify = () => {
     if (notifiable) {
-      states.send();
+      (states.send as any)();
       if (throttle > 0) {
         notifiable = falseValue;
         setTimeout(() => {
@@ -82,7 +82,7 @@ const useAutoRequest: AutoRequestHook = (handler, config = {}) => {
     offVisiblity();
     offPolling();
   });
-  return states;
+  return states as any;
 };
 
 const on = (type: string, handler: NotifyHandler) => {

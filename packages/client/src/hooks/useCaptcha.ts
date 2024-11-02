@@ -1,15 +1,14 @@
 import useRequest from '@/hooks/core/useRequest';
-import { AlovaError, createAssert } from '@alova/shared/assert';
-import { newInstance, statesHookHelper } from '@alova/shared/function';
-import { PromiseCls, falseValue, undefinedValue } from '@alova/shared/vars';
+import { statesHookHelper } from '@/util/helper';
+import { AlovaError, PromiseCls, createAssert, falseValue, newInstance, undefinedValue } from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, CaptchaHookConfig } from '~/typings/clienthook';
 
 const hookPrefix = 'useCaptcha';
 const captchaAssert = createAssert(hookPrefix);
-export default <AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
-  config: CaptchaHookConfig<AG> = {}
+export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
+  config: CaptchaHookConfig<AG, Args> = {}
 ) => {
   const { initialCountdown, middleware } = config;
   captchaAssert(initialCountdown === undefinedValue || initialCountdown > 0, 'initialCountdown must be greater than 0');
@@ -32,7 +31,7 @@ export default <AG extends AlovaGenerics>(
   });
 
   const timer = ref(undefinedValue as NodeJS.Timeout | undefined);
-  const send = (...args: any[]) =>
+  const send = (...args: [...Args, ...any[]]) =>
     newInstance(PromiseCls, (resolve, reject) => {
       if (countdown.v <= 0) {
         requestReturned

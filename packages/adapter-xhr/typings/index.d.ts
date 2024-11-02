@@ -2,38 +2,38 @@ import { MockResponse } from '@alova/mock';
 import { AlovaRequestAdapter } from 'alova';
 
 /**
- * xhr请求配置参数
+ * xhr request configuration parameters
  */
 export interface AlovaXHRRequestConfig {
   /**
-   * 设置响应数据类型。
+   * Set the response data type.
    *
-   * 可以设置更改响应类型。 值为：“arraybuffer”、“blob”、“document”、“json”和“text”。
-   * 设置1：如果当前全局对象不是 Window 对象，则忽略设置为“文档”。
-   * 设置2：如果状态正在加载或完成，则抛出“InvalidStateError”DOMException。
-   * 设置3：如果设置了同步标志且当前全局对象是 Window 对象，则抛出“InvalidAccessError”DOMException。
+   * Change response type can be set. values are: "arraybuffer", "blob", "document", "json", and "text".
+   * Setting 1: If the current global object is not a Window object, the setting to "Document" is ignored.
+   * Setup 2: Throw an "InvalidStateError" DOMException if the state is loading or completing.
+   * Setting 3: If the synchronization flag is set and the current global object is a Window object, an "InvalidAccessError" DOMException is thrown.
    * @default "json"
    */
   responseType?: XMLHttpRequestResponseType;
 
   /**
-   * 当凭证要包含在跨源请求中时为true。 当它们被排除在跨源请求中以及当 cookie 在其响应中被忽略时为 false。 默认为false。
-   * 如果状态未发送或未打开，或者设置了send() 标志，则抛出“InvalidStateError”DOMException。
+   * True when credentials are to be included in cross-origin requests. False when they are excluded from cross-origin requests and when cookies are ignored in their responses. The default is false.
+   * If the state has not been sent or opened, or the send() flag is set, an "InvalidStateError" DOMException is thrown.
    * @default false
    */
   withCredentials?: boolean;
 
   /**
-   * 设置响应数据的mimeType
+   * Set the mimeType of the response data
    */
   mimeType?: string;
 
   /**
-   * `auth` 表示应该使用 HTTP Basic 身份验证，并提供凭据。
-   * 这将设置一个 `Authorization` 标头，覆盖任何现有的
-   * 使用 `headers` 设置的 `Authorization` 自定义标头。
-   * 请注意，只有 HTTP Basic 身份验证可以通过此参数进行配置。
-   * 对于 Bearer 令牌等，请改用 `Authorization` 自定义标头。
+   * `auth` indicates that HTTP Basic authentication should be used, providing credentials.
+   * This will set an `Authorization` header, overwriting any existing
+   * Use `Authorization` custom headers set by `headers`.
+   * Note that only HTTP Basic authentication can be configured with this parameter.
+   * For Bearer tokens etc., use the `Authorization` custom header instead.
    */
   auth?: {
     username: string;
@@ -42,14 +42,14 @@ export interface AlovaXHRRequestConfig {
 }
 
 /**
- * 响应头信息
+ * Response header information
  */
 export interface AlovaXHRResponseHeaders {
   [x: string]: any;
 }
 
 /**
- * 响应数据结构
+ * response data structure
  */
 export interface AlovaXHRResponse<T = any> {
   status: number;
@@ -59,17 +59,17 @@ export interface AlovaXHRResponse<T = any> {
 }
 
 /**
- * XMLHttpRequest请求适配器类型
+ * XMLHttpRequest request adapter type
  */
 export type AlovaXHRAdapter = AlovaRequestAdapter<AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders>;
 
 /**
- * XMLHttpRequest请求适配器
+ * XMLHttpRequest request adapter
  */
 export declare function xhrRequestAdapter(): AlovaXHRAdapter;
 
 /**
- * 模拟响应适配器，它用于@alova/mock中，让模拟请求时也能返回xhr响应数据兼容的格式
+ * Mock response adapter, which is used in @alova/mock to allow xhr response data to be returned in a format compatible with mock requests.
  * @example
  * ```js
  * import { xhrRequestAdapter, xhrMockResponse } from '@alova/adapter-xhr';

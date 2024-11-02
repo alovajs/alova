@@ -52,13 +52,13 @@ describe('invalitate cached response data', () => {
     });
 
     await Promise.all([Get1, Get2]);
-    // 此时响应数据来自网络请求
+    // At this time, the response data comes from the network request
     expect(Get1.fromCache).toBeFalsy();
     expect(Get2.fromCache).toBeFalsy();
 
-    // 检查缓存情况
+    // Check cache
     const [data1, data2] = await Promise.all([Get1, Get2]);
-    // 此时响应数据来自缓存
+    // At this time, the response data comes from the cache
     expect(Get1.fromCache).toBeTruthy();
     expect(Get2.fromCache).toBeTruthy();
 
@@ -69,11 +69,11 @@ describe('invalitate cached response data', () => {
       params: { count: 0, countKey: 'c' }
     });
 
-    await invalidateCache(); // 清空缓存
+    await invalidateCache(); // Clear cache
 
-    // 缓存清空，会重新请求
+    // The cache is cleared and the request will be made again.
     const [data11, data22] = await Promise.all([Get1, Get2]);
-    // 缓存清除，此时响应数据再次来自网络请求
+    // Cache clearing, now the response data comes from the network request again
     expect(Get1.fromCache).toBeFalsy();
     expect(Get2.fromCache).toBeFalsy();
     expect(data11).toStrictEqual({ path: '/unit-test', method: 'GET', params: {} });
@@ -105,11 +105,11 @@ describe('invalitate cached response data', () => {
     });
 
     await Promise.all([Get1, Get2]);
-    // 此时响应数据来自网络请求
+    // At this time, the response data comes from the network request
     expect(Get1.fromCache).toBeFalsy();
     expect(Get2.fromCache).toBeFalsy();
 
-    // 检查缓存情况
+    // Check cache
     const cacheGet1 = { path: '/unit-test', method: 'GET', params: {} };
     const cacheGet2 = {
       path: '/unit-test-count',
@@ -127,9 +127,9 @@ describe('invalitate cached response data', () => {
     });
     expect(persistentData2).toStrictEqual(cacheGet2);
 
-    await invalidateCache(); // 清空缓存
+    await invalidateCache(); // Clear cache
 
-    // 缓存清空
+    // Cache clear
     expect(
       await queryCache(Get1, {
         policy: 'l1'
@@ -187,7 +187,7 @@ describe('invalitate cached response data', () => {
     });
   });
 
-  // invalidateCache 可以批量失效不同alova实例的缓存
+  // invalidateCache can batch invalidate the cache of different alova instances.
   test('should batch invalidate the caches created by different alova instance.', async () => {
     const alova1 = getAlovaInstance();
     const alova2 = getAlovaInstance();

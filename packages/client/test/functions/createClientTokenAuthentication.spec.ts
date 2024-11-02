@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createClientTokenAuthentication } from '@/functions/tokenAuthentication/createTokenAuthentication';
 import { useRequest } from '@/index';
-import type { Equal } from '@alova/shared/types';
+import VueHook from '@/statesHook/vue';
+import type { Equal } from '@alova/shared';
 import { Alova, createAlova, Method } from 'alova';
 import adapterFetch from 'alova/fetch';
-import VueHook, { type VueHookType } from 'alova/vue';
 import { delay } from 'msw';
 import { generateContinuousNumbers, Result, untilCbCalled } from 'root/testUtils';
 import type { Ref } from 'vue';
+import { type VueHookType } from '~/typings/stateshook/vue';
 import { MockRequestAdapter, mockRequestAdapter } from '../mockData';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -19,9 +20,9 @@ describe('createClientTokenAuthentication', () => {
   test('type check', async () => {
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<VueHookType>({});
 
-    onResponseRefreshToken((response, method) => {
+    onResponseRefreshToken((response, _method) => {
       type Response = typeof response;
-      type Method = typeof method;
+      type Method = typeof _method;
 
       expect<ReturnType<Response['json']> extends Promise<any> ? true : never>(true);
       expect<Response['status'] extends number ? true : never>(true);
@@ -29,8 +30,8 @@ describe('createClientTokenAuthentication', () => {
       expect<Method['context'] extends Alova<any> ? true : never>(true);
     });
 
-    onAuthRequired(method => {
-      type Method = typeof method;
+    onAuthRequired(_method => {
+      type Method = typeof _method;
       expect<Method['context'] extends Alova<any> ? true : never>(true);
     });
   });
@@ -39,8 +40,8 @@ describe('createClientTokenAuthentication', () => {
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<VueHookType, MockRequestAdapter>(
       {}
     );
-    const beforeRequestFn = jest.fn();
-    const responseFn = jest.fn();
+    const beforeRequestFn = vi.fn();
+    const responseFn = vi.fn();
     const alovaInst = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -60,8 +61,8 @@ describe('createClientTokenAuthentication', () => {
     expect(beforeRequestFn).toHaveBeenCalledTimes(1);
     expect(responseFn).toHaveBeenCalledTimes(1);
 
-    const responseErrorFn = jest.fn();
-    const completeFn = jest.fn();
+    const responseErrorFn = vi.fn();
+    const completeFn = vi.fn();
     const alovaInst2 = createAlova({
       statesHook: VueHook,
       requestAdapter: mockRequestAdapter,
@@ -145,7 +146,7 @@ describe('createClientTokenAuthentication', () => {
   });
 
   test('should emit login interceptor when set authRole to `login`', async () => {
-    const loginInterceptorFn = jest.fn();
+    const loginInterceptorFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         login(response, method) {
@@ -199,7 +200,7 @@ describe('createClientTokenAuthentication', () => {
     expect(loginInterceptorFn).toHaveBeenCalledTimes(2);
   });
   test('should emit logout interceptor when set authRole to `logout`', async () => {
-    const logoutInterceptorFn = jest.fn();
+    const logoutInterceptorFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         logout(response, method) {
@@ -281,7 +282,7 @@ describe('createClientTokenAuthentication', () => {
     loginMethod.meta = {
       authRole: 'login'
     };
-    const { onSuccess, data } = useRequest(loginMethod);
+    const { onSuccess, data: dataUnused } = useRequest(loginMethod);
     onSuccess(() => {
       orderAry.push('useHook.onSuccess');
     });
@@ -289,7 +290,7 @@ describe('createClientTokenAuthentication', () => {
     await untilCbCalled(onSuccess);
     expect(orderAry).toStrictEqual(['login', 'global.onSuccess', 'useHook.onSuccess']);
 
-    // 测试logout
+    // test logout
     orderAry = [];
     const logoutMethod = alovaInst.Get<ListResponse>('/list');
     logoutMethod.meta = {
@@ -302,13 +303,13 @@ describe('createClientTokenAuthentication', () => {
 
     await untilCbCalled(onLogoutSuccess);
     expect(orderAry).toStrictEqual(['logout', 'global.onSuccess', 'useHook.onSuccess']);
-    expect<Equal<typeof data, Ref<ListResponse>>>(true);
+    expect<Equal<typeof dataUnused, Ref<ListResponse>>>(true);
   });
 
   test('should refresh token first when it is expired', async () => {
     let token = '';
-    const refreshTokenFn = jest.fn();
-    const beforeRequestFn = jest.fn();
+    const refreshTokenFn = vi.fn();
+    const beforeRequestFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         refreshToken: {
@@ -344,8 +345,8 @@ describe('createClientTokenAuthentication', () => {
   test('the requests should wait until token refreshed when token is refreshing', async () => {
     let token = '';
 
-    const refreshTokenFn = jest.fn();
-    const beforeRequestFn = jest.fn();
+    const refreshTokenFn = vi.fn();
+    const beforeRequestFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createClientTokenAuthentication<
       VueHookType,
       MockRequestAdapter
@@ -359,7 +360,7 @@ describe('createClientTokenAuthentication', () => {
             refreshToken: true
           };
           token = (await refreshMethod).token;
-          expect(waitingList).toHaveLength(1); // 等待列表中有一个请求
+          expect(waitingList).toHaveLength(1); // There is a request in the waiting list
           refreshTokenFn();
         },
         metaMatches: {
@@ -390,14 +391,14 @@ describe('createClientTokenAuthentication', () => {
     const [list, list2] = await Promise.all([method, method]);
     expect(list).toStrictEqual(generateContinuousNumbers(10, 5));
     expect(list2).toStrictEqual(generateContinuousNumbers(10, 5));
-    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // 多次请求，只会刷新一次token
-    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // 两次list-auth，1次refresh-token
-    expect(waitingList).toHaveLength(0); // 等待列表中的请求已发出
+    expect(refreshTokenFn).toHaveBeenCalledTimes(1); // Multiple requests will only refresh the token once.
+    expect(beforeRequestFn).toHaveBeenCalledTimes(3); // List auth twice, refresh token once
+    expect(waitingList).toHaveLength(0); // The request in the waiting list has been issued
   });
   test("shouldn't continue run when throw error in refreshToken", async () => {
     let token = '';
-    const refreshTokenFn = jest.fn();
-    const redirectLoginFn = jest.fn();
+    const refreshTokenFn = vi.fn();
+    const redirectLoginFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken, waitingList } = createClientTokenAuthentication<
       VueHookType,
       MockRequestAdapter
@@ -413,7 +414,7 @@ describe('createClientTokenAuthentication', () => {
           refreshTokenFn();
           try {
             token = (await refreshMethod).token;
-            expect(waitingList).toHaveLength(1); // 等待列表中有一个请求
+            expect(waitingList).toHaveLength(1); // There is a request in the waiting list
           } catch (error) {
             redirectLoginFn();
             throw error;
@@ -439,12 +440,12 @@ describe('createClientTokenAuthentication', () => {
     await expect(method).rejects.toThrow();
     expect(refreshTokenFn).toHaveBeenCalledTimes(1);
     expect(redirectLoginFn).toHaveBeenCalledTimes(1);
-    expect(waitingList).toHaveLength(0); // refreshToken.handler中抛出错误，也会清空等待列表
+    expect(waitingList).toHaveLength(0); // An error is thrown in Refresh token.handler and the waiting list will also be cleared.
   });
   test('should emit bypass the token validation when set authRole to null', async () => {
     let token = '';
-    const expireFn = jest.fn();
-    const refreshTokenFn = jest.fn();
+    const expireFn = vi.fn();
+    const refreshTokenFn = vi.fn();
     const { onAuthRequired, onResponseRefreshToken } = createClientTokenAuthentication<VueHookType, MockRequestAdapter>(
       {
         refreshToken: {
@@ -473,7 +474,7 @@ describe('createClientTokenAuthentication', () => {
       cacheFor: null,
       beforeRequest: onAuthRequired(),
       responded: onResponseRefreshToken((response, method) => {
-        expect(method.config.headers.Authorization).toBeUndefined(); // 绕过了token验证阶段，因此发送请求时不会带token
+        expect(method.config.headers.Authorization).toBeUndefined(); // The token verification phase is bypassed, so the token will not be included when sending the request.
         return response;
       })
     });
@@ -483,10 +484,10 @@ describe('createClientTokenAuthentication', () => {
     };
     const { list } = await method;
     expect(list).toStrictEqual(generateContinuousNumbers(9));
-    expect(refreshTokenFn).not.toHaveBeenCalled(); // authRole=null会直接放行
+    expect(refreshTokenFn).not.toHaveBeenCalled(); // Auth role=null will be released directly.
     expect(expireFn).not.toHaveBeenCalled();
 
-    // 自定义忽略method规则
+    // Customize ignore method rules
     const { onAuthRequired: onAuthRequired2, onResponseRefreshToken: onResponseRefreshToken2 } =
       createClientTokenAuthentication<VueHookType, MockRequestAdapter>({
         visitorMeta: {
@@ -517,7 +518,7 @@ describe('createClientTokenAuthentication', () => {
       cacheFor: null,
       beforeRequest: onAuthRequired2(),
       responded: onResponseRefreshToken2((response, method) => {
-        expect(method.config.headers.Authorization).toBeUndefined(); // 绕过了token验证阶段，因此发送请求时不会带token
+        expect(method.config.headers.Authorization).toBeUndefined(); // The token verification phase is bypassed, so the token will not be included when sending the request.
         return response;
       })
     });
@@ -527,7 +528,7 @@ describe('createClientTokenAuthentication', () => {
     };
     const { list: list2 } = await method2;
     expect(list2).toStrictEqual(generateContinuousNumbers(9));
-    expect(refreshTokenFn).not.toHaveBeenCalled(); // authRole=null会直接放行
+    expect(refreshTokenFn).not.toHaveBeenCalled(); // Auth role=null will be released directly.
     expect(expireFn).not.toHaveBeenCalled();
   });
 });

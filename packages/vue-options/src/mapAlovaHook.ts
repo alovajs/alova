@@ -1,24 +1,23 @@
-import { isPlainObject } from '@alova/shared/function';
-import { ObjectCls, trueValue } from '@alova/shared/vars';
+import { isPlainObject, ObjectCls, trueValue } from '@alova/shared';
 import { computed, reactive, version } from 'vue';
 import { UseHookCallers, UseHookMapGetter, VueHookMapperMixin } from '~/typings';
 import { classifyHookExposure, extractWatches } from './helper';
 import myAssert from './myAssert';
 
 /**
- * 将useHook的返回值和操作函数动态映射到vueComponent上
+ * Dynamically map the return value and operation function of useHook to vueComponent
  *
- * **本模块经历了一定的探索过程，如下：**
- * 1. 在beforeCreate中动态添加use hook数据和函数到$options中，发现在mapGetter中无法访问到完整的vueComponent数据；
- * 2. 在data函数中调用mapGetter并返回use hook数据，这样就避免了动态添加，但获取的数据还是不够完整，例如computed、injecting无法获取到；
- * 3. 为了让mapGetter中的this可以访问到完整的数据，如data、props、computed、injecting、setup、methods等，就必须在created及以后的生命周期触发函数，但发现dataKey无法动态通过$set挂载到vueComponent对象上，$set只能动态挂载data中的某个子对象中；
- * 4. 在data中先定义一个用于存放全部use hook数据的命名空间（例如叫alova_namespace），那在用户访问use hook数据时需要通过alova_namespace.xxx.loading，太麻烦了，希望可以减少一层；
- * 5. 希望使用computed来减少一层访问路径，但在created中无法自行动态挂载computed到vueComponent上；
- * 6. （1.x中的方案）想到通过Object.defineProperty自定义挂载use hook数据到vueComponent上，并作为代理访问，这样就实现了访问xxx.loading时实际访问的是alova_namespace.xxx.loading
- * 7. （2.x中的方案）为了适配alova@3.x，现在需要动态挂载计算属性到当前实例上，同时也希望消除watch属性需要辅助函数`mapWatcher`，先方案时使用`reactive`和`computed`来动态创建状态和计算属性并挂载到当前实例上，目前要求版本为vue@2.7.x和vue@3.x，将不再支持vue@2.7之前的版本
+ * ** This module has gone through a certain exploration process, as follows: **
+ * 1. Dynamically add use hook data and functions to $options in beforeCreate, and find that the complete vueComponent data cannot be accessed in mapGetter;
+ * 2. Call mapGetter in the data function and return the use hook data. This avoids dynamic addition, but the data obtained is still incomplete. For example, computed and injecting cannot be obtained;
+ * 3. In order to allow this in mapGetter to access complete data, such as data, props, computed, injecting, setup, methods, etc., the function must be triggered in the created and subsequent life cycles. However, it was found that the dataKey cannot be dynamically hung through $set. Loaded to the vueComponent object, $set can only dynamically mount a sub-object in data;
+ * 4. First define a namespace in data to store all use hook data (for example, called alova_namespace). Then when users access use hook data, they need to go through alova_namespace.xxx.loading. It is too troublesome. I hope it can be reduced by one layer;
+ * 5. I hope to use computed to reduce one layer of access paths, but I cannot dynamically mount computed to vueComponent in created;
+ * 6. (Scheme in 1.x) I thought of custom-mounting use hook data to vueComponent through Object.defineProperty and accessing it as a proxy. In this way, when accessing xxx.loading, the actual access is alova_namespace.xxx.loading.
+ * 7. (Scheme in 2.x) In order to adapt to alova@3.x, it is now necessary to dynamically mount calculated properties to the current instance. At the same time, we also hope to eliminate the need for watch properties and the auxiliary function `mapWatcher`. Use `reactive` in the first solution ` and `computed` to dynamically create state and calculated properties and mount them on the current instance. The current required versions are vue@2.7.x and vue@3.x, and versions before vue@2.7 will no longer be supported.
  *
- * @param mapGetter usehook映射函数，它将返回映射的集合
- * @returns vue mixins数组
+ * @param mapGetter usehook mapping function which will return a mapped collection
+ * @returns vue mixins array
  */
 export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) => {
   const mixinItem = {
@@ -27,9 +26,9 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
       const hookMapper = mapGetter.call(vm, vm);
       myAssert(isPlainObject(hookMapper), 'expect receive an object which contains use hook exposures');
 
-      // 在created阶段遍历发送请求
+      // Traverse and send requests in the created phase
       for (const dataKey in hookMapper) {
-        // 可以在useHookReturns中通过_$c获取useHook的config对象引用，将vue对象和dataKey传入alova内部
+        // You can get the config object reference of use hook through $c in use hook returns, and pass the vue object and data key into alova.
         const useHookExposure = hookMapper[dataKey];
         const { __referingObj: referingObject } = useHookExposure;
         myAssert(
@@ -46,7 +45,7 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
         // require the version of vue must be 3.x or 2.7.x
         myAssert(/^3|2\.7/.test(version), 'please upgrade vue to `2.7.x` or `3.x`');
 
-        // 挂载响应式状态和计算属性
+        // Mount reactive state and computed properties
         const proxy = {};
         vm[dataKey] = proxy;
         const rectiveStates = reactive(states);
@@ -72,13 +71,13 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
           });
         }
 
-        // 设置watchers
+        // Set watchers
         const watchers = extractWatches(dataKey, vm, states, computeds);
         for (const watchingKey in watchers) {
           vm.$watch(watchingKey, watchers[watchingKey]);
         }
 
-        // 将函数动态挂载到vue实例上
+        // Dynamically mount the function to the vue instance
         for (const key in fns) {
           (vm as any)[`${dataKey}$${key}`] = function (...args: any) {
             return fns[key](...args);

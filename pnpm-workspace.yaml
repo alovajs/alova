@@ -2,4 +2,3 @@ packages:
   - packages/*
   - examples/*
   - scripts
-  - benchmarks/*

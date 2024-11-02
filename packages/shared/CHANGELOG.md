@@ -1,5 +1,23 @@
 # @alova/shared
 
+## 1.1.0
+
+### Minor Changes
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - move `statesHookHelper` to client, @alova/shared is refactored to build a single file
+
+## 1.0.7
+
+### Patch Changes
+
+- [#569](https://github.com/alovajs/alova/pull/569) [`ebb1e6e`](https://github.com/alovajs/alova/commit/ebb1e6e911a2b61353305c55c4c8fcc2e2ad270d) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: correct incorrect reference paths after `shared` package build
+
+## 1.0.6
+
+### Patch Changes
+
+- [#563](https://github.com/alovajs/alova/pull/563) [`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - feat: add inference for send arguments
+
 ## 1.0.5
 
 ### Patch Changes

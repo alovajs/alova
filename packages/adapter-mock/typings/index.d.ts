@@ -25,7 +25,7 @@ export interface MockRequestLoggerAdapter {
   (loggerData: LoggerMockRequestResponse): void;
 }
 /**
- * 模拟响应函数
+ * Simulate response function
  */
 export interface MockResponse<RequestConfig, Response, ResponseHeader> {
   (
@@ -47,31 +47,31 @@ export interface MockError {
 }
 export interface MockRequestInit<RequestConfig, Response, ResponseHeader> {
   /**
-   * 是否启用模拟数据
+   * Whether to enable simulated data
    * @default true
    */
   enable?: boolean;
   /**
-   * 模拟响应延迟时间，单位毫秒
+   * Analog response delay time, in milliseconds
    * @default 2000
    */
   delay?: number;
   /**
-   * 当未匹配模拟接口时将使用此请求适配器请求
+   * This request adapter request will be used when the mock interface is not matched
    */
   httpAdapter?: AlovaRequestAdapter<RequestConfig, Response, ResponseHeader>;
 
   /**
-   * 是否打印模拟请求信息，便于调试
+   * Whether to print simulation request information to facilitate debugging
    */
   mockRequestLogger?: boolean | MockRequestLoggerAdapter;
   onMockResponse?: MockResponse<RequestConfig, Response, ResponseHeader>;
   onMockError?: MockError;
 
   /**
-   * 匹配模式
-   * 值为pathname时将匹配url的pathname
-   * 值为methodurl时将匹配method中的url
+   * match pattern
+   * When the value is pathname, it will match the pathname of the url.
+   * When the value is methodurl, it will match the url in method.
    * @default 'pathname'
    */
   matchMode?: 'pathname' | 'methodurl';

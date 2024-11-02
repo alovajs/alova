@@ -3,9 +3,7 @@
   "input": "src/index.ts",
   "output": "dist/psc.{suffix}.{ext}",
   "external": {
-    "@alova/shared/function": null,
-    "@alova/shared/vars": null,
-    "@alova/shared/assert": null
+    "@alova/shared": null
   },
   "formats": ["cjs", "esm"],
   "withDTS": true

@@ -1,6 +1,6 @@
 let count = 0;
 export function createIndexedDBAdapter() {
-  const objectStoreName = `images`;
+  const objectStoreName = 'images';
   const dbVersion = 1;
   let dbInstance;
   const request = window.indexedDB.open(`MyTestDatabase${count++}`, dbVersion);

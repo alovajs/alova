@@ -2,9 +2,9 @@ import { GeneralFn } from './types';
 
 declare const Deno: any;
 const undefStr = 'undefined';
-// 以下为减少编译代码量而添加的统一处理函数或变量
+// The following unified processing functions or variables added to reduce the amount of compiled code
 export const PromiseCls = Promise;
-export const promiseResolve = <T>(value: T) => PromiseCls.resolve(value);
+export const promiseResolve = <T = void>(value?: T) => PromiseCls.resolve(value);
 export const promiseReject = <T>(value: T) => PromiseCls.reject(value);
 export const ObjectCls = Object;
 export const RegExpCls = RegExp;
@@ -46,18 +46,17 @@ export const len = (data: any[] | Uint8Array | string) => data.length;
 export const isArray = (arg: any): arg is any[] => Array.isArray(arg);
 export const deleteAttr = <T extends Record<any, any>>(arg: T, attr: keyof T) => delete arg[attr];
 export const typeOf = (arg: any) => typeof arg;
-export const regexpTest = (reg: RegExp, str: string) => reg.test(str);
+export const regexpTest = (reg: RegExp, str: string | number) => reg.test(`${str}`);
 export const includes = <T>(ary: T[], target: T) => ary.includes(target);
 export const valueObject = <T>(value: T, writable = falseValue) => ({ value, writable });
 export const defineProperty = (o: object, key: string | symbol, value: any, isDescriptor = falseValue) =>
   ObjectCls.defineProperty(o, key, isDescriptor ? value : valueObject(value, falseValue));
-// 是否为服务端运行，node和bun通过process判断，deno通过Deno判断
-// 部分框架（如支付宝和 uniapp）会注入 process 对象作为全局变量使用
-// 因此使用服务端独有的 process.cwd 函数作为判断依据
-export const defaultIsSSR =
+// Whether it is running on the server side, node and bun are judged by process, and deno is judged by Deno.
+// Some frameworks (such as Alipay and uniapp) will inject the process object as a global variable.
+// Therefore, the process.cwd function unique to the server is used as the basis for judgment.
+export const isSSR =
   typeof window === undefStr &&
   (typeof process !== undefStr ? typeof (process as any).cwd === 'function' : typeof Deno !== undefStr);
-export const isSSR = defaultIsSSR;
 
 /** cache mode */
 // only cache in memory, it's default option

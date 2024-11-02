@@ -1,6 +1,5 @@
 import { createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
-import { usePromise, uuid } from '@alova/shared/function';
-import { QueueCallback } from '@alova/shared/queueCallback';
+import { QueueCallback, usePromise, uuid } from '@alova/shared';
 import { IPCModule as IPCModule_ } from '@node-ipc/node-ipc';
 import type { IPC } from 'node-ipc';
 
@@ -49,7 +48,9 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
 
   return createSyncAdapter({
     send(event) {
-      queue.queueCallback(() => ipc.of[id]?.emit(EventName.TO_MAIN, event));
+      queue.queueCallback(() => {
+        ipc.of[id]?.emit(EventName.TO_MAIN, event);
+      });
     },
     receive(handler) {
       queue.queueCallback(() => {

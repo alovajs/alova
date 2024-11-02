@@ -156,7 +156,7 @@ describe('request adapter', () => {
       }
     });
 
-    // 使用formData上传文件
+    // Upload files using form data
     const formData = new FormData();
     formData.append('f1', 'f1');
     formData.append('f2', 'f2');
@@ -166,7 +166,7 @@ describe('request adapter', () => {
     formData.append('file', imageFile);
     const Post = alovaInst.Post<Result<string>>('/unit-test', formData, {
       withCredentials: true
-      // 设置上传回调后，msw无法接收请求
+      // After setting the upload callback, msw cannot receive the request
       // enableUpload: true
     });
 
@@ -203,8 +203,8 @@ describe('request adapter', () => {
       timeout: 5000
     });
 
-    const axiosRequestFn = jest.fn();
-    const axiosResponseFn = jest.fn();
+    const axiosRequestFn = vi.fn();
+    const axiosResponseFn = vi.fn();
     newAxiosInst.interceptors.request.use(config => {
       axiosRequestFn();
       return config;
@@ -218,11 +218,11 @@ describe('request adapter', () => {
       requestAdapter: axiosRequestAdapter({
         axios: newAxiosInst
       }),
-      // 比axios的request钩子更早触发
+      // Triggered earlier than axios request hook
       beforeRequest() {
         expect(axiosRequestFn).not.toHaveBeenCalled();
       },
-      // 比axios的response钩子更迟触发
+      // Triggered later than axios response hook
       responded(res) {
         expect(axiosResponseFn).toHaveBeenCalled();
         return res;

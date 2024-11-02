@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-axios",
-  "version": "2.0.7",
+  "version": "2.0.10",
   "description": "axios adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-axios.common.cjs",
@@ -24,9 +24,7 @@
   "unpkg": "dist/alova-adapter-axios.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test:browser": "jest",
-    "test:node": "jest --config=jest.config.node.ts",
-    "test": "npm run test:browser",
+    "test": "vitest run",
     "build": "npm run clean && alova-scripts build",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0"
@@ -48,16 +46,16 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.17",
+    "alova": "^3.0.20",
     "axios": ">=0.4.0"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
-    "alova": "workspace:^",
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*",
     "form-data": "^4.0.0"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   }
 }

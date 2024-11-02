@@ -1,5 +1,4 @@
-import { getMethodInternalKey, instanceOf } from '@alova/shared/function';
-import { falseValue } from '@alova/shared/vars';
+import { falseValue, getMethodInternalKey, instanceOf } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 
 interface SnapshotValue<AG extends AlovaGenerics> {
@@ -13,8 +12,8 @@ export default <AG extends AlovaGenerics>(handler: (page: number) => Method<AG>)
     snapshots: () => methodSnapshots,
     save(methodInstance: Method<AG>, force = falseValue) {
       const key = getMethodInternalKey(methodInstance);
-      // 因为无法定位缓存中total数据的位置
-      // 因此这边冗余维护这个字段
+      // Because it is impossible to locate the location of the total data in the cache
+      // Therefore, this field is maintained redundantly here.
       if (!methodSnapshots[key] || force) {
         methodSnapshots[key] = {
           entity: methodInstance

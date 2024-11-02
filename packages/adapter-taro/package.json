@@ -1,11 +1,12 @@
 {
   "name": "@alova/adapter-taro",
-  "version": "2.0.5",
+  "version": "2.0.8",
   "description": "taro adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-taro.common.cjs",
   "module": "dist/alova-adapter-taro.esm.js",
   "types": "typings/index.d.ts",
+  "type": "module",
   "keywords": [
     "hooks",
     "vuejs",
@@ -19,8 +20,8 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "build": "npm run clean && alova-scripts build",
     "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info"
   },
@@ -60,16 +61,16 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.17"
+    "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^"
+    "@alova/shared": "workspace:*"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
     "@tarojs/shared": "^3.6.30",
     "@tarojs/taro": "^3.6.30",
-    "alova": "workspace:^"
+    "alova": "workspace:*"
   }
 }

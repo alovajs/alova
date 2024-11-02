@@ -1,6 +1,5 @@
 import { VueOptionsHook } from '@/index';
-import { GeneralFn } from '@alova/shared/types';
-import '@testing-library/jest-dom';
+import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import { generateContinuousNumbers } from 'root/testUtils';
@@ -12,7 +11,7 @@ import {
 } from '../../client/test/mockData';
 import Pagination from './components/Pagination.vue';
 
-// jest.setTimeout(1000000);
+// vi.setTimeout(1000000);
 // reset data
 beforeEach(() => {
   setMockListData();
@@ -62,7 +61,7 @@ describe('usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(page + 1, pageSize));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19, 10));
@@ -90,7 +89,7 @@ describe('usePagination', () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
     });
 
-    // 检查预加载缓存
+    // Check preload cache
     await waitFor(async () => {
       let cache = await queryCache(getter1(3, 20));
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(59, 40));
@@ -98,7 +97,7 @@ describe('usePagination', () => {
       expect(cache?.list).toStrictEqual(generateContinuousNumbers(19));
     });
 
-    // 最后一页
+    // last page
     fireEvent.click(screen.getByRole('setLastPage'));
     await waitFor(async () => {
       expect(screen.getByRole('isLastPage')).toHaveTextContent('true');

@@ -19,11 +19,11 @@ async function result(code: number, req: StrictRequest<DefaultBodyType>, hasBody
   if (hasBody) {
     try {
       data.data = await req.clone().json();
-    } catch (error) {
+    } catch {
       try {
         const formData = Object.fromEntries((await req.clone().formData()).entries());
         data.data = formData;
-      } catch (innerError) {
+      } catch {
         data.data = await (await req.blob()).text();
       }
     }

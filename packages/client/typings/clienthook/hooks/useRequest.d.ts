@@ -1,36 +1,36 @@
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaFrontMiddleware, AlovaMethodHandler, UseHookConfig, UseHookExposure } from '../general';
 
-/** useRequest和useWatcher都有的类型 */
+/** Both use request and use watcher have types */
 type InitialDataType = number | string | boolean | object;
-export interface FrontRequestHookConfig<AG extends AlovaGenerics> extends UseHookConfig<AG> {
-  /** 是否立即发起一次请求 */
+export interface FrontRequestHookConfig<AG extends AlovaGenerics, Args extends any[]> extends UseHookConfig<AG, Args> {
+  /** Whether to initiate a request immediately */
   immediate?: boolean;
 
   /** set initial data for request state */
   initialData?: InitialDataType | (() => InitialDataType);
 
-  /** 额外的监管状态，可通过updateState更新 */
+  /** Additional regulatory status, which can be updated via update state */
   managedStates?: Record<string | symbol, AG['StatesExport']['State']>;
 
-  /** 中间件 */
-  middleware?: AlovaFrontMiddleware<AG>;
+  /** Middleware */
+  middleware?: AlovaFrontMiddleware<AG, Args>;
 }
 
 /** useRequest config export type */
-export type RequestHookConfig<AG extends AlovaGenerics> = FrontRequestHookConfig<AG>;
+export type RequestHookConfig<AG extends AlovaGenerics, Args extends any[]> = FrontRequestHookConfig<AG, Args>;
 
 /**
- * 自动管理响应状态hook
+ * Automatically manage response status hooks
  * @example
  * ```js
  * const { loading, data, error, send, onSuccess } = useRequest(alova.Get('/api/user'))
  * ```
- * @param methodHandler method实例或获取函数
- * @param config 配置项
- * @returns 响应式请求数据、操作函数及事件绑定函数
+ * @param methodHandler method instance or get function
+ * @param config Configuration items
+ * @returns Responsive request data, operation functions and event binding functions
  */
-export declare function useRequest<AG extends AlovaGenerics>(
-  methodHandler: Method<AG> | AlovaMethodHandler<AG>,
-  config?: RequestHookConfig<AG>
-): UseHookExposure<AG>;
+export declare function useRequest<AG extends AlovaGenerics, Args extends any[]>(
+  methodHandler: Method<AG> | AlovaMethodHandler<AG, Args>,
+  config?: RequestHookConfig<AG, Args>
+): UseHookExposure<AG, Args>;

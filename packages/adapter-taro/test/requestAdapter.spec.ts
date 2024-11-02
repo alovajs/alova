@@ -1,11 +1,11 @@
 import AdapterTaro from '@/adapterVue';
-import { noop } from '@alova/shared/function';
+import { noop } from '@alova/shared';
 import Taro from '@tarojs/taro';
 import { createAlova } from 'alova';
 import { useRequest } from 'alova/client';
 import { onDownloadCall, onRequestCall, onUploadCall, untilCbCalled } from './utils';
 
-jest.mock('@tarojs/taro');
+vi.mock('@tarojs/taro');
 describe('request adapter', () => {
   test('should call uni.request and pass the right args', async () => {
     const alovaInst = createAlova({
@@ -48,7 +48,7 @@ describe('request adapter', () => {
     });
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onRequestCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test?a=1&b=2');
@@ -105,7 +105,7 @@ describe('request adapter', () => {
     );
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onRequestCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test?a=1&b=2');
@@ -238,7 +238,7 @@ describe('request adapter', () => {
     );
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onUploadCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test');
@@ -312,7 +312,7 @@ describe('request adapter', () => {
     });
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onDownloadCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test');

@@ -2,10 +2,9 @@ import { getAlovaInstance } from '#/utils';
 import { getStateCache } from '@/hooks/core/implements/stateCache';
 import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
-import { key } from '@alova/shared/function';
-import '@testing-library/jest-dom';
+import { key } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { ReactElement, StrictMode } from 'react';
+import { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
 
 const StrictModeReact = StrictMode as any;
@@ -30,7 +29,7 @@ describe('useRequest hook with react', () => {
 
   test('should apply initialData with object and function', async () => {
     const alova = getAlovaInstance(ReactHook);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     function Page() {
       const { data: data1 } = useRequest(alova.Get(''), { initialData: 'test', immediate: false });
       const { data: data2 } = useRequest(alova.Get(''), {
@@ -196,14 +195,14 @@ describe('useRequest hook with react', () => {
     }
     const { unmount } = render((<Page />) as ReactElement<any, any>);
 
-    // useRequest内会缓存状态
+    // The status will be cached in the Use request.
     await waitFor(() => {
       const { s: { data } = { data: null } } = getStateCache(alova.id, key(Get));
       expect(data?.v.path).toBe('/unit-test');
     });
     unmount();
     await waitFor(() => {
-      // 当DataConsole组件卸载时，会同步清除state缓存，避免内存泄露，空对象表示未匹配到
+      // When the data console component is unloaded, the state cache will be cleared synchronously to avoid memory leaks. An empty object indicates that no match was found.
       expect(getStateCache(alova.id, key(Get))).toStrictEqual({});
     });
   });
@@ -259,7 +258,7 @@ describe('useRequest hook with react', () => {
     expect(screen.getByRole('downloading')).toHaveTextContent('1_1000');
   });
 
-  // 如果立即发送请求，react的loading状态将初始为true
+  // If the request is sent immediately, react's loading status will initially be true
   test('should render twice instead of third', async () => {
     const alova = getAlovaInstance(ReactHook, {
       responseExpect: r => r.json()
@@ -270,7 +269,7 @@ describe('useRequest hook with react', () => {
       cacheFor: 100 * 1000
     });
 
-    const renderMockFn = jest.fn();
+    const renderMockFn = vi.fn();
     function Page() {
       const { loading, data = { path: '', method: '' } } = useRequest(Get);
       renderMockFn();

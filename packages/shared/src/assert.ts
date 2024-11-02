@@ -1,7 +1,7 @@
 import { newInstance } from './function';
 
 /**
- * alova错误类
+ * alova error class
  */
 export class AlovaError extends Error {
   constructor(prefix: string, message: string, errorCode?: number) {
@@ -11,10 +11,10 @@ export class AlovaError extends Error {
 }
 
 /**
- * 自定义断言函数，表达式为false时抛出错误
- * 当传入了errorCode时，将提供链接到错误文档，引导用户改正
- * @param expression 判断表达式，true或false
- * @param message 断言消息
+ * Custom assertion function that throws an error when the expression is false
+ * When errorCode is passed in, a link to the error document will be provided to guide the user to correct it.
+ * @param expression Judgment expression, true or false
+ * @param message Assert message
  */
 export const createAssert =
   (prefix = '') =>

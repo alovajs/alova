@@ -1,4 +1,4 @@
-import { BackoffPolicy } from '@alova/shared/types';
+import type { BackoffPolicy } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import { AlovaErrorEvent, AlovaEvent, AlovaMethodHandler, UseHookExposure } from '../general';
 import { RequestHookConfig } from './useRequest';
@@ -6,84 +6,85 @@ import { RequestHookConfig } from './useRequest';
 /**
  * useRetriableRequest配置
  */
-export type RetriableHookConfig<AG extends AlovaGenerics> = {
+export type RetriableHookConfig<AG extends AlovaGenerics, Args extends any[]> = {
   /**
-   * 最大重试次数，也可以设置为返回 boolean 值的函数，来动态判断是否继续重试。
+   * The maximum number of retries can also be set as a function that returns a boolean value to dynamically determine whether to continue retrying.
    * @default 3
    */
-  retry?: number | ((error: Error, ...args: any[]) => boolean);
+  retry?: number | ((error: Error, ...args: [...Args, ...any[]]) => boolean);
 
   /**
-   * 避让策略
+   * avoidance strategy
    */
   backoff?: BackoffPolicy;
-} & RequestHookConfig<AG>;
+} & RequestHookConfig<AG, Args>;
 
 /**
- * useRetriableRequest onRetry回调事件实例
+ * useRetriableRequest onRetry callback event instance
  */
-export interface RetriableRetryEvent<AG extends AlovaGenerics> extends AlovaEvent<AG> {
+export interface RetriableRetryEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaEvent<AG, Args> {
   /**
-   * 当前的重试次数
+   * Current number of retries
    */
   retryTimes: number;
 
   /**
-   * 本次重试的延迟时间
+   * Delay time for this retry
    */
   retryDelay: number;
 }
 /**
- * useRetriableRequest onFail回调事件实例
+ * useRetriableRequest onFail callback event instance
  */
-export interface RetriableFailEvent<AG extends AlovaGenerics> extends AlovaErrorEvent<AG> {
+export interface RetriableFailEvent<AG extends AlovaGenerics, Args extends any[]> extends AlovaErrorEvent<AG, Args> {
   /**
-   * 失败时的重试次数
+   * Number of retries on failure
    */
   retryTimes: number;
 }
 /**
- * useRetriableRequest返回值
+ * useRetriableRequest return value
  */
-export interface RetriableExposure<AG extends AlovaGenerics> extends UseHookExposure<AG, RetriableExposure<AG>> {
+export interface RetriableExposure<AG extends AlovaGenerics, Args extends any[] = any[]>
+  extends UseHookExposure<AG, Args, RetriableExposure<AG, Args>> {
   /**
-   * 停止重试，只在重试期间调用有效
-   * 停止后将立即触发onFail事件
+   * Stop retrying, the call is only valid during the retry period
+   * The onFail event will be triggered immediately after stopping
    *
    */
   stop(): void;
 
   /**
-   * 重试事件绑定
-   * 它们将在重试发起后触发
-   * @param handler 重试事件回调
+   * Retry event binding
+   * They will be triggered after the retry is initiated
+   * @param handler Retry event callback
    */
-  onRetry(handler: (event: RetriableRetryEvent<AG>) => void): this;
+  onRetry(handler: (event: RetriableRetryEvent<AG, Args>) => void): this;
 
   /**
-   * 失败事件绑定
-   * 它们将在不再重试时触发，例如到达最大重试次数时，重试回调返回false时，手动调用stop停止重试时
-   * 而alova的onError事件是在每次请求报错时都将被触发
+   * failed event binding
+   * They will be triggered when there are no more retries, such as when the maximum number of retries is reached, when the retry callback returns false, or when stop is manually called to stop retries.
+   * The onError event of alova will be triggered every time an error is requested.
    *
-   * 注意：如果没有重试次数时，onError、onComplete和onFail会被同时触发
+   * Note: If there are no retries, onError, onComplete and onFail will be triggered at the same time.
    *
-   * @param handler 失败事件回调
+   * @param handler Failure event callback
    */
-  onFail(handler: (event: RetriableFailEvent<AG>) => void): this;
+  onFail(handler: (event: RetriableFailEvent<AG, Args>) => void): this;
 }
 
 /**
  * useRetriableRequest
- * 具有重试功能的请求hook
- * 适用场景：
- * 1. 请求失败重试、或自定义规则重试
- * 2. 手动停止/启动重试
+ * Request hook with retry function
+ * Applicable scenarios:
+ * 1. Retry if the request fails, or retry with custom rules
+ * 2. Manual stop/start retry
  *
- * @param handler method实例或获取函数
- * @param config 配置参数
- * @return useRetriableRequest相关数据和操作函数
+ * @param handler method instance or get function
+ * @param config Configuration parameters
+ * @return useRetriableRequest related data and operation functions
  */
-export declare function useRetriableRequest<AG extends AlovaGenerics>(
-  handler: Method<AG> | AlovaMethodHandler<AG>,
-  config?: RetriableHookConfig<AG>
-): RetriableExposure<AG>;
+export declare function useRetriableRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
+  config?: RetriableHookConfig<AG, Args>
+): RetriableExposure<AG, Args>;

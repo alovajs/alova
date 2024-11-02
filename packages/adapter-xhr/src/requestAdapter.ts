@@ -1,13 +1,21 @@
-import { isPlainObject, isSpecialRequestBody, isString, newInstance, noop } from '@alova/shared/function';
-import { falseValue, nullValue, trueValue } from '@alova/shared/vars';
-import type { ProgressUpdater } from 'alova';
 import { data2QueryString, parseResponseHeaders } from '@/helper';
+import {
+  falseValue,
+  isPlainObject,
+  isSpecialRequestBody,
+  isString,
+  newInstance,
+  noop,
+  nullValue,
+  trueValue
+} from '@alova/shared';
+import type { ProgressUpdater } from 'alova';
 import { AlovaXHRAdapter, AlovaXHRResponse } from '~/typings';
 
 const err = (msg: string) => newInstance(Error, msg);
 const isBodyData = (data: any): data is XMLHttpRequestBodyInit => isString(data) || isSpecialRequestBody(data);
 /**
- * XMLHttpRequest请求适配器
+ * XMLHttpRequest request adapter
  */
 export default function requestAdapter() {
   const adapter: AlovaXHRAdapter = ({ type, url, data = null, headers }, method) => {
@@ -33,12 +41,12 @@ export default function requestAdapter() {
           xhr.withCredentials = withCredentials;
         }
 
-        // 设置mimeType
+        // Set mime type
         if (mimeType) {
           xhr.overrideMimeType(mimeType);
         }
 
-        // 设置请求头
+        // Set request header
         let isContentTypeSet = falseValue;
         let isContentTypeFormUrlEncoded = falseValue;
         Object.keys(headers).forEach(headerName => {
@@ -49,22 +57,22 @@ export default function requestAdapter() {
           xhr.setRequestHeader(headerName, headers[headerName]);
         });
 
-        // Content-Type在未指定时默认使用application/json; charset=UTF-8
+        // Content-Type defaults to application/json when not specified; charset=UTF-8
         if (!isContentTypeSet && (data ? data.toString() !== '[object FormData]' : true)) {
           xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
         }
 
-        // 监听下载事件
+        // Listen for download events
         xhr.addEventListener('progress', event => {
           downloadHandler(event.loaded, event.total);
         });
 
-        // 监听上传事件
+        // Listen for upload events
         xhr.upload.addEventListener('progress', event => {
           uploadHandler(event.loaded, event.total);
         });
 
-        // 请求成功事件
+        // Request success event
         xhr.addEventListener('load', () => {
           let responseData =
             !responseType || responseType === 'text' || responseType === 'json' ? xhr.responseText : xhr.response;
@@ -85,25 +93,25 @@ export default function requestAdapter() {
           });
         });
 
-        // 请求错误事件
+        // request error event
         xhr.addEventListener('error', () => {
           reject(err('Network Error'));
         });
-        // 请求超时事件
+        // Request timeout event
         xhr.addEventListener('timeout', () => {
           reject(err('Network Timeout'));
         });
-        // 中断事件
+        // interrupt event
         xhr.addEventListener('abort', () => {
           reject(err('The user aborted a request.'));
         });
 
-        // 如果请求头中的Content-Type是application/x-www-form-urlencoded时，将body数据转换为queryString
+        // If the content type in the request header is application/x www form urlencoded, convert the body data into query string
         let dataSend: any = data;
         if (isContentTypeFormUrlEncoded && isPlainObject(dataSend)) {
           dataSend = data2QueryString(dataSend);
         }
-        // GET请求时为null，此时不需要进入处理
+        // It is null when making a Get request, and there is no need to enter processing at this time.
         if (dataSend !== nullValue) {
           dataSend = isBodyData(dataSend) ? dataSend : JSON.stringify(dataSend);
         }

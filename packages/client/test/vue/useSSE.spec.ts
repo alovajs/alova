@@ -1,57 +1,55 @@
+import { SSEHookReadyState } from '@/hooks/useSSE';
 import { useSSE } from '@/index';
-import { usePromise } from '@alova/shared/function';
-import { GeneralFn } from '@alova/shared/types';
-import '@testing-library/jest-dom';
+import VueHook from '@/statesHook/vue';
+import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import VueHook from 'alova/vue';
 import ES from 'eventsource';
 import { AddressInfo } from 'net';
 import mockServer from 'root/mockServer';
-import { untilCbCalled } from 'root/testUtils';
+import { delay, untilCbCalled } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
-import { AlovaSSEMessageEvent, SSEHookReadyState } from '~/typings/clienthook';
+import { AlovaSSEMessageEvent } from '~/typings/clienthook';
 import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
 import CompUseSSE from './components/use-sse.vue';
 
 Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
-afterEach(() => {
-  const { promise, resolve } = usePromise();
-  if (server.listening) {
-    server.close(resolve);
-    return promise;
-  }
-});
-// 关掉下默认的server，避免抛出大量警告
+let port = 0;
 beforeAll(() => {
+  port = (server.listen().address() as AddressInfo).port;
+  // Turn off the default server to avoid throwing a lot of warnings
   mockServer.close();
 });
+afterAll(() => {
+  server.close();
+});
 
-type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
+type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]> = AlovaSSEMessageEvent<
+  any,
+  AG,
+  Args
+>;
 
 /**
- * 准备 Alova 实例环境，并且开始 SSE 服务器的监听
+ * Prepare the Alova instance environment and start monitoring the SSE server
  */
-const prepareAlova = async () => {
-  server.listen();
-  const { port } = server.address() as AddressInfo;
-  return createAlova({
+const prepareAlova = async () =>
+  createAlova({
     baseURL: `http://127.0.0.1:${port}`,
     statesHook: VueHook,
     requestAdapter: GlobalFetch(),
     cacheLogger: false
   });
-};
 
 describe('vue => useSSE', () => {
-  // ! 无初始数据，不立即发送请求
+  // ! No initial data, do not send request immediately
   test('should default NOT request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
+    const poster = (data?: any) => alovaInst.Get(`/${IntervalEventName}`, data);
     const { on, onOpen, data, readyState, send, close } = useSSE(poster);
-    const cb = jest.fn();
-    const openCb = jest.fn();
+    const cb = vi.fn();
+    const openCb = vi.fn();
     on(IntervalEventName, cb);
     onOpen(openCb);
     const onIntervalCb = (cb: GeneralFn) => on(IntervalEventName, cb);
@@ -59,18 +57,18 @@ describe('vue => useSSE', () => {
     expect(readyState.value).toStrictEqual(SSEHookReadyState.CLOSED);
     expect(data.value).toBeUndefined();
 
-    // 如果 immediate 有问题，1000ms 内就会得到至少一个 interval 消息
-    await untilCbCalled(setTimeout, 1000);
+    // If there is a problem with immediate, you will get at least one interval message within 1000ms.
+    await delay(1000);
 
     expect(readyState.value).toStrictEqual(SSEHookReadyState.CLOSED);
     expect(data.value).toBeUndefined();
 
-    // 调用 send 方法前不应该收到消息
+    // The message should not be received before calling the send method
     expect(cb).not.toHaveBeenCalled();
     expect(openCb).not.toHaveBeenCalled();
 
     await send();
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(openCb).toHaveBeenCalled();
 
     const { data: recvData } = (await untilCbCalled(onIntervalCb)) as AnyMessageType;
@@ -83,10 +81,10 @@ describe('vue => useSSE', () => {
     close();
   }, 3000);
 
-  // ! 有初始数据，不立即发送请求
+  // ! There is initial data and the request is not sent immediately
   test('should get the initial data and NOT send request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const poster = (data?: any) => alovaInst.Get(`/${TriggerEventName}`, data);
     const initialData = {
       id: 9527,
       name: 'Tom',
@@ -97,30 +95,30 @@ describe('vue => useSSE', () => {
     const testDataA = 'test-data-1';
     const testDataB = 'test-data-2';
 
-    const cb = jest.fn();
-    const openCb = jest.fn();
+    const cb = vi.fn();
+    const openCb = vi.fn();
     onMessage(cb);
     onOpen(openCb);
 
     expect(readyState.value).toStrictEqual(SSEHookReadyState.CLOSED);
     expect(data.value).toStrictEqual(initialData);
 
-    // 调用 send 方法前不应该收到消息
+    // The message should not be received before calling the send method
     expect(cb).not.toHaveBeenCalled();
     expect(openCb).not.toHaveBeenCalled();
 
-    // 服务器发送信息
+    // Server sends information
     await serverSend(testDataA);
-    await untilCbCalled(setTimeout, 300);
+    await delay(300);
 
-    // 此时还没有调用 send，不应该收到信息
+    // Send has not been called at this time and the message should not be received.
     expect(readyState.value).toStrictEqual(SSEHookReadyState.CLOSED);
     expect(data.value).toStrictEqual(initialData);
 
     expect(openCb).not.toHaveBeenCalled();
     expect(cb).not.toHaveBeenCalled();
 
-    // 调用 send 连接服务器，并使服务器发送信息
+    // Call send to connect to the server and let the server send information
     await send();
     serverSend(testDataB);
 
@@ -134,10 +132,8 @@ describe('vue => useSSE', () => {
     close();
   });
 
-  // ! 有初始数据，立即发送请求
+  // ! With initial data, send the request immediately
   test('should get the initial data and send request immediately', async () => {
-    const { port } = server.listen().address() as AddressInfo;
-
     const initialData = 'initial-data';
     const testDataA = 'test-data-1';
 
@@ -153,24 +149,23 @@ describe('vue => useSSE', () => {
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
     await screen.findByText(/opened/);
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
 
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('1');
+    expect(screen.getByRole('onopen')).toHaveTextContent('1');
 
     await serverSend(testDataA);
 
     await waitFor(
       () => {
-        expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('1');
+        expect(screen.getByRole('onmessage')).toHaveTextContent('1');
         expect(screen.getByRole('data')).toHaveTextContent(testDataA);
       },
       { timeout: 4000 }
     );
   });
 
-  // ! 测试关闭后重新连接
+  // !Test reconnect after closing
   test('should not trigger handler after close', async () => {
-    const { port } = server.listen().address() as AddressInfo;
     render(CompUseSSE, {
       props: {
         port,
@@ -186,54 +181,53 @@ describe('vue => useSSE', () => {
 
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
 
-    // 测试发送数据 A
+    // Test sending data A
     await serverSend(testDataA);
-    await untilCbCalled(setTimeout, 300);
+    await delay(300);
 
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('1');
+    expect(screen.getByRole('onopen')).toHaveTextContent('1');
     expect(screen.getByRole('status')).toHaveTextContent('opened');
     expect(screen.getByRole('data')).toHaveTextContent(testDataA);
 
-    // 关闭连接
+    // close connection
     fireEvent.click(screen.getByRole('close'));
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     expect(screen.getByRole('status')).toHaveTextContent('closed');
 
-    // 测试发送数据 B
+    // Test sending data B
     await serverSend(testDataB);
 
-    // 连接已经关闭，不应该触发事件，数据也应该不变
-    expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('1');
+    // The connection has been closed, the event should not be triggered, and the data should remain unchanged.
+    expect(screen.getByRole('onmessage')).toHaveTextContent('1');
     expect(screen.getByRole('data')).toHaveTextContent(testDataA);
 
-    // 重新连接若干次。。。
+    // Reconnect several times. . .
     fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     fireEvent.click(screen.getByRole('send'));
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
 
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('6');
+    expect(screen.getByRole('onopen')).toHaveTextContent('6');
     expect(screen.getByRole('status')).toHaveTextContent('opened');
     expect(screen.getByRole('data')).toHaveTextContent(testDataA);
 
-    // 测试发送数据 B
+    // Test sending data B
     await serverSend(testDataB);
-    await untilCbCalled(setTimeout, 300);
+    await delay(300);
 
-    // abortLast 为 true（默认）时，调用 send 会断开之前建立的连接
-    expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('2');
+    // When abortLast is true (default), calling send will disconnect the previously established connection.
+    expect(screen.getByRole('onmessage')).toHaveTextContent('2');
     expect(screen.getByRole('data')).toHaveTextContent(testDataB);
   });
 
-  // ! 打开失败应该报错，立即发送请求
+  // ! If the opening fails, an error should be reported and the request will be sent immediately.
   test('should throw error then try to connect a not exist url', async () => {
-    const { port } = server.listen().address() as AddressInfo;
     render(CompUseSSE, {
       props: {
         port,
@@ -242,17 +236,16 @@ describe('vue => useSSE', () => {
       }
     });
 
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
     await screen.findByText(/closed/);
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('onerror').innerHTML).toStrictEqual('1');
-    expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('0');
+    expect(screen.getByRole('onopen')).toHaveTextContent('0');
+    expect(screen.getByRole('onerror')).toHaveTextContent('1');
+    expect(screen.getByRole('onmessage')).toHaveTextContent('0');
   });
 
-  // ! 打开失败应该报错，不立即发送请求
+  // ! If the opening fails, an error should be reported and the request will not be sent immediately.
   test('should throw error then try to connect a not exist url (immediate: false)', async () => {
-    const { port } = server.listen().address() as AddressInfo;
     render(CompUseSSE, {
       props: {
         port,
@@ -262,22 +255,22 @@ describe('vue => useSSE', () => {
 
     await screen.findByText(/closed/);
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('onerror').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('0');
+    expect(screen.getByRole('onopen')).toHaveTextContent('0');
+    expect(screen.getByRole('onerror')).toHaveTextContent('0');
+    expect(screen.getByRole('onmessage')).toHaveTextContent('0');
 
     fireEvent.click(screen.getByRole('send'));
     await screen.findByText(/connecting/);
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
 
     await screen.findByText(/closed/);
     expect(screen.getByRole('data')).toBeEmptyDOMElement();
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('onerror').innerHTML).toStrictEqual('1');
-    expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('0');
+    expect(screen.getByRole('onopen')).toHaveTextContent('0');
+    expect(screen.getByRole('onerror')).toHaveTextContent('1');
+    expect(screen.getByRole('onmessage')).toHaveTextContent('0');
   });
 
-  // ! 拦截器应该触发 (interceptByGlobalResponded: true)
+  // ! The interceptor should fire (interceptByGlobalResponded: true)
   test('should trigger global response', async () => {
     const initialData = 'initial-data';
 
@@ -286,7 +279,6 @@ describe('vue => useSSE', () => {
 
     const dataThrowError = 'never-gonna-give-you-up';
 
-    const { port } = server.listen().address() as AddressInfo;
     render(CompUseSSEGlobalResponse, {
       props: {
         port,
@@ -300,78 +292,77 @@ describe('vue => useSSE', () => {
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
     await screen.findByText(/opened/);
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
 
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('1');
-    expect(screen.getByRole('on-response').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('on-response-error').innerHTML).toStrictEqual('0');
+    expect(screen.getByRole('onopen')).toHaveTextContent('1');
+    expect(screen.getByRole('on-response')).toHaveTextContent('0');
+    expect(screen.getByRole('on-response-error')).toHaveTextContent('0');
 
-    // 这个数据会被响应拦截器替换掉
+    // This data will be replaced by the response interceptor
     await serverSend(dataReplaceMe);
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
 
     await waitFor(
       () => {
         expect(screen.getByRole('data')).toHaveTextContent(replacedData);
-        expect(screen.getByRole('onerror').innerHTML).toStrictEqual('0');
-        expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('1');
+        expect(screen.getByRole('onerror')).toHaveTextContent('0');
+        expect(screen.getByRole('onmessage')).toHaveTextContent('1');
 
-        expect(screen.getByRole('on-response').innerHTML).toStrictEqual('1');
-        expect(screen.getByRole('on-response-error').innerHTML).toStrictEqual('0');
-        expect(screen.getByRole('on-response-complete').innerHTML).toStrictEqual('1');
+        expect(screen.getByRole('on-response')).toHaveTextContent('1');
+        expect(screen.getByRole('on-response-error')).toHaveTextContent('0');
+        expect(screen.getByRole('on-response-complete')).toHaveTextContent('1');
       },
       { timeout: 4000 }
     );
 
-    // 连接到不存在的地址
+    // Connecting to a non-existent address
     fireEvent.click(screen.getByRole('send-to-not-exist'));
 
-    // 等 useSSE 反应一会儿
-    await untilCbCalled(setTimeout, 100);
+    // Wait for useSSE to react for a while
+    await delay(100);
 
-    // 因为目标不存在，所以：
-    // 1. resErrorExpect 会触发
-    // 2. onMessage, responseExpect 不会被触发，触发次数和上面一样；onError不被触发，因为被 onError 拦截
-    // 3. resCompleteExpect 会被触发
+    // Because the target does not exist, so:
+    // 1. resErrorExpect will trigger
+    // 2. onMessage, responseExpect will not be triggered, and the number of triggers is the same as above; onError will not be triggered because it is intercepted by onError
+    // 3. resCompleteExpect will be triggered
 
-    // 全局错误拦截器会返回 initialData
+    // The global error interceptor will return initialData
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
-    expect(screen.getByRole('onerror').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('on-response').innerHTML).toStrictEqual('1');
+    expect(screen.getByRole('onerror')).toHaveTextContent('0');
+    expect(screen.getByRole('on-response')).toHaveTextContent('1');
 
-    // 因为错误被全局拦截器拦截，所以 会调用 onMessage
-    expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('2');
-    expect(screen.getByRole('on-response-error').innerHTML).toStrictEqual('1');
-    expect(screen.getByRole('on-response-complete').innerHTML).toStrictEqual('2');
+    // Because the error is intercepted by the global interceptor, onMessage will be called
+    expect(screen.getByRole('onmessage')).toHaveTextContent('2');
+    expect(screen.getByRole('on-response-error')).toHaveTextContent('1');
+    expect(screen.getByRole('on-response-complete')).toHaveTextContent('2');
 
-    // ! 测试抛出错误
+    // ! Test throws error
 
-    // 连接到正常地址
+    // Connect to normal address
     fireEvent.click(screen.getByRole('send'));
-    // 等 useSSE 反应一会儿
-    await untilCbCalled(setTimeout, 100);
+    // Wait for useSSE to react for a while
+    await delay(100);
     expect(screen.getByRole('status')).toHaveTextContent('opened');
 
-    // 这个数据会导致抛出异常
-    // 触发responseExpect 和 onError
+    // This data will cause an exception to be thrown
+    // Trigger responseExpect and onError
     await serverSend(dataThrowError);
-    await untilCbCalled(setTimeout, 300);
+    await delay(300);
 
-    expect(screen.getByRole('onerror').innerHTML).toStrictEqual('1');
-    expect(screen.getByRole('on-response').innerHTML).toStrictEqual('2');
+    expect(screen.getByRole('onerror')).toHaveTextContent('1');
+    expect(screen.getByRole('on-response')).toHaveTextContent('2');
 
-    expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('2');
-    expect(screen.getByRole('on-response-error').innerHTML).toStrictEqual('1');
-    expect(screen.getByRole('on-response-complete').innerHTML).toStrictEqual('3');
+    expect(screen.getByRole('onmessage')).toHaveTextContent('2');
+    expect(screen.getByRole('on-response-error')).toHaveTextContent('1');
+    expect(screen.getByRole('on-response-complete')).toHaveTextContent('3');
   });
 
-  // ! 拦截器不应该触发 (interceptByGlobalResponded: false)
+  // ! The interceptor should not fire (interceptByGlobalResponded: false)
   test('should NOT trigger global response', async () => {
     const initialData = 'initial-data';
     const testDataA = 'test-data-1';
 
-    const { port } = server.listen().address() as AddressInfo;
     render(CompUseSSEGlobalResponse, {
       props: {
         port,
@@ -385,26 +376,26 @@ describe('vue => useSSE', () => {
     expect(screen.getByRole('data')).toHaveTextContent(initialData);
 
     await screen.findByText(/opened/);
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
 
-    expect(screen.getByRole('onopen').innerHTML).toStrictEqual('1');
-    expect(screen.getByRole('on-response').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('on-response-error').innerHTML).toStrictEqual('0');
-    expect(screen.getByRole('on-response-complete').innerHTML).toStrictEqual('0');
+    expect(screen.getByRole('onopen')).toHaveTextContent('1');
+    expect(screen.getByRole('on-response')).toHaveTextContent('0');
+    expect(screen.getByRole('on-response-error')).toHaveTextContent('0');
+    expect(screen.getByRole('on-response-complete')).toHaveTextContent('0');
 
-    // 这个数据会被响应拦截器替换掉
+    // This data will be replaced by the response interceptor
     await serverSend(testDataA);
-    await untilCbCalled(setTimeout, 500);
+    await delay(500);
 
     await waitFor(
       () => {
         expect(screen.getByRole('data')).toHaveTextContent(testDataA);
-        expect(screen.getByRole('onmessage').innerHTML).toStrictEqual('1');
-        expect(screen.getByRole('onerror').innerHTML).toStrictEqual('0');
+        expect(screen.getByRole('onmessage')).toHaveTextContent('1');
+        expect(screen.getByRole('onerror')).toHaveTextContent('0');
 
-        expect(screen.getByRole('on-response').innerHTML).toStrictEqual('0');
-        expect(screen.getByRole('on-response-error').innerHTML).toStrictEqual('0');
-        expect(screen.getByRole('on-response-complete').innerHTML).toStrictEqual('0');
+        expect(screen.getByRole('on-response')).toHaveTextContent('0');
+        expect(screen.getByRole('on-response-error')).toHaveTextContent('0');
+        expect(screen.getByRole('on-response-complete')).toHaveTextContent('0');
       },
       { timeout: 4000 }
     );

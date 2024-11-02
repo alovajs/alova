@@ -1,4 +1,4 @@
-export type CallbackFn = () => void;
+export type CallbackFn = () => void | Promise<void>;
 
 export class QueueCallback {
   private callbackQueue: CallbackFn[] = [];
@@ -44,12 +44,7 @@ export class QueueCallback {
     this.interrupt = false;
     while (this.callbackQueue.length > 0 && !this.interrupt) {
       const cb = this.callbackQueue.shift();
-      try {
-        await cb?.();
-      } catch (err) {
-        // TODO: maybe better?
-        console.error(err);
-      }
+      await cb?.();
     }
     this.isProcessing = false;
   }

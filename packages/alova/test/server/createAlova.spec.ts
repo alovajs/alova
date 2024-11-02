@@ -26,9 +26,9 @@ describe('createAlova', () => {
   });
 
   test('cache logger in server', async () => {
-    const logConsoleMockFn = jest.fn();
+    const logConsoleMockFn = vi.fn();
     // eslint-disable-next-line
-    console.log = logConsoleMockFn; // 重写以便监听
+    console.log = logConsoleMockFn; // Rewritten to listen
     const alova = createAlova({
       baseURL,
       requestAdapter: GlobalFetch()

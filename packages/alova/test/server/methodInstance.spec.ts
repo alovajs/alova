@@ -105,7 +105,7 @@ describe('method instance', () => {
     });
     await alovaInst.Get('/unit-test');
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alovaInst2 = getAlovaInstance({
       beforeRequestExpect(methodInstance) {
         mockFn({
@@ -122,7 +122,7 @@ describe('method instance', () => {
     };
     (Get2 as any).showMsg = false;
 
-    // 从beforeRequest中抛出json字符串
+    // Throw json string from before request
     await Get2;
     expect(mockFn.mock.calls[0][0]).toStrictEqual({
       meta: {
@@ -134,7 +134,7 @@ describe('method instance', () => {
   });
 
   test('should receive method metadata in a shorthand', async () => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const alovaInst = getAlovaInstance({
       beforeRequestExpect(methodInstance) {
         mockFn({
@@ -149,7 +149,7 @@ describe('method instance', () => {
         b: 2
       }
     });
-    // 从beforeRequest中抛出json字符串
+    // Throw json string from before request
     await Get;
     expect(mockFn.mock.calls[0][0].meta).toStrictEqual({
       a: 1,
@@ -157,7 +157,7 @@ describe('method instance', () => {
     });
   });
 
-  // 2.16.0+ 已将method实例转换为PromiseLike
+  // 2.16.0+ has converted method instances to PromiseLike
   test('should send request when call `method.then` or await method instance', async () => {
     const rawData = await alova.Get('/unit-test', {
       params: { e: 'e', f: 'gty' },
@@ -177,7 +177,7 @@ describe('method instance', () => {
     await expect(alova.Get<Result>('/unit-test-error')).rejects.toThrow();
   });
   test('should send request when call `method.catch`', async () => {
-    const catchMockFn = jest.fn();
+    const catchMockFn = vi.fn();
     const errorReason = await alova.Get<Result>('/unit-test-error').catch(reason => {
       catchMockFn(reason);
       return reason;
@@ -188,8 +188,8 @@ describe('method instance', () => {
   });
 
   test('should send request when call `method.finally`', async () => {
-    const finallyMockFn = jest.fn();
-    const finallyPromiseMockFn = jest.fn();
+    const finallyMockFn = vi.fn();
+    const finallyPromiseMockFn = vi.fn();
     const rawData = await alova
       .Get('/unit-test', {
         params: { gb: 'gb', f: 'gty' },
@@ -291,9 +291,9 @@ describe('method instance', () => {
   });
 
   test('should share request when custom the same method key, event if these two methods have different request info', async () => {
-    const requestMockFn = jest.fn();
-    const beforeRequestMockFn = jest.fn();
-    const responseMockFn = jest.fn();
+    const requestMockFn = vi.fn();
+    const beforeRequestMockFn = vi.fn();
+    const responseMockFn = vi.fn();
     const alova = createAlova({
       baseURL: 'http://xxx',
       cacheFor: {

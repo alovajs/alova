@@ -1,7 +1,7 @@
 /**
- * 解析url
+ * parse url
  * @param url url
- * @returns 解析后的信息对象
+ * @returns Parsed information object
  */
 export const parseUrl = (url: string) => {
   url = /^[^/]*\/\//.test(url) ? url : `//${url}`;
@@ -12,7 +12,7 @@ export const parseUrl = (url: string) => {
   let hash = '';
   if (pathContainedParams) {
     pathContainedParams = pathContainedParams.replace(/\?[^?#]+/, mat => {
-      // 解析url参数
+      // Parse url parameters
       mat
         .substring(1)
         .split('&')

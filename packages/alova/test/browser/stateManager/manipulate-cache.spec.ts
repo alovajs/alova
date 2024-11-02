@@ -15,10 +15,10 @@ describe('manipulate cache', () => {
       transform: ({ data }: Result) => data
     });
 
-    // 没有缓存时为undefined
+    // It is undefined when there is no cache
     await setCache(Get, data => {
       expect(data).toBeUndefined();
-      return undefined; // 返回undefined或不返回时，取消缓存修改
+      return undefined; // When undefined or no return is returned, cache modifications are cancelled.
     });
 
     await setCache(Get, {
@@ -66,7 +66,7 @@ describe('manipulate cache', () => {
       }
     });
 
-    // 通过传入数组设置
+    // Set by passing in an array
     await setCache([Get1, Get2], {
       path: '/unit-test',
       method: 'GET',
@@ -118,8 +118,8 @@ describe('manipulate cache', () => {
       }
     });
 
-    // 更新以上两个请求的缓存
-    const mockfn = jest.fn();
+    // Update the cache for the above two requests
+    const mockfn = vi.fn();
     await setCache([Get1, Get2], cache => {
       if (!cache) {
         return;
@@ -142,7 +142,7 @@ describe('manipulate cache', () => {
         a: 'update'
       }
     });
-    expect(mockfn).toHaveBeenCalledTimes(2); // 会被调用两次
+    expect(mockfn).toHaveBeenCalledTimes(2); // will be called twice
   });
 
   test('update will be canceled when callback return undefined', async () => {
@@ -161,8 +161,8 @@ describe('manipulate cache', () => {
       }
     });
 
-    // 更新函数返回undefined时，表示中断更新
-    const mockfn = jest.fn();
+    // When the update function returns undefined, it means interrupting the update.
+    const mockfn = vi.fn();
     setCache(Get1, () => {
       mockfn();
     });
@@ -173,7 +173,7 @@ describe('manipulate cache', () => {
         a: '200'
       }
     });
-    expect(mockfn).toHaveBeenCalledTimes(1); // 执行了一次
+    expect(mockfn).toHaveBeenCalledTimes(1); // Executed once
   });
 
   test('should also replace storaged data when using method instance with `restore`', async () => {
@@ -235,7 +235,7 @@ describe('manipulate cache', () => {
       transform: ({ data }: Result) => data
     });
 
-    // 持久化自定义缓存
+    // Persistent custom cache
     await setCache(
       Get,
       {
@@ -246,9 +246,9 @@ describe('manipulate cache', () => {
       }
     );
 
-    // 未指定policy参数时，将根据method实例的`cacheFor`判断是否获取l2Cache
+    // When the policy parameter is not specified, whether to obtain the L2 cache will be determined based on the `cache for` of the method instance.
     expect(await queryCache(Get)).toBeUndefined();
-    // 指定policy参数时，将获取对应的cache
+    // When specifying the policy parameter, the corresponding cache will be obtained
     expect(
       await queryCache(Get, {
         policy: 'l1'
@@ -263,7 +263,7 @@ describe('manipulate cache', () => {
     });
   });
 
-  // 通过设置cacheFor为函数，将缓存变为受控状态，可以自定义返回需要使用的缓存数据
+  // By setting cache for as a function, the cache becomes a controlled state, and the cache data that needs to be returned can be customized.
   test('should hit the controlled cache when cacheFor is sync function', async () => {
     const mockControlledCache = {
       path: 'local-controlled',

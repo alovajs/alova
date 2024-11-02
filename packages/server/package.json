@@ -1,6 +1,6 @@
 {
   "name": "@alova/server",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0",
   "description": "server request strategies for alova.js",
   "homepage": "https://alova.js.org",
   "private": true,
@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
-    "test": "jest",
+    "test": "vitest run",
     "lint": "eslint --ext .ts,.js src/**",
     "lint:fix": "eslint --ext .ts,.js src/** --fix",
     "build": "npm run clean && alova-scripts build",
@@ -37,15 +37,15 @@
     "dist"
   ],
   "peerDependencies": {
-    "alova": "^3.0.17"
+    "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:^",
+    "@alova/shared": "workspace:*",
     "rate-limiter-flexible": "^5.0.3"
   },
   "devDependencies": {
-    "@alova/mock": "workspace:^",
-    "@alova/scripts": "workspace:^",
-    "alova": "workspace:^"
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*"
   }
 }

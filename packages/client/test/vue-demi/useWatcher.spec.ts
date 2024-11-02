@@ -1,6 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { useWatcher } from '@/index';
-import VueHook from 'alova/vue-demi';
+import VueHook from '@/statesHook/vue-demi';
 import { queryCache, setCache } from 'alova';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { computed, reactive, ref } from 'vue';
@@ -32,16 +32,16 @@ describe('use useWatcher hook to send GET with vue', () => {
       [mutateNum, mutateStr]
     );
 
-    const mockCallback = jest.fn(() => {});
+    const mockCallback = vi.fn(() => {});
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     await delay(10);
-    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    // A request is triggered when the listening state changes, and only one request will be triggered when both states change.
     mutateNum.value = 1;
     mutateStr.value = 'b';
 
@@ -51,7 +51,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(error.value).toBeUndefined();
-    // 缓存有值
+    // Cache has value
     let cacheData = await queryCache(method);
     expect(cacheData?.path).toBe('/unit-test');
     expect(cacheData?.params).toStrictEqual({ num: '1', str: 'b' });
@@ -84,16 +84,16 @@ describe('use useWatcher hook to send GET with vue', () => {
       [mutateNum, mutateStr]
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     await untilCbCalled(setTimeout);
-    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    // A request is triggered when the listening state changes, and only one request will be triggered when both states change.
     i += 1;
     mutateNum.value = 1;
     mutateStr.value = 'b';
@@ -106,7 +106,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     await untilCbCalled(onSuccess);
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    expect(mockCallback).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
+    expect(mockCallback).toHaveBeenCalledTimes(1); // The request has been sent, but the data is only updated with the latest
   });
 
   test('should ignore the error which is not the last request', async () => {
@@ -131,18 +131,18 @@ describe('use useWatcher hook to send GET with vue', () => {
       [mutateNum, mutateStr]
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
-    const mockErrorCallback = jest.fn();
+    const mockErrorCallback = vi.fn();
     onError(mockErrorCallback);
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     await untilCbCalled(setTimeout);
-    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    // A request is triggered when the listening state changes, and only one request will be triggered when both states change.
     i += 1;
     mutateNum.value = 1;
     mutateStr.value = 'b';
@@ -155,9 +155,9 @@ describe('use useWatcher hook to send GET with vue', () => {
     await untilCbCalled(onSuccess);
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
-    expect(mockCallback).toHaveBeenCalledTimes(1); // 请求已发出，但数据只更新最新的
-    expect(mockErrorCallback).not.toHaveBeenCalled(); // unit-test-1s因为后面才响应，不会触发回调
-    expect(error.value).toBeUndefined(); // 对应的error也不会有值
+    expect(mockCallback).toHaveBeenCalledTimes(1); // The request has been sent, but the data is only updated with the latest
+    expect(mockErrorCallback).not.toHaveBeenCalled(); // Unit test 1s will not trigger the callback because it responds later.
+    expect(error.value).toBeUndefined(); // The corresponding error will also have no value.
   });
 
   test('should receive last response when set abortLast to false', async () => {
@@ -180,16 +180,16 @@ describe('use useWatcher hook to send GET with vue', () => {
       }
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     await untilCbCalled(setTimeout);
-    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    // A request is triggered when the listening state changes, and only one request will be triggered when both states change.
     i += 1;
     mutateNum.value = 1;
     mutateStr.value = 'b';
@@ -201,7 +201,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     await delay(1100);
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
-    expect(mockCallback).toHaveBeenCalledTimes(2); // 请求已发出，但数据只更新最新的
+    expect(mockCallback).toHaveBeenCalledTimes(2); // The request has been sent, but the data is only updated with the latest
   });
 
   test('should not send request when change value but intercepted by middleware', async () => {
@@ -210,7 +210,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     const { loading, data, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
@@ -233,7 +233,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       }
     );
 
-    const mockCallback = jest.fn(() => {});
+    const mockCallback = vi.fn(() => {});
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
@@ -241,9 +241,9 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(error.value).toBeUndefined();
     expect(sendableFn).not.toHaveBeenCalled();
 
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     await delay(10);
-    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    // A request is triggered when the listening state changes, and only one request will be triggered when both states change.
     mutateNum.value = 1;
     mutateStr.value = 'b';
 
@@ -258,7 +258,7 @@ describe('use useWatcher hook to send GET with vue', () => {
 
     mutateNum.value = 2;
     mutateStr.value = 'c';
-    await delay(50); // 修改值后不会发出请求，使用setTimeout延迟查看是否发起了请求
+    await delay(50); // No request will be issued after modifying the value. Use set timeout to delay the request to see if it is initiated.
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(sendableFn).toHaveBeenCalledTimes(2);
@@ -271,7 +271,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     const { loading, data, downloading, error, onSuccess } = useWatcher(
       () =>
         alova.Get('/unit-test', {
@@ -292,7 +292,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       }
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     expect(loading.value).toBeFalsy();
@@ -301,9 +301,9 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(error.value).toBeUndefined();
     expect(sendableFn).not.toHaveBeenCalled();
 
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     await delay(10);
-    // 当监听状态改变时触发请求，且两个状态都变化只会触发一次请求
+    // A request is triggered when the listening state changes, and only one request will be triggered when both states change.
     mutateNum.value = 1;
     mutateStr.value = 'b';
     await delay(50);
@@ -331,7 +331,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
     const mutateNum = ref(0);
     const mutateStr = ref('a');
-    const sendableFn = jest.fn();
+    const sendableFn = vi.fn();
     const { loading } = useWatcher(
       () =>
         alova.Get('/unit-test', {
@@ -366,7 +366,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     const { data, error, onSuccess } = useWatcher(currentGet, [mutateNum, mutateStr], {
       immediate: true
     });
-    const successMockFn = jest.fn();
+    const successMockFn = vi.fn();
     onSuccess(successMockFn);
 
     await untilCbCalled(onSuccess);
@@ -410,12 +410,12 @@ describe('use useWatcher hook to send GET with vue', () => {
         }),
       [mutateObj, mutateObjReactive]
     );
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
-    // 改变数据触发请求
+    // Change data trigger request
     mutateObj.value.num = 1;
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
@@ -424,7 +424,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.str).toBe('');
     expect(error.value).toBeUndefined();
 
-    // 再次改变数据，触发请求
+    // Change the data again and trigger the request
     mutateObj.value.num = 2;
     mutateObjReactive.str = 'c';
     await untilCbCalled(onSuccess);
@@ -451,12 +451,12 @@ describe('use useWatcher hook to send GET with vue', () => {
         }),
       [computedStr]
     );
-    // 一开始和两秒后数据都没有改变，表示监听状态未改变时不会触发请求
+    // The data does not change at the beginning or after two seconds, which means that the request will not be triggered when the listening status has not changed.
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
 
-    // 改变数据触发请求
+    // Change data trigger request
     mutateNum.value = 1;
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
@@ -464,7 +464,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.str).toBe('str2');
     expect(error.value).toBeUndefined();
 
-    // 再次改变数据，触发请求
+    // Change the data again and trigger the request
     mutateNum.value = 0;
     await untilCbCalled(onSuccess);
     expect(data.value.params.str).toBe('str1');
@@ -491,7 +491,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       { debounce: 100 }
     );
 
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
     await delay(10);
     const checkInitData = () => {
@@ -504,7 +504,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     mutateStr.value = 'b';
     checkInitData();
 
-    // 还没到防抖时间，请求相关数据不变
+    // The anti-shake time has not yet arrived, requesting that the relevant data remain unchanged.
     await delay(10);
     mutateNum.value = 2;
     mutateStr.value = 'c';
@@ -517,9 +517,9 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.num).toBe('2');
     expect(data.value.params.str).toBe('c');
     expect(error.value).toBeUndefined();
-    expect(Date.now() - startTs).toBeLessThanOrEqual(200); // 实际异步时间会较长
+    expect(Date.now() - startTs).toBeLessThanOrEqual(200); // The actual asynchronous time will be longer
 
-    // 缓存有值
+    // Cache has value
     const cacheData = await queryCache(method);
     expect(cacheData?.path).toBe('/unit-test');
     expect(cacheData?.params).toStrictEqual({ num: '2', str: 'c' });
@@ -547,7 +547,7 @@ describe('use useWatcher hook to send GET with vue', () => {
       { debounce: [200, 100] }
     );
 
-    // 暂没发送请求
+    // No request sent yet
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
@@ -558,7 +558,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     let startTs = Date.now();
     await untilCbCalled(onSuccess);
     let endTs = Date.now();
-    // 请求已响应
+    // Request responded
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('a');
@@ -568,13 +568,13 @@ describe('use useWatcher hook to send GET with vue', () => {
     startTs = Date.now();
     await untilCbCalled(onSuccess);
     endTs = Date.now();
-    // 请求已响应
+    // Request responded
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(endTs - startTs).toBeLessThan(200);
 
-    // 同时改变，以后一个为准
+    // If changed at the same time, the later one shall prevail.
     mutateNum.value = 3;
     mutateStr.value = 'c';
     startTs = Date.now();
@@ -612,7 +612,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     await delay(10);
     mutateNum.value = 1;
     let startTs = Date.now();
-    // 请求已响应
+    // Request responded
     await untilCbCalled(onSuccess);
     let endTs = Date.now();
     expect(data.value.path).toBe('/unit-test');
@@ -624,13 +624,13 @@ describe('use useWatcher hook to send GET with vue', () => {
     startTs = Date.now();
     await untilCbCalled(onSuccess);
     endTs = Date.now();
-    // 第二个值未设置防抖，请求已发送并响应
+    // The second value does not set anti-shake, the request is sent and responded
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(endTs - startTs).toBeLessThan(100);
 
-    // 同时改变，以后一个为准
+    // If changed at the same time, the later one shall prevail.
     mutateNum.value = 3;
     mutateStr.value = 'c';
     startTs = Date.now();
@@ -671,7 +671,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     mutateObj.value.num = 1;
     let startTs = Date.now();
     await untilCbCalled(onSuccess);
-    // 请求已响应
+    // Request responded
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('a');
@@ -680,13 +680,13 @@ describe('use useWatcher hook to send GET with vue', () => {
     mutateObjReactive.str = 'b';
     startTs = Date.now();
     await untilCbCalled(onSuccess);
-    // 请求已响应
+    // Request responded
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(Date.now() - startTs).toBeLessThan(300);
 
-    // 同时改变，以后一个为准
+    // If changed at the same time, the later one shall prevail.
     mutateObj.value.num = 3;
     mutateObjReactive.str = 'c';
     startTs = Date.now();
@@ -726,7 +726,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     mutateObj.value.num = 1;
     let startTs = Date.now();
     await untilCbCalled(onSuccess);
-    // 请求已响应
+    // Request responded
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('a');
@@ -735,13 +735,13 @@ describe('use useWatcher hook to send GET with vue', () => {
     mutateObjReactive.str = 'b';
     startTs = Date.now();
     await untilCbCalled(onSuccess);
-    // 请求已响应
+    // Request responded
     expect(data.value.path).toBe('/unit-test');
     expect(data.value.params.num).toBe('1');
     expect(data.value.params.str).toBe('b');
     expect(Date.now() - startTs).toBeLessThanOrEqual(200);
 
-    // 同时改变，以后一个为准
+    // If changed at the same time, the later one shall prevail.
     mutateObj.value.num = 3;
     mutateObjReactive.str = 'c';
     startTs = Date.now();
@@ -776,7 +776,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     const { method } = await untilCbCalled(onSuccess);
@@ -786,7 +786,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.str).toBe('a');
     expect(downloading.value).toStrictEqual({ total: 96, loaded: 96 });
     expect(error.value).toBeUndefined();
-    // 缓存没有值
+    // Cache has no value
     let cacheData = await queryCache(method);
     expect(cacheData).toBeUndefined();
     expect(mockCallback).toHaveBeenCalledTimes(1);
@@ -822,11 +822,11 @@ describe('use useWatcher hook to send GET with vue', () => {
       { immediate: true, debounce: 200 }
     );
 
-    // 监听时立即出发一次请求，因此loading的值为true
+    // A request is made immediately when listening, so the value of loading is true.
     expect(loading.value).toBeTruthy();
     expect(data.value).toBeUndefined();
     expect(error.value).toBeUndefined();
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     onSuccess(mockCallback);
 
     const { method } = await untilCbCalled(onSuccess);
@@ -835,7 +835,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(data.value.params.num).toBe('0');
     expect(data.value.params.str).toBe('a');
     expect(error.value).toBeUndefined();
-    // 缓存有值
+    // Cache has value
     let cacheData = await queryCache(method);
     expect(cacheData).toBeUndefined();
     expect(mockCallback).toHaveBeenCalledTimes(1);
@@ -843,7 +843,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     mutateNum.value = 2;
     mutateStr.value = 'c';
 
-    // 因为值改变后延迟200毫秒发出请求，因此150毫秒后应该还是原数据
+    // Because the request is delayed by 200 milliseconds after the value is changed, the original data should still be there after 150 milliseconds.
     await delay(150);
     expect(data.value.params.num).toBe('0');
     expect(data.value.params.str).toBe('a');
@@ -870,7 +870,7 @@ describe('use useWatcher hook to send GET with vue', () => {
     });
 
     const ctrlVal = ref(0);
-    const { data, send, onSuccess } = useWatcher(() => getGetterObj, [ctrlVal], {
+    const { data, send, onSuccess } = useWatcher((_force: boolean) => getGetterObj, [ctrlVal], {
       force: ({ args: [force] }) => force
     });
 
@@ -899,9 +899,9 @@ describe('use useWatcher hook to send GET with vue', () => {
       responseExpect: r => r.json()
     });
 
-    const successFn = jest.fn();
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const errorFn = vi.fn();
+    const completeFn = vi.fn();
     const mutateNum = ref(0);
     const mutateStr = ref('accc');
     const { loading, data, error, onSuccess } = useWatcher(

@@ -1,5 +1,64 @@
 # alova
 
+## 3.2.0
+
+### Minor Changes
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - add solid statesHook, and now solidjs is supported
+
+### Patch Changes
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that not request immediately when set `immediate` and `store` to true
+
+- [#576](https://github.com/alovajs/alova/pull/576) [`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - move the debounce function of all statesHook to unified place.
+
+- Updated dependencies [[`433320f`](https://github.com/alovajs/alova/commit/433320f7f1507bc2cd12baee9db0e6c5d9c5dab9)]:
+  - @alova/shared@1.1.0
+
+## 3.1.1
+
+### Patch Changes
+
+- [#569](https://github.com/alovajs/alova/pull/569) [`ebb1e6e`](https://github.com/alovajs/alova/commit/ebb1e6e911a2b61353305c55c4c8fcc2e2ad270d) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: correct type inconsistency between the form arg of handler and initialData in `useForm`
+
+- Updated dependencies [[`ebb1e6e`](https://github.com/alovajs/alova/commit/ebb1e6e911a2b61353305c55c4c8fcc2e2ad270d)]:
+  - @alova/shared@1.0.7
+
+## 3.1.0
+
+### Minor Changes
+
+- [#563](https://github.com/alovajs/alova/pull/563) [`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - the function `refresh` and `reload` return by `usePagination` will return a promise
+
+### Patch Changes
+
+- [#563](https://github.com/alovajs/alova/pull/563) [`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - loading value depends on `immdediate` event if `middleware` is set
+
+- [#563](https://github.com/alovajs/alova/pull/563) [`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - feat: add inference for send arguments
+
+- [#563](https://github.com/alovajs/alova/pull/563) [`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - optimize the type `Method` to extend `Promise`
+
+- Updated dependencies [[`ea20f56`](https://github.com/alovajs/alova/commit/ea20f564e5f33795959524d22a68f3ca4a305c1c)]:
+  - @alova/shared@1.0.6
+
+## 3.0.20
+
+### Patch Changes
+
+- [#560](https://github.com/alovajs/alova/pull/560) [`2b5898a`](https://github.com/alovajs/alova/commit/2b5898aad1b9606342ec7813e647785ac9c16bca) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - recovery previous version
+
+## 3.0.19
+
+### Patch Changes
+
+- [#557](https://github.com/alovajs/alova/pull/557) [`b2f5379`](https://github.com/alovajs/alova/commit/b2f5379dfa6eb8df1e284bb7253f7ce64ac7057e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - publish fetch.d.cts
+
+## 3.0.18
+
+### Patch Changes
+
+- [#549](https://github.com/alovajs/alova/pull/549) [`80cdea9`](https://github.com/alovajs/alova/commit/80cdea9c820273d8fa733b19c6a69c4e410d33ad) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that cannot found alova/fetch in ts5.6
+
 ## 3.0.17
 
 ### Patch Changes

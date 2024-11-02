@@ -1,11 +1,11 @@
 import { globalConfigMap } from '@/globalConfig';
-import { STORAGE_RESTORE, len } from '@alova/shared/vars';
+import { STORAGE_RESTORE, len } from '@alova/shared';
 import { CacheMode } from '~/typings';
 import { Method } from '..';
 
 const titleStyle = 'color: black; font-size: 12px; font-weight: bolder';
 /**
- * 默认cacheLogger函数
+ * Default cacheLogger function
  */
 export default (response: any, methodInstance: Method, cacheMode: CacheMode, tag: string | number | undefined) => {
   const cole = console;

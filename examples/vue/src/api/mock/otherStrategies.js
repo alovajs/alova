@@ -5,7 +5,7 @@ export default defineMock({
   '/configuration': () => {
     return {
       input: 'abc',
-      select: 2,
+      select: 'Option 2',
       date: '2023-05-16',
       switch: true,
       checkbox: ['apple', 'grape']

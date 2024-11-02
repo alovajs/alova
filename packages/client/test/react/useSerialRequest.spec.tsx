@@ -1,10 +1,8 @@
 import { useSerialRequest } from '@/index';
-import { undefinedValue } from '@alova/shared/vars';
-import '@testing-library/jest-dom';
+import ReactHook from '@/statesHook/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Method, createAlova } from 'alova';
-import ReactHook from 'alova/react';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { mockRequestAdapter } from '~/test/mockData';
 
 const alovaInst = createAlova({
@@ -17,7 +15,7 @@ describe('react => useSerialRequest', () => {
   test("should throws a error when don't pass a method handlers array", async () => {
     const methodInstance = alovaInst.Post('/detail');
     const Page = () => {
-      const [error, setError] = useState(undefinedValue as Error | undefined);
+      const [error, setError] = useState(undefined as Error | undefined);
       try {
         useSerialRequest(methodInstance as any);
       } catch (err: any) {
@@ -38,10 +36,10 @@ describe('react => useSerialRequest', () => {
   });
 
   test('should receive the previous response in every handler function, and receive the latest response data in `data`', async () => {
-    const methodHandlerMockFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
+    const methodHandlerMockFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
     const Page = () => {
       const { loading, error, data, onError, onComplete, onSuccess } = useSerialRequest([
         alovaInst.Post<{ id: number }>('/detail'),
@@ -108,10 +106,10 @@ describe('react => useSerialRequest', () => {
   });
 
   test('should pass all the args in send function to every serial method handler', async () => {
-    const methodHandlerMockFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
+    const methodHandlerMockFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
     const Page = () => {
       const { loading, error, data, onError, onComplete, onSuccess, send } = useSerialRequest(
         [
@@ -199,10 +197,10 @@ describe('react => useSerialRequest', () => {
   });
 
   test('any of method handlers request fails should lead to an error', async () => {
-    const methodHandlerMockFn = jest.fn();
-    const mockErrorFn = jest.fn();
-    const mockCompleteFn = jest.fn();
-    const mockSuccessFn = jest.fn();
+    const methodHandlerMockFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCompleteFn = vi.fn();
+    const mockSuccessFn = vi.fn();
     let errorMethod: Method | null = null;
     const Page = () => {
       const { loading, error, data, onError, onComplete, onSuccess } = useSerialRequest([
@@ -242,7 +240,7 @@ describe('react => useSerialRequest', () => {
       expect(mockErrorFn).toHaveBeenCalledTimes(1);
       expect(mockCompleteFn).toHaveBeenCalledTimes(1);
       expect(mockSuccessFn).not.toBeCalled();
-      expect(methodHandlerMockFn).toHaveBeenCalledTimes(1); // 错误了就不会再继续往下执行了
+      expect(methodHandlerMockFn).toHaveBeenCalledTimes(1); // If there is an error, the execution will not continue.
       expect(screen.getByRole('error')).toHaveTextContent('server error');
       expect(screen.getByRole('data')).toHaveTextContent('');
     });

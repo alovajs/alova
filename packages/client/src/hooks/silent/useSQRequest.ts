@@ -1,12 +1,13 @@
 import useRequest from '@/hooks/core/useRequest';
-import { noop, statesHookHelper } from '@alova/shared/function';
+import { statesHookHelper } from '@/util/helper';
+import { noop } from '@alova/shared';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, SQRequestHookConfig, UseHookExposure } from '~/typings/clienthook';
 import createSilentQueueMiddlewares from './createSilentQueueMiddlewares';
 
-export default function useSQRequest<AG extends AlovaGenerics>(
-  handler: AlovaMethodHandler<AG>,
-  config: SQRequestHookConfig<AG> = {}
+export default function useSQRequest<AG extends AlovaGenerics, Args extends any[] = any[]>(
+  handler: AlovaMethodHandler<AG, Args>,
+  config: SQRequestHookConfig<AG, Args> = {}
 ) {
   const { exposeProvider, __referingObj: referingObj } = statesHookHelper(promiseStatesHook());
   const { middleware = noop } = config;
@@ -25,7 +26,7 @@ export default function useSQRequest<AG extends AlovaGenerics>(
       return silentMidPromise;
     }
   });
-  decorateEvent(states as UseHookExposure<AG>);
+  decorateEvent(states as unknown as UseHookExposure<AG, Args>);
 
   return exposeProvider({
     ...states,

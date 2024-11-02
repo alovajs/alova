@@ -15,6 +15,11 @@ function FileViewer({ children, filePath, docPath, showPath = false, className }
   return (
     <div className={clsx('flex flex-row items-center justify-between', className)}>
       {children}
+      <a
+        href="#"
+        className="hidden"
+        target="_safsdfblank"
+        rel="noreferrer"></a>
       <div className={clsx('flex items-center', children ? 'ml-2' : '')}>
         <div
           onClick={handleToGithub}

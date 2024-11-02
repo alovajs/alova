@@ -7,9 +7,9 @@ type MockWrapper = {
 };
 
 /**
- * 创建alova模拟数据请求适配器
- * @param baseURL 模拟的基础url，用于命名空间使用，与createAlova函数的baseURL参数保持一致
- * @returns 创建一个模拟定义器
+ * Create alova mock data request adapter
+ * @param baseURL The simulated base URL, used for namespace use, is consistent with the baseURL parameter of the createAlova function.
+ * @returns Create a mock definer
  */
 export default function createAlovaMockAdapter<RequestConfig, Response, ResponseHeader>(
   mockWrapper: MockWrapper[],

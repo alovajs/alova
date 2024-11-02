@@ -1,15 +1,25 @@
-import { getContext, getMethodInternalKey, isFn, isObject } from '@alova/shared/function';
-import { falseValue, forEach, isArray, objectKeys, trueValue, undefinedValue } from '@alova/shared/vars';
+import {
+  falseValue,
+  forEach,
+  getContext,
+  getMethodInternalKey,
+  isArray,
+  isFn,
+  isObject,
+  objectKeys,
+  trueValue,
+  undefinedValue
+} from '@alova/shared';
 import { AlovaGenerics, Method, promiseStatesHook, setCache } from 'alova';
 import { UpdateStateCollection } from '~/typings/clienthook';
 import { coreAssert } from './hooks/core/implements/assert';
 import { getStateCache } from './hooks/core/implements/stateCache';
 
 /**
- * 更新对应method的状态
- * @param method 请求方法对象
- * @param handleUpdate 更新回调
- * @returns 是否更新成功，未找到对应的状态时不会更新成功
+ * Update the status of the corresponding method
+ * @param method request method object
+ * @param handleUpdate update callback
+ * @returns Whether the update is successful or not. If the corresponding status is not found, the update will not be successful.
  */
 export default async function updateState<Responded = unknown>(
   matcher: Method<AlovaGenerics<Responded extends unknown ? any : Responded>>,
@@ -17,7 +27,7 @@ export default async function updateState<Responded = unknown>(
 ) {
   let updated = falseValue;
 
-  // 只处理符合条件的第一个Method实例，如果没有符合条件的实例，则不处理
+  // Only process the first method instance that meets the conditions. If there is no instance that meets the conditions, it will not be processed.
   if (matcher) {
     const { update } = promiseStatesHook();
     const methodKey = getMethodInternalKey(matcher);
@@ -29,7 +39,7 @@ export default async function updateState<Responded = unknown>(
 
     let updatedDataColumnData = undefinedValue as any;
     if (frontStates) {
-      // 循环遍历更新数据，并赋值给受监管的状态
+      // Loop through the updated data and assign it to the supervised state
       forEach(objectKeys(updateStateCollection), stateName => {
         coreAssert(stateName in frontStates, `state named \`${stateName}\` is not found`);
         const targetStateProxy = frontStates[stateName as keyof typeof frontStates];
@@ -42,18 +52,18 @@ export default async function updateState<Responded = unknown>(
             ? { ...updatedData }
             : updatedData;
 
-        // 记录data字段的更新值，用于更新缓存数据
+        // Record the updated value of the data field, used to update cached data
         if (stateName === 'data') {
           updatedDataColumnData = updatedData;
         }
 
-        // 直接使用update更新，不检查referingObject.trackedKeys
+        // Update directly using update without checking referring object.tracked keys
         update(updatedData, frontStates[stateName as keyof typeof frontStates].s, stateName, hookInstance.ro);
       });
       updated = trueValue;
     }
 
-    // 如果更新了data，则需要同时更新缓存和持久化数据
+    // If data is updated, cache and persistent data need to be updated at the same time
     if (updatedDataColumnData !== undefinedValue) {
       setCache(matcher, updatedDataColumnData);
     }

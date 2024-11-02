@@ -3,12 +3,12 @@ import useRequest from '@/hooks/core/useRequest';
 import { setDependentAlova } from '@/hooks/silent/globalVariables';
 import { storageGetItem } from '@/hooks/silent/storage/performers';
 import createVirtualResponse from '@/hooks/silent/virtualResponse/createVirtualResponse';
+import VueHook from '@/statesHook/vue';
 import updateState from '@/updateState';
 import { AlovaGlobalCacheAdapter, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 
-// 响应数据持久化时，自动转换虚拟数据和匹配序列化器的数据
+// Automatically convert dummy data to data matching the serializer when responding to data persistence
 describe('serialize response data', () => {
   test('serialize response data with useRequest', async () => {
     let mockStorage = {} as Record<string, any>;
@@ -34,7 +34,7 @@ describe('serialize response data', () => {
     });
     setDependentAlova(alovaInst);
 
-    // 先构造一个带虚拟数据和可序列化的缓存
+    // First construct a cache with dummy data and serializability
     const Get = alovaInst.Get('/list', {
       name: 'test-get',
       cacheFor: {
@@ -44,7 +44,7 @@ describe('serialize response data', () => {
       transform: (data: { total: number; list: number[] }) => data.list
     });
     const { onSuccess, data } = useRequest(Get);
-    data; // 访问后才能触发此数据的更新
+    data; // Updates to this data can only be triggered after access
     await untilCbCalled(onSuccess);
     const vData = createVirtualResponse(100);
     const date = new Date('2022-10-01 00:00:00');
@@ -56,12 +56,12 @@ describe('serialize response data', () => {
       });
     }
 
-    // 查看mockStorage内的数据是否如预期
+    // Check whether the data in the mock storage is as expected
     const deserializedStoragedData = await storageGetItem(Object.keys(mockStorage)[0]);
     const [deserializedResponse, expireTimestamp, tag] = deserializedStoragedData || [];
     expect(deserializedResponse.pop().source).toBe('tttt');
     expect(deserializedResponse.pop().getTime()).toBe(date.getTime());
-    expect(expireTimestamp).toBeUndefined(); // 过期时间为undefined时表示永不过期
+    expect(expireTimestamp).toBeUndefined(); // When the expiration time is undefined, it means it will never expire.
     expect(tag).toBeUndefined();
   });
 });

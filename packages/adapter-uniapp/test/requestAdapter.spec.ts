@@ -1,6 +1,6 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
 import AdapterUniapp from '@/index';
-import { noop } from '@alova/shared/function';
+import { noop } from '@alova/shared';
 import { createAlova } from 'alova';
 import { useRequest } from 'alova/client';
 import { delay, untilCbCalled } from 'root/testUtils';
@@ -48,7 +48,7 @@ describe('request adapter', () => {
     });
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onRequestCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test?a=1&b=2');
@@ -105,7 +105,7 @@ describe('request adapter', () => {
     );
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onRequestCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test?a=1&b=2');
@@ -238,7 +238,7 @@ describe('request adapter', () => {
     );
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onUploadCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test');
@@ -300,7 +300,7 @@ describe('request adapter', () => {
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(uploading.value).toEqual({ total: 200, loaded: 40 });
+    expect(uploading.value).toEqual({ total: 200, loaded: 60 });
     expect(error.value?.message).toBe('uploadFile:fail abort');
   });
 
@@ -316,7 +316,7 @@ describe('request adapter', () => {
     });
 
     // 验证请求数据
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onDownloadCall(options => {
       mockFn();
       expect(options.url).toBe('http://xxx/unit-test');
@@ -352,7 +352,7 @@ describe('request adapter', () => {
     await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(downloading.value).toEqual({ total: 200, loaded: 40 });
+    expect(downloading.value).toEqual({ total: 200, loaded: 60 });
     expect(error.value?.message).toBe('downloadFile:fail abort');
   });
 });

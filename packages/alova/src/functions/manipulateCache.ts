@@ -8,27 +8,33 @@ import {
   setWithCacheAdapter
 } from '@/storage/cacheWrapper';
 import {
+  MEMORY,
+  PromiseCls,
+  STORAGE_RESTORE,
   getConfig,
   getContext,
   getLocalCacheConfigParam,
   getMethodInternalKey,
   getTime,
-  isFn
-} from '@alova/shared/function';
-import { MEMORY, PromiseCls, STORAGE_RESTORE, isArray, len, mapItem, undefinedValue } from '@alova/shared/vars';
+  isArray,
+  isFn,
+  len,
+  mapItem,
+  undefinedValue
+} from '@alova/shared';
 import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
 /*
- * 以下三个函数中的matcher为Method实例匹配器，它分为3种情况：
- * 1. 如果matcher为Method实例，则清空该Method实例缓存
- * 2. 如果matcher为字符串或正则，则清空所有符合条件的Method实例缓存
- * 3. 如果未传入matcher，则会清空所有缓存
+ * The matchers in the following three functions are Method instance matchers, which are divided into three situations:
+ * 1. If the matcher is a Method instance, clear the cache of the Method instance.
+ * 2. If matcher is a string or regular expression, clear the cache of all Method instances that meet the conditions.
+ * 3. If no matcher is passed in, all caches will be cleared.
  */
 
 /**
- * 查询缓存
- * @param matcher Method实例匹配器
- * @returns 缓存数据，未查到时返回undefined
+ * Query cache
+ * @param matcher Method instance matcher
+ * @returns Cache data, return undefined if not found
  */
 export const queryCache = async <Responded>(
   matcher: Method<AlovaGenerics<Responded>>,
@@ -58,9 +64,8 @@ export const queryCache = async <Responded>(
 };
 
 /**
- * 手动设置缓存响应数据，如果对应的methodInstance设置了持久化存储，则还会去检出持久化存储中的缓存
- * @param matcher Method实例匹配器
- * @param data 缓存数据
+ * Manually set cache response data. If the corresponding methodInstance sets persistent storage, the cache in the persistent storage will also be checked out.
+ * @param matcher Method instance matcher cache data
  */
 export const setCache = async <Responded>(
   matcher: Method<AlovaGenerics<Responded>> | Method<AlovaGenerics<Responded>>[],
@@ -102,8 +107,8 @@ export const setCache = async <Responded>(
 };
 
 /**
- * 失效缓存
- * @param matcher Method实例匹配器
+ * invalid cache
+ * @param matcher Method instance matcher
  */
 export const invalidateCache = async (matcher?: Method | Method[]) => {
   if (!matcher) {
@@ -133,8 +138,8 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
  * @param sourceMethod source method instance
  */
 export const hitCacheBySource = async <AG extends AlovaGenerics>(sourceMethod: Method<AG>) => {
-  // 查找hit target cache，让它的缓存失效
-  // 通过全局配置`autoHitCache`来控制自动缓存失效范围
+  // Find the hit target cache and invalidate its cache
+  // Control the automatic cache invalidation range through global configuration `autoHitCache`
   const { autoHitCache } = globalConfigMap;
   const { l1Cache, l2Cache } = getContext(sourceMethod);
   const sourceKey = getMethodInternalKey(sourceMethod);

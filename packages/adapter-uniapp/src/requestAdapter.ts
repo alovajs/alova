@@ -1,5 +1,5 @@
 /// <reference path="../node_modules/@dcloudio/types/index.d.ts" />
-import { isPlainObject, noop } from '@alova/shared/function';
+import { isPlainObject, noop } from '@alova/shared';
 import { Arg, ProgressUpdater } from 'alova';
 import { UniappRequestAdapter } from '~/typings';
 

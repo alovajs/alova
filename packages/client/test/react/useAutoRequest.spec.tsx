@@ -1,9 +1,8 @@
 import { useAutoRequest } from '@/index';
-import '@testing-library/jest-dom';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { delay } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 
@@ -33,10 +32,10 @@ beforeEach(() => {
 });
 describe('react => useAutoRequest', () => {
   test('should request when window event is emitted', async () => {
-    const networkFn = jest.fn();
-    const visibilityFn = jest.fn();
-    const focusFn = jest.fn();
-    const pollingFn = jest.fn();
+    const networkFn = vi.fn();
+    const visibilityFn = vi.fn();
+    const focusFn = vi.fn();
+    const pollingFn = vi.fn();
     useAutoRequest.onNetwork = (...args: any) => {
       networkFn();
       return (originalOnNetwork as any)(...args);
@@ -97,10 +96,10 @@ describe('react => useAutoRequest', () => {
   });
 
   test("window event emitted shouldn't request when switch is closed", async () => {
-    const networkFn = jest.fn();
-    const visibilityFn = jest.fn();
-    const focusFn = jest.fn();
-    const pollingFn = jest.fn();
+    const networkFn = vi.fn();
+    const visibilityFn = vi.fn();
+    const focusFn = vi.fn();
+    const pollingFn = vi.fn();
     useAutoRequest.onNetwork = (...args: any) => {
       networkFn();
       return (originalOnNetwork as any)(...args);
@@ -146,10 +145,10 @@ describe('react => useAutoRequest', () => {
   });
 
   test('should polling request when set pollingTime', async () => {
-    const networkFn = jest.fn();
-    const visibilityFn = jest.fn();
-    const focusFn = jest.fn();
-    const pollingFn = jest.fn();
+    const networkFn = vi.fn();
+    const visibilityFn = vi.fn();
+    const focusFn = vi.fn();
+    const pollingFn = vi.fn();
     useAutoRequest.onNetwork = (...args: any) => {
       networkFn();
       return (originalOnNetwork as any)(...args);
@@ -205,10 +204,10 @@ describe('react => useAutoRequest', () => {
   });
 
   test('should unbind event when component is destroyed', async () => {
-    const networkOffFn = jest.fn();
-    const visibilityOffFn = jest.fn();
-    const focusOffFn = jest.fn();
-    const pollingOffFn = jest.fn();
+    const networkOffFn = vi.fn();
+    const visibilityOffFn = vi.fn();
+    const focusOffFn = vi.fn();
+    const pollingOffFn = vi.fn();
     useAutoRequest.onNetwork = (...args: any) => {
       const off = (originalOnNetwork as any)(...args);
       return () => {
@@ -282,7 +281,7 @@ describe('react => useAutoRequest', () => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag }));
     });
 
-    // 默认1000ms内只有第一次会触发请求
+    // By default, only the first request will be triggered within 1000ms.
     tag = 'online';
     mockGlobalEventEmit('online');
     delay(100)

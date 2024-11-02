@@ -1,5 +1,4 @@
-import { createSyncOnceRunner, isNumber, noop } from '@alova/shared/function';
-import { falseValue, trueValue, undefinedValue } from '@alova/shared/vars';
+import { falseValue, isNumber, noop, trueValue, undefinedValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactHookExportType, ReactState } from '~/typings/stateshook/react';
@@ -10,7 +9,7 @@ const setRef = <T>(ref: MutableRefObject<T>, newVal: T) => {
   ref.current = newVal;
 };
 
-// React的预定义hooks
+// the react predefined hooks
 export default {
   name: 'React',
   create: initialValue => useState(initialValue),
@@ -22,7 +21,7 @@ export default {
     state[1](newVal);
   },
   memorize: fn => {
-    // 使用useCallback使用同一个引用，同事通过useRef来引用最新函数
+    // use `useCallback` to ensure the same reference, and refer the newest function with `useRef`
     const fnRef = useRef(noop as typeof fn);
     setRef(fnRef, fn);
     return useCallback((...args: any[]) => refCurrent(fnRef)(...args), []);
@@ -33,14 +32,12 @@ export default {
     return refObj;
   },
   effectRequest({ handler, removeStates, saveStates, immediate, frontStates, watchingStates = [] }) {
-    // 当有监听状态时，状态变化再触发
+    // `handler` is called when some states change are detected
     const oldStates = useRef(watchingStates);
 
-    // 多个值同时改变只触发一次
-    const onceRunner = refCurrent(useRef(createSyncOnceRunner()));
     useEffect(() => {
       const oldStatesValue = refCurrent(oldStates);
-      // 对比新旧状态，获取变化的状态索引
+      // compare the old and new value, and get the index of changed state
       let changedIndex: number | undefined = undefinedValue;
       for (const index in watchingStates) {
         if (!Object.is(oldStatesValue[index], watchingStates[index])) {
@@ -49,18 +46,16 @@ export default {
         }
       }
       setRef(oldStates, watchingStates);
-      onceRunner(() => {
-        if (immediate || isNumber(changedIndex)) {
-          handler(changedIndex);
-        }
-      });
+      if (immediate || isNumber(changedIndex)) {
+        handler(changedIndex);
+      }
 
-      // 组件卸载时移除对应状态
+      // remove states when component is unmounted
       return removeStates;
     }, watchingStates);
 
-    // 因为react每次刷新都会重新调用usehook，因此每次会让状态缓存失效
-    // 因此每次都需要更新管理的状态
+    // Because react will call usehook again every time it refreshes, the state cache will be invalidated every time
+    // Therefore, the managed state needs to be updated every time
     const needSave = useRef(false);
     useEffect(() => {
       refCurrent(needSave) ? saveStates(frontStates) : setRef(needSave, trueValue);
@@ -71,7 +66,7 @@ export default {
     return [memo, noop];
   },
   watch: (states, callback) => {
-    // 当有监听状态时，状态变化再触发
+    // When there is a monitoring state, the state changes and then triggers
     const needEmit = useRef(falseValue);
     useEffect(() => {
       needEmit.current ? callback() : (needEmit.current = true);

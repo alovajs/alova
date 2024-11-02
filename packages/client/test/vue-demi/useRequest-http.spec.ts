@@ -1,7 +1,7 @@
 import { getAlovaInstance } from '#/utils';
+import { AlovaEventBase } from '@/event';
 import { useRequest } from '@/index';
-import VueHook from 'alova/vue-demi';
-import { AlovaEventBase } from '@alova/shared/event';
+import VueHook from '@/statesHook/vue-demi';
 import { queryCache, setCache } from 'alova';
 import { Result, delay, untilCbCalled } from 'root/testUtils';
 
@@ -14,7 +14,7 @@ describe('use useRequest hook to send GET with vue', () => {
 
   test('should apply initialData with object and function', async () => {
     const alova = getAlovaInstance(VueHook);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const { data: data1 } = useRequest(alova.Get(''), { initialData: 'test', immediate: false });
     const { data: data2 } = useRequest(alova.Get(''), {
       initialData: () => {
@@ -61,7 +61,7 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(error.value).toBeUndefined();
     expect(fromCache).toBeFalsy();
 
-    // 缓存有值
+    // Cache has value
     const cacheData = await queryCache(Get);
     expect(cacheData?.path).toBe('/unit-test');
     expect(cacheData?.params).toStrictEqual({ a: 'a', b: 'str' });
@@ -90,7 +90,7 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(downloading.value).toStrictEqual({ total: 0, loaded: 0 });
     expect(error.value).toBeUndefined();
 
-    // 请求错误无缓存
+    // Request error no cache
     const cacheData = await queryCache(Get);
     expect(cacheData).toBeUndefined();
   });
@@ -133,7 +133,7 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(error.value?.name).toBe('404');
     expect(error.value?.message).toBe('api not found');
 
-    // 请求错误无缓存
+    // Request error no cache
     const cacheData = await queryCache(Get);
     expect(cacheData).toBeUndefined();
 
@@ -247,7 +247,7 @@ describe('use useRequest hook to send GET with vue', () => {
     });
     const Get = alova.Get<string, Result<string>>('/will-never-request');
     const { loading, data, error, abort, onError } = useRequest(Get, { immediate: false });
-    const errFn = jest.fn();
+    const errFn = vi.fn();
     onError(errFn);
 
     expect(loading.value).toBeFalsy();
@@ -287,7 +287,7 @@ describe('use useRequest hook to send GET with vue', () => {
   test('abort request manually with cloned method instance in beforeRequest', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect(methodInstance) {
-        // 在这边中断请求
+        // Interrupt request here
         setTimeout(methodInstance.abort, 100);
       },
       resErrorExpect: error => {
@@ -340,7 +340,7 @@ describe('use useRequest hook to send GET with vue', () => {
       expect(obj.b).toMatch(/~|\./);
     });
 
-    // 延迟一会儿发送请求
+    // Delay sending request for a while
     await delay(500);
     const sendObj = { a: '~', b: '~' };
     let rawData = await send(sendObj);
@@ -374,7 +374,7 @@ describe('use useRequest hook to send GET with vue', () => {
       immediate: false
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onError(({ error, args }) => {
       const index = args[0];
       mockFn();
@@ -388,7 +388,7 @@ describe('use useRequest hook to send GET with vue', () => {
       expect(index.toString()).toMatch(/3|5/);
     });
 
-    // 延迟一会儿发送请求
+    // Delay sending request for a while
     await delay(100);
     try {
       const data = await send(3);
@@ -404,7 +404,7 @@ describe('use useRequest hook to send GET with vue', () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     const getGetterObj = alova.Get('/unit-test');
 
     const { send } = useRequest(getGetterObj, {
@@ -484,9 +484,9 @@ describe('use useRequest hook to send GET with vue', () => {
       transform: ({ data }: Result) => data
     });
 
-    const successFn = jest.fn();
-    const errorFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const errorFn = vi.fn();
+    const completeFn = vi.fn();
     const { loading, data, error, onSuccess } = useRequest(Get)
       .onSuccess(successFn)
       .onError(errorFn)

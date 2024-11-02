@@ -1,4 +1,4 @@
-import { len, objectKeys, pushItem, splice } from '@alova/shared/vars';
+import { len, objectKeys, pushItem, splice } from '@alova/shared';
 import { AlovaGenerics } from 'alova';
 import type { SilentMethod } from '../SilentMethod';
 import {
@@ -11,24 +11,24 @@ import {
 } from './performers';
 
 /**
- * 序列化并保存silentMethod实例
- * @param silentMethodInstance silentMethod实例
+ * Serialize and save silentMethod instance
+ * @param silentMethodInstance silentMethod instance
  */
 export const persistSilentMethod = <AG extends AlovaGenerics>(silentMethodInstance: SilentMethod<AG>) =>
   storageSetItem(silentMethodStorageKeyPrefix + silentMethodInstance.id, silentMethodInstance);
 
 /**
- * 将静默请求的配置信息放入对应storage中
- * 逻辑：通过构造一个key，并用这个key将静默方法的配置信息放入对应storage中，然后将key存入统一管理key的存储中
- * @param silentMethod SilentMethod实例
- * @param queue 操作的队列名
+ * Put the configuration information of silent request into the corresponding storage
+ * Logic: Construct a key and use this key to put the configuration information of the silent method into the corresponding storage, and then store the key in the unified management key storage.
+ * @param silentMethod SilentMethodInstance
+ * @param queue Operation queue name
  */
 export const push2PersistentSilentQueue = async <AG extends AlovaGenerics>(
   silentMethodInstance: SilentMethod<AG>,
   queueName: string
 ) => {
   await persistSilentMethod(silentMethodInstance);
-  // 将silentMethod实例id保存到queue存储中
+  // Save the silent method instance id to queue storage
   const silentMethodIdQueueMap = ((await storageGetItem(silentMethodIdQueueMapStorageKey)) ||
     {}) as SerializedSilentMethodIdQueueMap;
   const currentQueue = (silentMethodIdQueueMap[queueName] = silentMethodIdQueueMap[queueName] || []);
@@ -37,17 +37,17 @@ export const push2PersistentSilentQueue = async <AG extends AlovaGenerics>(
 };
 
 /**
- * 对缓存中的silentMethod实例移除或替换
- * @param queue 操作的队列名
- * @param targetSilentMethodId 目标silentMethod实例id
- * @param newSilentMethod 替换的新silentMethod实例，未传则表示删除
+ * Remove or replace silentMethod instances in the cache
+ * @param queue Operation queue name
+ * @param targetSilentMethodId Target silentMethod instance id
+ * @param newSilentMethod The new silentMethod instance to replace. If not passed, it means deleted.
  */
 export const spliceStorageSilentMethod = async <AG extends AlovaGenerics>(
   queueName: string,
   targetSilentMethodId: string,
   newSilentMethod?: SilentMethod<AG>
 ) => {
-  // 将silentMethod实例id从queue中移除
+  // Remove the silent method instance id from the queue
   const silentMethodIdQueueMap = ((await storageGetItem(silentMethodIdQueueMapStorageKey)) ||
     {}) as SerializedSilentMethodIdQueueMap;
   const currentQueue = silentMethodIdQueueMap[queueName] || [];
@@ -61,12 +61,12 @@ export const spliceStorageSilentMethod = async <AG extends AlovaGenerics>(
     }
 
     await storageRemoveItem(silentMethodStorageKeyPrefix + targetSilentMethodId);
-    // 队列为空时删除此队列
+    // Delete this queue when it is empty
     len(currentQueue) <= 0 && delete silentMethodIdQueueMap[queueName];
     if (len(objectKeys(silentMethodIdQueueMap)) > 0) {
       await storageSetItem(silentMethodIdQueueMapStorageKey, silentMethodIdQueueMap);
     } else {
-      // 队列集合为空时移除它
+      // Remove the queue collection when it is empty
       await storageRemoveItem(silentMethodIdQueueMapStorageKey);
     }
   }

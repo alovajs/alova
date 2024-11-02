@@ -1,29 +1,73 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "globalDependencies": [".editorconfig", "eslint.config.js", ".prettierrc.cjs", "tsconfig.base.json", "tsconfig.json"],
+  "tasks": {
     "//#lint": {
-      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+      "inputs": [
+        "!.git/**",
+        "!node_modules/**",
+        "!packages/**",
+        "!changeset/**",
+        "!.github/**",
+        "!.vscode/**",
+        "!.husky/**",
+        "!examples/**"
+      ]
     },
     "//#lint:fix": {
-      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+      "inputs": [
+        "!.git/**",
+        "!node_modules/**",
+        "!packages/**",
+        "!changeset/**",
+        "!.github/**",
+        "!.vscode/**",
+        "!.husky/**",
+        "!examples/**"
+      ]
     },
     "//#format": {
-      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+      "inputs": [
+        "!.git/**",
+        "!node_modules/**",
+        "!packages/**",
+        "!changeset/**",
+        "!.github/**",
+        "!.vscode/**",
+        "!.husky/**",
+        "!examples/**"
+      ]
     },
     "//#format:fix": {
-      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+      "inputs": [
+        "!.git/**",
+        "!node_modules/**",
+        "!packages/**",
+        "!changeset/**",
+        "!.github/**",
+        "!.vscode/**",
+        "!.husky/**",
+        "!examples/**"
+      ]
+    },
+    "//#test": {
+      "inputs": [
+        "!.git/**",
+        "!node_modules/**",
+        "!packages/**",
+        "!changeset/**",
+        "!.github/**",
+        "!.vscode/**",
+        "!.husky/**",
+        "!examples/**"
+      ]
     },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "lint": {},
-    "lint:fix": {},
-    "format": {},
-    "format:fix": {},
     "test": {
       "dependsOn": ["^build"]
     }
-  },
-  "globalDependencies": [".editorconfig", ".eslintrc.cjs", ".prettierrc.cjs", "tsconfig.base.json", "tsconfig.json"]
+  }
 }

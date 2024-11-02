@@ -1,5 +1,6 @@
 import { createAssert } from '@/assert';
 import {
+  buildCompletedURL,
   createAsyncQueue,
   createSyncOnceRunner,
   getConfig,
@@ -136,7 +137,8 @@ describe('shared functions', () => {
     expect(isSpecialRequestBody(new FormData())).toBeTruthy();
     // Note: ReadableStream is an abstract class and can't be instantiated directly in a test environment.
     // You might need to use a polyfill or a mock implementation for testing.
-    // expect(isSpecialRequestBody(new ReadableStream())).toBeTruthy(); // Uncomment if you have a mock or polyfill
+    // expect(isSpecialRequestBody(new ReadableStream())).toBeTruthy();
+    // Uncomment if you have a mock or polyfill
     expect(isSpecialRequestBody(new URLSearchParams())).toBeTruthy();
     expect(isSpecialRequestBody(new ArrayBuffer(100))).toBeTruthy();
 
@@ -377,7 +379,7 @@ describe('shared functions', () => {
     const runner = createSyncOnceRunner(delay);
 
     // This function will be executed by the runner
-    const testFn = jest.fn();
+    const testFn = vi.fn();
 
     // Act
     // Call the runner multiple times synchronously
@@ -430,10 +432,10 @@ describe('shared functions', () => {
     // should handle an empty queue gracefully
     const { addQueue: addToQueue2 } = createAsyncQueue();
 
-    // 添加空操作
+    // Add no-op
     const results2 = await addToQueue2(async () => Promise.resolve('Empty'));
 
-    // 不应该抛出任何错误
+    // should not throw any errors
     expect(results2).toBe('Empty');
 
     // should reject the promise when async function fails and catchError is false
@@ -495,8 +497,7 @@ describe('shared functions', () => {
       e: 4
     };
 
-    // eslint-disable-next-line
-    const callbackSpy = jest.fn((value, _, __) => value);
+    const callbackSpy = vi.fn((value, _, __) => value);
 
     // Act
     walkObject(target, callbackSpy, true);
@@ -533,8 +534,7 @@ describe('shared functions', () => {
       },
       e: 4
     };
-    // eslint-disable-next-line
-    const callbackSpy2 = jest.fn((value, _, __) => value);
+    const callbackSpy2 = vi.fn((value, _, __) => value);
 
     // Act
     walkObject(target2, callbackSpy2, false);
@@ -569,8 +569,7 @@ describe('shared functions', () => {
         c: 2
       }
     };
-    // eslint-disable-next-line
-    const callbackSpy3 = jest.fn((value, key, _) => {
+    const callbackSpy3 = vi.fn((value, key, _) => {
       if (key === 'c') {
         return value * 2; // Double the value of 'c'
       }
@@ -614,5 +613,31 @@ describe('shared functions', () => {
       await delay(50);
     }
     expect(Object.keys(uuidMap2)).toHaveLength(total2);
+  });
+
+  test('buildCompletedURL', () => {
+    // should remove trailing slash from baseURL
+    let result = buildCompletedURL('http://example.com/', 'api', {});
+    expect(result).toBe('http://example.com/api');
+
+    // should add leading slash to url if not present
+    result = buildCompletedURL('http://example.com', 'api', {});
+    expect(result).toBe('http://example.com/api');
+
+    // should handle empty url
+    result = buildCompletedURL('http://example.com', '', {});
+    expect(result).toBe('http://example.com');
+
+    // should append params as query string
+    result = buildCompletedURL('http://example.com/api', '', { param1: 'value1', param2: 'value2' });
+    expect(result).toBe('http://example.com/api?param1=value1&param2=value2');
+
+    // should handle params with undefined values
+    result = buildCompletedURL('http://example.com/api', '', { param1: 'value1', param2: undefined });
+    expect(result).toBe('http://example.com/api?param1=value1');
+
+    // 'should handle existing query string in url'
+    result = buildCompletedURL('http://example.com/api?existingParam=existingValue', '', { param1: 'value1' });
+    expect(result).toBe('http://example.com/api?existingParam=existingValue&param1=value1');
   });
 });

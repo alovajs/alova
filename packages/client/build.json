@@ -5,9 +5,7 @@
     "packageName": "AlovaClientHook",
     "external": {
       "alova": "alova",
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     }
   },
   "vue": {
@@ -15,9 +13,7 @@
     "input": "src/statesHook/vue.ts",
     "external": {
       "vue": "Vue",
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     },
     "output": "../alova/dist/stateshook/vue.{suffix}.{ext}"
   },
@@ -26,9 +22,7 @@
     "input": "src/statesHook/vue-demi.ts",
     "external": {
       "vue-demi": "Vue",
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     },
     "output": "../alova/dist/stateshook/vue-demi.{suffix}.{ext}"
   },
@@ -37,9 +31,7 @@
     "input": "src/statesHook/react.ts",
     "external": {
       "react": "React",
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     },
     "output": "../alova/dist/stateshook/react.{suffix}.{ext}"
   },
@@ -49,11 +41,20 @@
     "external": {
       "svelte": null,
       "svelte/store": null,
+      "@alova/shared": null
+    },
+    "formats": ["cjs", "esm"],
+    "output": "../alova/dist/stateshook/svelte.{suffix}.{ext}"
+  },
+  "solid": {
+    "packageName": "solidHook",
+    "input": "src/statesHook/solid.ts",
+    "external": {
+      "solid-js": "Solid",
       "@alova/shared/function": null,
       "@alova/shared/vars": null,
       "@alova/shared/assert": null
     },
-    "formats": ["cjs", "esm"],
-    "output": "../alova/dist/stateshook/svelte.{suffix}.{ext}"
+    "output": "../alova/dist/stateshook/solid.{suffix}.{ext}"
   }
 }

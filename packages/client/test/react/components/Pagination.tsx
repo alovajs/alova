@@ -1,6 +1,6 @@
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PaginationHookConfig } from '~/typings/clienthook';
 import { ReactHookExportType } from '~/typings/stateshook/react';
 
@@ -44,12 +44,35 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
     pageSize,
     isLastPage,
     update,
-    refresh,
     insert,
     replace,
     remove,
-    reload
+    refresh
   } = exposure;
+
+  const [awaitResult, setAwaitResult] = useState<string | undefined>();
+  const refreshWithCatch = async (...args: any[]) => {
+    setAwaitResult(undefined);
+    return exposure
+      .refresh(...args)
+      .then(() => {
+        setAwaitResult('resolve');
+      })
+      .catch(() => {
+        setAwaitResult('reject');
+      });
+  };
+  const reloadWithCatch = async () => {
+    setAwaitResult(undefined);
+    return exposure
+      .reload()
+      .then(() => {
+        setAwaitResult('resolve');
+      })
+      .catch(() => {
+        setAwaitResult('reject');
+      });
+  };
 
   return (
     <div>
@@ -62,6 +85,7 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
       <span role="response">{JSON.stringify(data)}</span>
       <span role="error">{error?.message}</span>
       <span role="replacedError">{replacedError?.message}</span>
+      {awaitResult ? <span role="awaitResult">{awaitResult}</span> : null}
       <button
         role="setPage"
         onClick={() => update({ page: page + 1 })}>
@@ -89,7 +113,7 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
       </button>
       <button
         role="refresh1"
-        onClick={() => refresh(1)}>
+        onClick={() => refreshWithCatch(1)}>
         btn
       </button>
       <button
@@ -241,7 +265,7 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
       </button>
       <button
         role="reload1"
-        onClick={reload}>
+        onClick={reloadWithCatch}>
         btn
       </button>
       <button

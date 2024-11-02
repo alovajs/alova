@@ -1,16 +1,15 @@
 import { accessAction, actionDelegationMiddleware, useForm } from '@/index';
-import { getMethodInternalKey } from '@alova/shared/function';
-import '@testing-library/jest-dom';
+import VueHook from '@/statesHook/vue';
+import { getMethodInternalKey } from '@alova/shared';
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { AlovaGenerics, Method, createAlova } from 'alova';
-import VueHook from 'alova/vue';
 import { untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 import { FormHookConfig } from '~/typings/clienthook';
 import CompPersistentDataReset from './components/persistent-data-reset.vue';
 import CompRestorePersistentData from './components/restore-persistent-data.vue';
 
-type ID = NonNullable<FormHookConfig<AlovaGenerics, any>['id']>;
+type ID = NonNullable<FormHookConfig<AlovaGenerics, any, any[]>['id']>;
 const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
@@ -37,7 +36,7 @@ describe('vue => useForm', () => {
       code: 200,
       data: newForm
     });
-    // 提交后表单数据不重置
+    // Form data is not reset after submission
     expect(form.value).toStrictEqual(newForm);
   });
 
@@ -47,18 +46,80 @@ describe('vue => useForm', () => {
       name: 'Ming',
       age: '18'
     };
-    const { form, loading, onSuccess } = useForm(poster, {
+    const {
+      form: form1,
+      loading: loading1,
+      data: data1,
+      onSuccess: onSuccess1
+    } = useForm(poster, {
       initialForm: newForm,
       immediate: true
     });
-    expect(form.value).toStrictEqual(newForm);
-    expect(loading.value).toBeTruthy();
+    expect(form1.value).toStrictEqual(newForm);
+    expect(loading1.value).toBeTruthy();
 
-    const { data } = await untilCbCalled(onSuccess);
-    // 提交后表单数据不重置
-    expect(data).toStrictEqual({
+    const { data: dataRaw1 } = await untilCbCalled(onSuccess1);
+    // Form data is not reset after submission
+    expect(dataRaw1).toStrictEqual({
       code: 200,
       data: newForm
+    });
+    expect(data1.value).toStrictEqual({
+      code: 200,
+      data: newForm
+    });
+
+    const {
+      form: form2,
+      loading: loading2,
+      data: data2,
+      onSuccess: onSuccess2
+    } = useForm(poster, {
+      initialForm: newForm,
+      immediate: true,
+      store: true
+    });
+    expect(form2.value).toStrictEqual(newForm);
+    expect(loading2.value).toBeFalsy(); // Request only after data recovery
+
+    const { data: dataRaw2 } = await untilCbCalled(onSuccess2);
+    // Form data is not reset after submission
+    expect(dataRaw2).toStrictEqual({
+      code: 200,
+      data: newForm
+    });
+    expect(data2.value).toStrictEqual({
+      code: 200,
+      data: newForm
+    });
+  });
+
+  test('should restore data first and request immediately', async () => {
+    const poster = (form: any) => alovaInst.Post('/saveData', form);
+    const initialForm = {
+      name: '',
+      age: ''
+    };
+    const storagedForm = {
+      name: 'Ming',
+      age: '20'
+    };
+
+    // Store data in advance and simulate refresh to restore persistent data
+    const methodStorageKey = getStoragedKey(poster(initialForm));
+    alovaInst.l2Cache.set(methodStorageKey, storagedForm);
+
+    const { form, onSuccess } = useForm(poster, {
+      initialForm,
+      immediate: true,
+      store: true
+    });
+
+    const { data } = await untilCbCalled(onSuccess);
+    // Form data is not reset after submission
+    expect(data).toStrictEqual({
+      code: 200,
+      data: form.value
     });
   });
 
@@ -76,12 +137,12 @@ describe('vue => useForm', () => {
     expect(form.value).toStrictEqual(initialForm);
     expect(loading.value).toBeFalsy();
 
-    // 更新表单数据
+    // Update form data
     form.value.name = 'Ming';
     form.value.age = '18';
 
     await send(form.value);
-    // 提交后表单数据后将重置数据
+    // Data will be reset after form data is submitted
     expect(form.value).toStrictEqual(initialForm);
   });
 
@@ -96,17 +157,17 @@ describe('vue => useForm', () => {
       store: true,
       resetAfterSubmiting: true
     });
-    const restoreMockHandler = jest.fn();
+    const restoreMockHandler = vi.fn();
     onRestore(restoreMockHandler);
 
     await untilCbCalled(setTimeout, 100);
-    expect(restoreMockHandler).not.toHaveBeenCalled(); // 没有缓存不会触发onRestore
+    expect(restoreMockHandler).not.toHaveBeenCalled(); // No cache will not trigger on restore
 
-    // storageKey会在useForm被调用时同步生成
+    // The Storage key will be generated synchronously when the use form is called.
     const methodStorageKey = getStoragedKey(poster(initialForm));
     const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
 
-    // 更新表单数据，并验证持久化数据
+    // Update form data and validate persistent data
     form.value.name = 'Ming';
     await untilCbCalled(setTimeout, 100);
     expect(await getStoragedForm()).toStrictEqual({
@@ -121,7 +182,7 @@ describe('vue => useForm', () => {
     });
 
     await send(form.value);
-    // 提交后表单数据后将重置数据
+    // Data will be reset after form data is submitted
     expect(form.value).toStrictEqual(initialForm);
     expect(getStoragedForm()).toBeNull();
   });
@@ -136,21 +197,21 @@ describe('vue => useForm', () => {
       name: 'Hong',
       age: '22'
     };
-    // 预先存储数据，模拟刷新恢复持久化数据
+    // Store data in advance and simulate refresh to restore persistent data
     const methodStorageKey = getStoragedKey(poster(initialForm));
     alovaInst.l2Cache.set(methodStorageKey, storagedForm);
 
     render(CompRestorePersistentData);
 
-    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // 缓存恢复前
+    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // Before cache recovery
     await screen.findByText('isRestore_1');
-    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(storagedForm)); // 缓存恢复后
+    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(storagedForm)); // After cache recovery
 
-    // 缓存恢复后才会开始发送请求
+    // Requests will not be sent until the cache is restored.
     await screen.findByText('isSuccess_1');
-    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // 请求成功后重置了
+    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // Reset after successful request
 
-    // 当有缓存数据并且immediate设置为true时，会在数据恢复后再发起提交
+    // When there is cached data and immediate is set to true, submission will be initiated after the data is restored.
     expect(screen.getByRole('data')).toHaveTextContent(
       JSON.stringify({
         code: 200,
@@ -201,7 +262,7 @@ describe('vue => useForm', () => {
       date: dateObj,
       reg: regObj
     });
-    // 序列化自动转换date和regexp对象
+    // Serialization automatically converts date and regexp objects
     expect(alovaInst.l2Cache.get(methodStorageKey)).toStrictEqual({
       date: ['date', dateTimestamp],
       reg: ['regexp', regObj.source]
@@ -224,16 +285,16 @@ describe('vue => useForm', () => {
       age: '22'
     };
 
-    // 预先存储数据，模拟刷新恢复持久化数据
+    // Store data in advance and simulate refresh to restore persistent data
     const methodStorageKey = getStoragedKey(poster(initialForm));
     alovaInst.l2Cache.set(methodStorageKey, storagedForm);
     const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
     expect(getStoragedForm()).toStrictEqual(storagedForm);
 
-    render(CompPersistentDataReset); // 渲染组件
-    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // 缓存恢复前
+    render(CompPersistentDataReset); // render component
+    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // Before cache recovery
     await screen.findByText('isRestore_1');
-    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(storagedForm)); // 缓存恢复后
+    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(storagedForm)); // After cache recovery
 
     fireEvent.click(screen.getByRole('btnReset'));
     expect(getStoragedForm()).toBeNull();
@@ -251,8 +312,8 @@ describe('vue => useForm', () => {
       middleware: actionDelegationMiddleware('test_page')
     });
 
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     onSuccess(successFn);
     onComplete(completeFn);
     await untilCbCalled(onSuccess);

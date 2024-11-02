@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "3.0.17",
+  "version": "3.2.0",
   "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
   "main": "dist/alova.common.cjs",
   "module": "dist/alova.esm.js",
@@ -29,19 +29,17 @@
   "unpkg": "dist/alova.umd.min.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "test:browser": "jest",
-    "test:node": "jest --config=jest.config.node.ts",
-    "test": "npm run test:browser && npm run test:node",
-    "test:coverage": "jest --coverage",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "release": "semantic-release",
     "lint": "eslint --ext .ts,.js src",
-    "lint:fix": "npm run lint -- --fix",
+    "lint:fix": "pnpm lint --fix",
     "build:core": "alova-scripts build core",
     "build:fetch": "alova-scripts build fetch",
     "build:client": "pnpm --filter=@alova/client run build",
     "build:server": "pnpm --filter=@alova/server run build",
-    "build": "npm run clean && alova-scripts build && npm run build:client && npm run build:server",
-    "coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
+    "build": "pnpm clean && alova-scripts build && pnpm build:client && pnpm build:server",
+    "coveralls": "pnpm test:coverage && coveralls < coverage/lcov.info",
     "changelog": "conventional-changelog -p angular -u -i CHANGELOG.md -s -r 0",
     "commit": "git-cz && git push",
     "format": "prettier . --write"
@@ -57,7 +55,7 @@
   },
   "files": [
     "dist",
-    "typings/**/*.d.ts"
+    "typings"
   ],
   "engines": {
     "node": ">= 18.0.0"
@@ -79,7 +77,10 @@
       "default": "./dist/serverhook/index.esm.js"
     },
     "./fetch": {
-      "types": "./typings/fetch.d.ts",
+      "types": {
+        "require": "./typings/fetch.d.cts",
+        "default": "./typings/fetch.d.ts"
+      },
       "require": "./dist/adapter/fetch.common.cjs",
       "default": "./dist/adapter/fetch.esm.js"
     },
@@ -102,6 +103,11 @@
       "types": "./typings/stateshook/svelte.d.ts",
       "require": "./dist/stateshook/svelte.common.cjs",
       "default": "./dist/stateshook/svelte.esm.js"
+    },
+    "./solid": {
+      "types": "./typings/stateshook/solid.d.ts",
+      "require": "./dist/stateshook/solid.common.cjs",
+      "default": "./dist/stateshook/solid.esm.js"
     }
   },
   "typesVersions": {
@@ -126,15 +132,18 @@
       ],
       "svelte": [
         "typings/stateshook/svelte.d.ts"
+      ],
+      "solid": [
+        "typings/stateshook/solid.d.ts"
       ]
     }
   },
   "dependencies": {
-    "@alova/shared": "workspace:^",
+    "@alova/shared": "workspace:*",
     "rate-limiter-flexible": "^5.0.3"
   },
   "devDependencies": {
-    "@alova/scripts": "workspace:^"
+    "@alova/scripts": "workspace:*"
   },
   "config": {
     "commitizen": {

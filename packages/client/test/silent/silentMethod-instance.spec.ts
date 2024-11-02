@@ -2,9 +2,9 @@ import { bootSilentFactory } from '@/hooks/silent/silentFactory';
 import { SilentMethod } from '@/hooks/silent/SilentMethod';
 import { pushNewSilentMethod2Queue } from '@/hooks/silent/silentQueue';
 import loadSilentQueueMapFromStorage from '@/hooks/silent/storage/loadSilentQueueMapFromStorage';
-import createEventManager from '@alova/shared/createEventManager';
+import vueHook from '@/statesHook/vue';
+import { createEventManager } from '@alova/shared';
 import { createAlova, Method } from 'alova';
-import vueHook from 'alova/vue';
 import { mockRequestAdapter } from '../mockData';
 
 const alovaInst = createAlova({
@@ -14,7 +14,7 @@ const alovaInst = createAlova({
   cacheLogger: false
 });
 beforeAll(() => {
-  // 启动silentFactory
+  // Start silent factory
   bootSilentFactory({
     alova: alovaInst,
     delay: 0
@@ -22,7 +22,7 @@ beforeAll(() => {
 });
 describe('silentMethods instance methods', () => {
   test('should save silentMethod when call function save', async () => {
-    // 模拟数据创建
+    // Simulation data creation
     const methodInstance = new Method('POST', alovaInst, '/detail');
     const silentMethodInstance = new SilentMethod(methodInstance, 'silent', createEventManager());
     await pushNewSilentMethod2Queue(silentMethodInstance, true);
@@ -50,7 +50,7 @@ describe('silentMethods instance methods', () => {
     const silentMethodInstance = new SilentMethod(methodInstance, 'silent', createEventManager());
     await pushNewSilentMethod2Queue(silentMethodInstance, true, queue);
 
-    // 两个silentMethod实例cache一致才能替换，否则报错
+    // The caches of the two silent method instances must be consistent before they can be replaced, otherwise an error will be reported.
     await expect(
       silentMethodInstance.replace(new SilentMethod(methodInstance, 'silent', createEventManager()))
     ).rejects.toThrow();

@@ -1,17 +1,17 @@
-import { FrameworkState } from '@alova/shared/FrameworkState';
-import { undefinedValue } from '@alova/shared/vars';
+import { EnumHookType } from '@/util/helper';
+import { FrameworkState, undefinedValue } from '@alova/shared';
 import type { AlovaGenerics, FrontRequestState, Progress, ReferingObject } from 'alova';
 import { Method } from 'alova';
-import { Hook, EnumHookType as TEnumHookType, UseHookConfig } from '~/typings/clienthook';
+import { Hook, UseHookConfig } from '~/typings/clienthook';
 
-export default <AG extends AlovaGenerics>(
-  ht: TEnumHookType,
-  c: UseHookConfig<AG>,
-  eventManager: Hook['em'],
+export default <AG extends AlovaGenerics, Args extends any[]>(
+  ht: EnumHookType,
+  c: UseHookConfig<AG, Args>,
+  eventManager: Hook<Args>['em'],
   ro: ReferingObject
 ) =>
   ({
-    /** 最后一次请求的method实例 */
+    /** The method instance of the last request */
     m: undefinedValue as unknown as Method,
 
     /** saveStatesFns */
@@ -43,4 +43,4 @@ export default <AG extends AlovaGenerics>(
 
     /** managedStates */
     ms: {}
-  }) as Hook;
+  }) as Hook<Args>;

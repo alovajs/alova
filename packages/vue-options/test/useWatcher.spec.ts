@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { delay } from 'root/testUtils';
 import TestWatcher from './components/TestWatcher.vue';
@@ -7,8 +6,8 @@ import { createTestAlova, eventObj } from './utils';
 const alovaInst = createTestAlova();
 describe('vue options watcher hook', () => {
   test('should request when watching states are changed', async () => {
-    const successFn = jest.fn();
-    const completeFn = jest.fn();
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
     render(TestWatcher, {
       props: {
         methodHandler: (state1: number, state2: string) =>
@@ -26,7 +25,7 @@ describe('vue options watcher hook', () => {
       })
     });
 
-    await delay(100); // 默认不发出请求，100毫秒后也是初始值
+    await delay(100); // By default, no request is issued, and it is also the initial value after 100 milliseconds.
     expect(screen.getByRole('loading')).toHaveTextContent('loaded');
     expect(screen.getByRole('error')).toHaveTextContent('');
     expect(screen.getByRole('data')).toHaveTextContent('{}');

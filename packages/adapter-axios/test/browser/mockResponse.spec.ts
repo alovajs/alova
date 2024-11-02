@@ -22,7 +22,7 @@ const mocks = defineMock({
   '/unit-test-download': () => 'http://download-xxxxx'
 });
 
-// 模拟数据请求适配器
+// Mock Data Request Adapter
 const mockAdapter = createAlovaMockAdapter([mocks], {
   delay: 100,
   httpAdapter: axiosRequestAdapter(),
@@ -35,7 +35,7 @@ const alovaInst = createAlova({
   requestAdapter: mockAdapter
 });
 
-// 每个用例运行前清除缓存，避免相互影响
+// Clear cache before running each use case to avoid mutual influence
 beforeEach(() => invalidateCache());
 describe('mock response adapter', () => {
   test('request success', async () => {
@@ -70,7 +70,7 @@ describe('mock response adapter', () => {
   });
 
   test('uploadFile', async () => {
-    // 使用formData上传文件
+    // Upload files using form data
     const formData = new FormData();
     formData.append('f1', 'f1');
     formData.append('f2', 'f2');

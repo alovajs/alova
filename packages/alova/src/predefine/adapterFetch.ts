@@ -1,14 +1,16 @@
-import { isSpecialRequestBody, isString, newInstance } from '@alova/shared/function';
 import {
   JSONStringify,
   ObjectCls,
   clearTimeoutTimer,
   falseValue,
+  isSpecialRequestBody,
+  isString,
+  newInstance,
   promiseReject,
   setTimeoutFn,
   trueValue,
   undefinedValue
-} from '@alova/shared/vars';
+} from '@alova/shared';
 import { AlovaRequestAdapter } from '~/typings';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
@@ -22,7 +24,7 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
     const isContentTypeSet = /content-type/i.test(ObjectCls.keys(headers).join());
     const isDataFormData = data && data.toString() === '[object FormData]';
 
-    // 未设置Content-Type并且data不是FormData对象时，默认设置Content-Type为application/json
+    // When the content type is not set and the data is not a form data object, the content type is set to application/json by default.
     if (!isContentTypeSet && !isDataFormData) {
       headers['Content-Type'] = 'application/json;charset=UTF-8';
     }
@@ -33,7 +35,7 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
       body: isBodyData(data) ? data : JSONStringify(data)
     });
 
-    // 设置了中断时间，则在指定时间后中断请求
+    // If the interruption time is set, the request will be interrupted after the specified time.
     let abortTimer: NodeJS.Timeout | number;
     let isTimeout = falseValue;
     if (timeout > 0) {
@@ -47,22 +49,22 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
       response: () =>
         fetchPromise.then(
           response => {
-            // 请求成功后清除中断处理
+            // Clear interrupt processing after successful request
             clearTimeoutTimer(abortTimer);
 
-            // Response的Readable只能被读取一次，需要克隆才可重复使用
+            // Response's readable can only be read once and needs to be cloned before it can be reused.
             return response.clone();
           },
           err => promiseReject(isTimeout ? newInstance(Error, 'fetchError: network timeout') : err)
         ),
 
-      // headers函数内的then需捕获异常，否则会导致内部无法获取到正确的错误对象
+      // The then in the Headers function needs to catch exceptions, otherwise the correct error object will not be obtained internally.
       headers: () =>
         fetchPromise.then(
           ({ headers: responseHeaders }) => responseHeaders,
           () => ({}) as Headers
         ),
-      // 因nodeFetch库限制，这块代码无法进行单元测试，但已在浏览器中通过测试
+      // Due to limitations of the node fetch library, this code cannot be unit tested, but it has passed the test in the browser.
       /* c8 ignore start */
       onDownload: async (cb: (loaded: number, total: number) => void) => {
         let isAborted = falseValue;

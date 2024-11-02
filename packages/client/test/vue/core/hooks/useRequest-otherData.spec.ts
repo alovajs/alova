@@ -1,11 +1,11 @@
 import { getAlovaInstance } from '#/utils';
 import { useRequest } from '@/index';
 import VueHook from '@/statesHook/vue';
-import { key } from '@alova/shared/function';
+import { key } from '@alova/shared';
 import { queryCache } from 'alova';
 import { Result, untilCbCalled } from 'root/testUtils';
 
-// 其他请求方式测试
+// Testing other request methods
 describe('Request by other data', () => {
   test('send POST with FormData', async () => {
     const alova = getAlovaInstance(VueHook, {
@@ -42,7 +42,7 @@ describe('Request by other data', () => {
       }
     });
 
-    // 提交特殊数据时不会缓存
+    // Special data is not cached when submitted
     expect(await queryCache(Post)).toBeUndefined();
   });
 
@@ -74,7 +74,7 @@ describe('Request by other data', () => {
       }
     });
 
-    // 字符串不是特殊数据，会进行缓存
+    // Strings are not special data and will be cached.
     expect(await queryCache(Post)).toStrictEqual(data);
   });
 
@@ -99,7 +99,7 @@ describe('Request by other data', () => {
       data: '<span>xxx</span>'
     });
 
-    // 提交特殊数据时不会缓存
+    // Special data is not cached when submitted
     expect(await queryCache(Post)).toBeUndefined();
   });
 });

@@ -44,7 +44,7 @@ Visit the [alova website](https://alova.js.org) for more information, or [check 
 
 ## Join the community
 
-- [Follow us on X to get the latest updates](https://x.com/alovajs)
+- [Follow us on X](https://x.com/alovajs)
 
 - [Join the Discord community to participate in the communication](https://discord.gg/S47QGJgkVb)
 

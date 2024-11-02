@@ -1,5 +1,5 @@
 import Method from '@/Method';
-import { getContext, newInstance, objAssign } from '@alova/shared/function';
+import { getContext, newInstance, objAssign } from '@alova/shared';
 import { AlovaGenerics } from '~/typings';
 
 export default <AG extends AlovaGenerics>(methodInstance: Method<AG>) => {

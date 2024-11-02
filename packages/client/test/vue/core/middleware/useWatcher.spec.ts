@@ -47,7 +47,7 @@ describe('useWatcher middleware', () => {
       },
       immediate: true
     });
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    expect(loading.value).toBeTruthy();
     let startTs = Date.now();
     const rawData = await untilCbCalled(onSuccess);
     let endTs = Date.now();
@@ -75,10 +75,10 @@ describe('useWatcher middleware', () => {
       immediate: true
     });
 
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     onSuccess(mockFn);
-    // middleware中未调用next，因此不会发送请求
-    expect(loading.value).toBeFalsy(); // 设置了middleware则默认为false
+    // next is not called in Middleware, so the request will not be sent
+    expect(loading.value).toBeTruthy();
     await delay(1000);
     expect(mockFn).toHaveBeenCalledTimes(0);
     expect(loading.value).toBeFalsy();
