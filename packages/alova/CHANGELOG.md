@@ -1,5 +1,11 @@
 # alova
 
+## 3.2.1
+
+### Patch Changes
+
+- [#578](https://github.com/alovajs/alova/pull/578) [`873e457`](https://github.com/alovajs/alova/commit/873e457796d203b43ab63cbac535e0d938d99b8b) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - export `statesHookHelper` from `alova/client`
+
 ## 3.2.0
 
 ### Minor Changes
