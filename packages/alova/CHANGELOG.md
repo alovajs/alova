@@ -1,5 +1,11 @@
 # alova
 
+## 3.2.2
+
+### Patch Changes
+
+- [#581](https://github.com/alovajs/alova/pull/581) [`0e8be7c`](https://github.com/alovajs/alova/commit/0e8be7c848ce5227d89251b01e7ecc2c52a1d7fe) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that debounce not effect in react
+
 ## 3.2.1
 
 ### Patch Changes
