@@ -95,8 +95,10 @@ export default function createRequestState<
     } catch {}
   }
 
-  const { create, effectRequest, ref, memorize, objectify, exposeProvider, transformState2Proxy } =
-    statesHookHelper<AG>(promiseStatesHook(), referingObject);
+  const { create, effectRequest, ref, objectify, exposeProvider, transformState2Proxy } = statesHookHelper<AG>(
+    promiseStatesHook(),
+    referingObject
+  );
   const progress: Progress = {
     total: 0,
     loaded: 0
@@ -151,26 +153,26 @@ export default function createRequestState<
     });
   };
 
+  /**
+   * fix: #421
+   * Use ref wraps to prevent react from creating new debounce function in every render
+   * Explicit passing is required because the context will change
+   */
+  const debouncingSendHandler = ref(
+    debounce(
+      (_, ro, handler) => wrapEffectRequest(ro, handler),
+      (changedIndex?: number) =>
+        isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
+    )
+  );
+
   // Do not send requests when rendering on the server side
   if (!globalConfigMap.ssr) {
     effectRequest({
       handler:
         // When `watchingStates` is an array, it indicates the watching states (including an empty array). When it is undefined, it indicates the non-watching state.
         hasWatchingStates
-          ? /**
-             * fix: #421
-             * Use `memorize` wraps to prevent react from creating new debounce function in every render.
-             * the newest values in this context can be access in `memorize` function
-             */
-            memorize(
-              debounce(
-                () => {
-                  wrapEffectRequest(referingObject, methodHandler);
-                },
-                (changedIndex?: number) =>
-                  isNumber(changedIndex) ? (isArray(debounceDelay) ? debounceDelay[changedIndex] : debounceDelay) : 0
-              )
-            )
+          ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
           : () => wrapEffectRequest(referingObject),
       removeStates: () => forEach(hookInstance.rf, fn => fn()),
       saveStates: states => forEach(hookInstance.sf, fn => fn(states)),
