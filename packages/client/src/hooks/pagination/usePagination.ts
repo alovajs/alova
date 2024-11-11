@@ -62,7 +62,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     watchingStates = [],
     initialData,
     immediate = trueValue,
-    middleware = noop,
+    middleware,
     force = noop,
     ...others
   } = config;
@@ -130,7 +130,11 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       initialData,
       managedStates: objectify([data, page, pageSize, total], 's'),
       middleware(ctx, next) {
-        middleware(
+        if (!middleware) {
+          return next();
+        }
+
+        return middleware(
           {
             ...ctx,
             delegatingActions: {
@@ -154,10 +158,8 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
               }
             }
           },
-          promiseResolve
+          next
         );
-
-        return next();
       },
       force: event => event.args[1] || (isFn(force) ? (force(event) as boolean) : force),
       ...others
