@@ -1675,4 +1675,31 @@ describe('vue => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3, 100, 200, 300]));
     });
   });
+
+  test('should can be interrupted by middleware', async () => {
+    const successMockFn = vi.fn();
+    const errorMockFn = vi.fn();
+    const completedMockFn = vi.fn();
+    const middlewareMockFn = vi.fn();
+
+    usePagination(getter1, {
+      total: res => res.total,
+      data: res => res.list,
+      middleware() {
+        // middleware without call `next` will appear as the request has not been sent.
+        middlewareMockFn();
+      }
+    })
+      .onSuccess(successMockFn)
+      .onError(errorMockFn)
+      .onComplete(completedMockFn);
+
+    await waitFor(() => {
+      expect(middlewareMockFn).toHaveBeenCalled();
+    });
+
+    expect(successMockFn).not.toHaveBeenCalled();
+    expect(errorMockFn).not.toHaveBeenCalled();
+    expect(completedMockFn).not.toHaveBeenCalled();
+  });
 });
