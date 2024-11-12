@@ -1,5 +1,11 @@
 # alova
 
+## 3.2.3
+
+### Patch Changes
+
+- [#585](https://github.com/alovajs/alova/pull/585) [`00ef3ba`](https://github.com/alovajs/alova/commit/00ef3baec9a055a8a6bdc2cadd6d3c42cd3e8528) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: allow middleware to interrupt requests in `usePagination`
+
 ## 3.2.2
 
 ### Patch Changes
