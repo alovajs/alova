@@ -114,19 +114,21 @@ describe('send args', () => {
   });
 
   test('usePagination', () => {
-    const usePaginationState = usePagination((page, pageSize, name?: string) =>
+    const usePaginationState = usePagination((page, pageSize, name: string, age?: number) =>
       VueAlovaInst.Get(`/unit-test?${page} ${pageSize}`)
     );
 
-    expectAssignableBy<SendHandler<[number, number], any>>(usePaginationState.send);
-    expectAssignableBy<SendHandler<[number, number, string], any>>(usePaginationState.send);
-    expectAssignableBy<SendHandler<[number, number, string, 123, 345], any>>(usePaginationState.send);
+    expectAssignableBy<SendHandler<[], any>>(usePaginationState.send);
+    expectAssignableBy<SendHandler<[string], any>>(usePaginationState.send);
+    expectAssignableBy<SendHandler<[string, 123, true], any>>(usePaginationState.send);
     // @ts-expect-error
-    expectAssignableBy<SendHandler<[string, number], any>>(usePaginationState.send);
+    expectAssignableBy<SendHandler<[string, boolean], any>>(usePaginationState.send);
 
-    usePaginationState.onFetchError(e => assertType<[number, number, name?: string | undefined, ...any]>(e.args));
-    usePaginationState.onFetchComplete(e => assertType<[number, number, name?: string | undefined, ...any]>(e.args));
-    usePaginationState.onFetchSuccess(e => assertType<[number, number, name?: string | undefined, ...any]>(e.args));
+    usePaginationState.onFetchError(e => assertType<[name: string, age?: number, ...any]>(e.args));
+    // @ts-expect-error
+    usePaginationState.onFetchError(e => assertType<[name: string, age?: boolean, ...any]>(e.args));
+    usePaginationState.onFetchComplete(e => assertType<[name: string, ...any]>(e.args));
+    usePaginationState.onFetchSuccess(e => assertType<[name: string, ...any]>(e.args));
   });
 
   test('middleware', () => {
