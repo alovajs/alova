@@ -1,5 +1,11 @@
 # alova
 
+## 3.2.4
+
+### Patch Changes
+
+- [#589](https://github.com/alovajs/alova/pull/589) [`2ea4916`](https://github.com/alovajs/alova/commit/2ea49169a279dfa1e30a847bc555adbcd6215ae5) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: remove `page` and `pageSize` parameters from usePagination's send function
+
 ## 3.2.3
 
 ### Patch Changes
