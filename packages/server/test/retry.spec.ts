@@ -1,11 +1,9 @@
 import { HookedMethod, retry } from '@/index';
 import { createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import ReactHook from 'alova/react';
 
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
-  statesHook: ReactHook,
   requestAdapter: GlobalFetch(),
   responded: r => r.json()
 });
