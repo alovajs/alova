@@ -1,15 +1,14 @@
 import { statesHookHelper } from '@/util/helper';
 import {
+  $self,
   createAssert,
-  falseValue,
   filterItem,
   forEach,
   instanceOf,
   isNumber,
   isString,
   objectKeys,
-  pushItem,
-  trueValue
+  pushItem
 } from '@alova/shared';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
 import {
@@ -19,6 +18,7 @@ import {
   AlovaGuardNext
 } from '~/typings/clienthook';
 
+let currentHookIndex = 0;
 const actionsMap: Record<string | number | symbol, Actions[]> = {};
 const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
   context: AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>
@@ -37,9 +37,20 @@ const assert = createAssert('subscriber');
 export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
   id: string | number | symbol
 ) => {
-  const { ref } = statesHookHelper(promiseStatesHook());
+  const { ref, onUnmounted } = statesHookHelper(promiseStatesHook());
 
-  const delegated = ref(falseValue);
+  const hookIndex = ref(currentHookIndex + 1);
+
+  if (hookIndex.current > currentHookIndex) {
+    currentHookIndex += 1;
+  }
+
+  onUnmounted(() => {
+    if (actionsMap[id]?.[hookIndex.current]) {
+      // TODO delete this action
+    }
+  });
+
   return (
     context: (AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>) & {
       delegatingActions?: Actions;
@@ -47,34 +58,31 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
     next: AlovaGuardNext<AG, Args>
   ) => {
     // The middleware will be called repeatedly. If you have already subscribed, you do not need to subscribe again.
-    if (!delegated.current) {
-      const { abort, proxyStates, delegatingActions = {} } = context;
-      const update = (newStates: Record<string, any>) => {
-        type ProxyStateKeys = keyof typeof proxyStates;
-        for (const key in newStates) {
-          proxyStates[key as ProxyStateKeys] && (proxyStates[key as ProxyStateKeys].v = newStates[key]);
+    const { abort, proxyStates, delegatingActions = {} } = context;
+    const update = (newStates: Record<string, any>) => {
+      type ProxyStateKeys = keyof typeof proxyStates;
+      for (const key in newStates) {
+        proxyStates[key as ProxyStateKeys] && (proxyStates[key as ProxyStateKeys].v = newStates[key]);
+      }
+    };
+    // Those with the same ID will be saved together in the form of an array
+    const hooks = (actionsMap[id] = actionsMap[id] || []);
+    const handler = isFrontMiddlewareContext(context)
+      ? {
+          ...delegatingActions,
+          send: context.send,
+          abort,
+          update
         }
-      };
-      // Those with the same ID will be saved together in the form of an array
-      const handlersItems = (actionsMap[id] = actionsMap[id] || []);
-      handlersItems.push(
-        isFrontMiddlewareContext(context)
-          ? {
-              ...delegatingActions,
-              send: context.send,
-              abort,
-              update
-            }
-          : {
-              ...delegatingActions,
-              fetch: context.fetch,
-              abort,
-              update
-            }
-      );
+      : {
+          ...delegatingActions,
+          fetch: context.fetch,
+          abort,
+          update
+        };
 
-      delegated.current = trueValue;
-    }
+    hooks[hookIndex.current] = handler;
+
     return next();
   };
 };
@@ -107,5 +115,5 @@ export const accessAction = (
     assert(false, `no handler can be matched by using \`${id.toString()}\``);
   }
 
-  forEach(matched, onMatch);
+  forEach(filterItem(matched, $self), onMatch);
 };
