@@ -1,13 +1,9 @@
-import { useRequest, actionDelegationMiddleware, accessAction, useWatcher } from '@/index';
+import { accessAction, actionDelegationMiddleware, useWatcher } from '@/index';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
-import { send } from 'process';
-import { untilCbCalled } from 'root/testUtils';
-import { mockRequestAdapter } from '~/test/mockData';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactElement, StrictMode, useState } from 'react';
-import { Result, delay } from 'root/testUtils';
-import { request } from 'http';
+import { mockRequestAdapter } from '~/test/mockData';
 
 const StrictModeReact = StrictMode as any;
 
