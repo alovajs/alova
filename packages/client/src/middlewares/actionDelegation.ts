@@ -8,6 +8,7 @@ import {
   isNumber,
   isString,
   objectKeys,
+  objectValues,
   pushItem
 } from '@alova/shared';
 import { AlovaGenerics, promiseStatesHook } from 'alova';
@@ -19,7 +20,8 @@ import {
 } from '~/typings/clienthook';
 
 let currentHookIndex = 0;
-const actionsMap: Record<string | number | symbol, Actions[]> = {};
+// (id, (hookIndex, Actions))
+const actionsMap: Record<string | number | symbol, Record<string | number, Actions>> = {};
 const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
   context: AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>
 ): context is AlovaFrontMiddlewareContext<AG, Args> => !!(context as AlovaFrontMiddlewareContext<AG, Args>).send;
@@ -47,7 +49,8 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
 
   onUnmounted(() => {
     if (actionsMap[id]?.[hookIndex.current]) {
-      // TODO delete this action
+      // delete action on unmount
+      delete actionsMap[id][hookIndex.current];
     }
   });
 
@@ -100,12 +103,12 @@ export const accessAction = (
 ) => {
   const matched = [] as Actions[];
   if (typeof id === 'symbol' || isString(id) || isNumber(id)) {
-    actionsMap[id] && pushItem(matched, ...actionsMap[id]);
+    actionsMap[id] && pushItem(matched, ...objectValues(actionsMap[id]));
   } else if (instanceOf(id, RegExp)) {
     forEach(
       filterItem(objectKeys(actionsMap), idItem => id.test(idItem)),
       idItem => {
-        pushItem(matched, ...actionsMap[idItem]);
+        pushItem(matched, ...objectValues(actionsMap[idItem]));
       }
     );
   }
