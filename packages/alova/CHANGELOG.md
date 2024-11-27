@@ -1,5 +1,13 @@
 # alova
 
+## 3.2.5
+
+### Patch Changes
+
+- [#600](https://github.com/alovajs/alova/pull/600) [`cb52b76`](https://github.com/alovajs/alova/commit/cb52b76a9c56f35efb2ddbc8d02d11d865841dac) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix: setting the cached data if found on useRequest initialization
+
+- [#598](https://github.com/alovajs/alova/pull/598) [`15a99af`](https://github.com/alovajs/alova/commit/15a99af6787b453a62990692a2302bdedbeadd80) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: resolve issue with delegateMiddleware using outdated context in react
+
 ## 3.2.4
 
 ### Patch Changes
