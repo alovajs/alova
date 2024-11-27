@@ -4,6 +4,7 @@ import { useRequest } from '@/index';
 import ReactHook from '@/statesHook/react';
 import { key } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { setCache } from 'alova';
 import { ReactElement, StrictMode } from 'react';
 import { Result, delay } from 'root/testUtils';
 
@@ -117,6 +118,34 @@ describe('useRequest hook with react', () => {
     fireEvent.click(screen.getByRole('btn'));
     await screen.findByText(/unit-test/);
     expect(screen.getByRole('method')).toHaveTextContent('GET');
+  });
+
+  test('should apply the cache data if is found on the cache on initialization and set `immediate=true`', async () => {
+    const alova = getAlovaInstance(ReactHook);
+    const mockFn = vi.fn();
+    const Get = alova.Get('', { cacheFor: 100 * 1000 });
+    await setCache(Get, 'cache-test');
+    function Page() {
+      const { data: data1 } = useRequest(Get, { initialData: 'test', immediate: true });
+      const { data: data2 } = useRequest(Get, {
+        initialData: () => {
+          mockFn();
+          return 'test';
+        },
+        immediate: true
+      });
+      return (
+        <div role="wrap">
+          <span role="data-1">{data1 as string}</span>
+          <span role="data-2">{data2 as string}</span>
+        </div>
+      );
+    }
+
+    render((<Page />) as ReactElement<any, any>);
+    expect(screen.getByRole('data-1')).toHaveTextContent('cache-test');
+    expect(screen.getByRole('data-2')).toHaveTextContent('cache-test');
+    expect(mockFn).toHaveBeenCalledTimes(0);
   });
 
   test("shouldn't send request when set `immediate=false` in react StrictMode", async () => {
