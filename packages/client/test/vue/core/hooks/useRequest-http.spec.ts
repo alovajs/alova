@@ -29,6 +29,25 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
+  test('should apply the cache data if is found on the cache on initialization and set `immediate=true`', async () => {
+    const alova = getAlovaInstance(VueHook);
+    const mockFn = vi.fn();
+    const Get = alova.Get('', { cacheFor: 100 * 1000 });
+    await setCache(Get, 'cache-test');
+    const { data: data1 } = useRequest(Get, { initialData: 'test', immediate: true });
+    const { data: data2 } = useRequest(Get, {
+      initialData: () => {
+        mockFn();
+        return 'test';
+      },
+      immediate: true
+    });
+
+    expect(data1.value).toStrictEqual('cache-test');
+    expect(data2.value).toStrictEqual('cache-test');
+    expect(mockFn).toHaveBeenCalledTimes(0);
+  });
+
   test('init and send get request', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
