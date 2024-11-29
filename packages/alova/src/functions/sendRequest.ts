@@ -15,7 +15,6 @@ import {
   getLocalCacheConfigParam,
   getMethodInternalKey,
   getOptions,
-  globalToString,
   isFn,
   isPlainObject,
   isSpecialRequestBody,
@@ -184,9 +183,8 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       }
 
       // Deep clone the transformed data before returning to avoid reference issues
-      return globalToString(transformedData) === '[object Response]'
-        ? transformedData.clone()
-        : deepClone(transformedData);
+      // the `deepClone` will only clone array and plain object
+      return deepClone(transformedData);
     };
 
     return promiseFinally(

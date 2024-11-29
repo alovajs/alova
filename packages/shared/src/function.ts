@@ -404,17 +404,16 @@ export const buildCompletedURL = (baseURL: string, url: string, params: Record<s
  * @returns The cloned object.
  */
 export const deepClone = <T>(obj: T): T => {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-
   if (isArray(obj)) {
     return mapItem(obj, deepClone) as T;
   }
 
-  const clone = {} as T;
-  forEach(objectKeys(obj), key => {
-    clone[key as keyof T] = deepClone(obj[key as keyof T]);
-  });
-  return clone;
+  if (isPlainObject(obj)) {
+    const clone = {} as T;
+    forEach(objectKeys(obj), key => {
+      clone[key as keyof T] = deepClone(obj[key as keyof T]);
+    });
+    return clone;
+  }
+  return obj;
 };

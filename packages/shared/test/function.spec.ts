@@ -650,6 +650,11 @@ describe('shared functions', () => {
     expect(deepClone('string')).toBe('string');
     expect(deepClone(true)).toBe(true);
 
+    // non-array non-object values
+    const originalValue = new Blob(['abc']);
+    const clonedValue = deepClone(originalValue);
+    expect(clonedValue).toBe(originalValue);
+
     // arrays
     const originalArray = [1, [2, 3], { a: 4 }];
     const clonedArray = deepClone(originalArray);
