@@ -272,7 +272,7 @@ describe('l1cache cache data', () => {
     const cacheData2 = await queryCache(Get2);
     expect(response2).toBeInstanceOf(Response);
     expect(cacheData2).toBeInstanceOf(Response);
-    expect(response2).not.toBe(cacheData2);
+    expect(response2).toBe(cacheData2);
 
     const Get3 = alova2.Get('/unit-test?a=1', {
       cacheFor: 1000,
