@@ -20,6 +20,64 @@ describe('l1cache cache data', () => {
     await Post;
     expect(await queryCache(Post)).toBeUndefined();
   });
+
+  test('should disable the global cache', async () => {
+    const alova1 = getAlovaInstance({
+      responseExpect: r => r.json(),
+      cacheFor: null
+    });
+
+    // disable GET cache
+    const Get1 = alova1.Get('/unit-test', {
+      transform: ({ data }: Result) => data
+    });
+    await Get1;
+    expect(await queryCache(Get1)).toBeUndefined();
+
+    // disable POST cache
+    const Post1 = alova1.Post('/unit-test');
+    await Post1;
+    expect(await queryCache(Post1)).toBeUndefined();
+
+    const alova2 = getAlovaInstance({
+      responseExpect: r => r.json(),
+      cacheFor: {
+        GET: 0
+      }
+    });
+
+    // disable GET cache
+    const Get2 = alova2.Get('/unit-test', {
+      transform: ({ data }: Result) => data
+    });
+    await Get2;
+    expect(await queryCache(Get2)).toBeUndefined();
+
+    // disable POST cache
+    const Post2 = alova2.Post('/unit-test');
+    await Post2;
+    expect(await queryCache(Post2)).toBeUndefined();
+
+    const alova3 = getAlovaInstance({
+      responseExpect: r => r.json(),
+      cacheFor: {
+        GET: null
+      }
+    });
+
+    // disable GET cache
+    const Get3 = alova3.Get('/unit-test', {
+      transform: ({ data }: Result) => data
+    });
+    await Get3;
+    expect(await queryCache(Get3)).toBeUndefined();
+
+    // disable POST cache
+    const Post3 = alova3.Post('/unit-test');
+    await Post3;
+    expect(await queryCache(Post3)).toBeUndefined();
+  });
+
   test("change the default cache's setting globally", async () => {
     const alova = getAlovaInstance({
       cacheFor: {
