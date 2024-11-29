@@ -1,5 +1,20 @@
 # alova
 
+## 3.2.6
+
+### Patch Changes
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that `fromCache` is undefined in cache hit console
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - do not share request when special request body is exists
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - split response and cache data with different reference value
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - correct default `multiplier` 0 to 1 in comment
+
+- Updated dependencies [[`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e)]:
+  - @alova/shared@1.1.1
+
 ## 3.2.5
 
 ### Patch Changes
