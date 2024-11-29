@@ -1,5 +1,14 @@
 # @alova/mock
 
+## 2.0.10
+
+### Patch Changes
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - split response and cache data with different reference value
+
+- Updated dependencies [[`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e)]:
+  - @alova/shared@1.1.1
+
 ## 2.0.9
 
 ### Patch Changes
