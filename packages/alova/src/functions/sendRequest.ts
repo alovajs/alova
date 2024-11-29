@@ -111,7 +111,8 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       requestAdapterCtrlsPromiseResolveFn(); // Ctrls will not be passed in when cache is encountered
 
       // Print cache log
-      sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod as any, cacheMode, tag);
+      clonedMethod.fromCache = trueValue;
+      sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod, cacheMode, tag);
       responseCompleteHandler(clonedMethod);
       return cachedResponse;
     }

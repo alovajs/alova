@@ -462,6 +462,7 @@ describe('createAlova', () => {
     expect(calls1[1][2]).toBe('memory');
     expect(calls1[2][0]).toBe('%c[Method]');
     expect(calls1[2][2]).toBeInstanceOf(Method);
+    expect(calls1[2][2].fromCache).toBeTruthy();
 
     const getter2 = alova1.Get('/unit-test', {
       params: { restore: '1' },
