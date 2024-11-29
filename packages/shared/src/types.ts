@@ -35,7 +35,7 @@ export interface BackoffPolicy {
   delay?: number;
   /**
    * Specify the delay multiple. For example, if the multiplier is set to 1.5 and the delay is 2 seconds, the first retry will be 2 seconds, the second will be 3 seconds, and the third will be 4.5 seconds
-   * @default 0
+   * @default 1
    */
   multiplier?: number;
 

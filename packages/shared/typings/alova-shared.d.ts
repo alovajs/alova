@@ -69,7 +69,7 @@ interface BackoffPolicy {
   delay?: number;
   /**
    * Specify the delay multiple. For example, if the multiplier is set to 1.5 and the delay is 2 seconds, the first retry will be 2 seconds, the second will be 3 seconds, and the third will be 4.5 seconds
-   * @default 0
+   * @default 1
    */
   multiplier?: number;
   /**
@@ -456,27 +456,16 @@ declare const STORAGE_RESTORE = 'restore';
 export {
   $self,
   AlovaError,
-  type BackoffPolicy,
-  type CallbackFn,
-  type Equal,
-  type EventManager,
   FrameworkReadableState,
   FrameworkState,
-  type GeneralFn,
-  type GeneralState,
-  type IsAny,
-  type IsAssignable,
-  type IsUnknown,
   JSONParse,
   JSONStringify,
   MEMORY,
   ObjectCls,
-  type Omit,
   PromiseCls,
   QueueCallback,
   RegExpCls,
   STORAGE_RESTORE,
-  type UsePromiseExposure,
   buildCompletedURL,
   buildNamespacedCacheKey,
   clearTimeoutTimer,
@@ -540,5 +529,16 @@ export {
   usePromise,
   uuid,
   valueObject,
-  walkObject
+  walkObject,
+  type BackoffPolicy,
+  type CallbackFn,
+  type Equal,
+  type EventManager,
+  type GeneralFn,
+  type GeneralState,
+  type IsAny,
+  type IsAssignable,
+  type IsUnknown,
+  type Omit,
+  type UsePromiseExposure
 };
