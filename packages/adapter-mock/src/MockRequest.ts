@@ -1,5 +1,6 @@
 import {
   falseValue,
+  globalToString,
   isFn,
   isNumber,
   isString,
@@ -211,7 +212,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
     return {
       response: () =>
         resonpsePromise.then(({ response }) =>
-          response && response.toString() === '[object Response]' ? (response as any).clone() : response
+          response && globalToString(response) === '[object Response]' ? (response as any).clone() : response
         ),
       headers: () => resonpsePromise.then(({ headers }) => headers),
       abort: () => {

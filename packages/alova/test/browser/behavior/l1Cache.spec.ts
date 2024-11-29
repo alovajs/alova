@@ -250,7 +250,43 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeFalsy(); // Because the cache has been deleted, the request will be reissued
   });
 
-  test('param localCache can also set to be a Date instance', async () => {
+  test("shouldn't the cache object and return object refer the same reference value", async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      cacheFor: 1000,
+      transform: ({ data }: Result) => data
+    });
+    const response = await Get;
+    const cacheData = await queryCache(Get);
+    expect(response).not.toBe(cacheData);
+    response.path = '/unit-test-modified';
+    expect(response).not.toStrictEqual(cacheData);
+
+    const alova2 = getAlovaInstance();
+    const Get2 = alova2.Get<Response>('/unit-test', {
+      cacheFor: 1000
+    });
+    const response2 = await Get2;
+    const cacheData2 = await queryCache(Get2);
+    expect(response2).toBeInstanceOf(Response);
+    expect(cacheData2).toBeInstanceOf(Response);
+    expect(response2).not.toBe(cacheData2);
+
+    const Get3 = alova2.Get('/unit-test?a=1', {
+      cacheFor: 1000,
+      transform() {
+        return null;
+      }
+    });
+    const response3 = await Get3;
+    const cacheData3 = await queryCache(Get3);
+    expect(response3).toBeNull();
+    expect(cacheData3).toBeUndefined();
+  });
+
+  test('param cacheFor can also set to be a Date instance', async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -272,7 +308,7 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeFalsy(); // Because the cache has been deleted, the request will be reissued
   });
 
-  test("cache data wouldn't be invalid when set localCache to `Infinity`", async () => {
+  test("cache data wouldn't be invalid when set cacheFor to `Infinity`", async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -293,7 +329,7 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeTruthy(); // Because the cache has not expired, the cached data will continue to be used and the loading will not change.
   });
 
-  test('cache data will be invalid when set localCache to 0', async () => {
+  test('cache data will be invalid when set cacheFor to 0', async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -308,7 +344,7 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeFalsy();
   });
 
-  test('cache data will be invalid when set localCache to null', async () => {
+  test('cache data will be invalid when set cacheFor to null', async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });

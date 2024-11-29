@@ -365,6 +365,13 @@ declare const delayWithBackoff: (backoff: BackoffPolicy, retryTimes: number) => 
  * Build the complete url baseURL path url parameters complete url
  */
 declare const buildCompletedURL: (baseURL: string, url: string, params: Record<string, any>) => string;
+/**
+ * Deep clone an object.
+ *
+ * @param obj The object to be cloned.
+ * @returns The cloned object.
+ */
+declare const deepClone: <T>(obj: T) => T;
 
 type CallbackFn = () => void | Promise<void>;
 declare class QueueCallback {
@@ -456,16 +463,27 @@ declare const STORAGE_RESTORE = 'restore';
 export {
   $self,
   AlovaError,
+  type BackoffPolicy,
+  type CallbackFn,
+  type Equal,
+  type EventManager,
   FrameworkReadableState,
   FrameworkState,
+  type GeneralFn,
+  type GeneralState,
+  type IsAny,
+  type IsAssignable,
+  type IsUnknown,
   JSONParse,
   JSONStringify,
   MEMORY,
   ObjectCls,
+  type Omit,
   PromiseCls,
   QueueCallback,
   RegExpCls,
   STORAGE_RESTORE,
+  type UsePromiseExposure,
   buildCompletedURL,
   buildNamespacedCacheKey,
   clearTimeoutTimer,
@@ -474,6 +492,7 @@ export {
   createEventManager,
   createSyncOnceRunner,
   decorateEvent,
+  deepClone,
   defineProperty,
   delayWithBackoff,
   deleteAttr,
@@ -529,16 +548,5 @@ export {
   usePromise,
   uuid,
   valueObject,
-  walkObject,
-  type BackoffPolicy,
-  type CallbackFn,
-  type Equal,
-  type EventManager,
-  type GeneralFn,
-  type GeneralState,
-  type IsAny,
-  type IsAssignable,
-  type IsUnknown,
-  type Omit,
-  type UsePromiseExposure
+  walkObject
 };
