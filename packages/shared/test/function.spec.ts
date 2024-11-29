@@ -3,6 +3,7 @@ import {
   buildCompletedURL,
   createAsyncQueue,
   createSyncOnceRunner,
+  deepClone,
   getConfig,
   getContext,
   getContextOptions,
@@ -639,5 +640,71 @@ describe('shared functions', () => {
     // 'should handle existing query string in url'
     result = buildCompletedURL('http://example.com/api?existingParam=existingValue', '', { param1: 'value1' });
     expect(result).toBe('http://example.com/api?existingParam=existingValue&param1=value1');
+  });
+
+  test('deepClone', () => {
+    // primitive values
+    expect(deepClone(null)).toBe(null);
+    expect(deepClone(undefined)).toBe(undefined);
+    expect(deepClone(1)).toBe(1);
+    expect(deepClone('string')).toBe('string');
+    expect(deepClone(true)).toBe(true);
+
+    // non-array non-object values
+    const originalValue = new Blob(['abc']);
+    const clonedValue = deepClone(originalValue);
+    expect(clonedValue).toBe(originalValue);
+
+    // arrays
+    const originalArray = [1, [2, 3], { a: 4 }];
+    const clonedArray = deepClone(originalArray);
+    expect(clonedArray).toStrictEqual(originalArray);
+    expect(clonedArray).not.toBe(originalArray);
+    expect(clonedArray[1]).not.toBe(originalArray[1]);
+    expect(clonedArray[2]).not.toBe(originalArray[2]);
+
+    // objects
+    const originalObject = {
+      a: 1,
+      b: { c: 2 },
+      d: [3, 4],
+      e: null
+    };
+    const clonedObject = deepClone(originalObject);
+    expect(clonedObject).toStrictEqual(originalObject);
+    expect(clonedObject).not.toBe(originalObject);
+    expect(clonedObject.b).not.toBe(originalObject.b);
+    expect(clonedObject.d).not.toBe(originalObject.d);
+
+    // nested complex structures
+    const originalNested = {
+      arr: [1, { nested: true }],
+      obj: {
+        deep: {
+          deeper: [{ deepest: 'value' }]
+        }
+      }
+    };
+    const clonedNested = deepClone(originalNested);
+    expect(clonedNested).toStrictEqual(originalNested);
+    expect(clonedNested.arr[1]).not.toBe(originalNested.arr[1]);
+    expect(clonedNested.obj.deep).not.toBe(originalNested.obj.deep);
+    expect(clonedNested.obj.deep.deeper[0]).not.toBe(originalNested.obj.deep.deeper[0]);
+
+    // empty objects and arrays
+    const originalEmpty = {
+      emptyObj: {},
+      emptyArr: [],
+      nested: {
+        emptyObj: {},
+        emptyArr: []
+      }
+    };
+    const clonedEmpty = deepClone(originalEmpty);
+    expect(clonedEmpty).toStrictEqual(originalEmpty);
+    expect(clonedEmpty.emptyObj).not.toBe(originalEmpty.emptyObj);
+    expect(clonedEmpty.emptyArr).not.toBe(originalEmpty.emptyArr);
+    expect(clonedEmpty.nested.emptyObj).not.toBe(originalEmpty.nested.emptyObj);
+    expect(clonedEmpty.nested.emptyArr).not.toBe(originalEmpty.nested.emptyArr);
   });
 });

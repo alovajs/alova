@@ -2,13 +2,14 @@ import { getAlovaInstance } from '#/utils';
 import { createAlova } from '@/index';
 import { Result, delay, untilReject } from 'root/testUtils';
 
+const baseURL = process.env.NODE_BASE_URL as string;
 describe('Request shared', () => {
   test('should share request when use usehooks', async () => {
     const requestMockFn = vi.fn();
     const beforeRequestMockFn = vi.fn();
     const responseMockFn = vi.fn();
     const alova = createAlova({
-      baseURL: 'http://xxx',
+      baseURL,
       cacheFor: {
         GET: 0
       },
@@ -56,7 +57,7 @@ describe('Request shared', () => {
   test('request shared promise will also remove when request error', async () => {
     let index = 0;
     const alova = createAlova({
-      baseURL: 'http://xxx',
+      baseURL,
       cacheFor: {
         GET: 0
       },
@@ -184,7 +185,7 @@ describe('Request shared', () => {
   test("shouldn't share request when close in global config", async () => {
     const requestMockFn = vi.fn();
     const alova = createAlova({
-      baseURL: 'http://xxx',
+      baseURL,
       cacheFor: {
         GET: 0
       },
@@ -218,7 +219,7 @@ describe('Request shared', () => {
   test("shouldn't share request when close in method config", async () => {
     const requestMockFn = vi.fn();
     const alova = createAlova({
-      baseURL: 'http://xxx',
+      baseURL,
       cacheFor: {
         GET: 0
       },
@@ -247,5 +248,30 @@ describe('Request shared', () => {
 
     // The sharing request is closed in the method configuration and executed twice
     expect(requestMockFn).toHaveBeenCalledTimes(2);
+  });
+
+  test('should not share request when post with FormData', async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+    const formData1 = new FormData();
+    formData1.append('file', 'file1');
+    const formData2 = new FormData();
+    formData2.append('file', 'file2');
+
+    // Create two POST requests with different FormData
+    const Post1 = alova.Post<{ status: number; data: { data: { file: string } } }>('/unit-test', formData1, {
+      shareRequest: true
+    });
+    const Post2 = alova.Post<{ status: number; data: { data: { file: string } } }>('/unit-test', formData2, {
+      shareRequest: true
+    });
+
+    // Send requests simultaneously
+    const [response1, response2] = await Promise.all([Post1, Post2]);
+
+    // Verify responses are different
+    expect(response1.data.data.file).toBe('file1');
+    expect(response2.data.data.file).toBe('file2');
   });
 });

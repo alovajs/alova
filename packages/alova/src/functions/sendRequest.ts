@@ -7,6 +7,7 @@ import {
   PromiseCls,
   STORAGE_RESTORE,
   buildCompletedURL,
+  deepClone,
   deleteAttr,
   falseValue,
   getConfig,
@@ -92,7 +93,11 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
     const { baseURL, url: newUrl, type, data } = clonedMethod;
     const { params = {}, headers = {}, transform = $self, shareRequest } = getConfig(clonedMethod);
     const namespacedAdapterReturnMap = (adapterReturnMap[id] = adapterReturnMap[id] || {});
-    let requestAdapterCtrls = namespacedAdapterReturnMap[methodKey];
+    const requestBody = clonedMethod.data;
+    const requestBodyIsSpecial = isSpecialRequestBody(requestBody);
+
+    // Will not share the request when requestBody is special data
+    let requestAdapterCtrls = requestBodyIsSpecial ? undefinedValue : namespacedAdapterReturnMap[methodKey];
     let responseSuccessHandler: RespondedHandler<AG> = $self;
     let responseErrorHandler: ResponseErrorHandler<AG> | undefined = undefinedValue;
     let responseCompleteHandler: ResponseCompleteHandler<AG> = noop;
@@ -111,7 +116,8 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       requestAdapterCtrlsPromiseResolveFn(); // Ctrls will not be passed in when cache is encountered
 
       // Print cache log
-      sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod as any, cacheMode, tag);
+      clonedMethod.fromCache = trueValue;
+      sloughFunction(cacheLogger, defaultCacheLogger)(cachedResponse, clonedMethod, cacheMode, tag);
       responseCompleteHandler(clonedMethod);
       return cachedResponse;
     }
@@ -155,8 +161,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
       // Do not save cache when requestBody is special data
       // Reason 1: Special data is generally submitted and requires interaction with the server.
       // Reason 2: Special data is not convenient for generating cache keys
-      const requestBody = clonedMethod.data;
-      const toCache = !requestBody || !isSpecialRequestBody(requestBody);
+      const toCache = !requestBody || !requestBodyIsSpecial;
 
       // Use the latest expiration time after the response to cache data to avoid the problem of expiration time loss due to too long response time
       if (toCache && callInSuccess) {
@@ -176,7 +181,10 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
           ]);
         } catch {}
       }
-      return transformedData;
+
+      // Deep clone the transformed data before returning to avoid reference issues
+      // the `deepClone` will only clone array and plain object
+      return deepClone(transformedData);
     };
 
     return promiseFinally(

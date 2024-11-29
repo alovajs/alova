@@ -69,7 +69,7 @@ interface BackoffPolicy {
   delay?: number;
   /**
    * Specify the delay multiple. For example, if the multiplier is set to 1.5 and the delay is 2 seconds, the first retry will be 2 seconds, the second will be 3 seconds, and the third will be 4.5 seconds
-   * @default 0
+   * @default 1
    */
   multiplier?: number;
   /**
@@ -365,6 +365,13 @@ declare const delayWithBackoff: (backoff: BackoffPolicy, retryTimes: number) => 
  * Build the complete url baseURL path url parameters complete url
  */
 declare const buildCompletedURL: (baseURL: string, url: string, params: Record<string, any>) => string;
+/**
+ * Deep clone an object.
+ *
+ * @param obj The object to be cloned.
+ * @returns The cloned object.
+ */
+declare const deepClone: <T>(obj: T) => T;
 
 type CallbackFn = () => void | Promise<void>;
 declare class QueueCallback {
@@ -485,6 +492,7 @@ export {
   createEventManager,
   createSyncOnceRunner,
   decorateEvent,
+  deepClone,
   defineProperty,
   delayWithBackoff,
   deleteAttr,
