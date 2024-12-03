@@ -1,0 +1,22 @@
+{
+  "name": "vue2-vite",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.3.4",
+    "@vitejs/plugin-vue2": "^2.2.0",
+    "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "@alova/mock": "^1.5.0",
+    "@alova/vue-options": "file:../艺施胡/alova-vue-options",
+    "alova": "^2.13.0",
+    "vue": "^3.3.4"
+  }
+}

@@ -1,0 +1,15 @@
+<template>
+  <view class="content">
+    <image class="logo" src="/static/logo.png" />
+    <text>{{ loading ? 'nvue 加载中...' : JSON.stringify(data) }}</text>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { userinfo, detail } from '@/apis';
+import { useRequest } from 'alova/client';
+import { ref, watchEffect } from 'vue'
+
+const { loading, data } = useRequest(detail);
+
+</script>

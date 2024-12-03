@@ -1,0 +1,20 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@types/node": "^18",
+    "nuxt": "^3.8.0"
+  },
+  "dependencies": {
+    "@alova/adapter-xhr": "^2.0.1",
+    "@alova/mock": "^2.0.1",
+    "alova": "^3.0.1"
+  }
+}
