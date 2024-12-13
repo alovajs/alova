@@ -18,25 +18,27 @@
 
 ## alova 是什么？
 
-alova（读作/əˈləʊva/）是一个流程精简的下一代请求工具，从前后端协作和 API 集成作为出发点，将 API 集成步骤从 7 步简化为只有 1 步，极致地简化 API 集成工作流，让网络请求变得非常简单。我们来看看 alova 是如何帮你的简化工作的。
+alova（读作/əˈləʊva/）是一个流程简化的下一代请求工具，它可以将你的 API 集成工作流从 7 个步骤极致地简化为 1 个步骤，你只需要选择 API 即可使用。
 
 ![](https://alova.js.org/img/overview_flow_cn.png)
 
+## 特性
+
+- 简单易用，并且学习成本更低。
+- 更先进的 openAPI 解决方案，直接扔掉中间的API文档吧。
+- 搭配客户端技术和请求库，`react/vue/svelte/solid/next/nuxt/sveltkit/solid-start/uniapp/taro/...` + `fetch/XMLHttpRequest/axios/...`
+- 搭配服务端技术和请求库，`nodejs/deno/bun/...` + `fetch/XMLHttpRequest/axios/...`
+- 15+ 高性能的请求策略应对复杂的请求场景，帮助你快速开发性能更好的应用。
+
+## 在线示例
+
+请访问这个[链接](https://alova.js.org/examples)查看.
+
 ## 有什么不同吗？
 
-与其他请求库不同的是，alova 的目标是让请求变得非常简单，并且保持更高效的数据交互。
+与 `@tanstack/react-request`、`swrjs`、`ahooks` 的 `useRequest` 等库不同，alova 旨在让请求变得非常简单，并保持更高效的数据交互。我们同时考虑开发者和应用用户，对于开发者，alova 为他们提供极致的用户体验，对于应用用户，他们可以享受 alova 高性能数据交互带来的流畅体验。
 
-我们为开发者和 App 使用者双方考虑，对于开发者来说，alova 为他们提供了极致的使用体验，对于应用的用户来说，他们可以享受到 alova 的高性能数据交互带来的流畅体验。
-
-此外，再从具体的特性来看看：
-
-- 与 axios 相似的 api 设计，让使用者学习成本更低；
-- 高性能的客户端和服务端请求策略，让应用更流畅；
-- 灵活性高，alova 的适配器可以让 alova 在任何 js 环境下，与任何 UI 框架协作使用，并且提供了统一的使用体验和完美的代码迁移；
-- 2 种缓存模式和请求共享机制，提升请求性能并降低服务端压力；
-- api 代码的高聚合组织，每个 api 的请求参数、缓存行为、响应数据转换等都将聚集在相同的代码块中，这对于管理大量的 api 有很大的优势；
-
-> 你还可以查看请[与其他请求库比较](https://alova.js.org/about/comparison)详细了解 alova 的不同之处。
+> 您还可以查看 [与其他请求库的比较](https://alova.js.org/about/comparison) 以详细了解 alova 的不同之处。
 
 ## 文档
 
