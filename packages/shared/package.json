@@ -1,6 +1,6 @@
 {
   "name": "@alova/shared",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "type": "module",
   "author": "Scott Hu",
   "main": "dist/alova-shared.common.cjs",

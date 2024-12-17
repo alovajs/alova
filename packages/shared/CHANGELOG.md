@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.1.2
+
+### Patch Changes
+
+- [#608](https://github.com/alovajs/alova/pull/608) [`9e95069`](https://github.com/alovajs/alova/commit/9e95069b0fee0e86edb750f4bd5ab2c60083bcaa) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix to only clone array and plain object in `deepClone`
+
 ## 1.1.1
 
 ### Patch Changes
