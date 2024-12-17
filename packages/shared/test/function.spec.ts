@@ -663,18 +663,31 @@ describe('shared functions', () => {
     expect(clonedArray[1]).not.toBe(originalArray[1]);
     expect(clonedArray[2]).not.toBe(originalArray[2]);
 
+    class J {}
+
     // objects
     const originalObject = {
       a: 1,
       b: { c: 2 },
       d: [3, 4],
-      e: null
+      e: null,
+      f: undefined,
+      g: () => {},
+      h: Symbol('h'),
+      i: new Date(),
+      j: new J()
     };
     const clonedObject = deepClone(originalObject);
     expect(clonedObject).toStrictEqual(originalObject);
     expect(clonedObject).not.toBe(originalObject);
     expect(clonedObject.b).not.toBe(originalObject.b);
     expect(clonedObject.d).not.toBe(originalObject.d);
+    expect(clonedObject.e).toBeNull();
+    expect(clonedObject.f).toBeUndefined();
+    expect(clonedObject.g).toBe(originalObject.g);
+    expect(clonedObject.h).toBe(originalObject.h);
+    expect(clonedObject.i).toBe(originalObject.i);
+    expect(clonedObject.j).toBe(originalObject.j);
 
     // nested complex structures
     const originalNested = {
