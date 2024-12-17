@@ -408,7 +408,7 @@ export const deepClone = <T>(obj: T): T => {
     return mapItem(obj, deepClone) as T;
   }
 
-  if (isPlainObject(obj)) {
+  if (isPlainObject(obj) && obj.constructor === ObjectCls) {
     const clone = {} as T;
     forEach(objectKeys(obj), key => {
       clone[key as keyof T] = deepClone(obj[key as keyof T]);
