@@ -1,5 +1,12 @@
 # @alova/psc
 
+## 1.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`9e95069`](https://github.com/alovajs/alova/commit/9e95069b0fee0e86edb750f4bd5ab2c60083bcaa)]:
+  - @alova/shared@1.1.2
+
 ## 1.0.10
 
 ### Patch Changes
