@@ -1686,4 +1686,42 @@ describe('react => usePagination', () => {
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0, 1, 2, 3, 100, 200, 300]));
     });
   });
+
+  test('should receive custom params from function send', async () => {
+    const successFn = vi.fn();
+    const fetchSuccessMockFn = vi.fn();
+    render(
+      <Pagination
+        getter={(page, pageSize) => getter1(page, pageSize)}
+        paginationConfig={{
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          immediate: false
+        }}
+        handleExposure={exposure => {
+          exposure.onSuccess(({ args }) => {
+            successFn(args);
+          });
+          exposure.onFetchSuccess(({ args }) => {
+            fetchSuccessMockFn(args);
+          });
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('page')).toHaveTextContent('1');
+      expect(screen.getByRole('pageSize')).toHaveTextContent('10');
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+      expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('true');
+    });
+
+    fireEvent.click(screen.getByRole('customSend'));
+    await waitFor(() => {
+      expect(successFn).toHaveBeenCalledWith(['a', 1, undefined, undefined]);
+      expect(fetchSuccessMockFn).toHaveBeenCalledWith(['a', 1, false]);
+    });
+  });
 });
