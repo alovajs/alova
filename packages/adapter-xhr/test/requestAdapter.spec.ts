@@ -330,4 +330,21 @@ describe('request adapter', () => {
 
     await expect(Promise.all([Get1, Get2, Get3])).resolves.toStrictEqual(['object', 'object', 'string']);
   });
+
+  test('should respect the type', async () => {
+    const mockFn = vi.fn();
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter({
+        create(xhr) {
+          mockFn(xhr);
+        }
+      })
+    });
+
+    expect(mockFn).not.toHaveBeenCalled();
+    await alovaInst.Get('/unit-test');
+    expect(mockFn).toHaveBeenCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledWith(expect.any(XMLHttpRequest));
+  });
 });

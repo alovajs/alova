@@ -10,14 +10,14 @@ import {
   trueValue
 } from '@alova/shared';
 import type { ProgressUpdater } from 'alova';
-import { AlovaXHRAdapter, AlovaXHRResponse } from '~/typings';
+import { AlovaXHRAdapter, AlovaXHRAdapterOptions, AlovaXHRResponse } from '~/typings';
 
 const err = (msg: string) => newInstance(Error, msg);
 const isBodyData = (data: any): data is XMLHttpRequestBodyInit => isString(data) || isSpecialRequestBody(data);
 /**
  * XMLHttpRequest request adapter
  */
-export default function requestAdapter() {
+export default function requestAdapter({ create = noop }: AlovaXHRAdapterOptions = {}) {
   const adapter: AlovaXHRAdapter = ({ type, url, data = null, headers }, method) => {
     const { config } = method;
     const { auth, withCredentials, mimeType, responseType } = config;
@@ -115,6 +115,9 @@ export default function requestAdapter() {
         if (dataSend !== nullValue) {
           dataSend = isBodyData(dataSend) ? dataSend : JSON.stringify(dataSend);
         }
+
+        // export xhr in `create`
+        create(xhr);
         xhr.send(dataSend);
       } catch (error) {
         reject(error);
