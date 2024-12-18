@@ -67,7 +67,7 @@ export type AlovaXHRAdapter = AlovaRequestAdapter<AlovaXHRRequestConfig, AlovaXH
  * XMLHttpRequest request adapter options
  */
 export interface AlovaXHRAdapterOptions {
-  create?: (xhr: XMLHttpRequest) => void;
+  onCreate?: (xhr: XMLHttpRequest) => void;
 }
 
 /**

@@ -336,7 +336,7 @@ describe('request adapter', () => {
     const alovaInst = createAlova({
       baseURL,
       requestAdapter: xhrRequestAdapter({
-        create(xhr) {
+        onCreate(xhr) {
           mockFn(xhr);
         }
       })

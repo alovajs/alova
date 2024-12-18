@@ -17,7 +17,7 @@ const isBodyData = (data: any): data is XMLHttpRequestBodyInit => isString(data)
 /**
  * XMLHttpRequest request adapter
  */
-export default function requestAdapter({ create = noop }: AlovaXHRAdapterOptions = {}) {
+export default function requestAdapter({ onCreate = noop }: AlovaXHRAdapterOptions = {}) {
   const adapter: AlovaXHRAdapter = ({ type, url, data = null, headers }, method) => {
     const { config } = method;
     const { auth, withCredentials, mimeType, responseType } = config;
@@ -116,8 +116,8 @@ export default function requestAdapter({ create = noop }: AlovaXHRAdapterOptions
           dataSend = isBodyData(dataSend) ? dataSend : JSON.stringify(dataSend);
         }
 
-        // export xhr in `create`
-        create(xhr);
+        // export xhr in `onCreate`
+        onCreate(xhr);
         xhr.send(dataSend);
       } catch (error) {
         reject(error);
