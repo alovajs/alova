@@ -1,5 +1,5 @@
 /**
- * @alova/shared 1.1.0 (https://alova.js.org)
+ * @alova/shared 1.1.2 (https://alova.js.org)
  * Document https://alova.js.org
  * Copyright 2024 Scott Hu. All Rights Reserved
  * Licensed under MIT (https://github.com/alovajs/alova/blob/main/LICENSE)
