@@ -20,6 +20,64 @@ describe('l1cache cache data', () => {
     await Post;
     expect(await queryCache(Post)).toBeUndefined();
   });
+
+  test('should disable the global cache', async () => {
+    const alova1 = getAlovaInstance({
+      responseExpect: r => r.json(),
+      cacheFor: null
+    });
+
+    // disable GET cache
+    const Get1 = alova1.Get('/unit-test', {
+      transform: ({ data }: Result) => data
+    });
+    await Get1;
+    expect(await queryCache(Get1)).toBeUndefined();
+
+    // disable POST cache
+    const Post1 = alova1.Post('/unit-test');
+    await Post1;
+    expect(await queryCache(Post1)).toBeUndefined();
+
+    const alova2 = getAlovaInstance({
+      responseExpect: r => r.json(),
+      cacheFor: {
+        GET: 0
+      }
+    });
+
+    // disable GET cache
+    const Get2 = alova2.Get('/unit-test', {
+      transform: ({ data }: Result) => data
+    });
+    await Get2;
+    expect(await queryCache(Get2)).toBeUndefined();
+
+    // disable POST cache
+    const Post2 = alova2.Post('/unit-test');
+    await Post2;
+    expect(await queryCache(Post2)).toBeUndefined();
+
+    const alova3 = getAlovaInstance({
+      responseExpect: r => r.json(),
+      cacheFor: {
+        GET: null
+      }
+    });
+
+    // disable GET cache
+    const Get3 = alova3.Get('/unit-test', {
+      transform: ({ data }: Result) => data
+    });
+    await Get3;
+    expect(await queryCache(Get3)).toBeUndefined();
+
+    // disable POST cache
+    const Post3 = alova3.Post('/unit-test');
+    await Post3;
+    expect(await queryCache(Post3)).toBeUndefined();
+  });
+
   test("change the default cache's setting globally", async () => {
     const alova = getAlovaInstance({
       cacheFor: {
@@ -192,7 +250,43 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeFalsy(); // Because the cache has been deleted, the request will be reissued
   });
 
-  test('param localCache can also set to be a Date instance', async () => {
+  test("shouldn't the cache object and return object refer the same reference value", async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      cacheFor: 1000,
+      transform: ({ data }: Result) => data
+    });
+    const response = await Get;
+    const cacheData = await queryCache(Get);
+    expect(response).not.toBe(cacheData);
+    response.path = '/unit-test-modified';
+    expect(response).not.toStrictEqual(cacheData);
+
+    const alova2 = getAlovaInstance();
+    const Get2 = alova2.Get<Response>('/unit-test', {
+      cacheFor: 1000
+    });
+    const response2 = await Get2;
+    const cacheData2 = await queryCache(Get2);
+    expect(response2).toBeInstanceOf(Response);
+    expect(cacheData2).toBeInstanceOf(Response);
+    expect(response2).toBe(cacheData2);
+
+    const Get3 = alova2.Get('/unit-test?a=1', {
+      cacheFor: 1000,
+      transform() {
+        return null;
+      }
+    });
+    const response3 = await Get3;
+    const cacheData3 = await queryCache(Get3);
+    expect(response3).toBeNull();
+    expect(cacheData3).toBeUndefined();
+  });
+
+  test('param cacheFor can also set to be a Date instance', async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -214,7 +308,7 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeFalsy(); // Because the cache has been deleted, the request will be reissued
   });
 
-  test("cache data wouldn't be invalid when set localCache to `Infinity`", async () => {
+  test("cache data wouldn't be invalid when set cacheFor to `Infinity`", async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -235,7 +329,7 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeTruthy(); // Because the cache has not expired, the cached data will continue to be used and the loading will not change.
   });
 
-  test('cache data will be invalid when set localCache to 0', async () => {
+  test('cache data will be invalid when set cacheFor to 0', async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });
@@ -250,7 +344,7 @@ describe('l1cache cache data', () => {
     expect(Get.fromCache).toBeFalsy();
   });
 
-  test('cache data will be invalid when set localCache to null', async () => {
+  test('cache data will be invalid when set cacheFor to null', async () => {
     const alova = getAlovaInstance({
       responseExpect: r => r.json()
     });

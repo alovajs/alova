@@ -1,5 +1,37 @@
 # alova
 
+## 3.2.7
+
+### Patch Changes
+
+- [#608](https://github.com/alovajs/alova/pull/608) [`9e95069`](https://github.com/alovajs/alova/commit/9e95069b0fee0e86edb750f4bd5ab2c60083bcaa) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that cannot receive custom params call send `send` in `usePagination`
+
+- Updated dependencies [[`9e95069`](https://github.com/alovajs/alova/commit/9e95069b0fee0e86edb750f4bd5ab2c60083bcaa)]:
+  - @alova/shared@1.1.2
+
+## 3.2.6
+
+### Patch Changes
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that `fromCache` is undefined in cache hit console
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - do not share request when special request body is exists
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - split response and cache data with different reference value
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - correct default `multiplier` 0 to 1 in comment
+
+- Updated dependencies [[`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e)]:
+  - @alova/shared@1.1.1
+
+## 3.2.5
+
+### Patch Changes
+
+- [#600](https://github.com/alovajs/alova/pull/600) [`cb52b76`](https://github.com/alovajs/alova/commit/cb52b76a9c56f35efb2ddbc8d02d11d865841dac) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix: setting the cached data if found on useRequest initialization
+
+- [#598](https://github.com/alovajs/alova/pull/598) [`15a99af`](https://github.com/alovajs/alova/commit/15a99af6787b453a62990692a2302bdedbeadd80) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: resolve issue with delegateMiddleware using outdated context in react
+
 ## 3.2.4
 
 ### Patch Changes

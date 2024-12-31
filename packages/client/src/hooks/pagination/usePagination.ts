@@ -37,8 +37,14 @@ const paginationAssert = createAssert('usePagination');
 const indexAssert = (index: number, rawData: any[]) =>
   paginationAssert(isNumber(index) && index < len(rawData), 'index must be a number that less than list length');
 
+const parseSendArgs = (args: any[]) => [
+  args[args.length - 2], // refreshPage
+  args[args.length - 1], // isRefresh
+  args.slice(0, args.length - 2) // send args
+];
+
 export default <AG extends AlovaGenerics, ListData extends unknown[]>(
-  handler: (page: number, pageSize: number) => Method<AG>,
+  handler: (page: number, pageSize: number, ...args: any[]) => Method<AG>,
   config: PaginationHookConfig<AG, ListData> = {}
 ) => {
   const {
@@ -86,14 +92,13 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   const fetchStates = useFetcher<FetcherType<Alova<AG>>>({
     __referingObj: referingObject,
     updateState: falseValue,
-    force: ({ args }) => args[0]
+    force: ({ args }) => args[len(args) - 1]
   });
   const { loading, fetch, abort: abortFetch, onSuccess: onFetchSuccess } = fetchStates;
   const fetchingRef = ref(loading);
 
-  const getHandlerMethod = (refreshPage: number | undefined = page.v) => {
-    const pageSizeVal = pageSize.v;
-    const handlerMethod = handler(refreshPage, pageSizeVal);
+  const getHandlerMethod = (refreshPage: number = page.v, customArgs: any[] = []) => {
+    const handlerMethod = handler(refreshPage, pageSize.v, ...customArgs);
 
     // Define unified additional names to facilitate management
     saveSnapshot(handlerMethod);
@@ -121,9 +126,12 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     (actionName: string) =>
     (...args: any[]) =>
       delegationActions.current[actionName](...args);
-  const states = useWatcher<AG, [page?: number, force?: boolean]>(
-    getHandlerMethod,
-    [...watchingStates, page.e, pageSize.e] as any,
+  const states = useWatcher(
+    (...args: any[]) => {
+      const [refreshPage, , customArgs] = parseSendArgs(args);
+      return getHandlerMethod(refreshPage, customArgs);
+    },
+    [...watchingStates, page.e, pageSize.e],
     {
       __referingObj: referingObject,
       immediate,
@@ -207,9 +215,9 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   };
 
   // Preload next page data
-  const fetchNextPage = async (rawData?: any[], force = falseValue) => {
+  const fetchNextPage = async (rawData: any[] | undefined, force: boolean, customArgs: any[] = []) => {
     const nextPage = page.v + 1;
-    const fetchMethod = getHandlerMethod(nextPage);
+    const fetchMethod = getHandlerMethod(nextPage, customArgs);
     if (
       preloadNextPage &&
       (await canPreload({
@@ -220,13 +228,13 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         forceRequest: force
       }))
     ) {
-      promiseCatch(fetch(fetchMethod as Method, force), noop);
+      promiseCatch(fetch(fetchMethod as Method, ...customArgs, force), noop);
     }
   };
   // Preload previous page data
-  const fetchPreviousPage = async (rawData: any[]) => {
+  const fetchPreviousPage = async (rawData: any[], customArgs: any[] = []) => {
     const prevPage = page.v - 1;
-    const fetchMethod = getHandlerMethod(prevPage);
+    const fetchMethod = getHandlerMethod(prevPage, customArgs);
     if (
       preloadPreviousPage &&
       (await canPreload({
@@ -235,7 +243,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         fetchMethod
       }))
     ) {
-      promiseCatch(fetch(fetchMethod as Method), noop);
+      promiseCatch(fetch(fetchMethod as Method, ...customArgs, undefinedValue), noop);
     }
   };
   // If the returned data is smaller than the page size, it is considered the last page.
@@ -299,13 +307,14 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   const awaitResolve = ref(undefinedValue as GeneralFn | undefined);
   const awaitReject = ref(undefinedValue as GeneralFn | undefined);
   states
-    .onSuccess(({ data: rawData, args: [refreshPage, isRefresh], method }) => {
+    .onSuccess(({ data: rawData, args, method }) => {
+      const [refreshPage, isRefresh, customArgs] = parseSendArgs(args);
       const { total: cachedTotal } = getSnapshotMethods(method) || {};
       const typedRawData = rawData as any[];
       total.v = cachedTotal !== undefinedValue ? cachedTotal : totalGetter(typedRawData);
       if (!isRefresh) {
-        fetchPreviousPage(typedRawData);
-        fetchNextPage(typedRawData);
+        fetchPreviousPage(typedRawData, customArgs);
+        fetchNextPage(typedRawData, falseValue, customArgs);
       }
 
       const pageSizeVal = pageSize.v;
@@ -583,6 +592,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   return exposeProvider({
     ...states,
     ...objectify([data, page, pageCount, pageSize, total, isLastPage]),
+    send: (...args: any[]) => send(...args, undefinedValue, undefinedValue),
 
     fetching: fetchStates.loading,
     onFetchSuccess: fetchStates.onSuccess,

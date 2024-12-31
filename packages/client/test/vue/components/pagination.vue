@@ -242,6 +242,11 @@
       ">
       btn1
     </button>
+    <button
+      role="customSend"
+      @click="send('a', 1)">
+      btn1
+    </button>
   </div>
 </template>
 
@@ -257,7 +262,7 @@ type CollapsedAlovaGenerics = Omit<AlovaGenerics, 'StatesExport'> & {
 };
 
 const props = defineProps<{
-  getter: (page: number, pageSize: number) => Method<CollapsedAlovaGenerics>;
+  getter: (page: number, pageSize: number, ...args: any[]) => Method<CollapsedAlovaGenerics>;
   paginationConfig?: PaginationHookConfig<CollapsedAlovaGenerics, unknown[]>;
   handleExposure?: (exposure: ReturnType<typeof usePagination>) => void;
 }>();
@@ -286,6 +291,7 @@ const {
   page,
   pageSize,
   isLastPage,
+  send,
   update,
   insert,
   replace,

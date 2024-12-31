@@ -8,6 +8,8 @@ import {
   STORAGE_RESTORE,
   falseValue,
   filterItem,
+  forEach,
+  isArray,
   len,
   mapItem,
   nullValue,
@@ -393,4 +395,25 @@ export const buildCompletedURL = (baseURL: string, url: string, params: Record<s
       ? `${completeURL}&${paramsStr}`
       : `${completeURL}?${paramsStr}`
     : completeURL;
+};
+
+/**
+ * Deep clone an object.
+ *
+ * @param obj The object to be cloned.
+ * @returns The cloned object.
+ */
+export const deepClone = <T>(obj: T): T => {
+  if (isArray(obj)) {
+    return mapItem(obj, deepClone) as T;
+  }
+
+  if (isPlainObject(obj) && obj.constructor === ObjectCls) {
+    const clone = {} as T;
+    forEach(objectKeys(obj), key => {
+      clone[key as keyof T] = deepClone(obj[key as keyof T]);
+    });
+    return clone;
+  }
+  return obj;
 };

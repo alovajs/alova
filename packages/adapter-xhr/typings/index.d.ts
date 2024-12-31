@@ -64,9 +64,16 @@ export interface AlovaXHRResponse<T = any> {
 export type AlovaXHRAdapter = AlovaRequestAdapter<AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders>;
 
 /**
+ * XMLHttpRequest request adapter options
+ */
+export interface AlovaXHRAdapterOptions {
+  onCreate?: (xhr: XMLHttpRequest) => void;
+}
+
+/**
  * XMLHttpRequest request adapter
  */
-export declare function xhrRequestAdapter(): AlovaXHRAdapter;
+export declare function xhrRequestAdapter(options: AlovaXHRAdapterOptions): AlovaXHRAdapter;
 
 /**
  * Mock response adapter, which is used in @alova/mock to allow xhr response data to be returned in a format compatible with mock requests.

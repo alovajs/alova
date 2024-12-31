@@ -68,6 +68,7 @@ export default function createRequestState<
   useHookConfig = { ...useHookConfig };
   const { __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
   let initialLoading = !!immediate;
+  let cachedResponse: any = undefinedValue;
 
   // When sending a request immediately, you need to determine the initial loading value by whether to force the request and whether there is a cache. This has the following two benefits:
   // 1. Sending the request immediately under react can save one rendering time
@@ -80,7 +81,7 @@ export default function createRequestState<
       const l1CacheResult = (alovaInstance.l1Cache as AlovaGlobalCacheAdapter).get<[any, number]>(
         buildNamespacedCacheKey(alovaInstance.id, getMethodInternalKey(methodInstance))
       );
-      let cachedResponse: any = undefinedValue;
+
       // The cache is only checked synchronously, so it does not take effect on asynchronous l1Cache adapters.
       // It is recommended not to set up the asynchronous l1Cache adapter on the client side
       if (l1CacheResult && !instanceOf(l1CacheResult, PromiseCls)) {
@@ -106,7 +107,7 @@ export default function createRequestState<
   // Put the externally incoming supervised states into the front states collection together
   const { managedStates = {} } = useHookConfig as FrontRequestHookConfig<AG, Args>;
   const managedStatesProxy = mapObject(managedStates, (state, key) => transformState2Proxy(state, key));
-  const data = create((isFn(initialData) ? initialData() : initialData) as AG['Responded'], 'data');
+  const data = create(cachedResponse ?? ((isFn(initialData) ? initialData() : initialData) as AG['Responded']), 'data');
   const loading = create(initialLoading, 'loading');
   const error = create(undefinedValue as Error | undefined, 'error');
   const downloading = create({ ...progress }, 'downloading');

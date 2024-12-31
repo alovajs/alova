@@ -1,5 +1,25 @@
 # @alova/adapter-xhr
 
+## 2.1.0
+
+### Minor Changes
+
+- [#611](https://github.com/alovajs/alova/pull/611) [`61407b0`](https://github.com/alovajs/alova/commit/61407b0e647cdb0e0be887d86cf469840ac4b5e1) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - export xhr instance in `options.create` of adapter
+
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [[`9e95069`](https://github.com/alovajs/alova/commit/9e95069b0fee0e86edb750f4bd5ab2c60083bcaa)]:
+  - @alova/shared@1.1.2
+
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e)]:
+  - @alova/shared@1.1.1
+
 ## 2.0.10
 
 ### Patch Changes

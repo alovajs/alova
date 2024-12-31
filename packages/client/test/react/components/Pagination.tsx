@@ -43,6 +43,7 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
     page,
     pageSize,
     isLastPage,
+    send,
     update,
     insert,
     replace,
@@ -277,6 +278,11 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
         role="clearData"
         onClick={() => update({ data: [] })}>
         btn
+      </button>
+      <button
+        role="customSend"
+        onClick={() => send('a', 1)}>
+        btn1
       </button>
     </div>
   );

@@ -1396,7 +1396,7 @@ describe('vue => usePagination', () => {
     });
   });
 
-  test("load more mode paginated data don't need to preload when go to last page", async () => {
+  test("load more mode paginated data doesn't need to preload when go to last page", async () => {
     const fetchMockFn = vi.fn();
     render(Pagination, {
       props: {
@@ -1676,7 +1676,7 @@ describe('vue => usePagination', () => {
     });
   });
 
-  test('should can be interrupted by middleware', async () => {
+  test('should be interrupted by middleware', async () => {
     const successMockFn = vi.fn();
     const errorMockFn = vi.fn();
     const completedMockFn = vi.fn();
@@ -1701,5 +1701,43 @@ describe('vue => usePagination', () => {
     expect(successMockFn).not.toHaveBeenCalled();
     expect(errorMockFn).not.toHaveBeenCalled();
     expect(completedMockFn).not.toHaveBeenCalled();
+  });
+
+  test('should receive custom params from function send', async () => {
+    const successFn = vi.fn();
+    const fetchSuccessMockFn = vi.fn();
+    render(Pagination, {
+      props: {
+        getter: (page, pageSize) => getter1(page, pageSize),
+        paginationConfig: {
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          immediate: false
+        },
+        handleExposure(exposure) {
+          exposure.onSuccess(({ args }) => {
+            successFn(args);
+          });
+          exposure.onFetchSuccess(({ args }) => {
+            fetchSuccessMockFn(args);
+          });
+        }
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('page')).toHaveTextContent('1');
+      expect(screen.getByRole('pageSize')).toHaveTextContent('10');
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+      expect(screen.getByRole('total')).toHaveTextContent('');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('true');
+    });
+
+    fireEvent.click(screen.getByRole('customSend'));
+    await waitFor(() => {
+      expect(successFn).toHaveBeenCalledWith(['a', 1, undefined, undefined]);
+      expect(fetchSuccessMockFn).toHaveBeenCalledWith(['a', 1, false]);
+    });
   });
 });

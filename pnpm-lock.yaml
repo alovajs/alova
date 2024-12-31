@@ -203,7 +203,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.9(alova@3.2.0)
+        version: 2.0.10(alova@3.2.6)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -212,7 +212,7 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.2.0
+        version: 3.2.6
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -226,8 +226,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       trix:
-        specifier: ^2.1.7
-        version: 2.1.7
+        specifier: ^2.1.9
+        version: 2.1.9
     devDependencies:
       '@types/react':
         specifier: ^18.3.12
@@ -255,13 +255,13 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.9(alova@3.2.0)
+        version: 2.0.10(alova@3.2.6)
       '@alova/psc':
         specifier: latest
-        version: 1.0.9(alova@3.2.0)(electron@30.5.1)
+        version: 1.0.10(alova@3.2.6)(electron@30.5.1)
       alova:
         specifier: latest
-        version: 3.2.0
+        version: 3.2.6
       body-parser:
         specifier: ^1.20.3
         version: 1.20.3
@@ -298,7 +298,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.9(alova@3.2.0)
+        version: 2.0.10(alova@3.2.6)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -307,7 +307,7 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.2.0
+        version: 3.2.6
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -315,8 +315,8 @@ importers:
         specifier: ^1.8.19
         version: 1.9.3
       trix:
-        specifier: ^2.1.7
-        version: 2.1.7
+        specifier: ^2.1.9
+        version: 2.1.9
     devDependencies:
       '@eslint/js':
         specifier: ^9.13.0
@@ -350,7 +350,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.9(alova@3.2.0)
+        version: 2.0.10(alova@3.2.6)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -359,7 +359,7 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.2.0
+        version: 3.2.6
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -367,8 +367,8 @@ importers:
         specifier: ^4.2.19
         version: 4.2.19
       trix:
-        specifier: ^2.1.7
-        version: 2.1.7
+        specifier: ^2.1.9
+        version: 2.1.9
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.2
@@ -390,7 +390,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.9(alova@3.2.0)
+        version: 2.0.10(alova@3.2.6)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -399,10 +399,10 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.2.0
+        version: 3.2.6
       trix:
-        specifier: ^2.1.7
-        version: 2.1.7
+        specifier: ^2.1.9
+        version: 2.1.9
       vue:
         specifier: ^3.5.12
         version: 3.5.12(typescript@5.6.3)
@@ -500,7 +500,7 @@ importers:
         version: 3.4.14
       '@dcloudio/uni-app':
         specifier: ^3.0.0-3090920231225001
-        version: 3.0.0-alpha-4030220241029001(@dcloudio/types@3.4.14)(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+        version: 3.0.0-alpha-4030220241029001(@dcloudio/types@3.4.14)(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       alova:
         specifier: workspace:*
         version: link:../alova
@@ -649,19 +649,19 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@alova/mock@2.0.9':
-    resolution: {integrity: sha512-mjGwIcTZXkjGTkvI7FtSArIov/BF/G0lxz29ukOWHcFyCRsyWLrgY/68fv8Vbu6npAF9RwNXsgiB4WVW0NbXmA==}
+  '@alova/mock@2.0.10':
+    resolution: {integrity: sha512-6f7zn9OZHz2Esf0ABc2kdu0WhTDca6UoAzbXNl9JcbUsJjL+bmijAn82mWJA3AGRZXF86c3HD45lju7nXXpv1w==}
     peerDependencies:
       alova: ^3.0.20
 
-  '@alova/psc@1.0.9':
-    resolution: {integrity: sha512-y0X99Jr1tBvZbbicWtv4eEIljqlMQjwxu3sC/02Ppk+YGASB1jH/1maInHtHG8sIAnTP9Ghpwuf/U94zT95gqw==}
+  '@alova/psc@1.0.10':
+    resolution: {integrity: sha512-BroQbbPW5qfS14Msz7WB4Y9puxsV1KBjKeWNJweYiJUYIEfnR7EyZowLLZkuYXkLpBd09Z5kL9vO9wzFkn7IoQ==}
     peerDependencies:
       alova: ^3.0.20
       electron: ^30.5.1
 
-  '@alova/shared@1.1.0':
-    resolution: {integrity: sha512-sCX5cVKYGrYJ8hGZ9fxqyKAsNGXd2frB4/UG3SKTXqCgs4OyROz1SYhh16iaKT1NaKrQ3444bS2BS/7kTwFpVA==}
+  '@alova/shared@1.1.1':
+    resolution: {integrity: sha512-wYEpisfemAaKH9ODLzlFEcDN34tmc1eWrc++r/Axtdvxb4xpiokWQmQtqr+ODEJ90qG4TCuB5MkCCQBxgKf+fg==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -2284,28 +2284,24 @@ packages:
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@swc/core-linux-arm64-musl@1.3.96':
     resolution: {integrity: sha512-i5/UTUwmJLri7zhtF6SAo/4QDQJDH2fhYJaBIUhrICmIkRO/ltURmpejqxsM/ye9Jqv5zG7VszMC0v/GYn/7BQ==}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   '@swc/core-linux-x64-gnu@1.3.96':
     resolution: {integrity: sha512-USdaZu8lTIkm4Yf9cogct/j5eqtdZqTgcTib4I+NloUW0E/hySou3eSyp3V2UAA1qyuC72ld1otXuyKBna0YKQ==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@swc/core-linux-x64-musl@1.3.96':
     resolution: {integrity: sha512-QYErutd+G2SNaCinUVobfL7jWWjGTI0QEoQ6hqTp7PxCJS/dmKmj3C5ZkvxRYcq7XcZt7ovrYCTwPTHzt6lZBg==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   '@swc/core-win32-arm64-msvc@1.3.96':
     resolution: {integrity: sha512-hjGvvAduA3Un2cZ9iNP4xvTXOO4jL3G9iakhFsgVhpkU73SGmK7+LN8ZVBEu4oq2SUcHO6caWvnZ881cxGuSpg==}
@@ -2827,8 +2823,8 @@ packages:
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
-  alova@3.2.0:
-    resolution: {integrity: sha512-lHUBCgbKRuR4iuu/WTvknfQb/O0GreKNnuYwUSXSojYdY0h+f7Kvkj2XAgYrggO394W9E435wd4oFfaWh+L0EQ==}
+  alova@3.2.6:
+    resolution: {integrity: sha512-PJFExNPfuoa9Bvmp2gbSpmJyqXnpT6kDFQ+UYvpyQjXqAbKW2wcw1KUcKMXdPHO9hkzkGdev1dlZRMYIMFYd8g==}
     engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
@@ -3570,6 +3566,9 @@ packages:
 
   dom-event-types@1.1.0:
     resolution: {integrity: sha512-jNCX+uNJ3v38BKvPbpki6j5ItVlnSqVV6vDWGS6rExzCMjsc39frLjm1n91o6YaKK6AZl0wLloItW6C6mr61BQ==}
+
+  dompurify@3.2.3:
+    resolution: {integrity: sha512-U1U5Hzc2MO0oW3DF+G9qYN0aT7atAou4AgI0XjWz061nyBPbdxkfdhfy5uMgGn6+oLFCfn44ZGbdDqCzVmlOWA==}
 
   dot-prop@5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
@@ -6191,8 +6190,8 @@ packages:
     resolution: {integrity: sha512-tk2G5R2KRwBd+ZN0zaEXpmzdKyOYksXwywulIX95MBODjSzMIuQnQ3m8JxgbhnL1LeVo7lqQKsYa1O3Htl7K5g==}
     engines: {node: '>=18'}
 
-  trix@2.1.7:
-    resolution: {integrity: sha512-RyFmjLJfxP2nuAKqgVqJ40wk4qoYfDQtyi71q6ozkP+X4EOILe+j5ll5g/suvTyMx7BacGszNWzjnx9Vbj17sw==}
+  trix@2.1.9:
+    resolution: {integrity: sha512-Hm02gmsFLjQ+gcFNUW0iwGibYpQpklBCnBUj4z5013W+q6eiZPA9d9HmeJK8jd+BMbqMq7OsVEGclrBrbl4MJw==}
 
   ts-api-utils@1.3.0:
     resolution: {integrity: sha512-UQMIo7pb8WRomKR1/+MFVLTroIvDVtMX3K6OUir8ynLyzB8Jeriont2bTAtmNPa1ekAgN7YPDyf6V+ygrdU+eQ==}
@@ -6712,19 +6711,19 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alova/mock@2.0.9(alova@3.2.0)':
+  '@alova/mock@2.0.10(alova@3.2.6)':
     dependencies:
-      '@alova/shared': 1.1.0
-      alova: 3.2.0
+      '@alova/shared': 1.1.1
+      alova: 3.2.6
 
-  '@alova/psc@1.0.9(alova@3.2.0)(electron@30.5.1)':
+  '@alova/psc@1.0.10(alova@3.2.6)(electron@30.5.1)':
     dependencies:
-      '@alova/shared': 1.1.0
+      '@alova/shared': 1.1.1
       '@node-ipc/node-ipc': 11.0.3
-      alova: 3.2.0
+      alova: 3.2.6
       electron: 30.5.1
 
-  '@alova/shared@1.1.0': {}
+  '@alova/shared@1.1.1': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -7773,15 +7772,15 @@ snapshots:
 
   '@dcloudio/types@3.4.14': {}
 
-  '@dcloudio/uni-app@3.0.0-alpha-4030220241029001(@dcloudio/types@3.4.14)(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-app@3.0.0-alpha-4030220241029001(@dcloudio/types@3.4.14)(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
       '@dcloudio/types': 3.4.14
-      '@dcloudio/uni-cloud': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
-      '@dcloudio/uni-components': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-cloud': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-components': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-i18n': 3.0.0-alpha-4030220241029001
-      '@dcloudio/uni-push': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-push': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-shared': 3.0.0-alpha-4030220241029001
-      '@dcloudio/uni-stat': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-stat': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@vue/shared': 3.4.21
     transitivePeerDependencies:
       - '@nuxt/kit'
@@ -7793,7 +7792,7 @@ snapshots:
       - vue
       - webpack-sources
 
-  '@dcloudio/uni-cli-shared@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-cli-shared@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@babel/code-frame': 7.26.0
@@ -7834,7 +7833,7 @@ snapshots:
       os-locale-s-fix: 1.0.8-fix-1
       picocolors: 1.1.1
       postcss-import: 14.1.0(postcss@8.4.47)
-      postcss-load-config: 3.1.4(postcss@8.4.47)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))
+      postcss-load-config: 3.1.4(postcss@8.4.47)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))
       postcss-modules: 4.3.1(postcss@8.4.47)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.8
@@ -7852,9 +7851,9 @@ snapshots:
       - vue
       - webpack-sources
 
-  '@dcloudio/uni-cloud@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-cloud@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
-      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-i18n': 3.0.0-alpha-4030220241029001
       '@dcloudio/uni-shared': 3.0.0-alpha-4030220241029001
       '@vue/shared': 3.4.21
@@ -7869,10 +7868,10 @@ snapshots:
       - vue
       - webpack-sources
 
-  '@dcloudio/uni-components@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-components@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
-      '@dcloudio/uni-cloud': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
-      '@dcloudio/uni-h5': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-cloud': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-h5': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-i18n': 3.0.0-alpha-4030220241029001
     transitivePeerDependencies:
       - '@nuxt/kit'
@@ -7884,9 +7883,9 @@ snapshots:
       - vue
       - webpack-sources
 
-  '@dcloudio/uni-h5-vite@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-h5-vite@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
-      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-shared': 3.0.0-alpha-4030220241029001
       '@rollup/pluginutils': 5.1.3(rollup@4.24.3)
       '@vue/compiler-dom': 3.4.21
@@ -7914,9 +7913,9 @@ snapshots:
     transitivePeerDependencies:
       - vue
 
-  '@dcloudio/uni-h5@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-h5@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
-      '@dcloudio/uni-h5-vite': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-h5-vite': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-h5-vue': 3.0.0-alpha-4030220241029001(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-i18n': 3.0.0-alpha-4030220241029001
       '@dcloudio/uni-shared': 3.0.0-alpha-4030220241029001
@@ -7940,9 +7939,9 @@ snapshots:
 
   '@dcloudio/uni-i18n@3.0.0-alpha-4030220241029001': {}
 
-  '@dcloudio/uni-push@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-push@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
-      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
     transitivePeerDependencies:
       - '@nuxt/kit'
       - '@vueuse/core'
@@ -7957,9 +7956,9 @@ snapshots:
     dependencies:
       '@vue/shared': 3.4.21
 
-  '@dcloudio/uni-stat@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
+  '@dcloudio/uni-stat@3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
-      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
+      '@dcloudio/uni-cli-shared': 3.0.0-alpha-4030220241029001(postcss@8.4.47)(rollup@4.24.3)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3))(vue@3.5.12(typescript@5.6.3))
       '@dcloudio/uni-shared': 3.0.0-alpha-4030220241029001
       debug: 4.3.7(supports-color@5.5.0)
     transitivePeerDependencies:
@@ -9336,9 +9335,9 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alova@3.2.0:
+  alova@3.2.6:
     dependencies:
-      '@alova/shared': 1.1.0
+      '@alova/shared': 1.1.1
       rate-limiter-flexible: 5.0.4
 
   ansi-colors@4.1.3: {}
@@ -10127,6 +10126,10 @@ snapshots:
   dom-accessibility-api@0.6.3: {}
 
   dom-event-types@1.1.0: {}
+
+  dompurify@3.2.3:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
 
   dot-prop@5.3.0:
     dependencies:
@@ -12161,13 +12164,13 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.47
 
-  postcss-load-config@3.1.4(postcss@8.4.47)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3)):
+  postcss-load-config@3.1.4(postcss@8.4.47)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 1.10.2
     optionalDependencies:
       postcss: 8.4.47
-      ts-node: 10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3)
+      ts-node: 10.9.2(@swc/core@1.3.96)(@types/node@20.17.3)(typescript@5.6.3)
 
   postcss-load-config@4.0.2(postcss@8.4.47)(ts-node@10.9.2(@swc/core@1.3.96)(@types/node@22.8.4)(typescript@5.6.3)):
     dependencies:
@@ -13033,7 +13036,9 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  trix@2.1.7: {}
+  trix@2.1.9:
+    dependencies:
+      dompurify: 3.2.3
 
   ts-api-utils@1.3.0(typescript@5.6.3):
     dependencies:

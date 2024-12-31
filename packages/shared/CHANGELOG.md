@@ -1,5 +1,17 @@
 # @alova/shared
 
+## 1.1.2
+
+### Patch Changes
+
+- [#608](https://github.com/alovajs/alova/pull/608) [`9e95069`](https://github.com/alovajs/alova/commit/9e95069b0fee0e86edb750f4bd5ab2c60083bcaa) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix to only clone array and plain object in `deepClone`
+
+## 1.1.1
+
+### Patch Changes
+
+- [#602](https://github.com/alovajs/alova/pull/602) [`cf0b04a`](https://github.com/alovajs/alova/commit/cf0b04a82829c116232d487c046fec3c563f8a8e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - split response and cache data with different reference value
+
 ## 1.1.0
 
 ### Minor Changes
