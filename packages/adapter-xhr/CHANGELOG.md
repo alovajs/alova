@@ -1,5 +1,11 @@
 # @alova/adapter-xhr
 
+## 2.1.1
+
+### Patch Changes
+
+- [#623](https://github.com/alovajs/alova/pull/623) [`4a8a37f`](https://github.com/alovajs/alova/commit/4a8a37f083fca32f0371b37be0d59d2fc9a768fd) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: mark option type as optional.
+
 ## 2.1.0
 
 ### Minor Changes
