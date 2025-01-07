@@ -2,6 +2,7 @@ import { DefaultBodyType, delay, http, HttpResponse, passthrough, StrictRequest 
 import { setupServer } from 'msw/node';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { randomId } from './testUtils';
 
 // -------------------
 // 服务模拟
@@ -94,7 +95,8 @@ const mockServer = setupServer(
         requestHeaders: Object.fromEntries(request.headers.entries())
       }
     })
-  )
+  ),
+  http.get(`${baseURL}/unit-test-random`, () => HttpResponse.json({ id: randomId() }))
 );
 
 export default mockServer;

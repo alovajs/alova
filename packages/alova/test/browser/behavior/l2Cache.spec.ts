@@ -269,4 +269,24 @@ describe('l2cache cache data', () => {
     await Get2;
     expect(Get2.fromCache).toBeFalsy();
   });
+
+  test('should ignore l1Cache and l2Cache when forceRequest is true', async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+    const Get = () =>
+      alova.Get('/unit-test-random', {
+        cacheFor: {
+          expire: 100 * 1000,
+          mode: 'restore'
+        }
+      });
+
+    const result1 = await Get();
+    const result2 = await Get().send(false);
+    const result3 = await Get().send(true);
+
+    expect(result1).toStrictEqual(result2);
+    expect(result1).not.toStrictEqual(result3);
+  });
 });
