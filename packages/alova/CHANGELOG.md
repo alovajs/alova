@@ -1,5 +1,13 @@
 # alova
 
+## 3.2.8
+
+### Patch Changes
+
+- [#629](https://github.com/alovajs/alova/pull/629) [`55a9cc0`](https://github.com/alovajs/alova/commit/55a9cc06f262e708ce473e04f1c7b0a05143be79) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that mismatching cache when items clear in last page
+
+- [#627](https://github.com/alovajs/alova/pull/627) [`92e83a1`](https://github.com/alovajs/alova/commit/92e83a1e85a2a81fdaca945b18ea9ad4dcfe12e8) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: cannot force send request in restore cache mode
+
 ## 3.2.7
 
 ### Patch Changes
