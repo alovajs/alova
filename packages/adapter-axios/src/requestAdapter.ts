@@ -1,6 +1,6 @@
-import { noop, undefinedValue } from '@alova/shared';
+import { newInstance, noop, undefinedValue } from '@alova/shared';
 import type { ProgressUpdater } from 'alova';
-import axios, { AxiosResponseHeaders } from 'axios';
+import axios, { AxiosHeaders, AxiosResponseHeaders } from 'axios';
 import { AdapterCreateOptions, AxiosRequestAdapter } from '~/typings';
 
 /**
@@ -37,7 +37,7 @@ export default function requestAdapter(options: AdapterCreateOptions = {}) {
 
     return {
       response: () => responsePromise,
-      headers: () => responsePromise.then(res => res.headers as AxiosResponseHeaders),
+      headers: () => responsePromise.then(res => (res?.headers || newInstance(AxiosHeaders)) as AxiosResponseHeaders),
       abort: () => {
         controller.abort();
       },

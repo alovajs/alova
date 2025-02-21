@@ -1,6 +1,6 @@
 import { axiosRequestAdapter } from '@/index';
 import { createAlova } from 'alova';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosHeaders } from 'axios';
 import { readFileSync } from 'node:fs';
 import path from 'path';
 import { Result, delay } from 'root/testUtils';
@@ -248,5 +248,41 @@ describe('request adapter', () => {
       b: '2'
     });
     expect(data.data.path).toBe('/unit-test');
+  });
+
+  test('should return an empty axios header when receiving headers is falsy value', async () => {
+    const axiosInst = axios.create({
+      baseURL,
+      timeout: 5000
+    });
+    let mockResponse: any = null;
+    axiosInst.interceptors.response.use(() => mockResponse);
+
+    const alovaInst = createAlova({
+      requestAdapter: axiosRequestAdapter({
+        axios: axiosInst
+      })
+    });
+
+    const transformFn = vi.fn();
+    const Get = alovaInst.Get('/unit-test', {
+      params: {
+        a: '1',
+        b: '2'
+      },
+      transform(data: any, headers) {
+        transformFn(headers);
+        return data;
+      }
+    });
+
+    const data = await Get;
+    expect(data).toBeNull();
+    expect(transformFn).toHaveBeenLastCalledWith(new AxiosHeaders());
+
+    mockResponse = {};
+    const data2 = await Get;
+    expect(data2).toStrictEqual({});
+    expect(transformFn).toHaveBeenLastCalledWith(new AxiosHeaders());
   });
 });
