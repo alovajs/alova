@@ -37,7 +37,7 @@ export default function requestAdapter(options: AdapterCreateOptions = {}) {
 
     return {
       response: () => responsePromise,
-      headers: () => responsePromise.then(res => res.headers as AxiosResponseHeaders),
+      headers: () => responsePromise.then(res => res?.headers as AxiosResponseHeaders),
       abort: () => {
         controller.abort();
       },
