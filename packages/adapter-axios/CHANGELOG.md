@@ -1,5 +1,11 @@
 # @alova/adapter-axios
 
+## 2.0.13
+
+### Patch Changes
+
+- [#639](https://github.com/alovajs/alova/pull/639) [`0f20fbd`](https://github.com/alovajs/alova/commit/0f20fbd09004c9a707b02f1cf7525af6d7d9f784) Thanks [@Aaminly](https://github.com/Aaminly)! - to be compatible with falsy data by axios adapter
+
 ## 2.0.12
 
 ### Patch Changes
