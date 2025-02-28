@@ -20,6 +20,7 @@ import {
   isFn,
   len,
   mapItem,
+  promiseResolve,
   undefinedValue
 } from '@alova/shared';
 import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
@@ -118,7 +119,7 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
   const methodInstances = isArray(matcher) ? matcher : [matcher];
   const batchPromises = methodInstances.map(methodInstance => {
     const { id, l1Cache, l2Cache } = getContext(methodInstance);
-    const { c: controlled } = getLocalCacheConfigParam(methodInstance);
+    const { c: controlled, m: cacheMode } = getLocalCacheConfigParam(methodInstance);
     // don't invalidate cache when it's controlled cache.
     if (controlled) {
       return;
@@ -126,7 +127,7 @@ export const invalidateCache = async (matcher?: Method | Method[]) => {
     const methodKey = getMethodInternalKey(methodInstance);
     return PromiseCls.all([
       removeWithCacheAdapter(id, methodKey, l1Cache),
-      removeWithCacheAdapter(id, methodKey, l2Cache)
+      cacheMode === STORAGE_RESTORE ? removeWithCacheAdapter(id, methodKey, l2Cache) : promiseResolve()
     ]);
   });
   await PromiseCls.all(batchPromises);
