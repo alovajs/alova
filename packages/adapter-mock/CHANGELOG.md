@@ -1,5 +1,11 @@
 # @alova/mock
 
+## 2.0.12
+
+### Patch Changes
+
+- [#643](https://github.com/alovajs/alova/pull/643) [`672ff2f`](https://github.com/alovajs/alova/commit/672ff2f4a5aad005973185d2e4fb0ed71edc79d7) Thanks [@AprildreamMI](https://github.com/AprildreamMI)! - fix the array traversal after editing the prototype
+
 ## 2.0.11
 
 ### Patch Changes

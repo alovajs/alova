@@ -1,5 +1,11 @@
 # alova
 
+## 3.2.9
+
+### Patch Changes
+
+- [#644](https://github.com/alovajs/alova/pull/644) [`466f837`](https://github.com/alovajs/alova/commit/466f837a6ec7f61975ed7e8d37ca04c2bfeb3bbc) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - shouldn't check l2 cache in memory mode when invalidate cache
+
 ## 3.2.8
 
 ### Patch Changes
