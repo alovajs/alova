@@ -15,7 +15,7 @@
     "@nordhealth/css": "^3.3.1",
     "alova": "latest",
     "clsx": "^2.1.1",
-    "solid-js": "^1.8.19",
+    "solid-js": "^1.9.4",
     "trix": "^2.1.12"
   },
   "devDependencies": {
