@@ -1,5 +1,11 @@
 # alova
 
+## 3.2.10
+
+### Patch Changes
+
+- [#649](https://github.com/alovajs/alova/pull/649) [`68f6d16`](https://github.com/alovajs/alova/commit/68f6d167ce8264778dc6a121af09a72981dd506e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that l2Cache is not defined in `invalidateCache`
+
 ## 3.2.9
 
 ### Patch Changes
