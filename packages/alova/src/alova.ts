@@ -11,7 +11,7 @@ import {
   StatesHook
 } from '~/typings';
 import Method from './Method';
-import { localStorageAdapter, memoryAdapter } from './defaults/cacheAdapter';
+import { localStorageAdapter, memoryAdapter, placeholderAdapter } from './defaults/cacheAdapter';
 import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
 
@@ -59,7 +59,8 @@ export class Alova<AG extends AlovaGenerics> {
     instance.id = (options.id || (idCount += 1)).toString();
     // If storage is not specified, local storage is used by default.
     instance.l1Cache = options.l1Cache || memoryAdapter();
-    instance.l2Cache = options.l2Cache || localStorageAdapter();
+    instance.l2Cache =
+      options.l2Cache || (typeof localStorage !== 'undefined' ? localStorageAdapter() : placeholderAdapter());
 
     // Merge default options
     instance.options = {

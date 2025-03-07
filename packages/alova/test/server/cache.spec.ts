@@ -36,4 +36,13 @@ describe('cache data on server', () => {
     invalidateCache(GetRestore);
     expect(removeFn).toHaveBeenCalledTimes(1);
   });
+
+  test("shouldn't check l2 cache in memory mode when invalidate all cache", async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+
+    expect(alova).not.toBeUndefined();
+    invalidateCache();
+  });
 });
