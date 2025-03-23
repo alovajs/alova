@@ -474,4 +474,23 @@ describe('mock request', () => {
       .send();
     expect(data).toStrictEqual({ id: 1 });
   });
+
+  test('should return string data when post request data type is string', async () => {
+    const mocks = defineMock({
+      '[POST]/detail': ({ data }) => data
+    });
+    // Mock Data Request Adapter
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      onMockResponse({ body }) {
+        return {
+          response: body,
+          headers: {}
+        };
+      }
+    });
+    const data = await createAlova({ baseURL: 'http://xxx', requestAdapter: mockRequestAdapter })
+      .Post('/detail', 'hello')
+      .send();
+    expect(data).toBe('hello');
+  });
 });
