@@ -493,4 +493,23 @@ describe('mock request', () => {
       .send();
     expect(data).toBe('hello');
   });
+
+  test('should return json object when post request data is json string', async () => {
+    const mocks = defineMock({
+      '[POST]/detail': ({ data }) => data
+    });
+    // Mock Data Request Adapter
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      onMockResponse({ body }) {
+        return {
+          response: body,
+          headers: {}
+        };
+      }
+    });
+    const data = await createAlova({ baseURL: 'http://xxx', requestAdapter: mockRequestAdapter })
+      .Post('/detail', '{"key": "value"}')
+      .send();
+    expect(data).toStrictEqual({ key: 'value' });
+  });
 });
