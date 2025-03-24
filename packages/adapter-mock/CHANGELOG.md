@@ -1,5 +1,11 @@
 # @alova/mock
 
+## 2.0.13
+
+### Patch Changes
+
+- [#654](https://github.com/alovajs/alova/pull/654) [`95d3c28`](https://github.com/alovajs/alova/commit/95d3c284f9196db9c2332dc74da13d6bc66e3aae) Thanks [@Nakus0426](https://github.com/Nakus0426)! - compatible with json string post data
+
 ## 2.0.12
 
 ### Patch Changes
