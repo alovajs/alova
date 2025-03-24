@@ -8,7 +8,7 @@ export interface MockServerRequest {
   headers: Record<string, any>;
   query: Record<string, any>;
   params: Record<string, any>;
-  data: Record<string, any>;
+  data: any;
 }
 
 export interface ResponseHeaders {

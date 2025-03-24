@@ -134,7 +134,15 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
           ? mockDataRaw({
               query,
               params,
-              data: isString(data) || !data ? {} : data,
+              data: isString(data)
+                ? (() => {
+                    try {
+                      return JSON.parse(data);
+                    } catch {
+                      return data;
+                    }
+                  })()
+                : data || {},
               headers: requestHeaders
             })
           : mockDataRaw;
