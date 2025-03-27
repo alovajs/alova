@@ -372,16 +372,24 @@ export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => 
  * Build the complete url baseURL path url parameters complete url
  */
 export const buildCompletedURL = (baseURL: string, url: string, params: Record<string, any>) => {
-  // If the Base url ends with /, remove /
-  baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
-  // If it does not start with /or http protocol, you need to add /
+  // Check if the URL starts with http/https
+  const startsWithPrefix = /^https?:\/\//i.test(url);
 
-  // Compatible with some RESTful usage fix: https://github.com/alovajs/alova/issues/382
-  if (url !== '') {
-    url = url.match(/^(\/|https?:\/\/)/) ? url : `/${url}`;
+  if (!startsWithPrefix) {
+    // If the Base url ends with /, remove /
+    baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+    // If it does not start with /or http protocol, you need to add /
+
+    // Compatible with some RESTful usage fix: https://github.com/alovajs/alova/issues/382
+    if (url !== '') {
+      // Since absolute URLs (http/https) are handled above,
+      // we only need to ensure relative URLs start with a forward slash
+      url = url.startsWith('/') ? url : `/${url}`;
+    }
   }
 
-  const completeURL = baseURL + url;
+  // fix: https://github.com/alovajs/alova/issues/653
+  const completeURL = startsWithPrefix ? url : baseURL + url;
 
   // Convert params object to get string
   // Filter out those whose value is undefined
