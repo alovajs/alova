@@ -4,6 +4,52 @@ import { delay, untilCbCalled, untilReject } from 'root/testUtils';
 
 declare const isSSR: boolean;
 describe('mock request', () => {
+  test('should receive response body and headers defaults', async () => {
+    const mocks = defineMock({
+      '/unit-test': () => ({
+        id: 0
+      }),
+      '[GET]/unit-test-with-headers': () => ({
+        body: {
+          id: 1
+        },
+        responseHeaders: {
+          'normal-header': 'value',
+          'special-header': 'multi line',
+          'empty-header': ''
+        },
+        status: 200,
+        statusText: 'ok'
+      })
+    });
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      mockRequestLogger: false
+    });
+    const alovaInst = createAlova({
+      baseURL: 'http://xxx',
+      requestAdapter: mockRequestAdapter
+    });
+
+    const response = await alovaInst.Get<Response>('/unit-test');
+    expect(response).toBeInstanceOf(Response);
+    expect(await response.json()).toStrictEqual({ id: 0 });
+    expect(response.headers.get('normal-header')).toBeNull();
+
+    const response2 = await alovaInst.Get('unit-test-with-headers', {
+      transform(data: Response, headers) {
+        const typedHeaders = headers as Headers;
+        expect(typedHeaders.get('normal-header')).toBe('value');
+        expect(typedHeaders.get('special-header')).toBe('multi line');
+        expect(typedHeaders.get('empty-header')).toBe('');
+        return data;
+      }
+    });
+    expect(await response2.json()).toStrictEqual({ id: 1 });
+    expect(response2.headers.get('normal-header')).toBe('value');
+    expect(response2.headers.get('special-header')).toBe('multi line');
+    expect(response2.headers.get('empty-header')).toBe('');
+  });
+
   test('response with plain body data', async () => {
     const mockApi = vi.fn();
     const mocks = defineMock({
