@@ -56,3 +56,5 @@ export const expectType = <T>(value: T) => {};
 export const expectTrue = <T extends true>() => {};
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const expectAssignableBy = <T, T2 extends T = T>(value: T2) => {};
+
+export const randomId = () => Math.random().toString(36).slice(2);

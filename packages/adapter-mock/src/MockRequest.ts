@@ -79,7 +79,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
 
       // Determine whether the path matches by matching with the same subscript
       // If a wildcard is encountered, pass it directly
-      for (const i in keySplited) {
+      for (let i = 0; i < keySplited.length; i += 1) {
         const keySplitedItem = keySplited[i];
         const matchedParamKey = (keySplitedItem.match(/^\{(.*)\}$/) || ['', ''])[1];
         if (!matchedParamKey) {
@@ -134,7 +134,15 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
           ? mockDataRaw({
               query,
               params,
-              data: isString(data) || !data ? {} : data,
+              data: isString(data)
+                ? (() => {
+                    try {
+                      return JSON.parse(data);
+                    } catch {
+                      return data;
+                    }
+                  })()
+                : data || {},
               headers: requestHeaders
             })
           : mockDataRaw;

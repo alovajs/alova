@@ -74,7 +74,7 @@ export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Me
         : getWithCacheAdapter(id, methodKey, l1Cache));
 
     // If it is storage restore mode and there is no data in the cache, the persistent data needs to be restored to the cache, and the cached expiration time must be used.
-    if (cacheMode === STORAGE_RESTORE && !cachedResponse) {
+    if (cacheMode === STORAGE_RESTORE && !cachedResponse && !forceRequest) {
       const rawL2CacheData = await getRawWithCacheAdapter(id, methodKey, l2Cache, tag);
       if (rawL2CacheData) {
         const [l2Response, l2ExpireMilliseconds] = rawL2CacheData;

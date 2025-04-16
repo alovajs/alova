@@ -1,5 +1,25 @@
 # alova
 
+## 3.2.10
+
+### Patch Changes
+
+- [#649](https://github.com/alovajs/alova/pull/649) [`68f6d16`](https://github.com/alovajs/alova/commit/68f6d167ce8264778dc6a121af09a72981dd506e) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that l2Cache is not defined in `invalidateCache`
+
+## 3.2.9
+
+### Patch Changes
+
+- [#644](https://github.com/alovajs/alova/pull/644) [`466f837`](https://github.com/alovajs/alova/commit/466f837a6ec7f61975ed7e8d37ca04c2bfeb3bbc) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - shouldn't check l2 cache in memory mode when invalidate cache
+
+## 3.2.8
+
+### Patch Changes
+
+- [#629](https://github.com/alovajs/alova/pull/629) [`55a9cc0`](https://github.com/alovajs/alova/commit/55a9cc06f262e708ce473e04f1c7b0a05143be79) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that mismatching cache when items clear in last page
+
+- [#627](https://github.com/alovajs/alova/pull/627) [`92e83a1`](https://github.com/alovajs/alova/commit/92e83a1e85a2a81fdaca945b18ea9ad4dcfe12e8) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: cannot force send request in restore cache mode
+
 ## 3.2.7
 
 ### Patch Changes

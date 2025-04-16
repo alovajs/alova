@@ -20,9 +20,6 @@ describe('createAlova', () => {
     expect(() => {
       alova.l2Cache.remove('1');
     }).toThrow(errorTips);
-    expect(() => {
-      alova.l2Cache.clear();
-    }).toThrow(errorTips);
   });
 
   test('cache logger in server', async () => {

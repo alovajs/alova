@@ -89,7 +89,7 @@ interface CacheEvent {
 }
 export interface AlovaDefaultCacheAdapter extends AlovaGlobalCacheAdapter {
   /**
-   * the events related to cache operating emitter.
+   * the events related to cache action emitter.
    */
   readonly emitter: EventManager<{ success: CacheEvent; fail: Omit<CacheEvent, 'value'> }>;
 }

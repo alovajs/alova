@@ -13,7 +13,7 @@
     "@nordhealth/components": "^3.18.2",
     "@nordhealth/css": "^3.3.1",
     "alova": "latest",
-    "trix": "^2.1.9",
+    "trix": "^2.1.12",
     "vue": "^3.5.12"
   },
   "devDependencies": {
@@ -22,6 +22,6 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
-    "vite": "^5.4.10"
+    "vite": "^5.4.12"
   }
 }

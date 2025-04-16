@@ -192,26 +192,24 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       isNextPage = falseValue
     } = payload;
 
-    const { e: expireMilliseconds } = getLocalCacheConfigParam(fetchMethod);
-    // If the cache time is less than or equal to the current time, it means that the cache is not set and the data will no longer be pre-pulled at this time.
-    // Or there is already a cache and it is not pre-fetched.
-    if (expireMilliseconds(MEMORY) <= getTime()) {
-      return falseValue;
-    }
-    if (forceRequest) {
-      return trueValue;
-    }
-    if (await queryCache(fetchMethod)) {
-      return falseValue;
-    }
-
     const pageCountVal = pageCount.v;
     const exceedPageCount = pageCountVal
       ? preloadPage > pageCountVal
       : isNextPage // If it is judged to preload the next page of data and there is no page count, it is judged by whether the data volume of the last page reaches the page size.
         ? len(listDataGetter(rawData)) < pageSize.v
         : falseValue;
-    return preloadPage > 0 && !exceedPageCount;
+    const isMatchPageScope = preloadPage > 0 && !exceedPageCount;
+
+    if (!isMatchPageScope) {
+      return falseValue;
+    }
+
+    const { e: expireMilliseconds } = getLocalCacheConfigParam(fetchMethod);
+    const hasCache = await queryCache(fetchMethod);
+
+    // If the cache time is less than or equal to the current time, it means that the cache is not set and the data will no longer be pre-pulled at this time.
+    // Or there is already a cache and it is not pre-fetched.
+    return expireMilliseconds(MEMORY) <= getTime() ? falseValue : forceRequest || !hasCache;
   };
 
   // Preload next page data
@@ -425,7 +423,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     // cache invalidation
     await invalidatePaginationCache();
 
-    // When the amount of data on the next page does not exceed the page size, the next page is forced to be requested. Because there is a request for sharing, the pull operation needs to be performed asynchronously after interrupting the request.
+    // When the amount of data on the next page does not exceed the page size, the next page is forced to be requested. Because there is a request for sharing, the fetching needs to be performed asynchronously after interrupting the request.
     const snapshotItem = getSnapshotMethods(page.v + 1);
     if (snapshotItem) {
       const cachedListData = listDataGetter((await queryCache(snapshotItem.entity)) || {}) || [];
@@ -528,14 +526,14 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
 
       const isLastPageVal = isLastPage.v;
       const fillingItemsLen = len(fillingItems);
+      let isLastEmptyPageInNonAppendMode = false;
       if (fillingItemsLen > 0 || isLastPageVal) {
         // Delete data at the specified index
         const newListData = filterItem(data.v, (_, index) => !includes(indexes, index));
 
         // In page turning mode, if it is the last page and all items have been deleted, then turn one page forward.
-        if (!append && isLastPageVal && len(newListData) <= 0) {
-          page.v = pageVal - 1;
-        } else if (fillingItemsLen > 0) {
+        isLastEmptyPageInNonAppendMode = !append && isLastPageVal && len(newListData) <= 0;
+        if (!isLastEmptyPageInNonAppendMode && fillingItemsLen > 0) {
           pushItem(newListData, ...fillingItems);
         }
         data.v = newListData;
@@ -546,7 +544,11 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
 
       updateTotal(-len(indexes));
       // The cache of the current page is updated synchronously
-      return updateCurrentPageCache();
+      return updateCurrentPageCache().then(() => {
+        if (isLastEmptyPageInNonAppendMode) {
+          page.v = pageVal - 1;
+        }
+      });
     });
   };
   /**
