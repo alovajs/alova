@@ -25,7 +25,7 @@ afterAll(() => {
   server.close();
 });
 
-type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
+type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<any, AG, any>;
 
 /**
  * Prepare the Alova instance environment and start monitoring the SSE server
@@ -669,6 +669,52 @@ describe('react => useSSE', () => {
         expect(mockResponseFn).not.toHaveBeenCalled();
         expect(mockResponseErrorFn).not.toHaveBeenCalled();
         expect(mockResponseCompleteFn).not.toHaveBeenCalled();
+      },
+      { timeout: 4000 }
+    );
+  });
+
+  test('should support chained event handlers', async () => {
+    const alovaInst = await prepareAlova();
+    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const testData = 'test-data';
+
+    const mockOpenFn = vi.fn();
+    const mockMessageFn = vi.fn();
+    const mockErrorFn = vi.fn();
+    const mockCustomFn = vi.fn();
+
+    const Page = () => {
+      const exposure = useSSE(poster, { immediate: true });
+      const { data, readyState } = exposure;
+
+      // 链式调用事件处理函数
+      exposure.onOpen(mockOpenFn).onMessage(mockMessageFn).onError(mockErrorFn).on('message', mockCustomFn);
+
+      return (
+        <div>
+          <span role="status">
+            {readyState === SSEHookReadyState.OPEN
+              ? 'opened'
+              : readyState === SSEHookReadyState.CLOSED
+                ? 'closed'
+                : 'connecting'}
+          </span>
+          <span role="data">{data}</span>
+        </div>
+      );
+    };
+
+    render(<Page />);
+    await screen.findByText(/opened/);
+    expect(mockOpenFn).toHaveBeenCalled();
+
+    await serverSend(testData);
+    await waitFor(
+      () => {
+        expect(mockMessageFn).toHaveBeenCalled();
+        expect(mockCustomFn).toHaveBeenCalled();
+        expect(screen.getByRole('data')).toHaveTextContent(testData);
       },
       { timeout: 4000 }
     );

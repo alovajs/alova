@@ -28,7 +28,7 @@ import {
   hitCacheBySource,
   promiseStatesHook
 } from 'alova';
-import { AlovaMethodHandler, SSEHookConfig, SSEOn } from '~/typings/clienthook';
+import { AlovaMethodHandler, SSEHookConfig } from '~/typings/clienthook';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
@@ -41,11 +41,11 @@ export const enum SSEHookReadyState {
 
 export type SSEEvents<Data, AG extends AlovaGenerics, Args extends any[]> = {
   [SSEOpenEventKey]: AlovaSSEEvent<AG, Args>;
-  [SSEMessageEventKey]: AlovaSSEMessageEvent<AG, Data, Args>;
+  [SSEMessageEventKey]: AlovaSSEMessageEvent<Data, AG, Args>;
   [SSEErrorEventKey]: AlovaSSEErrorEvent<AG, Args>;
 };
 
-type AnySSEEventType<Data, AG extends AlovaGenerics, Args extends any[]> = AlovaSSEMessageEvent<AG, Data, Args> &
+type AnySSEEventType<Data, AG extends AlovaGenerics, Args extends any[]> = AlovaSSEMessageEvent<Data, AG, Args> &
   AlovaSSEErrorEvent<AG, Args> &
   AlovaSSEEvent<AG, Args>;
 
@@ -92,7 +92,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
   const onOpen = (handler: (event: AlovaSSEEvent<AG, Args>) => void) => {
     eventManager.on(SSEOpenEventKey, handler);
   };
-  const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<AG, Data, Args>) => void) => {
+  const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<Data, AG, Args>) => void) => {
     eventManager.on(SSEMessageEventKey, handler);
   };
   const onError = (handler: (event: AlovaSSEErrorEvent<AG, Args>) => void) => {
@@ -198,7 +198,10 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   // * MARK: Event handling of EventSource
 
-  const onCustomEvent: SSEOn<AG, Args> = (eventName, callbackHandler) => {
+  const onCustomEvent = <T = AG['Responded']>(
+    eventName: string,
+    callbackHandler: (event: AlovaSSEMessageEvent<T, AG, Args>) => void
+  ) => {
     const currentMap = customEventMap.current;
     if (!currentMap.has(eventName)) {
       const useCallbackObject = useCallback<(event: AlovaSSEEvent<AG, Args>) => void>(callbacks => {
