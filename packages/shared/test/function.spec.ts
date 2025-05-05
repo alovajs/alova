@@ -672,6 +672,10 @@ describe('shared functions', () => {
     });
     expect(result).toBe('http://example.com/api?special char=test space&chinese=中文');
 
+    // should handle string parameters
+    result = buildCompletedURL('http://example.com', '/api', 'param1=a&param2=b');
+    expect(result).toBe('http://example.com/api?param1=a&param2=b');
+
     // should handle URLs with encoded characters
     result = buildCompletedURL('http://example.com', 'api/users%20space', {});
     expect(result).toBe('http://example.com/api/users%20space');

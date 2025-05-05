@@ -1,4 +1,4 @@
-import type { CacheExpire, CacheMode } from '../../alova/typings';
+import type { CacheExpire, CacheMode, MethodRequestConfig } from '../../alova/typings';
 import type { BackoffPolicy, GeneralFn, UsePromiseExposure } from './types';
 import {
   JSONStringify,
@@ -371,7 +371,7 @@ export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => 
 /**
  * Build the complete url baseURL path url parameters complete url
  */
-export const buildCompletedURL = (baseURL: string, url: string, params: Record<string, any>) => {
+export const buildCompletedURL = (baseURL: string, url: string, params: MethodRequestConfig['params']) => {
   // Check if the URL starts with http/https
   const startsWithPrefix = /^https?:\/\//i.test(url);
 
@@ -393,10 +393,12 @@ export const buildCompletedURL = (baseURL: string, url: string, params: Record<s
 
   // Convert params object to get string
   // Filter out those whose value is undefined
-  const paramsStr = mapItem(
-    filterItem(objectKeys(params), key => params[key] !== undefinedValue),
-    key => `${key}=${params[key]}`
-  ).join('&');
+  const paramsStr = isString(params)
+    ? params
+    : mapItem(
+        filterItem(objectKeys(params), key => params[key] !== undefinedValue),
+        key => `${key}=${params[key]}`
+      ).join('&');
   // Splice the get parameters behind the url. Note that the url may already have parameters.
   return paramsStr
     ? +completeURL.includes('?')

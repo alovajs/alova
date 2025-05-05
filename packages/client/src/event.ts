@@ -1,3 +1,4 @@
+import { trueValue } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import {
   AlovaEvent,
@@ -16,6 +17,7 @@ import {
   SQHookBehavior,
   SilentMethod
 } from '~/typings/clienthook';
+import EventSourceFetch from './hooks/sse/FetchEventSource';
 
 // base event
 export class AlovaEventBase<AG extends AlovaGenerics, Args extends any[]> implements AlovaEvent<AG, Args> {
@@ -84,11 +86,47 @@ export class AlovaCompleteEvent<AG extends AlovaGenerics, Args extends any[]> ex
   }
 }
 
+interface EventSourceFetchEventInit {
+  /** Event type */
+  type: string;
+  /** Event data */
+  data: string;
+  /** Last event ID */
+  lastEventId: string;
+  /** Origin of the event */
+  origin?: string;
+  /** Error object (for error events) */
+  error?: Error;
+}
+
+export class EventSourceFetchEvent extends Event {
+  /** Event data */
+  readonly data: string;
+  /** Last event ID */
+  readonly lastEventId: string;
+  /** Origin of the event */
+  readonly origin: string;
+  /** Error object (for error events) */
+  readonly error?: Error;
+
+  constructor(type: string, eventInitDict: EventSourceFetchEventInit) {
+    super(type, {
+      bubbles: trueValue,
+      cancelable: trueValue,
+      composed: trueValue
+    });
+    this.data = eventInitDict.data;
+    this.lastEventId = eventInitDict.lastEventId;
+    this.origin = eventInitDict.origin || '';
+    this.error = eventInitDict.error;
+  }
+}
+
 // extend event
 export class AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEventBase<AG, Args> {
-  eventSource: EventSource; // EventSource instance
+  eventSource: EventSourceFetch; // EventSourceFetch instance
 
-  constructor(base: AlovaEventBase<AG, Args>, eventSource: EventSource) {
+  constructor(base: AlovaEventBase<AG, Args>, eventSource: EventSourceFetch) {
     super(base.method, base.args);
     this.eventSource = eventSource;
   }

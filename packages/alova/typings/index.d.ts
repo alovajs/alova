@@ -44,7 +44,21 @@ export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader> = (
   abort: () => void;
 };
 
-export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
+export type MethodType =
+  | 'GET'
+  | 'get'
+  | 'POST'
+  | 'post'
+  | 'PUT'
+  | 'put'
+  | 'DELETE'
+  | 'delete'
+  | 'HEAD'
+  | 'head'
+  | 'OPTIONS'
+  | 'options'
+  | 'PATCH'
+  | 'patch';
 
 /**
  * provide user to custom some types
@@ -119,8 +133,9 @@ export type CacheController<Responded> = () => Responded | undefined | Promise<R
 export interface MethodRequestConfig {
   /**
    * url parameters
+   * if set to a string, it will be automatically added to query string.
    */
-  params: Arg;
+  params: Arg | string;
 
   /**
    * Request header
@@ -604,12 +619,25 @@ export type RespondedAlovaGenerics<AG extends AlovaGenerics, Responded, Transfor
   Transformed: Transformed;
 };
 
+export type AlovaMethodCommonConfig<AG extends AlovaGenerics, Responded, Transformed> = AlovaMethodCreateConfig<
+  AG,
+  Responded,
+  Transformed
+> & {
+  url: string;
+  method?: MethodType;
+  data?: RequestBody;
+};
+
 export interface Alova<AG extends AlovaGenerics> {
   id: string;
   options: AlovaOptions<AG>;
   l1Cache: AG['L1Cache'];
   l2Cache: AG['L2Cache'];
   snapshots: MethodSnapshotContainer<AG>;
+  Request<Responded = unknown, Transformed = unknown>(
+    config: AlovaMethodCommonConfig<AG, Responded, Transformed>
+  ): Method<RespondedAlovaGenerics<AG, Responded, Transformed>>;
   Get<Responded = unknown, Transformed = unknown>(
     url: string,
     config?: AlovaMethodCreateConfig<AG, Responded, Transformed>

@@ -114,6 +114,8 @@ declare class FrameworkState<Data, Key extends string> extends FrameworkReadable
   get v(): Data;
 }
 
+type Arg = Record<string, any>;
+
 /**
  * Request cache settings
  * expire: expiration time
@@ -123,6 +125,18 @@ declare class FrameworkState<Data, Key extends string> extends FrameworkReadable
  */
 type CacheExpire = number | Date | null;
 type CacheMode = 'memory' | 'restore';
+interface MethodRequestConfig {
+  /**
+   * url parameters
+   * if set to a string, it will be automatically added to query string.
+   */
+  params: Arg | string;
+
+  /**
+   * Request header
+   */
+  headers: Arg;
+}
 
 /**
  * Empty function for compatibility processing
@@ -364,7 +378,7 @@ declare const delayWithBackoff: (backoff: BackoffPolicy, retryTimes: number) => 
 /**
  * Build the complete url baseURL path url parameters complete url
  */
-declare const buildCompletedURL: (baseURL: string, url: string, params: Record<string, any>) => string;
+declare const buildCompletedURL: (baseURL: string, url: string, params: MethodRequestConfig['params']) => string;
 /**
  * Deep clone an object.
  *

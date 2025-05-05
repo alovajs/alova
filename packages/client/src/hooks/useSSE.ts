@@ -1,4 +1,10 @@
-import { AlovaEventBase, AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '@/event';
+import {
+  AlovaEventBase,
+  AlovaSSEErrorEvent,
+  AlovaSSEEvent,
+  AlovaSSEMessageEvent,
+  EventSourceFetchEvent
+} from '@/event';
 import { getHandlerMethod, statesHookHelper, throwFn, useCallback } from '@/util/helper';
 import {
   $self,
@@ -29,6 +35,7 @@ import {
   promiseStatesHook
 } from 'alova';
 import { AlovaMethodHandler, SSEHookConfig, SSEOn } from '~/typings/clienthook';
+import EventSourceFetch from './sse/FetchEventSource';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
@@ -76,7 +83,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
   const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper<AG>(promiseStatesHook());
 
   const usingArgs = ref<[...Args, ...any[]]>([] as any);
-  const eventSource = ref<EventSource | undefined>(undefinedValue);
+  const eventSource = ref<EventSourceFetch | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
   const data = create(initialData as Data, 'data');
@@ -247,7 +254,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     sendPromiseObject.current?.resolve();
   });
 
-  const esMessage = memorize((event: MessageEvent<any>) => {
+  const esMessage = memorize((event: EventSourceFetchEvent) => {
     promiseThen(
       createSSEEvent(MessageType.Message, Promise.resolve(event.data)),
       sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
@@ -312,7 +319,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     const fullURL = buildCompletedURL(baseURL, url, params);
 
     // Establish connection
-    es = new EventSource(fullURL, { withCredentials });
+    es = new EventSourceFetch(fullURL, { withCredentials });
     eventSource.current = es;
     readyState.v = SSEHookReadyState.CONNECTING;
     // * MARK: Register to handle events
