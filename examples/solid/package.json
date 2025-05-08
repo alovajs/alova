@@ -16,7 +16,7 @@
     "alova": "latest",
     "clsx": "^2.1.1",
     "solid-js": "^1.9.4",
-    "trix": "^2.1.12"
+    "trix": "^2.1.15"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

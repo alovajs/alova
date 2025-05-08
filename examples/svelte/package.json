@@ -15,7 +15,7 @@
     "alova": "latest",
     "clsx": "^2.1.1",
     "svelte": "^4.2.19",
-    "trix": "^2.1.12"
+    "trix": "^2.1.15"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
