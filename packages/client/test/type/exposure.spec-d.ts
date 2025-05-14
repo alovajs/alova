@@ -1,7 +1,8 @@
 import { createAlova } from 'alova';
-import { usePagination, useRequest } from 'alova/client';
+import { usePagination, useRequest, useSSE } from 'alova/client';
 import vueHook from 'alova/vue';
 import { Ref } from 'vue';
+import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent } from '../../typings/clienthook/hooks/useSSE';
 
 const emptyRequestAdapter = () => ({
   response: () => Promise.resolve({}),
@@ -49,6 +50,31 @@ describe('hook exposure', () => {
         .onSuccess(() => {})
         .onSuccess(() => {})
         .onSuccess(() => {})
+    );
+  });
+
+  test('useSSE', () => {
+    const sseExposure = useSSE(Getter<number>, {
+      immediate: false
+    });
+    type SSEExposure = typeof sseExposure;
+
+    assertType<Ref<number>>(sseExposure.data);
+    assertType<Ref<EventSource | undefined>>(sseExposure.eventSource);
+    assertType<Ref<0 | 1 | 2>>(sseExposure.readyState);
+
+    // 测试事件处理函数
+    assertType<SSEExposure>(sseExposure.onOpen((_event: AlovaSSEEvent<any>) => {}));
+    assertType<SSEExposure>(sseExposure.onMessage((_event: AlovaSSEMessageEvent<number, any>) => {}));
+    assertType<SSEExposure>(sseExposure.onError((_event: AlovaSSEErrorEvent<any>) => {}));
+
+    // 测试链式调用
+    assertType<SSEExposure>(
+      sseExposure
+        .onOpen(() => {})
+        .onMessage(() => {})
+        .onError(() => {})
+        .on('customEvent', () => {})
     );
   });
 });

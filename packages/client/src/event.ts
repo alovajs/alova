@@ -103,7 +103,7 @@ export class AlovaSSEErrorEvent<AG extends AlovaGenerics, Args extends any[] = a
   }
 }
 
-export class AlovaSSEMessageEvent<AG extends AlovaGenerics, Data, Args extends any[] = any[]> extends AlovaSSEEvent<
+export class AlovaSSEMessageEvent<Data, AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaSSEEvent<
   AG,
   Args
 > {

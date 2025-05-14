@@ -24,10 +24,6 @@ export type SSEOnMessageTrigger<Data, AG extends AlovaGenerics, Args extends any
 export type SSEOnErrorTrigger<AG extends AlovaGenerics, Args extends any[] = any[]> = (
   event: AlovaSSEErrorEvent<AG, Args>
 ) => void;
-export type SSEOn<AG extends AlovaGenerics, Args extends any[] = any[]> = <Data = any>(
-  eventName: string,
-  handler: (event: AlovaSSEMessageEvent<Data, AG, Args>) => void
-) => () => void;
 
 /**
  *  useSSE() configuration item
@@ -66,9 +62,9 @@ export interface SSEHookConfig {
 /**
  * useSSE() return type
  */
-export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] = any[]> {
+export interface SSEExposure<AG extends AlovaGenerics, Args extends any[] = any[]> {
   readyState: ExportedState<SSEHookReadyState, AG['StatesExport']>;
-  data: ExportedState<Data | undefined, AG['StatesExport']>;
+  data: ExportedState<AG['Responded'], AG['StatesExport']>;
   eventSource: ExportedState<EventSource | undefined, AG['StatesExport']>;
   /**
    * Make the request manually. This method is automatically triggered when using `immediate: true`
@@ -91,7 +87,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
    * @param callback callback function
    * @returns Unregister function
    */
-  onMessage<T = Data>(callback: SSEOnMessageTrigger<T, AG, Args>): this;
+  onMessage<T = AG['Responded']>(callback: SSEOnMessageTrigger<T, AG, Args>): this;
 
   /**
    * Register the callback function for EventSource error
@@ -104,7 +100,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
    * @param eventName Event name, default exists `open` | `error` | `message`
    * @param handler event handler
    */
-  on: SSEOn<AG>;
+  on<T = AG['Responded']>(eventName: string, handler: (event: AlovaSSEMessageEvent<T, AG, Args>) => void): this;
 }
 
 /**
@@ -116,7 +112,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
  * @param config Configuration parameters
  * @return useSSE related data and operation functions
  */
-export declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+export declare function useSSE<AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: SSEHookConfig
-): SSEExposure<AG, Data, Args>;
+): SSEExposure<AG, Args>;
