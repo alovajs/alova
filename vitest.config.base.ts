@@ -3,7 +3,7 @@ import { defineProject } from 'vitest/config';
 
 export default defineProject({
   test: {
-    include: ['**/*.{test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)'],
+    include: ['**/*.{test,spec}.?(c|m)[jt]s?(x)'],
     alias: {
       '~': process.cwd(),
       '#': resolve(process.cwd(), 'test'),
@@ -12,6 +12,11 @@ export default defineProject({
     },
     environment: 'jsdom',
     setupFiles: [resolve(__dirname, 'internal/vitest.setup.ts')],
-    globals: true
+    globals: true,
+    typecheck: {
+      include: ['**/*.{test-d,spec-d}.ts?(x)'],
+      enabled: true,
+      ignoreSourceErrors: true
+    }
   }
 });

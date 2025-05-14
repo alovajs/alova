@@ -20,7 +20,10 @@ export default mergeConfig(
     test: {
       name: '[SSR]client',
       environment: 'node',
-      include: ['test/ssr/**/*.{test,spec}.ts(x)?']
+      include: ['test/ssr/**/*.{test,spec}.ts(x)?'],
+      typecheck: {
+        enabled: false
+      }
     }
   })
 );
