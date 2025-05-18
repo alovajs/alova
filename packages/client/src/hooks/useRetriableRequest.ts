@@ -32,7 +32,7 @@ export type RetriableEvents<AG extends AlovaGenerics, Args extends any[]> = {
 type RetryHandler<AG extends AlovaGenerics, Args extends any[]> = (event: RetriableRetryEvent<AG, Args>) => void;
 type FailHandler<AG extends AlovaGenerics, Args extends any[]> = (event: RetriableFailEvent<AG, Args>) => void;
 const hookPrefix = 'useRetriableRequest';
-const assert = createAssert(hookPrefix);
+const assert: ReturnType<typeof createAssert> = createAssert(hookPrefix);
 export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: RetriableHookConfig<AG, Args> = {}

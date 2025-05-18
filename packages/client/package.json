@@ -42,11 +42,10 @@
     "@alova/shared": "workspace:*"
   },
   "devDependencies": {
+    "@alova/adapter-xhr": "workspace:*",
     "@alova/mock": "workspace:*",
     "@alova/scripts": "workspace:*",
-    "@types/eventsource": "^1.1.15",
-    "alova": "workspace:*",
-    "eventsource": "^2.0.2"
+    "alova": "workspace:*"
   },
   "config": {
     "commitizen": {

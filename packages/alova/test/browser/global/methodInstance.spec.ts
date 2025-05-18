@@ -51,7 +51,7 @@ describe('method instance', () => {
   test('the params can be set with string', async () => {
     const alova = getAlovaInstance({
       beforeRequestExpect(methodInstance) {
-        expect(methodInstance.config.params).toBeInstanceOf(String);
+        expect(methodInstance.config.params).toBeTypeOf('string');
       },
       responseExpect: r => r.json()
     });

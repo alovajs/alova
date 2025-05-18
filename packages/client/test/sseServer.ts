@@ -1,6 +1,6 @@
 import http from 'http';
 
-let replyList: http.ServerResponse[] = [];
+let replyList: { req: http.IncomingMessage; res: http.ServerResponse }[] = [];
 
 function wrapData(event: string, data: string) {
   return [`event: ${event}`, `data: ${data}`, '\n'].join('\n');
@@ -12,7 +12,7 @@ export const IntervalMessage = 'interval-message';
 
 export const server = http.createServer((req, res) => {
   req.on('close', () => {
-    replyList = replyList.filter(e => e !== res);
+    replyList = replyList.filter(e => e.res !== res);
   });
 
   const path = `.${req.url}`;
@@ -30,7 +30,7 @@ export const server = http.createServer((req, res) => {
   }
 
   if (path === `./${TriggerEventName}`) {
-    replyList.push(res);
+    replyList.push({ req, res });
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
@@ -64,6 +64,32 @@ export const server = http.createServer((req, res) => {
   }
 });
 
-export async function send(data: string) {
-  return Promise.all(replyList.map(e => e.write(wrapData('message', data))));
+/**
+ * reply message from server
+ * @param data response data, if not provided, will reply the request data
+ */
+export async function send(data?: string) {
+  const responsePromises = replyList.map(async ({ req, res }) => {
+    if (!data) {
+      data = await new Promise<string>(resolve => {
+        let body = '';
+        req.on('data', chunk => {
+          body += chunk.toString();
+        });
+        req.on('end', () => {
+          resolve(
+            JSON.stringify({
+              url: req.url,
+              method: req.method,
+              headers: req.headers,
+              body: JSON.parse(body)
+            })
+          );
+        });
+      });
+    }
+
+    res.write(wrapData('message', data));
+  });
+  await Promise.all(responsePromises);
 }

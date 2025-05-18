@@ -53,7 +53,7 @@ export const isString = (arg: any): arg is string => typeOf(arg) === 'string';
  * Determine whether the parameter is an object any parameter
  * @returns Whether the parameter is an object
  */
-export const isObject = <T = any>(arg: any): arg is T => arg !== nullValue && typeOf(arg) === 'object';
+export const isObject = (arg: any): arg is Record<any, unknown> => arg !== nullValue && typeOf(arg) === 'object';
 /**
  * Global toString any parameter stringified parameters
  */
@@ -273,7 +273,7 @@ export const createAsyncQueue = (catchError = falseValue) => {
   let executing = false;
 
   const executeQueue = async () => {
-    executing = true;
+    executing = trueValue;
     while (len(queue) > 0) {
       const asyncFunc = shift(queue);
       if (asyncFunc) {
@@ -281,7 +281,7 @@ export const createAsyncQueue = (catchError = falseValue) => {
       }
     }
     completedHandler && completedHandler();
-    executing = false;
+    executing = falseValue;
   };
   const addQueue = <T>(asyncFunc: AsyncFunction<T>): Promise<T> =>
     newInstance(PromiseCls<T>, (resolve, reject) => {

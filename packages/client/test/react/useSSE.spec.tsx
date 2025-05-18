@@ -1,20 +1,18 @@
-import { AlovaSSEMessageEvent } from '@/event';
+import { AlovaSSEMessageEvent } from '@/hooks/sse/event';
 import { useSSE } from '@/index';
 import ReactHook from '@/statesHook/react';
 import { undefinedValue } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import ES from 'eventsource';
 import { AddressInfo } from 'net';
 import { delay } from 'root/testUtils';
 import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
 
-import { SSEHookReadyState } from '@/hooks/useSSE';
+import { SSEHookReadyState } from '@/hooks/sse/useSSE';
 import mockServer from 'root/mockServer';
 import { getAlovaInstance } from '../utils';
 
-Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
 let port = 0;
 beforeAll(() => {
   port = (server.listen().address() as AddressInfo).port;
@@ -42,7 +40,7 @@ describe('react => useSSE', () => {
   // ! No initial data, do not send request immediately
   test('should default not request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${IntervalEventName}`, data);
+    const poster = (data: any) => alovaInst.Get<string>(`/${IntervalEventName}`, data);
 
     let recv = undefinedValue;
     const mockOpenFn = vi.fn();
@@ -109,7 +107,7 @@ describe('react => useSSE', () => {
   // ! There is initial data and the request is not sent immediately
   test('should get the initial data and NOT send request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const poster = (data: any) => alovaInst.Get<string>(`/${TriggerEventName}`, data);
     const initialData = 'initial-data';
     const testDataA = 'test-data-1';
     const testDataB = 'test-data-2';
@@ -187,7 +185,7 @@ describe('react => useSSE', () => {
   // ! With initial data, send the request immediately
   test('should get the initial data and send request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const poster = (data: any) => alovaInst.Get<string>(`/${TriggerEventName}`, data);
     const initialData = 'initial-data';
     const testDataA = 'test-data-1';
 
@@ -239,7 +237,7 @@ describe('react => useSSE', () => {
   // !Test reconnect after closing
   test('should not trigger handler after close', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const poster = (data: any) => alovaInst.Get<string>(`/${TriggerEventName}`, data);
     const testDataA = 'test-data-1';
     const testDataB = 'test-data-2';
 
@@ -341,7 +339,7 @@ describe('react => useSSE', () => {
   // ! If the opening fails, an error should be reported and the request will be sent immediately.
   test('should throw error then try to connect a not exist url', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data: any) => alovaInst.Get('/not-exist-path', data);
+    const poster = (data: any) => alovaInst.Get<string>('/not-exist-path', data);
 
     let recv = undefinedValue;
     const mockOpenFn = vi.fn();
@@ -384,7 +382,7 @@ describe('react => useSSE', () => {
   // ! If the opening fails, an error should be reported and the request will not be sent immediately.
   test('should throw error then try to connect a not exist url (immediate: false)', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data?: any) => alovaInst.Get('/not-exist-path', data);
+    const poster = (data?: any) => alovaInst.Get<string>('/not-exist-path', data);
 
     let recv = undefinedValue;
     const mockOpenFn = vi.fn();
@@ -471,7 +469,7 @@ describe('react => useSSE', () => {
         mockResponseCompleteFn();
       }
     });
-    const poster = (url = `/${TriggerEventName}`) => alovaInst.Get(url);
+    const poster = (url = `/${TriggerEventName}`) => alovaInst.Get<string>(url);
 
     let recv = undefinedValue;
     const mockErrorFn = vi.fn();
@@ -611,7 +609,7 @@ describe('react => useSSE', () => {
       resErrorExpect: mockResponseErrorFn,
       resCompleteExpect: mockResponseCompleteFn
     });
-    const poster = (data: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const poster = (data: any) => alovaInst.Get<string>(`/${TriggerEventName}`, data);
 
     let recv = undefinedValue;
     const mockOpenFn = vi.fn();
@@ -663,12 +661,47 @@ describe('react => useSSE', () => {
       () => {
         expect(recv).toEqual(testDataA);
         expect(screen.getByRole('data')).toHaveTextContent(testDataA);
-
         expect(mockOnMessageFn).toHaveBeenCalledTimes(1);
         expect(mockErrorFn).not.toHaveBeenCalled();
         expect(mockResponseFn).not.toHaveBeenCalled();
         expect(mockResponseErrorFn).not.toHaveBeenCalled();
         expect(mockResponseCompleteFn).not.toHaveBeenCalled();
+      },
+      { timeout: 4000 }
+    );
+  });
+
+  // ! Test POST method with headers and data
+  test('should send POST request with headers and data', async () => {
+    const alovaInst = await prepareAlova();
+    const requestData = { key: 'value' };
+    const requestHeaders = { 'x-custom-header': 'custom-value' };
+    const method = alovaInst.Post(`/${TriggerEventName}`, requestData, {
+      headers: requestHeaders
+    });
+
+    const Page = () => {
+      const { data } = useSSE(method, { immediate: true, responseType: 'json' });
+
+      return (
+        <div>
+          <span role="data">{JSON.stringify(data)}</span>
+        </div>
+      );
+    };
+
+    render(<Page />);
+    expect(screen.getByRole('data')).toBeEmptyDOMElement();
+
+    await delay(100);
+    await serverSend();
+    await waitFor(
+      () => {
+        const data = JSON.parse(screen.getByRole('data').textContent || '{}');
+        expect(data.url).toBe(method.url);
+        expect(data.method).toBe(method.type);
+        expect(data.headers['x-custom-header']).toBe(method.config.headers['x-custom-header']);
+        expect(data.body).toStrictEqual(method.data);
       },
       { timeout: 4000 }
     );

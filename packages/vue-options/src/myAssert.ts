@@ -5,5 +5,5 @@ import { createAssert } from '@alova/shared';
  * @param expression Judgment expression, true or false
  * @param msg assert message
  */
-const myAssert = createAssert();
+const myAssert: ReturnType<typeof createAssert> = createAssert();
 export default myAssert;

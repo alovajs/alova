@@ -1,7 +1,7 @@
 import { createAssert, getTime, isArray, isFn } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, Method } from 'alova';
 
-const assert = createAssert('Captcha');
+const assert: ReturnType<typeof createAssert> = createAssert('Captcha');
 
 interface CaptchaCodeSet {
   chars?: (string | number)[];

@@ -55,7 +55,7 @@ export interface RateLimitOptions {
   storage?: AlovaGlobalCacheAdapter;
 }
 
-const assert = createAssert('RateLimit');
+const assert: ReturnType<typeof createAssert> = createAssert('RateLimit');
 
 class RateLimiterStore extends RateLimiterStoreAbstract {
   constructor(

@@ -8,6 +8,9 @@
     <span role="isLastPage">{{ JSON.stringify(isLastPage) }}</span>
     <span role="response">{{ JSON.stringify(data) }}</span>
     <span role="error">{{ error?.message }}</span>
+    <span role="status-value">{{ status }}</span>
+    <span role="replacing">{{ replacing }}</span>
+    <span role="removing">{{ removing.join() }}</span>
     <span role="replacedError">{{ replacedError?.message }}</span>
     <span
       role="awaitResult"
@@ -196,6 +199,11 @@
       @click="remove(data[2])">
       btn3
     </button>
+    <button
+      role="batchRemoveByItem"
+      @click="remove(data[2], data[3], data[4])">
+      btn3
+    </button>
 
     <button
       role="toNoDataPage"
@@ -296,7 +304,10 @@ const {
   insert,
   replace,
   remove,
-  refresh
+  refresh,
+  removing,
+  replacing,
+  status
   // reload
 } = exposure;
 

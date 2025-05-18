@@ -95,7 +95,8 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
  */
 export const getHandlerMethod = (methodHandler: Method | AlovaMethodHandler, args: any[] = []) => {
   const methodInstance = isFn(methodHandler) ? methodHandler(...args) : methodHandler;
-  createAssert('scene')(
+  const assert: ReturnType<typeof createAssert> = createAssert('scene');
+  assert(
     instanceOf(methodInstance, Method),
     'hook handler must be a method instance or a function that returns method instance'
   );
