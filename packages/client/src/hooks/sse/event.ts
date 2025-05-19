@@ -1,7 +1,7 @@
 import { AlovaEventBase } from '@/event';
 import { trueValue } from '@alova/shared';
 import { AlovaGenerics } from 'alova';
-import EventSourceFetch from './EventSourceFetch';
+import type EventSourceFetch from './EventSourceFetch';
 
 interface EventSourceFetchEventInit {
   /** Event type */

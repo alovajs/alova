@@ -295,17 +295,30 @@ describe('Test other methods without GET', () => {
     const GetMethod = alova.Request({
       url: '/unit-test',
       params: { a: 'a', b: 'str' },
+      cacheFor: 100 * 1000,
       transform(resp: Result, headers) {
         expect(headers.get('content-type')).toBe('application/json');
         return resp;
       }
     });
     expect(GetMethod.type).toBe('GET');
+    expect(GetMethod.data).toBeUndefined();
     const { loading, data, error, onSuccess } = useRequest(GetMethod);
 
     await untilCbCalled(onSuccess);
     expect(loading.value).toBeFalsy();
-    expect(data.value).toStrictEqual({});
+    expect(data.value).toStrictEqual({
+      code: 200,
+      data: {
+        method: 'GET',
+        params: {
+          a: 'a',
+          b: 'str'
+        },
+        path: '/unit-test'
+      },
+      msg: ''
+    });
     expect(error.value).toBeUndefined();
     const cacheData = await queryCache(GetMethod);
     expect(cacheData).not.toBeUndefined();
@@ -313,6 +326,7 @@ describe('Test other methods without GET', () => {
     const PostMethod = alova.Request({
       url: '/unit-test',
       params: { a: 'a', b: 'str' },
+      method: 'POST',
       data: {
         p1: 'a',
         p2: 'b'
@@ -331,7 +345,7 @@ describe('Test other methods without GET', () => {
     await untilCbCalled(onSuccess2);
     expect(data2.value.path).toBe('/unit-test');
     expect(data2.value.params).toStrictEqual({ a: 'a', b: 'str' });
-    expect(data2.value.data).toStrictEqual({ post1: 'a', post2: 'b' });
+    expect(data2.value.data).toStrictEqual({ p1: 'a', p2: 'b' });
   });
 
   test('should download file and pass the right args with cache', async () => {

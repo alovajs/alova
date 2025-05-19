@@ -41,9 +41,7 @@ const countMap = {} as Record<string, number>;
 const mockServer = setupServer(
   http.get(`${baseURL}/unit-test-empty`, () => HttpResponse.text(null)),
   http.get(`${baseURL}/unit-test-plaintext`, () => HttpResponse.text('plaintext')),
-  http.get(`${baseURL}/unit-test`, async ({ request }) => {
-    return result(200, request);
-  }),
+  http.get(`${baseURL}/unit-test`, async ({ request }) => result(200, request)),
   http.get(`${baseURL}/unit-test-1s`, async ({ request }) => {
     await delay(900);
     return result(200, request);
