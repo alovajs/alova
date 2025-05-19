@@ -58,13 +58,13 @@ export class AlovaSSEErrorEvent<AG extends AlovaGenerics, Args extends any[] = a
   }
 }
 
-export class AlovaSSEMessageEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaSSEEvent<
+export class AlovaSSEMessageEvent<Data, AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaSSEEvent<
   AG,
   Args
 > {
-  data: AG['Responded']; // Data converted by the interceptor for each response
+  data: Data; // Data converted by the interceptor for each response
 
-  constructor(base: AlovaSSEEvent<AG, Args>, data: AG['Responded']) {
+  constructor(base: AlovaSSEEvent<AG, Args>, data: Data) {
     super(base, base.eventSource);
     this.data = data;
   }

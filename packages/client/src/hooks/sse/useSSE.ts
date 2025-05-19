@@ -36,7 +36,7 @@ import {
   hitCacheBySource,
   promiseStatesHook
 } from 'alova';
-import { AlovaMethodHandler, SSEHookConfig, SSEOn } from '~/typings/clienthook';
+import { AlovaMethodHandler, SSEHookConfig } from '~/typings/clienthook';
 import EventSourceFetch from './EventSourceFetch';
 import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent, EventSourceFetchEvent } from './event';
 
@@ -49,13 +49,13 @@ export const enum SSEHookReadyState {
   CLOSED = 2
 }
 
-export type SSEEvents<AG extends AlovaGenerics, Args extends any[]> = {
+export type SSEEvents<Data, AG extends AlovaGenerics, Args extends any[]> = {
   [SSEOpenEventKey]: AlovaSSEEvent<AG, Args>;
-  [SSEMessageEventKey]: AlovaSSEMessageEvent<AG, Args>;
+  [SSEMessageEventKey]: AlovaSSEMessageEvent<Data, AG, Args>;
   [SSEErrorEventKey]: AlovaSSEErrorEvent<AG, Args>;
 };
 
-type AnySSEEventType<AG extends AlovaGenerics, Args extends any[]> = AlovaSSEMessageEvent<AG, Args> &
+type AnySSEEventType<Data, AG extends AlovaGenerics, Args extends any[]> = AlovaSSEMessageEvent<Data, AG, Args> &
   AlovaSSEErrorEvent<AG, Args> &
   AlovaSSEEvent<AG, Args>;
 
@@ -67,7 +67,7 @@ const enum MessageType {
   Message = 'message'
 }
 
-export default <AG extends AlovaGenerics<any, any, {}>, Args extends any[] = any[]>(
+export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: SSEHookConfig = {}
 ) => {
@@ -88,20 +88,20 @@ export default <AG extends AlovaGenerics<any, any, {}>, Args extends any[] = any
   const eventSource = ref<EventSourceFetch | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
-  const data = create(initialData as AG['Responded'], 'data');
+  const data = create(initialData as Data, 'data');
   const readyState = create(SSEHookReadyState.CLOSED, 'readyState');
 
   let methodInstance = getHandlerMethod(handler);
 
   let responseUnified: RespondedHandler<AG> | RespondedHandlerRecord<AG> | undefined;
 
-  const eventManager = createEventManager<SSEEvents<AG, Args>>();
+  const eventManager = createEventManager<SSEEvents<Data, AG, Args>>();
   // UseCallback object that stores custom events, where key is eventName
   const customEventMap = ref(new Map<string, ReturnType<typeof useCallback>>());
   const onOpen = (handler: (event: AlovaSSEEvent<AG, Args>) => void) => {
     eventManager.on(SSEOpenEventKey, handler);
   };
-  const onMessage = (handler: (event: AlovaSSEMessageEvent<AG, Args>) => void) => {
+  const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<Data, AG, Args>) => void) => {
     eventManager.on(SSEMessageEventKey, handler);
   };
   const onError = (handler: (event: AlovaSSEErrorEvent<AG, Args>) => void) => {
@@ -196,9 +196,9 @@ export default <AG extends AlovaGenerics<any, any, {}>, Args extends any[] = any
     return promiseThen(
       p,
       // Get processed data (data after transform)
-      res => newInstance(AlovaSSEMessageEvent<AG, Args>, baseEvent, res),
+      res => newInstance(AlovaSSEMessageEvent<Data, AG, Args>, baseEvent, res),
       // There is an error
-      error => newInstance(AlovaSSEErrorEvent<AG, Args>, baseEvent, error)
+      error => new AlovaSSEErrorEvent(baseEvent, error)
     );
   };
 
@@ -206,16 +206,20 @@ export default <AG extends AlovaGenerics<any, any, {}>, Args extends any[] = any
    * Select the required trigger function based on the event. If the event has no errors, the callback function passed in is triggered.
    * @param callback Callback function triggered when there is no error
    */
-  const sendSSEEvent = (callback: (event: AnySSEEventType<AG, Args>) => any) => (event: AnySSEEventType<AG, Args>) => {
-    if (event.error === undefinedValue) {
-      return callback(event);
-    }
-    return eventManager.emit(SSEErrorEventKey, event);
-  };
+  const sendSSEEvent =
+    (callback: (event: AnySSEEventType<Data, AG, Args>) => any) => (event: AnySSEEventType<Data, AG, Args>) => {
+      if (event.error === undefinedValue) {
+        return callback(event);
+      }
+      return eventManager.emit(SSEErrorEventKey, event);
+    };
 
   // * MARK: Event handling of EventSource
 
-  const onCustomEvent: SSEOn<AG, Args> = (eventName, callbackHandler) => {
+  const onCustomEvent = <T = AG['Responded']>(
+    eventName: string,
+    callbackHandler: (event: AlovaSSEMessageEvent<T, AG, Args>) => void
+  ) => {
     const currentMap = customEventMap.current;
     if (!currentMap.has(eventName)) {
       const useCallbackObject = useCallback<(event: AlovaSSEEvent<AG, Args>) => void>(callbacks => {
