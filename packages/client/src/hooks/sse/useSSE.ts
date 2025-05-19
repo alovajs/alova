@@ -1,13 +1,10 @@
-import {
-  AlovaEventBase,
-  AlovaSSEErrorEvent,
-  AlovaSSEEvent,
-  AlovaSSEMessageEvent,
-  EventSourceFetchEvent
-} from '@/event';
+import { AlovaEventBase } from '@/event';
 import { getHandlerMethod, statesHookHelper, throwFn, useCallback } from '@/util/helper';
 import {
   $self,
+  AlovaError,
+  JSONParse,
+  JSONStringify,
   UsePromiseExposure,
   buildCompletedURL,
   createAssert,
@@ -17,8 +14,13 @@ import {
   getOptions,
   isFn,
   isPlainObject,
+  isSpecialRequestBody,
+  isString,
+  newInstance,
   noop,
   promiseFinally,
+  promiseReject,
+  promiseResolve,
   promiseThen,
   trueValue,
   undefinedValue,
@@ -35,7 +37,8 @@ import {
   promiseStatesHook
 } from 'alova';
 import { AlovaMethodHandler, SSEHookConfig, SSEOn } from '~/typings/clienthook';
-import EventSourceFetch from './sse/FetchEventSource';
+import EventSourceFetch from './EventSourceFetch';
+import { AlovaSSEErrorEvent, AlovaSSEEvent, AlovaSSEMessageEvent, EventSourceFetchEvent } from './event';
 
 const SSEOpenEventKey = Symbol('SSEOpen');
 const SSEMessageEventKey = Symbol('SSEMessage');
@@ -46,24 +49,25 @@ export const enum SSEHookReadyState {
   CLOSED = 2
 }
 
-export type SSEEvents<Data, AG extends AlovaGenerics, Args extends any[]> = {
+export type SSEEvents<AG extends AlovaGenerics, Args extends any[]> = {
   [SSEOpenEventKey]: AlovaSSEEvent<AG, Args>;
-  [SSEMessageEventKey]: AlovaSSEMessageEvent<AG, Data, Args>;
+  [SSEMessageEventKey]: AlovaSSEMessageEvent<AG, Args>;
   [SSEErrorEventKey]: AlovaSSEErrorEvent<AG, Args>;
 };
 
-type AnySSEEventType<Data, AG extends AlovaGenerics, Args extends any[]> = AlovaSSEMessageEvent<AG, Data, Args> &
+type AnySSEEventType<AG extends AlovaGenerics, Args extends any[]> = AlovaSSEMessageEvent<AG, Args> &
   AlovaSSEErrorEvent<AG, Args> &
   AlovaSSEEvent<AG, Args>;
 
-const assert = createAssert('useSSE');
-const MessageType: Record<Capitalize<keyof EventSourceEventMap>, keyof EventSourceEventMap> = {
-  Open: 'open',
-  Error: 'error',
-  Message: 'message'
-} as const;
+const errorPrefix = 'useSSE';
+const assert: ReturnType<typeof createAssert> = createAssert(errorPrefix);
+const enum MessageType {
+  Open = 'open',
+  Error = 'error',
+  Message = 'message'
+}
 
-export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+export default <AG extends AlovaGenerics<any, any, {}>, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: SSEHookConfig = {}
 ) => {
@@ -72,34 +76,32 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     withCredentials,
     interceptByGlobalResponded = trueValue,
     /** abortLast = trueValue, */
-    immediate = falseValue
+    immediate = falseValue,
+    responseType = 'text'
   } = config;
   // ! Temporarily does not support specifying abortLast
   const abortLast = trueValue;
-
-  let { memorize } = promiseStatesHook();
-  memorize ??= $self;
-
-  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider } = statesHookHelper<AG>(promiseStatesHook());
+  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider, memorize } =
+    statesHookHelper<AG>(promiseStatesHook());
 
   const usingArgs = ref<[...Args, ...any[]]>([] as any);
   const eventSource = ref<EventSourceFetch | undefined>(undefinedValue);
   const sendPromiseObject = ref<UsePromiseExposure<void> | undefined>(undefinedValue);
 
-  const data = create(initialData as Data, 'data');
+  const data = create(initialData as AG['Responded'], 'data');
   const readyState = create(SSEHookReadyState.CLOSED, 'readyState');
 
   let methodInstance = getHandlerMethod(handler);
 
   let responseUnified: RespondedHandler<AG> | RespondedHandlerRecord<AG> | undefined;
 
-  const eventManager = createEventManager<SSEEvents<Data, AG, Args>>();
+  const eventManager = createEventManager<SSEEvents<AG, Args>>();
   // UseCallback object that stores custom events, where key is eventName
   const customEventMap = ref(new Map<string, ReturnType<typeof useCallback>>());
   const onOpen = (handler: (event: AlovaSSEEvent<AG, Args>) => void) => {
     eventManager.on(SSEOpenEventKey, handler);
   };
-  const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<AG, Data, Args>) => void) => {
+  const onMessage = (handler: (event: AlovaSSEMessageEvent<AG, Args>) => void) => {
     eventManager.on(SSEMessageEventKey, handler);
   };
   const onError = (handler: (event: AlovaSSEErrorEvent<AG, Args>) => void) => {
@@ -152,30 +154,39 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
    * For specific data processing procedures, please refer to the following link
    * @link https://alova.js.org/zh-CN/tutorial/combine-framework/response
    */
-  const createSSEEvent = async (eventFrom: keyof EventSourceEventMap, dataOrError: Promise<any>) => {
-    assert(!!eventSource.current, 'EventSource is not initialized');
-    const es = eventSource.current!;
+  const createSSEEvent = async (eventFrom: string, dataOrError?: any) => {
+    assert(eventSource.current, 'EventSource is not initialized');
+    const es = eventSource.current;
 
-    const baseEvent = new AlovaSSEEvent<AG, Args>(
+    const baseEvent = newInstance(
+      AlovaSSEEvent<AG, Args>,
       AlovaEventBase.spawn<AG, Args>(methodInstance, usingArgs.current),
       es
     );
 
     if (eventFrom === MessageType.Open) {
-      return Promise.resolve(baseEvent);
+      return baseEvent;
     }
 
     const globalSuccess = interceptByGlobalResponded ? responseSuccessHandler.current : $self;
     const globalError = interceptByGlobalResponded ? responseErrorHandler.current : throwFn;
     const globalFinally = interceptByGlobalResponded ? responseCompleteHandler.current : noop;
 
+    const isStringData = isString(dataOrError);
+    if (responseType === 'json' && isStringData) {
+      try {
+        dataOrError = JSONParse(dataOrError);
+      } catch (error: any) {
+        throw newInstance(AlovaError, errorPrefix, error.message);
+      }
+    }
+
     const p = promiseFinally(
       promiseThen(
-        dataOrError,
+        isStringData ? promiseResolve(dataOrError) : promiseReject(dataOrError),
         res => handleResponseTask(globalSuccess(res, methodInstance)),
         error => handleResponseTask(globalError(error, methodInstance))
       ),
-      // Finally
       () => {
         globalFinally(methodInstance);
       }
@@ -185,9 +196,9 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     return promiseThen(
       p,
       // Get processed data (data after transform)
-      res => new AlovaSSEMessageEvent<AG, any, Args>(baseEvent, res),
+      res => newInstance(AlovaSSEMessageEvent<AG, Args>, baseEvent, res),
       // There is an error
-      error => new AlovaSSEErrorEvent(baseEvent, error)
+      error => newInstance(AlovaSSEErrorEvent<AG, Args>, baseEvent, error)
     );
   };
 
@@ -195,13 +206,12 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
    * Select the required trigger function based on the event. If the event has no errors, the callback function passed in is triggered.
    * @param callback Callback function triggered when there is no error
    */
-  const sendSSEEvent =
-    (callback: (event: AnySSEEventType<Data, AG, Args>) => any) => (event: AnySSEEventType<Data, AG, Args>) => {
-      if (event.error === undefinedValue) {
-        return callback(event);
-      }
-      return eventManager.emit(SSEErrorEventKey, event);
-    };
+  const sendSSEEvent = (callback: (event: AnySSEEventType<AG, Args>) => any) => (event: AnySSEEventType<AG, Args>) => {
+    if (event.error === undefinedValue) {
+      return callback(event);
+    }
+    return eventManager.emit(SSEErrorEventKey, event);
+  };
 
   // * MARK: Event handling of EventSource
 
@@ -218,12 +228,11 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
       const trigger = useCallbackObject[1];
       currentMap.set(eventName, useCallbackObject);
       eventSource.current?.addEventListener(eventName, event => {
-        promiseThen(createSSEEvent(eventName as any, Promise.resolve(event.data)), sendSSEEvent(trigger) as any);
+        promiseThen(createSSEEvent(eventName, event.data), sendSSEEvent(trigger) as any);
       });
     }
 
     const [onEvent] = currentMap.get(eventName)!;
-
     return onEvent(callbackHandler);
   };
   /**
@@ -238,17 +247,15 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
   const esOpen = memorize(() => {
     // resolve the promise returned when using send()
     readyState.v = SSEHookReadyState.OPEN;
-    promiseThen(createSSEEvent(MessageType.Open, Promise.resolve()), event =>
-      eventManager.emit(SSEOpenEventKey, event)
-    );
+    promiseThen(createSSEEvent(MessageType.Open), event => eventManager.emit(SSEOpenEventKey, event));
     // ! Must be resolved after calling onOpen
     sendPromiseObject.current?.resolve();
   });
 
-  const esError = memorize((event: Event) => {
+  const esError = memorize((event: EventSourceFetchEvent) => {
     readyState.v = SSEHookReadyState.CLOSED;
     promiseThen(
-      createSSEEvent(MessageType.Error, Promise.reject((event as any)?.message ?? 'SSE Error')),
+      createSSEEvent(MessageType.Error, event.error || newInstance(Error, 'SSE Error')),
       sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
     );
     sendPromiseObject.current?.resolve();
@@ -256,7 +263,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   const esMessage = memorize((event: EventSourceFetchEvent) => {
     promiseThen(
-      createSSEEvent(MessageType.Message, Promise.resolve(event.data)),
+      createSSEEvent(MessageType.Message, event.data),
       sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
     );
   });
@@ -304,7 +311,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
       promiseObj = sendPromiseObject.current = usePromise();
       // Clear the promise object after open
       promiseObj &&
-        promiseObj.promise.finally(() => {
+        promiseFinally(promiseObj.promise, () => {
           promiseObj = undefinedValue;
         });
     }
@@ -314,16 +321,22 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     // Set up response interceptor
     setResponseHandler(methodInstance);
 
-    const { params } = getConfig(methodInstance);
-    const { baseURL, url } = methodInstance;
+    const { params, headers } = getConfig(methodInstance);
+    const { baseURL, url, data, type } = methodInstance;
     const fullURL = buildCompletedURL(baseURL, url, params);
 
     // Establish connection
-    es = new EventSourceFetch(fullURL, { withCredentials });
+    const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
+    es = newInstance(EventSourceFetch, fullURL, {
+      withCredentials,
+      method: type || 'GET',
+      headers,
+      body: isBodyData(data) ? data : JSONStringify(data)
+    });
     eventSource.current = es;
     readyState.v = SSEHookReadyState.CONNECTING;
-    // * MARK: Register to handle events
 
+    // * MARK: Register to handle events
     // Register to handle event open error message
     es.addEventListener(MessageType.Open, esOpen);
     es.addEventListener(MessageType.Error, esError);
@@ -333,7 +346,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     // If the on listener is used before connect (send), there will already be events in customEventMap.
     customEventMap.current.forEach(([_, eventTrigger], eventName) => {
       es?.addEventListener(eventName, event => {
-        promiseThen(createSSEEvent(eventName as any, Promise.resolve(event.data)), sendSSEEvent(eventTrigger) as any);
+        promiseThen(createSSEEvent(eventName, event.data), sendSSEEvent(eventTrigger) as any);
       });
     });
 

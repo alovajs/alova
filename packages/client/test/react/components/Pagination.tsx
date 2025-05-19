@@ -48,7 +48,10 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
     insert,
     replace,
     remove,
-    refresh
+    refresh,
+    status,
+    replacing,
+    removing
   } = exposure;
 
   const [awaitResult, setAwaitResult] = useState<string | undefined>();
@@ -85,6 +88,9 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
       <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
       <span role="response">{JSON.stringify(data)}</span>
       <span role="error">{error?.message}</span>
+      <span role="status-value">{status}</span>
+      <span role="replacing">{replacing}</span>
+      <span role="removing">{removing.join()}</span>
       <span role="replacedError">{replacedError?.message}</span>
       {awaitResult ? <span role="awaitResult">{awaitResult}</span> : null}
       <button
@@ -243,6 +249,11 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
         role="removeByItem__search"
         onClick={() => remove(data[2])}>
         btn
+      </button>
+      <button
+        role="batchRemoveByItem"
+        onClick={() => remove(data[2], data[3], data[4])}>
+        btn3
       </button>
       <button
         role="toNoDataPage"

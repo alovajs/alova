@@ -1,9 +1,29 @@
-import { EventSourceFetchEvent } from '@/event';
+import {
+  AlovaError,
+  createAssert,
+  falseValue,
+  filterItem,
+  instanceOf,
+  isArray,
+  isFn,
+  isObject,
+  newInstance,
+  promiseResolve,
+  pushItem,
+  setTimeoutFn,
+  trueValue
+} from '@alova/shared';
+import { type EventSourceFetchEvent } from './event';
 
+const assert: ReturnType<typeof createAssert> = createAssert('EventSourceFetch');
 interface EventSourceFetchInit extends RequestInit {
-  /** Whether to include credentials in the request */
+  /**
+   * Whether to include credentials in the request
+   */
   withCredentials?: boolean;
-  /** Reconnection time in milliseconds */
+  /**
+   * Reconnection time in milliseconds
+   */
   reconnectionTime?: number;
 }
 
@@ -14,24 +34,54 @@ type EventSourceFetchEventListenerOrEventListenerObject =
   | EventSourceFetchEventListenerObject;
 
 export default class EventSourceFetch implements EventTarget {
-  /** EventSource is connecting */
+  /**
+   * connecting status
+   */
   static readonly CONNECTING: number = 0;
-  /** EventSource is open */
+  /**
+   * open status
+   */
   static readonly OPEN: number = 1;
-  /** EventSource is closed */
+  /**
+   * closed status
+   */
   static readonly CLOSED: number = 2;
+  /**
+   * connecting status
+   */
+  readonly CONNECTING: number = 0;
+  /**
+   * open status
+   */
+  readonly OPEN: number = 1;
+  /**
+   * closed status
+   */
+  readonly CLOSED: number = 2;
 
-  /** URL of the event source */
+  /**
+   * URL of the event source
+   */
   readonly url: string;
-  /** Whether to include credentials in requests */
+  /**
+   * Whether to include credentials in requests
+   */
   readonly withCredentials: boolean;
-  /** Current state of the connection */
+  /**
+   * Current state of the connection
+   */
   readyState: number;
-  /** Handler for open events */
+  /**
+   * Handler for open events
+   */
   onopen: EventSourceFetchEventListener = null;
-  /** Handler for message events */
+  /**
+   * Handler for message events
+   */
   onmessage: EventSourceFetchEventListener = null;
-  /** Handler for error events */
+  /**
+   * Handler for error events
+   */
   onerror: EventSourceFetchEventListener = null;
 
   private _options: EventSourceFetchInit;
@@ -50,7 +100,7 @@ export default class EventSourceFetch implements EventTarget {
   constructor(url: string, options: EventSourceFetchInit = {}) {
     this.url = url;
     this.readyState = EventSourceFetch.CONNECTING;
-    this.withCredentials = options.withCredentials || false;
+    this.withCredentials = options.withCredentials || falseValue;
 
     this._options = { ...options };
 
@@ -59,17 +109,13 @@ export default class EventSourceFetch implements EventTarget {
       this._reconnectTime = options.reconnectionTime;
     }
 
-    try {
-      // Get origin from URL
-      const urlObj = new URL(url, window.location.href);
-      this._origin = urlObj.origin;
-    } catch (e) {
-      // Invalid URL, origin will be set when connection is established
-    }
+    // Get origin from URL
+    const urlObj = newInstance(URL, url, window.location.href);
+    this._origin = urlObj.origin;
 
     if (url) {
       // Auto-connect like native EventSource
-      setTimeout(() => this._connect(), 0);
+      setTimeoutFn(() => this._connect());
     }
   }
 
@@ -85,9 +131,7 @@ export default class EventSourceFetch implements EventTarget {
 
     // Don't add the same listener twice
     const existing = this._listeners[type].find(
-      l =>
-        l === listener ||
-        (typeof l === 'object' && typeof listener === 'object' && l?.handleEvent === listener.handleEvent)
+      l => l === listener || (isObject(l) && isObject(listener) && l?.handleEvent === listener.handleEvent)
     );
 
     if (!existing) {
@@ -105,7 +149,8 @@ export default class EventSourceFetch implements EventTarget {
   removeEventListener(type: string, listener: EventSourceFetchEventListenerOrEventListenerObject): void {
     if (!listener || !this._listeners[type]) return;
 
-    this._listeners[type] = this._listeners[type].filter(
+    this._listeners[type] = filterItem(
+      this._listeners[type],
       l =>
         l !== listener &&
         !(typeof l === 'object' && typeof listener === 'object' && l?.handleEvent === listener.handleEvent)
@@ -120,21 +165,17 @@ export default class EventSourceFetch implements EventTarget {
    */
   dispatchEvent(event: Event): boolean {
     if (!(event instanceof EventSourceFetchEvent)) {
-      return true;
+      return trueValue;
     }
 
     const listeners = this._listeners[event.type] || [];
 
     // Call all event listeners
     for (const listener of listeners) {
-      try {
-        if (typeof listener === 'function') {
-          listener(event);
-        } else if (listener && typeof listener.handleEvent === 'function') {
-          listener.handleEvent(event);
-        }
-      } catch (e) {
-        console.error('Error in event listener', e);
+      if (isFn(listener)) {
+        listener(event);
+      } else if (listener && isFn(listener.handleEvent)) {
+        listener.handleEvent(event);
       }
     }
 
@@ -142,23 +183,19 @@ export default class EventSourceFetch implements EventTarget {
     const handlerName = `on${event.type}` as keyof EventSourceFetch;
     const handler = this[handlerName] as EventSourceFetchEventListener;
 
-    if (typeof handler === 'function') {
-      try {
-        handler(event);
-      } catch (e) {
-        console.error(`Error in on${event.type} handler`, e);
-      }
+    if (isFn(handler)) {
+      handler(event);
     }
-
     return !event.defaultPrevented;
   }
 
   /**
    * Closes the connection
    */
-  close(): void {
-    if (this.readyState === EventSourceFetch.CLOSED) return;
-
+  close() {
+    if (this.readyState === EventSourceFetch.CLOSED) {
+      return;
+    }
     this.readyState = EventSourceFetch.CLOSED;
     if (this._controller) {
       this._controller.abort();
@@ -169,49 +206,46 @@ export default class EventSourceFetch implements EventTarget {
   /**
    * Establishes connection to the event source
    */
-  private _connect(): void {
-    if (this.readyState === EventSourceFetch.CLOSED) return;
-
-    this._controller = new AbortController();
-
-    const headers: HeadersInit & { 'Last-Event-ID': string } = {
-      Accept: 'text/event-stream',
-      ...(this._options.headers || {})
-    };
-
-    if (this._lastEventId) {
-      headers['Last-Event-ID'] = this._lastEventId;
+  private _connect() {
+    if (this.readyState === EventSourceFetch.CLOSED) {
+      return;
+    }
+    this._controller = newInstance(AbortController);
+    const options = this._options;
+    const headers = options.headers || {};
+    const accept = ['Accept', 'text/event-stream'];
+    const lastEventIdKey = 'Last-Event-ID';
+    const lastEventId = this._lastEventId;
+    if (isArray(headers)) {
+      pushItem(headers, accept);
+      lastEventId && pushItem(headers, [lastEventIdKey, lastEventId]);
+    } else if (instanceOf(headers, Headers)) {
+      headers.append(accept[0], accept[1]);
+      lastEventId && headers.append(lastEventIdKey, lastEventId);
+    } else if (isObject(headers)) {
+      const [acceptHeaderKey, acceptHeaderValue] = accept;
+      headers[acceptHeaderKey] = acceptHeaderValue;
+      lastEventId && (headers[lastEventIdKey] = lastEventId);
     }
 
     // Start with base fetch options from user options
     const fetchOptions: RequestInit = {
-      ...this._options,
+      ...options,
       headers,
       signal: this._controller.signal
     };
 
     // Override/set specific options required for SSE
-    fetchOptions.method = fetchOptions.method || 'GET';
-    fetchOptions.cache = 'no-cache';
-    fetchOptions.credentials = this.withCredentials ? 'include' : 'same-origin';
+    fetchOptions.credentials = fetchOptions.credentials || (this.withCredentials ? 'include' : 'same-origin');
 
     fetch(this.url, fetchOptions)
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-
-        if (!response.body) {
-          throw new Error('ReadableStream not supported');
-        }
+        assert(response.ok, `HTTP error: ${response.status}`);
+        assert(response.body, 'ReadableStream not supported');
 
         // Update origin if available
-        try {
-          const responseUrl = new URL(response.url);
-          this._origin = responseUrl.origin;
-        } catch (e) {
-          // Unable to get origin from response URL
-        }
+        const responseUrl = newInstance(URL, response.url);
+        this._origin = responseUrl.origin;
 
         this.readyState = EventSourceFetch.OPEN;
         this._dispatchEvent('open', '');
@@ -225,7 +259,7 @@ export default class EventSourceFetch implements EventTarget {
             if (this.readyState !== EventSourceFetch.CLOSED) {
               this._reconnect();
             }
-            return Promise.resolve();
+            return promiseResolve();
           }
 
           buffer += decoder.decode(value, { stream: true });
@@ -242,7 +276,7 @@ export default class EventSourceFetch implements EventTarget {
               if (e.name !== 'AbortError' && this.readyState !== EventSourceFetch.CLOSED) {
                 this._onError(e);
               }
-              return Promise.resolve();
+              return promiseResolve();
             });
         };
 
@@ -272,7 +306,6 @@ export default class EventSourceFetch implements EventTarget {
     let data = '';
     let eventId: string | null = null;
     let retry: string | null = null;
-    let eventComplete = false;
 
     const dispatchPendingEvent = () => {
       if (data) {
@@ -289,7 +322,7 @@ export default class EventSourceFetch implements EventTarget {
         // Process retry value if present
         if (retry !== null) {
           const retryInt = parseInt(retry, 10);
-          if (!isNaN(retryInt)) {
+          if (!Number.isNaN(retryInt)) {
             this._reconnectTime = retryInt;
           }
         }
@@ -308,15 +341,14 @@ export default class EventSourceFetch implements EventTarget {
     for (const line of lines) {
       if (line === '') {
         // Empty line means the event is complete
-        eventComplete = true;
         dispatchPendingEvent();
         continue;
       }
 
       // Skip comments
-      if (line.startsWith(':')) continue;
-
-      eventComplete = false;
+      if (line.startsWith(':')) {
+        continue;
+      }
 
       // Parse field:value
       let field: string;
@@ -337,12 +369,11 @@ export default class EventSourceFetch implements EventTarget {
           eventType = value;
           break;
         case 'data':
-          data = data ? data + '\n' + value : value;
+          data = data ? `${data}\n${value}` : value;
           break;
         case 'id':
           // Null character in ID field terminates the connection
           if (value.includes('\0')) {
-            console.warn('EventSource: ID field contained null character, ignoring');
             continue;
           }
           eventId = value;
@@ -350,6 +381,8 @@ export default class EventSourceFetch implements EventTarget {
         case 'retry':
           retry = value;
           break;
+        default:
+          throw newInstance(AlovaError, 'EventSource', `EventSource: Unknown field "${field}", ignoring`);
       }
     }
 
@@ -364,7 +397,7 @@ export default class EventSourceFetch implements EventTarget {
    * @param data Event data
    */
   private _dispatchEvent(type: string, data: string): void {
-    const event = new EventSourceFetchEvent(type, {
+    const event = newInstance(EventSourceFetchEvent, type, {
       type,
       data,
       lastEventId: this._lastEventId,
@@ -380,7 +413,7 @@ export default class EventSourceFetch implements EventTarget {
    * @param error Error object
    */
   private _onError(error: Error): void {
-    const event = new EventSourceFetchEvent('error', {
+    const event = newInstance(EventSourceFetchEvent, 'error', {
       type: 'error',
       data: '',
       lastEventId: this._lastEventId,
@@ -401,7 +434,7 @@ export default class EventSourceFetch implements EventTarget {
   private _reconnect(): void {
     if (this.readyState !== EventSourceFetch.CLOSED) {
       this.readyState = EventSourceFetch.CONNECTING;
-      setTimeout(() => this._connect(), this._reconnectTime);
+      setTimeoutFn(() => this._connect(), this._reconnectTime);
     }
   }
 }

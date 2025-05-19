@@ -2,10 +2,10 @@ import { EnumHookType } from '@/util/helper';
 import { createAssert, instanceOf } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 
-export const coreAssert = createAssert('');
-export const requestHookAssert = createAssert('useRequest');
-export const watcherHookAssert = createAssert('useWatcher');
-export const fetcherHookAssert = createAssert('useFetcher');
+export const coreAssert: ReturnType<typeof createAssert> = createAssert('');
+export const requestHookAssert: ReturnType<typeof createAssert> = createAssert('useRequest');
+export const watcherHookAssert: ReturnType<typeof createAssert> = createAssert('useWatcher');
+export const fetcherHookAssert: ReturnType<typeof createAssert> = createAssert('useFetcher');
 
 export const coreHookAssert = (hookType: EnumHookType) =>
   ({

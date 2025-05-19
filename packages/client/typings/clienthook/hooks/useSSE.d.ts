@@ -1,4 +1,5 @@
 import { AlovaGenerics, Method } from 'alova';
+import { FetchRequestInit } from 'alova/fetch';
 import { AlovaEvent, AlovaMethodHandler, ExportedState } from '../general';
 
 type SSEHookReadyState = 0 | 1 | 2;
@@ -32,9 +33,11 @@ export type SSEOn<AG extends AlovaGenerics, Args extends any[] = any[]> = <Data 
 /**
  *  useSSE() configuration item
  */
-export interface SSEHookConfig {
+export type SSEHookConfig = FetchRequestInit & {
   /**
-   * Will be passed to new EventSource
+   * A boolean value indicating whether the EventSource object was instantiated with cross-origin (CORS) credentials set true.
+   * @default false
+   * @deprecated use fetchOptions.credentials instead
    */
   withCredentials?: boolean;
 
@@ -61,7 +64,13 @@ export interface SSEHookConfig {
    * TODO does not currently support specifying
    */
   abortLast?: true;
-}
+
+  /**
+   * set the message data type.
+   * @default "text"
+   */
+  responseType?: 'text' | 'json';
+};
 
 /**
  * useSSE() return type
@@ -116,7 +125,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
  * @param config Configuration parameters
  * @return useSSE related data and operation functions
  */
-export declare function useSSE<Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+export declare function useSSE<AG extends AlovaGenerics, Data = any, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: SSEHookConfig
 ): SSEExposure<AG, Data, Args>;

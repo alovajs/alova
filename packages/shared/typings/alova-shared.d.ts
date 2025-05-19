@@ -17,7 +17,9 @@ declare class AlovaError extends Error {
  * @param expression Judgment expression, true or false
  * @param message Assert message
  */
-declare const createAssert: (prefix?: string) => (expression: boolean, message: string, errorCode?: number) => void;
+declare const createAssert: (
+  prefix?: string
+) => (expression: any, message: string, errorCode?: number) => asserts expression;
 
 interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
@@ -168,7 +170,7 @@ declare const isString: (arg: any) => arg is string;
  * Determine whether the parameter is an object any parameter
  * @returns Whether the parameter is an object
  */
-declare const isObject: <T = any>(arg: any) => arg is T;
+declare const isObject: (arg: any) => arg is Record<any, unknown>;
 /**
  * Global toString any parameter stringified parameters
  */
@@ -436,6 +438,7 @@ declare const promiseCatch: <T, TResult = never>(
   onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
 ) => Promise<T | TResult>;
 declare const promiseFinally: <T>(promise: Promise<T>, onfinally?: (() => void) | undefined | null) => Promise<T>;
+declare const promiseAll: <T>(values: (Promise<T> | T)[]) => Promise<T[]>;
 declare const JSONStringify: <T>(
   value: T,
   replacer?: (this: any, key: string, value: any) => any,
@@ -542,6 +545,7 @@ export {
   objectKeys,
   objectValues,
   omit,
+  promiseAll,
   promiseCatch,
   promiseFinally,
   promiseReject,
