@@ -13,7 +13,7 @@ import {
   setTimeoutFn,
   trueValue
 } from '@alova/shared';
-import { EventSourceFetchEvent } from './event';
+import { type EventSourceFetchEvent } from './event';
 
 const assert: ReturnType<typeof createAssert> = createAssert('EventSourceFetch');
 interface EventSourceFetchInit extends RequestInit {

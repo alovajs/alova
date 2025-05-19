@@ -42,7 +42,6 @@ const mockServer = setupServer(
   http.get(`${baseURL}/unit-test-empty`, () => HttpResponse.text(null)),
   http.get(`${baseURL}/unit-test-plaintext`, () => HttpResponse.text('plaintext')),
   http.get(`${baseURL}/unit-test`, async ({ request }) => {
-    console.log('key: count: ', request.url);
     return result(200, request);
   }),
   http.get(`${baseURL}/unit-test-1s`, async ({ request }) => {
@@ -54,7 +53,6 @@ const mockServer = setupServer(
     const key = (urlObj.searchParams.get('countKey') || '') as string;
     const count = (countMap[key] = countMap[key] || 0);
     countMap[key] += 1;
-    console.log('key: count: ', request.url, key, count);
     return result(200, request, false, { count });
   }),
   http.get(
