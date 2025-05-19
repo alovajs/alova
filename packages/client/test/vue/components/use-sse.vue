@@ -45,22 +45,22 @@ const onErrorCounter = ref(0);
 const onMessageCounter = ref(0);
 
 const poster = (data: any) => alovaInst.Get(props.path, data);
-const { onMessage, onOpen, onError, data, readyState, send, close } = useSSE(poster, {
+const exposure = useSSE(poster, {
   initialData: props.initialData,
   immediate: props.immediate
 });
+const { data, readyState, send, close } = exposure;
 
-onMessage(e => {
-  onMessageCounter.value += 1;
-});
-
-onOpen(() => {
-  onOpenCounter.value += 1;
-});
-
-onError(() => {
-  onErrorCounter.value += 1;
-});
+exposure
+  .onMessage(e => {
+    onMessageCounter.value += 1;
+  })
+  .onOpen(() => {
+    onOpenCounter.value += 1;
+  })
+  .onError(() => {
+    onErrorCounter.value += 1;
+  });
 
 const getStatusText = computed(() => {
   if (readyState.value === 1 /** Sse hook ready state.open */) {

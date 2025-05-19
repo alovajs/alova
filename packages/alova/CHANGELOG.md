@@ -1,5 +1,16 @@
 # alova
 
+## 3.2.11
+
+### Patch Changes
+
+- [#677](https://github.com/alovajs/alova/pull/677) [`5208b2b`](https://github.com/alovajs/alova/commit/5208b2b13f9f444c6d3d98e2bc74647591ea29d4) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix(types): correct type declaration of `accessAction()`
+  fix(test): ensure vitest runs typecheck correctly
+
+  - correct vitest config to enable typecheck for specific test file
+
+- [#676](https://github.com/alovajs/alova/pull/676) [`b04361a`](https://github.com/alovajs/alova/commit/b04361af0a65e9b0736b09f130596f1aa7c641e3) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: fix the issue where the on method in useSSE cannot be chained
+
 ## 3.2.10
 
 ### Patch Changes

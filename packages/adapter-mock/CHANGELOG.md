@@ -1,5 +1,11 @@
 # @alova/mock
 
+## 2.0.14
+
+### Patch Changes
+
+- [#660](https://github.com/alovajs/alova/pull/660) [`94e280f`](https://github.com/alovajs/alova/commit/94e280f20fc70013e1442ae0c8d5b67ea1e43569) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that cannot receive headers default in mock adapter
+
 ## 2.0.13
 
 ### Patch Changes

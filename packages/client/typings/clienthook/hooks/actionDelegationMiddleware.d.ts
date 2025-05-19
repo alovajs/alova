@@ -32,5 +32,6 @@ export declare function actionDelegationMiddleware<
  */
 export declare function accessAction(
   id: string | number | symbol | RegExp,
-  onMatch: (matchedSubscriber: Record<string, any>, index: number) => void
+  onMatch: (matchedSubscriber: Record<string, any>, index: number) => void,
+  silent?: boolean
 ): void;
