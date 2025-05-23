@@ -7,6 +7,7 @@ import {
   ObjectCls,
   clearTimeoutTimer,
   createAssert,
+  deleteAttr,
   falseValue,
   filterItem,
   forEach,
@@ -141,7 +142,9 @@ type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string
     : // eslint-disable-next-line @typescript-eslint/no-unused-vars
       K extends `on${infer _}`
       ? (...args: Parameters<O[K]>) => CompletedExposingProvider<AG, O>
-      : O[K];
+      : K extends 'then'
+        ? (onFulfilled: (value: Omit<CompletedExposingProvider<AG, O>, 'then'>) => void) => void
+        : O[K];
 };
 /**
  * create simple and unified, framework-independent states creators and handlers.
@@ -233,6 +236,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
     exposeProvider: <O extends Record<string | number | symbol, any>>(object: O) => {
       const provider: Record<string | number | symbol, any> = {};
       const originalStatesMap: Record<string, GeneralState> = {};
+      const stateKeys: string[] = [];
       for (const key in object) {
         const value = object[key];
         const isValueFunction = isFn(value);
@@ -252,6 +256,10 @@ export function statesHookHelper<AG extends AlovaGenerics>(
               ? value
               : memorize(value);
         } else {
+          // collect states of current exposures, and open tracked for these ststes
+          if (!includes(['uploading', 'downloading'], key) && !key.startsWith('__')) {
+            pushItem(stateKeys, key);
+          }
           const isFrameworkState = instanceOf(value, FrameworkReadableState);
           if (isFrameworkState) {
             originalStatesMap[key] = value.s;
@@ -281,6 +289,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       };
       referingObject.bindError = falseValue;
 
+      const { then: providerThen } = provider;
       const extraProvider = {
         // expose referingObject automatically.
         __referingObj: referingObject,
@@ -308,7 +317,30 @@ export function statesHookHelper<AG extends AlovaGenerics>(
             return object[key];
           }
           return nestedProxyState(key);
-        })
+        }),
+
+        /**
+         * send and wait for responding with `await`
+         * this is always used in `nuxt3`
+         * @example
+         * ```js
+         * const { loading, data, error } = await useRequest(...);
+         * ```
+         */
+        then(onfulfilled: (result: any) => void) {
+          // open all the states to track.
+          forEach(stateKeys, key => {
+            referingObject.trackedKeys[key] = trueValue;
+          });
+
+          const handleFullfilled = () => {
+            // eslint-disable-next-line
+            deleteAttr(completedProvider, 'then');
+            // eslint-disable-next-line
+            onfulfilled(completedProvider);
+          };
+          isFn(providerThen) ? providerThen(handleFullfilled) : handleFullfilled();
+        }
       };
 
       const completedProvider = objAssign(provider, extraProvider) as CompletedExposingProvider<

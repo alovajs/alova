@@ -1949,17 +1949,17 @@ describe('vue => usePagination', () => {
     const fetchSuccessMockFn = vi.fn();
     render(Pagination, {
       props: {
-        getter: (page, pageSize) => getter1(page, pageSize),
+        getter: (page: number, pageSize: number) => getter1(page, pageSize),
         paginationConfig: {
           total: (res: any) => res.total,
           data: (res: any) => res.list,
           immediate: false
         },
-        handleExposure(exposure) {
-          exposure.onSuccess(({ args }) => {
+        handleExposure(exposure: any) {
+          exposure.onSuccess(({ args }: any) => {
             successFn(args);
           });
-          exposure.onFetchSuccess(({ args }) => {
+          exposure.onFetchSuccess(({ args }: any) => {
             fetchSuccessMockFn(args);
           });
         }
@@ -1980,5 +1980,23 @@ describe('vue => usePagination', () => {
       expect(successFn).toHaveBeenCalledWith(['a', 1, undefined, undefined]);
       expect(fetchSuccessMockFn).toHaveBeenCalledWith(['a', 1, false]);
     });
+  });
+
+  test("should't send request when call with `await`", async () => {
+    const { loading, data, error, page, pageCount, total, onSuccess, onComplete } = await usePagination(getter1);
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
+    onSuccess(successFn);
+    onComplete(completeFn);
+
+    await delay(100);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toStrictEqual([]);
+    expect(error.value).toBeUndefined();
+    expect(page.value).toBe(1);
+    expect(pageCount.value).toBeUndefined();
+    expect(total.value).toBeUndefined();
+    expect(successFn).not.toHaveBeenCalled();
+    expect(completeFn).not.toHaveBeenCalled();
   });
 });
