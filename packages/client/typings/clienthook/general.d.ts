@@ -231,14 +231,58 @@ export interface UseHookExposure<
   Args extends any[] = any[],
   SelfType = unknown
 > extends UseHookExportedState<AG> {
+  /**
+   * abort current request
+   */
   abort: () => void;
+  /**
+   * update state manually
+   * @example
+   * ```js
+   * update({
+   *   data: '...',
+   *   loading: true
+   * });
+   * ```
+   */
   update: StateUpdater<UseHookExportedState<AG>, AG['StatesExport']>;
+  /**
+   * send request and pass params
+   */
   send: SendHandler<Args, AG['Responded']>;
+  /**
+   * subscribe to the success event
+   * @param handler the handler to be called when request is successful
+   */
   onSuccess(handler: SuccessHandler<AG, Args>): IsUnknown<SelfType, this, SelfType>;
+  /**
+   * subscribe to the error event
+   * @param handler the handler to be called when request is failed
+   */
   onError(handler: ErrorHandler<AG, Args>): IsUnknown<SelfType, this, SelfType>;
+  /**
+   * subscribe to the complete event
+   * @param handler the handler to be called when request is complete
+   */
   onComplete(handler: CompleteHandler<AG, Args>): IsUnknown<SelfType, this, SelfType>;
+  /**
+   * get the original proxy state object, it's a internal api
+   */
   __proxyState: ProxyStateGetter<UseHookExportedState<AG>>;
+  /**
+   * save component refering object, it's a internal api
+   */
   __referingObj: ReferingObject;
+  /**
+   * send and wait for responding with `await`
+   * this is always used in `nuxt3` and `<suspense>` of `vue3`
+   * @example
+   * ```js
+   * const { loading, data, error } = await useRequest(...);
+   * const { loading, data, error } = await useWatcher(...);
+   * ```
+   */
+  then: (onfulfilled: (value: Omit<IsUnknown<SelfType, this, SelfType>, 'then'>) => void) => void;
 }
 
 type EnumHookType = 1 | 2 | 3;

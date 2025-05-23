@@ -1,11 +1,10 @@
-import { SSEHookReadyState } from '@/hooks/useSSE';
+import { SSEHookReadyState } from '@/hooks/sse/useSSE';
 import { useSSE } from '@/index';
 import VueHook from '@/statesHook/vue';
 import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/vue';
 import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import ES from 'eventsource';
 import { AddressInfo } from 'net';
 import mockServer from 'root/mockServer';
 import { delay, untilCbCalled } from 'root/testUtils';
@@ -14,7 +13,6 @@ import { AlovaSSEMessageEvent } from '~/typings/clienthook';
 import CompUseSSEGlobalResponse from './components/use-sse-global-response.vue';
 import CompUseSSE from './components/use-sse.vue';
 
-Object.defineProperty(global, 'EventSource', { value: ES, writable: false });
 let port = 0;
 beforeAll(() => {
   port = (server.listen().address() as AddressInfo).port;
@@ -46,7 +44,7 @@ describe('vue => useSSE', () => {
   // ! No initial data, do not send request immediately
   test('should default NOT request immediately', async () => {
     const alovaInst = await prepareAlova();
-    const poster = (data?: any) => alovaInst.Get(`/${IntervalEventName}`, data);
+    const poster = (data?: any) => alovaInst.Get<string>(`/${IntervalEventName}`, data);
     const { on, onOpen, data, readyState, send, close } = useSSE(poster);
     const cb = vi.fn();
     const openCb = vi.fn();
@@ -122,7 +120,7 @@ describe('vue => useSSE', () => {
     await send();
     serverSend(testDataB);
 
-    const { data: recvData } = (await untilCbCalled(onMessage)) as AnyMessageType;
+    const { data: recvData } = await untilCbCalled(onMessage);
 
     expect(readyState.value).toStrictEqual(SSEHookReadyState.OPEN);
     expect(cb).toHaveBeenCalled();
@@ -399,5 +397,31 @@ describe('vue => useSSE', () => {
       },
       { timeout: 4000 }
     );
+  });
+
+  // ! Test POST method with headers and data
+  test('should send POST request with headers and data', async () => {
+    const alovaInst = await prepareAlova();
+    const requestData = { key: 'value' };
+    const requestHeaders = { 'x-custom-header': 'custom-value' };
+    const method = alovaInst.Post<{
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body: Record<string, string>;
+    }>(`/${TriggerEventName}`, requestData, {
+      headers: requestHeaders
+    });
+    const { data } = useSSE(method, { immediate: true, responseType: 'json' });
+
+    await delay(100);
+    // Server sends information
+    await serverSend();
+    await delay(1000);
+
+    expect(data.value.url).toBe(method.url);
+    expect(data.value.method).toBe(method.type);
+    expect(data.value.headers['x-custom-header']).toBe(method.config.headers['x-custom-header']);
+    expect(data.value.body).toStrictEqual(method.data);
   });
 });

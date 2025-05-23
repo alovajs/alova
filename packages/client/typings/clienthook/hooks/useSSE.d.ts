@@ -1,4 +1,5 @@
 import { AlovaGenerics, Method } from 'alova';
+import { FetchRequestInit } from 'alova/fetch';
 import { AlovaEvent, AlovaMethodHandler, ExportedState } from '../general';
 
 type SSEHookReadyState = 0 | 1 | 2;
@@ -28,9 +29,11 @@ export type SSEOnErrorTrigger<AG extends AlovaGenerics, Args extends any[] = any
 /**
  *  useSSE() configuration item
  */
-export interface SSEHookConfig {
+export type SSEHookConfig = FetchRequestInit & {
   /**
-   * Will be passed to new EventSource
+   * A boolean value indicating whether the EventSource object was instantiated with cross-origin (CORS) credentials set true.
+   * @default false
+   * @deprecated use fetchOptions.credentials instead
    */
   withCredentials?: boolean;
 
@@ -57,14 +60,20 @@ export interface SSEHookConfig {
    * TODO does not currently support specifying
    */
   abortLast?: true;
-}
+
+  /**
+   * set the message data type.
+   * @default "text"
+   */
+  responseType?: 'text' | 'json';
+};
 
 /**
  * useSSE() return type
  */
-export interface SSEExposure<AG extends AlovaGenerics, Args extends any[] = any[]> {
+export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] = any[]> {
   readyState: ExportedState<SSEHookReadyState, AG['StatesExport']>;
-  data: ExportedState<AG['Responded'], AG['StatesExport']>;
+  data: ExportedState<Data | undefined, AG['StatesExport']>;
   eventSource: ExportedState<EventSource | undefined, AG['StatesExport']>;
   /**
    * Make the request manually. This method is automatically triggered when using `immediate: true`
@@ -87,7 +96,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Args extends any[] = any[
    * @param callback callback function
    * @returns Unregister function
    */
-  onMessage<T = AG['Responded']>(callback: SSEOnMessageTrigger<T, AG, Args>): this;
+  onMessage<T = Data>(callback: SSEOnMessageTrigger<T, AG, Args>): this;
 
   /**
    * Register the callback function for EventSource error
@@ -112,7 +121,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Args extends any[] = any[
  * @param config Configuration parameters
  * @return useSSE related data and operation functions
  */
-export declare function useSSE<AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+export declare function useSSE<AG extends AlovaGenerics, Data = any, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config?: SSEHookConfig
-): SSEExposure<AG, Args>;
+): SSEExposure<AG, Data, Args>;

@@ -48,7 +48,10 @@ const adapterReturnMap: Record<string, Record<string, RequestAdapterReturnType>>
  * @param forceRequest Ignore cache
  * @returns response data
  */
-export default function sendRequest<AG extends AlovaGenerics>(methodInstance: Method<AG>, forceRequest: boolean) {
+export default function sendRequest<AG extends AlovaGenerics<any, any, {}>>(
+  methodInstance: Method<AG>,
+  forceRequest: boolean
+) {
   let fromCache = trueValue;
   let requestAdapterCtrlsPromiseResolveFn: (value?: RequestAdapterReturnType) => void;
   const requestAdapterCtrlsPromise = newInstance(PromiseCls, resolve => {

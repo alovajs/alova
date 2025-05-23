@@ -3,6 +3,7 @@ import {
   AlovaDefaultCacheAdapter,
   AlovaGenerics,
   AlovaGlobalCacheAdapter,
+  AlovaMethodCommonConfig,
   AlovaMethodCreateConfig,
   AlovaOptions,
   RequestBody,
@@ -70,6 +71,17 @@ export class Alova<AG extends AlovaGenerics> {
     instance.snapshots = newInstance(
       MethodSnapshotContainer<AG>,
       options.snapshots ?? defaultAlovaOptions.snapshots ?? 0
+    );
+  }
+
+  Request<Responded = unknown, Transformed = unknown>(config: AlovaMethodCommonConfig<AG, Responded, Transformed>) {
+    return newInstance(
+      Method<RespondedAlovaGenerics<AG, Responded, Transformed>>,
+      config.method || typeGet,
+      this as any,
+      config.url,
+      config,
+      config.data
     );
   }
 

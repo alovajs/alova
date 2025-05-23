@@ -100,7 +100,7 @@ export const storageGetItem = async (key: string) => {
         value => {
           // Convert virtual data format back to virtual data instance
           if (isObject(value) && value?.[vDataKey]) {
-            const vDataId = value[vDataKey];
+            const vDataId = value[vDataKey] as any;
             const vDataValue = createVirtualResponse(value[vDataValueKey], vDataId);
             forEach(objectKeys(value), key => {
               if (!includes([vDataKey, vDataValueKey], key)) {

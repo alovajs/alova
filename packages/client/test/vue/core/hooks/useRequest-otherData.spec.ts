@@ -10,7 +10,7 @@ describe('Request by other data', () => {
   test('send POST with FormData', async () => {
     const alova = getAlovaInstance(VueHook, {
       beforeRequestExpect: method => {
-        method.config.params.p1 = 'a';
+        (method.config.params as any).p1 = 'a';
         method.config.headers.h1 = 'b';
         if (method.data instanceof FormData) {
           method.data.append('extra', 'zzz');

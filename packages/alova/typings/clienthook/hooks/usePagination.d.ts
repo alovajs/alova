@@ -15,7 +15,36 @@ import { WatcherHookConfig } from './useWatcher';
  * @description usePagination related
  */
 export type ArgGetter<R, LD> = (data: R) => LD | undefined;
-export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extends WatcherHookConfig<AG> {
+export type PaginationActionStatus = '' | 'loading' | 'removing' | 'inserting' | 'replacing';
+
+export interface PaginationActions<ListData extends unknown[]> {
+  /**
+   * Insert action method creator
+   * @param item The item to insert
+   * @param position Insert position (index) or list item
+   */
+  insert?: (
+    item: ListData extends any[] ? ListData[number] : any,
+    position?: number | ListData[number]
+  ) => Promise<void>;
+  /**
+   * Remove action method creator
+   * @param positions Removed index or list item
+   */
+  remove?: (item: number | ListData[number]) => Promise<void>;
+  /**
+   * Replace action method creator
+   * @param item The item to replace
+   * @param position Replace position (index) or list item
+   */
+  replace?: (
+    item: ListData extends any[] ? ListData[number] : any,
+    position: number | ListData[number]
+  ) => Promise<void>;
+}
+
+export interface PaginationHookConfig<AG extends AlovaGenerics, ListData extends unknown[]>
+  extends WatcherHookConfig<AG> {
   /**
    * Whether to preload the previous page
    * @default true
@@ -56,6 +85,10 @@ export interface PaginationHookConfig<AG extends AlovaGenerics, ListData> extend
    * @default [page, pageSize]
    */
   watchingStates?: AG['StatesExport']['Watched'][];
+  /**
+   * Action methods for insert/remove/replace operations
+   */
+  actions?: PaginationActions<ListData>;
 }
 export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extends unknown[], Args extends any[]>
   extends Omit<UseHookExposure<AG, Args, UsePaginationExposure<AG, ListData, Args>>, 'update'> {
@@ -77,6 +110,18 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   total: ExportedComputed<number | undefined, AG['StatesExport']>;
   isLastPage: ExportedComputed<boolean, AG['StatesExport']>;
   fetching: ExportedState<boolean, AG['StatesExport']>;
+  /**
+   * Current action status
+   */
+  status: ExportedState<PaginationActionStatus, AG['StatesExport']>;
+  /**
+   * Index of the item being removed
+   */
+  removing: ExportedState<number | undefined, AG['StatesExport']>;
+  /**
+   * Index of the item being replaced
+   */
+  replacing: ExportedState<number | undefined, AG['StatesExport']>;
   onFetchSuccess(handler: SuccessHandler<AG, Args>): UsePaginationExposure<AG, ListData, Args>;
   onFetchError(handler: ErrorHandler<AG, Args>): UsePaginationExposure<AG, ListData, Args>;
   onFetchComplete(handler: CompleteHandler<AG, Args>): UsePaginationExposure<AG, ListData, Args>;

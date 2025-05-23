@@ -81,6 +81,8 @@ export default class Method<AG extends AlovaGenerics = any> {
     };
     abortRequest.a = noop;
 
+    type = type.toUpperCase() as MethodType;
+
     const instance = this;
     const contextOptions = getContextOptions(context);
     instance.abort = abortRequest;

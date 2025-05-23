@@ -23,6 +23,7 @@ export const promiseCatch = <T, TResult = never>(
 ) => promise.catch(onrejected);
 export const promiseFinally = <T>(promise: Promise<T>, onfinally?: (() => void) | undefined | null) =>
   promise.finally(onfinally);
+export const promiseAll = <T>(values: (Promise<T> | T)[]): Promise<T[]> => PromiseCls.all(values);
 export const JSONStringify = <T>(
   value: T,
   replacer?: (this: any, key: string, value: any) => any,

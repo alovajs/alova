@@ -637,9 +637,52 @@ describe('shared functions', () => {
     result = buildCompletedURL('http://example.com/api', '', { param1: 'value1', param2: undefined });
     expect(result).toBe('http://example.com/api?param1=value1');
 
-    // 'should handle existing query string in url'
+    // should handle existing query string in url
     result = buildCompletedURL('http://example.com/api?existingParam=existingValue', '', { param1: 'value1' });
     expect(result).toBe('http://example.com/api?existingParam=existingValue&param1=value1');
+
+    // should handle absolute URLs and preserve them
+    result = buildCompletedURL('http://example.com', 'https://api.another.com/users', {});
+    expect(result).toBe('https://api.another.com/users');
+
+    // should handle case-insensitive protocol in URLs
+    result = buildCompletedURL('http://example.com', 'HTTP://api.another.com', {});
+    expect(result).toBe('HTTP://api.another.com');
+
+    // should handle multiple forward slashes in URL
+    result = buildCompletedURL('http://example.com', '//api/users', {});
+    expect(result).toBe('http://example.com//api/users');
+
+    // should handle URLs with hash and query parameters
+    result = buildCompletedURL('http://example.com', 'api/users?id=1&name=test#hash', {});
+    expect(result).toBe('http://example.com/api/users?id=1&name=test#hash');
+
+    // should handle empty baseURL
+    result = buildCompletedURL('', '/api/users', {});
+    expect(result).toBe('/api/users');
+
+    // should handle URLs with spaces and special characters
+    result = buildCompletedURL('http://example.com', 'api/users space', {});
+    expect(result).toBe('http://example.com/api/users space');
+
+    // should handle parameters with special characters and non-ASCII values
+    result = buildCompletedURL('http://example.com', '/api', {
+      'special char': 'test space',
+      chinese: '中文'
+    });
+    expect(result).toBe('http://example.com/api?special char=test space&chinese=中文');
+
+    // should handle string parameters
+    result = buildCompletedURL('http://example.com', '/api', 'param1=a&param2=b');
+    expect(result).toBe('http://example.com/api?param1=a&param2=b');
+
+    // should handle URLs with encoded characters
+    result = buildCompletedURL('http://example.com', 'api/users%20space', {});
+    expect(result).toBe('http://example.com/api/users%20space');
+
+    // should handle absolute URLs with query parameters
+    result = buildCompletedURL('http://example.com', 'https://api.another.com/users?id=1', { extra: 'param' });
+    expect(result).toBe('https://api.another.com/users?id=1&extra=param');
   });
 
   test('deepClone', () => {

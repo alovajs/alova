@@ -1,5 +1,5 @@
 import Method from '@/Method';
-import { getContext, newInstance, objAssign } from '@alova/shared';
+import { getContext, isString, newInstance, objAssign } from '@alova/shared';
 import { AlovaGenerics } from '~/typings';
 
 export default <AG extends AlovaGenerics>(methodInstance: Method<AG>) => {
@@ -8,7 +8,7 @@ export default <AG extends AlovaGenerics>(methodInstance: Method<AG>) => {
   const { headers = {}, params = {} } = newConfig;
   const ctx = getContext(methodInstance);
   newConfig.headers = { ...headers };
-  newConfig.params = { ...params };
+  newConfig.params = isString(params) ? params : { ...params };
   const newMethod = newInstance(Method<AG>, methodInstance.type, ctx, methodInstance.url, newConfig, data);
   return objAssign(newMethod, {
     ...methodInstance,

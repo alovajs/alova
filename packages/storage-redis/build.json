@@ -1,0 +1,12 @@
+{
+  "input": "src/index.ts",
+  "output": "./dist/index.{suffix}.{ext}",
+  "packageName": "AlovaStorageFile",
+  "formats": ["esm", "cjs"],
+  "external": {
+    "ioredis": null,
+    "@alova/shared": null
+  },
+  "withDTS": true,
+  "dtsOutput": "./dist/index.d.ts"
+}

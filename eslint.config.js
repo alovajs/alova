@@ -65,6 +65,8 @@ export default [
       'no-await-in-loop': 'off',
       'func-names': 'off',
       'no-empty': 'off',
+      'no-continue': 'off',
+      'class-methods-use-this': 'off',
 
       // jsx-a11y
       'jsx-a11y/aria-role': 'off',

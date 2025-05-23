@@ -5,7 +5,7 @@ import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
 import { AlovaMethodHandler, CaptchaHookConfig } from '~/typings/clienthook';
 
 const hookPrefix = 'useCaptcha';
-const captchaAssert = createAssert(hookPrefix);
+const captchaAssert: ReturnType<typeof createAssert> = createAssert(hookPrefix);
 export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: CaptchaHookConfig<AG, Args> = {}

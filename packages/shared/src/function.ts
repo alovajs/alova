@@ -1,4 +1,4 @@
-import type { CacheExpire, CacheMode } from '../../alova/typings';
+import type { CacheExpire, CacheMode, MethodRequestConfig } from '../../alova/typings';
 import type { BackoffPolicy, GeneralFn, UsePromiseExposure } from './types';
 import {
   JSONStringify,
@@ -53,7 +53,7 @@ export const isString = (arg: any): arg is string => typeOf(arg) === 'string';
  * Determine whether the parameter is an object any parameter
  * @returns Whether the parameter is an object
  */
-export const isObject = <T = any>(arg: any): arg is T => arg !== nullValue && typeOf(arg) === 'object';
+export const isObject = (arg: any): arg is Record<any, unknown> => arg !== nullValue && typeOf(arg) === 'object';
 /**
  * Global toString any parameter stringified parameters
  */
@@ -273,7 +273,7 @@ export const createAsyncQueue = (catchError = falseValue) => {
   let executing = false;
 
   const executeQueue = async () => {
-    executing = true;
+    executing = trueValue;
     while (len(queue) > 0) {
       const asyncFunc = shift(queue);
       if (asyncFunc) {
@@ -281,7 +281,7 @@ export const createAsyncQueue = (catchError = falseValue) => {
       }
     }
     completedHandler && completedHandler();
-    executing = false;
+    executing = falseValue;
   };
   const addQueue = <T>(asyncFunc: AsyncFunction<T>): Promise<T> =>
     newInstance(PromiseCls<T>, (resolve, reject) => {
@@ -371,24 +371,34 @@ export const delayWithBackoff = (backoff: BackoffPolicy, retryTimes: number) => 
 /**
  * Build the complete url baseURL path url parameters complete url
  */
-export const buildCompletedURL = (baseURL: string, url: string, params: Record<string, any>) => {
-  // If the Base url ends with /, remove /
-  baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
-  // If it does not start with /or http protocol, you need to add /
+export const buildCompletedURL = (baseURL: string, url: string, params: MethodRequestConfig['params']) => {
+  // Check if the URL starts with http/https
+  const startsWithPrefix = /^https?:\/\//i.test(url);
 
-  // Compatible with some RESTful usage fix: https://github.com/alovajs/alova/issues/382
-  if (url !== '') {
-    url = url.match(/^(\/|https?:\/\/)/) ? url : `/${url}`;
+  if (!startsWithPrefix) {
+    // If the Base url ends with /, remove /
+    baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+    // If it does not start with /or http protocol, you need to add /
+
+    // Compatible with some RESTful usage fix: https://github.com/alovajs/alova/issues/382
+    if (url !== '') {
+      // Since absolute URLs (http/https) are handled above,
+      // we only need to ensure relative URLs start with a forward slash
+      url = url.startsWith('/') ? url : `/${url}`;
+    }
   }
 
-  const completeURL = baseURL + url;
+  // fix: https://github.com/alovajs/alova/issues/653
+  const completeURL = startsWithPrefix ? url : baseURL + url;
 
   // Convert params object to get string
   // Filter out those whose value is undefined
-  const paramsStr = mapItem(
-    filterItem(objectKeys(params), key => params[key] !== undefinedValue),
-    key => `${key}=${params[key]}`
-  ).join('&');
+  const paramsStr = isString(params)
+    ? params
+    : mapItem(
+        filterItem(objectKeys(params), key => params[key] !== undefinedValue),
+        key => `${key}=${params[key]}`
+      ).join('&');
   // Splice the get parameters behind the url. Note that the url may already have parameters.
   return paramsStr
     ? +completeURL.includes('?')

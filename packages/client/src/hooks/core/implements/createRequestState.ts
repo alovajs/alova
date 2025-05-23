@@ -15,6 +15,8 @@ import {
   isNumber,
   promiseCatch,
   PromiseCls,
+  promiseResolve,
+  promiseThen,
   sloughConfig,
   trueValue,
   undefinedValue
@@ -138,19 +140,26 @@ export default function createRequestState<
     sendCallingArgs?: [...Args, ...any[]]
   ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
 
+  // if user call hook like `await useRequest(...)`
+  // that will stop the immediate request, because it will be call a request in function `then`
+  let stopImmediateRequest = falseValue;
+
   // only call once when multiple values changed at the same time
   const onceRunner = refCurrent(ref(createSyncOnceRunner()));
 
-  // Call handleRequest in a way that catches the exception
+  // Call `handleRequest` in a way that catches the exception
   // Catching exceptions prevents exceptions from being thrown out
   const wrapEffectRequest = (ro = referingObject, handler?: Method<AG> | AlovaMethodHandler<AG>) => {
     onceRunner(() => {
-      promiseCatch(handleRequest(handler), error => {
-        // the error tracking indicates that the error need to throw.
-        if (!ro.bindError && !ro.trackedKeys.error) {
-          throw error;
-        }
-      });
+      if (!stopImmediateRequest) {
+        promiseCatch(handleRequest(handler), error => {
+          // the error tracking indicates that the error need to throw.
+          // when user access the `error` state or bind the error event, the error instance won't be thrown out.
+          if (!ro.bindError && !ro.trackedKeys.error) {
+            throw error;
+          }
+        });
+      }
     });
   };
 
@@ -183,7 +192,7 @@ export default function createRequestState<
     });
   }
 
-  return exposeProvider({
+  const hookProvider = exposeProvider({
     ...objectify([data, loading, error, downloading, uploading]),
     abort: () => hookInstance.m && hookInstance.m.abort(),
     /**
@@ -206,6 +215,27 @@ export default function createRequestState<
     },
     onComplete(handler: CompleteHandler<AG, Args>) {
       eventManager.on(KEY_COMPLETE, handler);
+    },
+
+    /**
+     * send and wait for responding with `await`
+     * this is always used in `nuxt3`
+     * @example
+     * ```js
+     * const { loading, data, error } = await useRequest(...);
+     * ```
+     */
+    then(onfulfilled: (result: any) => void) {
+      const handleFullfilled = () => {
+        onfulfilled(hookProvider);
+      };
+      stopImmediateRequest = trueValue;
+      promiseThen(
+        immediate && globalConfigMap.ssr ? handleRequest() : promiseResolve(),
+        handleFullfilled,
+        handleFullfilled
+      );
     }
   });
+  return hookProvider;
 }

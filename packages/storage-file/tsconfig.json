@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "~/*": ["./*"],
+      "#/*": ["test/*"],
+      "root/*": ["../../internal/*"]
+    }
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "NodeNext",
+      "moduleResolution": "nodenext"
+    }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

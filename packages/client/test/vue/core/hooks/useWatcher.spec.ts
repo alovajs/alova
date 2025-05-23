@@ -933,4 +933,33 @@ describe('use useWatcher hook to send GET with vue', () => {
     expect(errorFn).not.toHaveBeenCalled();
     expect(completeFn).toHaveBeenCalled();
   });
+
+  test("shouldn't send request event if the `immediate` is `true` when call with `await`", async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const mutateNum = ref(0);
+    const { loading, data, error, onSuccess, onComplete } = await useWatcher(
+      () =>
+        alova.Get('/unit-test', {
+          cacheFor: null
+        }),
+      [mutateNum],
+      {
+        immediate: true
+      }
+    );
+
+    const successFn = vi.fn();
+    const completeFn = vi.fn();
+    onSuccess(successFn);
+    onComplete(completeFn);
+
+    await delay(100);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+    expect(successFn).not.toHaveBeenCalled();
+    expect(completeFn).not.toHaveBeenCalled();
+  });
 });

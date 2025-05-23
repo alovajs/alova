@@ -1,3 +1,4 @@
+import { newInstance } from '@alova/shared';
 import { AlovaGenerics, Method } from 'alova';
 import {
   AlovaEvent,
@@ -33,7 +34,7 @@ export class AlovaEventBase<AG extends AlovaGenerics, Args extends any[]> implem
   }
 
   static spawn<AG extends AlovaGenerics, Args extends any[]>(method: Method<AG>, args: [...Args, ...any[]]) {
-    return new AlovaEventBase<AG, Args>(method, args);
+    return newInstance(AlovaEventBase<AG, Args>, method, args);
   }
 }
 
@@ -81,37 +82,6 @@ export class AlovaCompleteEvent<AG extends AlovaGenerics, Args extends any[]> ex
     this.data = data;
     this.fromCache = status === 'error' ? false : fromCache;
     this.error = error;
-  }
-}
-
-// extend event
-export class AlovaSSEEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaEventBase<AG, Args> {
-  eventSource: EventSource; // EventSource instance
-
-  constructor(base: AlovaEventBase<AG, Args>, eventSource: EventSource) {
-    super(base.method, base.args);
-    this.eventSource = eventSource;
-  }
-}
-
-export class AlovaSSEErrorEvent<AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaSSEEvent<AG, Args> {
-  error: Error; // error object
-
-  constructor(base: AlovaSSEEvent<AG, Args>, error: Error) {
-    super(base, base.eventSource);
-    this.error = error;
-  }
-}
-
-export class AlovaSSEMessageEvent<Data, AG extends AlovaGenerics, Args extends any[] = any[]> extends AlovaSSEEvent<
-  AG,
-  Args
-> {
-  data: Data; // Data converted by the interceptor for each response
-
-  constructor(base: AlovaSSEEvent<AG, Args>, data: Data) {
-    super(base, base.eventSource);
-    this.data = data;
   }
 }
 
