@@ -246,25 +246,27 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     }
   };
 
+  const computeIsLastPage = () => {
+    const dataRaw = nestedData.v;
+    if (!dataRaw) {
+      return trueValue;
+    }
+    const statesDataVal = listDataGetter(dataRaw as any[]);
+    const pageVal = page.v;
+    const pageCountVal = pageCount.v;
+    const dataLen = isArray(statesDataVal) ? len(statesDataVal) : 0;
+    return pageCountVal ? pageVal >= pageCountVal : dataLen < pageSize.v;
+  };
   /**
    * fix #685
    * @see {https://github.com/alovajs/alova/issues/685}
    */
-  const isLastPage = create(falseValue, 'isLastPage');
+  const isLastPage = create(computeIsLastPage(), 'isLastPage');
   // If the returned data is smaller than the page size, it is considered the last page.
-  watch([page, pageCount, nestedData, pageSize], () => {
-    // the reason why setTimeout is used is that needed to wait for the `loading` state to be updated.
+  watch([page, pageCount, nestedData, pageSize], async () => {
+    // the reason why delay is used is that needed to wait for the `loading` state to be updated.
     setTimeoutFn(() => {
-      const dataRaw = nestedData.v;
-      if (!dataRaw) {
-        isLastPage.v = trueValue;
-        return;
-      }
-      const statesDataVal = listDataGetter(dataRaw as any[]);
-      const pageVal = page.v;
-      const pageCountVal = pageCount.v;
-      const dataLen = isArray(statesDataVal) ? len(statesDataVal) : 0;
-      isLastPage.v = pageCountVal ? pageVal >= pageCountVal : dataLen < pageSize.v;
+      isLastPage.v = computeIsLastPage();
     });
   });
 
@@ -531,7 +533,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         });
       }
 
-      const isLastPageVal = isLastPage.v;
+      const isLastPageVal = computeIsLastPage();
       const fillingItemsLen = len(fillingItems);
       let isLastEmptyPageInNonAppendMode = false;
       if (fillingItemsLen > 0 || isLastPageVal) {
