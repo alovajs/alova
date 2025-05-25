@@ -24,6 +24,7 @@ import {
   promiseCatch,
   promiseResolve,
   pushItem,
+  setTimeoutFn,
   splice,
   trueValue,
   undefinedValue,
@@ -244,22 +245,28 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       promiseCatch(fetch(fetchMethod as Method, ...customArgs, undefinedValue), noop);
     }
   };
+
+  /**
+   * fix #685
+   * @see {https://github.com/alovajs/alova/issues/685}
+   */
+  const isLastPage = create(falseValue, 'isLastPage');
   // If the returned data is smaller than the page size, it is considered the last page.
-  const isLastPage = computed(
-    () => {
+  watch([page, pageCount, nestedData, pageSize], () => {
+    // the reason why setTimeout is used is that needed to wait for the `loading` state to be updated.
+    setTimeoutFn(() => {
       const dataRaw = nestedData.v;
       if (!dataRaw) {
-        return trueValue;
+        isLastPage.v = trueValue;
+        return;
       }
       const statesDataVal = listDataGetter(dataRaw as any[]);
       const pageVal = page.v;
       const pageCountVal = pageCount.v;
       const dataLen = isArray(statesDataVal) ? len(statesDataVal) : 0;
-      return pageCountVal ? pageVal >= pageCountVal : dataLen < pageSize.v;
-    },
-    [page, pageCount, nestedData, pageSize],
-    'isLastPage'
-  );
+      isLastPage.v = pageCountVal ? pageVal >= pageCountVal : dataLen < pageSize.v;
+    });
+  });
 
   // Update current page cache
   const updateCurrentPageCache = async () => {
