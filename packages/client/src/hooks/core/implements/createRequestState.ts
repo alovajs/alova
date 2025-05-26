@@ -13,6 +13,7 @@ import {
   isArray,
   isFn,
   isNumber,
+  objectValues,
   promiseCatch,
   PromiseCls,
   sloughConfig,
@@ -123,12 +124,13 @@ export default function createRequestState<
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
 
   /**
-   * ## react ##Every time the function is executed, the following items need to be reset
+   * ## react
+   * Every time the function is executed, the following items need to be reset
    */
   hookInstance.fs = frontStates;
   hookInstance.em = eventManager;
   hookInstance.c = useHookConfig;
-  hookInstance.ms = managedStatesProxy;
+  hookInstance.ms = { ...frontStates, ...managedStatesProxy };
 
   const hasWatchingStates = watchingStates !== undefinedValue;
   // Initialize request event
@@ -175,9 +177,10 @@ export default function createRequestState<
         hasWatchingStates
           ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
           : () => wrapEffectRequest(referingObject),
-      removeStates: () => forEach(hookInstance.rf, fn => fn()),
-      saveStates: states => forEach(hookInstance.sf, fn => fn(states)),
-      frontStates: { ...frontStates, ...managedStatesProxy },
+      removeStates: () => {
+        forEach(objectValues(hookInstance.rf), fn => fn());
+      },
+      frontStates: hookInstance.ms,
       watchingStates,
       immediate: immediate ?? trueValue
     });

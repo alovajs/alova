@@ -2,6 +2,7 @@ import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent 
 import { EnumHookType } from '@/util/helper';
 import {
   falseValue,
+  forEach,
   getContext,
   getHandlerMethod,
   getMethodInternalKey,
@@ -10,7 +11,6 @@ import {
   omit,
   promiseResolve,
   promiseThen,
-  pushItem,
   sloughConfig,
   trueValue,
   undefinedValue
@@ -45,7 +45,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
 ) {
   const currentHookAssert = coreHookAssert(hookInstance.ht);
   let methodInstance = getHandlerMethod(methodHandler, currentHookAssert, sendCallingArgs);
-  const { fs: frontStates, ht: hookType, c: useHookConfig, ms: managedStates } = hookInstance;
+  const { fs: frontStates, ht: hookType, c: useHookConfig } = hookInstance;
   const { loading: loadingState, data: dataState, error: errorState } = frontStates;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
   const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
@@ -62,7 +62,6 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
   return (async () => {
     // Initialize status data, which does not need to be loaded when pulling data, because pulling data does not require returning data.
     let removeStates = noop;
-    let saveStates = noop as Hook['sf'][number];
     let isNextCalled = falseValue;
     let responseHandlePromise = promiseResolve<any>(undefinedValue);
     let offDownloadEvent = noop;
@@ -73,11 +72,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
     let controlledLoading = falseValue;
     if (!isFetcher) {
       // Store the initial state in cache for subsequent updates
-      saveStates = frontStates => setStateCache(id, methodKey, frontStates, hookInstance);
-      saveStates({ ...frontStates, ...managedStates });
+      setStateCache(id, methodKey, hookInstance);
 
       // Setting the state removal function will be passed to the effect request in the hook, and it will be set to be called when the component is unloaded.
-      removeStates = () => removeStateCache(id, methodKey);
+      removeStates = () => removeStateCache(id, methodKey, hookInstance);
     }
 
     // The middleware function next callback function allows you to modify mandatory request parameters and even replace the method instance that is about to send the request.
@@ -99,8 +97,7 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
 
       methodInstance = guardNextReplacingMethod;
       // The latest controller needs to be saved every time a request is sent
-      pushItem(hookInstance.sf, saveStates);
-      pushItem(hookInstance.rf, removeStates);
+      hookInstance.rf[methodKey] = removeStates;
 
       // Loading will not be changed when the loading state is controlled
       // The cache is missed, or loading needs to be set to true when forcing a request.
@@ -172,8 +169,9 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
           toUpdateResponse() && (dataState.v = data);
         } else if (hookInstance.c.updateState !== falseValue) {
           // Update the status in the cache, usually entered in use fetcher
-          const cachedState = getStateCache(id, methodKey).s;
-          cachedState && (cachedState.data.v = data);
+          forEach(getStateCache(id, methodKey), hookInstance => {
+            hookInstance.fs.data.v = data;
+          });
         }
 
         // If the response data needs to be updated, the corresponding callback function is triggered after the request.

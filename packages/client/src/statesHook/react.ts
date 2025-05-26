@@ -1,4 +1,4 @@
-import { falseValue, isNumber, noop, trueValue, undefinedValue } from '@alova/shared';
+import { falseValue, isNumber, noop, undefinedValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactHookExportType, ReactState } from '~/typings/stateshook/react';
@@ -31,7 +31,7 @@ export default {
     refCurrent(refObj) === undefinedValue && setRef(refObj, initialValue);
     return refObj;
   },
-  effectRequest({ handler, removeStates, saveStates, immediate, frontStates, watchingStates = [] }) {
+  effectRequest({ handler, removeStates, immediate, watchingStates = [] }) {
     // `handler` is called when some states change are detected
     const oldStates = useRef(watchingStates);
 
@@ -49,17 +49,10 @@ export default {
       if (immediate || isNumber(changedIndex)) {
         handler(changedIndex);
       }
-
-      // remove states when component is unmounted
-      return removeStates;
     }, watchingStates);
 
-    // Because react will call usehook again every time it refreshes, the state cache will be invalidated every time
-    // Therefore, the managed state needs to be updated every time
-    const needSave = useRef(false);
-    useEffect(() => {
-      refCurrent(needSave) ? saveStates(frontStates) : setRef(needSave, trueValue);
-    });
+    // remove states when component is unmounted
+    useEffect(() => removeStates, []);
   },
   computed: (getter, depList) => {
     const memo = useMemo(getter, depList);

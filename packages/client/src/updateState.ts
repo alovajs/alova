@@ -1,4 +1,5 @@
 import {
+  PromiseCls,
   falseValue,
   forEach,
   getContext,
@@ -6,6 +7,8 @@ import {
   isArray,
   isFn,
   isObject,
+  len,
+  mapItem,
   objectKeys,
   trueValue,
   undefinedValue
@@ -32,40 +35,48 @@ export default async function updateState<Responded = unknown>(
     const { update } = promiseStatesHook();
     const methodKey = getMethodInternalKey(matcher);
     const { id } = getContext(matcher);
-    const { s: frontStates, h: hookInstance } = getStateCache(id, methodKey);
+    const hookInstances = getStateCache(id, methodKey);
     const updateStateCollection = isFn(handleUpdate)
       ? ({ data: handleUpdate } as UpdateStateCollection<Responded>)
       : handleUpdate;
 
-    let updatedDataColumnData = undefinedValue as any;
-    if (frontStates) {
-      // Loop through the updated data and assign it to the supervised state
-      forEach(objectKeys(updateStateCollection), stateName => {
-        coreAssert(stateName in frontStates, `state named \`${stateName}\` is not found`);
-        const targetStateProxy = frontStates[stateName as keyof typeof frontStates];
-        let updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](targetStateProxy.v);
+    const updatePromises = mapItem(hookInstances, async hookInstance => {
+      let updatedDataColumnData = undefinedValue as any;
+      if (hookInstance) {
+        const { ms: mergedStates, ro: referingObject } = hookInstance;
+        // Loop through the updated data and assign it to the supervised state
 
-        // shallow clone the updatedData so that can effect in react.
-        updatedData = isArray(updatedData)
-          ? [...updatedData]
-          : isObject(updatedData)
-            ? { ...updatedData }
-            : updatedData;
+        forEach(objectKeys(updateStateCollection), stateName => {
+          coreAssert(stateName in mergedStates, `state named \`${stateName}\` is not found`);
+          const targetStateProxy = mergedStates[stateName as keyof typeof mergedStates];
+          let updatedData = updateStateCollection[stateName as keyof typeof updateStateCollection](targetStateProxy.v);
 
-        // Record the updated value of the data field, used to update cached data
-        if (stateName === 'data') {
-          updatedDataColumnData = updatedData;
-        }
+          // shallow clone the updatedData so that can effect in react.
+          updatedData = isArray(updatedData)
+            ? [...updatedData]
+            : isObject(updatedData)
+              ? { ...updatedData }
+              : updatedData;
 
-        // Update directly using update without checking referring object.tracked keys
-        update(updatedData, frontStates[stateName as keyof typeof frontStates].s, stateName, hookInstance.ro);
-      });
+          // Record the updated value of the data field, used to update cached data
+          if (stateName === 'data') {
+            updatedDataColumnData = updatedData;
+          }
+
+          // Update directly using update without checking referring object.tracked keys
+          update(updatedData, mergedStates[stateName as keyof typeof mergedStates].s, stateName, referingObject);
+        });
+      }
+
+      // If data is updated, cache and persistent data need to be updated at the same time
+      if (updatedDataColumnData !== undefinedValue) {
+        await setCache(matcher, updatedDataColumnData);
+      }
+    });
+
+    if (len(updatePromises) > 0) {
+      await PromiseCls.all(updatePromises);
       updated = trueValue;
-    }
-
-    // If data is updated, cache and persistent data need to be updated at the same time
-    if (updatedDataColumnData !== undefinedValue) {
-      setCache(matcher, updatedDataColumnData);
     }
   }
   return updated;
