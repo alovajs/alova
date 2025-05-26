@@ -66,7 +66,6 @@ export default function createRequestState<
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
-  const { __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
   let initialLoading = !!immediate;
   let cachedResponse: any = undefinedValue;
 
@@ -96,10 +95,15 @@ export default function createRequestState<
     } catch {}
   }
 
-  const { create, effectRequest, ref, objectify, exposeProvider, transformState2Proxy } = statesHookHelper<AG>(
-    promiseStatesHook(),
-    referingObject
-  );
+  const {
+    create,
+    effectRequest,
+    ref,
+    objectify,
+    exposeProvider,
+    transformState2Proxy,
+    __referingObj: referingObject
+  } = statesHookHelper<AG>(promiseStatesHook(), useHookConfig.__referingObj);
   const progress: Progress = {
     total: 0,
     loaded: 0
