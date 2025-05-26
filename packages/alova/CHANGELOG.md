@@ -1,5 +1,13 @@
 # alova
 
+## 3.2.12
+
+### Patch Changes
+
+- [#687](https://github.com/alovajs/alova/pull/687) [`70ccbee`](https://github.com/alovajs/alova/commit/70ccbee3307fc5e12d2a8b57a76f279116893fea) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that cannot update state which is the same key but distribute in different component
+
+- [#686](https://github.com/alovajs/alova/pull/686) [`4196f50`](https://github.com/alovajs/alova/commit/4196f5053dbd584c393b02f79ba90dd449158534) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - delay update `isLastPage` so that it can wait for the `loading` state to be updated
+
 ## 3.2.11
 
 ### Patch Changes
