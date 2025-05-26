@@ -25,7 +25,7 @@ describe('update cached response data by user in svelte', () => {
     expect(screen.getByRole('id2')).toHaveTextContent('10');
     const alovaId = screen.getByRole('alovaId').innerHTML;
     const methodKey1 = screen.getByRole('methodKey').innerHTML;
-    expect(getStateCache(alovaId, methodKey1)).not.toBeUndefined();
+    expect(getStateCache(alovaId, methodKey1)).not.toHaveLength(0);
 
     // It is necessary to pause for a period of time before triggering the event and checking the response data.
     fireEvent.click(screen.getByRole('button'));
@@ -34,14 +34,14 @@ describe('update cached response data by user in svelte', () => {
     expect(screen.getByRole('id1')).toHaveTextContent('1');
     expect(screen.getByRole('id2')).toHaveTextContent('11');
     const methodKey2 = screen.getByRole('methodKey').innerHTML;
-    expect(getStateCache(alovaId, methodKey2)).not.toBeUndefined();
+    expect(getStateCache(alovaId, methodKey2)).not.toHaveLength(0);
 
     // After the component is uninstalled, the corresponding cache status will be deleted.
     unmount();
     await waitFor(() => {
       // An empty object indicates that the state cache is not matched.
-      expect(getStateCache(alovaId, methodKey1)).toStrictEqual({});
-      expect(getStateCache(alovaId, methodKey2)).toStrictEqual({});
+      expect(getStateCache(alovaId, methodKey1)).toHaveLength(0);
+      expect(getStateCache(alovaId, methodKey2)).toHaveLength(0);
     });
   });
 });

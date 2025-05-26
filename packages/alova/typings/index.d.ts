@@ -211,7 +211,6 @@ export type MergedStatesMap = Record<string, FrameworkState<any, string>>;
 export interface EffectRequestParams<E> {
   handler: (...args: any[]) => void;
   removeStates: () => void;
-  saveStates: (frontStates: MergedStatesMap) => void;
   frontStates: MergedStatesMap;
   watchingStates?: E[];
   immediate: boolean;

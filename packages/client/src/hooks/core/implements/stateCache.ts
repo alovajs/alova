@@ -1,13 +1,8 @@
-import { deleteAttr } from '@alova/shared';
-import type { MergedStatesMap } from 'alova';
+import { deleteAttr, newInstance } from '@alova/shared';
 import { Hook } from '~/typings/clienthook';
 
-// State data cache
-interface CacheItem {
-  s: MergedStatesMap;
-  h: Hook;
-}
-const stateCache: Record<string, Record<string, CacheItem>> = {};
+type Key = string | number | symbol;
+const stateCache: Record<Key, Record<Key, Set<Hook<any>>>> = {};
 
 /**
  * @description Get State cache data
@@ -15,9 +10,9 @@ const stateCache: Record<string, Record<string, CacheItem>> = {};
  * @param key Request key value
  * @returns Cached response data, if not returned {}
  */
-export const getStateCache = (namespace: string, key: string) => {
+export const getStateCache = (namespace: string, key: Key) => {
   const cachedState = stateCache[namespace] || {};
-  return cachedState[key] || {};
+  return cachedState[key] ? Array.from(cachedState[key]) : [];
 };
 
 /**
@@ -26,17 +21,12 @@ export const getStateCache = (namespace: string, key: string) => {
  * @param key Request key value
  * @param data cache data
  */
-export const setStateCache = <Args extends any[] = any[]>(
-  namespace: string,
-  key: string,
-  data: MergedStatesMap,
-  hookInstance: Hook<Args>
-) => {
+export const setStateCache = <Args extends any[] = any[]>(namespace: string, key: Key, hookInstance: Hook<Args>) => {
   const cachedState = (stateCache[namespace] = stateCache[namespace] || {});
-  cachedState[key] = {
-    s: data,
-    h: hookInstance as Hook<any>
-  };
+  if (!cachedState[key]) {
+    cachedState[key] = newInstance(Set<Hook<any>>);
+  }
+  cachedState[key].add(hookInstance);
 };
 
 /**
@@ -44,9 +34,17 @@ export const setStateCache = <Args extends any[] = any[]>(
  * @param baseURL Base URL
  * @param key Request key value
  */
-export const removeStateCache = (namespace: string, key: string) => {
+export const removeStateCache = <Args extends any[] = any[]>(
+  namespace: string,
+  key: Key,
+  hookInstance?: Hook<Args>
+) => {
   const cachedState = stateCache[namespace];
-  if (cachedState) {
-    deleteAttr(cachedState, key);
+  const hookSet = cachedState[key];
+  if (cachedState && hookSet) {
+    hookInstance ? hookSet.delete(hookInstance) : hookSet.clear();
+    if (hookSet.size === 0) {
+      deleteAttr(cachedState, key);
+    }
   }
 };

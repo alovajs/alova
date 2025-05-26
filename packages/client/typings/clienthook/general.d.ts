@@ -246,11 +246,8 @@ export interface Hook<Args extends any[] = any[]> {
   /** The method instance of the last request */
   m?: Method;
 
-  /** Save states fns */
-  sf: ((frontStates: MergedStatesMap) => void)[];
-
   /** Remove states fns */
-  rf: (() => void)[];
+  rf: Record<string | number | symbol, () => void>;
 
   /** Front states */
   fs: FrontRequestState<
@@ -277,6 +274,6 @@ export interface Hook<Args extends any[] = any[]> {
   /** refering object */
   ro: ReferingObject;
 
-  /** managed states */
+  /** merged states */
   ms: MergedStatesMap;
 }
