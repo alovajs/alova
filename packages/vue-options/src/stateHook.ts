@@ -34,6 +34,9 @@ export default {
     // async update, because the `component` and `dataKey` must be mounted to referingObject first.
     setTimeoutFn(() => {
       const { component, dataKey } = referingObject;
+      if (dataKey === '__proto__' || dataKey === 'constructor' || dataKey === 'prototype') {
+        throw new Error(`Invalid dataKey: ${dataKey}`);
+      }
       component[dataKey][key] = newValue;
     });
   },
