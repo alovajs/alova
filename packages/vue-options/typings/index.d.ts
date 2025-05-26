@@ -50,7 +50,7 @@ export type VueOptionExportType<T> = StatesExportHelper<{
   State: OptionsState<T>;
   Computed: OptionsComputed<any>;
   Export: OptionsState<T> | OptionsComputed<any>;
-  Watched: string;
+  Watched: { value: any; key: string; type: 's' | 'c' };
   StateExport: T;
   ComputedExport: T;
 }>;

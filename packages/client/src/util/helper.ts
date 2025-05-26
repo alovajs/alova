@@ -11,6 +11,7 @@ import {
   filterItem,
   forEach,
   includes,
+  injectReferingObject,
   instanceOf,
   isFn,
   isNumber,
@@ -150,7 +151,7 @@ type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string
  */
 export function statesHookHelper<AG extends AlovaGenerics>(
   statesHook: StatesHook<StatesExport<unknown>>,
-  referingObject: ReferingObject = { trackedKeys: {}, bindError: falseValue }
+  referingObject: ReferingObject = { trackedKeys: {}, bindError: falseValue, ...injectReferingObject() }
 ) {
   const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
@@ -161,7 +162,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       return fn;
     }
     const memorizedFn = statesHook.memorize(fn);
-    (memorizedFn as unknown as MemorizedFunction).memorized = true;
+    (memorizedFn as unknown as MemorizedFunction).memorized = trueValue;
     return memorizedFn;
   };
   const { dehydrate } = statesHook;
@@ -198,7 +199,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       // Collect all dependencies in computed
       forEach(depList, dep => {
         if (dep.k) {
-          depKeys[dep.k as string] = true;
+          depKeys[dep.k as string] = trueValue;
         }
       });
 
