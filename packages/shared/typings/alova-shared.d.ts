@@ -1,7 +1,7 @@
 /**
- * @alova/shared 1.1.0 (https://alova.js.org)
+ * @alova/shared 1.1.2 (https://alova.js.org)
  * Document https://alova.js.org
- * Copyright 2024 Scott Hu. All Rights Reserved
+ * Copyright 2025 Scott Hu. All Rights Reserved
  * Licensed under MIT (https://github.com/alovajs/alova/blob/main/LICENSE)
  */
 
@@ -18,6 +18,13 @@ declare class AlovaError extends Error {
  * @param message Assert message
  */
 declare const createAssert: (prefix?: string) => (expression: boolean, message: string, errorCode?: number) => void;
+
+/**
+ * Injects a reference object with `JSON.parse` so that it can be accessed in another module.
+ * @param object injecting object
+ */
+declare const provideReferingObject: (object: Record<string, any>) => void;
+declare const injectReferingObject: () => Record<string, any>;
 
 interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
@@ -509,6 +516,7 @@ export {
   getTime,
   globalToString,
   includes,
+  injectReferingObject,
   instanceOf,
   isArray,
   isFn,
@@ -533,6 +541,7 @@ export {
   promiseReject,
   promiseResolve,
   promiseThen,
+  provideReferingObject,
   pushItem,
   regexpTest,
   setTimeoutFn,
