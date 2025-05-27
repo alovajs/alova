@@ -1,5 +1,12 @@
 # @alova/vue-options
 
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [[`c238c37`](https://github.com/alovajs/alova/commit/c238c379c7b55888cad0c8ed4dee7a572f05444d)]:
+  - @alova/shared@1.2.0
+
 ## 2.0.10
 
 ### Patch Changes
