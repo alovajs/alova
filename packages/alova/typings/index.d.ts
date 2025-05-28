@@ -3,7 +3,7 @@ import { EventManager, FrameworkState } from '@alova/shared';
 export interface AlovaGenerics<
   R = any,
   T = any,
-  RC = any,
+  RC = unknown,
   RE = any,
   RH = any,
   L1 extends AlovaGlobalCacheAdapter = any,
