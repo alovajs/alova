@@ -1,7 +1,7 @@
 import { AlovaGlobalCacheAdapter } from 'alova';
 import Redis, { RedisOptions } from 'ioredis';
 
-interface RedisStorageAdapterOptions extends RedisOptions {
+interface RedisStorageCommonOptions {
   /**
    * Redis connection key prefix
    * @default 'alova:'
@@ -9,14 +9,25 @@ interface RedisStorageAdapterOptions extends RedisOptions {
   keyPrefix?: string;
 }
 
+interface RedisStorageAdapterOptions extends RedisStorageCommonOptions, RedisOptions {}
+
+interface RedisStorageInstance extends RedisStorageCommonOptions {
+  client: Redis;
+}
+
 class RedisStorageAdapter implements AlovaGlobalCacheAdapter {
   public name = 'adapterRedis';
   public client: Redis;
   private keyPrefix: string;
 
-  constructor(options: RedisStorageAdapterOptions) {
-    const { keyPrefix, ...redisOptions } = options;
-    this.client = new Redis(redisOptions);
+  constructor(config: RedisStorageAdapterOptions | RedisStorageInstance) {
+    const { client, keyPrefix } = config as RedisStorageInstance;
+    if (client instanceof Redis) {
+      this.client = client;
+    } else {
+      const { keyPrefix: prefixUnused, ...redisOptions } = config as RedisStorageAdapterOptions;
+      this.client = new Redis(redisOptions);
+    }
     this.keyPrefix = keyPrefix || 'alova:';
   }
 
