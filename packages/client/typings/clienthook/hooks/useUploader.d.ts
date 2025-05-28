@@ -80,14 +80,6 @@ interface Progress {
    * The total size of all files to be uploaded, which is the sum of multiple files.
    */
   total: number;
-  /**
-   * The number of files that have been successfully uploaded.
-   */
-  successCount: number;
-  /**
-   * The number of files that failed to upload.
-   */
-  failCount: number;
 }
 
 export interface AlovaUploaderFileType {
@@ -117,15 +109,6 @@ export interface AlovaRawFile<F = AlovaUploaderFileType[keyof AlovaUploaderFileT
    * It is recommended to provide this when `file` is not a File object.
    */
   mimeType?: string;
-  /**
-   * The upload status of the file.
-   * - 0: Not uploaded yet.
-   * - 1: Uploading.
-   * - 2: Upload completed.
-   * - 3: Upload error.
-   * @default 0
-   */
-  status?: 0 | 1 | 2 | 3;
 }
 
 interface FileAppendOptions {
@@ -176,6 +159,14 @@ export interface UploadExposure<AG extends AlovaGenerics, Args extends any[] = a
    * error message
    */
   error: ExportedComputed<Error | undefined, AG['StatesExport']>;
+  /**
+   * The number of files that have been successfully uploaded.
+   */
+  successCount: number;
+  /**
+   * The number of files that failed to upload.
+   */
+  failCount: number;
 
   /**
    * Appends files to the upload list. After appending, the 'file' items in the list will be automatically converted to File objects.
@@ -201,6 +192,11 @@ export interface UploadExposure<AG extends AlovaGenerics, Args extends any[] = a
    * Internally, it can be implemented using useRequest because many properties in the fileList can be provided by useRequest.
    */
   upload: (...indexes: number[]) => Promise<M extends 'batch' ? AG['Responded'] : AG['Responded'][]>;
+  /**
+   * abort the upload operation.
+   * @param indexes - The indexes of the upload request to abort. If no indexes are provided, all ongoing uploads will be aborted.
+   */
+  abort: (...indexes: number[]) => void;
   /**
    * Event handler for when each file is uploaded successfully.
    * @param handler - The callback function to handle the AlovaFileSuccessEvent.

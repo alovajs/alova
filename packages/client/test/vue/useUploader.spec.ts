@@ -140,6 +140,7 @@ describe('vue => useUploader', () => {
     // uploading error test
     const {
       fileList: fileList2,
+      failCount,
       upload: upload2,
       appendFiles: appendFiles2,
       uploading: uploading2,
@@ -153,6 +154,7 @@ describe('vue => useUploader', () => {
     await uploadingMethodError.catch(() => {});
     fileList2.value.forEach(file => expect(file.status).toBe(3)); // Upload failed
     expect(error.value?.message).toBe('Network Error'); // Error occurred
+    expect(failCount.value).toBe(1);
   });
 
   test('should handle appendFiles with start position', async () => {
@@ -300,13 +302,16 @@ describe('vue => useUploader', () => {
 
   test('should track upload progress', async () => {
     const file1 = mockFile('test1.txt');
-    const { progress, upload, appendFiles, fileList } = useUploader(({ file }) => mockUpload(file));
+    const { progress, successCount, failCount, upload, appendFiles, fileList } = useUploader(({ file }) =>
+      mockUpload(file)
+    );
 
     await appendFiles({ file: { file: file1 } });
     await upload();
     expect(progress.value.uploaded).toBe(17);
     expect(progress.value.total).toBe(17);
-    expect(progress.value.successCount).toBe(1);
+    expect(successCount.value).toBe(1);
+    expect(failCount.value).toBe(0);
     expect(fileList.value[0].progress.uploaded).toBe(17);
     expect(fileList.value[0].progress.total).toBe(17);
 
@@ -314,9 +319,45 @@ describe('vue => useUploader', () => {
     await upload();
     expect(progress.value.uploaded).toBe(34);
     expect(progress.value.total).toBe(34);
-    expect(progress.value.successCount).toBe(2);
+    expect(successCount.value).toBe(2);
+    expect(failCount.value).toBe(0);
     expect(fileList.value[1].progress.uploaded).toBe(17);
     expect(fileList.value[1].progress.total).toBe(17);
+  });
+
+  test('should upload with specific index', async () => {
+    const file1 = mockFile('test1.txt');
+    const file2 = mockFile('test2.txt');
+    const { progress, successCount, failCount, upload, appendFiles, fileList } = useUploader(({ file }) =>
+      mockUpload(file)
+    );
+
+    await appendFiles({
+      file: [
+        {
+          file: file1
+        }
+      ]
+    });
+    await expect(upload(1)).rejects.toThrowError('The file at index 1 does not exist');
+    await appendFiles({
+      file: [
+        {
+          file: file2
+        }
+      ]
+    });
+    await upload(1);
+    expect(progress.value.uploaded).toBe(17);
+    expect(progress.value.total).toBe(17);
+    expect(successCount.value).toBe(1);
+    expect(failCount.value).toBe(0);
+    expect(fileList.value[0].progress.uploaded).toBe(0);
+    expect(fileList.value[0].progress.total).toBe(17);
+    expect(fileList.value[1].progress.uploaded).toBe(17);
+    expect(fileList.value[1].progress.total).toBe(17);
+
+    await expect(upload(1)).rejects.toThrowError('The file at index 1 cannot be uploaded');
   });
 
   test('should handle success and complete events', async () => {
@@ -396,4 +437,8 @@ describe('vue => useUploader', () => {
     vi.spyOn(HTMLInputElement.prototype, 'click').mockRestore();
     vi.spyOn(HTMLInputElement.prototype, 'addEventListener').mockRestore();
   });
+
+  test('should abort upload in each mode', async () => {});
+
+  test('should abort upload in batch mode', async () => {});
 });

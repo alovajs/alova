@@ -117,15 +117,6 @@ export interface AlovaRawFile<F = AlovaUploaderFileType[keyof AlovaUploaderFileT
    * It is recommended to provide this when `file` is not a File object.
    */
   mimeType?: string;
-  /**
-   * The upload status of the file.
-   * - 0: Not uploaded yet.
-   * - 1: Uploading.
-   * - 2: Upload completed.
-   * - 3: Upload error.
-   * @default 0
-   */
-  status?: 0 | 1 | 2 | 3;
 }
 
 interface FileAppendOptions {
