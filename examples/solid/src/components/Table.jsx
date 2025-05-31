@@ -52,7 +52,9 @@ function Table(_props) {
                     <tr {...componentProps}>
                       <For each={props.columns}>
                         {({ dataIndex, render }) => (
-                          <td>{typeof render === 'function' ? render(row[dataIndex], row) : row[dataIndex]}</td>
+                          <td>
+                            {typeof render === 'function' ? render(row[dataIndex], row, index()) : row[dataIndex]}
+                          </td>
                         )}
                       </For>
                     </tr>

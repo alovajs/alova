@@ -6,5 +6,9 @@ export default defineConfig({
   plugins: [svelte()],
   resolve: {
     extensions: ['.svelte', '.js', '.ts']
+  },
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: true
   }
 });

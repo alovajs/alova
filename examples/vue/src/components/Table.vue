@@ -35,7 +35,7 @@
                 :key="dataIndex">
                 <component
                   v-if="typeof render === 'function'"
-                  :is="render(row[dataIndex], row)"
+                  :is="render(row[dataIndex], row, index)"
                   :row="row"
                   :index="index">
                 </component>

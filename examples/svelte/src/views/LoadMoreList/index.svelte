@@ -1,5 +1,5 @@
 <script>
-  import { usePagination, useRequest } from 'alova/client';
+  import { usePagination } from 'alova/client';
   import { writable } from 'svelte/store';
   import { queryStudents, removeStudent } from '../../api/methods';
   import Table from '../../components/Table.svelte';
@@ -20,7 +20,8 @@
     refresh,
     reload,
     isLastPage,
-    update
+    update,
+    removing
   } = usePagination((page, pageSize) => queryStudents(page, pageSize, $studentName, $clsName), {
     watchingStates: [studentName, clsName],
     initialData: { total: 0, list: [] },
@@ -28,19 +29,16 @@
     append: true,
     initialPageSize: 15,
     total: res => res.total,
-    data: res => res.list
+    data: res => res.list,
+    actions: {
+      remove: ({ id }) => removeStudent(id)
+    }
   });
 
   function editItem(row) {
     detailVisible = true;
     selectedItem = row;
   }
-
-  const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
-    immediate: false
-  }).onSuccess(({ args: [row] }) => {
-    remove(row);
-  });
 
   function updateList({ detail }) {
     if (selectedItem) {
@@ -129,6 +127,7 @@
     <div
       slot="slot4"
       let:row
+      let:index
       class="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
       <nord-button
         size="s"
@@ -139,8 +138,8 @@
         variant="danger"
         size="s"
         type="error"
-        disabled={$removing}
-        on:click={() => removeSend(row)}>
+        disabled={$removing.includes(index) || undefined}
+        on:click={() => remove(row)}>
         Remove
       </nord-button>
     </div>

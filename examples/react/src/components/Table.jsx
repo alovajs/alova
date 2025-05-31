@@ -42,7 +42,7 @@ function Table({ style = {}, columns, data, loading, title, rowProps, pagination
                     {...props}>
                     {columns.map(({ dataIndex, render }) => (
                       <td key={dataIndex}>
-                        {typeof render === 'function' ? render(row[dataIndex], row) : row[dataIndex]}
+                        {typeof render === 'function' ? render(row[dataIndex], row, index) : row[dataIndex]}
                       </td>
                     ))}
                   </tr>
