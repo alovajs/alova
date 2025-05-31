@@ -51,6 +51,12 @@ export default defineMock({
     }
     retriedTimes[id] = 0;
     return ['apple', 'banana', 'orange'];
+  },
+  '[POST]/upload': ({ data }) => {
+    const key = data.keys().next();
+    return {
+      url: `https://example.com/file/${key.value}`
+    };
   }
 });
 const retriedTimes = {};

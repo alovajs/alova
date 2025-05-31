@@ -1,4 +1,4 @@
-import { usePagination, useRequest } from 'alova/client';
+import { usePagination } from 'alova/client';
 import { For, createEffect, createSignal, on } from 'solid-js';
 import { queryStudents, removeStudent } from '../../api/methods';
 import Table from '../../components/Table';
@@ -20,7 +20,8 @@ function View() {
     refresh,
     reload,
     isLastPage,
-    update
+    update,
+    removing
   } = usePagination((page, pageSize) => queryStudents(page, pageSize, studentName(), clsName()), {
     watchingStates: [studentName, clsName],
     initialData: { total: 0, list: [] },
@@ -28,19 +29,16 @@ function View() {
     append: true,
     initialPageSize: 15,
     total: res => res.total,
-    data: res => res.list
+    data: res => res.list,
+    actions: {
+      remove: ({ id }) => removeStudent(id)
+    }
   });
 
   const editItem = row => {
     selectedItem = row;
     setDetailVisible(true);
   };
-
-  const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
-    immediate: false
-  }).onSuccess(({ args: [row] }) => {
-    remove(row);
-  });
 
   const updateList = detail => {
     if (selectedItem) {
@@ -68,7 +66,7 @@ function View() {
     {
       title: 'Operate',
       dataIndex: 'operate',
-      render: (_, row) => (
+      render: (_, row, index) => (
         <div class="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
           <nord-button
             size="s"
@@ -79,8 +77,8 @@ function View() {
             variant="danger"
             size="s"
             type="error"
-            disabled={removing() || undefined}
-            onClick={() => removeSend(row)}>
+            disabled={removing().includes(index) || undefined}
+            onClick={() => remove(row)}>
             Remove
           </nord-button>
         </div>

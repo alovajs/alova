@@ -10,13 +10,13 @@ import {
   includes,
   instanceOf,
   isArray,
+  isNumber,
+  isObject,
   isString,
   len,
   mapItem,
   newInstance,
-  promiseCatch,
   promiseFinally,
-  promiseThen,
   pushItem,
   splice,
   trueValue,
@@ -71,17 +71,26 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
         }
       )
     }),
-    [fileList, successCount, failCount],
+    [fileList],
     'progress'
   );
   const error = computed(() => fileList.v.find(item => item.error)?.error, [fileList], 'error');
 
-  const appendFiles = async (options: FileAppendOptions = {}) => {
+  const appendFiles = async (
+    files: AlovaRawFile | AlovaRawFile[] | FileAppendOptions = {},
+    options: FileAppendOptions = {}
+  ) => {
     // If no files are provided, call selectFile to get them
-    const optionsFile = options.file || [];
-    let rawFiles: AlovaRawFile[] = isArray(optionsFile) ? optionsFile : [optionsFile];
+    let optionsFiles: AlovaRawFile | AlovaRawFile[] = files as AlovaRawFile | AlovaRawFile[];
+    let finallyOptions: FileAppendOptions = options;
+    if (!(files as AlovaRawFile).file && !isArray(files)) {
+      finallyOptions = files as FileAppendOptions;
+      optionsFiles = [];
+    }
+
+    let rawFiles: AlovaRawFile[] = isArray(optionsFiles) ? optionsFiles : [optionsFiles];
     if (len(rawFiles) <= 0) {
-      rawFiles = await useUploader.selectFile(options);
+      rawFiles = await useUploader.selectFile(finallyOptions);
     }
 
     // Check file quantity limit
@@ -89,7 +98,7 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
 
     // File format conversion
     const { converters } = useUploader;
-    const convertedFiles = await Promise.all(
+    const convertedFiles = await PromiseCls.all(
       mapItem(rawFiles, async file => {
         const converter = converters.find(({ is }) => is(file));
 
@@ -110,12 +119,87 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
     );
 
     // Update fileList
-    const insertPosition = options.start ?? len(fileList.v);
+    const insertPosition = finallyOptions.start ?? len(fileList.v);
     const validConvertedFiles = filterItem(convertedFiles, Boolean);
     const fileListValue = [...fileList.v];
     splice(fileListValue, insertPosition, 0, ...validConvertedFiles);
     fileList.v = fileListValue;
     return len(convertedFiles);
+  };
+
+  const getTargetFiles = (
+    positions: Array<AlovaFileItem | number>,
+    excludeStatuses: AlovaFileItem['status'][] = [1, 2],
+    type: 'upload' | 'abort' = 'upload'
+  ) => {
+    const assertErrorWords = {
+      upload: 'uploaded',
+      abort: 'aborted'
+    }[type];
+    const fileListValue = fileList.v;
+    return len(positions) > 0
+      ? mapItem(positions, (item, i) => {
+          const isItemNum = isNumber(item);
+          const fileItem = isItemNum ? fileListValue[item] : item;
+          const positionText = isItemNum ? `index ${item}` : `position ${i}`;
+          assert(fileItem, `The file of ${positionText} does not exist`);
+          len(excludeStatuses) > 0 &&
+            assert(
+              !includes(excludeStatuses, fileItem.status) && isObject(fileItem.file),
+              `The file of ${positionText} cannot be ${assertErrorWords}, which status is ${fileItem.status}`
+            );
+          return fileItem;
+        })
+      : filterItem(fileListValue, f => !includes(excludeStatuses, f.status));
+  };
+
+  const filterFiles = (files: AlovaFileItem[], statuses: number[]) =>
+    filterItem(files, file => (len(statuses) > 0 ? includes(statuses, file.status) : trueValue));
+  const uploadingMethods = ref<Array<{ f: AlovaFileItem['file']; m: Method }>>([]);
+  const pushMethod = (file: AlovaFileItem['file'], method: Method) => {
+    const index = fileList.v.findIndex(fileItem => fileItem.file === file);
+    if (index > -1) {
+      pushItem(uploadingMethods.current, { f: file, m: method });
+    }
+  };
+  const removeMethod = (method: Method) => {
+    uploadingMethods.current = filterItem(uploadingMethods.current, ({ m }) => m !== method);
+  };
+
+  const abort = (...positions: Array<AlovaFileItem | number>) => {
+    const filesToAbort = getTargetFiles(positions, [0, 2, 3], 'abort');
+    const abortMethods: Method[] = [];
+    if (len(filesToAbort) > 0) {
+      forEach(filesToAbort, ({ file }) => {
+        const uploadingItem = uploadingMethods.current.find(({ f }) => f === file);
+        uploadingItem && pushItem(abortMethods, uploadingItem.m);
+      });
+    } else {
+      pushItem(abortMethods, ...mapItem(uploadingMethods.current, ({ m }) => m));
+    }
+
+    // remove the repeat items
+    const abortMethodSet: Method[] = [];
+    forEach(abortMethods, m => {
+      if (!abortMethodSet.includes(m)) {
+        pushItem(abortMethodSet, m);
+      }
+    });
+    forEach(abortMethodSet, method => method.abort());
+  };
+
+  const removeFiles = (...positions: Array<AlovaFileItem | number>) => {
+    const filesToRemove = getTargetFiles(positions, []);
+    if (len(filesToRemove) > 0) {
+      // abort uploading files before removing them
+      abort(...filterFiles(filesToRemove, [1]));
+      fileList.v = filterItem(fileList.v, file => !includes(filesToRemove, file));
+      successCount.v = len(filterFiles(fileList.v, [2]));
+      failCount.v = len(filterFiles(fileList.v, [3]));
+    } else {
+      abort(...filterFiles(fileList.v, [1]));
+      fileList.v = [];
+    }
   };
 
   const createEvent = (method: Method<AG>, response: any, error?: any) => {
@@ -153,15 +237,8 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
     } else if (status === 3) {
       file.error = error;
     }
-  };
-
-  const uploadingMethods = ref<Method[]>([]);
-  const pushMethod = (method: Method) => pushItem(uploadingMethods.current, method);
-  const removeMethod = (method: Method) => {
-    const index = uploadingMethods.current.indexOf(method);
-    if (index > -1) {
-      splice(uploadingMethods.current, index, 1);
-    }
+    // trigger reactivity in react
+    fileList.v = [...fileList.v];
   };
 
   const createBatchUploadHandler = (filesToUpload: AlovaFileItem[], filesData: UploadingFileData[]) => {
@@ -171,29 +248,31 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
         file.progress.uploaded = totalProgress.loaded * (file.progress.total / totalProgress.total);
       });
     });
-    pushMethod(uploadingMethod);
+    forEach(filesToUpload, ({ file }) => pushMethod(file, uploadingMethod));
 
-    return promiseThen(
-      promiseCatch(uploadingMethod, error => {
-        forEach(filesToUpload, file => updateFileStatus(file, 3, undefined, error));
-        failCount.v += len(filesToUpload);
-        const { errorEvent, completeEvent } = createEvent(uploadingMethod, undefined, error);
-        eventManager.emit(KEY_ERROR, errorEvent);
-        eventManager.emit(KEY_COMPLETE, completeEvent);
-        throw error;
-      }),
-      response => {
-        forEach(filesToUpload, (file, i) => updateFileStatus(file, 2, response, undefined, i));
-        successCount.v += len(filesToUpload);
-        const { successEvent, completeEvent } = createEvent(uploadingMethod, response);
-        eventManager.emit(KEY_SUCCESS, successEvent);
-        eventManager.emit(KEY_COMPLETE, completeEvent);
-        return response;
-      }
-    ).finally(() => {
-      uploading.v = false;
-      removeMethod(uploadingMethod);
-    });
+    return uploadingMethod
+      .then(
+        response => {
+          forEach(filesToUpload, (file, i) => updateFileStatus(file, 2, response, undefined, i));
+          successCount.v = len(filterFiles(fileList.v, [2]));
+          const { successEvent, completeEvent } = createEvent(uploadingMethod, response);
+          eventManager.emit(KEY_SUCCESS, successEvent);
+          eventManager.emit(KEY_COMPLETE, completeEvent);
+          return response;
+        },
+        error => {
+          forEach(filesToUpload, file => updateFileStatus(file, 3, undefined, error));
+          failCount.v = len(filterFiles(fileList.v, [3]));
+          const { errorEvent, completeEvent } = createEvent(uploadingMethod, undefined, error);
+          eventManager.emit(KEY_ERROR, errorEvent);
+          eventManager.emit(KEY_COMPLETE, completeEvent);
+          return error;
+        }
+      )
+      .finally(() => {
+        uploading.v = false;
+        removeMethod(uploadingMethod);
+      });
   };
 
   const createEachUploadHandler = (filesToUpload: AlovaFileItem[]) => {
@@ -209,44 +288,37 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
         });
       });
 
-      pushMethod(uploadingMethod);
-      return promiseThen(
-        promiseCatch(uploadingMethod, error => {
-          updateFileStatus(file, 3, undefined, error);
-          failCount.v += 1;
-          const { errorEvent, completeEvent } = createEvent(uploadingMethod, undefined, error);
-          eventManager.emit(KEY_ERROR, errorEvent);
-          eventManager.emit(KEY_COMPLETE, completeEvent);
-          throw error;
-        }),
-        response => {
-          updateFileStatus(file, 2, response, undefinedValue, i);
-          successCount.v += 1;
-          const { successEvent, completeEvent } = createEvent(uploadingMethod, response);
-          eventManager.emit(KEY_SUCCESS, successEvent);
-          eventManager.emit(KEY_COMPLETE, completeEvent);
-          return response;
-        }
-      ).finally(() => {
-        removeMethod(uploadingMethod);
-      });
+      pushMethod(file.file, uploadingMethod);
+      return uploadingMethod
+        .then(
+          response => {
+            updateFileStatus(file, 2, response, undefinedValue, i);
+            successCount.v += 1;
+            const { successEvent, completeEvent } = createEvent(uploadingMethod, response);
+            eventManager.emit(KEY_SUCCESS, successEvent);
+            eventManager.emit(KEY_COMPLETE, completeEvent);
+            return response;
+          },
+          error => {
+            updateFileStatus(file, 3, undefinedValue, error);
+            failCount.v += 1;
+            const { errorEvent, completeEvent } = createEvent(uploadingMethod, undefinedValue, error);
+            eventManager.emit(KEY_ERROR, errorEvent);
+            eventManager.emit(KEY_COMPLETE, completeEvent);
+            return error;
+          }
+        )
+        .finally(() => {
+          removeMethod(uploadingMethod);
+        });
     });
-    return promiseFinally(Promise.all(uploadPromises), () => {
+    return promiseFinally(PromiseCls.all(uploadPromises), () => {
       uploading.v = falseValue;
     });
   };
 
-  const upload = async (...indexes: number[]) => {
-    const cannotUploadStatuses = [1, 2];
-    const filesToUpload =
-      len(indexes) > 0
-        ? mapItem(indexes, i => {
-            const fileItem = fileList.v[i];
-            assert(fileItem, `The file at index ${i} does not exist`);
-            assert(!includes(cannotUploadStatuses, fileItem.status), `The file at index ${i} cannot be uploaded`);
-            return fileItem;
-          })
-        : filterItem(fileList.v, f => !includes(cannotUploadStatuses, f.status));
+  const upload = async (...positions: Array<AlovaFileItem | number>) => {
+    const filesToUpload = getTargetFiles(positions);
     forEach(filesToUpload, file => {
       file.status = 1;
     });
@@ -259,17 +331,7 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
     uploading.v = trueValue;
     return (
       mode === 'batch' ? createBatchUploadHandler(filesToUpload, filesData) : createEachUploadHandler(filesToUpload)
-    ) as Promise<M extends 'batch' ? AG['Responded'] : AG['Responded'][]>;
-  };
-
-  const abort = (...indexes: number[]) => {
-    if (len(indexes) > 0) {
-      forEach(indexes, i => {
-        uploadingMethods.current[i]?.abort();
-      });
-    } else {
-      forEach(uploadingMethods.current, method => method.abort());
-    }
+    ) as Promise<M extends 'batch' ? AG['Responded'] | Error : Array<AG['Responded'] | Error>>;
   };
 
   return exposeProvider({
@@ -281,6 +343,7 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
     failCount,
     error,
     appendFiles,
+    removeFiles,
     upload,
     abort,
     onSuccess: (handler: (event: AlovaSuccessEvent<AG, any[]>) => void) => {
@@ -345,6 +408,7 @@ useUploader.converters = <FileConverter[]>[
     name: 'base64',
     is: ({ file }: AlovaRawFile) => isString(file),
     convert({ file = '', mimeType, name }: AlovaRawFile<string>) {
+      assert(/data:.+;base64,/.test(file), 'Invalid base64 string');
       // Convert Base64 to File
       const arr = file.split(',');
       const mime = arr[0].match(/:(.*?);/)?.[1];

@@ -25,6 +25,7 @@ export { default as isVData } from '@/hooks/silent/virtualResponse/isVData';
 export { default as stringifyVData } from '@/hooks/silent/virtualResponse/stringifyVData';
 export { default as updateStateEffect } from '@/hooks/silent/virtualResponse/updateStateEffect';
 export { default as useSSE } from '@/hooks/sse/useSSE';
+export { default as useUploader } from '@/hooks/uploader/useUploader';
 export { default as useAutoRequest } from '@/hooks/useAutoRequest';
 export { default as useCaptcha } from '@/hooks/useCaptcha';
 export { default as useForm } from '@/hooks/useForm';

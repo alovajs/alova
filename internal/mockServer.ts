@@ -98,12 +98,16 @@ const mockServer = setupServer(
   /**
    * upload request
    */
-  http.post(`${baseURL}/unit-test-upload`, ({ request }) =>
+  http.post(`${baseURL}/unit-test-upload`, async ({ request }) => {
     // Read the image from the file system using the "fs" module.
-    result(200, request, true, {
+    const delaySeconds = Number(request.headers.get('delay'));
+    if (delaySeconds && delaySeconds > 0) {
+      await delay(delaySeconds);
+    }
+    return result(200, request, true, {
       contentType: request.headers.get('Content-Type')
-    })
-  )
+    });
+  })
 );
 
 export default mockServer;

@@ -101,13 +101,11 @@ export const createCaptchaProvider = (options: CaptchaProviderOptions) => {
    */
   const sendCaptcha = async (methodHandler: (code: string, key: string) => Method, { key }: { key: string }) => {
     const storeKey = getStoreKey(key);
-    const now = getTime();
+    let now = getTime();
     const storedData = await store.get<CaptchaData>(storeKey);
 
     // Check if can resend
-    if (storedData && now < storedData.resetTime) {
-      throw new Error('Cannot send captcha yet, please wait');
-    }
+    assert(!storedData || now >= storedData.resetTime, 'Cannot send captcha yet, please wait');
 
     // If resendFormStore is enabled and there's an unexpired captcha in storage,
     // use the stored captcha
@@ -122,6 +120,7 @@ export const createCaptchaProvider = (options: CaptchaProviderOptions) => {
     const response = await methodHandler(code, key);
 
     // Store captcha information
+    now = getTime();
     await store.set(storeKey, {
       code,
       expireTime: now + expireTime,

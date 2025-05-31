@@ -19,5 +19,9 @@ export default defineConfig({
   ],
   resolve: {
     extensions: ['.vue', '.tsx', '.js', '.ts']
+  },
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: true
   }
 });

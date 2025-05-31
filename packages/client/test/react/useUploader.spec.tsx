@@ -16,10 +16,14 @@ const alovaInst = createAlova({
 });
 
 // 模拟FormData上传
-const mockUpload = (file: File) => {
+const mockUpload = (file: File, delay?: number) => {
   const formData = new FormData();
   formData.append('file', file);
-  return alovaInst.Post<Result<true>['data']>('/unit-test-upload', formData);
+  return alovaInst.Post<Result<true>['data']>('/unit-test-upload', formData, {
+    headers: {
+      delay
+    }
+  });
 };
 
 // 模拟批量上传
@@ -27,6 +31,13 @@ const mockBatchUpload = (files: File[]) => {
   const formData = new FormData();
   files.forEach(file => formData.append('files', file));
   return alovaInst.Post<Result<true>['data']>('/unit-test-upload', formData);
+};
+
+// 模拟错误上传
+const mockErrorUpload = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return alovaInst.Post<Result<true>['data']>('/unit-test-error', formData);
 };
 
 // 模拟文件对象
@@ -49,7 +60,7 @@ describe('react => useUploader', () => {
       const [uploadResult, setUploadResult] = useState<any>(null);
 
       const handleTest = async () => {
-        const count = await appendFiles({ file: { file: file1 } });
+        const count = await appendFiles({ file: file1 });
         setAppendCount(count);
 
         const [res] = await upload();
@@ -100,15 +111,14 @@ describe('react => useUploader', () => {
     const uploadHandler = vi.fn(fileData => mockUpload(fileData.file));
 
     const TestComponent = () => {
-      const { fileList, appendFiles, upload, uploading } = useUploader(uploadHandler, {
+      const { fileList, appendFiles, upload, uploading, successCount, failCount } = useUploader(uploadHandler, {
         mode: 'each',
         replaceSrc: (_, i) =>
           [`https://example.com/uploads/${file1.name}`, `https://example.com/uploads/${file2.name}`][i]
       });
 
       const handleTest = async () => {
-        await appendFiles({ file: [{ file: file1 }, { file: file2 }] });
-        await upload();
+        await appendFiles([{ file: file1 }, { file: file2 }]);
       };
 
       return (
@@ -118,7 +128,14 @@ describe('react => useUploader', () => {
             data-testid="test-button">
             Test
           </button>
+          <button
+            onClick={() => upload()}
+            data-testid="test-button2">
+            Test2
+          </button>
           <div data-testid="file-count">{fileList.length}</div>
+          <div data-testid="success-count">{successCount}</div>
+          <div data-testid="fail-count">{failCount}</div>
           <div data-testid="file1-status">{fileList[0]?.status}</div>
           <div data-testid="file2-status">{fileList[1]?.status}</div>
           <div data-testid="file1-src">{fileList[0]?.src}</div>
@@ -129,14 +146,26 @@ describe('react => useUploader', () => {
     };
 
     render(<TestComponent />);
-
-    const testButton = screen.getByTestId('test-button');
-    testButton.click();
-
+    fireEvent.click(screen.getByTestId('test-button'));
     await waitFor(() => {
-      expect(screen.getByTestId('upload-complete')).toHaveTextContent('true');
+      expect(screen.getByTestId('upload-complete')).toHaveTextContent('false');
+      expect(uploadHandler).not.toHaveBeenCalled();
+      expect(screen.getByTestId('file-count')).toHaveTextContent('2');
+      expect(screen.getByTestId('success-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('fail-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('file1-status')).toHaveTextContent('0');
+      expect(screen.getByTestId('file2-status')).toHaveTextContent('0');
+      expect(screen.getByTestId('file1-src')).toBeEmptyDOMElement();
+      expect(screen.getByTestId('file2-src')).toBeEmptyDOMElement();
+    });
+
+    fireEvent.click(screen.getByTestId('test-button2'));
+    await waitFor(() => {
+      expect(screen.getByTestId('upload-complete')).toHaveTextContent('false');
       expect(uploadHandler).toHaveBeenCalledTimes(2);
       expect(screen.getByTestId('file-count')).toHaveTextContent('2');
+      expect(screen.getByTestId('success-count')).toHaveTextContent('2');
+      expect(screen.getByTestId('fail-count')).toHaveTextContent('0');
       expect(screen.getByTestId('file1-status')).toHaveTextContent('2');
       expect(screen.getByTestId('file2-status')).toHaveTextContent('2');
       expect(screen.getByTestId('file1-src')).toHaveTextContent(`https://example.com/uploads/${file1.name}`);
@@ -158,7 +187,7 @@ describe('react => useUploader', () => {
       });
 
       const handleTest = async () => {
-        await appendFiles({ file: [{ file: file1 }, { file: file2 }] });
+        await appendFiles([{ file: file1 }, { file: file2 }]);
         await upload();
       };
 
@@ -180,12 +209,10 @@ describe('react => useUploader', () => {
     };
 
     render(<TestComponent />);
-
-    const testButton = screen.getByTestId('test-button');
-    testButton.click();
+    fireEvent.click(screen.getByTestId('test-button'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('upload-complete')).toHaveTextContent('true');
+      expect(screen.getByTestId('upload-complete')).toHaveTextContent('false');
       expect(uploadHandler).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('file-count')).toHaveTextContent('2');
       expect(screen.getByTestId('file1-status')).toHaveTextContent('2');
@@ -204,7 +231,7 @@ describe('react => useUploader', () => {
       });
 
       const handleTest = async () => {
-        await appendFiles({ file: { file: file1 } });
+        await appendFiles({ file: file1 });
       };
 
       return (
@@ -239,6 +266,106 @@ describe('react => useUploader', () => {
       expect(screen.getByTestId('status')).toHaveTextContent(JSON.stringify([2]));
       expect(screen.getByTestId('src')).toHaveTextContent(JSON.stringify(['https://example.com/uploads/test1.txt']));
       expect(screen.getByTestId('progress')).toHaveTextContent(JSON.stringify([{ uploaded: 17, total: 17 }]));
+    });
+  });
+
+  test('should remove specific files', async () => {
+    const file1 = mockFile('test1.txt');
+    const file2 = mockFile('test2.txt');
+    const file3 = mockFile('test3.txt');
+    const file4 = mockFile('test4.txt');
+    let uploadSuccessIndex = -1;
+
+    const TestComponent = () => {
+      const { successCount, failCount, upload, appendFiles, removeFiles, fileList } = useUploader(({ file }) => {
+        uploadSuccessIndex += 1;
+        return uploadSuccessIndex === 0 ? mockUpload(file) : mockErrorUpload(file);
+      });
+
+      const handleTest = async () => {
+        await appendFiles([
+          {
+            file: file1
+          },
+          {
+            file: file2
+          },
+          {
+            file: file3
+          },
+          {
+            file: file4
+          }
+        ]);
+      };
+
+      return (
+        <div>
+          <button
+            onClick={handleTest}
+            data-testid="test-button">
+            Test
+          </button>
+          <button
+            onClick={() => upload()}
+            data-testid="upload-button">
+            Test2
+          </button>
+          <button
+            onClick={() => removeFiles(1)}
+            data-testid="remove-button">
+            Test3
+          </button>
+          <button
+            onClick={() => removeFiles()}
+            data-testid="remove-all-button">
+            Test3
+          </button>
+          <div data-testid="file-count">{fileList.length}</div>
+          <div data-testid="success-count">{successCount}</div>
+          <div data-testid="fail-count">{failCount}</div>
+          <div data-testid="file1-status">{fileList[0]?.status}</div>
+          <div data-testid="file2-status">{fileList[1]?.status}</div>
+          <div data-testid="file3-status">{fileList[2]?.status}</div>
+          <div data-testid="file4-status">{fileList[3]?.status}</div>
+        </div>
+      );
+    };
+
+    render(<TestComponent />);
+    fireEvent.click(screen.getByTestId('test-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('file-count')).toHaveTextContent('4');
+      expect(screen.getByTestId('success-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('fail-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('file1-status')).toHaveTextContent('0');
+      expect(screen.getByTestId('file2-status')).toHaveTextContent('0');
+      expect(screen.getByTestId('file3-status')).toHaveTextContent('0');
+      expect(screen.getByTestId('file4-status')).toHaveTextContent('0');
+    });
+
+    fireEvent.click(screen.getByTestId('upload-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('file-count')).toHaveTextContent('4');
+      expect(screen.getByTestId('success-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('fail-count')).toHaveTextContent('3');
+    });
+
+    fireEvent.click(screen.getByTestId('remove-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('file-count')).toHaveTextContent('3');
+      expect(screen.getByTestId('success-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('fail-count')).toHaveTextContent('2');
+      expect(screen.getByTestId('file1-status')).toHaveTextContent('2');
+      expect(screen.getByTestId('file2-status')).toHaveTextContent('3');
+      expect(screen.getByTestId('file3-status')).toHaveTextContent('3');
+    });
+
+    fireEvent.click(screen.getByTestId('remove-all-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('file-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('success-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('fail-count')).toHaveTextContent('0');
     });
   });
 });

@@ -13,6 +13,7 @@ export default defineMock({
     }
     retriedTimes[id] = 0;
     return ['apple', 'banana', 'orange'];
-  }
+  },
+  '[POST]/captcha/send': 'SUCCESS'
 });
 const retriedTimes: Record<string, any> = {};

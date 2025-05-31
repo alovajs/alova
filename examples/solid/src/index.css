@@ -32,7 +32,6 @@ body {
   @apply grid-cols-1;
   @apply md:grid-cols-2;
   @apply gap-4;
-  @apply items-start;
 }
 .title {
   @apply text-lg;

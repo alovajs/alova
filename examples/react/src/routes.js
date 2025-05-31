@@ -186,6 +186,14 @@ Operation guide:
         component: () => import('./views/AutoRequest')
       },
       {
+        title: 'Upload Files',
+        description:
+          'upload files, support a variant of types, such as File, Blob, base64, HTMLCanvasElement and ArrayBuffer',
+        source: ['Uploader/SelectFile', 'Uploader/Canvas', 'Uploader/WithInput'],
+        doc: 'client/strategy/use-uploader',
+        component: () => import('./views/Uploader')
+      },
+      {
         title: 'Send Captcha',
         description: 'The Captcha sending strategy provides the automatic countdown and limit the sending frequency',
         doc: 'client/strategy/use-captcha',

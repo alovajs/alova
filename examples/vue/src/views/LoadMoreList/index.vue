@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="jsx">
-import { usePagination, useRequest } from 'alova/client';
+import { usePagination } from 'alova/client';
 import { ref, watch } from 'vue';
 import { queryStudents, removeStudent } from '../../api/methods';
 import Table from '../../components/Table.vue';
@@ -66,7 +66,8 @@ const {
   insert,
   refresh,
   reload,
-  isLastPage
+  isLastPage,
+  removing
 } = usePagination((page, pageSize) => queryStudents(page, pageSize, studentName.value, clsName.value), {
   watchingStates: [studentName, clsName],
   initialData: { total: 0, list: [] },
@@ -74,19 +75,16 @@ const {
   append: true,
   initialPageSize: 15,
   total: res => res.total,
-  data: res => res.list
+  data: res => res.list,
+  actions: {
+    remove: ({ id }) => removeStudent(id)
+  }
 });
 
 const editItem = row => {
   detailVisible.value = true;
   selectedItem = row;
 };
-
-const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
-  immediate: false
-}).onSuccess(({ args: [row] }) => {
-  remove(row);
-});
 
 const updateList = detail => {
   if (selectedItem) {
@@ -114,7 +112,7 @@ const columns = [
   {
     title: 'Operate',
     dataIndex: 'operate',
-    render: (_, row) => (
+    render: (_, row, index) => (
       <div class="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
         <nord-button
           size="s"
@@ -125,8 +123,8 @@ const columns = [
           variant="danger"
           size="s"
           type="error"
-          disabled={removing.value || undefined}
-          onClick={() => removeSend(row)}>
+          disabled={removing.value.includes(index) || undefined}
+          onClick={() => remove(row)}>
           Remove
         </nord-button>
       </div>
