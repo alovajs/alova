@@ -25,10 +25,6 @@ export type SSEOnMessageTrigger<Data, AG extends AlovaGenerics, Args extends any
 export type SSEOnErrorTrigger<AG extends AlovaGenerics, Args extends any[] = any[]> = (
   event: AlovaSSEErrorEvent<AG, Args>
 ) => void;
-export type SSEOn<AG extends AlovaGenerics, Args extends any[] = any[]> = <Data = any>(
-  eventName: string,
-  handler: (event: AlovaSSEMessageEvent<Data, AG, Args>) => void
-) => () => void;
 
 /**
  *  useSSE() configuration item
@@ -113,7 +109,7 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
    * @param eventName Event name, default exists `open` | `error` | `message`
    * @param handler event handler
    */
-  on: SSEOn<AG>;
+  on<T = AG['Responded']>(eventName: string, handler: (event: AlovaSSEMessageEvent<T, AG, Args>) => void): this;
 }
 
 /**

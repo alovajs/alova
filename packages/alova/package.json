@@ -108,6 +108,11 @@
       "types": "./typings/stateshook/solid.d.ts",
       "require": "./dist/stateshook/solid.common.cjs",
       "default": "./dist/stateshook/solid.esm.js"
+    },
+    "./nuxt": {
+      "types": "./typings/stateshook/nuxt.d.ts",
+      "require": "./dist/stateshook/nuxt.common.cjs",
+      "default": "./dist/stateshook/nuxt.esm.js"
     }
   },
   "typesVersions": {
@@ -135,6 +140,9 @@
       ],
       "solid": [
         "typings/stateshook/solid.d.ts"
+      ],
+      "nuxt": [
+        "typings/stateshook/nuxt.d.ts"
       ]
     }
   },

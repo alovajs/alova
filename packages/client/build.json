@@ -51,10 +51,18 @@
     "input": "src/statesHook/solid.ts",
     "external": {
       "solid-js": "Solid",
-      "@alova/shared/function": null,
-      "@alova/shared/vars": null,
-      "@alova/shared/assert": null
+      "@alova/shared": null
     },
     "output": "../alova/dist/stateshook/solid.{suffix}.{ext}"
+  },
+  "nuxt": {
+    "packageName": "nuxtHook",
+    "input": "src/statesHook/nuxt.ts",
+    "external": {
+      "vue": "Vue",
+      "@alova/shared": null
+    },
+    "formats": ["cjs", "esm"],
+    "output": "../alova/dist/stateshook/nuxt.{suffix}.{ext}"
   }
 }

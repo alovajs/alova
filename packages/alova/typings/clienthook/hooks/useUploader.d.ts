@@ -80,14 +80,6 @@ interface Progress {
    * The total size of all files to be uploaded, which is the sum of multiple files.
    */
   total: number;
-  /**
-   * The number of files that have been successfully uploaded.
-   */
-  successCount: number;
-  /**
-   * The number of files that failed to upload.
-   */
-  failCount: number;
 }
 
 export interface AlovaUploaderFileType {
@@ -103,7 +95,7 @@ export interface AlovaRawFile<F = AlovaUploaderFileType[keyof AlovaUploaderFileT
    * A file object, base64 string, Blob object, ArrayBuffer, or HTMLCanvasElement.
    * It can be omitted when displaying the uploaded file.
    */
-  file?: F;
+  file: F;
   /**
    * The preview URL of the file. If provided, it will not be overwritten even if `localLink` is set to `true`.
    */
@@ -120,11 +112,6 @@ export interface AlovaRawFile<F = AlovaUploaderFileType[keyof AlovaUploaderFileT
 }
 
 interface FileAppendOptions {
-  /**
-   * Pass an object for a single file, or an array for multiple files
-   * if not provide, it will open an input file dialog to select files.
-   */
-  file?: AlovaRawFile | AlovaRawFile[];
   /**
    * The position in the fileList to start appending.
    */
@@ -167,31 +154,52 @@ export interface UploadExposure<AG extends AlovaGenerics, Args extends any[] = a
    * error message
    */
   error: ExportedComputed<Error | undefined, AG['StatesExport']>;
+  /**
+   * The number of files that have been successfully uploaded.
+   */
+  successCount: number;
+  /**
+   * The number of files that failed to upload.
+   */
+  failCount: number;
 
   /**
    * Appends files to the upload list. After appending, the 'file' items in the list will be automatically converted to File objects.
    * At this time, the 'name' property must have a value.
    *
-   * @param files - A single file object or an array of multiple file objects.
-   * @param start - The position in the fileList where the files will be appended. Optional.
+   * @param files - an object for single file, or an array for multiple files, if files are not need, it can be passed options params.
+   * @param options - file append options.
    * @returns The number of successfully appended files. Append may fail due to quantity or format restrictions.
    */
-  appendFiles: (options?: FileAppendOptions) => number;
-
+  appendFiles: (
+    file?: AlovaRawFile | AlovaRawFile[] | FileAppendOptions,
+    options?: FileAppendOptions
+  ) => Promise<number>;
   /**
-   * Executes the upload operation.
-   * If no parameters are passed, it will automatically re-initiate upload requests for all items in the fileList
-   * whose 'file' property has a value and whose 'status' is 0 (not uploaded) or 3 (upload failed).
-   * If parameter indexes are passed, it will create a new array with the corresponding items in the fileList,
-   * filter out the uploadable items according to the above conditions, and initiate upload requests.
-   * In this case, if there are items that do not meet the conditions, an error should be thrown instead of being ignored.
-   *
-   * After initiating the upload operation:
-   * Multiple files will be uploaded in parallel. That is, the array of files that meet the upload conditions will be traversed,
-   * and the first callback function of useUploader will be called in sequence to obtain the Method object and send requests.
-   * Internally, it can be implemented using useRequest because many properties in the fileList can be provided by useRequest.
+   * Removes files from the upload list. if no parameters are given, it will remove all files.
+   * @param positions - The file items or indexes in `fileList`.
+   * @returns The number of successfully removed files.
    */
-  upload: (...indexes: number[]) => Promise<M extends 'batch' ? AG['Responded'] : AG['Responded'][]>;
+  removeFiles: (...positions: Array<AlovaFileItem | number>) => number;
+  /**
+   * Executes the upload action.
+   * - If no parameters are passed, it will automatically re-initiate upload requests for all items in the fileList, whose 'file' property has a value and whose 'status' is 0 (not uploaded) or 3 (upload failed).
+   * - If parameter positions are passed, it will upload the specific items in fileList, filter out the uploadable items according to the above conditions, and initiate upload requests. In this case, if there are items that do not meet the conditions, an error should be thrown instead of being ignored.
+   *
+   * After initiating the upload action:
+   * Multiple files will be uploaded in parallel. That is, the array of files that meet the upload conditions will be traversed,
+   * and the first callback function of useUploader will be called in sequence to obtain the Method instance and send requests.
+   * @param positions - The file items or indexes in `fileList`.
+   * @returns upload response
+   */
+  upload: (
+    ...positions: Array<AlovaFileItem | number>
+  ) => Promise<M extends 'batch' ? AG['Responded'] | Error : Array<AG['Responded'] | Error>>;
+  /**
+   * abort the upload operation.
+   * @param indexes - The indexes of the upload request to abort. If no indexes are provided, all ongoing uploads will be aborted.
+   */
+  abort: (...positions: Array<AlovaFileItem | number>) => void;
   /**
    * Event handler for when each file is uploaded successfully.
    * @param handler - The callback function to handle the AlovaFileSuccessEvent.

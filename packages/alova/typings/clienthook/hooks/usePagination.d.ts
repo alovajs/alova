@@ -19,7 +19,7 @@ export type PaginationActionStatus = '' | 'loading' | 'removing' | 'inserting' |
 
 export interface PaginationActions<ListData extends unknown[]> {
   /**
-   * Insert action method creator
+   * Insert action callback
    * @param item The item to insert
    * @param position Insert position (index) or list item
    */
@@ -28,12 +28,12 @@ export interface PaginationActions<ListData extends unknown[]> {
     position?: number | ListData[number]
   ) => Promise<void>;
   /**
-   * Remove action method creator
+   * Remove action callback
    * @param positions Removed index or list item
    */
   remove?: (item: number | ListData[number]) => Promise<void>;
   /**
-   * Replace action method creator
+   * Replace action callback
    * @param item The item to replace
    * @param position Replace position (index) or list item
    */
@@ -117,7 +117,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
   /**
    * Index of the item being removed
    */
-  removing: ExportedState<number | undefined, AG['StatesExport']>;
+  removing: ExportedState<number[], AG['StatesExport']>;
   /**
    * Index of the item being replaced
    */
@@ -149,7 +149,7 @@ export interface UsePaginationExposure<AG extends AlovaGenerics, ListData extend
    * If a list item is passed in, the list item will be removed. If the list item is not in the list data, an error will be thrown.
    * @param position Removed index or list item
    */
-  remove(...positions: (number | ListData[number])[]): Promise<void>;
+  remove(...positions: Array<number | ListData[number]>): Promise<void>;
 
   /**
    * Replace a piece of data
