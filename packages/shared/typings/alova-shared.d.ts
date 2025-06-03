@@ -21,6 +21,13 @@ declare const createAssert: (
   prefix?: string
 ) => (expression: any, message: string, errorCode?: number) => asserts expression;
 
+/**
+ * Injects a reference object with `JSON.parse` so that it can be accessed in another module.
+ * @param object injecting object
+ */
+declare const provideReferingObject: (object: Record<string, any>) => void;
+declare const injectReferingObject: () => Record<string, any>;
+
 interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
   off<K extends keyof E>(type: K, handler?: (event: E[K]) => void): () => void;
@@ -507,6 +514,7 @@ export {
   getTime,
   globalToString,
   includes,
+  injectReferingObject,
   instanceOf,
   isArray,
   isFn,
@@ -537,6 +545,7 @@ export {
   promiseReject,
   promiseResolve,
   promiseThen,
+  provideReferingObject,
   pushItem,
   QueueCallback,
   RegExpCls,

@@ -13,6 +13,7 @@ import {
   isArray,
   isFn,
   isNumber,
+  objectValues,
   promiseCatch,
   PromiseCls,
   promiseFinally,
@@ -70,7 +71,6 @@ export default function createRequestState<
 ) {
   // shallow clone config object to avoid passing the same useHookConfig object which may cause vue2 state update error
   useHookConfig = { ...useHookConfig };
-  const { __referingObj: referingObject = { trackedKeys: {}, bindError: falseValue } } = useHookConfig;
   let initialLoading = !!immediate;
   let cachedResponse: any = undefinedValue;
 
@@ -100,10 +100,15 @@ export default function createRequestState<
     } catch {}
   }
 
-  const { create, effectRequest, ref, objectify, exposeProvider, transformState2Proxy } = statesHookHelper<AG>(
-    promiseStatesHook(),
-    referingObject
-  );
+  const {
+    create,
+    effectRequest,
+    ref,
+    objectify,
+    exposeProvider,
+    transformState2Proxy,
+    __referingObj: referingObject
+  } = statesHookHelper<AG>(promiseStatesHook(), useHookConfig.__referingObj);
   const progress: Progress = {
     total: 0,
     loaded: 0
@@ -127,12 +132,13 @@ export default function createRequestState<
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
 
   /**
-   * ## react ##Every time the function is executed, the following items need to be reset
+   * ## react
+   * Every time the function is executed, the following items need to be reset
    */
   hookInstance.fs = frontStates;
   hookInstance.em = eventManager;
   hookInstance.c = useHookConfig;
-  hookInstance.ms = managedStatesProxy;
+  hookInstance.ms = { ...frontStates, ...managedStatesProxy };
 
   const hasWatchingStates = watchingStates !== undefinedValue;
   // Initialize request event
@@ -193,8 +199,9 @@ export default function createRequestState<
       hasWatchingStates
         ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
         : () => wrapEffectRequest(referingObject),
-    removeStates: () => forEach(hookInstance.rf, fn => fn()),
-    saveStates: states => forEach(hookInstance.sf, fn => fn(states)),
+    removeStates: () => {
+      forEach(objectValues(hookInstance.rf), fn => fn());
+    },
     frontStates: { ...frontStates, ...managedStatesProxy },
     watchingStates,
     immediate: immediate ?? trueValue

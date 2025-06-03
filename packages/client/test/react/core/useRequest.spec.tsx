@@ -226,13 +226,14 @@ describe('useRequest hook with react', () => {
 
     // The status will be cached in the Use request.
     await waitFor(() => {
-      const { s: { data } = { data: null } } = getStateCache(alova.id, key(Get));
-      expect(data?.v.path).toBe('/unit-test');
+      const hookInstances = getStateCache(alova.id, key(Get));
+      expect(hookInstances).toHaveLength(1);
+      expect(hookInstances[0].fs.data?.v.path).toBe('/unit-test');
     });
     unmount();
     await waitFor(() => {
       // When the data console component is unloaded, the state cache will be cleared synchronously to avoid memory leaks. An empty object indicates that no match was found.
-      expect(getStateCache(alova.id, key(Get))).toStrictEqual({});
+      expect(getStateCache(alova.id, key(Get))).toHaveLength(0);
     });
   });
 

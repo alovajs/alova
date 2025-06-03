@@ -14,11 +14,8 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
     /** The method instance of the last request */
     m: undefinedValue as unknown as Method,
 
-    /** saveStatesFns */
-    sf: [],
-
-    /** removeStatesFns */
-    rf: [],
+    /** sent method keys */
+    rf: {},
 
     /** frontStates */
     fs: {} as FrontRequestState<
@@ -41,6 +38,6 @@ export default <AG extends AlovaGenerics, Args extends any[]>(
     /** referingObject */
     ro,
 
-    /** managedStates */
+    /** merged states */
     ms: {}
   }) as Hook<Args>;

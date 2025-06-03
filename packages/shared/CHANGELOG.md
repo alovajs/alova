@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.2.0
+
+### Minor Changes
+
+- [#690](https://github.com/alovajs/alova/pull/690) [`c238c37`](https://github.com/alovajs/alova/commit/c238c379c7b55888cad0c8ed4dee7a572f05444d) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - add bridge context
+
 ## 1.1.2
 
 ### Patch Changes

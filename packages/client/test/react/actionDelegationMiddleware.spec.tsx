@@ -1,7 +1,7 @@
 import { accessAction, actionDelegationMiddleware, useWatcher } from '@/index';
+import ReactHook from '@/statesHook/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
-import ReactHook from 'alova/react';
 import { ReactElement, StrictMode, useState } from 'react';
 import { mockRequestAdapter } from '~/test/mockData';
 

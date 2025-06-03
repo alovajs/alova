@@ -1,4 +1,4 @@
-import { isObject, ObjectCls, trueValue } from '@alova/shared';
+import { isObject, ObjectCls, setTimeoutFn, trueValue } from '@alova/shared';
 import { StatesHook } from 'alova';
 import { VueOptionExportType } from '~/typings';
 
@@ -29,9 +29,16 @@ export default {
   create: (data, key) => ({ value: data, key, type: 's' }),
 
   // Explanation: Computed generally relies on states, so states on components must be accessed to implement dependency tracking.
-  dehydrate: (_, key, { component, dataKey }) => component[dataKey][key],
-  update: (newValue, _, key, { component, dataKey }) => {
-    component[dataKey][key] = newValue;
+  dehydrate: (_, key, { component, dataKey }) => component[dataKey]?.[key],
+  update: (newValue, _, key, referingObject) => {
+    // async update, because the `component` and `dataKey` must be mounted to referingObject first.
+    setTimeoutFn(() => {
+      const { component, dataKey } = referingObject;
+      if (dataKey === '__proto__' || dataKey === 'constructor' || dataKey === 'prototype') {
+        throw new Error(`Invalid dataKey: ${dataKey}`);
+      }
+      component[dataKey][key] = newValue;
+    });
   },
   effectRequest({ handler, removeStates, immediate, watchingStates }, referingObject) {
     // It needs to be executed asynchronously, and the component and data key are injected into the config in the map alova hook.
@@ -61,9 +68,12 @@ export default {
     key,
     type: 'c'
   }),
-  watch: (states, callback, { component }) => {
-    (states || []).forEach(state => {
-      component.$watch(state, callback, { deep: trueValue });
+  watch: (states, callback, referingObject) => {
+    setTimeoutFn(() => {
+      const { component, dataKey } = referingObject;
+      (states || []).forEach(state => {
+        component.$watch(`${dataKey}.${state.key}`, callback, { deep: trueValue });
+      });
     });
   },
   onMounted: (callback, { component }) => {

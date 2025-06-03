@@ -1,4 +1,4 @@
-import { isPlainObject, ObjectCls, trueValue } from '@alova/shared';
+import { isPlainObject, ObjectCls, provideReferingObject, trueValue } from '@alova/shared';
 import { computed, reactive, version } from 'vue';
 import { UseHookCallers, UseHookMapGetter, VueHookMapperMixin } from '~/typings';
 import { classifyHookExposure, extractWatches } from './helper';
@@ -22,7 +22,13 @@ import myAssert from './myAssert';
 export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) => {
   const mixinItem = {
     created(this: any) {
+      // require the version of vue must be 3.x or 2.7.x
+      myAssert(/^3|2\.7/.test(version), 'please upgrade vue to `2.7.x` or `3.x`');
+
       const vm = this;
+      provideReferingObject({
+        component: vm
+      });
       const hookMapper = mapGetter.call(vm, vm);
       myAssert(isPlainObject(hookMapper), 'expect receive an object which contains use hook exposures');
 
@@ -36,14 +42,10 @@ export default <UHC extends UseHookCallers>(mapGetter: UseHookMapGetter<UHC>) =>
           `the use hook exposure of key \`${dataKey}\` is not supported in vue options style.`
         );
 
-        referingObject.component = vm;
         referingObject.dataKey = dataKey;
         const originalTrackedKeys = { ...referingObject.trackedKeys };
         const [states, computeds, fns] = classifyHookExposure(useHookExposure);
         referingObject.trackedKeys = originalTrackedKeys; // recovery trackedKeys
-
-        // require the version of vue must be 3.x or 2.7.x
-        myAssert(/^3|2\.7/.test(version), 'please upgrade vue to `2.7.x` or `3.x`');
 
         // Mount reactive state and computed properties
         const proxy = {};

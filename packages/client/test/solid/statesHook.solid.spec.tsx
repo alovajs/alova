@@ -4,7 +4,7 @@ import { updateState, useRequest, useWatcher } from '@/index';
 import Solidhook from '@/statesHook/solid';
 import { renderHook, waitFor } from '@solidjs/testing-library';
 import { ReferingObject } from 'alova';
-import { delay, Result, untilCbCalled } from 'root/testUtils';
+import { Result, delay, untilCbCalled } from 'root/testUtils';
 import { createRoot, createSignal } from 'solid-js';
 
 const referingObject: ReferingObject = {
@@ -88,11 +88,12 @@ describe('Solid statesHook', () => {
 
       await untilCbCalled(onSuccess);
       expect(rrr().method).toBe('GET');
-      const { s: { data } = { data: null } } = getStateCache(alova.id, Get.key);
-      expect(data?.v.path).toBe('/unit-test');
+      const hookInstances = getStateCache(alova.id, Get.key);
+      expect(hookInstances).not.toHaveLength(0);
+      expect(hookInstances[0].fs.data?.v.path).toBe('/unit-test');
       cleanup();
       // When the data console component is unloaded, the state cache will be cleared synchronously to avoid memory leaks. An empty object indicates that no match was found.
-      expect(getStateCache(alova.id, Get.key)).toStrictEqual({});
+      expect(getStateCache(alova.id, Get.key)).toHaveLength(0);
       dispose();
     }));
 

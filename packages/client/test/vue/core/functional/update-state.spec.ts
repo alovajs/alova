@@ -145,4 +145,24 @@ describe('update cached response data by user in vue', () => {
     expect(mockUpdateFn).not.toHaveBeenCalled();
     expect(updated).toBeFalsy();
   });
+
+  test('should update the state which is the same key but distribute in different component', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      cacheFor: 100000,
+      transform: ({ data }: Result) => data
+    });
+    const { data, onSuccess } = useRequest(Get);
+    const { data: data2, onSuccess: onSuccess2 } = useRequest(Get);
+    await Promise.all([untilCbCalled(onSuccess), untilCbCalled(onSuccess2)]);
+    const updated = await updateState(Get, responseData => {
+      responseData.path = '/unit-test-updated';
+      return responseData;
+    });
+    expect(data.value.path).toBe('/unit-test-updated');
+    expect(data2.value.path).toBe('/unit-test-updated');
+    expect(updated).toBeTruthy();
+  });
 });

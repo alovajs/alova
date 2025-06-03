@@ -207,8 +207,12 @@ describe('update cached response data by user in react', () => {
       expect(screen.getByRole('path')).toHaveTextContent('/path-str-b');
 
       // The status of both caches should be the latest value
-      expect(getStateCache(alova.id, key(getter('a'))).s.data.v.path).toBe('/path-str-b');
-      expect(getStateCache(alova.id, key(getter('b'))).s.data.v.path).toBe('/path-str-b');
+      const aHooks = getStateCache(alova.id, getter('a').key);
+      const bHooks = getStateCache(alova.id, getter('b').key);
+      expect(aHooks).toHaveLength(1);
+      expect(bHooks).toHaveLength(1);
+      expect(aHooks[0].fs.data.v.path).toBe('/path-str-b');
+      expect(bHooks[0].fs.data.v.path).toBe('/path-str-b');
     });
   });
 
@@ -247,20 +251,84 @@ describe('update cached response data by user in react', () => {
     const { unmount } = render((<Page />) as ReactElement<any, any>);
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(1);
-      expect(getStateCache(alova.id, key(getter('a')))).not.toBeUndefined();
+      expect(getStateCache(alova.id, key(getter('a')))).not.toHaveLength(0);
     });
     fireEvent.click(screen.getByRole('btnUpd'));
     await waitFor(() => {
       expect(successMockFn).toHaveBeenCalledTimes(2);
-      expect(getStateCache(alova.id, key(getter('b')))).not.toBeUndefined();
+      expect(getStateCache(alova.id, key(getter('b')))).not.toHaveLength(0);
     });
 
     // After the component is uninstalled, the corresponding cache status will be deleted.
     unmount();
     await waitFor(() => {
       // An empty object indicates that no match was found
-      expect(getStateCache(alova.id, key(getter('a')))).toStrictEqual({});
-      expect(getStateCache(alova.id, key(getter('b')))).toStrictEqual({});
+      expect(getStateCache(alova.id, key(getter('a')))).toHaveLength(0);
+      expect(getStateCache(alova.id, key(getter('b')))).toHaveLength(0);
+    });
+  });
+
+  test('should update the state which is the same key but distribute in different component', async () => {
+    const alova = getAlovaInstance(ReactHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get('/unit-test', {
+      cacheFor: 100000,
+      transform: ({ data }: Result) => data
+    });
+
+    function Page1() {
+      const { data } = useRequest(Get);
+      return <div role="path1">{data?.path}</div>;
+    }
+    function Page2() {
+      const { data } = useRequest(Get);
+      return <div role="path2">{data?.path}</div>;
+    }
+    function Root() {
+      const [showP1, setShowP1] = useState(true);
+      const updateGetState = () => {
+        updateState(Get, responseData => {
+          responseData.path = '/unit-test-updated';
+          return responseData;
+        });
+      };
+      return (
+        <div>
+          {showP1 ? <Page1 /> : null}
+          <Page2 />
+          <button
+            role="btnUpd"
+            onClick={updateGetState}>
+            set show p1
+          </button>
+          <button
+            role="btnHideP1"
+            onClick={() => setShowP1(false)}>
+            set show p1
+          </button>
+        </div>
+      );
+    }
+    const { unmount } = render((<Root />) as ReactElement<any, any>);
+
+    await waitFor(() => {
+      expect(screen.getByRole('path1')).toHaveTextContent('/unit-test');
+      expect(screen.getByRole('path2')).toHaveTextContent('/unit-test');
+      expect(getStateCache(alova.id, Get.key)).toHaveLength(2);
+    });
+    fireEvent.click(screen.getByRole('btnUpd'));
+    await waitFor(() => {
+      expect(screen.getByRole('path1')).toHaveTextContent('/unit-test-updated');
+      expect(screen.getByRole('path2')).toHaveTextContent('/unit-test-updated');
+    });
+    fireEvent.click(screen.getByRole('btnHideP1'));
+    await waitFor(() => {
+      expect(getStateCache(alova.id, Get.key)).toHaveLength(1);
+    });
+    unmount();
+    await waitFor(() => {
+      expect(getStateCache(alova.id, Get.key)).toHaveLength(0);
     });
   });
 });
