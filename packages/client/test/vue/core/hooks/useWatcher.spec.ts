@@ -939,9 +939,9 @@ describe('use useWatcher hook to send GET with vue', () => {
       responseExpect: r => r.json()
     });
     const mutateNum = ref(0);
-    const { loading, data, error, onSuccess, onComplete } = await useWatcher(
+    const { loading, data, error } = await useWatcher(
       () =>
-        alova.Get('/unit-test', {
+        alova.Get<Result>('/unit-test', {
           cacheFor: null
         }),
       [mutateNum],
@@ -949,17 +949,12 @@ describe('use useWatcher hook to send GET with vue', () => {
         immediate: true
       }
     );
-
-    const successFn = vi.fn();
-    const completeFn = vi.fn();
-    onSuccess(successFn);
-    onComplete(completeFn);
-
-    await delay(100);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toBeUndefined();
+    expect(loading.value).toBeFalsy();
+    expect(data.value.data).toStrictEqual({
+      method: 'GET',
+      params: {},
+      path: '/unit-test'
+    });
     expect(error.value).toBeUndefined();
-    expect(successFn).not.toHaveBeenCalled();
-    expect(completeFn).not.toHaveBeenCalled();
   });
 });

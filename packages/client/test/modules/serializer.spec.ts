@@ -40,6 +40,12 @@ describe('serializers', () => {
     });
   });
 
+  test('serialize outside payload', () => {
+    const originalPayload = dateObj;
+    const serializedPayload = performer.serialize(originalPayload);
+    expect(serializedPayload).toStrictEqual(['date', dateTimestamp]);
+  });
+
   test('dserialize payload', () => {
     const originalPayload = {
       date: ['date', dateTimestamp],
@@ -58,5 +64,11 @@ describe('serializers', () => {
         reg: regObj
       }
     });
+  });
+
+  test('deserialize outside payload', () => {
+    const originalPayload = ['date', dateTimestamp];
+    const serializedPayload = performer.deserialize(originalPayload);
+    expect(serializedPayload).toBeInstanceOf(Date);
   });
 });

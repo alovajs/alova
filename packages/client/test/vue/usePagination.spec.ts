@@ -1983,20 +1983,15 @@ describe('vue => usePagination', () => {
   });
 
   test("should't send request when call with `await`", async () => {
-    const { loading, data, error, page, pageCount, total, onSuccess, onComplete } = await usePagination(getter1);
-    const successFn = vi.fn();
-    const completeFn = vi.fn();
-    onSuccess(successFn);
-    onComplete(completeFn);
+    const { loading, data, error, page, pageCount, total } = await usePagination(getter1, {
+      data: (res: any) => res.list
+    });
 
-    await delay(100);
-    expect(loading.value).toBeTruthy();
-    expect(data.value).toStrictEqual([]);
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toStrictEqual(generateContinuousNumbers(9));
     expect(error.value).toBeUndefined();
     expect(page.value).toBe(1);
-    expect(pageCount.value).toBeUndefined();
-    expect(total.value).toBeUndefined();
-    expect(successFn).not.toHaveBeenCalled();
-    expect(completeFn).not.toHaveBeenCalled();
+    expect(pageCount.value).toBe(30);
+    expect(total.value).toBe(300);
   });
 });

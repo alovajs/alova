@@ -529,21 +529,18 @@ describe('use useRequest hook to send GET with vue', () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()
     });
-    const Get = alova.Get('/unit-test', {
+    const Get = alova.Get<Result>('/unit-test', {
       cacheFor: null
     });
-    const successFn = vi.fn();
-    const completeFn = vi.fn();
 
-    const { loading, data, error, onSuccess, onComplete } = await useRequest(Get);
-    onSuccess(successFn);
-    onComplete(completeFn);
-    await delay(100);
+    const { loading, data, error } = await useRequest(Get);
 
-    expect(loading.value).toBeTruthy(); // the same behavior as ssr mode, which will not send request immediately but loading is true.
-    expect(data.value).toBeUndefined();
+    expect(loading.value).toBeFalsy();
+    expect(data.value.data).toStrictEqual({
+      method: 'GET',
+      params: {},
+      path: '/unit-test'
+    });
     expect(error.value).toBeUndefined();
-    expect(successFn).not.toHaveBeenCalled();
-    expect(completeFn).not.toHaveBeenCalled();
   });
 });

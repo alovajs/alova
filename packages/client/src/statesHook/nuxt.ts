@@ -45,15 +45,17 @@ export default ({ nuxtApp: useNuxtApp, serializer = {} }: NuxtHookConfig) => {
 
       //  deserialize data in client
       const state = ref(performer.deserialize(nuxtStatePayload) ?? data);
-      nuxtApp.hooks.hook('app:rendered', () => {
-        nuxtApp.payload[stateKey] = state.value;
-      });
+      isSSR &&
+        nuxtApp.hooks.hook('app:rendered', () => {
+          // serialize data in server so that it can be jsonify, and deserialize in client ↑↑↑
+          nuxtApp.payload[stateKey] = performer.serialize(state.value);
+        });
       return state;
     },
     dehydrate: state => state.value,
     update: (newVal, state) => {
       // serialize data in server, and deserialize in client ↑↑↑
-      state.value = isSSR ? performer.serialize(newVal) : newVal;
+      state.value = newVal;
     },
     effectRequest({ handler, removeStates, immediate, watchingStates }) {
       if (getCurrentInstance()) {
@@ -63,7 +65,6 @@ export default ({ nuxtApp: useNuxtApp, serializer = {} }: NuxtHookConfig) => {
       nuxtApp.hooks.hook('app:mounted', () => {
         allowRequest = trueValue;
       });
-
       immediate && allowRequest && handler();
 
       watchingStates?.forEach((state, i) => {
