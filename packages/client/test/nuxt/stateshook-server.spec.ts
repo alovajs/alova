@@ -58,7 +58,7 @@ describe('nuxt.ts adapter', async () => {
     };
     mockConfig = {
       nuxtApp: () => mockNuxtApp,
-      serializer: {
+      serializers: {
         mock: mockSerializer
       }
     };
@@ -117,7 +117,6 @@ describe('nuxt.ts adapter', async () => {
         removeStates,
         immediate: true,
         watchingStates: [],
-        saveStates: () => {},
         frontStates: {}
       },
       referingObject

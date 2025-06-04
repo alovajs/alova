@@ -27,11 +27,11 @@ const assert: ReturnType<typeof createAssert> = createAssert('nuxt-hook');
 const isSSR = typeof window === 'undefined';
 let allowRequest = isSSR;
 // the vue's predefined hooks
-export default ({ nuxtApp: useNuxtApp, serializer = {} }: NuxtHookConfig) => {
+export default ({ nuxtApp: useNuxtApp, serializers = {} }: NuxtHookConfig) => {
   assert(isFn(useNuxtApp), '`useNuxtApp` is required in nuxt states hook');
   const performer = createSerializerPerformer({
     error: errorSerializer,
-    ...serializer
+    ...serializers
   });
 
   return {

@@ -51,7 +51,7 @@ describe('nuxt adapter - common', async () => {
     };
     mockConfig = {
       nuxtApp: () => mockNuxtApp,
-      serializer: {
+      serializers: {
         mock: mockSerializer
       }
     };
@@ -94,8 +94,7 @@ describe('nuxt adapter - common', async () => {
         removeStates,
         immediate: false,
         watchingStates: [state1, state2],
-        frontStates: {},
-        saveStates: () => {}
+        frontStates: {}
       },
       referingObject
     );
