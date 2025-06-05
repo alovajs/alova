@@ -44,7 +44,11 @@ export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader> = (
   abort: () => void;
 };
 
-export type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
+type StandardMethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
+
+type CustomMethodType = string & {};
+
+export type MethodType = StandardMethodType | CustomMethodType;
 
 /**
  * provide user to custom some types
