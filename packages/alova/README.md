@@ -23,7 +23,7 @@
 
 ## Features
 
-- ​​Easy to use, [watching video](/video-tutorial) to get started in 5 mins.
+- ​​Easy to use, [watching video](https://alova.js.org/video-tutorial) to get started in 5 mins.
 - ​​Full compatibility​​ with your favorite technology stack.
 - ​​20+ high-performance business modules​​ for building faster apps.
 - ​​Advanced OpenAPI solution​​ for efficient APIs information interaction within your code.
