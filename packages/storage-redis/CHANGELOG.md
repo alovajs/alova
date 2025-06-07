@@ -1,5 +1,11 @@
 # @alova/storage-redis
 
+## 2.0.0
+
+### Major Changes
+
+- [#701](https://github.com/alovajs/alova/pull/701) [`1247851`](https://github.com/alovajs/alova/commit/12478513c1adcee10bde9b3a07f2e308eefde128) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - release redis storage adapter
+
 ## 1.0.0
 
 ### Major Changes
