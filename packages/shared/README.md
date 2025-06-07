@@ -1,12 +1,8 @@
 <img width="100%" src="https://alova.js.org/img/cover.jpg" />
 
-# Redis Storage Adapter for Alova
+# shared functions for alova(Internal)
 
 Refer to [alova](https://github.com/alovajs/alova)
-
-## Usage
-
-Please to [redis storage adapter documentation](/resource/storage-adapter/redis) for more details.
 
 ## Join the community
 

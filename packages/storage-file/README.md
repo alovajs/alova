@@ -1,18 +1,12 @@
+<img width="100%" src="https://alova.js.org/img/cover.jpg" />
+
 # Storage adapter of local files for alova
-
-<p align="center">
-<img width="200px" src="https://alova.js.org/img/logo-text-vertical.svg" />
-</p>
-
-<p align="center"><b>Workflow-Streamlined next-generation request tools.<br />Extremely improve your API using efficiency and save brainpower Just one step</b></p>
-
----
 
 Refer to [alova](https://github.com/alovajs/alova)
 
 ## Usage
 
-Please to [server strategies documentation](https://alova.js.org/tutorial/server/strategy) for more details.
+Please to [file storage adapter documentation](/resource/storage-adapter/file) for more details.
 
 ## Join the community
 
@@ -30,7 +24,7 @@ If you like alova, we are very grateful for giving us a star in the upper right 
 
 We are honored to receive active participation from developers around the world in Issues and Discussions.
 
-We hope to make alova a common project for everyone who is willing to participate, rather than the alova team. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your ideas meet the development guidelines of alova, please participate generously.
+We hope to make alova a common project for everyone who is willing to participate. We encourage everyone to become a contributor to the alova community with an open and inclusive attitude. Even if you are a junior developer, as long as your ideas meet the development guidelines of alova, please participate generously.
 
 Effective contributions will win you a certain reputation in the Alova community. Before contributing, please be sure to read the [Contribution Guide](https://github.com/alovajs/alova/blob/main/CONTRIBUTING.md) in detail to ensure your contribution is effective.
 
