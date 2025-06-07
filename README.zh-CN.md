@@ -31,7 +31,7 @@
 
 ## 有什么不同吗？
 
-与 `@tanstack/react-request`、`swrjs`、`ahooks` 的 `useRequest` 等库不同，alova 旨在让请求变得非常简单，并保持更高效的数据交互。我们同时考虑开发者和应用用户，对于开发者，alova 为他们提供极致的用户体验，对于应用用户，他们可以享受 alova 高性能数据交互带来的流畅体验。
+与 `@tanstack/react-query`、`swrjs`、`ahooks` 的 `useRequest` 等库不同，alova 旨在让API集成变得非常轻松高效，还能保持更高效的数据交互，为用户带来更流畅的体验。
 
 > 您还可以查看 [与其他请求库的比较](https://alova.js.org/about/comparison) 以详细了解 alova 的不同之处。
 

@@ -32,7 +32,7 @@
 
 ## Is there any difference?
 
-Unlike libraries such as `@tanstack/react-request`, `swrjs`, and `useRequest` from `ahooks`, alova aims to make requests very simple and maintain more efficient data interaction. We consider both developers and App users. For developers, alova provides them with the ultimate user experience, and for application users, they can enjoy the smooth experience brought by alova's high-performance data interaction.
+Unlike libraries such as `@tanstack/react-query`, `swrjs`, and `ahooks`'s `useRequest`, alova aims to make API integration very easy and efficient, while maintaining more efficient data interaction and bringing a smoother experience to users.
 
 > You can also check [Comparison with other request libraries](https://alova.js.org/about/comparison) to learn more about the differences of alova.
 
