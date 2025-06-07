@@ -5,7 +5,7 @@ import path from 'node:path';
 import { randomId } from './testUtils';
 
 // -------------------
-// 服务模拟
+// mock service response
 async function result(code: number, req: StrictRequest<DefaultBodyType>, hasBody = false, extraParams = {}) {
   await delay(10);
   const urlObj = new URL(req.url);
@@ -62,6 +62,7 @@ const mockServer = setupServer(
       })
   ),
   http.get(`${baseURL}/unit-test-error`, () => HttpResponse.error()),
+  http.post(`${baseURL}/unit-test-error`, () => HttpResponse.error()),
   http.options(`${baseURL}/unit-test-passthrough`, () => passthrough()),
   http.get(`${baseURL}/unit-test-passthrough`, () => passthrough()),
   http.post(`${baseURL}/unit-test`, ({ request }) => result(200, request, true)),
@@ -70,6 +71,18 @@ const mockServer = setupServer(
   http.head(`${baseURL}/unit-test`, () => HttpResponse.json({})),
   http.patch(`${baseURL}/unit-test`, ({ request }) => result(200, request, true)),
   http.options(`${baseURL}/unit-test`, () => HttpResponse.json({})),
+  http.post(`${baseURL}/unit-test-headers`, ({ request }) =>
+    HttpResponse.json({
+      code: 200,
+      msg: '',
+      data: {
+        requestHeaders: Object.fromEntries(request.headers.entries())
+      }
+    })
+  ),
+  http.get(`${baseURL}/unit-test-random`, () => HttpResponse.json({ id: randomId() })),
+
+  // download request
   http.get(`${baseURL}/unit-test-download`, async () => {
     await delay(200);
     // Read the image from the file system using the "fs" module.
@@ -81,22 +94,20 @@ const mockServer = setupServer(
       }
     });
   }),
-  http.post(`${baseURL}/unit-test-upload`, ({ request }) =>
+
+  /**
+   * upload request
+   */
+  http.post(`${baseURL}/unit-test-upload`, async ({ request }) => {
     // Read the image from the file system using the "fs" module.
-    result(200, request, true, {
+    const delaySeconds = Number(request.headers.get('delay'));
+    if (delaySeconds && delaySeconds > 0) {
+      await delay(delaySeconds);
+    }
+    return result(200, request, true, {
       contentType: request.headers.get('Content-Type')
-    })
-  ),
-  http.post(`${baseURL}/unit-test-headers`, ({ request }) =>
-    HttpResponse.json({
-      code: 200,
-      msg: '',
-      data: {
-        requestHeaders: Object.fromEntries(request.headers.entries())
-      }
-    })
-  ),
-  http.get(`${baseURL}/unit-test-random`, () => HttpResponse.json({ id: randomId() }))
+    });
+  })
 );
 
 export default mockServer;

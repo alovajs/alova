@@ -26,7 +26,7 @@ const isFrontMiddlewareContext = <AG extends AlovaGenerics = AlovaGenerics, Args
   context: AlovaFrontMiddlewareContext<AG, Args> | AlovaFetcherMiddlewareContext<AG, Args>
 ): context is AlovaFrontMiddlewareContext<AG, Args> => !!(context as AlovaFrontMiddlewareContext<AG, Args>).send;
 
-const assert = createAssert('subscriber');
+const assert: ReturnType<typeof createAssert> = createAssert('subscriber');
 
 /**
  * Operation function delegation middleware

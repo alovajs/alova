@@ -4,6 +4,7 @@ import hbs from 'hbs';
 import path from 'path';
 import { clearLogs, flushLogs } from './logs';
 import basicRouter from './routes/basic';
+import captchaRouter from './routes/captcha';
 import pscRouter from './routes/psc';
 import rateLimitRouter from './routes/rateLimit';
 import retryRouter from './routes/retry';
@@ -34,7 +35,7 @@ app.use((_, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
-app.use(basicRouter, retryRouter, pscRouter, rateLimitRouter);
+app.use(basicRouter, retryRouter, pscRouter, rateLimitRouter, captchaRouter);
 
 app.get('/', (_, res) => {
   res.render('index', { title: 'Home' });
@@ -62,6 +63,13 @@ app.get('/psc', (_, res) => {
   res.render('psc', {
     title: 'psc',
     docPath: '/resource/storage-adapter/psc'
+  });
+});
+app.get('/captcha', (_, res) => {
+  res.render('captcha', {
+    title: 'captcha send and verify',
+    filePath: 'captcha',
+    docPath: '/tutorial/server/strategy/captcha'
   });
 });
 

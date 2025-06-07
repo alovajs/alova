@@ -17,7 +17,9 @@ declare class AlovaError extends Error {
  * @param expression Judgment expression, true or false
  * @param message Assert message
  */
-declare const createAssert: (prefix?: string) => (expression: boolean, message: string, errorCode?: number) => void;
+declare const createAssert: (
+  prefix?: string
+) => (expression: any, message: string, errorCode?: number) => asserts expression;
 
 /**
  * Injects a reference object with `JSON.parse` so that it can be accessed in another module.
@@ -121,6 +123,8 @@ declare class FrameworkState<Data, Key extends string> extends FrameworkReadable
   get v(): Data;
 }
 
+type Arg = Record<string, any>;
+
 /**
  * Request cache settings
  * expire: expiration time
@@ -130,6 +134,18 @@ declare class FrameworkState<Data, Key extends string> extends FrameworkReadable
  */
 type CacheExpire = number | Date | null;
 type CacheMode = 'memory' | 'restore';
+interface MethodRequestConfig {
+  /**
+   * url parameters
+   * if set to a string, it will be automatically added to query string.
+   */
+  params: Arg | string;
+
+  /**
+   * Request header
+   */
+  headers: Arg;
+}
 
 /**
  * Empty function for compatibility processing
@@ -161,7 +177,7 @@ declare const isString: (arg: any) => arg is string;
  * Determine whether the parameter is an object any parameter
  * @returns Whether the parameter is an object
  */
-declare const isObject: <T = any>(arg: any) => arg is T;
+declare const isObject: (arg: any) => arg is Record<any, unknown>;
 /**
  * Global toString any parameter stringified parameters
  */
@@ -371,7 +387,7 @@ declare const delayWithBackoff: (backoff: BackoffPolicy, retryTimes: number) => 
 /**
  * Build the complete url baseURL path url parameters complete url
  */
-declare const buildCompletedURL: (baseURL: string, url: string, params: Record<string, any>) => string;
+declare const buildCompletedURL: (baseURL: string, url: string, params: MethodRequestConfig['params']) => string;
 /**
  * Deep clone an object.
  *
@@ -429,6 +445,7 @@ declare const promiseCatch: <T, TResult = never>(
   onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
 ) => Promise<T | TResult>;
 declare const promiseFinally: <T>(promise: Promise<T>, onfinally?: (() => void) | undefined | null) => Promise<T>;
+declare const promiseAll: <T>(values: (Promise<T> | T)[]) => Promise<T[]>;
 declare const JSONStringify: <T>(
   value: T,
   replacer?: (this: any, key: string, value: any) => any,
@@ -470,27 +487,6 @@ declare const STORAGE_RESTORE = 'restore';
 export {
   $self,
   AlovaError,
-  type BackoffPolicy,
-  type CallbackFn,
-  type Equal,
-  type EventManager,
-  FrameworkReadableState,
-  FrameworkState,
-  type GeneralFn,
-  type GeneralState,
-  type IsAny,
-  type IsAssignable,
-  type IsUnknown,
-  JSONParse,
-  JSONStringify,
-  MEMORY,
-  ObjectCls,
-  type Omit,
-  PromiseCls,
-  QueueCallback,
-  RegExpCls,
-  STORAGE_RESTORE,
-  type UsePromiseExposure,
   buildCompletedURL,
   buildNamespacedCacheKey,
   clearTimeoutTimer,
@@ -506,6 +502,8 @@ export {
   falseValue,
   filterItem,
   forEach,
+  FrameworkReadableState,
+  FrameworkState,
   getConfig,
   getContext,
   getContextOptions,
@@ -523,26 +521,34 @@ export {
   isNumber,
   isObject,
   isPlainObject,
-  isSSR,
   isSpecialRequestBody,
+  isSSR,
   isString,
+  JSONParse,
+  JSONStringify,
   key,
   len,
   mapItem,
+  MEMORY,
   newInstance,
   noop,
   nullValue,
   objAssign,
+  ObjectCls,
   objectKeys,
   objectValues,
   omit,
+  promiseAll,
   promiseCatch,
+  PromiseCls,
   promiseFinally,
   promiseReject,
   promiseResolve,
   promiseThen,
   provideReferingObject,
   pushItem,
+  QueueCallback,
+  RegExpCls,
   regexpTest,
   setTimeoutFn,
   shift,
@@ -550,6 +556,7 @@ export {
   sloughConfig,
   sloughFunction,
   splice,
+  STORAGE_RESTORE,
   trueValue,
   type,
   typeOf,
@@ -557,5 +564,16 @@ export {
   usePromise,
   uuid,
   valueObject,
-  walkObject
+  walkObject,
+  type BackoffPolicy,
+  type CallbackFn,
+  type Equal,
+  type EventManager,
+  type GeneralFn,
+  type GeneralState,
+  type IsAny,
+  type IsAssignable,
+  type IsUnknown,
+  type Omit,
+  type UsePromiseExposure
 };

@@ -18,7 +18,7 @@ const createSerializerPerformer = (customSerializers: Record<string | number, Da
    */
   const serialize = (payload: any) => {
     if (isObject(payload)) {
-      payload = walkObject(isArray(payload) ? [...payload] : { ...payload }, value => {
+      const { data } = walkObject({ data: payload }, value => {
         let finallyApplySerializerName = undefinedValue as string | undefined;
         // Find a matching serializer and serialize the value. If not found, return the original value.
         const serializedValue = objectKeys(serializers).reduce((currentValue, serializerName) => {
@@ -41,6 +41,7 @@ const createSerializerPerformer = (customSerializers: Record<string | number, Da
         }
         return finallyApplySerializerName !== undefinedValue ? [finallyApplySerializerName, serializedValue] : value;
       });
+      payload = data;
     }
     return payload;
   };
@@ -48,20 +49,22 @@ const createSerializerPerformer = (customSerializers: Record<string | number, Da
   /**
    * Deserialize data
    */
-  const deserialize = (payload: any) =>
-    isObject(payload)
-      ? walkObject(
-          payload,
-          value => {
-            if (isArray(value) && len(value) === 2) {
-              const foundSerializer = serializers[value[0]];
-              value = foundSerializer ? foundSerializer.backward(value[1]) : value;
-            }
-            return value;
-          },
-          falseValue
-        )
-      : payload;
+  const deserialize = (payload: any) => {
+    if (isObject(payload)) {
+      return walkObject(
+        { data: payload },
+        value => {
+          if (isArray(value) && len(value) === 2) {
+            const foundSerializer = serializers[value[0]];
+            value = foundSerializer ? foundSerializer.backward(value[1]) : value;
+          }
+          return value;
+        },
+        falseValue
+      ).data;
+    }
+    return payload;
+  };
 
   return {
     serialize,

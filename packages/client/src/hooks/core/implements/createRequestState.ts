@@ -16,9 +16,13 @@ import {
   objectValues,
   promiseCatch,
   PromiseCls,
+  promiseFinally,
+  promiseThen,
+  setTimeoutFn,
   sloughConfig,
   trueValue,
-  undefinedValue
+  undefinedValue,
+  usePromise
 } from '@alova/shared';
 import type { AlovaGlobalCacheAdapter, Method, Progress } from 'alova';
 import { AlovaGenerics, globalConfigMap, promiseStatesHook } from 'alova';
@@ -144,24 +148,40 @@ export default function createRequestState<
     sendCallingArgs?: [...Args, ...any[]]
   ) => useHookToSendRequest(hookInstance, handler, sendCallingArgs) as Promise<AG['Responded']>;
 
+  // if user call hook like `await useRequest(...)`
+  // that will stop the immediate request, because it will be call a request in function `then`
+  const hookRequestPromiseResolve = ref(undefinedValue as ((value?: any) => void) | undefined);
+  const isInitialRequest = ref(falseValue);
+
   // only call once when multiple values changed at the same time
   const onceRunner = refCurrent(ref(createSyncOnceRunner()));
 
-  // Call handleRequest in a way that catches the exception
+  // Call `handleRequest` in a way that catches the exception
   // Catching exceptions prevents exceptions from being thrown out
   const wrapEffectRequest = (ro = referingObject, handler?: Method<AG> | AlovaMethodHandler<AG>) => {
     onceRunner(() => {
-      promiseCatch(handleRequest(handler), error => {
-        // the error tracking indicates that the error need to throw.
-        if (!ro.bindError && !ro.trackedKeys.error) {
-          throw error;
-        }
-      });
+      // Do not send requests when rendering on the server side
+      // but if call hook with `await`, the `hookRequestPromiseResolve` will be set as `resolve` function
+      if (!globalConfigMap.ssr || hookRequestPromiseResolve.current) {
+        isInitialRequest.current = trueValue;
+        promiseFinally(
+          promiseCatch(handleRequest(handler), error => {
+            // the error tracking indicates that the error need to throw.
+            // when user access the `error` state or bind the error event, the error instance won't be thrown out.
+            if (!ro.bindError && !ro.trackedKeys.error) {
+              throw error;
+            }
+          }),
+          () => {
+            hookRequestPromiseResolve.current && hookRequestPromiseResolve.current();
+          }
+        );
+      }
     });
   };
 
   /**
-   * fix: #421
+   * fix: https://github.com/alovajs/alova/issues/421
    * Use ref wraps to prevent react from creating new debounce function in every render
    * Explicit passing is required because the context will change
    */
@@ -173,24 +193,21 @@ export default function createRequestState<
     )
   );
 
-  // Do not send requests when rendering on the server side
-  if (!globalConfigMap.ssr) {
-    effectRequest({
-      handler:
-        // When `watchingStates` is an array, it indicates the watching states (including an empty array). When it is undefined, it indicates the non-watching state.
-        hasWatchingStates
-          ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
-          : () => wrapEffectRequest(referingObject),
-      removeStates: () => {
-        forEach(objectValues(hookInstance.rf), fn => fn());
-      },
-      frontStates: hookInstance.ms,
-      watchingStates,
-      immediate: immediate ?? trueValue
-    });
-  }
+  effectRequest({
+    handler:
+      // When `watchingStates` is an array, it indicates the watching states (including an empty array). When it is undefined, it indicates the non-watching state.
+      hasWatchingStates
+        ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
+        : () => wrapEffectRequest(referingObject),
+    removeStates: () => {
+      forEach(objectValues(hookInstance.rf), fn => fn());
+    },
+    frontStates: { ...frontStates, ...managedStatesProxy },
+    watchingStates,
+    immediate: immediate ?? trueValue
+  });
 
-  return exposeProvider({
+  const hookProvider = exposeProvider({
     ...objectify([data, loading, error, downloading, uploading]),
     abort: () => hookInstance.m && hookInstance.m.abort(),
     /**
@@ -213,6 +230,29 @@ export default function createRequestState<
     },
     onComplete(handler: CompleteHandler<AG, Args>) {
       eventManager.on(KEY_COMPLETE, handler);
+    },
+
+    /**
+     * send and wait for responding with `await`
+     * this is always used in `nuxt3` and `<suspense>` in vue3
+     * @example
+     * ```js
+     * const { loading, data, error } = await useRequest(...);
+     * ```
+     */
+    then(onfulfilled: (result: any) => void) {
+      const handleFullfilled = () => {
+        onfulfilled(hookProvider);
+      };
+      const { resolve, promise } = usePromise<void>();
+      hookRequestPromiseResolve.current = resolve;
+
+      // if the request handler is not called, the promise will resolve asynchronously.
+      setTimeoutFn(() => {
+        !isInitialRequest.current && resolve();
+      }, 10);
+      promiseThen(promise, handleFullfilled, handleFullfilled);
     }
   });
+  return hookProvider;
 }

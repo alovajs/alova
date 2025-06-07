@@ -23,7 +23,7 @@ export interface SyncAdapter {
   receive(handler: SharedEventHandler): void;
 }
 
-const myAssert = createAssert('Shared Cache');
+const myAssert: ReturnType<typeof createAssert> = createAssert('Shared Cache');
 
 // just a helper for providing type
 export const createSyncAdapter = (syncAdapter: SyncAdapter) => syncAdapter;

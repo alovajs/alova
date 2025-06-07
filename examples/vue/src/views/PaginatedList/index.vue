@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="jsx">
-import { usePagination, useRequest } from 'alova/client';
+import { usePagination } from 'alova/client';
 import { ref } from 'vue';
 import { queryStudents, removeStudent } from '../../api/methods';
 import Table from '../../components/Table';
@@ -77,19 +77,17 @@ const {
   remove,
   insert,
   refresh,
-  reload
+  reload,
+  removing
 } = usePagination((page, pageSize) => queryStudents(page, pageSize, studentName.value, clsName.value), {
   watchingStates: [studentName, clsName],
   initialData: { total: 0, list: [] },
   debounce: [800],
   total: res => res.total,
-  data: res => res.list
-});
-
-const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
-  immediate: false
-}).onSuccess(({ args: [row] }) => {
-  remove(row);
+  data: res => res.list,
+  actions: {
+    remove: ({ id }) => removeStudent(id)
+  }
 });
 
 const editItem = id => {
@@ -142,7 +140,7 @@ const columns = [
   {
     title: 'Operate',
     dataIndex: 'operate',
-    render: (_, row) => (
+    render: (_, row, i) => (
       <div class="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2">
         <nord-button
           size="s"
@@ -153,8 +151,8 @@ const columns = [
           variant="danger"
           size="s"
           type="error"
-          disabled={removing.value || undefined}
-          onClick={() => removeSend(row)}>
+          disabled={removing.value.includes(i) || undefined}
+          onClick={() => remove(row)}>
           Remove
         </nord-button>
       </div>

@@ -524,4 +524,23 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(errorFn).not.toHaveBeenCalled();
     expect(completeFn).toHaveBeenCalled();
   });
+
+  test("shouldn't send request event if the `immediate` is `true` when call with `await`", async () => {
+    const alova = getAlovaInstance(VueHook, {
+      responseExpect: r => r.json()
+    });
+    const Get = alova.Get<Result>('/unit-test', {
+      cacheFor: null
+    });
+
+    const { loading, data, error } = await useRequest(Get);
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value.data).toStrictEqual({
+      method: 'GET',
+      params: {},
+      path: '/unit-test'
+    });
+    expect(error.value).toBeUndefined();
+  });
 });

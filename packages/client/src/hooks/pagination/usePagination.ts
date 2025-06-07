@@ -21,7 +21,9 @@ import {
   noop,
   objectKeys,
   objectValues,
+  promiseAll,
   promiseCatch,
+  promiseFinally,
   promiseResolve,
   pushItem,
   setTimeoutFn,
@@ -31,10 +33,10 @@ import {
   usePromise
 } from '@alova/shared';
 import { Alova, AlovaGenerics, Method, invalidateCache, promiseStatesHook, queryCache, setCache } from 'alova';
-import { FetcherType, PaginationHookConfig } from '~/typings/clienthook';
+import { FetcherType, PaginationActionStatus, PaginationHookConfig } from '~/typings/clienthook';
 import createSnapshotMethodsManager from './createSnapshotMethodsManager';
 
-const paginationAssert = createAssert('usePagination');
+const paginationAssert: ReturnType<typeof createAssert> = createAssert('usePagination');
 const indexAssert = (index: number, rawData: any[]) =>
   paginationAssert(isNumber(index) && index < len(rawData), 'index must be a number that less than list length');
 
@@ -71,6 +73,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     immediate = trueValue,
     middleware,
     force = noop,
+    actions = {},
     ...others
   } = config;
 
@@ -114,6 +117,9 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   // Compatible with react, store functions that require proxy here
   // In this way, the latest operation function can be called in the proxy function and avoid the react closure trap.
   const delegationActions = ref<Record<string, GeneralFn>>({});
+  const status = create('' as PaginationActionStatus, 'status');
+  const removing = create([] as number[], 'removing');
+  const replacing = create(undefinedValue as number | undefined, 'replacing');
   // Calculate data, total, is last page parameters
   const pageCount = computed(
     () => {
@@ -470,6 +476,16 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     onAsyncQueueRunComplete(resetCache); // The cache needs to be reset at the end of execution
     return add2AsyncQueue(async () => {
       const index = isNumber(position) ? position : getItemIndex(position) + 1;
+      paginationAssert(index >= 0, 'illegal insert position');
+
+      // if has insert action, call it
+      if (isFn(actions.insert)) {
+        status.v = 'inserting';
+        await promiseFinally(actions.insert(item, position), () => {
+          status.v = '';
+        });
+      }
+
       let popItem: ListData[number] | undefined = undefinedValue;
       const rawData = [...data.v];
       // Only when the number of items currently displayed is exactly a multiple of page size, you need to remove an item of data to ensure that the number of operating pages is page size.
@@ -516,6 +532,18 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
         indexAssert(index, data.v);
         return index;
       });
+
+      // if has remove action, call it
+      if (isFn(actions.remove)) {
+        status.v = 'removing';
+        removing.v = [...indexes];
+        const p = promiseAll(mapItem(positions, position => actions.remove!(position)));
+        await promiseFinally(p, () => {
+          status.v = '';
+          removing.v = [];
+        });
+      }
+
       const pageVal = page.v;
       const nextPage = pageVal + 1;
       const snapshotItem = getSnapshotMethods(nextPage);
@@ -571,6 +599,17 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       paginationAssert(position !== undefinedValue, 'expect specify the replace position');
       const index = isNumber(position) ? position : getItemIndex(position);
       indexAssert(index, data.v);
+
+      // if has replace action, call it
+      if (isFn(actions.replace)) {
+        status.v = 'replacing';
+        replacing.v = index;
+        await promiseFinally(actions.replace(item, position), () => {
+          status.v = '';
+          replacing.v = undefinedValue;
+        });
+      }
+
       const rawData = [...data.v];
       splice(rawData, index, 1, item);
       data.v = rawData;
@@ -602,7 +641,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
   /** @Returns */
   return exposeProvider({
     ...states,
-    ...objectify([data, page, pageCount, pageSize, total, isLastPage]),
+    ...objectify([data, page, pageCount, pageSize, total, isLastPage, status, removing, replacing]),
     send: (...args: any[]) => send(...args, undefinedValue, undefinedValue),
 
     fetching: fetchStates.loading,

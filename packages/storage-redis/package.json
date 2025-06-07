@@ -1,0 +1,55 @@
+{
+  "name": "@alova/storage-redis",
+  "version": "1.0.0-beta.0",
+  "description": "storage adapter of redis for alova.js",
+  "homepage": "https://alova.js.org",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.common.cjs",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "hooks",
+    "nodejs",
+    "deno",
+    "bun",
+    "typescript",
+    "request",
+    "superagent",
+    "alova",
+    "axios"
+  ],
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "test": "vitest run",
+    "lint": "eslint --ext .ts,.js src/**",
+    "lint:fix": "eslint --ext .ts,.js src/** --fix",
+    "build": "npm run clean && alova-scripts build",
+    "commit": "git-cz && git push"
+  },
+  "author": "Scott hu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alovajs/alova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alovajs/alova/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "ioredis": "^5.3.2",
+    "alova": "^3.0.20"
+  },
+  "dependencies": {
+    "@alova/shared": "workspace:*",
+    "ioredis": "^5.6.1"
+  },
+  "devDependencies": {
+    "@alova/mock": "workspace:*",
+    "@alova/scripts": "workspace:*",
+    "alova": "workspace:*"
+  }
+}

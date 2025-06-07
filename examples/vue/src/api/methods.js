@@ -141,3 +141,9 @@ export const getLatestTime = () =>
 export const sendCaptcha = phoneNumber => alova.Post('/captcha', { phoneNumber });
 
 export const getRetryData = params => alova.Get('/retryData', { params, cacheFor: null });
+
+export const uploadFiles = ({ file, name }) => {
+  const formData = new FormData();
+  formData.append(name, file);
+  return alova.Post('/upload', formData);
+};

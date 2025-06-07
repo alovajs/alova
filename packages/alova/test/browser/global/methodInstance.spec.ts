@@ -24,8 +24,6 @@ describe('method instance', () => {
     expect(code).toBe(200);
     expect(data.path).toBe('/unit-test');
     expect(data.params).toEqual({ a: 'a', b: 'str' });
-    expect(data.path).toBe('/unit-test');
-    expect(data.params).toEqual({ a: 'a', b: 'str' });
 
     const Get2 = alova.Get<Result>('/unit-test-error', {
       params: { a: 'a', b: 'str' },
@@ -35,6 +33,45 @@ describe('method instance', () => {
       }
     });
     await expect(Get2.send()).rejects.toThrow('Failed to fetch');
+  });
+
+  test('should the params will be append to url', async () => {
+    const Get1 = alova.Get<Result>('/unit-test?a=1&b=2', {
+      params: { c: 'c', d: 'str' }
+    });
+
+    const prom = Get1.send();
+    expect(prom).toBeInstanceOf(Promise);
+    const { code, data } = await prom;
+    expect(code).toBe(200);
+    expect(data.path).toBe('/unit-test');
+    expect(data.params).toEqual({ a: '1', b: '2', c: 'c', d: 'str' });
+  });
+
+  test('the params can be set with string', async () => {
+    const alova = getAlovaInstance({
+      beforeRequestExpect(methodInstance) {
+        expect(methodInstance.config.params).toBeTypeOf('string');
+      },
+      responseExpect: r => r.json()
+    });
+    const Get1 = alova.Get<Result>('/unit-test', {
+      params: 'a=a&b=str'
+    });
+    const prom = Get1.send();
+    expect(prom).toBeInstanceOf(Promise);
+    const { code, data } = await prom;
+    expect(code).toBe(200);
+    expect(data.path).toBe('/unit-test');
+    expect(data.params).toEqual({ a: 'a', b: 'str' });
+
+    const Get2 = alova.Get<Result>('/unit-test?a=a&b=b', {
+      params: 'c=c&d=str'
+    });
+    const { code: code2, data: data2 } = await Get2.send();
+    expect(code2).toBe(200);
+    expect(data2.path).toBe('/unit-test');
+    expect(data2.params).toEqual({ a: 'a', b: 'b', c: 'c', d: 'str' });
   });
 
   test('fromCache should be true when request with cache', async () => {
@@ -373,6 +410,9 @@ describe('method instance', () => {
     const methodDelete = alova.Delete('/unit-test');
     const methodPatch = alova.Patch('/unit-test');
     const methodOptions = alova.Options('/unit-test');
+    const methodRequest = alova.Request<Result>({
+      url: '/unit-test'
+    });
     expect(methodGet.data).toBeUndefined();
     expect(methodPost.data).toBeUndefined();
     expect(methodHead.data).toBeUndefined();
@@ -380,15 +420,21 @@ describe('method instance', () => {
     expect(methodDelete.data).toBeUndefined();
     expect(methodPatch.data).toBeUndefined();
     expect(methodOptions.data).toBeUndefined();
+    expect(methodRequest.data).toBeUndefined();
 
     const methodPost2 = alova.Post('/unit-test', {});
     const methodPut2 = alova.Put('/unit-test', {});
     const methodDelete2 = alova.Delete('/unit-test', {});
     const methodPatch2 = alova.Patch('/unit-test', {});
+    const methodRequest2 = alova.Request<Result>({
+      url: '/unit-test',
+      data: {}
+    });
     expect(methodPost2.data).toStrictEqual({});
     expect(methodPut2.data).toStrictEqual({});
     expect(methodDelete2.data).toStrictEqual({});
     expect(methodPatch2.data).toStrictEqual({});
+    expect(methodRequest2.data).toStrictEqual({});
   });
 
   test('it can customize the method key', async () => {

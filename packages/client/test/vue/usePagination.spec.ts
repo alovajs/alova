@@ -537,6 +537,67 @@ describe('vue => usePagination', () => {
     });
   });
 
+  test('replace item with replace action', async () => {
+    const replaceMockFn = vi.fn();
+    const successMockFn = vi.fn();
+    render(Pagination, {
+      props: {
+        getter: getterSearch,
+        paginationConfig: {
+          preloadPreviousPage: false,
+          preloadNextPage: false,
+          total: (res: any) => res.total,
+          data: (res: any) => res.list,
+          actions: {
+            async replace(item: any, position: any) {
+              await delay(200);
+              replaceMockFn(item, position);
+              setMockListWithSearchData((data: any) => {
+                const index = data.findIndex((i: any) => i.id === position.id);
+                data.splice(index, 1, item);
+                return data;
+              });
+            }
+          }
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onSuccess(successMockFn);
+        }
+      }
+    });
+
+    const currentList = generateContinuousNumbers(9, 0, i => {
+      const n = i % 3;
+      return {
+        id: i,
+        word: ['aaa', 'bbb', 'ccc'][n]
+      };
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+    });
+
+    fireEvent.click(screen.getByRole('replaceByItem__search'));
+    await delay();
+    expect(screen.getByRole('status-value')).toHaveTextContent('replacing');
+    expect(screen.getByRole('replacing')).toHaveTextContent('2');
+    currentList[2] = { id: 100, word: 'zzz' };
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+      expect(screen.getByRole('status-value')).toBeEmptyDOMElement();
+      expect(screen.getByRole('replacing')).toBeEmptyDOMElement();
+      expect(replaceMockFn).toHaveBeenCalledTimes(1);
+      expect(replaceMockFn).toHaveBeenCalledWith({ id: 100, word: 'zzz' }, { id: 2, word: 'ccc' });
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+    });
+
+    await fireEvent.click(screen.getByRole('refreshCurPage'));
+    await waitFor(() => {
+      expect(successMockFn).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(currentList));
+    });
+  });
+
   test('paginated data insert item without preload', async () => {
     const fetchMockFn = vi.fn();
     const successMockFn = vi.fn();
@@ -581,6 +642,58 @@ describe('vue => usePagination', () => {
     expect(cache).toBeUndefined();
     cache = await queryCache(getter1(page - 1, pageSize));
     expect(cache).toBeUndefined();
+  });
+
+  test('insert item with insert action', async () => {
+    const page = 2;
+    const pageSize = 10;
+    const insertMockFn = vi.fn();
+    render(Pagination, {
+      props: {
+        getter: getter1,
+        paginationConfig: {
+          data: (res: any) => res.list,
+          preloadNextPage: false,
+          preloadPreviousPage: false,
+          initialPage: page,
+          initialPageSize: pageSize,
+          actions: {
+            async insert(item: any, position: any) {
+              await delay(200);
+              insertMockFn(item, position);
+              setMockListData(data => {
+                data.splice((page - 1) * pageSize + 1 + position, 0, item);
+                return data;
+              });
+            }
+          }
+        }
+      }
+    });
+
+    await waitFor(async () => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19, 10)));
+    });
+    expect(screen.getByRole('status-value')).toBeEmptyDOMElement();
+    fireEvent.click(screen.getByRole('insert300'));
+    await delay();
+    expect(screen.getByRole('status-value')).toHaveTextContent('inserting');
+    await waitFor(async () => {
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(generateContinuousNumbers(18, 9, { 9: 300 }))
+      );
+      expect(screen.getByRole('status-value')).toBeEmptyDOMElement();
+      expect(insertMockFn).toHaveBeenNthCalledWith(1, 300, 0);
+    });
+
+    fireEvent.click(screen.getByRole('batchInsert'));
+    await waitFor(async () => {
+      const curData = [400, 300, 500, ...generateContinuousNumbers(15, 10), 600];
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(curData));
+      expect(insertMockFn).toHaveBeenNthCalledWith(2, 400, 0);
+      expect(insertMockFn).toHaveBeenNthCalledWith(3, 500, 2);
+      expect(insertMockFn).toHaveBeenNthCalledWith(4, 600, 9);
+    });
   });
 
   test('paginated data insert item by another item', async () => {
@@ -1001,6 +1114,93 @@ describe('vue => usePagination', () => {
       expect(screen.getByRole('page')).toHaveTextContent('2');
       expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([4, 5, 6, 7]));
       expect(screen.getByRole('total')).toHaveTextContent(total.toString());
+    });
+  });
+
+  test('remove item with remove action', async () => {
+    const page = 1;
+    const pageSize = 5;
+    const removeMockFn = vi.fn();
+    render(Pagination, {
+      props: {
+        getter: getterSearch,
+        paginationConfig: {
+          data: (res: any) => res.list,
+          preloadNextPage: false,
+          preloadPreviousPage: false,
+          initialPage: page,
+          initialPageSize: pageSize,
+          actions: {
+            async remove(item: any) {
+              await delay(200);
+              removeMockFn(item);
+              setMockListWithSearchData(data => {
+                data = data.filter((i: any) => i.id !== item.id);
+                return data;
+              });
+            }
+          }
+        }
+      }
+    });
+
+    await waitFor(async () => {
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(
+          generateContinuousNumbers(4, 0, i => {
+            const n = i % 3;
+            return {
+              id: i,
+              word: ['aaa', 'bbb', 'ccc'][n]
+            };
+          })
+        )
+      );
+    });
+    expect(screen.getByRole('status-value')).toBeEmptyDOMElement();
+    fireEvent.click(screen.getByRole('removeByItem__search'));
+    await delay();
+    expect(screen.getByRole('status-value')).toHaveTextContent('removing');
+    expect(screen.getByRole('removing')).toHaveTextContent([2].join());
+    await waitFor(async () => {
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(
+          generateContinuousNumbers(5, 0, i => {
+            if (i === 2) return;
+            const n = i % 3;
+            return {
+              id: i,
+              word: ['aaa', 'bbb', 'ccc'][n]
+            };
+          })
+        )
+      );
+      expect(screen.getByRole('status-value')).toBeEmptyDOMElement();
+      expect(screen.getByRole('removing')).toBeEmptyDOMElement();
+      expect(removeMockFn).toHaveBeenCalledTimes(1);
+      expect(removeMockFn).toHaveBeenCalledWith({ id: 2, word: 'ccc' });
+    });
+
+    fireEvent.click(screen.getByRole('batchRemoveByItem'));
+    await delay();
+    expect(screen.getByRole('removing')).toHaveTextContent([2, 3, 4].join());
+    await waitFor(async () => {
+      expect(screen.getByRole('response')).toHaveTextContent(
+        JSON.stringify(
+          generateContinuousNumbers(8, 0, i => {
+            if ([2, 3, 4, 5].includes(i)) return;
+            const n = i % 3;
+            return {
+              id: i,
+              word: ['aaa', 'bbb', 'ccc'][n]
+            };
+          })
+        )
+      );
+      expect(removeMockFn).toHaveBeenCalledTimes(4);
+      expect(removeMockFn).toHaveBeenNthCalledWith(2, { id: 3, word: 'aaa' });
+      expect(removeMockFn).toHaveBeenNthCalledWith(3, { id: 4, word: 'bbb' });
+      expect(removeMockFn).toHaveBeenNthCalledWith(4, { id: 5, word: 'ccc' });
     });
   });
 
@@ -1749,17 +1949,17 @@ describe('vue => usePagination', () => {
     const fetchSuccessMockFn = vi.fn();
     render(Pagination, {
       props: {
-        getter: (page, pageSize) => getter1(page, pageSize),
+        getter: (page: number, pageSize: number) => getter1(page, pageSize),
         paginationConfig: {
           total: (res: any) => res.total,
           data: (res: any) => res.list,
           immediate: false
         },
-        handleExposure(exposure) {
-          exposure.onSuccess(({ args }) => {
+        handleExposure(exposure: any) {
+          exposure.onSuccess(({ args }: any) => {
             successFn(args);
           });
-          exposure.onFetchSuccess(({ args }) => {
+          exposure.onFetchSuccess(({ args }: any) => {
             fetchSuccessMockFn(args);
           });
         }
@@ -1780,5 +1980,18 @@ describe('vue => usePagination', () => {
       expect(successFn).toHaveBeenCalledWith(['a', 1, undefined, undefined]);
       expect(fetchSuccessMockFn).toHaveBeenCalledWith(['a', 1, false]);
     });
+  });
+
+  test("should't send request when call with `await`", async () => {
+    const { loading, data, error, page, pageCount, total } = await usePagination(getter1, {
+      data: (res: any) => res.list
+    });
+
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toStrictEqual(generateContinuousNumbers(9));
+    expect(error.value).toBeUndefined();
+    expect(page.value).toBe(1);
+    expect(pageCount.value).toBe(30);
+    expect(total.value).toBe(300);
   });
 });

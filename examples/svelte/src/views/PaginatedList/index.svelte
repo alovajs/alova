@@ -1,5 +1,5 @@
 <script>
-  import { usePagination, useRequest } from 'alova/client';
+  import { usePagination } from 'alova/client';
   import { writable } from 'svelte/store';
   import { queryStudents, removeStudent } from '../../api/methods';
   import Table from '../../components/Table.svelte';
@@ -20,19 +20,17 @@
     remove,
     insert,
     refresh,
-    reload
+    reload,
+    removing
   } = usePagination((page, pageSize) => queryStudents(page, pageSize, $studentName, $clsName), {
     watchingStates: [studentName, clsName],
     initialData: { total: 0, list: [] },
     debounce: [800],
     total: res => res.total,
-    data: res => res.list
-  });
-
-  const { send: removeSend, loading: removing } = useRequest(({ id }) => removeStudent(id), {
-    immediate: false
-  }).onSuccess(({ args: [row] }) => {
-    remove(row);
+    data: res => res.list,
+    actions: {
+      remove: ({ id }) => removeStudent(id)
+    }
   });
 
   const editItem = id => {
@@ -132,7 +130,8 @@
       <div
         class="grid grid-cols-[repeat(2,fit-content(100px))] gap-x-2"
         slot="slot4"
-        let:row>
+        let:row
+        let:index>
         <nord-button
           size="s"
           on:click={() => editItem(row.id)}>
@@ -142,8 +141,8 @@
           variant="danger"
           size="s"
           type="error"
-          disabled={$removing || undefined}
-          on:click={() => removeSend(row)}>
+          disabled={$removing.includes(index) || undefined}
+          on:click={() => remove(row)}>
           Remove
         </nord-button>
       </div>

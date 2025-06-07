@@ -1,0 +1,42 @@
+{{> header}}
+<ul class="col">
+  <li>reset time is 10s which means you can re-send captcha after this time</li>
+  <li>expire time is 30s which means you can verify captcha within this time</li>
+</ul>
+<div class="col">
+  <label>phone number</label>
+  <input id="phoneNumberEl" />
+  <button id="sendCaptchaEl">send captcha</button>
+</div>
+<div class="col">
+  <label>captcha number</label>
+  <input id="captchaNumberEl" />
+</div>
+<div class="col">
+  <button id="btnSubmit">Submit</button>
+</div>
+<div id="dashboard"></div>
+
+<script>
+  on('#sendCaptchaEl', 'click', async () => {
+    dashboard.innerHTML = '';
+    const { success, error } = await alovaInstance.Post('/api/captcha/send', { phoneNumber: phoneNumberEl.value });
+    dashboard.innerHTML = success
+      ? '<div>Captcha sent, please get numbers in the terminal of IDE</div>'
+      : `<div style="color: red">send failed: ${error}</div>`;
+  });
+
+  on('#btnSubmit', 'click', async () => {
+    const phoneNumber = phoneNumberEl.value;
+    const captcha = captchaNumberEl.value;
+    btnSubmit.setAttribute('disabled', 'disabled');
+    const { success } = await alovaInstance.Post('/api/captcha/verify', {
+      phoneNumber,
+      captcha
+    });
+    dashboard.innerHTML += success
+      ? '<div>🎉🎉🎉verify success</div>'
+      : '<div style="color: red">😶verify failed</div>';
+    btnSubmit.removeAttribute('disabled');
+  });
+</script>

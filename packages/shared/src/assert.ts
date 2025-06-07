@@ -18,7 +18,7 @@ export class AlovaError extends Error {
  */
 export const createAssert =
   (prefix = '') =>
-  (expression: boolean, message: string, errorCode?: number) => {
+  (expression: any, message: string, errorCode?: number): asserts expression => {
     if (!expression) {
       throw newInstance(AlovaError, prefix, message, errorCode);
     }
