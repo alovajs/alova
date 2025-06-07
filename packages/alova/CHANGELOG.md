@@ -1,5 +1,22 @@
 # alova
 
+## 3.3.0
+
+### Minor Changes
+
+- [#682](https://github.com/alovajs/alova/pull/682) [`5462ca9`](https://github.com/alovajs/alova/commit/5462ca9b40f0ea9a1962c68269f05d556f085cf8) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - add `then` in hook exposure, so that you can call hook with `await` in nuxt3 and use `<suspense>` in vue3
+
+- [#682](https://github.com/alovajs/alova/pull/682) [`f8474a7`](https://github.com/alovajs/alova/commit/f8474a717e2cd95d84070f7bedd6380bfe4cb60d) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - add captcha send and verify server hook
+
+- [#682](https://github.com/alovajs/alova/pull/682) [`309f1da`](https://github.com/alovajs/alova/commit/309f1da5d5ccffd12b02b874b1dd7af97cd8c554) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - add statesHook for nuxt, now the states exported by usehooks is sync between server and client
+
+- [#681](https://github.com/alovajs/alova/pull/681) [`e62297b`](https://github.com/alovajs/alova/commit/e62297b07e3a6e0107f8fef13600290b25798d05) Thanks [@3sonboy](https://github.com/3sonboy)! - feat: change `EventSource` to fetch, add `useUploader`, add actions in `usePagination`
+
+### Patch Changes
+
+- Updated dependencies [[`f8f713b`](https://github.com/alovajs/alova/commit/f8f713bde99c92f234d175c13ab355604ae9d0f8), [`6b843ea`](https://github.com/alovajs/alova/commit/6b843ea91221b169c25b0eb75853658642024881), [`e62297b`](https://github.com/alovajs/alova/commit/e62297b07e3a6e0107f8fef13600290b25798d05)]:
+  - @alova/shared@1.3.0
+
 ## 3.2.13
 
 ### Patch Changes
