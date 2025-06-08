@@ -1,7 +1,7 @@
 {
   "name": "alova",
   "version": "3.3.0",
-  "description": "Request strategy library for MVVM libraries such as Vue.js, React.js and Svelte.js",
+  "description": "The Request Toolkit For Ultimate Efficiency",
   "main": "dist/alova.common.cjs",
   "module": "dist/alova.esm.js",
   "types": "typings/index.d.ts",

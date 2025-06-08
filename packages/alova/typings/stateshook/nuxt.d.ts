@@ -4,7 +4,7 @@ import { VueHookType } from './vue';
 
 export interface NuxtHookConfig {
   nuxtApp: () => NuxtApp;
-  serializer?: Record<string, DataSerializer>;
+  serializers?: Record<string, DataSerializer>;
 }
 
 declare const nuxtHook: (config: NuxtHookConfig) => VueHookType;
