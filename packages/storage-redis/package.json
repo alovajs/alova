@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "storage adapter of redis for alova.js",
   "homepage": "https://alova.js.org",
-  "private": true,
   "type": "module",
   "main": "dist/index.common.cjs",
   "module": "dist/index.esm.js",

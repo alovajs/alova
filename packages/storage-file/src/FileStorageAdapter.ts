@@ -1,6 +1,6 @@
 import { QueueCallback, usePromise } from '@alova/shared';
 import { AlovaGlobalCacheAdapter } from 'alova';
-import { promises as fs } from 'fs';
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 interface FileStorageAdapterOptions {
