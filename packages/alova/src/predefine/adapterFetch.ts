@@ -84,10 +84,10 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
           const pump = (): Promise<void> =>
             reader.read().then(({ done, value = new Uint8Array() }) => {
               if (done || isAborted) {
-                isAborted && cb(total, 0);
+                isAborted && cb(loaded, 0);
               } else {
                 loaded += value.byteLength;
-                cb(total, loaded);
+                cb(loaded, total);
                 return pump();
               }
             });
