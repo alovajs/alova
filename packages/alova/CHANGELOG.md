@@ -1,5 +1,11 @@
 # alova
 
+## 3.3.1
+
+### Patch Changes
+
+- [#712](https://github.com/alovajs/alova/pull/712) [`97b45e7`](https://github.com/alovajs/alova/commit/97b45e7afe496a670f01294515c1e30fd2cce24e) Thanks [@36Dyyds](https://github.com/36Dyyds)! - fix:https://github.com/alovajs/alova/issues/711
+
 ## 3.3.0
 
 ### Minor Changes
