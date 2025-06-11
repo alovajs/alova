@@ -171,7 +171,7 @@ describe('createAlova', () => {
       cacheLogger: null,
       requestAdapter: adapterFetch(),
       beforeRequest: method => {
-        if (method.config.params.async) {
+        if ((method.config.params as any).async) {
           return Promise.reject(new Error('reject in beforeRequest'));
         }
         throw new Error('error in beforeRequest');

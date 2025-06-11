@@ -7,6 +7,7 @@ import {
   falseValue,
   getContext,
   getMethodInternalKey,
+  instanceOf,
   isArray,
   isPlainObject,
   sloughConfig,
@@ -14,12 +15,12 @@ import {
   undefinedValue,
   walkObject
 } from '@alova/shared';
-import { AlovaGenerics, Method, promiseStatesHook } from 'alova';
+import { AlovaGenerics, AlovaGlobalCacheAdapter, Method, promiseStatesHook } from 'alova';
 import { FormExposure, FormHookConfig, FormHookHandler, RestoreHandler, StoreDetailConfig } from '~/typings/clienthook';
 
 const RestoreEventKey = Symbol('FormRestore');
-const getStoragedKey = <AG extends AlovaGenerics>(methodInstance: Method<AG>, id?: ID) =>
-  `alova/form-${id || getMethodInternalKey(methodInstance)}`;
+const getStoragedKey = <AG extends AlovaGenerics>(targetKey: Method<AG> | ID) =>
+  `alova/form-${instanceOf(targetKey, Method) ? getMethodInternalKey(targetKey) : targetKey}`;
 type ID = NonNullable<FormHookConfig<AlovaGenerics, any, any[]>['id']>;
 
 const sharedStates = {};
@@ -45,7 +46,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   memorize ??= $self;
   const {
     create,
-    ref: useFlag$,
+    ref,
     onMounted,
     watch,
     objectify,
@@ -63,15 +64,14 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     [RestoreEventKey]: void;
   }>();
   // Use computed properties to avoid calling methodHandler every time this use hook is executed.
-  const initialMethodInstance = useFlag$(sloughConfig(methodHandler, [form.v]));
-  const storageContext = getContext(initialMethodInstance.current).l2Cache;
-  const storagedKey = getStoragedKey(initialMethodInstance.current, id);
-  const reseting = useFlag$(falseValue);
-  const serializerPerformer = useFlag$(
+  const storageContext = ref(undefinedValue as AlovaGlobalCacheAdapter | undefined);
+  const storagedKey = ref('');
+  const reseting = ref(falseValue);
+  const serializerPerformer = ref(
     createSerializerPerformer(isStoreObject ? (store as StoreDetailConfig).serializers : undefinedValue)
   );
   // Whether the shared state created by the current hook is initiated. The hook that initiates the creation needs to return the latest state. Otherwise, because the hook is called in react, the latest state cannot be obtained from the hook initiated.
-  const isCreateShardState = useFlag$(false);
+  const isCreateShardState = ref(false);
   const originalHookProvider = useRequest((...args: Args) => methodHandler(form.v as FormData, ...args), {
     ...config,
     __referingObj: referingObject,
@@ -101,7 +101,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
     reseting.current = trueValue;
     const clonedFormData = cloneFormData(initialForm);
     clonedFormData && (form.v = clonedFormData);
-    enableStore && storageContext.remove(storagedKey);
+    enableStore && storageContext.current?.remove(storagedKey.current);
   };
 
   /**
@@ -147,10 +147,14 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   const { send, onSuccess } = hookProvider;
   onMounted(() => {
     // Update data when persistence is required
-    if (enableStore && !sharedState) {
+    if (enableStore) {
+      const initialMethod = sloughConfig(methodHandler, [form.v]);
+      const storageContextIns = (storageContext.current = getContext(initialMethod).l2Cache);
+      storagedKey.current = getStoragedKey(id || initialMethod);
+
       // Get storage and update data
       // It needs to be called in onMounted, otherwise it will cause it to be called repeatedly in react.
-      const storagedForm = serializerPerformer.current.deserialize(storageContext.get(storagedKey));
+      const storagedForm = serializerPerformer.current.deserialize(storageContextIns.get(storagedKey));
 
       // When there is draft data, the data is restored asynchronously, otherwise the on restore event cannot be bound normally.
       if (storagedForm) {
@@ -158,7 +162,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
         // Trigger persistent data recovery event
         eventManager.emit(RestoreEventKey, undefinedValue);
       }
-      enableStore && immediate && send(...([] as unknown as [...Args, any[]]));
+      immediate && send(...([] as unknown as [...Args, any[]]));
     }
   });
 
@@ -168,7 +172,7 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
       reseting.current = falseValue;
       return;
     }
-    storageContext.set(storagedKey, serializerPerformer.current.serialize(form.v));
+    storageContext.current?.set(storagedKey.current, serializerPerformer.current.serialize(form.v));
   });
   // If data needs to be cleared after submission, call reset
   onSuccess(() => {
