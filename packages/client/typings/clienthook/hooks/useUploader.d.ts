@@ -171,10 +171,8 @@ export interface UploadExposure<AG extends AlovaGenerics, Args extends any[] = a
    * @param options - file append options.
    * @returns The number of successfully appended files. Append may fail due to quantity or format restrictions.
    */
-  appendFiles: (
-    file?: AlovaRawFile | AlovaRawFile[] | FileAppendOptions,
-    options?: FileAppendOptions
-  ) => Promise<number>;
+  appendFiles(file?: AlovaRawFile | AlovaRawFile[], options?: FileAppendOptions): Promise<number>;
+  appendFiles(options?: FileAppendOptions): Promise<number>;
   /**
    * Removes files from the upload list. if no parameters are given, it will remove all files.
    * @param positions - The file items or indexes in `fileList`.
