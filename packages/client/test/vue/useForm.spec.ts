@@ -3,14 +3,14 @@ import VueHook from '@/statesHook/vue';
 import { getMethodInternalKey } from '@alova/shared';
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { AlovaGenerics, Method, createAlova } from 'alova';
-import { untilCbCalled } from 'root/testUtils';
+import { delay, untilCbCalled } from 'root/testUtils';
 import { mockRequestAdapter } from '~/test/mockData';
 import { FormHookConfig } from '~/typings/clienthook';
-import CompPersistentDataReset from './components/persistent-data-reset.vue';
-import CompRestorePersistentData from './components/restore-persistent-data.vue';
+import FormComponent from './components/form.vue';
 
 type ID = NonNullable<FormHookConfig<AlovaGenerics, any, any[]>['id']>;
-const getStoragedKey = (methodInstance: Method, id?: ID) => `alova/form-${id || getMethodInternalKey(methodInstance)}`;
+const getStoragedKey = <AG extends AlovaGenerics>(targetKey: Method<AG> | ID) =>
+  `alova/form-${targetKey instanceof Method ? getMethodInternalKey(targetKey) : targetKey}`;
 const alovaInst = createAlova({
   baseURL: 'http://localhost:8080',
   statesHook: VueHook,
@@ -19,7 +19,7 @@ const alovaInst = createAlova({
 });
 describe('vue => useForm', () => {
   test('should default not request immediately', async () => {
-    const poster = (data: any) => alovaInst.Post('/saveData', data);
+    const poster = vi.fn((data: any) => alovaInst.Post('/saveData', data));
     const { form, send, loading, updateForm } = useForm(poster);
     expect(form.value).toBeUndefined();
     expect(loading.value).toBeFalsy();
@@ -31,6 +31,7 @@ describe('vue => useForm', () => {
       age: '18'
     };
     expect(form.value).toStrictEqual(newForm);
+    expect(poster).not.toHaveBeenCalled();
     const res = await send(form.value);
     expect(res).toStrictEqual({
       code: 200,
@@ -38,6 +39,7 @@ describe('vue => useForm', () => {
     });
     // Form data is not reset after submission
     expect(form.value).toStrictEqual(newForm);
+    expect(poster).toHaveBeenCalledTimes(1);
   });
 
   test('should get the initial form and send request immediately', async () => {
@@ -160,7 +162,7 @@ describe('vue => useForm', () => {
     const restoreMockHandler = vi.fn();
     onRestore(restoreMockHandler);
 
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(restoreMockHandler).not.toHaveBeenCalled(); // No cache will not trigger on restore
 
     // The Storage key will be generated synchronously when the use form is called.
@@ -169,13 +171,13 @@ describe('vue => useForm', () => {
 
     // Update form data and validate persistent data
     form.value.name = 'Ming';
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(await getStoragedForm()).toStrictEqual({
       name: 'Ming',
       age: ''
     });
     form.value.age = '18';
-    await untilCbCalled(setTimeout, 100);
+    await delay(100);
     expect(getStoragedForm()).toStrictEqual({
       name: 'Ming',
       age: '18'
@@ -201,7 +203,16 @@ describe('vue => useForm', () => {
     const methodStorageKey = getStoragedKey(poster(initialForm));
     alovaInst.l2Cache.set(methodStorageKey, storagedForm);
 
-    render(CompRestorePersistentData);
+    render(FormComponent, {
+      props: {
+        handler: poster,
+        config: {
+          store: true,
+          resetAfterSubmiting: true,
+          immediate: true
+        }
+      }
+    });
 
     expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // Before cache recovery
     await screen.findByText('isRestore_1');
@@ -230,7 +241,7 @@ describe('vue => useForm', () => {
       name: 'Hong',
       age: '22'
     };
-    const { form, reset, updateForm } = useForm(form => poster(form), {
+    const { form, reset, updateForm } = useForm(poster, {
       initialForm
     });
 
@@ -257,7 +268,7 @@ describe('vue => useForm', () => {
     const regObj = /abc_([0-9])+$/;
     form.value.date = dateObj;
     form.value.reg = regObj;
-    await untilCbCalled(setTimeout, 20);
+    await delay(20);
     expect(form.value).toStrictEqual({
       date: dateObj,
       reg: regObj
@@ -270,7 +281,7 @@ describe('vue => useForm', () => {
 
     reset();
     expect(form.value).toStrictEqual(initialForm);
-    await untilCbCalled(setTimeout, 20);
+    await delay(20);
     expect(alovaInst.l2Cache.get(methodStorageKey)).toBeNull();
   });
 
@@ -291,13 +302,125 @@ describe('vue => useForm', () => {
     const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
     expect(getStoragedForm()).toStrictEqual(storagedForm);
 
-    render(CompPersistentDataReset); // render component
+    render(FormComponent, {
+      props: {
+        handler: poster,
+        config: {
+          store: true
+        }
+      }
+    });
     expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm)); // Before cache recovery
     await screen.findByText('isRestore_1');
     expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(storagedForm)); // After cache recovery
 
     fireEvent.click(screen.getByRole('btnReset'));
     expect(getStoragedForm()).toBeNull();
+  });
+
+  test('should reuse the shared states with id', async () => {
+    const poster = vi.fn((data: any) => alovaInst.Post('/saveData?d=4', data));
+    const initialForm = {
+      name: '',
+      age: ''
+    };
+    const formId = 'test_page';
+    const methodStorageKey = getStoragedKey(formId);
+    const getStoragedForm = () => alovaInst.l2Cache.get(methodStorageKey);
+
+    // step 1: init form
+    const { unmount } = render(FormComponent, {
+      props: {
+        handler: poster,
+        config: {
+          id: formId,
+          resetAfterSubmiting: true,
+          store: true
+        }
+      }
+    });
+    expect(screen.getByRole('form')).toHaveTextContent(JSON.stringify(initialForm));
+    expect(poster).toHaveBeenCalledTimes(1); // get initial method instance when set store
+    fireEvent.click(screen.getByRole('btnSet'));
+    await delay();
+    expect(getStoragedForm()).toStrictEqual({
+      name: 'Hong',
+      age: '22'
+    });
+    unmount();
+
+    // step 2: init form with shared state
+    const { form: form2, send } = useForm(poster, {
+      id: formId
+    });
+    expect(form2.value).toStrictEqual({
+      name: 'Hong',
+      age: '22'
+    });
+    expect(poster).toHaveBeenCalledTimes(1); // will not get method instance again
+    form2.value.age = '30';
+    form2.value.name = 'Ming';
+    await delay();
+    expect(getStoragedForm()).toStrictEqual({
+      name: 'Ming',
+      age: '30'
+    });
+
+    await send();
+    expect(poster).toHaveBeenCalledTimes(2);
+    expect(poster).lastCalledWith({
+      name: 'Ming',
+      age: '30'
+    });
+    await delay();
+    expect(getStoragedForm()).toBeNull();
+  });
+
+  test('should sync form data between multiple component', async () => {
+    const poster = vi.fn((data: any) => alovaInst.Post('/saveData?d=4', data));
+    const initialForm = {
+      name: '',
+      age: ''
+    };
+    const formId = 'test_page';
+    // step 1: init form
+    const { form } = useForm(poster, {
+      id: formId,
+      initialForm,
+      resetAfterSubmiting: true
+    });
+    expect(poster).not.toHaveBeenCalled(); // will not get initial method instance when store is false
+    form.value.name = 'Hong';
+    form.value.age = '22';
+
+    await delay(50);
+    // step 2: init form with shared state
+    const { form: form2, send } = useForm(poster, {
+      id: formId
+    });
+    expect(form2.value).toStrictEqual({
+      name: 'Hong',
+      age: '22'
+    });
+    expect(poster).not.toHaveBeenCalled(); // will not get method instance too
+    form2.value.age = '30';
+    form2.value.name = 'Ming';
+    await delay(50);
+
+    // check the sync situation
+    expect(form.value).toStrictEqual({
+      name: 'Ming',
+      age: '30'
+    });
+
+    await send();
+    expect(poster).toHaveBeenCalledTimes(1);
+    expect(poster).lastCalledWith({
+      name: 'Ming',
+      age: '30'
+    });
+    expect(form.value).toStrictEqual(initialForm);
+    expect(form2.value).toStrictEqual(initialForm);
   });
 
   test('should access actions by middleware actionDelegation', async () => {

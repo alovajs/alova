@@ -196,8 +196,8 @@ export const createAlova = <
     options
   );
   const newStatesHook = alovaInstance.options.statesHook;
-  if (boundStatesHook) {
-    myAssert(boundStatesHook === newStatesHook, 'expected to use the same `statesHook`');
+  if (boundStatesHook && newStatesHook) {
+    myAssert(boundStatesHook.name === newStatesHook.name, 'expected to use the same `statesHook`');
   }
   boundStatesHook = newStatesHook;
   const { l1Cache, l2Cache } = alovaInstance;

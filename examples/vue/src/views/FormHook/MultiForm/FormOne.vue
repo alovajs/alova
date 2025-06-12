@@ -13,4 +13,5 @@ const formId = 'multi-form-id';
 const { form } = useForm(form => submitForm(form), {
   id: formId
 });
+console.log(form.value);
 </script>

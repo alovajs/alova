@@ -24,7 +24,11 @@ export default function MultiFormCard() {
   const addCurrentStep = () => setCurrentStep(v => v + 1);
   const subCurrentStep = () => setCurrentStep(v => v - 1);
 
-  const { send, loading: submitting } = useForm(form => submitForm(form), {
+  const {
+    form,
+    send,
+    loading: submitting
+  } = useForm(form => submitForm(form), {
     id: formId,
     initialForm,
     resetAfterSubmiting: true

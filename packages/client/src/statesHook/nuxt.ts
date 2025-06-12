@@ -1,5 +1,5 @@
 import createSerializerPerformer from '@/util/serializer';
-import { createAssert, instanceOf, isFn, trueValue, undefinedValue } from '@alova/shared';
+import { createAssert, instanceOf, isFn, isSSR, trueValue, undefinedValue } from '@alova/shared';
 import type { StatesHook } from 'alova';
 import { computed, getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
 import { DataSerializer } from '~/typings/clienthook';
@@ -24,7 +24,6 @@ const errorSerializer: DataSerializer = {
 };
 const counterKey = '__ALOVA_COUNTER';
 const assert: ReturnType<typeof createAssert> = createAssert('nuxt-hook');
-const isSSR = typeof window === 'undefined';
 let allowRequest = isSSR;
 // the vue's predefined hooks
 export default ({ nuxtApp: useNuxtApp, serializers = {} }: NuxtHookConfig) => {
