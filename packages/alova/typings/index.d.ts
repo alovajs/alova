@@ -44,21 +44,20 @@ export type AlovaRequestAdapter<RequestConfig, Response, ResponseHeader> = (
   abort: () => void;
 };
 
-export type MethodType =
-  | 'GET'
-  | 'get'
-  | 'POST'
-  | 'post'
-  | 'PUT'
-  | 'put'
-  | 'DELETE'
-  | 'delete'
-  | 'HEAD'
-  | 'head'
-  | 'OPTIONS'
-  | 'options'
-  | 'PATCH'
-  | 'patch';
+type UnionLowrCase<M extends string> = Lowercase<M> | M;
+
+type StandardMethodType =
+  | UnionLowrCase<'GET'>
+  | UnionLowrCase<'POST'>
+  | UnionLowrCase<'PUT'>
+  | UnionLowrCase<'DELETE'>
+  | UnionLowrCase<'PATCH'>
+  | UnionLowrCase<'OPTIONS'>
+  | UnionLowrCase<'HEAD'>;
+
+type CustomMethodType = string & {};
+
+export type MethodType = StandardMethodType | CustomMethodType;
 
 /**
  * provide user to custom some types
