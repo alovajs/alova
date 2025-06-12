@@ -1,5 +1,15 @@
 # alova
 
+## 3.3.2
+
+### Patch Changes
+
+- [#698](https://github.com/alovajs/alova/pull/698) [`5ef468d`](https://github.com/alovajs/alova/commit/5ef468d786a7d622dc73021ddcdb9ce0a9557908) Thanks [@shlroland](https://github.com/shlroland)! - update the MethodType type to support string extension
+
+- [#719](https://github.com/alovajs/alova/pull/719) [`e7c185f`](https://github.com/alovajs/alova/commit/e7c185f1df379cd5803a2dedc634f1bf7b63291a) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - compare states hook with name string instead of instance
+
+- [#719](https://github.com/alovajs/alova/pull/719) [`e7c185f`](https://github.com/alovajs/alova/commit/e7c185f1df379cd5803a2dedc634f1bf7b63291a) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - refactor the feature multiple form in `useForm`
+
 ## 3.3.1
 
 ### Patch Changes
