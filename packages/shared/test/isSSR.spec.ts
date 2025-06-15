@@ -4,9 +4,7 @@ const undefStr = 'undefined';
 const MockGlobal: any = {};
 const isSSR = () =>
   typeof MockGlobal.window === undefStr &&
-  (typeof MockGlobal.process !== undefStr
-    ? typeof MockGlobal.process.cwd === 'function'
-    : typeof MockGlobal.Deno !== undefStr);
+  (typeof MockGlobal.process !== undefStr ? !MockGlobal.process.browser : typeof MockGlobal.Deno !== undefStr);
 
 const setGlobalWindow = (window: any) => {
   MockGlobal.window = window;
@@ -58,14 +56,14 @@ describe('isSSR', () => {
 
   it('should return false in Alipay Mini Program environment', () => {
     // Alipay Mini Program: process is {browser: true}, Deno is undefined
-    setGlobalProcess({ browser: true });
+    setGlobalProcess({ browser: true, cwd: () => '/' });
     setGlobalDeno(undefined);
     expect(isSSR()).toBeFalsy();
   });
 
   it('should return false in DingTalk Mini Program environment', () => {
     // DingTalk Mini Program: process is {browser: true}, Deno is undefined
-    setGlobalProcess({ browser: true });
+    setGlobalProcess({ browser: true, cwd: () => '/' });
     setGlobalDeno(undefined);
     expect(isSSR()).toBeFalsy();
   });
