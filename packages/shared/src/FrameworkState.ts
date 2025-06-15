@@ -47,6 +47,6 @@ export class FrameworkState<Data, Key extends string> extends FrameworkReadableS
   }
 
   get v() {
-    return super.v;
+    return this.$dhy(this.s);
   }
 }
