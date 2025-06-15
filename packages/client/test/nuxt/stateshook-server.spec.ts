@@ -16,7 +16,8 @@ vi.mock('vue', async importOriginal => {
 });
 const referingObject: ReferingObject = {
   trackedKeys: {},
-  bindError: false
+  bindError: false,
+  initialRequest: false
 };
 const importNuxtHook = async () => {
   Object.defineProperty(global, 'window', {
@@ -106,7 +107,7 @@ describe('nuxt.ts adapter', async () => {
     expect(mockNuxtApp.payload.alova_testKey2_2).toStrictEqual(['mock', '123']);
   });
 
-  test("shouldn't immediately call handler in effectRequest even when immediate is true", () => {
+  test("shouldn't immediately call handler in effectRequest even if immediate is true", () => {
     const adapter = nuxtHookServer(mockConfig);
     const handler = vi.fn();
     const removeStates = vi.fn();
@@ -119,9 +120,14 @@ describe('nuxt.ts adapter', async () => {
         watchingStates: [],
         frontStates: {}
       },
-      referingObject
+      {
+        ...referingObject,
+        initialRequest: true
+      }
     );
     expect(handler).toHaveBeenCalled();
-    expect(mockNuxtApp.hooks.hook).toHaveBeenCalledTimes(1);
+    expect(mockNuxtApp.hooks.hook).toHaveBeenLastCalledWith('app:rendered', expect.any(Function));
+    mockNuxtApp.hooks.callHook('app:rendered', '' as any);
+    expect(mockNuxtApp.payload.alova_initialRequest_1).toBeTruthy();
   });
 });

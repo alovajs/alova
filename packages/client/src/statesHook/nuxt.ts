@@ -33,15 +33,19 @@ export default ({ nuxtApp: useNuxtApp, serializers = {} }: NuxtHookConfig) => {
     ...serializers
   });
 
+  const getCounter = (key: string) => {
+    const nuxtApp = useNuxtApp();
+    (nuxtApp as any)[counterKey] = (nuxtApp as any)[counterKey] || 0;
+    const counter = ((nuxtApp as any)[counterKey] += 1);
+    return `alova_${key}_${counter}`;
+  };
+
   return {
     name: 'Vue',
     create: (data, key) => {
       const nuxtApp = useNuxtApp();
-      (nuxtApp as any)[counterKey] = (nuxtApp as any)[counterKey] || 0;
-      const counter = ((nuxtApp as any)[counterKey] += 1);
-      const stateKey = `alova_${key}_${counter}`;
+      const stateKey = getCounter(key);
       const nuxtStatePayload = nuxtApp.payload[stateKey];
-
       //  deserialize data in client
       const state = ref(performer.deserialize(nuxtStatePayload) ?? data);
       isSSR &&
@@ -56,15 +60,27 @@ export default ({ nuxtApp: useNuxtApp, serializers = {} }: NuxtHookConfig) => {
       // serialize data in server, and deserialize in client ↑↑↑
       state.value = newVal;
     },
-    effectRequest({ handler, removeStates, immediate, watchingStates }) {
+    effectRequest({ handler, removeStates, immediate, watchingStates }, referingObject) {
       if (getCurrentInstance()) {
         onUnmounted(removeStates);
       }
       const nuxtApp = useNuxtApp();
-      nuxtApp.hooks.hook('app:mounted', () => {
-        allowRequest = trueValue;
-      });
-      immediate && allowRequest && handler();
+      const stateKey = getCounter('initialRequest');
+      let initialRequestInServer = referingObject.initialRequest;
+      // sync the initial request flag to client, and then it can judge whether the request is allowed in client
+      if (isSSR) {
+        nuxtApp.hooks.hook('app:rendered', () => {
+          nuxtApp.payload[stateKey] = initialRequestInServer;
+        });
+      } else {
+        initialRequestInServer = !!nuxtApp.payload[stateKey];
+        nuxtApp.hooks.hook('app:mounted', () => {
+          allowRequest = trueValue;
+        });
+      }
+
+      // if initialRequestInServer is `false`, it indicated that is not call hook with `await`, so it need to request in client
+      immediate && (allowRequest || !initialRequestInServer) && handler();
 
       watchingStates?.forEach((state, i) => {
         watch(

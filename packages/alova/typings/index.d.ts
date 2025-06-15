@@ -239,6 +239,10 @@ export interface ReferingObject {
    * has been bound error event
    */
   bindError: boolean;
+  /**
+   * is initial request
+   */
+  initialRequest: boolean;
   [key: string]: any;
 }
 export type StatesExportHelper<I extends StatesExport<any>> = I;

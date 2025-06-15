@@ -53,10 +53,7 @@ describe('[vue]use hooks in SSR', () => {
     expect(abort).toBeInstanceOf(Function);
     expect(send).toBeInstanceOf(Function);
 
-    const { loading: loading2, data: data2, error: error2 } = await useRequest(alova.Get<Result>('/unit-test-error'));
-    expect(loading2.value).toBeFalsy();
-    expect(data2.value).toBeUndefined();
-    expect(error2.value?.message).toMatch('Failed to fetch');
+    await expect(useRequest(alova.Get<Result>('/unit-test-error'))).rejects.toThrowError('Failed to fetch');
   });
 
   test('should `useWatcher` receive all exposures in promise after request', async () => {
@@ -82,16 +79,11 @@ describe('[vue]use hooks in SSR', () => {
     expect(data.value.data.path).toBe('/unit-test');
     expect(error.value).toBeUndefined();
 
-    const {
-      loading: loading2,
-      data: data2,
-      error: error2
-    } = await useWatcher(alova.Get<Result>('/unit-test-error'), [ref(1)], {
-      immediate: true
-    });
-    expect(loading2.value).toBeFalsy();
-    expect(data2.value).toBeUndefined();
-    expect(error2.value?.message).toMatch('Failed to fetch');
+    await expect(
+      useWatcher(alova.Get<Result>('/unit-test-error'), [ref(1)], {
+        immediate: true
+      })
+    ).rejects.toThrowError('Failed to fetch');
   });
 
   test("shouldn't request when `immediate` set to false", async () => {

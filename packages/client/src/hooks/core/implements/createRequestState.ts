@@ -14,9 +14,7 @@ import {
   isFn,
   isNumber,
   objectValues,
-  promiseCatch,
   PromiseCls,
-  promiseFinally,
   promiseThen,
   setTimeoutFn,
   sloughConfig,
@@ -150,7 +148,14 @@ export default function createRequestState<
 
   // if user call hook like `await useRequest(...)`
   // that will stop the immediate request, because it will be call a request in function `then`
-  const hookRequestPromiseResolve = ref(undefinedValue as ((value?: any) => void) | undefined);
+  const hookRequestPromiseCallback = ref(
+    undefinedValue as
+      | {
+          resolve: (value?: any) => void;
+          reject: (reason?: any) => void;
+        }
+      | undefined
+  );
   const isInitialRequest = ref(falseValue);
 
   // only call once when multiple values changed at the same time
@@ -161,19 +166,22 @@ export default function createRequestState<
   const wrapEffectRequest = (ro = referingObject, handler?: Method<AG> | AlovaMethodHandler<AG>) => {
     onceRunner(() => {
       // Do not send requests when rendering on the server side
-      // but if call hook with `await`, the `hookRequestPromiseResolve` will be set as `resolve` function
-      if (!globalConfigMap.ssr || hookRequestPromiseResolve.current) {
-        isInitialRequest.current = trueValue;
-        promiseFinally(
-          promiseCatch(handleRequest(handler), error => {
+      // but if call hook with `await`, the `hookRequestPromiseCallback` will be set as `resolve` and `reject` function
+      if (!globalConfigMap.ssr || refCurrent(hookRequestPromiseCallback)) {
+        // `referingObject.initialRequest` is used in nuxthook
+        referingObject.initialRequest = isInitialRequest.current = trueValue;
+        promiseThen(
+          handleRequest(handler),
+          () => {
+            refCurrent(hookRequestPromiseCallback)?.resolve();
+          },
+          error => {
             // the error tracking indicates that the error need to throw.
             // when user access the `error` state or bind the error event, the error instance won't be thrown out.
-            if (!ro.bindError && !ro.trackedKeys.error) {
+            if (!ro.bindError && !ro.trackedKeys.error && !refCurrent(hookRequestPromiseCallback)) {
               throw error;
             }
-          }),
-          () => {
-            hookRequestPromiseResolve.current && hookRequestPromiseResolve.current();
+            refCurrent(hookRequestPromiseCallback)?.reject(error);
           }
         );
       }
@@ -240,18 +248,24 @@ export default function createRequestState<
      * const { loading, data, error } = await useRequest(...);
      * ```
      */
-    then(onfulfilled: (result: any) => void) {
-      const handleFullfilled = () => {
-        onfulfilled(hookProvider);
+    then(onfulfilled: (result: any) => void, onrejected: (reason: any) => void) {
+      const { promise, resolve, reject } = usePromise<void>();
+      hookRequestPromiseCallback.current = {
+        resolve,
+        reject
       };
-      const { resolve, promise } = usePromise<void>();
-      hookRequestPromiseResolve.current = resolve;
 
       // if the request handler is not called, the promise will resolve asynchronously.
       setTimeoutFn(() => {
         !isInitialRequest.current && resolve();
       }, 10);
-      promiseThen(promise, handleFullfilled, handleFullfilled);
+      promiseThen(
+        promise,
+        () => {
+          onfulfilled(hookProvider);
+        },
+        onrejected
+      );
     }
   });
   return hookProvider;

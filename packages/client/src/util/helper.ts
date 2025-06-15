@@ -155,7 +155,12 @@ type CompletedExposingProvider<AG extends AlovaGenerics, O extends Record<string
  */
 export function statesHookHelper<AG extends AlovaGenerics>(
   statesHook: StatesHook<StatesExport<unknown>>,
-  referingObject: ReferingObject = { trackedKeys: {}, bindError: falseValue, ...injectReferingObject() }
+  referingObject: ReferingObject = {
+    trackedKeys: {},
+    bindError: falseValue,
+    initialRequest: falseValue,
+    ...injectReferingObject()
+  }
 ) {
   const ref = <Data>(initialValue: Data) => (statesHook.ref ? statesHook.ref(initialValue) : { current: initialValue });
   referingObject = ref(referingObject).current;
@@ -322,13 +327,13 @@ export function statesHookHelper<AG extends AlovaGenerics>(
 
         /**
          * send and wait for responding with `await`
-         * this is always used in `nuxt3`
+         * this is always used in `nuxt3` and suspense in vue3
          * @example
          * ```js
          * const { loading, data, error } = await useRequest(...);
          * ```
          */
-        then(onfulfilled: (result: any) => void) {
+        then(onfulfilled: (result: any) => void, onrejected: (reason: any) => void) {
           // open all the states to track.
           forEach(stateKeys, key => {
             referingObject.trackedKeys[key] = trueValue;
@@ -340,7 +345,7 @@ export function statesHookHelper<AG extends AlovaGenerics>(
             // eslint-disable-next-line
             onfulfilled(completedProvider);
           };
-          isFn(providerThen) ? providerThen(handleFullfilled) : handleFullfilled();
+          isFn(providerThen) ? providerThen(handleFullfilled, onrejected) : handleFullfilled();
         }
       };
 
