@@ -1,5 +1,16 @@
 # alova
 
+## 3.3.3
+
+### Patch Changes
+
+- [#722](https://github.com/alovajs/alova/pull/722) [`8ec7f52`](https://github.com/alovajs/alova/commit/8ec7f52122b5c5aa80a93ccc519fc73d14f57659) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - trigger request in usehook calling without `await` in nuxt environment
+
+- [#722](https://github.com/alovajs/alova/pull/722) [`8ec7f52`](https://github.com/alovajs/alova/commit/8ec7f52122b5c5aa80a93ccc519fc73d14f57659) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - compatible with `Event` which is not in browser
+
+- Updated dependencies [[`8ec7f52`](https://github.com/alovajs/alova/commit/8ec7f52122b5c5aa80a93ccc519fc73d14f57659), [`8ec7f52`](https://github.com/alovajs/alova/commit/8ec7f52122b5c5aa80a93ccc519fc73d14f57659)]:
+  - @alova/shared@1.3.1
+
 ## 3.3.2
 
 ### Patch Changes
