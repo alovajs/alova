@@ -9,7 +9,8 @@ import { createRoot, createSignal } from 'solid-js';
 
 const referingObject: ReferingObject = {
   trackedKeys: {},
-  bindError: false
+  bindError: false,
+  initialRequest: false
 };
 const alova = getAlovaInstance(Solidhook, {
   responseExpect: r => r.json()

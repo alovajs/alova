@@ -1,6 +1,9 @@
+import { useRequest } from '@/index';
 import nuxtHook from '@/statesHook/nuxt';
-import { ReferingObject } from 'alova';
+import { createAlova, ReferingObject } from 'alova';
+import adapterFetch from 'alova/fetch';
 import { NuxtApp } from 'nuxt/app';
+import { delay } from 'root/testUtils';
 import { getCurrentInstance } from 'vue';
 import { DataSerializer } from '~/typings/clienthook';
 import { NuxtHookConfig } from '~/typings/stateshook/nuxt';
@@ -17,7 +20,8 @@ vi.mock('vue', async importOriginal => {
 });
 const referingObject: ReferingObject = {
   trackedKeys: {},
-  bindError: false
+  bindError: false,
+  initialRequest: true // assume server-side request was triggered
 };
 describe('nuxt adapter - client', async () => {
   let mockNuxtApp: NuxtApp;
@@ -80,11 +84,12 @@ describe('nuxt adapter - client', async () => {
     expect(mockNuxtApp.hooks.hook).not.toHaveBeenCalled();
   });
 
-  test("shouldn't immediately call handler in effectRequest and then it is available after app:mounted being triggered", () => {
+  test("shouldn't immediately call handler in effectRequest until app:mounted is triggered", () => {
     const adapter = nuxtHook(mockConfig);
     const handler = vi.fn();
     const removeStates = vi.fn();
 
+    mockNuxtApp.payload.alova_initialRequest_1 = true; // assume that is requested in server-side
     const callEffectRequest = () =>
       adapter.effectRequest(
         {
@@ -122,5 +127,20 @@ describe('nuxt adapter - client', async () => {
     expect((state.value as Error).name).toBe('Custom Error');
     expect((state.value as Error).message).toBe('This is a custom error message');
     expect((state.value as Error).stack).toBe('custom stack');
+  });
+
+  test('should send request without `await` in usehook', async () => {
+    const alovaInstance = createAlova({
+      baseURL: process.env.NODE_BASE_URL as string,
+      statesHook: nuxtHook(mockConfig),
+      requestAdapter: adapterFetch()
+    });
+
+    const { loading, onSuccess } = useRequest(alovaInstance.Get('/unit-test'));
+    const successFn = vi.fn();
+    onSuccess(successFn);
+    await delay(300);
+    expect(loading.value).toBeFalsy();
+    expect(successFn).toHaveBeenCalled();
   });
 });

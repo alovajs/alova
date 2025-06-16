@@ -18,7 +18,8 @@ vi.mock('vue', async importOriginal => {
 });
 const referingObject: ReferingObject = {
   trackedKeys: {},
-  bindError: false
+  bindError: false,
+  initialRequest: false
 };
 describe('nuxt adapter - common', async () => {
   let mockNuxtApp: NuxtApp;

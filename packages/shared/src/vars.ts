@@ -53,11 +53,9 @@ export const valueObject = <T>(value: T, writable = falseValue) => ({ value, wri
 export const defineProperty = (o: object, key: string | symbol, value: any, isDescriptor = falseValue) =>
   ObjectCls.defineProperty(o, key, isDescriptor ? value : valueObject(value, falseValue));
 // Whether it is running on the server side, node and bun are judged by process, and deno is judged by Deno.
-// Some frameworks (such as Alipay and uniapp) will inject the process object as a global variable.
-// Therefore, the process.cwd function unique to the server is used as the basis for judgment.
+// Some frameworks (such as Alipay and uniapp) will inject the process object as a global variable which `browser` is true
 export const isSSR =
-  typeof window === undefStr &&
-  (typeof process !== undefStr ? typeof (process as any).cwd === 'function' : typeof Deno !== undefStr);
+  typeof window === undefStr && (typeof process !== undefStr ? !(process as any).browser : typeof Deno !== undefStr);
 
 /** cache mode */
 // only cache in memory, it's default option
