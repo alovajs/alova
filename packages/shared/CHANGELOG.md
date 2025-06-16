@@ -1,5 +1,13 @@
 # @alova/shared
 
+## 1.3.1
+
+### Patch Changes
+
+- [#722](https://github.com/alovajs/alova/pull/722) [`8ec7f52`](https://github.com/alovajs/alova/commit/8ec7f52122b5c5aa80a93ccc519fc73d14f57659) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that the `isSSR` is `true` in alipay miniprogram
+
+- [#722](https://github.com/alovajs/alova/pull/722) [`8ec7f52`](https://github.com/alovajs/alova/commit/8ec7f52122b5c5aa80a93ccc519fc73d14f57659) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that `this.$dhy` is not a function in miniprogram of alipay
+
 ## 1.3.0
 
 ### Minor Changes

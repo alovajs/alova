@@ -67,7 +67,7 @@ describe('nuxt adapter - client', async () => {
     const adapter = nuxtHook(mockConfig);
     const state = adapter.create('initialData', 'testKey', referingObject);
     expect(state.value).toBe('initialData');
-    expect(mockNuxtApp.payload).toEqual({});
+    expect(mockNuxtApp.payload).toStrictEqual({});
   });
 
   test('should deserialize data from nuxtStatePayload when it exists', () => {
@@ -84,12 +84,12 @@ describe('nuxt adapter - client', async () => {
     expect(mockNuxtApp.hooks.hook).not.toHaveBeenCalled();
   });
 
-  test("shouldn't immediately call handler in effectRequest until app:mounted is triggered", () => {
+  test("shouldn't immediately call handler in effectRequest until event `page:loading:end` is triggered", () => {
     const adapter = nuxtHook(mockConfig);
     const handler = vi.fn();
     const removeStates = vi.fn();
 
-    mockNuxtApp.payload.alova_initialRequest_1 = true; // assume that is requested in server-side
+    mockNuxtApp.payload.alova_initialRequest_1 = true;
     const callEffectRequest = () =>
       adapter.effectRequest(
         {
@@ -101,12 +101,12 @@ describe('nuxt adapter - client', async () => {
         },
         referingObject
       );
-    callEffectRequest();
-    expect(mockNuxtApp.hooks.hook).toHaveBeenCalledWith('app:mounted', expect.any(Function));
+    callEffectRequest(); // mock server call
+    expect(mockNuxtApp.hooks.hook).toHaveBeenCalledWith('page:loading:end', expect.any(Function));
     expect(handler).not.toHaveBeenCalled();
 
     // Call the mounted hook callback
-    mockNuxtApp.hooks.callHook('app:mounted', '' as any);
+    mockNuxtApp.hooks.callHook('page:loading:end');
     callEffectRequest();
     expect(handler).toHaveBeenCalledTimes(1);
   });

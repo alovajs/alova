@@ -1,6 +1,6 @@
 {
   "name": "@alova/psc",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "process shared cache for alova.js on nodejs, deno, bun and electron",
   "homepage": "https://alova.js.org",
   "main": "dist/psc.common.cjs",
