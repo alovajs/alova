@@ -1,5 +1,5 @@
 import { AlovaEventBase } from '@/event';
-import { trueValue } from '@alova/shared';
+import { falseValue, nullValue, trueValue } from '@alova/shared';
 import { AlovaGenerics } from 'alova';
 import type EventSourceFetch from './EventSourceFetch';
 
@@ -16,7 +16,73 @@ interface EventSourceFetchEventInit {
   error?: Error;
 }
 
-export class EventSourceFetchEvent extends Event {
+interface BaseEventInit {
+  bubbles?: boolean;
+  cancelable?: boolean;
+  composed?: boolean;
+}
+class BaseEvent {
+  readonly type: string;
+  readonly bubbles: boolean;
+  readonly cancelable: boolean;
+  readonly composed: boolean;
+  readonly timeStamp: number;
+
+  // Event standard properties
+  cancelBubble: boolean = falseValue;
+  currentTarget: EventTarget | null = nullValue;
+  defaultPrevented: boolean = falseValue;
+  eventPhase: number = 0;
+  isTrusted: boolean = falseValue;
+  returnValue: boolean = trueValue;
+  srcElement: EventTarget | null = nullValue;
+  target: EventTarget | null = nullValue;
+
+  // Event standard constants
+  static readonly NONE = 0;
+  static readonly CAPTURING_PHASE = 1;
+  static readonly AT_TARGET = 2;
+  static readonly BUBBLING_PHASE = 3;
+
+  readonly NONE = 0;
+  readonly CAPTURING_PHASE = 1;
+  readonly AT_TARGET = 2;
+  readonly BUBBLING_PHASE = 3;
+
+  constructor(type: string, eventInitDict: BaseEventInit = {}) {
+    this.type = type;
+    this.bubbles = eventInitDict.bubbles ?? false;
+    this.cancelable = eventInitDict.cancelable ?? false;
+    this.composed = eventInitDict.composed ?? false;
+    this.timeStamp = Date.now();
+  }
+
+  // Event 标准方法
+  preventDefault(): void {
+    if (this.cancelable) {
+      this.defaultPrevented = true;
+    }
+  }
+
+  stopImmediatePropagation(): void {}
+
+  stopPropagation(): void {
+    this.cancelBubble = true;
+  }
+
+  composedPath(): EventTarget[] {
+    return [];
+  }
+
+  initEvent(type: string, bubbles?: boolean, cancelable?: boolean): void {
+    type;
+    bubbles;
+    cancelable;
+  }
+}
+
+const EventConstructor = typeof Event !== 'undefined' ? Event : BaseEvent;
+export class EventSourceFetchEvent extends EventConstructor {
   /** Event data */
   readonly data: string;
   /** Last event ID */
