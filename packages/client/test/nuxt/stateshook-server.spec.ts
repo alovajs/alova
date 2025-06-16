@@ -120,13 +120,12 @@ describe('nuxt.ts adapter', async () => {
         watchingStates: [],
         frontStates: {}
       },
-      {
-        ...referingObject,
-        initialRequest: true
-      }
+      referingObject
     );
     expect(handler).toHaveBeenCalled();
     expect(mockNuxtApp.hooks.hook).toHaveBeenLastCalledWith('app:rendered', expect.any(Function));
+
+    referingObject.initialRequest = true; // mock request in server-side
     mockNuxtApp.hooks.callHook('app:rendered', '' as any);
     expect(mockNuxtApp.payload.alova_initialRequest_1).toBeTruthy();
   });

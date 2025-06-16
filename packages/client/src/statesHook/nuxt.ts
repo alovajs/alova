@@ -70,13 +70,14 @@ export default ({ nuxtApp: useNuxtApp, serializers = {} }: NuxtHookConfig) => {
       // sync the initial request flag to client, and then it can judge whether the request is allowed in client
       if (isSSR) {
         nuxtApp.hooks.hook('app:rendered', () => {
-          nuxtApp.payload[stateKey] = initialRequestInServer;
+          nuxtApp.payload[stateKey] = referingObject.initialRequest;
         });
       } else {
         initialRequestInServer = !!nuxtApp.payload[stateKey];
-        nuxtApp.hooks.hook('app:mounted', () => {
-          allowRequest = trueValue;
-        });
+        !allowRequest &&
+          nuxtApp.hooks.hook('page:loading:end', () => {
+            allowRequest = trueValue;
+          });
       }
 
       // if initialRequestInServer is `false`, it indicated that is not call hook with `await`, so it need to request in client
