@@ -7,7 +7,14 @@ import { AlovaGenerics, createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
 import { AddressInfo } from 'net';
 import { delay } from 'root/testUtils';
-import { IntervalEventName, IntervalMessage, TriggerEventName, server, send as serverSend } from '~/test/sseServer';
+import {
+  CloseEventName,
+  IntervalEventName,
+  IntervalMessage,
+  TriggerEventName,
+  server,
+  send as serverSend
+} from '~/test/sseServer';
 
 import { SSEHookReadyState } from '@/hooks/sse/useSSE';
 import mockServer from 'root/mockServer';
@@ -23,7 +30,7 @@ afterAll(() => {
   server.close();
 });
 
-type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<AG, any>;
+type AnyMessageType<AG extends AlovaGenerics = AlovaGenerics> = AlovaSSEMessageEvent<any, AG, any>;
 
 /**
  * Prepare the Alova instance environment and start monitoring the SSE server
@@ -705,5 +712,281 @@ describe('react => useSSE', () => {
       },
       { timeout: 4000 }
     );
+  });
+
+  // Test reconnection control functionality
+  describe('reconnection control', () => {
+    // Test case 1: reconnectionTime: 0 + server disconnect
+    test('should NOT reconnect when reconnectionTime is 0 and server disconnects', async () => {
+      const alovaInst = await prepareAlova();
+      const poster = (data: any) => alovaInst.Get<string>(`/${CloseEventName}`, data);
+      const testData = 'closing';
+
+      let recv = undefinedValue;
+      const mockOpenFn = vi.fn();
+      const mockErrorFn = vi.fn();
+      const mockMessageFn = vi.fn((event: AnyMessageType) => {
+        recv = event.data;
+      });
+
+      const Page = () => {
+        const { onMessage, onOpen, onError, data, readyState } = useSSE(poster, {
+          immediate: true,
+          fetchOptions: {
+            reconnectionTime: 0
+          }
+        });
+        onMessage(mockMessageFn);
+        onOpen(mockOpenFn);
+        onError(mockErrorFn);
+
+        return (
+          <div>
+            <span role="status">
+              {readyState === SSEHookReadyState.OPEN
+                ? 'opened'
+                : readyState === SSEHookReadyState.CLOSED
+                  ? 'closed'
+                  : 'connecting'}
+            </span>
+            <span role="data">{data}</span>
+          </div>
+        );
+      };
+
+      render(<Page />);
+
+      // Wait for connection to be established
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent('opened');
+        expect(mockOpenFn).toHaveBeenCalledTimes(1);
+      });
+
+      // Send test data to confirm connection is working
+      await waitFor(() => {
+        expect(mockMessageFn).toHaveBeenCalledTimes(1);
+        expect(recv).toBe(testData);
+        expect(screen.getByRole('data')).toHaveTextContent(testData);
+      });
+
+      // wait a long enough time
+      // if reconnect, the status should be opened
+      await delay(1000);
+
+      expect(mockOpenFn).toHaveBeenCalledTimes(1);
+      expect(mockMessageFn).toHaveBeenCalledTimes(1);
+      expect(mockErrorFn).toHaveBeenCalledTimes(0);
+      expect(screen.getByRole('data')).toHaveTextContent(testData);
+      expect(screen.getByRole('status')).toHaveTextContent('closed');
+    });
+
+    // Test case 2: reconnectionTime: 0 + user manual disconnect
+    test('should NOT reconnect when reconnectionTime is 0 and user closes manually', async () => {
+      const alovaInst = await prepareAlova();
+      const poster = (data: any) => alovaInst.Get<string>(`/${TriggerEventName}`, data);
+      const testData = 'test-data-before-close';
+
+      let recv = undefinedValue;
+      const mockOpenFn = vi.fn();
+      const mockErrorFn = vi.fn();
+      const mockMessageFn = vi.fn((event: AnyMessageType) => {
+        recv = event.data;
+      });
+
+      const Page = () => {
+        const { onMessage, onOpen, onError, data, readyState, close } = useSSE(poster, {
+          immediate: true,
+          fetchOptions: {
+            reconnectionTime: 0
+          }
+        });
+        onMessage(mockMessageFn);
+        onOpen(mockOpenFn);
+        onError(mockErrorFn);
+
+        return (
+          <div>
+            <span role="status">
+              {readyState === SSEHookReadyState.OPEN
+                ? 'opened'
+                : readyState === SSEHookReadyState.CLOSED
+                  ? 'closed'
+                  : 'connecting'}
+            </span>
+            <span role="data">{data}</span>
+            <button
+              role="close"
+              onClick={close}>
+              Close
+            </button>
+          </div>
+        );
+      };
+
+      render(<Page />);
+
+      // Wait for connection to be established
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent('opened');
+        expect(mockOpenFn).toHaveBeenCalledTimes(1);
+      });
+
+      // Send test data to confirm connection is working
+      await serverSend(testData);
+      await waitFor(() => {
+        expect(mockMessageFn).toHaveBeenCalledTimes(1);
+        expect(recv).toBe(testData);
+      });
+
+      // User manually closes the connection
+      fireEvent.click(screen.getByRole('close'));
+
+      // Verify connection is immediately closed
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent('closed');
+      });
+
+      // Wait long enough to ensure no reconnection attempts
+      await delay(1000);
+
+      // Verify no reconnection (onOpen called only once, status remains closed)
+      expect(mockOpenFn).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('status')).toHaveTextContent('closed');
+
+      // Verify subsequent messages are not received
+      const afterCloseData = 'data-after-close';
+      await serverSend(afterCloseData);
+      await delay(500);
+      expect(mockMessageFn).toHaveBeenCalledTimes(1); // Still only one call
+      expect(recv).toBe(testData); // Data not updated
+    });
+
+    // Test case 3: reconnectionTime: 100 + server disconnect
+    test('should reconnect when reconnectionTime > 0 and server disconnects', async () => {
+      const alovaInst = await prepareAlova();
+      const poster = (data: any) => alovaInst.Get<string>(`/${CloseEventName}`, data);
+
+      const mockOpenFn = vi.fn();
+      const mockErrorFn = vi.fn();
+      const mockMessageFn = vi.fn();
+
+      const Page = () => {
+        const { onMessage, onOpen, onError, data, readyState } = useSSE(poster, {
+          immediate: true,
+          fetchOptions: {
+            reconnectionTime: 100
+          }
+        });
+        onMessage(mockMessageFn);
+        onOpen(mockOpenFn);
+        onError(mockErrorFn);
+
+        return (
+          <div>
+            <span role="status">
+              {readyState === SSEHookReadyState.OPEN
+                ? 'opened'
+                : readyState === SSEHookReadyState.CLOSED
+                  ? 'closed'
+                  : 'connecting'}
+            </span>
+            <span role="data">{data}</span>
+          </div>
+        );
+      };
+
+      render(<Page />);
+
+      // Wait for initial connection to be established
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent('opened');
+        expect(mockOpenFn).toHaveBeenCalledTimes(1);
+        expect(mockMessageFn).toHaveBeenCalledTimes(1);
+      });
+
+      // Since reconnectionTime is set to 100, it should attempt to reconnect
+      // Wait for multiple reconnection attempts
+      await delay(500); // Wait for several reconnection attempts
+
+      // Since we are reconnecting, the status should keep opened unchanged.
+      expect(screen.getByRole('status')).toHaveTextContent('opened');
+      // Verify reconnection attempts occurred (onOpen should be called multiple times)
+      expect(mockOpenFn.mock.calls.length).toBeGreaterThan(2);
+    });
+
+    // Test case 4: reconnectionTime: 100 + user manual disconnect
+    test('should NOT reconnect when user closes manually even if reconnectionTime > 0', async () => {
+      const alovaInst = await prepareAlova();
+      const poster = (data: any) => alovaInst.Get<string>(`/${TriggerEventName}`, data);
+      const testData = 'test-data-manual-close';
+
+      let recv = undefinedValue;
+      const mockOpenFn = vi.fn();
+      const mockErrorFn = vi.fn();
+      const mockMessageFn = vi.fn((event: AnyMessageType) => {
+        recv = event.data;
+      });
+
+      const Page = () => {
+        const { onMessage, onOpen, onError, data, readyState, close } = useSSE(poster, {
+          immediate: true,
+          fetchOptions: {
+            reconnectionTime: 100
+          }
+        });
+        onMessage(mockMessageFn);
+        onOpen(mockOpenFn);
+        onError(mockErrorFn);
+
+        return (
+          <div>
+            <span role="status">
+              {readyState === SSEHookReadyState.OPEN
+                ? 'opened'
+                : readyState === SSEHookReadyState.CLOSED
+                  ? 'closed'
+                  : 'connecting'}
+            </span>
+            <span role="data">{data}</span>
+            <button
+              role="close"
+              onClick={close}>
+              Close
+            </button>
+          </div>
+        );
+      };
+
+      render(<Page />);
+
+      // Wait for connection to be established
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent('opened');
+        expect(mockOpenFn).toHaveBeenCalledTimes(1);
+      });
+
+      // Send test data to confirm connection is working
+      await serverSend(testData);
+      await waitFor(() => {
+        expect(mockMessageFn).toHaveBeenCalledTimes(1);
+        expect(recv).toBe(testData);
+      });
+
+      // User manually closes the connection
+      fireEvent.click(screen.getByRole('close'));
+
+      // Verify connection is immediately closed
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent('closed');
+      });
+
+      // Wait longer than reconnection time to ensure no reconnection even with reconnectionTime set
+      await delay(500); // Wait 5x the reconnection time
+
+      // Verify no reconnection (onOpen called only once, status remains closed)
+      expect(mockOpenFn).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('status')).toHaveTextContent('closed');
+      expect(mockErrorFn).not.toHaveBeenCalled(); // Should not have errors
+    });
   });
 });

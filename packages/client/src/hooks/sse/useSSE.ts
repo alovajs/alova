@@ -64,7 +64,8 @@ const assert: ReturnType<typeof createAssert> = createAssert(errorPrefix);
 const enum MessageType {
   Open = 'open',
   Error = 'error',
-  Message = 'message'
+  Message = 'message',
+  Close = 'close'
 }
 
 export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
@@ -77,9 +78,11 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     interceptByGlobalResponded = trueValue,
     /** abortLast = trueValue, */
     immediate = falseValue,
-    responseType = 'text'
+    responseType = 'text',
+    fetchOptions = {}
   } = config;
   // ! Temporarily does not support specifying abortLast
+  fetchOptions && (fetchOptions.withCredentials ??= withCredentials);
   const abortLast = trueValue;
   const { create, ref, onMounted, onUnmounted, objectify, exposeProvider, memorize } =
     statesHookHelper<AG>(promiseStatesHook());
@@ -291,6 +294,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     es.removeEventListener(MessageType.Open, esOpen);
     es.removeEventListener(MessageType.Error, esError);
     es.removeEventListener(MessageType.Message, esMessage);
+    es.removeEventListener(MessageType.Close, close);
     readyState.v = SSEHookReadyState.CLOSED;
     // After eventSource is closed, unregister all custom events
     // Otherwise it may cause memory leaks
@@ -332,6 +336,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     // Establish connection
     const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
     es = newInstance(EventSourceFetch, fullURL, {
+      ...fetchOptions,
       withCredentials,
       method: type || 'GET',
       headers,
@@ -345,6 +350,9 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     es.addEventListener(MessageType.Open, esOpen);
     es.addEventListener(MessageType.Error, esError);
     es.addEventListener(MessageType.Message, esMessage);
+    es.addEventListener(MessageType.Close, () => {
+      close();
+    });
 
     // and custom events
     // If the on listener is used before connect (send), there will already be events in customEventMap.

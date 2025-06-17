@@ -13,19 +13,10 @@ import {
   setTimeoutFn,
   trueValue
 } from '@alova/shared';
+import { EventSourceFetchInit } from '~/typings/clienthook';
 import { EventSourceFetchEvent } from './event';
 
 const assert: ReturnType<typeof createAssert> = createAssert('EventSourceFetch');
-interface EventSourceFetchInit extends RequestInit {
-  /**
-   * Whether to include credentials in the request
-   */
-  withCredentials?: boolean;
-  /**
-   * Reconnection time in milliseconds
-   */
-  reconnectionTime?: number;
-}
 
 type EventSourceFetchEventListener = ((event: EventSourceFetchEvent) => void) | null;
 type EventSourceFetchEventListenerObject = { handleEvent: (event: EventSourceFetchEvent) => void };
@@ -197,6 +188,7 @@ export default class EventSourceFetch implements EventTarget {
       return;
     }
     this.readyState = EventSourceFetch.CLOSED;
+    this._dispatchEvent('close', '');
     if (this._controller) {
       this._controller.abort();
       this._controller = null;
@@ -432,6 +424,11 @@ export default class EventSourceFetch implements EventTarget {
    * Attempts to reconnect after connection closed or error
    */
   private _reconnect(): void {
+    if (this._reconnectTime <= 0) {
+      this.close();
+      return;
+    }
+
     if (this.readyState !== EventSourceFetch.CLOSED) {
       this.readyState = EventSourceFetch.CONNECTING;
       setTimeoutFn(() => this._connect(), this._reconnectTime);
