@@ -350,9 +350,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     es.addEventListener(MessageType.Open, esOpen);
     es.addEventListener(MessageType.Error, esError);
     es.addEventListener(MessageType.Message, esMessage);
-    es.addEventListener(MessageType.Close, () => {
-      close();
-    });
+    es.addEventListener(MessageType.Close, close);
 
     // and custom events
     // If the on listener is used before connect (send), there will already be events in customEventMap.
