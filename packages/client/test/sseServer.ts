@@ -4,7 +4,7 @@ import { delay } from 'root/testUtils';
 let replyList: { req: http.IncomingMessage; res: http.ServerResponse }[] = [];
 
 function wrapData(event: string, data: string) {
-  return [`event: ${event}`, `data: ${data}`, '\n'].join('\n');
+  return [`event: ${event}`, 'retry: 500', `data: ${data}`, '\n'].join('\n');
 }
 
 export const TriggerEventName = 'trigger';

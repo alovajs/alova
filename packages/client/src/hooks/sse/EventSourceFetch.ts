@@ -77,7 +77,7 @@ export default class EventSourceFetch implements EventTarget {
 
   private _options: EventSourceFetchInit;
   private _listeners: Record<string, EventSourceFetchEventListenerOrEventListenerObject[]> = {};
-  private _reconnectTime: number = 1000;
+  private _reconnectTime: number | null = null;
   private _controller: AbortController | null = null;
   private _lastEventId: string = '';
   private _origin: string = '';
@@ -311,8 +311,8 @@ export default class EventSourceFetch implements EventTarget {
           this._lastEventId = eventId;
         }
 
-        // Process retry value if present
-        if (retry !== null) {
+        // Process retry value if present and _reconnectTime is null
+        if (retry !== null && this._reconnectTime === null) {
           const retryInt = parseInt(retry, 10);
           if (!Number.isNaN(retryInt)) {
             this._reconnectTime = retryInt;
@@ -424,14 +424,16 @@ export default class EventSourceFetch implements EventTarget {
    * Attempts to reconnect after connection closed or error
    */
   private _reconnect(): void {
-    if (this._reconnectTime <= 0) {
+    if (this._reconnectTime !== null && this._reconnectTime <= 0) {
       this.close();
       return;
     }
 
     if (this.readyState !== EventSourceFetch.CLOSED) {
       this.readyState = EventSourceFetch.CONNECTING;
-      setTimeoutFn(() => this._connect(), this._reconnectTime);
+      // 如果 _reconnectTime 为 null，使用默认值 1000ms
+      const reconnectDelay = this._reconnectTime ?? 1000;
+      setTimeoutFn(() => this._connect(), reconnectDelay);
     }
   }
 }

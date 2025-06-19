@@ -988,5 +988,70 @@ describe('react => useSSE', () => {
       expect(screen.getByRole('status')).toHaveTextContent('closed');
       expect(mockErrorFn).not.toHaveBeenCalled(); // Should not have errors
     });
+
+    // Test case 5: Verify server retry time override functionality
+    test('should use server-specified retry time when reconnectionTime is null', async () => {
+      const alovaInst = await prepareAlova();
+      const poster = (data: any) => alovaInst.Get<string>(`/${CloseEventName}`, data);
+
+      const mockOpenFn = vi.fn();
+      const mockErrorFn = vi.fn();
+      const mockMessageFn = vi.fn();
+      let reconnectStartTime = 0;
+      let reconnectInterval = 0;
+
+      const Page = () => {
+        const { onMessage, onOpen, onError, data, readyState } = useSSE(poster, {
+          immediate: true,
+          fetchOptions: {
+            // Don't specify reconnectionTime, let it be null to use server's retry: 500
+          }
+        });
+        onMessage(mockMessageFn);
+        onOpen(event => {
+          const currentTime = Date.now();
+          if (reconnectStartTime > 0) {
+            reconnectInterval = currentTime - reconnectStartTime;
+          }
+          reconnectStartTime = currentTime;
+          mockOpenFn(event);
+        });
+        onError(mockErrorFn);
+
+        return (
+          <div>
+            <span role="status">
+              {readyState === SSEHookReadyState.OPEN
+                ? 'opened'
+                : readyState === SSEHookReadyState.CLOSED
+                  ? 'closed'
+                  : 'connecting'}
+            </span>
+            <span role="data">{data}</span>
+          </div>
+        );
+      };
+
+      render(<Page />);
+
+      // Wait for initial connection
+      await waitFor(() => {
+        expect(screen.getByRole('status')).toHaveTextContent('opened');
+        expect(mockOpenFn).toHaveBeenCalledTimes(1);
+        expect(mockMessageFn).toHaveBeenCalledTimes(1); // CloseEventName will send 'closing' message then disconnect
+      });
+
+      // Wait for reconnection - server sent retry: 500, so should reconnect after ~500ms
+      await waitFor(
+        () => {
+          expect(mockOpenFn).toHaveBeenCalledTimes(2);
+        },
+        { timeout: 2000 }
+      );
+
+      // Verify reconnection interval is around 500ms (allowing some margin)
+      expect(reconnectInterval).toBeGreaterThan(300);
+      expect(reconnectInterval).toBeLessThan(700);
+    });
   });
 });
