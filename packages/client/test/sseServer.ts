@@ -1,16 +1,18 @@
 import http from 'http';
+import { delay } from 'root/testUtils';
 
 let replyList: { req: http.IncomingMessage; res: http.ServerResponse }[] = [];
 
 function wrapData(event: string, data: string) {
-  return [`event: ${event}`, `data: ${data}`, '\n'].join('\n');
+  return [`event: ${event}`, 'retry: 500', `data: ${data}`, '\n'].join('\n');
 }
 
 export const TriggerEventName = 'trigger';
 export const IntervalEventName = 'interval';
+export const CloseEventName = 'close';
 export const IntervalMessage = 'interval-message';
 
-export const server = http.createServer((req, res) => {
+export const server = http.createServer(async (req, res) => {
   req.on('close', () => {
     replyList = replyList.filter(e => e.res !== res);
   });
@@ -61,6 +63,20 @@ export const server = http.createServer((req, res) => {
     }, 200);
 
     req.socket.addListener('close', () => clearInterval(interval));
+  }
+
+  if (path === `./${CloseEventName}`) {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+
+    res.write(wrapData('message', 'closing'));
+    await delay(100);
+    res.end();
+    res.connection?.end();
   }
 });
 
