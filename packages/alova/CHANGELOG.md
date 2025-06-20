@@ -1,5 +1,11 @@
 # alova
 
+## 3.3.4
+
+### Patch Changes
+
+- [#725](https://github.com/alovajs/alova/pull/725) [`bec1570`](https://github.com/alovajs/alova/commit/bec1570ebf9b30da2cbed0ed07ba414350bad594) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: typo in d.ts
+
 ## 3.3.3
 
 ### Patch Changes
