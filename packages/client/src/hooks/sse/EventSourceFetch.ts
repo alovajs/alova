@@ -1,7 +1,6 @@
 import {
   AlovaError,
   createAssert,
-  falseValue,
   filterItem,
   instanceOf,
   isArray,
@@ -55,10 +54,6 @@ export default class EventSourceFetch implements EventTarget {
    */
   readonly url: string;
   /**
-   * Whether to include credentials in requests
-   */
-  readonly withCredentials: boolean;
-  /**
    * Current state of the connection
    */
   readyState: number;
@@ -91,7 +86,6 @@ export default class EventSourceFetch implements EventTarget {
   constructor(url: string, options: EventSourceFetchInit = {}) {
     this.url = url;
     this.readyState = EventSourceFetch.CONNECTING;
-    this.withCredentials = options.withCredentials || falseValue;
 
     this._options = { ...options };
 
@@ -228,7 +222,6 @@ export default class EventSourceFetch implements EventTarget {
     };
 
     // Override/set specific options required for SSE
-    fetchOptions.credentials = fetchOptions.credentials || (this.withCredentials ? 'include' : 'same-origin');
 
     fetch(this.url, fetchOptions)
       .then(response => {

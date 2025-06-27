@@ -732,9 +732,7 @@ describe('react => useSSE', () => {
       const Page = () => {
         const { onMessage, onOpen, onError, data, readyState } = useSSE(poster, {
           immediate: true,
-          fetchOptions: {
-            reconnectionTime: 0
-          }
+          reconnectionTime: 0
         });
         onMessage(mockMessageFn);
         onOpen(mockOpenFn);
@@ -796,9 +794,7 @@ describe('react => useSSE', () => {
       const Page = () => {
         const { onMessage, onOpen, onError, data, readyState, close } = useSSE(poster, {
           immediate: true,
-          fetchOptions: {
-            reconnectionTime: 0
-          }
+          reconnectionTime: 0
         });
         onMessage(mockMessageFn);
         onOpen(mockOpenFn);
@@ -873,9 +869,7 @@ describe('react => useSSE', () => {
       const Page = () => {
         const { onMessage, onOpen, onError, data, readyState } = useSSE(poster, {
           immediate: true,
-          fetchOptions: {
-            reconnectionTime: 100
-          }
+          reconnectionTime: 100
         });
         onMessage(mockMessageFn);
         onOpen(mockOpenFn);
@@ -930,9 +924,7 @@ describe('react => useSSE', () => {
       const Page = () => {
         const { onMessage, onOpen, onError, data, readyState, close } = useSSE(poster, {
           immediate: true,
-          fetchOptions: {
-            reconnectionTime: 100
-          }
+          reconnectionTime: 100
         });
         onMessage(mockMessageFn);
         onOpen(mockOpenFn);

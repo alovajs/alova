@@ -79,10 +79,9 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     /** abortLast = trueValue, */
     immediate = falseValue,
     responseType = 'text',
-    fetchOptions = {}
+    ...fetchOptions
   } = config;
   // ! Temporarily does not support specifying abortLast
-  fetchOptions && (fetchOptions.withCredentials ??= withCredentials);
   const abortLast = trueValue;
   const { create, ref, onMounted, onUnmounted, objectify, exposeProvider, memorize } =
     statesHookHelper<AG>(promiseStatesHook());
@@ -336,11 +335,11 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     // Establish connection
     const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
     es = newInstance(EventSourceFetch, fullURL, {
-      ...fetchOptions,
-      withCredentials,
+      credentials: withCredentials ? 'include' : 'same-origin',
       method: type || 'GET',
       headers,
-      body: isBodyData(data) ? data : JSONStringify(data)
+      body: isBodyData(data) ? data : JSONStringify(data),
+      ...fetchOptions
     });
     eventSource.current = es;
     readyState.v = SSEHookReadyState.CONNECTING;

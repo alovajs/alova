@@ -26,64 +26,57 @@ export type SSEOnErrorTrigger<AG extends AlovaGenerics, Args extends any[] = any
   event: AlovaSSEErrorEvent<AG, Args>
 ) => void;
 
-export interface EventSourceFetchInit extends RequestInit {
-  /**
-   * Whether to include credentials in the request
-   */
-  withCredentials?: boolean;
-  /**
-   * Reconnection time in milliseconds, default is 1000
-   * set to 0 to disable reconnection
-   */
-  reconnectionTime?: number;
-}
+export interface EventSourceFetchInit extends RequestInit {}
 
 /**
  *  useSSE() configuration item
  */
-export type SSEHookConfig = FetchRequestInit & {
-  /**
-   * A boolean value indicating whether the EventSource object was instantiated with cross-origin (CORS) credentials set true.
-   * @default false
-   * @deprecated use fetchOptions.credentials instead
-   */
-  withCredentials?: boolean;
+export type SSEHookConfig = FetchRequestInit &
+  EventSourceFetchInit & {
+    /**
+     * Whether to include credentials in the request
+     */
+    withCredentials?: boolean;
+    /**
+     * Reconnection time in milliseconds, default is 1000
+     * set to 0 to disable reconnection
+     */
+    reconnectionTime?: number;
+    /**
+     * Whether to pass the responded interception of the alova instance
+     * @default true
+     */
+    interceptByGlobalResponded?: boolean;
 
-  /**
-   * Whether to pass the responded interception of the alova instance
-   * @default true
-   */
-  interceptByGlobalResponded?: boolean;
+    /**
+     * initial data
+     */
+    initialData?: any;
 
-  /**
-   * initial data
-   */
-  initialData?: any;
+    /**
+     * Whether to initiate a request immediately
+     * @default false
+     */
+    immediate?: boolean;
 
-  /**
-   * Whether to initiate a request immediately
-   * @default false
-   */
-  immediate?: boolean;
+    /**
+     * Whether to interrupt the previous request and trigger this request
+     * @default true
+     * TODO does not currently support specifying
+     */
+    abortLast?: true;
 
-  /**
-   * Whether to interrupt the previous request and trigger this request
-   * @default true
-   * TODO does not currently support specifying
-   */
-  abortLast?: true;
+    /**
+     * set the message data type.
+     * @default "text"
+     */
+    responseType?: 'text' | 'json';
 
-  /**
-   * set the message data type.
-   * @default "text"
-   */
-  responseType?: 'text' | 'json';
-
-  /**
-   * options for EventSourceFetch
-   */
-  fetchOptions?: EventSourceFetchInit;
-};
+    /**
+     * options for EventSourceFetch
+     */
+    fetchOptions?: EventSourceFetchInit;
+  };
 
 /**
  * useSSE() return type
