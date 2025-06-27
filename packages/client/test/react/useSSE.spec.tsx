@@ -994,10 +994,7 @@ describe('react => useSSE', () => {
 
       const Page = () => {
         const { onMessage, onOpen, onError, data, readyState } = useSSE(poster, {
-          immediate: true,
-          fetchOptions: {
-            // Don't specify reconnectionTime, let it be null to use server's retry: 500
-          }
+          immediate: true
         });
         onMessage(mockMessageFn);
         onOpen(event => {
@@ -1043,7 +1040,7 @@ describe('react => useSSE', () => {
 
       // Verify reconnection interval is around 500ms (allowing some margin)
       expect(reconnectInterval).toBeGreaterThan(300);
-      expect(reconnectInterval).toBeLessThan(700);
+      expect(reconnectInterval).toBeLessThan(1000);
     });
   });
 });

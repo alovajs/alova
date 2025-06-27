@@ -83,16 +83,13 @@ export default class EventSourceFetch implements EventTarget {
    * @param url The URL to connect to
    * @param options Configuration options (includes all fetch options plus EventSource specific options)
    */
-  constructor(url: string, options: EventSourceFetchInit = {}) {
+  constructor(url: string, reconnectTime: number | null, options: EventSourceFetchInit = {}) {
     this.url = url;
     this.readyState = EventSourceFetch.CONNECTING;
 
     this._options = { ...options };
 
-    // Extract EventSource specific options
-    if (options.reconnectionTime !== undefined) {
-      this._reconnectTime = options.reconnectionTime;
-    }
+    this._reconnectTime = reconnectTime;
 
     // Get origin from URL
     const urlObj = newInstance(URL, url, window.location.href);

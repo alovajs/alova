@@ -79,6 +79,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     /** abortLast = trueValue, */
     immediate = falseValue,
     responseType = 'text',
+    reconnectionTime = null,
     ...fetchOptions
   } = config;
   // ! Temporarily does not support specifying abortLast
@@ -334,7 +335,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
     // Establish connection
     const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
-    es = newInstance(EventSourceFetch, fullURL, {
+    es = newInstance(EventSourceFetch, fullURL, reconnectionTime, {
       credentials: withCredentials ? 'include' : 'same-origin',
       method: type || 'GET',
       headers,
