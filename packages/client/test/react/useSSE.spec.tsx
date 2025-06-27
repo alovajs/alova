@@ -56,12 +56,13 @@ describe('react => useSSE', () => {
     });
 
     const Page = () => {
-      const { on, onOpen, data, readyState, send, close } = useSSE(poster);
+      const { on, onOpen, data, readyState, send, close, eventSource } = useSSE(poster);
       on(IntervalEventName, mockOnFn as any);
       onOpen(mockOpenFn);
 
       return (
         <div>
+          <span role="event-source-state">{eventSource?.readyState}</span>
           <span role="status">
             {readyState === SSEHookReadyState.OPEN
               ? 'opened'
@@ -106,6 +107,7 @@ describe('react => useSSE', () => {
       { timeout: 4000 }
     );
 
+    expect(screen.getByRole('event-source-state')).toHaveTextContent('1');
     fireEvent.click(screen.getByRole('close-btn'));
     await delay(200);
     expect(screen.getByRole('status')).toHaveTextContent('closed');

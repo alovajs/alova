@@ -93,6 +93,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   const data = create(initialData as Data, 'data');
   const readyState = create(SSEHookReadyState.CLOSED, 'readyState');
+  const exposedEventSource = create(undefinedValue as EventSourceFetch | undefined, 'eventSource');
 
   let methodInstance = getHandlerMethod(handler);
 
@@ -343,6 +344,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
       ...fetchOptions
     });
     eventSource.current = es;
+    exposedEventSource.v = es;
     readyState.v = SSEHookReadyState.CONNECTING;
 
     // * MARK: Register to handle events
@@ -389,7 +391,6 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     onMessage,
     onError,
     onOpen,
-    eventSource,
-    ...objectify([readyState, data])
+    ...objectify([readyState, data, exposedEventSource])
   });
 };
