@@ -26,17 +26,21 @@ export type SSEOnErrorTrigger<AG extends AlovaGenerics, Args extends any[] = any
   event: AlovaSSEErrorEvent<AG, Args>
 ) => void;
 
+export interface EventSourceFetchInit extends RequestInit {}
+
 /**
  *  useSSE() configuration item
  */
 export type SSEHookConfig = FetchRequestInit & {
   /**
-   * A boolean value indicating whether the EventSource object was instantiated with cross-origin (CORS) credentials set true.
-   * @default false
-   * @deprecated use fetchOptions.credentials instead
+   * Whether to include credentials in the request
    */
   withCredentials?: boolean;
-
+  /**
+   * Reconnection time in milliseconds, default is 1000
+   * set to 0 to disable reconnection
+   */
+  reconnectionTime?: number;
   /**
    * Whether to pass the responded interception of the alova instance
    * @default true

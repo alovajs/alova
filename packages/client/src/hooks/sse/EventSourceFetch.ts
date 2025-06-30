@@ -1,7 +1,6 @@
 import {
   AlovaError,
   createAssert,
-  falseValue,
   filterItem,
   instanceOf,
   isArray,
@@ -13,19 +12,10 @@ import {
   setTimeoutFn,
   trueValue
 } from '@alova/shared';
+import { EventSourceFetchInit } from '~/typings/clienthook';
 import { EventSourceFetchEvent } from './event';
 
 const assert: ReturnType<typeof createAssert> = createAssert('EventSourceFetch');
-interface EventSourceFetchInit extends RequestInit {
-  /**
-   * Whether to include credentials in the request
-   */
-  withCredentials?: boolean;
-  /**
-   * Reconnection time in milliseconds
-   */
-  reconnectionTime?: number;
-}
 
 type EventSourceFetchEventListener = ((event: EventSourceFetchEvent) => void) | null;
 type EventSourceFetchEventListenerObject = { handleEvent: (event: EventSourceFetchEvent) => void };
@@ -64,10 +54,6 @@ export default class EventSourceFetch implements EventTarget {
    */
   readonly url: string;
   /**
-   * Whether to include credentials in requests
-   */
-  readonly withCredentials: boolean;
-  /**
    * Current state of the connection
    */
   readyState: number;
@@ -86,7 +72,7 @@ export default class EventSourceFetch implements EventTarget {
 
   private _options: EventSourceFetchInit;
   private _listeners: Record<string, EventSourceFetchEventListenerOrEventListenerObject[]> = {};
-  private _reconnectTime: number = 1000;
+  private _reconnectTime: number | null = null;
   private _controller: AbortController | null = null;
   private _lastEventId: string = '';
   private _origin: string = '';
@@ -97,17 +83,13 @@ export default class EventSourceFetch implements EventTarget {
    * @param url The URL to connect to
    * @param options Configuration options (includes all fetch options plus EventSource specific options)
    */
-  constructor(url: string, options: EventSourceFetchInit = {}) {
+  constructor(url: string, reconnectTime: number | null, options: EventSourceFetchInit = {}) {
     this.url = url;
     this.readyState = EventSourceFetch.CONNECTING;
-    this.withCredentials = options.withCredentials || falseValue;
 
     this._options = { ...options };
 
-    // Extract EventSource specific options
-    if (options.reconnectionTime !== undefined) {
-      this._reconnectTime = options.reconnectionTime;
-    }
+    this._reconnectTime = reconnectTime;
 
     // Get origin from URL
     const urlObj = newInstance(URL, url, window.location.href);
@@ -197,6 +179,7 @@ export default class EventSourceFetch implements EventTarget {
       return;
     }
     this.readyState = EventSourceFetch.CLOSED;
+    this._dispatchEvent('close', '');
     if (this._controller) {
       this._controller.abort();
       this._controller = null;
@@ -236,7 +219,6 @@ export default class EventSourceFetch implements EventTarget {
     };
 
     // Override/set specific options required for SSE
-    fetchOptions.credentials = fetchOptions.credentials || (this.withCredentials ? 'include' : 'same-origin');
 
     fetch(this.url, fetchOptions)
       .then(response => {
@@ -319,8 +301,8 @@ export default class EventSourceFetch implements EventTarget {
           this._lastEventId = eventId;
         }
 
-        // Process retry value if present
-        if (retry !== null) {
+        // Process retry value if present and _reconnectTime is null
+        if (retry !== null && this._reconnectTime === null) {
           const retryInt = parseInt(retry, 10);
           if (!Number.isNaN(retryInt)) {
             this._reconnectTime = retryInt;
@@ -432,9 +414,16 @@ export default class EventSourceFetch implements EventTarget {
    * Attempts to reconnect after connection closed or error
    */
   private _reconnect(): void {
+    if (this._reconnectTime !== null && this._reconnectTime <= 0) {
+      this.close();
+      return;
+    }
+
     if (this.readyState !== EventSourceFetch.CLOSED) {
       this.readyState = EventSourceFetch.CONNECTING;
-      setTimeoutFn(() => this._connect(), this._reconnectTime);
+      // 如果 _reconnectTime 为 null，使用默认值 1000ms
+      const reconnectDelay = this._reconnectTime ?? 1000;
+      setTimeoutFn(() => this._connect(), reconnectDelay);
     }
   }
 }

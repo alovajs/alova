@@ -64,7 +64,8 @@ const assert: ReturnType<typeof createAssert> = createAssert(errorPrefix);
 const enum MessageType {
   Open = 'open',
   Error = 'error',
-  Message = 'message'
+  Message = 'message',
+  Close = 'close'
 }
 
 export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
@@ -77,7 +78,9 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     interceptByGlobalResponded = trueValue,
     /** abortLast = trueValue, */
     immediate = falseValue,
-    responseType = 'text'
+    responseType = 'text',
+    reconnectionTime = null,
+    ...fetchOptions
   } = config;
   // ! Temporarily does not support specifying abortLast
   const abortLast = trueValue;
@@ -90,6 +93,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   const data = create(initialData as Data, 'data');
   const readyState = create(SSEHookReadyState.CLOSED, 'readyState');
+  const exposedEventSource = create(undefinedValue as EventSourceFetch | undefined, 'eventSource');
 
   let methodInstance = getHandlerMethod(handler);
 
@@ -291,6 +295,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     es.removeEventListener(MessageType.Open, esOpen);
     es.removeEventListener(MessageType.Error, esError);
     es.removeEventListener(MessageType.Message, esMessage);
+    es.removeEventListener(MessageType.Close, close);
     readyState.v = SSEHookReadyState.CLOSED;
     // After eventSource is closed, unregister all custom events
     // Otherwise it may cause memory leaks
@@ -331,13 +336,15 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
     // Establish connection
     const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
-    es = newInstance(EventSourceFetch, fullURL, {
-      withCredentials,
+    es = newInstance(EventSourceFetch, fullURL, reconnectionTime, {
+      credentials: withCredentials ? 'include' : 'same-origin',
       method: type || 'GET',
       headers,
-      body: isBodyData(data) ? data : JSONStringify(data)
+      body: isBodyData(data) ? data : JSONStringify(data),
+      ...fetchOptions
     });
     eventSource.current = es;
+    exposedEventSource.v = es;
     readyState.v = SSEHookReadyState.CONNECTING;
 
     // * MARK: Register to handle events
@@ -345,6 +352,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     es.addEventListener(MessageType.Open, esOpen);
     es.addEventListener(MessageType.Error, esError);
     es.addEventListener(MessageType.Message, esMessage);
+    es.addEventListener(MessageType.Close, close);
 
     // and custom events
     // If the on listener is used before connect (send), there will already be events in customEventMap.
@@ -383,7 +391,6 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     onMessage,
     onError,
     onOpen,
-    eventSource,
-    ...objectify([readyState, data])
+    ...objectify([readyState, data, exposedEventSource])
   });
 };
