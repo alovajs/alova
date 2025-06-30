@@ -1,5 +1,19 @@
 # alova
 
+## 3.3.4
+
+### Patch Changes
+
+- [#724](https://github.com/alovajs/alova/pull/724) [`ccb53aa`](https://github.com/alovajs/alova/commit/ccb53aab6d8ec6af6694b4ec2f15f850e6163ef8) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: incorrect expose type of `eventSource` (#727)
+
+- [#724](https://github.com/alovajs/alova/pull/724) [`ccb53aa`](https://github.com/alovajs/alova/commit/ccb53aab6d8ec6af6694b4ec2f15f850e6163ef8) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: infinite reconnect when server disconnect (#716)
+
+  Added `reconnectionTime` to `0`, it means no reconnect.
+
+  If `reconnectionTime` is not set, useSSE respects the `retry` field returned by server now.
+
+- [#725](https://github.com/alovajs/alova/pull/725) [`bec1570`](https://github.com/alovajs/alova/commit/bec1570ebf9b30da2cbed0ed07ba414350bad594) Thanks [@MeetinaXD](https://github.com/MeetinaXD)! - fix: typo in d.ts
+
 ## 3.3.3
 
 ### Patch Changes
