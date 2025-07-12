@@ -1,6 +1,6 @@
 import { AlovaRequestAdapter } from '.';
 
-declare namespace FetchTypes {
+declare namespace GlobalFetch {
   type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 
   /**
@@ -9,5 +9,5 @@ declare namespace FetchTypes {
   type GlobalFetchRequestAdapter = AlovaRequestAdapter<any, any, FetchRequestInit, Response, Headers>;
 }
 
-declare function GlobalFetch(): FetchTypes.GlobalFetchRequestAdapter;
-export = FetchTypes;
+declare function GlobalFetch(): GlobalFetch.GlobalFetchRequestAdapter;
+export = GlobalFetch;
