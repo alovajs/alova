@@ -56,6 +56,6 @@
     "@alova/mock": "workspace:*",
     "@alova/scripts": "workspace:*",
     "alova": "workspace:*",
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.4"
   }
 }
