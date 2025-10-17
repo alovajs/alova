@@ -4,7 +4,7 @@
   alova is perfectly compatible with your favorite HTTP clients and UI frameworks, makes ultimate efficiency in APIs integration with its business modules and devtools.
 </p>
 
-<p align="center">English | <a href="./README.zh-CN.md">Chinese</a></p>
+<p align="center">English | <a href="./README.zh-CN.md">中文</a></p>
 
 <p align="center">
   <a href="https://alova.js.org">Documentation</a> | 
