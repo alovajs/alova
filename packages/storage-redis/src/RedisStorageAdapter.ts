@@ -1,3 +1,4 @@
+import { isArray, isNumber } from '@alova/shared';
 import { AlovaGlobalCacheAdapter } from 'alova';
 import Redis, { RedisOptions } from 'ioredis';
 
@@ -36,15 +37,19 @@ class RedisStorageAdapter implements AlovaGlobalCacheAdapter {
   }
 
   async set(key: string, value: any) {
-    const [data, expireTs] = value;
     const now = Date.now();
-    const dataToStore = JSON.stringify(data);
+    const redisKey = this._getKey(key);
+    let ttlArg: any[] | undefined;
 
-    // Calculate the TTL in milliseconds
-    const ttl = expireTs - now;
-    if (ttl > 0) {
-      await this.client.set(this._getKey(key), dataToStore, 'PX', ttl);
+    if (isArray(value) && isNumber(value[1]) && value[1] > now) {
+      // if value is an array like [data, expireTimestamp], set the expire time according to the expireTimestamp
+      const expireTs = value[1];
+      const ttl = expireTs - now;
+      if (ttl > 0) {
+        ttlArg = ['PX', ttl];
+      }
     }
+    await this.client.set(redisKey, JSON.stringify(value), ...(ttlArg || []));
   }
 
   async get<T>(key: string): Promise<T | undefined> {

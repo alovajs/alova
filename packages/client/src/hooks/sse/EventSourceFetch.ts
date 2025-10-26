@@ -421,7 +421,8 @@ export default class EventSourceFetch implements EventTarget {
 
     if (this.readyState !== EventSourceFetch.CLOSED) {
       this.readyState = EventSourceFetch.CONNECTING;
-      // 如果 _reconnectTime 为 null，使用默认值 1000ms
+
+      // if _reconnectTime is null, use default value 1000ms
       const reconnectDelay = this._reconnectTime ?? 1000;
       setTimeoutFn(() => this._connect(), reconnectDelay);
     }
