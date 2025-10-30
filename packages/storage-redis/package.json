@@ -1,6 +1,6 @@
 {
   "name": "@alova/storage-redis",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "storage adapter of redis for alova.js",
   "homepage": "https://alova.js.org",
   "type": "module",
