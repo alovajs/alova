@@ -1,5 +1,11 @@
 # @alova/storage-redis
 
+## 1.0.3
+
+### Patch Changes
+
+- [#768](https://github.com/alovajs/alova/pull/768) [`959b4e8`](https://github.com/alovajs/alova/commit/959b4e8aae912f4ad69e5cdc688eb0ce7c1d8983) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - redis storage adpater data error fixed
+
 ## 1.0.2
 
 ### Patch Changes
