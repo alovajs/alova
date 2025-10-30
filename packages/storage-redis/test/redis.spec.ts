@@ -1,13 +1,32 @@
 import RedisStorageAdapter from '@/RedisStorageAdapter';
+import { createAlova, queryCache } from 'alova';
+import adapterFetch from 'alova/fetch';
 import Redis from 'ioredis';
 import { Mock } from 'vitest';
 
 vi.mock('ioredis', () => {
+  const data: Record<string, string> = {};
+
   const RedisMock = vi.fn(() => ({
-    set: vi.fn().mockResolvedValue('OK'),
-    get: vi.fn().mockResolvedValue(null),
-    del: vi.fn().mockResolvedValue(1)
+    set: vi.fn((key: string, value: string) => {
+      data[key] = value;
+      return Promise.resolve('OK');
+    }),
+    get: vi.fn((key: string) => Promise.resolve(data[key] || null)),
+    del: vi.fn((key: string) => {
+      const count = key in data ? 1 : 0;
+      delete data[key];
+      return Promise.resolve(count);
+    }),
+    // 可选：添加一个清空所有数据的方法用于测试
+    flushAll: vi.fn(() => {
+      Object.keys(data).forEach(key => delete data[key]);
+      return Promise.resolve('OK');
+    }),
+    // 可选：添加一个获取所有数据的方法用于测试验证
+    getAll: vi.fn(() => Promise.resolve({ ...data }))
   }));
+
   return { default: RedisMock };
 });
 
@@ -44,7 +63,7 @@ describe('RedisStorageAdapter', () => {
 
     await adapter.set('test', [data, expireTs]);
 
-    expect(adapter.client.set).toHaveBeenCalledWith('alova:test', JSON.stringify(data), 'PX', 2000);
+    expect(adapter.client.set).toHaveBeenCalledWith('alova:test', JSON.stringify([data, expireTs]), 'PX', 2000);
     mockDate.mockRestore();
   });
 
@@ -69,7 +88,7 @@ describe('RedisStorageAdapter', () => {
   });
 
   test('get should return undefined when key does not exist', async () => {
-    const result = await adapter.get('test');
+    const result = await adapter.get('test_not_exist__');
     expect(result).toBeUndefined();
   });
 
@@ -86,5 +105,18 @@ describe('RedisStorageAdapter', () => {
     expect(consoleError).toHaveBeenCalledWith('[adapter:redis]redis cache clear is not allowed');
     expect(adapter.client.del).not.toHaveBeenCalled();
     consoleError.mockRestore();
+  });
+
+  test('name should return the adapter name', async () => {
+    const alova = createAlova({
+      baseURL: process.env.NODE_BASE_URL,
+      requestAdapter: adapterFetch(),
+      responded: response => response.json(),
+      l1Cache: new RedisStorageAdapter(mockOptions)
+    });
+
+    const method = alova.Get('/unit-test');
+    const res = await method;
+    await expect(queryCache(method)).resolves.toEqual(res);
   });
 });

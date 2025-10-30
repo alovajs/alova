@@ -48,11 +48,13 @@ export interface CaptchaProviderOptions {
   codeSet?: CaptchaCodeSetType;
 }
 
-interface CaptchaData {
-  code: string;
-  expireTime: number;
-  resetTime: number;
-}
+type CaptchaData = [
+  {
+    code: string;
+    resetTs: number;
+  },
+  number
+];
 
 const defaultCodeChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 const defaultCodeLength = 4;
@@ -102,15 +104,15 @@ export const createCaptchaProvider = (options: CaptchaProviderOptions) => {
   const sendCaptcha = async (methodHandler: (code: string, key: string) => Method, { key }: { key: string }) => {
     const storeKey = getStoreKey(key);
     let now = getTime();
-    const storedData = await store.get<CaptchaData>(storeKey);
+    const [storedData, expireTs = 0] = (await store.get<CaptchaData>(storeKey)) || [];
 
     // Check if can resend
-    assert(!storedData || now >= storedData.resetTime, 'Cannot send captcha yet, please wait');
+    assert(!storedData || now >= storedData.resetTs, 'Cannot send captcha yet, please wait');
 
     // If resendFormStore is enabled and there's an unexpired captcha in storage,
     // use the stored captcha
     let code: string;
-    if (resendFormStore && storedData && now < storedData.expireTime) {
+    if (resendFormStore && storedData && now < expireTs) {
       code = storedData.code;
     } else {
       code = generateCode(codeSet);
@@ -121,12 +123,13 @@ export const createCaptchaProvider = (options: CaptchaProviderOptions) => {
 
     // Store captcha information
     now = getTime();
-    await store.set(storeKey, {
-      code,
-      expireTime: now + expireTime,
-      resetTime: now + resetTime
-    });
-
+    await store.set(storeKey, [
+      {
+        code,
+        resetTs: now + resetTime
+      },
+      now + expireTime
+    ] as CaptchaData);
     return response;
   };
 
@@ -137,9 +140,9 @@ export const createCaptchaProvider = (options: CaptchaProviderOptions) => {
    */
   const verifyCaptcha = async (code: string, key: string) => {
     const storeKey = getStoreKey(key);
-    const storedData = await store.get<CaptchaData>(storeKey);
+    const [storedData, expireTs = 0] = (await store.get<CaptchaData>(storeKey)) || [];
 
-    if (!storedData || getTime() > storedData.expireTime) {
+    if (!storedData || getTime() > expireTs) {
       await store.remove(storeKey);
       return false;
     }

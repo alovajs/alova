@@ -220,6 +220,12 @@ export default [
         description: 'An easier way to complete serial request with useHook',
         doc: 'client/strategy/use-serial-request',
         component: () => import('./views/SerialRequest')
+      },
+      {
+        title: 'Server sent event',
+        description: 'Receive real-time data from server via SSE(Server Sent Event) protocol, with `fetch` in sse',
+        doc: 'client/strategy/use-sse',
+        component: () => import('./views/SSE')
       }
     ]
   }

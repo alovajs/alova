@@ -147,3 +147,6 @@ export const uploadFiles = ({ file, name }) => {
   formData.append(name, file);
   return alova.Post('/upload', formData);
 };
+
+// sse
+export const sseTest = () => alova.Get('https://sse.dev/test');

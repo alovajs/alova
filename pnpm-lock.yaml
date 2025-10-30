@@ -206,7 +206,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.16(alova@3.3.0)
+        version: 2.0.17(alova@3.3.4)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -215,7 +215,7 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.3.0
+        version: 3.3.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -258,13 +258,13 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.16(alova@3.3.0)
+        version: 2.0.17(alova@3.3.4)
       '@alova/psc':
         specifier: latest
-        version: 1.0.13(alova@3.3.0)(electron@30.5.1)
+        version: 1.0.14(alova@3.3.4)(electron@30.5.1)
       alova:
         specifier: latest
-        version: 3.3.0
+        version: 3.3.4
       body-parser:
         specifier: ^1.20.3
         version: 1.20.3
@@ -301,7 +301,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.16(alova@3.3.0)
+        version: 2.0.17(alova@3.3.4)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -310,7 +310,7 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.3.0
+        version: 3.3.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -353,7 +353,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.16(alova@3.3.0)
+        version: 2.0.17(alova@3.3.4)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -362,7 +362,7 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.3.0
+        version: 3.3.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -393,7 +393,7 @@ importers:
     dependencies:
       '@alova/mock':
         specifier: latest
-        version: 2.0.16(alova@3.3.0)
+        version: 2.0.17(alova@3.3.4)
       '@nordhealth/components':
         specifier: ^3.18.2
         version: 3.18.2
@@ -402,7 +402,7 @@ importers:
         version: 3.3.1
       alova:
         specifier: latest
-        version: 3.3.0
+        version: 3.3.4
       trix:
         specifier: ^2.1.14
         version: 2.1.14
@@ -693,19 +693,19 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@alova/mock@2.0.16':
-    resolution: {integrity: sha512-I6TgNpznfc041T6ufqoEPoCQQZ7tj92EcrExhafd36i4taZTre8gcgTdwvRpGmu+Z5JlL1wse/wIX/uIHhTKeg==}
+  '@alova/mock@2.0.17':
+    resolution: {integrity: sha512-Zf+I7AE0/vIt/pv0S25cqw6G+yX0uIJAdzRMkRvFVKGspPHnBZ+a43/8lT1bKdLsvPweydqC7jACCv1JThd3IQ==}
     peerDependencies:
       alova: ^3.0.20
 
-  '@alova/psc@1.0.13':
-    resolution: {integrity: sha512-VQkDEbL8yGG4y+33tg0DpYPbhtUMfLmYWyD23NWXw65jShalBda4mCU53rUmg6kKh9apPTVq7WJngrlxe6/n9A==}
+  '@alova/psc@1.0.14':
+    resolution: {integrity: sha512-iBnXkEukgYzVi1BKN7caeMs4uvz29ijmaR4jAjwcZj7HdZkfZxWYpv6/Q1N2FGh2APX8adpl3ewPY0On/cPvcA==}
     peerDependencies:
       alova: ^3.0.20
       electron: ^30.5.1
 
-  '@alova/shared@1.3.0':
-    resolution: {integrity: sha512-ClSAHKFjaZD4teMdIk01ulEs6WZsKFjSsDZB3I9cAzeFL7NnXkzmDb1FMbXH8mbi8Ce3N+6PoOUNOGVGqQwrKg==}
+  '@alova/shared@1.3.1':
+    resolution: {integrity: sha512-ijSOaFLUFcVzMKSY3avoEE5C03/p9atjMDPBwvNkwnzaCrhv6/m4A121NdadF8YlHCRuifyYfz90IyEdMXTsJg==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -4334,8 +4334,8 @@ packages:
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
-  alova@3.3.0:
-    resolution: {integrity: sha512-VqHVZ1u16bzMJAfHBTs6ew4xKFKxNZb7y64ekEZZ9UkvYFBw038kL7SaxyX67qIc6qAH9ymjAykif1iB9rQ2/w==}
+  alova@3.3.4:
+    resolution: {integrity: sha512-UKKqXdvf8aQ4C7m3brO77YWe5CDz8N59PdAUz7M8gowKUUXTutbk0Vk5DRBrCe0hMUyyNMUhdCZ38llGxCViyQ==}
     engines: {node: '>= 18.0.0'}
 
   ansi-colors@4.1.3:
@@ -10126,19 +10126,19 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alova/mock@2.0.16(alova@3.3.0)':
+  '@alova/mock@2.0.17(alova@3.3.4)':
     dependencies:
-      '@alova/shared': 1.3.0
-      alova: 3.3.0
+      '@alova/shared': 1.3.1
+      alova: 3.3.4
 
-  '@alova/psc@1.0.13(alova@3.3.0)(electron@30.5.1)':
+  '@alova/psc@1.0.14(alova@3.3.4)(electron@30.5.1)':
     dependencies:
-      '@alova/shared': 1.3.0
+      '@alova/shared': 1.3.1
       '@node-ipc/node-ipc': 11.0.3
-      alova: 3.3.0
+      alova: 3.3.4
       electron: 30.5.1
 
-  '@alova/shared@1.3.0': {}
+  '@alova/shared@1.3.1': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -14510,9 +14510,9 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alova@3.3.0:
+  alova@3.3.4:
     dependencies:
-      '@alova/shared': 1.3.0
+      '@alova/shared': 1.3.1
       rate-limiter-flexible: 5.0.4
 
   ansi-colors@4.1.3: {}
@@ -18294,7 +18294,7 @@ snapshots:
       unctx: 2.4.1
       unimport: 5.0.1
       unplugin: 2.3.5
-      unplugin-vue-router: 0.12.0(vue-router@4.5.1(vue@3.5.16(typescript@5.6.3)))(vue@3.5.16(typescript@5.6.3))
+      unplugin-vue-router: 0.12.0(vue-router@4.5.1(vue@3.5.12(typescript@5.6.3)))(vue@3.5.16(typescript@5.6.3))
       unstorage: 1.16.0(db0@0.3.2)(ioredis@5.6.1)
       untyped: 2.0.0
       vue: 3.5.16(typescript@5.6.3)
@@ -20444,7 +20444,7 @@ snapshots:
       pathe: 2.0.3
       picomatch: 4.0.2
 
-  unplugin-vue-router@0.12.0(vue-router@4.5.1(vue@3.5.16(typescript@5.6.3)))(vue@3.5.16(typescript@5.6.3)):
+  unplugin-vue-router@0.12.0(vue-router@4.5.1(vue@3.5.12(typescript@5.6.3)))(vue@3.5.16(typescript@5.6.3)):
     dependencies:
       '@babel/types': 7.27.6
       '@vue-macros/common': 1.16.1(vue@3.5.16(typescript@5.6.3))
