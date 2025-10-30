@@ -40,16 +40,15 @@ class RedisStorageAdapter implements AlovaGlobalCacheAdapter {
     const now = Date.now();
     const redisKey = this._getKey(key);
     let ttlArg: any[] | undefined;
-
-    if (isArray(value) && isNumber(value[1]) && value[1] > now) {
+    if (isArray(value) && isNumber(value[1])) {
       // if value is an array like [data, expireTimestamp], set the expire time according to the expireTimestamp
       const expireTs = value[1];
-      const ttl = expireTs - now;
-      if (ttl > 0) {
-        ttlArg = ['PX', ttl];
-      }
+      ttlArg = ['PX', expireTs - now];
     }
-    await this.client.set(redisKey, JSON.stringify(value), ...(ttlArg || []));
+
+    if (!isArray(ttlArg) || ttlArg[1] > 0) {
+      await this.client.set(redisKey, JSON.stringify(value), ...(ttlArg || []));
+    }
   }
 
   async get<T>(key: string): Promise<T | undefined> {

@@ -59,11 +59,11 @@ describe('captcha', () => {
 
     await sendCaptcha((code, key) => alovaInst.Post('/unit-test', { code, key }), { key: 'test' });
 
-    const storedData = await mockStorage.get('alova-captcha:test');
+    const [storedData, expireTs] = await mockStorage.get('alova-captcha:test');
     expect(storedData).toBeDefined();
     expect(storedData.code).toMatch(/^\d{4}$/);
-    expect(storedData.expireTime).toBe(currentTime + 300000);
-    expect(storedData.resetTime).toBe(currentTime + 60000);
+    expect(expireTs).toBe(currentTime + 300000);
+    expect(storedData.resetTs).toBe(currentTime + 60000);
   });
 
   test('should prevent resending within resetTime', async () => {
@@ -104,7 +104,7 @@ describe('captcha', () => {
 
     await sendCaptcha((code, key) => alovaInst.Post('/unit-test', { code, key }), { key: 'test' });
 
-    const storedData = await mockStorage.get('alova-captcha:test');
+    const [storedData] = await mockStorage.get('alova-captcha:test');
     expect(storedData.code).toMatch(/^[ABC]{4}$/);
   });
 
@@ -119,7 +119,7 @@ describe('captcha', () => {
 
     await sendCaptcha((code, key) => alovaInst.Post('/unit-test', { code, key }), { key: 'test' });
 
-    const storedData = await mockStorage.get('alova-captcha:test');
+    const [storedData] = await mockStorage.get('alova-captcha:test');
     expect(storedData.code).toMatch(/^[XYZ]{6}$/);
   });
 
@@ -131,7 +131,7 @@ describe('captcha', () => {
 
     await sendCaptcha((code, key) => alovaInst.Post('/unit-test', { code, key }), { key: 'test' });
 
-    const storedData = await mockStorage.get('alova-captcha:test');
+    const [storedData] = await mockStorage.get('alova-captcha:test');
     expect(storedData.code).toBe('1234');
   });
 
