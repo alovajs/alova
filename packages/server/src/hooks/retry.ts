@@ -22,7 +22,7 @@ const retry = createServerHook(<AG extends AlovaGenerics>(method: Method<AG>, op
   return new HookedMethod(
     method,
     forceRequest =>
-      new Promise<Promise<AG['Responded']>>((resolve, reject) => {
+      new Promise<AG['Responded']>((resolve, reject) => {
         const sendRequest = () => {
           method
             .send(forceRequest)

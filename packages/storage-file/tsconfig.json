@@ -11,8 +11,12 @@
   },
   "ts-node": {
     "compilerOptions": {
-      "module": "NodeNext",
-      "moduleResolution": "nodenext"
+      "baseUrl": ".",
+      "module": "nodenext",
+      "moduleResolution": "nodenext",
+      "esModuleInterop": true,
+      "types": ["node"],
+      "allowSyntheticDefaultImports": true
     }
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]

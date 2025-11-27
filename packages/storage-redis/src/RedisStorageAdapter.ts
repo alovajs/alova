@@ -1,39 +1,98 @@
 import { isArray, isNumber } from '@alova/shared';
+import { Settings as RedlockSettings } from '@sesamecare-oss/redlock';
 import { AlovaGlobalCacheAdapter } from 'alova';
-import Redis, { RedisOptions } from 'ioredis';
+import Redis, { Cluster, ClusterNode, ClusterOptions, RedisOptions } from 'ioredis';
+import RedisLocker, { FilterRedisClient } from './RedisLocker';
 
-interface RedisStorageCommonOptions {
+export interface RedisStorageCommonOptions {
   /**
    * Redis connection key prefix
    * @default 'alova:'
    */
   keyPrefix?: string;
+  /**
+   * redlock settings
+   * @implements @sesamecare-oss/redlock
+   */
+  redlockOptions?: RedlockSettings;
+  /**
+   * filter redis instances from this adapter's redlock
+   */
+  redlockFilter?: FilterRedisClient;
+  /**
+   * Time to live for the lock in milliseconds
+   * @default 5000
+   */
+  redlockTTL?: number;
 }
 
-interface RedisStorageAdapterOptions extends RedisStorageCommonOptions, RedisOptions {}
+export interface RedisStorageAdapterOptions extends RedisStorageCommonOptions, RedisOptions {}
 
-interface RedisStorageInstance extends RedisStorageCommonOptions {
-  client: Redis;
+export interface RedisClusterStorageAdapterOptions extends RedisStorageCommonOptions {
+  nodes: ClusterNode[];
+  options?: ClusterOptions;
 }
 
-class RedisStorageAdapter implements AlovaGlobalCacheAdapter {
+export interface RedisStorageInstance<T extends Redis | Cluster> extends RedisStorageCommonOptions {
+  client: T;
+}
+
+type InferClientType<T> =
+  T extends RedisStorageInstance<infer U>
+    ? U
+    : T extends RedisClusterStorageAdapterOptions
+      ? Cluster
+      : T extends RedisStorageAdapterOptions
+        ? Redis
+        : never;
+
+class RedisStorageAdapter<
+  T extends
+    | RedisStorageAdapterOptions
+    | RedisClusterStorageAdapterOptions
+    | RedisStorageInstance<Redis | Cluster> = RedisStorageAdapterOptions
+> implements AlovaGlobalCacheAdapter
+{
   public name = 'adapterRedis';
-  public client: Redis;
+  public client: InferClientType<T>;
   private keyPrefix: string;
+  private config: T;
+  private _locker?: RedisLocker;
 
-  constructor(config: RedisStorageAdapterOptions | RedisStorageInstance) {
-    const { client, keyPrefix } = config as RedisStorageInstance;
-    if (client instanceof Redis) {
-      this.client = client;
+  constructor(config: T) {
+    this.config = config;
+    const configAsInstance = config as RedisStorageInstance<Redis | Cluster>;
+    if ('client' in configAsInstance && configAsInstance.client) {
+      this.client = configAsInstance.client as InferClientType<T>;
     } else {
-      const { keyPrefix: prefixUnused, ...redisOptions } = config as RedisStorageAdapterOptions;
-      this.client = new Redis(redisOptions);
+      const configAsOptions = config as RedisStorageAdapterOptions | RedisClusterStorageAdapterOptions;
+      if ('nodes' in configAsOptions) {
+        // RedisClusterStorageAdapterOptions
+        this.client = new Cluster(configAsOptions.nodes, configAsOptions.options) as InferClientType<T>;
+      } else {
+        // RedisStorageAdapterOptions
+        const { keyPrefix: prefixUnused, ...redisOptions } = configAsOptions;
+        this.client = new Redis(redisOptions) as InferClientType<T>;
+      }
     }
-    this.keyPrefix = keyPrefix || 'alova:';
+
+    this.keyPrefix = config.keyPrefix || 'alova:';
   }
 
   private _getKey(key: string) {
     return `${this.keyPrefix}${key}`;
+  }
+
+  get locker() {
+    if (!this._locker) {
+      const { redlockOptions, redlockFilter, redlockTTL } = this.config;
+      this._locker = new RedisLocker(this.client, {
+        options: redlockOptions,
+        filter: redlockFilter,
+        ttl: redlockTTL
+      });
+    }
+    return this._locker;
   }
 
   async set(key: string, value: any) {
