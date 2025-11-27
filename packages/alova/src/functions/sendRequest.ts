@@ -215,12 +215,11 @@ export default function sendRequest<AG extends AlovaGenerics<any, any, {}>>(
 
   return {
     // request interrupt function
-    abort: () => {
+    abort: () =>
       promiseThen(
         requestAdapterCtrlsPromise,
         requestAdapterCtrls => requestAdapterCtrls && requestAdapterCtrls.abort()
-      );
-    },
+      ),
     onDownload: (handler: ProgressUpdater) => {
       promiseThen(
         requestAdapterCtrlsPromise,
