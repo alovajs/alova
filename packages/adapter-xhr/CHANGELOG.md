@@ -1,5 +1,11 @@
 # @alova/adapter-xhr
 
+## 2.3.0
+
+### Minor Changes
+
+- [#778](https://github.com/alovajs/alova/pull/778) [`bd104d3`](https://github.com/alovajs/alova/commit/bd104d347d67c7f1f2678f850904d413d7b3e2be) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - headers will be ignored when set to the falsy value.
+
 ## 2.2.1
 
 ### Patch Changes
