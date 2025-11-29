@@ -87,7 +87,7 @@ const mockServer = setupServer(
     await delay(200);
     // Read the image from the file system using the "fs" module.
     const imageBuffer = readFileSync(path.resolve(__dirname, '../assets/img-test.jpg'));
-    return new HttpResponse(imageBuffer, {
+    return new HttpResponse(new Uint8Array(imageBuffer), {
       headers: {
         'Content-Type': 'image/jpeg',
         'Content-Length': imageBuffer.byteLength.toString()

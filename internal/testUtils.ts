@@ -14,7 +14,7 @@ type PostData = {
 export type Result<T = string> = {
   code: number;
   msg: string;
-  data: T extends string ? GetData : PostData;
+  data: T extends string ? GetData : T extends boolean ? PostData : T;
 };
 
 // 辅助函数

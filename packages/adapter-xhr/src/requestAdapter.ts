@@ -1,13 +1,16 @@
 import { data2QueryString, parseResponseHeaders } from '@/helper';
 import {
   falseValue,
+  includes,
   isPlainObject,
   isSpecialRequestBody,
   isString,
   newInstance,
   noop,
   nullValue,
-  trueValue
+  ObjectCls,
+  trueValue,
+  undefinedValue
 } from '@alova/shared';
 import type { ProgressUpdater } from 'alova';
 import { AlovaXHRAdapter, AlovaXHRAdapterOptions, AlovaXHRResponse } from '~/typings';
@@ -47,20 +50,24 @@ export default function requestAdapter({ onCreate = noop }: AlovaXHRAdapterOptio
         }
 
         // Set request header
-        let isContentTypeSet = falseValue;
         let isContentTypeFormUrlEncoded = falseValue;
-        Object.keys(headers).forEach(headerName => {
-          if (/content-type/i.test(headerName)) {
-            isContentTypeSet = trueValue;
-            isContentTypeFormUrlEncoded = /application\/x-www-form-urlencoded/i.test(headers[headerName]);
-          }
-          xhr.setRequestHeader(headerName, headers[headerName]);
-        });
+        const isContentTypeSet = /content-type/i.test(ObjectCls.keys(headers).join());
+        const isFormData = data && data.toString() === '[object FormData]';
 
         // Content-Type defaults to application/json when not specified; charset=UTF-8
-        if (!isContentTypeSet && (data ? data.toString() !== '[object FormData]' : true)) {
-          xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+        if (!isContentTypeSet && !isFormData) {
+          headers['Content-Type'] = 'application/json; charset=UTF-8';
         }
+
+        const ignoringHeaderValues = ['', undefinedValue, nullValue, falseValue];
+        Object.keys(headers).forEach(headerName => {
+          if (/content-type/i.test(headerName)) {
+            isContentTypeFormUrlEncoded = /application\/x-www-form-urlencoded/i.test(headers[headerName]);
+          }
+          if (!includes(ignoringHeaderValues, headers[headerName])) {
+            xhr.setRequestHeader(headerName, headers[headerName]);
+          }
+        });
 
         // Listen for download events
         xhr.addEventListener('progress', event => {

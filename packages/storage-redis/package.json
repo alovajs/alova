@@ -39,11 +39,12 @@
     "dist"
   ],
   "peerDependencies": {
-    "ioredis": "^5.3.2",
-    "alova": "^3.0.20"
+    "alova": "^3.0.20",
+    "ioredis": "^5.3.2"
   },
   "dependencies": {
     "@alova/shared": "workspace:*",
+    "@sesamecare-oss/redlock": "^1.4.0",
     "ioredis": "^5.6.1"
   },
   "devDependencies": {

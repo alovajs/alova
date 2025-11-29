@@ -94,6 +94,21 @@ export interface AlovaGlobalCacheAdapter {
   clear(): void | Promise<void>;
 }
 
+export interface AlovaStorageAdapterLocker {
+  options?: unknown;
+  /**
+   * lock resource
+   * @param resource resource name
+   */
+  lock(resource: string | string[]): Promise<void>;
+
+  /**
+   * unlock resource
+   * @param resource resource name
+   */
+  unlock(resource: string | string[]): Promise<void>;
+}
+
 interface CacheEvent {
   type: 'set' | 'get' | 'remove' | 'clear';
   key: string;
@@ -465,8 +480,8 @@ export type Progress = {
 export type ProgressHandler = (progress: Progress) => void;
 
 export interface AbortFunction {
-  (): void;
-  a: () => void;
+  (): Promise<void>;
+  a: () => Promise<void>;
 }
 
 /**

@@ -6,6 +6,7 @@
   "main": "dist/index.common.cjs",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "keywords": [
     "hooks",
     "nodejs",
@@ -41,7 +42,9 @@
     "alova": "^3.0.20"
   },
   "dependencies": {
-    "@alova/shared": "workspace:*"
+    "@alova/shared": "workspace:*",
+    "@types/proper-lockfile": "^4.1.4",
+    "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
     "@alova/mock": "workspace:*",

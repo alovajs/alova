@@ -69,6 +69,59 @@ describe('request adapter', () => {
       post2: 'p2'
     });
     expect(data.data.path).toBe('/unit-test');
+
+    // it will set default content-type
+    const res = await alovaInst.Post<Result<{ requestHeaders: any }>>('/unit-test-headers');
+    const { requestHeaders } = res.data;
+    expect(requestHeaders).toStrictEqual({
+      'content-type': 'application/json; charset=UTF-8'
+    });
+
+    // it wounldn't set content-type when data is formData
+    const formData = new FormData();
+    formData.append('f1', 'f1');
+    formData.append('f2', 'f2');
+    const resFormData = await alovaInst.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', formData);
+    const { requestHeaders: requestHeadersFormData } = resFormData.data;
+    expect(requestHeadersFormData['content-type']).toMatch(/^multipart\/form-data; boundary=----formdata-undici/);
+  });
+
+  test("shouldn't set `content-type` when value is falsy", async () => {
+    const alovaInst = createAlova({
+      baseURL,
+      requestAdapter: xhrRequestAdapter(),
+      responded({ data }) {
+        return data;
+      }
+    });
+
+    const res = await alovaInst.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'Content-Type': null
+      }
+    });
+    expect(res.data.requestHeaders).toStrictEqual({});
+
+    const res2 = await alovaInst.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'content-type': undefined
+      }
+    });
+    expect(res2.data.requestHeaders).toStrictEqual({});
+
+    const res3 = await alovaInst.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'Content-Type': ''
+      }
+    });
+    expect(res3.data.requestHeaders).toStrictEqual({});
+
+    const res4 = await alovaInst.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'Content-Type': false
+      }
+    });
+    expect(res4.data.requestHeaders).toStrictEqual({});
   });
 
   test('should throw error when set wrong param', async () => {
@@ -238,7 +291,8 @@ describe('request adapter', () => {
     const formData = new FormData();
     formData.append('f1', 'f1');
     formData.append('f2', 'f2');
-    const imageFile = new File([readFileSync(path.resolve(__dirname, '../../../assets/img-test.jpg'))], 'file', {
+    const imageBuffer = readFileSync(path.resolve(__dirname, '../../../assets/img-test.jpg'));
+    const imageFile = new File([new Uint8Array(imageBuffer)], 'file', {
       type: 'image/jpeg'
     });
     formData.append('file', imageFile);

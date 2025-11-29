@@ -11,12 +11,14 @@ import {
   key,
   len,
   mapItem,
-  noop,
   promiseCatch,
   promiseFinally,
+  promiseResolve,
   promiseThen,
   pushItem,
-  undefinedValue
+  setTimeoutFn,
+  undefinedValue,
+  usePromise
 } from '@alova/shared';
 import {
   AbortFunction,
@@ -76,10 +78,8 @@ export default class Method<AG extends AlovaGenerics = any> {
     config?: AlovaMethodConfig<AG, AG['Responded'], AG['Transformed']>,
     data?: RequestBody
   ) {
-    const abortRequest: AbortFunction = () => {
-      abortRequest.a();
-    };
-    abortRequest.a = noop;
+    const abortRequest: AbortFunction = () => abortRequest.a();
+    abortRequest.a = () => promiseResolve();
 
     type = type.toUpperCase() as MethodType;
 
@@ -165,12 +165,22 @@ export default class Method<AG extends AlovaGenerics = any> {
     len(instance.uhs) > 0 && onUpload((loaded, total) => forEach(instance.uhs, handler => handler({ loaded, total })));
 
     // The interrupt function is bound to the method instance for each request. The user can also interrupt the current request through method instance.abort()
-    instance.abort.a = abort;
+    const { promise: abortPromise, resolve: abortResolve } = usePromise<void>();
+    instance.abort.a = () => {
+      abort();
+      return abortPromise;
+    };
     instance.fromCache = undefinedValue;
-    instance.promise = promiseThen(response(), r => {
-      instance.fromCache = fromCache();
-      return r;
-    });
+    instance.promise = response()
+      .then(r => {
+        instance.fromCache = fromCache();
+        return r;
+      })
+      .finally(() => {
+        // the reason of using setTimeout is to enable `method.catch` is called before `await method.abort()`.
+        // so that can execute catch callback before aborting.
+        setTimeoutFn(abortResolve);
+      });
     return instance.promise;
   }
 

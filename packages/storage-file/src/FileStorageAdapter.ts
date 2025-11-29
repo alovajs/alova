@@ -2,6 +2,8 @@ import { QueueCallback, usePromise } from '@alova/shared';
 import { AlovaGlobalCacheAdapter } from 'alova';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { LockOptions } from 'proper-lockfile';
+import FileLocker from './FileLocker';
 
 interface FileStorageAdapterOptions {
   /**
@@ -9,19 +11,33 @@ interface FileStorageAdapterOptions {
    * @required true
    */
   directory: string;
+  /**
+   * Options for the lockfile library.
+   */
+  lockerOptions?: LockOptions;
 }
 
 class FileStorageAdapter implements AlovaGlobalCacheAdapter {
   private directory: string;
   private queue = new QueueCallback();
+  private lockerOptions?: LockOptions;
+  private _locker?: FileLocker;
 
-  constructor({ directory }: FileStorageAdapterOptions) {
+  constructor({ directory, lockerOptions }: FileStorageAdapterOptions) {
     this.directory = directory;
+    this.lockerOptions = lockerOptions;
     fs.mkdir(this.directory, { recursive: true });
   }
 
   private _getFilePath(key: string) {
     return path.join(this.directory, `${key}.json`);
+  }
+
+  get locker() {
+    if (!this._locker) {
+      this._locker = new FileLocker(this.directory, this.lockerOptions);
+    }
+    return this._locker;
   }
 
   async set(key: string, value: any) {
