@@ -5,10 +5,7 @@ import { Result } from 'root/testUtils';
 
 let returnLocker = true;
 const locker = {
-  lock: vi.fn().mockImplementation((...args: any) => {
-    console.log('lock....', args);
-    return Promise.resolve();
-  }),
+  lock: vi.fn().mockImplementation(() => Promise.resolve()),
   unlock: vi.fn().mockImplementation(() => Promise.resolve())
 } as AlovaStorageAdapterLocker;
 // Mock storage adapter

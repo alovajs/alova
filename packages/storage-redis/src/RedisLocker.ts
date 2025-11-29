@@ -47,5 +47,3 @@ export class RedisLocker implements AlovaStorageAdapterLocker {
     }
   }
 }
-
-export default RedisLocker;

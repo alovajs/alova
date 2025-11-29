@@ -2,7 +2,7 @@ import { isArray, isNumber } from '@alova/shared';
 import { Settings as RedlockSettings } from '@sesamecare-oss/redlock';
 import { AlovaGlobalCacheAdapter } from 'alova';
 import Redis, { Cluster, ClusterNode, ClusterOptions, RedisOptions } from 'ioredis';
-import RedisLocker, { FilterRedisClient } from './RedisLocker';
+import { RedisLocker, FilterRedisClient } from './RedisLocker';
 
 export interface RedisStorageCommonOptions {
   /**

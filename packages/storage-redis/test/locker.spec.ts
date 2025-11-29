@@ -1,4 +1,4 @@
-import RedisLocker, { FilterRedisClient } from '@/RedisLocker';
+import { FilterRedisClient, RedisLocker } from '@/RedisLocker';
 import Redis, { Cluster } from 'ioredis';
 
 // Mock @sesamecare-oss/redlock
