@@ -1,5 +1,15 @@
 # alova
 
+## 3.4.0
+
+### Minor Changes
+
+- [#778](https://github.com/alovajs/alova/pull/778) [`bd104d3`](https://github.com/alovajs/alova/commit/bd104d347d67c7f1f2678f850904d413d7b3e2be) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - alova/server: add server hook of `atomize` which can keep atomic request in multiple processes`
+
+- [#778](https://github.com/alovajs/alova/pull/778) [`bd104d3`](https://github.com/alovajs/alova/commit/bd104d347d67c7f1f2678f850904d413d7b3e2be) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - alova/fetch: headers will be ignored when set to the falsy value.
+
+- [#778](https://github.com/alovajs/alova/pull/778) [`bd104d3`](https://github.com/alovajs/alova/commit/bd104d347d67c7f1f2678f850904d413d7b3e2be) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - core: return promise from abort function, which will resolve after aborting
+
 ## 3.3.4
 
 ### Patch Changes
