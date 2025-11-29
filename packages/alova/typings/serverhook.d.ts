@@ -17,6 +17,71 @@ declare class HookedMethod<AG extends AlovaGenerics> extends Method<AG> {
     send(forceRequest?: boolean): Promise<AG["Responded"]>;
 }
 
+interface AtomizeOptions {
+    /**
+     * The channel name to lock
+     */
+    channel?: string | string[];
+    /**
+     * Timeout for attempting to acquire the lock, ms
+     * @default 5000
+     */
+    timeout?: number;
+    /**
+     * Interval for attempting to acquire the lock, ms
+     * @default 100
+     */
+    interval?: number;
+}
+declare const atomize: <AG extends AlovaGenerics>(method: Method<AG>, options?: AtomizeOptions) => HookedMethod<AG>;
+
+interface CaptchaCodeSet {
+    chars?: (string | number)[];
+    length?: number;
+}
+type CaptchaCodeSetType = (string | number)[] | CaptchaCodeSet | (() => string);
+interface CaptchaProviderOptions {
+    /**
+     * Time interval before captcha can be resent, in milliseconds
+     * @default 60000
+     */
+    resetTime?: number;
+    /**
+     * Captcha expiration time, in milliseconds
+     * @default 300000
+     */
+    expireTime?: number;
+    /**
+     * Namespace prefix to prevent naming conflicts when using the same storage
+     * @default 'alova-captcha'
+     */
+    keyPrefix?: string;
+    /**
+     * Captcha storage adapter, required
+     */
+    store: AlovaGlobalCacheAdapter;
+    /**
+     * When set to true, if there's an unexpired captcha in storage during resend,
+     * it will resend the stored captcha instead of generating a new one
+     * @default false
+     */
+    resendFormStore?: boolean;
+    /**
+     * Set of characters for code generation
+     * @default Generates a 4-digit random number from 0-9
+     */
+    codeSet?: CaptchaCodeSetType;
+}
+/**
+ * Create captcha provider
+ */
+declare const createCaptchaProvider: (options: CaptchaProviderOptions) => {
+    sendCaptcha: (methodHandler: (code: string, key: string) => Method, { key }: {
+        key: string;
+    }) => Promise<any>;
+    verifyCaptcha: (code: string, key: string) => Promise<boolean>;
+};
+
 type StoreResult = [points: number, expireTime: number];
 interface LimitHandlerOptions<AG extends AlovaGenerics> {
     /** storage key */
@@ -133,51 +198,4 @@ interface RetryOptions {
 }
 declare const retry: <AG extends AlovaGenerics>(method: Method<AG>, options?: RetryOptions) => HookedMethod<AG>;
 
-interface CaptchaCodeSet {
-    chars?: (string | number)[];
-    length?: number;
-}
-type CaptchaCodeSetType = (string | number)[] | CaptchaCodeSet | (() => string);
-interface CaptchaProviderOptions {
-    /**
-     * Time interval before captcha can be resent, in milliseconds
-     * @default 60000
-     */
-    resetTime?: number;
-    /**
-     * Captcha expiration time, in milliseconds
-     * @default 300000
-     */
-    expireTime?: number;
-    /**
-     * Namespace prefix to prevent naming conflicts when using the same storage
-     * @default 'alova-captcha'
-     */
-    keyPrefix?: string;
-    /**
-     * Captcha storage adapter, required
-     */
-    store: AlovaGlobalCacheAdapter;
-    /**
-     * When set to true, if there's an unexpired captcha in storage during resend,
-     * it will resend the stored captcha instead of generating a new one
-     * @default false
-     */
-    resendFormStore?: boolean;
-    /**
-     * Set of characters for code generation
-     * @default Generates a 4-digit random number from 0-9
-     */
-    codeSet?: CaptchaCodeSetType;
-}
-/**
- * Create captcha provider
- */
-declare const createCaptchaProvider: (options: CaptchaProviderOptions) => {
-    sendCaptcha: (methodHandler: (code: string, key: string) => Method, { key }: {
-        key: string;
-    }) => Promise<any>;
-    verifyCaptcha: (code: string, key: string) => Promise<boolean>;
-};
-
-export { HookedMethod, createCaptchaProvider, createRateLimiter, retry };
+export { HookedMethod, atomize, createCaptchaProvider, createRateLimiter, retry };

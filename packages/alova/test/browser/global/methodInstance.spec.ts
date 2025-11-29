@@ -124,6 +124,42 @@ describe('method instance', () => {
     await expect(p).rejects.toThrow('The operation was aborted.');
   });
 
+  test('request wait for aborting', async () => {
+    const Get = alova.Get('/unit-test');
+    let errorMsg = '';
+    Get.catch(error => {
+      errorMsg = error.message;
+    });
+    await Get.abort();
+    expect(errorMsg).toBe('The operation was aborted.');
+  });
+
+  // mock some scenarios where the request adapter does not throw error when aborting
+  test('should resolve abort when the request adapter is not throw error', async () => {
+    const alova = createAlova({
+      requestAdapter: () => {
+        let resolveFn = (_: string) => {};
+        const p = new Promise<string>(resolve => {
+          resolveFn = resolve;
+        });
+        return {
+          response: () => p,
+          headers: async () => ({}),
+          abort: () => {
+            resolveFn('mock abort resolved');
+          }
+        };
+      }
+    });
+    const Get = alova.Get('/unit-test');
+    let errorMsg = '';
+    Get.then((error: any) => {
+      errorMsg = error;
+    });
+    await Get.abort();
+    expect(errorMsg).toBe('mock abort resolved');
+  });
+
   test('request should be aborted with `clonedMethod.abort` in beforeRequest', async () => {
     const Get = getAlovaInstance({
       beforeRequestExpect(methodInstance) {

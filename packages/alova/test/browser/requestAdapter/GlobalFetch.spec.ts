@@ -29,7 +29,7 @@ describe('request adapter GlobalFetch', () => {
     });
     const method = alova.Post<Record<string, any>>('/unit-test-headers', {});
     const { data } = await method;
-    expect(data.requestHeaders['content-type']).toBe('application/json;charset=UTF-8');
+    expect(data.requestHeaders['content-type']).toBe('application/json; charset=UTF-8');
   });
 
   test('The Content-Type should be what you set when set the Content-Type', async () => {
@@ -53,12 +53,12 @@ describe('request adapter GlobalFetch', () => {
       {},
       {
         headers: {
-          'Content-Type': undefined
+          'Content-Type': 'abc'
         }
       }
     );
     res = await method;
-    expect(res.data.requestHeaders['content-type']).toBe('undefined');
+    expect(res.data.requestHeaders['content-type']).toBe('abc');
   });
 
   test('The Content-Type should be undefined when pass the FormData', async () => {
@@ -76,6 +76,40 @@ describe('request adapter GlobalFetch', () => {
     });
     res = await method;
     expect(res.data.requestHeaders['content-type']).toBe('application/x-www-form-urlencoded');
+  });
+
+  test("shouldn't set `content-type` when value is falsy", async () => {
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+
+    const res = await alova.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'Content-Type': null
+      }
+    });
+    expect(res.data.requestHeaders).toStrictEqual({});
+
+    const res2 = await alova.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'content-type': undefined
+      }
+    });
+    expect(res2.data.requestHeaders).toStrictEqual({});
+
+    const res3 = await alova.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'Content-Type': ''
+      }
+    });
+    expect(res3.data.requestHeaders).toStrictEqual({});
+
+    const res4 = await alova.Post<Result<{ requestHeaders: any }>>('/unit-test-headers', undefined, {
+      headers: {
+        'Content-Type': false
+      }
+    });
+    expect(res4.data.requestHeaders).toStrictEqual({});
   });
 
   test('should console error that the fetch api does not support uploading progress', async () => {

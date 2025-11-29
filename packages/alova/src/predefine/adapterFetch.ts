@@ -2,10 +2,13 @@ import {
   JSONStringify,
   ObjectCls,
   clearTimeoutTimer,
+  deleteAttr,
   falseValue,
+  includes,
   isSpecialRequestBody,
   isString,
   newInstance,
+  nullValue,
   promiseReject,
   setTimeoutFn,
   trueValue,
@@ -22,12 +25,21 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
     const ctrl = new AbortController();
     const { data, headers } = elements;
     const isContentTypeSet = /content-type/i.test(ObjectCls.keys(headers).join());
-    const isDataFormData = data && data.toString() === '[object FormData]';
+    const isFormData = data && data.toString() === '[object FormData]';
 
     // When the content type is not set and the data is not a form data object, the content type is set to application/json by default.
-    if (!isContentTypeSet && !isDataFormData) {
-      headers['Content-Type'] = 'application/json;charset=UTF-8';
+    if (!isContentTypeSet && !isFormData) {
+      headers['Content-Type'] = 'application/json; charset=UTF-8';
     }
+
+    const ignoringHeaderValues = ['', undefinedValue, nullValue, falseValue];
+    ObjectCls.keys(headers).forEach(headerName => {
+      // fetch headers do not allow setting undefined/null/false values
+      if (includes(ignoringHeaderValues, headers[headerName])) {
+        deleteAttr(headers, headerName);
+      }
+    });
+
     const fetchPromise = fetch(elements.url, {
       ...adapterConfig,
       method: elements.type,

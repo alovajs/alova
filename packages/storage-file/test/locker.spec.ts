@@ -2,7 +2,6 @@ import FileLocker from '@/FileLocker';
 import { spawn } from 'child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 describe('FileLocker', () => {
   const tempDir = path.join(__dirname, 'temp');
@@ -40,7 +39,7 @@ describe('FileLocker', () => {
 
   test('should throw error when locking an already locked resource', async () => {
     const resource = 'test-resource2';
-    locker.lock(resource);
+    await locker.lock(resource);
     const expectPromises = [];
     for (let i = 0; i < 20; i += 1) {
       const p = expect(locker.lock(resource)).rejects.toThrow();
@@ -50,14 +49,14 @@ describe('FileLocker', () => {
 
     // lock another resource and it will be successful
     const resource2 = 'test-resource3';
-    locker.lock(resource2);
+    await locker.lock(resource2);
     await expect(locker.lock(resource2)).rejects.toThrow();
 
     await Promise.all([locker.unlock(resource), locker.unlock(resource2)]);
 
     // lock same resource again
-    locker.lock(resource);
-    locker.lock(resource2);
+    await locker.lock(resource);
+    await locker.lock(resource2);
     await expect(locker.lock(resource)).rejects.toThrow();
     await expect(locker.lock(resource2)).rejects.toThrow();
     await Promise.all([locker.unlock(resource), locker.unlock(resource2)]);

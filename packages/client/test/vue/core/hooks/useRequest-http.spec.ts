@@ -260,6 +260,34 @@ describe('use useRequest hook to send GET with vue', () => {
     expect(error.value).toStrictEqual(err.error);
   });
 
+  test('should return a promise from abort function, which will resolve after aborting', async () => {
+    const alova = getAlovaInstance(VueHook, {
+      resErrorExpect: error => {
+        expect(error.message).toMatch(/user aborted a request/);
+        return Promise.reject(error);
+      }
+    });
+    const Get = alova.Get<string, Result<string>>('/unit-test-1s');
+
+    const errorFn = vi.fn();
+    const { loading, data, error, abort, send } = useRequest(Get).onError(errorFn);
+    expect(loading.value).toBeTruthy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeUndefined();
+    await delay();
+    await abort();
+    expect(errorFn).toHaveBeenCalled();
+    expect(loading.value).toBeFalsy();
+    expect(data.value).toBeUndefined();
+    expect(error.value).toBeInstanceOf(Object);
+
+    const p = send();
+    await delay();
+    expect(loading.value).toBeTruthy();
+    await expect(p).resolves.not.toBeUndefined();
+    expect(loading.value).toBeFalsy();
+  });
+
   test('abort request manually with abort function returns in useRequest(non-immediate)', async () => {
     const alova = getAlovaInstance(VueHook, {
       responseExpect: r => r.json()

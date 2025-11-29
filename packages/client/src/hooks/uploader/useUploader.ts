@@ -16,6 +16,7 @@ import {
   len,
   mapItem,
   newInstance,
+  promiseAll,
   promiseFinally,
   pushItem,
   splice,
@@ -185,7 +186,7 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
         pushItem(abortMethodSet, m);
       }
     });
-    forEach(abortMethodSet, method => method.abort());
+    return promiseAll(mapItem(abortMethodSet, method => method.abort()));
   };
 
   const removeFiles = (...positions: Array<AlovaFileItem | number>) => {

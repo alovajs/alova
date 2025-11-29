@@ -233,8 +233,9 @@ export interface UseHookExposure<
 > extends UseHookExportedState<AG> {
   /**
    * abort current request
+   * @returns a promise that resolves when the request is aborted
    */
-  abort: () => void;
+  abort: () => Promise<void>;
   /**
    * update state manually
    * @example

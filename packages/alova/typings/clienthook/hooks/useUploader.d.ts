@@ -197,7 +197,7 @@ export interface UploadExposure<AG extends AlovaGenerics, Args extends any[] = a
    * abort the upload operation.
    * @param indexes - The indexes of the upload request to abort. If no indexes are provided, all ongoing uploads will be aborted.
    */
-  abort: (...positions: Array<AlovaFileItem | number>) => void;
+  abort: (...positions: Array<AlovaFileItem | number>) => Promise<void>;
   /**
    * Event handler for when each file is uploaded successfully.
    * @param handler - The callback function to handle the AlovaFileSuccessEvent.

@@ -16,7 +16,6 @@ const preprocessPath = (resource: string | string[], directory: string) => {
 const errorPrefix = 'storage:file';
 class FileLocker implements AlovaStorageAdapterLocker {
   private directory: string;
-  private currentResource: string | null = null;
   public options?: LockOptions;
 
   constructor(directory: string, options?: LockOptions) {
@@ -25,12 +24,11 @@ class FileLocker implements AlovaStorageAdapterLocker {
   }
 
   async lock(resource: string | string[]): Promise<void> {
-    const { normalizedResource, lockPath } = preprocessPath(resource, this.directory);
+    const { lockPath } = preprocessPath(resource, this.directory);
     // ensure directory exists before attempting to lock
     await fs.mkdir(this.options?.realpath === false ? this.directory : lockPath, { recursive: true });
 
     await lockfile.lock(lockPath, this.options);
-    this.currentResource = normalizedResource;
   }
 
   async unlock(resource: string | string[]): Promise<void> {
@@ -43,11 +41,6 @@ class FileLocker implements AlovaStorageAdapterLocker {
       if (error.code !== 'ENOENT') {
         throw new AlovaError(errorPrefix, `Failed to release lock for resource "${normalizedResource}": ${error}`);
       }
-    }
-
-    // Clear current tracking if it matches the unlocked resource
-    if (this.currentResource === normalizedResource) {
-      this.currentResource = null;
     }
   }
 }

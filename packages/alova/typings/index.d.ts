@@ -480,8 +480,8 @@ export type Progress = {
 export type ProgressHandler = (progress: Progress) => void;
 
 export interface AbortFunction {
-  (): void;
-  a: () => void;
+  (): Promise<void>;
+  a: () => Promise<void>;
 }
 
 /**
