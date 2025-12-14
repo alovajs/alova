@@ -349,6 +349,12 @@ const cacheKeyPrefix = '$a.';
 export const buildNamespacedCacheKey = (namespace: string, key: string) => cacheKeyPrefix + namespace + key;
 
 /**
+ * Determine whether it is a cache key built by alova
+ * @param key Cache key
+ */
+export const isAlovaCacheKey = (key: string) => key.startsWith(cacheKeyPrefix);
+
+/**
  * Calculate retry delay time based on avoidance strategy and number of retries avoid parameters
  * @param retryTimes Number of retries
  * @returns Retry delay time

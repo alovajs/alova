@@ -289,4 +289,52 @@ describe('l2cache cache data', () => {
     expect(result1).toStrictEqual(result2);
     expect(result1).not.toStrictEqual(result3);
   });
+
+  test('should only clear alova cache keys when calling clear method', async () => {
+    // Store some non-alova data in localStorage
+    localStorage.setItem('userSettings', JSON.stringify({ theme: 'dark' }));
+    localStorage.setItem('appPreferences', JSON.stringify({ lang: 'en' }));
+
+    const alova = getAlovaInstance({
+      responseExpect: r => r.json()
+    });
+
+    // Create and store some alova cache data
+    const Get = alova.Get('/unit-test', {
+      cacheFor: {
+        expire: 100 * 1000,
+        mode: 'restore'
+      },
+      transform: ({ data }: Result) => data
+    });
+
+    await Get;
+
+    // Verify alova cache exists
+    const l2Data = await queryCache(Get, { policy: 'l2' });
+    expect(l2Data).toStrictEqual({
+      path: '/unit-test',
+      method: 'GET',
+      params: {}
+    });
+
+    // Verify non-alova data exists
+    expect(localStorage.getItem('userSettings')).toBe(JSON.stringify({ theme: 'dark' }));
+    expect(localStorage.getItem('appPreferences')).toBe(JSON.stringify({ lang: 'en' }));
+
+    // Clear the cache using the alova instance
+    alova.l2Cache.clear();
+
+    // Verify alova cache is cleared
+    const clearedL2Data = await queryCache(Get, { policy: 'l2' });
+    expect(clearedL2Data).toBeUndefined();
+
+    // Verify non-alova data is preserved
+    expect(localStorage.getItem('userSettings')).toBe(JSON.stringify({ theme: 'dark' }));
+    expect(localStorage.getItem('appPreferences')).toBe(JSON.stringify({ lang: 'en' }));
+
+    // Clean up non-alova test data
+    localStorage.removeItem('userSettings');
+    localStorage.removeItem('appPreferences');
+  });
 });
