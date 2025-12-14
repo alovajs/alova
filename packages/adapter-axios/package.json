@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-axios",
-  "version": "2.0.16",
+  "version": "2.0.17",
   "description": "axios adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-axios.common.cjs",

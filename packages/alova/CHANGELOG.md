@@ -1,5 +1,16 @@
 # alova
 
+## 3.4.1
+
+### Patch Changes
+
+- [#781](https://github.com/alovajs/alova/pull/781) [`c378221`](https://github.com/alovajs/alova/commit/c3782216cb4ca0380104322d4b68858c81fd4184) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that cannot reduce page when remove item in only 1 item
+
+- [#781](https://github.com/alovajs/alova/pull/781) [`c378221`](https://github.com/alovajs/alova/commit/c3782216cb4ca0380104322d4b68858c81fd4184) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that alova default l2 cache is only clear what alova creates
+
+- Updated dependencies [[`c378221`](https://github.com/alovajs/alova/commit/c3782216cb4ca0380104322d4b68858c81fd4184)]:
+  - @alova/shared@1.3.2
+
 ## 3.4.0
 
 ### Minor Changes

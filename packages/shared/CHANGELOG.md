@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.3.2
+
+### Patch Changes
+
+- [#781](https://github.com/alovajs/alova/pull/781) [`c378221`](https://github.com/alovajs/alova/commit/c3782216cb4ca0380104322d4b68858c81fd4184) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that alova default l2 cache is only clear what alova creates
+
 ## 1.3.1
 
 ### Patch Changes
