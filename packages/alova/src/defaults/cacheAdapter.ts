@@ -1,5 +1,13 @@
 import myAssert from '@/utils/myAssert';
-import { createEventManager, deleteAttr, falseValue, JSONParse, JSONStringify, undefinedValue } from '@alova/shared';
+import {
+  createEventManager,
+  deleteAttr,
+  falseValue,
+  isAlovaCacheKey,
+  JSONParse,
+  JSONStringify,
+  undefinedValue
+} from '@alova/shared';
 import { AlovaDefaultCacheAdapter, AlovaGlobalCacheAdapter, CacheEvent } from '~/typings';
 
 // local storage will not fail the operation.
@@ -53,7 +61,13 @@ export const localStorageAdapter = () => {
       l2CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'remove', key, container: instance });
     },
     clear: () => {
-      instance.clear();
+      // Only remove alova cache keys
+      for (let i = instance.length - 1; i >= 0; i -= 1) {
+        const key = instance.key(i);
+        if (key && isAlovaCacheKey(key)) {
+          instance.removeItem(key);
+        }
+      }
       l2CacheEmitter.emit(EVENT_SUCCESS_KEY, { type: 'clear', key: '', container: instance });
     },
     emitter: l2CacheEmitter

@@ -379,6 +379,11 @@ declare const walkObject: (
  */
 declare const buildNamespacedCacheKey: (namespace: string, key: string) => string;
 /**
+ * Determine whether it is a cache key built by alova
+ * @param key Cache key
+ */
+declare const isAlovaCacheKey: (key: string) => boolean;
+/**
  * Calculate retry delay time based on avoidance strategy and number of retries avoid parameters
  * @param retryTimes Number of retries
  * @returns Retry delay time
@@ -535,6 +540,7 @@ export {
   includes,
   injectReferingObject,
   instanceOf,
+  isAlovaCacheKey,
   isArray,
   isFn,
   isNumber,

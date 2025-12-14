@@ -25,6 +25,10 @@ import {
 } from '@alova/shared';
 import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Method } from '~/typings';
 
+// Cache policy constants
+const CACHE_POLICY_L2 = 'l2';
+const CACHE_POLICY_ALL = 'all';
+
 /*
  * The matchers in the following three functions are Method instance matchers, which are divided into three situations:
  * 1. If the matcher is a Method instance, clear the cache of the Method instance.
@@ -39,7 +43,7 @@ import { AlovaGenerics, CacheController, CacheQueryOptions, CacheSetOptions, Met
  */
 export const queryCache = async <Responded>(
   matcher: Method<AlovaGenerics<Responded>>,
-  { policy = 'all' }: CacheQueryOptions = {}
+  { policy = CACHE_POLICY_ALL }: CacheQueryOptions = {}
 ) => {
   // if key exists, that means it's a method instance.
   if (matcher && matcher.key) {
@@ -52,10 +56,10 @@ export const queryCache = async <Responded>(
     }
 
     let cachedData: Responded | undefined =
-      policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
-    if (policy === 'l2') {
+      policy !== CACHE_POLICY_L2 ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
+    if (policy === CACHE_POLICY_L2) {
       cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
-    } else if (policy === 'all' && !cachedData) {
+    } else if (policy === CACHE_POLICY_ALL && !cachedData) {
       if (store && expireMilliseconds(STORAGE_RESTORE) > getTime()) {
         cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
       }
@@ -71,7 +75,7 @@ export const queryCache = async <Responded>(
 export const setCache = async <Responded>(
   matcher: Method<AlovaGenerics<Responded>> | Method<AlovaGenerics<Responded>>[],
   dataOrUpdater: Responded | ((oldCache?: Responded) => Responded | undefined | void),
-  { policy = 'all' }: CacheSetOptions = {}
+  { policy = CACHE_POLICY_ALL }: CacheSetOptions = {}
 ) => {
   const methodInstances = isArray(matcher) ? matcher : [matcher];
   const batchPromises = methodInstances.map(async methodInstance => {
@@ -85,10 +89,10 @@ export const setCache = async <Responded>(
     }
     let data: any = dataOrUpdater;
     if (isFn(dataOrUpdater)) {
-      let cachedData = policy !== 'l2' ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
+      let cachedData = policy !== CACHE_POLICY_L2 ? await getWithCacheAdapter(id, methodKey, l1Cache) : undefinedValue;
       if (
-        policy === 'l2' ||
-        (policy === 'all' && !cachedData && toStore && expireMilliseconds(STORAGE_RESTORE) > getTime())
+        policy === CACHE_POLICY_L2 ||
+        (policy === CACHE_POLICY_ALL && !cachedData && toStore && expireMilliseconds(STORAGE_RESTORE) > getTime())
       ) {
         cachedData = await getWithCacheAdapter(id, methodKey, l2Cache, tag);
       }
@@ -98,8 +102,9 @@ export const setCache = async <Responded>(
       }
     }
     return PromiseCls.all([
-      policy !== 'l2' && setWithCacheAdapter(id, methodKey, data, expireMilliseconds(MEMORY), l1Cache, hitSource),
-      policy === 'l2' || (policy === 'all' && toStore)
+      policy !== CACHE_POLICY_L2 &&
+        setWithCacheAdapter(id, methodKey, data, expireMilliseconds(MEMORY), l1Cache, hitSource),
+      policy === CACHE_POLICY_L2 || (policy === CACHE_POLICY_ALL && toStore)
         ? setWithCacheAdapter(id, methodKey, data, expireMilliseconds(STORAGE_RESTORE), l2Cache, hitSource, tag)
         : undefinedValue
     ]);

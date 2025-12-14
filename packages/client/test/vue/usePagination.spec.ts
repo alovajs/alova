@@ -895,6 +895,43 @@ describe('vue => usePagination', () => {
     expect(fetchMockFn).toHaveBeenCalledTimes(1);
   });
 
+  test("shouldn't turn to previous when remove the only one item in preload mode", async () => {
+    const fetchMockFn = vi.fn();
+    const successMockFn = vi.fn();
+    render(Pagination, {
+      props: {
+        getter: (page, pageSize) => getter1(page, pageSize, { max: 0 }),
+        paginationConfig: {
+          data: (res: any) => res.list
+        },
+        handleExposure: (exposure: any) => {
+          exposure.onFetchSuccess(fetchMockFn);
+          exposure.onSuccess(successMockFn);
+        }
+      }
+    });
+
+    await waitFor(async () => {
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([0]));
+    });
+
+    fetchMockFn.mockClear();
+    fireEvent.click(screen.getByRole('remove0'));
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+    });
+
+    // It will not turn to the previous when last page is 1
+    await waitFor(() => {
+      expect(screen.getByRole('page')).toHaveTextContent('1');
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify([]));
+    });
+
+    await delay(150);
+    expect(fetchMockFn).not.toHaveBeenCalled();
+  });
+
   // When the data is fetched again but there is no response, the page is turned to the page being fetched. At this time, the interface also needs to be updated.
   test('should update data when fetch current page', async () => {
     const fetchMockFn = vi.fn();

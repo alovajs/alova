@@ -582,7 +582,7 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
       updateTotal(-len(indexes));
       // The cache of the current page is updated synchronously
       return updateCurrentPageCache().then(() => {
-        if (isLastEmptyPageInNonAppendMode) {
+        if (isLastEmptyPageInNonAppendMode && pageVal > 1) {
           page.v = pageVal - 1;
         }
       });
