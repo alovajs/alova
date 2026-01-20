@@ -133,9 +133,9 @@ describe('request adapter GlobalFetch', () => {
     const mockFn = vi.fn();
     const alova = createAlova({
       requestAdapter: adapterFetch({
-        customFetch(...args: any) {
+        customFetch(...args) {
           mockFn();
-          return fetch.apply(null, args);
+          return fetch(...args);
         }
       }),
       responded: r => r.json()
