@@ -17,6 +17,15 @@ interface FileStorageAdapterOptions {
   lockerOptions?: LockOptions;
 }
 
+async function ensureDirectoryExists(directory: string) {
+  try {
+    await fs.access(directory);
+  } catch {
+    // Directory doesn't exist, create it recursively
+    await fs.mkdir(directory, { recursive: true });
+  }
+}
+
 class FileStorageAdapter implements AlovaGlobalCacheAdapter {
   private directory: string;
   private queue = new QueueCallback();
@@ -26,7 +35,6 @@ class FileStorageAdapter implements AlovaGlobalCacheAdapter {
   constructor({ directory, lockerOptions }: FileStorageAdapterOptions) {
     this.directory = directory;
     this.lockerOptions = lockerOptions;
-    fs.mkdir(this.directory, { recursive: true });
   }
 
   private _getFilePath(key: string) {
@@ -45,11 +53,13 @@ class FileStorageAdapter implements AlovaGlobalCacheAdapter {
 
     // ensure the execute timing with queue in the same process
     this.queue.queueCallback(async () => {
-      const filePath = this._getFilePath(key);
-      const tempPath = `${filePath}_${process.pid}.tmp`;
-      const data = JSON.stringify(value);
-
       try {
+        // Ensure directory exists before writing files
+        await ensureDirectoryExists(this.directory);
+        const filePath = this._getFilePath(key);
+        const tempPath = `${filePath}_${process.pid}.tmp`;
+        const data = JSON.stringify(value);
+
         // write temp file first
         await fs.writeFile(tempPath, data, 'utf8');
         // then, move temp file to target path
@@ -57,6 +67,8 @@ class FileStorageAdapter implements AlovaGlobalCacheAdapter {
         resolve();
       } catch (error) {
         // unlink file in case of error
+        const filePath = this._getFilePath(key);
+        const tempPath = `${filePath}_${process.pid}.tmp`;
         await fs.unlink(tempPath).catch(() => {});
         reject(error);
       }
@@ -89,6 +101,8 @@ class FileStorageAdapter implements AlovaGlobalCacheAdapter {
   }
 
   async clear() {
+    // Ensure directory exists before trying to read it
+    await ensureDirectoryExists(this.directory);
     const files = await fs.readdir(this.directory);
     const unlinkPromises = files
       .filter(file => !file.startsWith('.')) // ignore hidden files
