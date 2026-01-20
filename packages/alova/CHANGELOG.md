@@ -1,5 +1,15 @@
 # alova
 
+## 3.5.0
+
+### Minor Changes
+
+- [#794](https://github.com/alovajs/alova/pull/794) [`cf3c9c8`](https://github.com/alovajs/alova/commit/cf3c9c85d717d4b51cb14b11b17c9c7ca35fa92d) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - support set custom `fetch` function in fetch adapter
+
+### Patch Changes
+
+- [#794](https://github.com/alovajs/alova/pull/794) [`cf3c9c8`](https://github.com/alovajs/alova/commit/cf3c9c85d717d4b51cb14b11b17c9c7ca35fa92d) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that throw error in sveltekit
+
 ## 3.4.1
 
 ### Patch Changes
