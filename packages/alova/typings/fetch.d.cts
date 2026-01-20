@@ -7,7 +7,11 @@ declare namespace FetchTypes {
    * fetch request adapter
    */
   type FetchRequestAdapter = AlovaRequestAdapter<FetchRequestInit, Response, Headers>;
+
+  interface AdapterCreateOptions {
+    customFetch?: typeof fetch;
+  }
 }
 
-declare function adapterFetch(): FetchTypes.FetchRequestAdapter;
+declare function adapterFetch(options?: FetchTypes.AdapterCreateOptions): FetchTypes.FetchRequestAdapter;
 export = FetchTypes;
