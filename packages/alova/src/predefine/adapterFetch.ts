@@ -15,10 +15,13 @@ import {
   undefinedValue
 } from '@alova/shared';
 import { AlovaRequestAdapter } from '~/typings';
+import { AdapterCreateOptions } from '~/typings/fetch';
 
 type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
 const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
-export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Response, Headers> {
+export default function adapterFetch(
+  options: AdapterCreateOptions = {}
+): AlovaRequestAdapter<FetchRequestInit, Response, Headers> {
   return (elements, method) => {
     const adapterConfig = method.config;
     const timeout = adapterConfig.timeout || 0;
@@ -40,7 +43,7 @@ export default function adapterFetch(): AlovaRequestAdapter<FetchRequestInit, Re
       }
     });
 
-    const fetchPromise = fetch(elements.url, {
+    const fetchPromise = (options.customFetch || fetch)(elements.url, {
       ...adapterConfig,
       method: elements.type,
       signal: ctrl.signal,

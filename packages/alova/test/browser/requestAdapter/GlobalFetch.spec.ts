@@ -1,4 +1,6 @@
 import { getAlovaInstance } from '#/utils';
+import { createAlova } from '@/index';
+import adapterFetch from '@/predefine/adapterFetch';
 import { Result } from 'root/testUtils';
 
 describe('request adapter GlobalFetch', () => {
@@ -125,5 +127,21 @@ describe('request adapter GlobalFetch', () => {
       "fetch API does'nt support uploading progress. please consider to change `@alova/adapter-xhr` or `@alova/adapter-axios`"
     );
     consoleError.mockRestore();
+  });
+
+  test('should use custom fetch when specify the `customFetch` option', async () => {
+    const mockFn = vi.fn();
+    const alova = createAlova({
+      requestAdapter: adapterFetch({
+        customFetch(...args) {
+          mockFn();
+          return fetch(...args);
+        }
+      }),
+      responded: r => r.json()
+    });
+    const res = await alova.Get<Result>('/unit-test');
+    expect(mockFn).toHaveBeenCalledTimes(1);
+    expect(res).toBeDefined();
   });
 });

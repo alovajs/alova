@@ -7,5 +7,9 @@ export type FetchRequestInit = Omit<RequestInit, 'body' | 'headers' | 'method'>;
  */
 export type FetchRequestAdapter = AlovaRequestAdapter<FetchRequestInit, Response, Headers>;
 
-declare function adapterFetch(): FetchRequestAdapter;
+export interface AdapterCreateOptions {
+  customFetch?: typeof fetch;
+}
+
+declare function adapterFetch(options?: AdapterCreateOptions): FetchRequestAdapter;
 export default adapterFetch;
