@@ -50,6 +50,6 @@ export default {
     onMount(callback);
   },
   onUnmounted: callback => {
-    onDestroy(callback);
+    !isSSR && onDestroy(callback);
   }
 } as StatesHook<SvelteHookExportType<unknown>>;
