@@ -9,6 +9,7 @@ interface TaroMockMap {
   getStorageSync: typeof Taro.getStorageSync;
   setStorageSync: typeof Taro.setStorageSync;
   removeStorageSync: typeof Taro.removeStorageSync;
+  getStorageInfoSync: typeof Taro.getStorageInfoSync;
 }
 
 // 统一的响应时间
@@ -204,5 +205,12 @@ export default <TaroMockMap>{
     for (const key in mockStorageContainer) {
       delete mockStorageContainer[key];
     }
+  },
+  getStorageInfoSync() {
+    return {
+      keys: Object.keys(mockStorageContainer),
+      currentSize: 0,
+      limitSize: 0
+    };
   }
 };

@@ -9,6 +9,7 @@ interface UniMockMap {
   setStorageSync: UniNamespace.Uni['setStorageSync'];
   removeStorageSync: UniNamespace.Uni['removeStorageSync'];
   clearStorageSync: UniNamespace.Uni['clearStorageSync'];
+  getStorageInfoSync: UniNamespace.Uni['getStorageInfoSync'];
 }
 
 // 统一的响应时间
@@ -173,6 +174,13 @@ const uniMockMap: UniMockMap = {
     for (const key in mockStorageContainer) {
       delete mockStorageContainer[key];
     }
+  },
+  getStorageInfoSync() {
+    return {
+      keys: Object.keys(mockStorageContainer),
+      currentSize: 0,
+      limitSize: 0
+    };
   }
 };
 
