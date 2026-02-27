@@ -1,3 +1,4 @@
+import { isAlovaCacheKey } from '@alova/shared';
 import { AlovaGlobalCacheAdapter } from 'alova';
 
 export default {
@@ -11,6 +12,15 @@ export default {
     uni.removeStorageSync(key);
   },
   clear() {
-    uni.clearStorageSync();
+    // 获取所有存储的键
+    const storageInfo = uni.getStorageInfoSync();
+    const keys = storageInfo.keys || [];
+
+    // 只删除alova相关的缓存
+    keys.forEach(key => {
+      if (isAlovaCacheKey(key)) {
+        uni.removeStorageSync(key);
+      }
+    });
   }
 } as AlovaGlobalCacheAdapter;

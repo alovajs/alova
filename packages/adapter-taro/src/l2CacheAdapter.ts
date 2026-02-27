@@ -1,3 +1,4 @@
+import { isAlovaCacheKey } from '@alova/shared';
 import Taro from '@tarojs/taro';
 import { AlovaGlobalCacheAdapter } from 'alova';
 
@@ -12,6 +13,15 @@ export default {
     Taro.removeStorageSync(key);
   },
   clear() {
-    Taro.clearStorageSync();
+    // 获取所有存储的键
+    const storageInfo = Taro.getStorageInfoSync();
+    const keys = storageInfo.keys || [];
+
+    // 只删除alova相关的缓存
+    keys.forEach(key => {
+      if (isAlovaCacheKey(key)) {
+        Taro.removeStorageSync(key);
+      }
+    });
   }
 } as AlovaGlobalCacheAdapter;

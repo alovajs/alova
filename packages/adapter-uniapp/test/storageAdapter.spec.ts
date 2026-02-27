@@ -23,7 +23,13 @@ interface ResponseData {
 }
 
 // 每个用例运行前清除缓存，避免相互影响
-beforeEach(() => invalidateCache());
+beforeEach(() => {
+  // 清空所有存储
+  for (const key in mockStorageContainer) {
+    delete mockStorageContainer[key];
+  }
+  return invalidateCache();
+});
 
 describe('storage adapter', () => {
   test('set storage', async () => {
@@ -71,5 +77,39 @@ describe('storage adapter', () => {
 
     invalidateCache(Get);
     expect(getStoragedData()).toBeUndefined();
+  });
+
+  test('clear should only remove alova cache', async () => {
+    // 设置一些非alova的缓存
+    uni.setStorageSync('user-token', 'token-123');
+    uni.setStorageSync('user-info', { name: 'test', age: 20 });
+    uni.setStorageSync('app-settings', { theme: 'dark' });
+
+    // 设置alova相关的缓存
+    const Get = alovaInst.Get<ResponseData>('/unit-test', {
+      cacheFor: {
+        mode: 'restore',
+        expire: 100 * 1000
+      }
+    });
+    await Get;
+
+    // 验证缓存已设置
+    const alovaCacheKey = buildNamespacedCacheKey(alovaInst.id, Get.key);
+    expect(mockStorageContainer[alovaCacheKey]).toBeDefined();
+    expect(mockStorageContainer['user-token']).toBe('token-123');
+    expect(mockStorageContainer['user-info']).toStrictEqual({ name: 'test', age: 20 });
+    expect(mockStorageContainer['app-settings']).toStrictEqual({ theme: 'dark' });
+
+    // 清除缓存
+    invalidateCache();
+
+    // 验证alova缓存被清除
+    expect(mockStorageContainer[alovaCacheKey]).toBeUndefined();
+
+    // 验证非alova缓存保留
+    expect(mockStorageContainer['user-token']).toBe('token-123');
+    expect(mockStorageContainer['user-info']).toStrictEqual({ name: 'test', age: 20 });
+    expect(mockStorageContainer['app-settings']).toStrictEqual({ theme: 'dark' });
   });
 });
