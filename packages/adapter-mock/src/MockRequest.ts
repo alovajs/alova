@@ -15,7 +15,7 @@ import type { AlovaGenerics, Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit } from '~/typings';
 import consoleRequestInfo from './consoleRequestInfo';
 import { defaultMockError, defaultMockResponse } from './defaults';
-import { parseUrl } from './helper';
+import { parseUrl, parseQueryString } from './helper';
 
 type MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = MockRequestInit<
   RequestConfig,
@@ -37,6 +37,9 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
     matchMode = 'pathname'
   }: MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = { mock: {} }
 ) {
+  // Normalize the logger: true uses default consoleRequestInfo, false or undefined disables logging
+  const resolvedMockRequestLogger = mockRequestLogger === trueValue ? consoleRequestInfo : mockRequestLogger;
+
   return (
     elements: RequestElements,
     method: Method<AlovaGenerics<any, any, RequestConfig, Response, ResponseHeader>>
@@ -46,7 +49,8 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
 
     const { url, data, type, headers: requestHeaders } = elements;
     let pathname = method.url;
-    let query = method.config.params || {};
+    const paramsConfig = method.config.params;
+    let query = isString(paramsConfig) ? parseQueryString(paramsConfig) : paramsConfig || {};
     if (matchMode === 'pathname') {
       const parsedUrl = parseUrl(url);
       pathname = parsedUrl.pathname;
@@ -101,8 +105,8 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
     // If no simulated data is matched, it means that a request is to be initiated and the http adapter is used to send the request.
     if (mockDataRaw === undefinedValue) {
       if (httpAdapter) {
-        isFn(mockRequestLogger) &&
-          mockRequestLogger({
+        isFn(resolvedMockRequestLogger) &&
+          resolvedMockRequestLogger({
             isMock: falseValue,
             url,
             method: type,
@@ -199,8 +203,8 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
           }
         }).then(response => {
           // Print simulation data request information
-          isFn(mockRequestLogger) &&
-            mockRequestLogger({
+          isFn(resolvedMockRequestLogger) &&
+            resolvedMockRequestLogger({
               isMock: trueValue,
               url,
               method: type,

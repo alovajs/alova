@@ -179,6 +179,40 @@ describe('mock request', () => {
     expect(mockFn).toHaveBeenCalledTimes(1); // mockRequestLogger will not be called when throw error in `onMockResponse`
   });
 
+  test('should print log when `mockRequestLogger` is set to `true`', async () => {
+    const mocks = defineMock({
+      '[POST]/detail': () => ({
+        id: 1
+      })
+    });
+
+    // Mock Data Request Adapter
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      delay: 10,
+      mockRequestLogger: true,
+      onMockResponse: ({ body }) => ({
+        response: body,
+        headers: {}
+      })
+    });
+
+    // Spy on consoleRequestInfo by mocking the module
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const alovaInst = createAlova({
+      baseURL: 'http://xxx',
+      requestAdapter: mockRequestAdapter
+    });
+
+    const payload = await alovaInst.Post('/detail?aa=1', { data: 'test' });
+    expect(payload).toStrictEqual({ id: 1 });
+
+    // Should have called console.log when mockRequestLogger is true
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
   test('response with status and statusText', async () => {
     const mocks = defineMock({
       '[POST]/detail': () => ({
@@ -557,5 +591,39 @@ describe('mock request', () => {
       .Post('/detail', '{"key": "value"}')
       .send();
     expect(data).toStrictEqual({ key: 'value' });
+  });
+
+  test('should parse query correctly when params is string type', async () => {
+    const mocks = defineMock({
+      '[POST]/detail': ({ query }) => ({
+        query
+      })
+    });
+    // Mock Data Request Adapter
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      mockRequestLogger: false,
+      onMockResponse({ body }) {
+        return {
+          response: body,
+          headers: {}
+        };
+      }
+    });
+    const data = await createAlova({ baseURL: 'http://xxx', requestAdapter: mockRequestAdapter })
+      .Post(
+        '/detail',
+        {},
+        {
+          params: 'a=1&b=2&c=3'
+        }
+      )
+      .send();
+    expect(data).toStrictEqual({
+      query: {
+        a: '1',
+        b: '2',
+        c: '3'
+      }
+    });
   });
 });

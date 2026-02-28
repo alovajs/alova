@@ -140,8 +140,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "dependencies": {
-    "@testing-library/user-event": "^14.5.2"
   }
 }
