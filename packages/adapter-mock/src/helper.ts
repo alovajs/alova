@@ -1,4 +1,18 @@
 /**
+ * Parse query string to object
+ * @param queryString query string (e.g. "a=1&b=2")
+ * @returns Parsed key-value object
+ */
+export const parseQueryString = (queryString: string) => {
+  const query = {} as Record<string, string>;
+  queryString.split('&').forEach(paramItem => {
+    const [key, value] = paramItem.split('=');
+    key && (query[key] = value);
+  });
+  return query;
+};
+
+/**
  * parse url
  * @param url url
  * @returns Parsed information object
@@ -13,13 +27,7 @@ export const parseUrl = (url: string) => {
   if (pathContainedParams) {
     pathContainedParams = pathContainedParams.replace(/\?[^?#]+/, mat => {
       // Parse url parameters
-      mat
-        .substring(1)
-        .split('&')
-        .forEach(paramItem => {
-          const [key, value] = paramItem.split('=');
-          key && (query[key] = value);
-        });
+      Object.assign(query, parseQueryString(mat.substring(1)));
       return '';
     });
     pathContainedParams = pathContainedParams.replace(/#[^#]*/, mat => {
