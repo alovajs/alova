@@ -123,7 +123,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "5.0.9",
-    "rollup": "^4.22.4",
+    "rollup": "^4.59.0",
     "rollup-plugin-dts": "^6.1.1",
     "solid-js": "^1.9.4",
     "svelte": "^4.2.19",
