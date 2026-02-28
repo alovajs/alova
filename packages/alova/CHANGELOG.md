@@ -1,5 +1,11 @@
 # alova
 
+## 3.5.1
+
+### Patch Changes
+
+- [#797](https://github.com/alovajs/alova/pull/797) [`1e77ee2`](https://github.com/alovajs/alova/commit/1e77ee2425acf1c612ef48b504eba23109384b54) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - detech ssr in `onUnmount` to prevent error in svelitekit
+
 ## 3.5.0
 
 ### Minor Changes

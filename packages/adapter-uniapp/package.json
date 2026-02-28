@@ -1,6 +1,6 @@
 {
   "name": "@alova/adapter-uniapp",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "description": "uniapp adapter for alova.js",
   "homepage": "https://alova.js.org",
   "main": "dist/alova-adapter-uniapp.common.cjs",

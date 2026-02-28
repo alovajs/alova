@@ -1,5 +1,11 @@
 # @alova/adapter-uniapp
 
+## 2.0.16
+
+### Patch Changes
+
+- [#807](https://github.com/alovajs/alova/pull/807) [`191376d`](https://github.com/alovajs/alova/commit/191376ddbef7594437f3db404a776a5e38361711) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - only clear alova related caches in uniapp and taro
+
 ## 2.0.15
 
 ### Patch Changes
