@@ -1,5 +1,11 @@
 # @alova/mock
 
+## 2.0.19
+
+### Patch Changes
+
+- [#808](https://github.com/alovajs/alova/pull/808) [`fcfc871`](https://github.com/alovajs/alova/commit/fcfc87111d20b718a5d9869a4279f63bd2bc2bc2) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - cannot work when set `mockRequestLogger` to true in mock adapter.
+
 ## 2.0.18
 
 ### Patch Changes
