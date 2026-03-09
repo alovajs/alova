@@ -24,6 +24,9 @@ export type AlovaAxiosRequestConfig = Omit<
  */
 export type AxiosRequestAdapter = AlovaRequestAdapter<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponseHeaders>;
 
+export type AxiosMockResponse = MockResponse<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponseHeaders>;
+export type AxiosMockError = MockError;
+
 export interface AdapterCreateOptions {
   axios?: AxiosInstance;
 }
@@ -53,6 +56,6 @@ export declare function axiosRequestAdapter(options?: AdapterCreateOptions): Axi
  * ```
  */
 export declare const axiosMockResponse: {
-  onMockResponse: MockResponse<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponse['headers']>;
-  onMockError: MockError;
+  onMockResponse: AxiosMockResponse;
+  onMockError: AxiosMockError;
 };

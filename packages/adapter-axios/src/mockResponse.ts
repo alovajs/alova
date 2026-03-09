@@ -1,13 +1,8 @@
-import type { MockError, MockResponse } from '@alova/mock';
 import { undefinedValue } from '@alova/shared';
-import { AxiosError, AxiosHeaders, AxiosResponse, AxiosResponseHeaders } from 'axios';
-import { AlovaAxiosRequestConfig } from '~/typings';
+import { AxiosError, AxiosHeaders, AxiosResponseHeaders } from 'axios';
+import { AxiosMockError, AxiosMockResponse } from '~/typings';
 
-const mockResponseHandler: MockResponse<AlovaAxiosRequestConfig, AxiosResponse, AxiosResponseHeaders> = (
-  { status, statusText, body },
-  _,
-  currentMethod
-) => {
+const mockResponseHandler: AxiosMockResponse = ({ status, statusText, body }, _, currentMethod) => {
   const responseHeaders = {};
   const { config } = currentMethod;
   const axiosConfig = {
@@ -35,7 +30,7 @@ const mockResponseHandler: MockResponse<AlovaAxiosRequestConfig, AxiosResponse, 
   };
 };
 
-const mockErrorHandler: MockError = (error, currentMethod) => {
+const mockErrorHandler: AxiosMockError = (error, currentMethod) => {
   const { config } = currentMethod;
   return new AxiosError(error.message, 'ERR_NETWORK', {
     baseURL: currentMethod.baseURL,
