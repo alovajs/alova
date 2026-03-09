@@ -1,5 +1,11 @@
 # @alova/adapter-axios
 
+## 2.0.18
+
+### Patch Changes
+
+- [#811](https://github.com/alovajs/alova/pull/811) [`c8200bb`](https://github.com/alovajs/alova/commit/c8200bbc6532a5c4dbba81093f998e4d0dfaf968) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that throw error in `onMockResponse` will trigger `onMockError`, axios typo.
+
 ## 2.0.17
 
 ### Patch Changes
