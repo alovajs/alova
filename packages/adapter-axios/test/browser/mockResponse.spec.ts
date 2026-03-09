@@ -53,9 +53,12 @@ describe('mock response adapter', () => {
       await Get;
     } catch (error: any) {
       expect(error).toBeInstanceOf(AxiosError);
+      expect(error.status).toBe(500);
       expect(error.message).toBe('server error');
       expect(error.data).toBeUndefined();
       expect(!!error.config).toBeTruthy();
+      expect(error.response?.status).toBe(500);
+      expect(error.response?.statusText).toBe('server error');
     }
   });
 
@@ -65,7 +68,9 @@ describe('mock response adapter', () => {
       await Get;
     } catch (error: any) {
       expect(error).toBeInstanceOf(AxiosError);
+      expect(error.code).toBe('ERR_NETWORK');
       expect(error.message).toBe('network error');
+      expect(error.response).toBeUndefined();
     }
   });
 

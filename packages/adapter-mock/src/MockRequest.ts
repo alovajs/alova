@@ -15,7 +15,7 @@ import type { AlovaGenerics, Method, RequestElements } from 'alova';
 import { Mock, MockRequestInit } from '~/typings';
 import consoleRequestInfo from './consoleRequestInfo';
 import { defaultMockError, defaultMockResponse } from './defaults';
-import { parseUrl, parseQueryString } from './helper';
+import { parseQueryString, parseUrl } from './helper';
 
 type MockRequestInitWithMock<RequestConfig, Response, ResponseHeader> = MockRequestInit<
   RequestConfig,
@@ -163,6 +163,7 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
       }
     }, delay);
 
+    let isOnMockResponseError = falseValue;
     resonpsePromise = resonpsePromise
       .then((response: any) => {
         let status = 200;
@@ -185,23 +186,20 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
           body = response;
         }
 
-        return newInstance(Promise, (resolve, reject) => {
-          try {
-            const res = onMockResponse(
-              { status, statusText, responseHeaders, body },
-              {
-                headers: requestHeaders,
-                query,
-                params,
-                data: (data as any) || {}
-              },
-              method
-            );
-            resolve(res);
-          } catch (error) {
-            reject(error);
-          }
-        }).then(response => {
+        isOnMockResponseError = trueValue;
+        return Promise.all([
+          onMockResponse(
+            { status, statusText, responseHeaders, body },
+            {
+              headers: requestHeaders,
+              query,
+              params,
+              data: (data as any) || {}
+            },
+            method
+          ),
+          responseHeaders
+        ]).then(([response, responseHeaders]) => {
           // Print simulation data request information
           isFn(resolvedMockRequestLogger) &&
             resolvedMockRequestLogger({
@@ -218,7 +216,12 @@ export default function MockRequest<RequestConfig, Response, ResponseHeader>(
           return response;
         });
       })
-      .catch(error => promiseReject(onMockError(error, method)));
+      .catch(error => {
+        if (isOnMockResponseError) {
+          return promiseReject(error);
+        }
+        return promiseReject(onMockError(error, method));
+      });
 
     // Return response data
     return {
