@@ -4,7 +4,7 @@
   alova完美兼容你最喜欢的HTTP client和UI框架，快速开发客户端和服务的应用的业务逻辑，同时让API信息与代码进行交互，像虫洞一样拉近后端协作距离，极致高效地集成你的APIs
 </p>
 
-<p align="center"><a href="./README.md">📑English</a> | 中文</p>
+<p align="center"><a href="./README.md">📑English</a> | 中文 | <a href="./README.ja-JP.md">日本語</a></p>
 <p align="center">
   <a href="https://alova.js.org">文档</a> | 
   <a href="https://alova.js.org/examples">示例</a>
