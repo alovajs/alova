@@ -213,6 +213,46 @@ describe('mock request', () => {
     consoleSpy.mockRestore();
   });
 
+  test('should print log via console.log fallback when `console.groupCollapsed` is unavailable', async () => {
+    const mocks = defineMock({
+      '[POST]/detail': () => ({
+        id: 1
+      })
+    });
+
+    const mockRequestAdapter = createAlovaMockAdapter([mocks], {
+      delay: 10,
+      mockRequestLogger: true,
+      onMockResponse: ({ body }) => ({
+        response: body,
+        headers: {}
+      })
+    });
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const groupCollapsedMockFn = vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    const groupEndMockFn = vi.spyOn(console, 'groupEnd').mockImplementation(() => {});
+    // Simulate environments where groupCollapsed/groupEnd are not available
+    (console as any).groupCollapsed = (console as any).groupEnd = undefined;
+
+    const alovaInst = createAlova({
+      baseURL: 'http://xxx',
+      requestAdapter: mockRequestAdapter
+    });
+
+    const payload = await alovaInst.Post('/detail?aa=1', { data: 'test' });
+    expect(payload).toStrictEqual({ id: 1 });
+
+    // Should fall back to console.log without throwing
+    expect(consoleSpy).toHaveBeenCalled();
+    expect(groupCollapsedMockFn).not.toHaveBeenCalled();
+    expect(groupEndMockFn).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+    groupCollapsedMockFn.mockRestore();
+    groupEndMockFn.mockRestore();
+  });
+
   test('response with status and statusText', async () => {
     const mocks = defineMock({
       '[POST]/detail': () => ({
