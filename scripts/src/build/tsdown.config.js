@@ -138,7 +138,22 @@ export default function createTsdownConfig(bundleConfig, version) {
       },
       dts: false,
       clean: false, // when multiple formats share the same dir, the caller clears it before building
-      target: false // no syntax downgrading, keeping output consistent with the old rolldown builds
+      target: false, // no syntax downgrading, keeping output consistent with the old rolldown builds
+      // CommonJS interop footer for default-only adapter bundles (e.g. `alova/fetch`).
+      // tsdown/rolldown emits `module.exports = fn` for a single default export, which breaks consumers
+      // compiled with `module: "commonjs"` + `esModuleInterop: false`: TS generates
+      // `require('alova/fetch').default`, but `require('alova/fetch').default` is `undefined` -> TypeError.
+      // Appending `.default` + `__esModule` keeps the original callable `module.exports`
+      // (so `require('alova/fetch')()` still works) while also exposing `.default`,
+      // making both `import x from 'alova/fetch'` and `require('alova/fetch').default` work.
+      // This is a purely additive, non-breaking change for any CJS output.
+      ...(format === 'cjs'
+        ? {
+            footer: `module.exports.default = module.exports;
+Object.defineProperty(module.exports, '__esModule', { value: true });
+`
+          }
+        : {})
     };
     if (env) {
       config.define = { 'process.env.NODE_ENV': JSON.stringify(env) };
