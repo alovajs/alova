@@ -28,9 +28,20 @@ export const setMockShortListData = (cb?: (data: any) => void) => {
   shortList = typeof cb === 'function' ? cb(shortList) : Array.from({ length: shortTotal }).map((_, i) => i);
 };
 
+// Nested structure data (e.g. { data: { records: [...], total } }) to reproduce #810
+let nestedListData: any;
+// Counts requests per page so tests can assert whether the next page was re-fetched.
+let nestedListRequestCount: Record<number, number> = {};
+export const setMockNestedListData = (cb?: (data: any) => void) => {
+  nestedListData = typeof cb === 'function' ? cb(nestedListData) : Array.from({ length: total }).map((_, i) => i);
+  nestedListRequestCount = {};
+};
+export const getNestedListRequestCount = (page: number) => nestedListRequestCount[page] || 0;
+
 setMockListData();
 setMockListWithSearchData();
 setMockShortListData();
+setMockNestedListData();
 
 let detailErrorId = '';
 let detailErrorTimes = 0;
@@ -69,6 +80,21 @@ const mocks = defineMock({
     return {
       total: filteredList.length,
       list: filteredList.slice(start, start + pageSize)
+    };
+  },
+
+  // Nested pagination response to reproduce #810 (data is not on the first level)
+  '/list-nested': ({ query }) => {
+    let { page = 1, pageSize = 10 } = query;
+    page = Number(page);
+    pageSize = Number(pageSize);
+    nestedListRequestCount[page] = (nestedListRequestCount[page] || 0) + 1;
+    const start = (page - 1) * pageSize;
+    return {
+      data: {
+        total: nestedListData.length,
+        records: nestedListData.slice(start, start + pageSize)
+      }
     };
   },
 

@@ -91,6 +91,21 @@ export const actionDelegationMiddleware = <AG extends AlovaGenerics = AlovaGener
 };
 
 /**
+ * Alias of `actionDelegationMiddleware` with a `use` prefix.
+ *
+ * React Compiler treats functions named with the `use` prefix as Hooks and
+ * always keeps their call in the component render scope (never hoists it to the
+ * module scope). The original `actionDelegationMiddleware` calls framework Hooks
+ * (`ref`/`onUnmounted`) internally, so when it is hoisted by the React Compiler
+ * those Hooks run outside of a component render and throw
+ * "Should have a queue. You are likely calling Hooks conditionally".
+ *
+ * Use `useActionDelegationMiddleware` instead of `actionDelegationMiddleware`
+ * when the React Compiler is enabled. Both share the exact same behavior.
+ */
+export const useActionDelegationMiddleware = actionDelegationMiddleware;
+
+/**
  * Access the operation function, if there are multiple matches, onMatch will be called with this
  * @param id Delegator id, or regular expression
  * @param onMatch matching subscribers
