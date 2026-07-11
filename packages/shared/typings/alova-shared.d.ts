@@ -1,10 +1,4 @@
-/**
- * @alova/shared 1.3.2 (https://alova.js.org)
- * Document https://alova.js.org
- * Copyright 2026 Scott Hu. All Rights Reserved
- * Licensed under MIT (https://github.com/alovajs/alova/blob/main/LICENSE)
- */
-
+//#region src/assert.d.ts
 /**
  * alova error class
  */
@@ -20,14 +14,37 @@ declare class AlovaError extends Error {
 declare const createAssert: (
   prefix?: string
 ) => (expression: any, message: string, errorCode?: number) => asserts expression;
-
+//#endregion
+//#region src/bridge.d.ts
 /**
  * Injects a reference object with `JSON.parse` so that it can be accessed in another module.
  * @param object injecting object
  */
 declare const provideReferingObject: (object: Record<string, any>) => void;
 declare const injectReferingObject: () => Record<string, any>;
-
+//#endregion
+//#region src/cloneMethod.d.ts
+/**
+ * Clone a method instance deeply so that the global `beforeRequest` hook can
+ * mutate it without affecting the original instance. This avoids side effects
+ * when the same method is sent/connected multiple times.
+ *
+ * The `Method` constructor must be passed in because `@alova/shared` cannot
+ * depend on the `alova` package (that would create a circular dependency), and
+ * method subclasses such as `HookedMethod`/`LimitedMethod` have their own
+ * constructors that must not be instantiated here.
+ */
+declare const _default: <
+  T,
+  C extends {
+    new (...args: any[]): T;
+  }
+>(
+  methodInstance: T,
+  MethodCls: C
+) => T;
+//#endregion
+//#region src/createEventManager.d.ts
 interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
   off<K extends keyof E>(type: K, handler?: (event: E[K]) => void): () => void;
@@ -39,15 +56,14 @@ interface EventManager<E extends object> {
   emit<K extends keyof E>(type: K, event: E[K]): any[];
   eventMap: EventMap<E>;
 }
-type EventMap<E extends object> = {
-  [K in keyof E]?: ((event: E[K]) => void)[];
-};
+type EventMap<E extends object> = { [K in keyof E]?: ((event: E[K]) => void)[] };
 declare const createEventManager: <E extends object>() => EventManager<E>;
 declare const decorateEvent: <OnEvent extends (handler: (event: any) => void) => any>(
   onEvent: OnEvent,
   decoratedHandler: (handler: Parameters<OnEvent>[0], event: Parameters<Parameters<OnEvent>[0]>[0]) => void
 ) => (handler: Parameters<OnEvent>[0]) => any;
-
+//#endregion
+//#region src/types.d.ts
 type GeneralFn = (...args: any[]) => any;
 /**
  * common UI framework state type
@@ -97,7 +113,8 @@ interface BackoffPolicy {
   endQuiver?: number;
 }
 declare const type: {};
-
+//#endregion
+//#region src/FrameworkState.d.ts
 type UpdateFn<Data> = (state: GeneralState<Data>, newValue: Data) => void;
 type DehydrateFn<Data> = (state: GeneralState<Data>) => Data;
 type ExportFn<Data> = (state: GeneralState<Data>) => GeneralState<Data>;
@@ -122,9 +139,9 @@ declare class FrameworkState<Data, Key extends string> extends FrameworkReadable
   set v(newValue: Data);
   get v(): Data;
 }
-
+//#endregion
+//#region ../alova/typings/index.d.ts
 type Arg = Record<string, any>;
-
 /**
  * Request cache settings
  * expire: expiration time
@@ -140,13 +157,13 @@ interface MethodRequestConfig {
    * if set to a string, it will be automatically added to query string.
    */
   params: Arg | string;
-
   /**
    * Request header
    */
   headers: Arg;
 }
-
+//#endregion
+//#region src/function.d.ts
 /**
  * Empty function for compatibility processing
  */
@@ -291,7 +308,7 @@ declare const objAssign: <T extends Record<string, any>, U extends Record<string
   target: T,
   ...sources: U
 ) => T & U[number];
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+type Omit$1<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /**
  * Excludes specified attributes from a data collection and returns a new data collection data collection
  * @param keys Excluded keys new data collection
@@ -400,7 +417,8 @@ declare const buildCompletedURL: (baseURL: string, url: string, params: MethodRe
  * @returns The cloned object.
  */
 declare const deepClone: <T>(obj: T) => T;
-
+//#endregion
+//#region src/queueCallback.d.ts
 type CallbackFn = () => void | Promise<void>;
 declare class QueueCallback {
   protected limit?: (number | null) | undefined;
@@ -430,7 +448,8 @@ declare class QueueCallback {
    */
   setProcessingState(state: boolean): void;
 }
-
+//#endregion
+//#region src/vars.d.ts
 declare const PromiseCls: PromiseConstructor;
 declare const promiseResolve: <T = void>(value?: T) => Promise<Awaited<T> | undefined>;
 declare const promiseReject: <T>(value: T) => Promise<never>;
@@ -488,34 +507,35 @@ declare const isSSR: boolean;
 /** cache mode */
 declare const MEMORY = 'memory';
 declare const STORAGE_RESTORE = 'restore';
-
+//#endregion
 export {
   $self,
   AlovaError,
-  type BackoffPolicy,
-  type CallbackFn,
-  type Equal,
-  type EventManager,
+  BackoffPolicy,
+  CallbackFn,
+  Equal,
+  EventManager,
   FrameworkReadableState,
   FrameworkState,
-  type GeneralFn,
-  type GeneralState,
-  type IsAny,
-  type IsAssignable,
-  type IsUnknown,
+  GeneralFn,
+  GeneralState,
+  IsAny,
+  IsAssignable,
+  IsUnknown,
   JSONParse,
   JSONStringify,
   MEMORY,
   ObjectCls,
-  type Omit,
+  Omit$1 as Omit,
   PromiseCls,
   QueueCallback,
   RegExpCls,
   STORAGE_RESTORE,
-  type UsePromiseExposure,
+  UsePromiseExposure,
   buildCompletedURL,
   buildNamespacedCacheKey,
   clearTimeoutTimer,
+  _default as cloneMethod,
   createAssert,
   createAsyncQueue,
   createEventManager,

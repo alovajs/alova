@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import ora from 'ora';
 import createConfig from './tsdown.config.js';
-// tsdown 为纯 ESM 包，运行时经 pnpm 软链可正常解析；eslint 的 import 解析器无法识别，故在此禁用该规则
+// tsdown is a pure ESM package; it resolves fine at runtime via pnpm symlinks, but eslint's import resolver cannot recognize it, so this rule is disabled here
 // eslint-disable-next-line import/no-unresolved
 import { build as buildWithTsdown } from 'tsdown';
 import { resolve } from 'node:path';
@@ -21,7 +21,7 @@ const basePath = process.cwd();
  */
 
 /**
- * 调用 tsdown 构建单个配置，并（在需要时）将 d.ts 产物移动到目标路径。
+ * Builds a single tsdown config and (when needed) moves the generated .d.ts output to the target path.
  * @param {{ config: import('tsdown').UserConfig, dts?: { tmpDir: string, target: string } }} item
  */
 async function buildOne(item) {
@@ -36,7 +36,7 @@ async function buildOne(item) {
     throw error;
   }
 
-  // d.ts 产物先输出到临时目录，这里移动到最终目标路径
+  // The .d.ts output is first written to a temp dir, then moved to its final target path here.
   if (dts) {
     const files = readdirSync(dts.tmpDir);
     const jsRe = /\.(cjs|mjs|js)$/;

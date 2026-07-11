@@ -424,4 +424,64 @@ describe('vue => useSSE', () => {
     expect(data.value.headers['x-custom-header']).toBe(method.config.headers['x-custom-header']);
     expect(data.value.body).toStrictEqual(method.data);
   });
+
+  // ! The global `beforeRequest` hook must be called so that unified handling (e.g. auth headers) applies to SSE
+  test('should call beforeRequest and apply its modifications to the request', async () => {
+    const alovaInst = await prepareAlova();
+    const beforeRequestFn = vi.fn();
+    const customToken = 'my-token';
+    // Set the global beforeRequest hook to add an auth header, which is a common unified-handling scenario.
+    alovaInst.options.beforeRequest = method => {
+      beforeRequestFn();
+      method.config.headers = { ...method.config.headers, Authorization: customToken };
+    };
+
+    const requestData = { key: 'value' };
+    const method = alovaInst.Post<{
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body: Record<string, string>;
+    }>(`/${TriggerEventName}`, requestData);
+    const { data } = useSSE(method, { immediate: true, responseType: 'json' });
+
+    await delay(100);
+    // Server sends information and echoes back the received request (url/method/headers/body)
+    await serverSend();
+    await delay(1000);
+
+    // beforeRequest should have been called exactly once
+    expect(beforeRequestFn).toHaveBeenCalledTimes(1);
+    // The header added in beforeRequest must reach the server
+    expect(data.value.headers.authorization).toBe(customToken);
+    expect(data.value.body).toStrictEqual(method.data);
+  });
+
+  // ! The async `beforeRequest` hook must also be awaited before sending the request
+  test('should await an async beforeRequest', async () => {
+    const alovaInst = await prepareAlova();
+    const beforeRequestFn = vi.fn();
+    const customToken = 'async-token';
+    alovaInst.options.beforeRequest = async method => {
+      await delay(50);
+      beforeRequestFn();
+      method.config.headers = { ...method.config.headers, Authorization: customToken };
+    };
+
+    const requestData = { key: 'value' };
+    const method = alovaInst.Post<{
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body: Record<string, string>;
+    }>(`/${TriggerEventName}`, requestData);
+    const { data } = useSSE(method, { immediate: true, responseType: 'json' });
+
+    await delay(200);
+    await serverSend();
+    await delay(1000);
+
+    expect(beforeRequestFn).toHaveBeenCalledTimes(1);
+    expect(data.value.headers.authorization).toBe(customToken);
+  });
 });

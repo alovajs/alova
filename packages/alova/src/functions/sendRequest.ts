@@ -1,8 +1,9 @@
+import Method from '@/Method';
 import defaultCacheLogger from '@/defaults/cacheLogger';
 import { getRawWithCacheAdapter, getWithCacheAdapter, setWithCacheAdapter } from '@/storage/cacheWrapper';
-import cloneMethod from '@/utils/cloneMethod';
 import {
   $self,
+  cloneMethod,
   MEMORY,
   PromiseCls,
   STORAGE_RESTORE,
@@ -30,7 +31,6 @@ import {
 import {
   AlovaGenerics,
   AlovaRequestAdapter,
-  Method,
   ProgressUpdater,
   RespondedHandler,
   ResponseCompleteHandler,
@@ -88,7 +88,7 @@ export default function sendRequest<AG extends AlovaGenerics<any, any, {}>>(
 
     // Clone the method as a parameter and pass it to beforeRequest to prevent side effects when using the original method instance request multiple times.
     // Place it after `let cachedResponse = await...` to solve the problem of first assigning promise to the method instance in method.send, otherwise the promise will be undefined in clonedMethod.
-    const clonedMethod = cloneMethod(methodInstance);
+    const clonedMethod = cloneMethod(methodInstance, Method);
 
     // Call the hook function before sending the request
     // beforeRequest supports synchronous functions and asynchronous functions

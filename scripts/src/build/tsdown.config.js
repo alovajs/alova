@@ -1,5 +1,5 @@
-// tsdown 配置生成器：将 `build.json` 中的 bundle 描述转换为 tsdown 的构建配置数组。
-// 与旧的 rolldown/rollup 构建保持一致的输出文件名、格式、external、banner、globals 等行为。
+// tsdown config generator: converts the bundle descriptions in `build.json` into an array of tsdown build configs.
+// Keeps output file names, formats, externals, banner, and globals consistent with the old rolldown/rollup builds.
 import { readFileSync } from 'node:fs';
 import { resolve, dirname, basename } from 'node:path';
 
@@ -16,7 +16,7 @@ const defaultBuildFormats = ['cjs', 'esm', 'umd'];
  */
 
 /**
- * 根据 output 模板与 suffix/ext 解析出具体输出路径。
+ * Resolve the concrete output path from the output template and suffix/ext.
  * @param {string} outputPattern
  * @param {string} suffix
  * @param {string} ext
@@ -30,8 +30,8 @@ function resolveOutputPattern(outputPattern, suffix, ext) {
 }
 
 /**
- * 从 output 模板推导出产物 basename（即去掉 `.{suffix}` 之前的部分的文件名）。
- * 例如 `dist/alova.{suffix}.{ext}` -> `alova`，`../alova/dist/clienthook/index.{suffix}.{ext}` -> `index`。
+ * Derive the product basename from the output template (the filename before `.{suffix}`).
+ * e.g. `dist/alova.{suffix}.{ext}` -> `alova`, `../alova/dist/clienthook/index.{suffix}.{ext}` -> `index`.
  * @param {string} outputPattern
  */
 function getBaseName(outputPattern) {
@@ -91,11 +91,11 @@ export default function createTsdownConfig(bundleConfig, version) {
       ...['path', 'url', 'stream']
     ];
     if (!env) {
-      // 非浏览器产物：external 中声明的所有依赖均保持外部化
+      // Non-browser output: keep all dependencies declared in external as external.
       externalPackages.push(...Object.keys(globalPackages));
     } else {
-      // 浏览器（umd）产物：仅 external 中值为真（全局名）的依赖外部化，
-      // 值为 null 的依赖需被打包进 bundle（与旧 rolldown 行为一致）。
+      // Browser (umd) output: only dependencies whose external value is truthy (a global name) are externalized,
+      // those with a null value must be bundled in (consistent with the old rolldown behavior).
       Object.keys(globalPackages).forEach(key => {
         const value = globalPackages[key];
         if (value) {
@@ -106,12 +106,12 @@ export default function createTsdownConfig(bundleConfig, version) {
       });
     }
 
-    // umd 全局名映射：仅保留 external 中值不为 null 的依赖
+    // umd global name mapping: keep only dependencies whose external value is not null.
     const globals = Object.fromEntries(Object.entries(globalPackages).filter(([, value]) => value != null));
 
-    // tsdown 默认会把 package.json 中的 dependencies/peerDependencies 自动外部化，
-    // 而浏览器（umd）构建中 external 值为 null 的依赖需要被打进 bundle。
-    // 这里用 alwaysBundle 强制打包这些依赖，覆盖 tsdown 的默认自动外部化行为。
+    // tsdown auto-externalizes dependencies/peerDependencies from package.json by default,
+    // while in browser (umd) builds dependencies with a null external value must be bundled in.
+    // alwaysBundle forces these to be bundled, overriding tsdown's default auto-externalization.
     const alwaysBundle = isBrowser ? Object.keys(globalPackages).filter(key => !globalPackages[key]) : [];
 
     const resolvedOutput = resolveOutput({ suffix, ext });
@@ -131,14 +131,14 @@ export default function createTsdownConfig(bundleConfig, version) {
       },
       globalName: isBrowser ? buildName : undefined,
       banner,
-      // 通过 deps.neverBundle 显式控制外部依赖，避免 tsdown 的默认自动外部化干扰
+      // Explicitly control external deps via deps.neverBundle to avoid tsdown's default auto-externalization interfering.
       deps: {
         neverBundle: externalPackages,
         alwaysBundle
       },
       dts: false,
-      clean: false, // 同一目录多格式产物时由调用方在构建前清理
-      target: false // 不做语法降级，保持与旧 rolldown 构建一致的输出
+      clean: false, // when multiple formats share the same dir, the caller clears it before building
+      target: false // no syntax downgrading, keeping output consistent with the old rolldown builds
     };
     if (env) {
       config.define = { 'process.env.NODE_ENV': JSON.stringify(env) };
@@ -150,8 +150,8 @@ export default function createTsdownConfig(bundleConfig, version) {
   }
 
   /**
-   * 生成 d.ts 构建配置。tsdown 的 d.ts 产物文件名无法与 JS 产物完全解耦，
-   * 因此先输出到临时目录，再由调用方移动到 `dtsOutput` 指定的目标路径。
+   * Generate the d.ts build config. tsdown cannot fully decouple the .d.ts output filename from the JS output,
+   * so it is first written to a temp dir and then moved by the caller to the path specified by `dtsOutput`.
    */
   function createDTSConfig() {
     const tmpDir = resolve(basePath, `.tsdown-dts-${baseName}`);
@@ -162,9 +162,14 @@ export default function createTsdownConfig(bundleConfig, version) {
       entry: { [baseName]: entryFile },
       format: ['esm'],
       outDir: tmpDir,
-      outputOptions: {
-        entryFileNames: `${baseName}.js`
-      },
+      // Do not set outputOptions.entryFileNames:
+      // let rolldown-plugin-dts's createDtsInputPlugin decide the file name itself,
+      // it names the dts chunk <name>.d.mts (under esm), while the JS chunk produced by this config
+      // defaults to <name>.mjs, so the two do not conflict. Naming the dts chunk with a .d.mts
+      // suffix is what triggers renderChunk to convert the var X=[...] intermediate representation back to real declarations.
+      // If explicitly set to entryFileNames: '<name>.js', the dts chunk would be misnamed <name>.ts,
+      // renderChunk would skip the conversion and leak var X=[...]; if set to '<name>.d.ts', the JS
+      // chunk would steal that name and push the real dts to <name>2.d.ts, causing the wrong JS source to be selected when moving.
       dts: true,
       clean: true,
       target: false
