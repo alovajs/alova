@@ -1,5 +1,5 @@
 import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { accessAction, actionDelegationMiddleware, updateState } from '@/index';
+import { accessAction, actionDelegationMiddleware, updateState, usePagination } from '@/index';
 import reactHook from '@/statesHook/react';
 import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -2000,5 +2000,53 @@ describe('react => usePagination', () => {
       expect(successFn).toHaveBeenCalledWith(['a', 1, undefined, undefined]);
       expect(fetchSuccessMockFn).toHaveBeenCalledWith(['a', 1, false]);
     });
+  });
+
+  // https://github.com/alova-sc/alova/issues/742
+  // The response must be updated when a middleware replaces the method instance
+  // (usePagination is built on useWatcher where `abortLast` defaults to true).
+  test('should update response when middleware changes the method instance (#742)', async () => {
+    const successMockFn = vi.fn();
+    const completeMockFn = vi.fn();
+    const errorMockFn = vi.fn();
+
+    const MiddlewarePagination = () => {
+      const { loading, data, error, page, total, pageCount, isLastPage } = usePagination(getter1, {
+        total: res => res.total,
+        data: res => res.list,
+        // Replace the actually-sent method with a request for page 2,
+        // so we can verify the replaced method is the one that responds.
+        middleware: (_, next) => next({ method: getter1(2, 10) })
+      })
+        .onSuccess(successMockFn)
+        .onComplete(completeMockFn)
+        .onError(errorMockFn);
+      return (
+        <div>
+          <span role="loading">{loading ? 'loading' : 'loaded'}</span>
+          <span role="response">{JSON.stringify(data)}</span>
+          <span role="total">{total}</span>
+          <span role="pageCount">{pageCount}</span>
+          <span role="page">{page}</span>
+          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
+          <span role="error">{error?.message}</span>
+        </div>
+      );
+    };
+
+    render(<MiddlewarePagination />);
+
+    await waitFor(() => {
+      // data should come from the replaced method (page 2 => [10..19])
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19, 10)));
+      expect(screen.getByRole('loading')).toHaveTextContent('loaded');
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('30');
+      expect(screen.getByRole('page')).toHaveTextContent('1');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(completeMockFn).toHaveBeenCalledTimes(1);
+    });
+    expect(errorMockFn).not.toHaveBeenCalled();
   });
 });

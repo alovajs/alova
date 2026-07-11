@@ -96,6 +96,10 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
         };
 
       methodInstance = guardNextReplacingMethod;
+      // Sync the actual method being sent to the hook instance.
+      // This ensures `toUpdateResponse()` returns true for the current request in useWatcher/usePagination
+      // (where `abortLast` defaults to true), otherwise the replaced method's response would be ignored.
+      hookInstance.m = methodInstance;
       // The latest controller needs to be saved every time a request is sent
       hookInstance.rf[methodKey] = removeStates;
 

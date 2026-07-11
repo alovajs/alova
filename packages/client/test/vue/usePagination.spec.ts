@@ -2031,4 +2031,38 @@ describe('vue => usePagination', () => {
     expect(pageCount.value).toBe(30);
     expect(total.value).toBe(300);
   });
+
+  // https://github.com/alova-sc/alova/issues/742
+  // The response must be updated when a middleware replaces the method instance
+  // (usePagination is built on useWatcher where `abortLast` defaults to true).
+  test('should update response when middleware changes the method instance (#742)', async () => {
+    const successMockFn = vi.fn();
+    const completeMockFn = vi.fn();
+    const errorMockFn = vi.fn();
+
+    const { loading, data, error, page, total, pageCount, isLastPage } = usePagination(getter1, {
+      total: res => res.total,
+      data: res => res.list,
+      // Replace the actually-sent method with a request for page 2,
+      // so we can verify the replaced method is the one that responds.
+      middleware: (_, next) => next({ method: getter1(2, 10) })
+    })
+      .onSuccess(successMockFn)
+      .onComplete(completeMockFn)
+      .onError(errorMockFn);
+
+    await waitFor(() => {
+      // data should come from the replaced method (page 2 => [10..19])
+      expect(data.value).toStrictEqual(generateContinuousNumbers(19, 10));
+      expect(loading.value).toBeFalsy();
+      expect(total.value).toBe(300);
+      expect(pageCount.value).toBe(30);
+      expect(page.value).toBe(1);
+      expect(isLastPage.value).toBeFalsy();
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(completeMockFn).toHaveBeenCalledTimes(1);
+    });
+    expect(errorMockFn).not.toHaveBeenCalled();
+    expect(error.value).toBeUndefined();
+  });
 });
