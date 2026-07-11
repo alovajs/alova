@@ -13,7 +13,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import { Dispatch, SetStateAction, act, useState } from 'react';
 import { delay, generateContinuousNumbers } from 'root/testUtils';
-import Pagination from './components/Pagination';
+import Pagination, { CollapsedAlovaGenerics } from './components/Pagination';
 
 interface ListResponse {
   total: number;

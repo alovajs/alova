@@ -61,7 +61,8 @@
     "typings/*.d.ts"
   ],
   "peerDependencies": {
-    "alova": "^3.0.20"
+    "alova": "^3.0.20",
+    "@tarojs/taro": ">=3.6.0"
   },
   "dependencies": {
     "@alova/shared": "workspace:*"

@@ -11,7 +11,14 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['**/coverage', 'examples', '**/dist', '*.{js,mjs,cjs}', 'packages/alova/typings/serverhook.d.ts']
+    ignores: [
+      '**/coverage',
+      'examples',
+      '**/dist',
+      '*.{js,mjs,cjs}',
+      'packages/alova/typings/serverhook.d.ts',
+      'packages/shared/typings/alova-shared.d.ts'
+    ]
   },
   ...compat.extends('airbnb', 'airbnb-typescript', 'prettier'),
   {
