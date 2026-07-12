@@ -1,5 +1,12 @@
 # @alova/storage-redis
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973), [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973)]:
+  - @alova/shared@1.3.3
+
 ## 1.1.1
 
 ### Patch Changes

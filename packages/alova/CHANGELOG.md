@@ -1,5 +1,24 @@
 # alova
 
+## 3.5.2
+
+### Patch Changes
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that always loading when change method instance in middleware
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that draft of `useForm` is not effect in react
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that doesn't call `beforeRequest` in `useSSE`
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - memory overflow fix
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that fetch_1.default is not a function
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that cannot read properties of undefined when call remove in `usePagination`
+
+- Updated dependencies [[`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973), [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973)]:
+  - @alova/shared@1.3.3
+
 ## 3.5.1
 
 ### Patch Changes

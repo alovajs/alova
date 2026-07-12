@@ -1,5 +1,13 @@
 # @alova/shared
 
+## 1.3.3
+
+### Patch Changes
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that draft of `useForm` is not effect in react
+
+- [#827](https://github.com/alovajs/alova/pull/827) [`188166b`](https://github.com/alovajs/alova/commit/188166b11067756fe8340c58565cbf78edb43973) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - fix that doesn't call `beforeRequest` in `useSSE`
+
 ## 1.3.2
 
 ### Patch Changes
