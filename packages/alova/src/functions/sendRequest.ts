@@ -40,7 +40,7 @@ import { hitCacheBySource } from './manipulateCache';
 
 // The request adapter returns information temporarily, which is used to implement request sharing.
 type RequestAdapterReturnType = ReturnType<AlovaRequestAdapter<any, any, any>>;
-const adapterReturnMap: Record<string, Record<string, RequestAdapterReturnType>> = {};
+export const adapterReturnMap: Record<string, Record<string, RequestAdapterReturnType>> = {};
 
 /**
  * actual request function
@@ -196,11 +196,19 @@ export default function sendRequest<AG extends AlovaGenerics<any, any, {}>>(
         ([rawResponse, rawHeaders]) => {
           // Regardless of whether the request succeeds or fails, the shared request needs to be removed first
           deleteAttr(namespacedAdapterReturnMap, methodKey);
+          // If the namespace is empty, remove it from adapterReturnMap to prevent memory leak
+          if (!Object.keys(namespacedAdapterReturnMap).length) {
+            deleteAttr(adapterReturnMap, id);
+          }
           return handleResponseTask(responseSuccessHandler(rawResponse, clonedMethod), rawHeaders);
         },
         (error: any) => {
           // Regardless of whether the request succeeds or fails, the shared request needs to be removed first
           deleteAttr(namespacedAdapterReturnMap, methodKey);
+          // If the namespace is empty, remove it from adapterReturnMap to prevent memory leak
+          if (!Object.keys(namespacedAdapterReturnMap).length) {
+            deleteAttr(adapterReturnMap, id);
+          }
           return isFn(responseErrorHandler)
             ? // When responding to an error, if no error is thrown, the successful response process will be processed, but the data will not be cached.
               handleResponseTask(responseErrorHandler(error, clonedMethod), undefinedValue, falseValue)

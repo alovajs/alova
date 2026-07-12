@@ -1,4 +1,4 @@
-import { newInstance, pushItem, trueValue, undefinedValue } from '@alova/shared';
+import { newInstance, trueValue, undefinedValue } from '@alova/shared';
 import {
   AlovaDefaultCacheAdapter,
   AlovaGenerics,
@@ -13,6 +13,7 @@ import {
 } from '~/typings';
 import Method from './Method';
 import { localStorageAdapter, memoryAdapter, placeholderAdapter } from './defaults/cacheAdapter';
+import { cacheManager } from './storage/CacheAdapterManager';
 import MethodSnapshotContainer from './storage/MethodSnapshotContainer';
 import myAssert from './utils/myAssert';
 
@@ -171,11 +172,22 @@ export class Alova<AG extends AlovaGenerics> {
       config
     );
   }
+
+  /**
+   * Destroy this alova instance.
+   *
+   * Removes the instance's cache adapters from the global registry so they
+   * can be garbage-collected, and clears the L1 cache. This is especially
+   * important in server-side scenarios where an alova instance is created
+   * per request — calling `destroy()` after each request prevents memory leaks.
+   */
+  destroy() {
+    cacheManager.unregister(this);
+    this.l1Cache.clear();
+  }
 }
 
 export let boundStatesHook: StatesHook<StatesExport<any>> | undefined = undefinedValue;
-export const usingL1CacheAdapters: AlovaGlobalCacheAdapter[] = [];
-export const usingL2CacheAdapters: AlovaGlobalCacheAdapter[] = [];
 
 /**
  * create an alova instance.
@@ -201,7 +213,6 @@ export const createAlova = <
   }
   boundStatesHook = newStatesHook;
   const { l1Cache, l2Cache } = alovaInstance;
-  !usingL1CacheAdapters.includes(l1Cache) && pushItem(usingL1CacheAdapters, l1Cache);
-  !usingL2CacheAdapters.includes(l2Cache) && pushItem(usingL2CacheAdapters, l2Cache);
+  cacheManager.register(alovaInstance, l1Cache, l2Cache);
   return alovaInstance;
 };
