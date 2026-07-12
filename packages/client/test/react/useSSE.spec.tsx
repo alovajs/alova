@@ -716,6 +716,85 @@ describe('react => useSSE', () => {
     );
   });
 
+  // ! The global `beforeRequest` hook must be called so that unified handling (e.g. auth headers) applies to SSE
+  test('should call beforeRequest and apply its modifications to the request', async () => {
+    const alovaInst = await prepareAlova();
+    const beforeRequestFn = vi.fn();
+    const customToken = 'my-token';
+    // Set the global beforeRequest hook to add an auth header, a common unified-handling scenario.
+    alovaInst.options.beforeRequest = method => {
+      beforeRequestFn();
+      method.config.headers = { ...method.config.headers, Authorization: customToken };
+    };
+
+    const requestData = { key: 'value' };
+    const method = alovaInst.Post(`/${TriggerEventName}`, requestData);
+
+    const Page = () => {
+      const { data } = useSSE(method, { immediate: true, responseType: 'json' });
+      return (
+        <div>
+          <span role="data">{JSON.stringify(data)}</span>
+        </div>
+      );
+    };
+
+    render(<Page />);
+    expect(screen.getByRole('data')).toBeEmptyDOMElement();
+
+    await delay(100);
+    await serverSend();
+    await waitFor(
+      () => {
+        const data = JSON.parse(screen.getByRole('data').textContent || '{}');
+        // beforeRequest should have been called exactly once
+        expect(beforeRequestFn).toHaveBeenCalledTimes(1);
+        // The header added in beforeRequest must reach the server
+        expect(data.headers.authorization).toBe(customToken);
+        expect(data.body).toStrictEqual(method.data);
+      },
+      { timeout: 4000 }
+    );
+  });
+
+  // ! The async `beforeRequest` hook must also be awaited before sending the request
+  test('should await an async beforeRequest', async () => {
+    const alovaInst = await prepareAlova();
+    const beforeRequestFn = vi.fn();
+    const customToken = 'async-token';
+    alovaInst.options.beforeRequest = async method => {
+      await delay(50);
+      beforeRequestFn();
+      method.config.headers = { ...method.config.headers, Authorization: customToken };
+    };
+
+    const requestData = { key: 'value' };
+    const method = alovaInst.Post(`/${TriggerEventName}`, requestData);
+
+    const Page = () => {
+      const { data } = useSSE(method, { immediate: true, responseType: 'json' });
+      return (
+        <div>
+          <span role="data">{JSON.stringify(data)}</span>
+        </div>
+      );
+    };
+
+    render(<Page />);
+    expect(screen.getByRole('data')).toBeEmptyDOMElement();
+
+    await delay(200);
+    await serverSend();
+    await waitFor(
+      () => {
+        const data = JSON.parse(screen.getByRole('data').textContent || '{}');
+        expect(beforeRequestFn).toHaveBeenCalledTimes(1);
+        expect(data.headers.authorization).toBe(customToken);
+      },
+      { timeout: 4000 }
+    );
+  });
+
   // Test reconnection control functionality
   describe('reconnection control', () => {
     // Test case 1: reconnectionTime: 0 + server disconnect

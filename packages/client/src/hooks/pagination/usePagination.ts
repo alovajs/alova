@@ -441,7 +441,8 @@ export default <AG extends AlovaGenerics, ListData extends unknown[]>(
     // When the amount of data on the next page does not exceed the page size, the next page is forced to be requested. Because there is a request for sharing, the fetching needs to be performed asynchronously after interrupting the request.
     const snapshotItem = getSnapshotMethods(page.v + 1);
     if (snapshotItem) {
-      const cachedListData = listDataGetter((await queryCache(snapshotItem.entity)) || {}) || [];
+      const cachedRaw = await queryCache(snapshotItem.entity);
+      const cachedListData = cachedRaw ? listDataGetter(cachedRaw) || [] : [];
       fetchNextPage(undefinedValue, len(cachedListData) < pageSize.v);
     }
   };

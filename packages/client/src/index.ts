@@ -30,7 +30,11 @@ export { default as useAutoRequest } from '@/hooks/useAutoRequest';
 export { default as useCaptcha } from '@/hooks/useCaptcha';
 export { default as useForm } from '@/hooks/useForm';
 export { default as useRetriableRequest } from '@/hooks/useRetriableRequest';
-export { accessAction, actionDelegationMiddleware } from '@/middlewares/actionDelegation';
+export {
+  accessAction,
+  actionDelegationMiddleware,
+  useActionDelegationMiddleware
+} from '@/middlewares/actionDelegation';
 export { default as updateState } from '@/updateState';
 
 // helper

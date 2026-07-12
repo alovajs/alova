@@ -1,5 +1,6 @@
 import { getAlovaInstance } from '#/utils';
 import { createAlova } from '@/index';
+import { adapterReturnMap } from '@/functions/sendRequest';
 import { Result, delay, untilReject } from 'root/testUtils';
 
 const baseURL = process.env.NODE_BASE_URL as string;
@@ -273,5 +274,95 @@ describe('Request shared', () => {
     // Verify responses are different
     expect(response1.data.data.file).toBe('file1');
     expect(response2.data.data.file).toBe('file2');
+  });
+
+  test('should clean up adapterReturnMap namespace after request completes', async () => {
+    const alova = createAlova({
+      baseURL,
+      cacheFor: {
+        GET: 0
+      },
+      requestAdapter() {
+        return {
+          response: async () => ({
+            status: 200,
+            data: { id: 1 }
+          }),
+          headers: async () => ({}),
+          abort() {}
+        };
+      }
+    });
+
+    // Before request, namespace should not exist
+    expect(adapterReturnMap[alova.id]).toBeUndefined();
+
+    await alova.Get('/unit-test').send();
+
+    // After request completes, namespace should be cleaned up
+    expect(adapterReturnMap[alova.id]).toBeUndefined();
+  });
+
+  test('should clean up adapterReturnMap namespace after request error', async () => {
+    const alova = createAlova({
+      baseURL,
+      cacheFor: {
+        GET: 0
+      },
+      requestAdapter() {
+        return {
+          response: async () => {
+            throw new Error('request error');
+          },
+          headers: async () => ({}),
+          abort() {}
+        };
+      }
+    });
+
+    // Before request, namespace should not exist
+    expect(adapterReturnMap[alova.id]).toBeUndefined();
+
+    await expect(alova.Get('/unit-test').send()).rejects.toThrow('request error');
+
+    // After request fails, namespace should be cleaned up
+    expect(adapterReturnMap[alova.id]).toBeUndefined();
+  });
+
+  test('should not delete namespace while concurrent requests are still in flight', async () => {
+    const alova = createAlova({
+      baseURL,
+      cacheFor: {
+        GET: 0
+      },
+      requestAdapter() {
+        return {
+          response: async () => {
+            await delay(20);
+            return {
+              status: 200,
+              data: { id: 1 }
+            };
+          },
+          headers: async () => ({}),
+          abort() {}
+        };
+      }
+    });
+
+    const p1 = alova.Get('/unit-test-1').send();
+    const p2 = alova.Get('/unit-test-2').send();
+
+    // Wait for requests to be registered in the namespace
+    await delay(5);
+
+    // Namespace should exist while requests are in flight
+    expect(adapterReturnMap[alova.id]).toBeDefined();
+    expect(Object.keys(adapterReturnMap[alova.id]).length).toBe(2);
+
+    await Promise.all([p1, p2]);
+
+    // After all requests complete, namespace should be cleaned up
+    expect(adapterReturnMap[alova.id]).toBeUndefined();
   });
 });

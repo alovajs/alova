@@ -1,5 +1,5 @@
-const { exec, spawn } = require('node:child_process');
-const readline = require('node:readline');
+import { exec, spawn } from 'node:child_process';
+import readline from 'node:readline';
 
 // Create readline interface instance
 const rl = readline.createInterface({
@@ -31,7 +31,7 @@ function runCommand(command) {
   });
 }
 
-module.exports = async function () {
+export default async function () {
   // Ask questions and process answers
   const confirm = await askConfirmation('❓Do you need to bump a version?(Y/n)').finally(() => {
     rl.close();
@@ -47,4 +47,4 @@ module.exports = async function () {
     const changesetPath = '.changeset';
     await runCommand(`git add ${changesetPath}`);
   }
-};
+}

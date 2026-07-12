@@ -26,6 +26,15 @@ export declare function actionDelegationMiddleware<
 ) => Promise<any>;
 
 /**
+ * Alias of `actionDelegationMiddleware` with a `use` prefix, recommended when the
+ * React Compiler is enabled. React Compiler keeps `use`-prefixed calls in the
+ * component render scope and never hoists them, which avoids
+ * "Should have a queue" errors caused by the internal Hooks being invoked
+ * outside of a component render.
+ */
+export declare const useActionDelegationMiddleware: typeof actionDelegationMiddleware;
+
+/**
  * Access the operation function, if there are multiple matches, onMatch will be called with this
  * @param id Delegator id, or regular expression
  * @param onMatch matching subscribers

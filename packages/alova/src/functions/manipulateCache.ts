@@ -1,5 +1,5 @@
-import { usingL1CacheAdapters, usingL2CacheAdapters } from '@/alova';
 import { globalConfigMap } from '@/globalConfig';
+import { cacheManager } from '@/storage/CacheAdapterManager';
 import {
   clearWithCacheAdapter,
   getWithCacheAdapter,
@@ -118,7 +118,7 @@ export const setCache = async <Responded>(
  */
 export const invalidateCache = async (matcher?: Method | Method[]) => {
   if (!matcher) {
-    await PromiseCls.all([clearWithCacheAdapter(usingL1CacheAdapters), clearWithCacheAdapter(usingL2CacheAdapters)]);
+    await PromiseCls.all([clearWithCacheAdapter(cacheManager.l1), clearWithCacheAdapter(cacheManager.l2)]);
     return;
   }
   const methodInstances = isArray(matcher) ? matcher : [matcher];
@@ -151,7 +151,7 @@ export const hitCacheBySource = async <AG extends AlovaGenerics>(sourceMethod: M
   const sourceKey = getMethodInternalKey(sourceMethod);
   const { name: sourceName } = getConfig(sourceMethod);
   const cacheAdaptersInvolved = {
-    global: [...usingL1CacheAdapters, ...usingL2CacheAdapters],
+    global: [...cacheManager.l1, ...cacheManager.l2],
     self: [l1Cache, l2Cache],
     close: []
   }[autoHitCache];

@@ -30,11 +30,19 @@ const consoleRequestInfo: MockRequestLoggerAdapter = ({
   response
 }) => {
   const cole = console;
-  cole.groupCollapsed(
-    `%c${isMock ? mockLabel : realRequestLabel}`,
-    labelStyle(isMock ? mockLabelBg : realRequestLabelBg, isMock ? mockLabelColor : realRequestLabelColor),
-    url
-  );
+  const groupCollapsed = cole.groupCollapsed?.bind(cole);
+  const groupEnd = cole.groupEnd?.bind(cole);
+  groupCollapsed
+    ? groupCollapsed(
+        `%c${isMock ? mockLabel : realRequestLabel}`,
+        labelStyle(isMock ? mockLabelBg : realRequestLabelBg, isMock ? mockLabelColor : realRequestLabelColor),
+        url
+      )
+    : cole.log(
+        `%c${isMock ? mockLabel : realRequestLabel}`,
+        labelStyle(isMock ? mockLabelBg : realRequestLabelBg, isMock ? mockLabelColor : realRequestLabelColor),
+        url
+      );
 
   // Request method
   cole.log('%c[Method]', titleStyle, method.toUpperCase());
@@ -59,7 +67,7 @@ const consoleRequestInfo: MockRequestLoggerAdapter = ({
     }
     cole.log('%c[Response Body]', titleStyle, response || '');
   }
-  cole.groupEnd();
+  groupEnd?.();
 };
 
 export default consoleRequestInfo;

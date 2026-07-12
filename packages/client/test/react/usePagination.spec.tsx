@@ -1,12 +1,19 @@
-import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
-import { accessAction, actionDelegationMiddleware, updateState } from '@/index';
+import {
+  getNestedListRequestCount,
+  mockRequestAdapter,
+  setMockListData,
+  setMockListWithSearchData,
+  setMockNestedListData,
+  setMockShortListData
+} from '#/mockData';
+import { accessAction, actionDelegationMiddleware, updateState, usePagination } from '@/index';
 import reactHook from '@/statesHook/react';
 import { GeneralFn } from '@alova/shared';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova, invalidateCache, queryCache } from 'alova';
 import { Dispatch, SetStateAction, act, useState } from 'react';
 import { delay, generateContinuousNumbers } from 'root/testUtils';
-import Pagination from './components/Pagination';
+import Pagination, { CollapsedAlovaGenerics } from './components/Pagination';
 
 interface ListResponse {
   total: number;
@@ -24,6 +31,7 @@ beforeEach(async () => {
   setMockListData();
   setMockListWithSearchData();
   setMockShortListData();
+  setMockNestedListData();
   await invalidateCache();
 });
 const alovaInst = createAlova({
@@ -1999,6 +2007,119 @@ describe('react => usePagination', () => {
     await waitFor(() => {
       expect(successFn).toHaveBeenCalledWith(['a', 1, undefined, undefined]);
       expect(fetchSuccessMockFn).toHaveBeenCalledWith(['a', 1, false]);
+    });
+  });
+
+  // https://github.com/alova-sc/alova/issues/742
+  // The response must be updated when a middleware replaces the method instance
+  // (usePagination is built on useWatcher where `abortLast` defaults to true).
+  test('should update response when middleware changes the method instance (#742)', async () => {
+    const successMockFn = vi.fn();
+    const completeMockFn = vi.fn();
+    const errorMockFn = vi.fn();
+
+    const MiddlewarePagination = () => {
+      const { loading, data, error, page, total, pageCount, isLastPage } = usePagination(getter1, {
+        total: res => res.total,
+        data: res => res.list,
+        // Replace the actually-sent method with a request for page 2,
+        // so we can verify the replaced method is the one that responds.
+        middleware: (_, next) => next({ method: getter1(2, 10) })
+      })
+        .onSuccess(successMockFn)
+        .onComplete(completeMockFn)
+        .onError(errorMockFn);
+      return (
+        <div>
+          <span role="loading">{loading ? 'loading' : 'loaded'}</span>
+          <span role="response">{JSON.stringify(data)}</span>
+          <span role="total">{total}</span>
+          <span role="pageCount">{pageCount}</span>
+          <span role="page">{page}</span>
+          <span role="isLastPage">{JSON.stringify(isLastPage)}</span>
+          <span role="error">{error?.message}</span>
+        </div>
+      );
+    };
+
+    render(<MiddlewarePagination />);
+
+    await waitFor(() => {
+      // data should come from the replaced method (page 2 => [10..19])
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(19, 10)));
+      expect(screen.getByRole('loading')).toHaveTextContent('loaded');
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+      expect(screen.getByRole('pageCount')).toHaveTextContent('30');
+      expect(screen.getByRole('page')).toHaveTextContent('1');
+      expect(screen.getByRole('isLastPage')).toHaveTextContent('false');
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(completeMockFn).toHaveBeenCalledTimes(1);
+    });
+    expect(errorMockFn).not.toHaveBeenCalled();
+  });
+
+  // https://github.com/alova-sc/alova/issues/810
+  // When the pagination data is NOT on the first level (e.g. res.data.records),
+  // calling `remove` triggers `resetCache`, which passes an empty object `{}`
+  // into the user's `data` getter. `res.data.records` throws on `{}` because
+  // `({}).data` is undefined. This reproduction expects NO error to be thrown.
+  interface NestedListResponse {
+    data: {
+      total: number;
+      records: number[];
+    };
+  }
+  const getterNested = (page: number, pageSize: number) =>
+    alovaInst.Get<NestedListResponse>('/list-nested', {
+      params: { page, pageSize }
+    });
+
+  test('nested data (res.data.records): remove should not throw after cache invalidation (#810)', async () => {
+    let exposure: ReturnType<typeof usePagination<CollapsedAlovaGenerics, any[]>> | undefined;
+    render(
+      <Pagination
+        getter={getterNested}
+        paginationConfig={{
+          total: (res: any) => res.data.total,
+          data: (res: any) => res.data.records
+        }}
+        handleExposure={exp => {
+          exposure = exp;
+        }}
+      />
+    );
+
+    // initial page loaded: [0..9], total 300
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9)));
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+    });
+
+    // The next page (page 2) is prefetched by default, which registers its
+    // snapshot. Wait until that prefetch request has actually happened, then
+    // drop its cache so that `resetCache` later passes an empty object `{}`
+    // into the nested `data` getter and throws (before the fix).
+    await waitFor(() => {
+      expect(getNestedListRequestCount(2)).toBeGreaterThanOrEqual(1);
+    });
+    await invalidateCache(getterNested(2, 10));
+    const page2RequestsBeforeRemove = getNestedListRequestCount(2);
+
+    // remove an item on the current page -> resetCache runs afterwards
+    await act(async () => {
+      await exposure!.remove(0);
+    });
+
+    // remove always decrements the total by one
+    await waitFor(() => {
+      expect(screen.getByRole('total')).toHaveTextContent('299');
+    });
+
+    // Before the fix, resetCache throws on `res.data.records` (with `{}`) and
+    // therefore never reaches the re-fetch of the next page. After the fix the
+    // next page is re-fetched, so the page-2 request count increases.
+    await waitFor(() => {
+      expect(getNestedListRequestCount(2)).toBeGreaterThan(page2RequestsBeforeRemove);
     });
   });
 });

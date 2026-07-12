@@ -1,4 +1,11 @@
-import { mockRequestAdapter, setMockListData, setMockListWithSearchData, setMockShortListData } from '#/mockData';
+import {
+  getNestedListRequestCount,
+  mockRequestAdapter,
+  setMockListData,
+  setMockListWithSearchData,
+  setMockNestedListData,
+  setMockShortListData
+} from '#/mockData';
 import { accessAction, actionDelegationMiddleware, updateState, usePagination } from '@/index';
 import vueHook from '@/statesHook/vue';
 import { GeneralFn } from '@alova/shared';
@@ -14,6 +21,7 @@ beforeEach(() => {
   setMockListData();
   setMockListWithSearchData();
   setMockShortListData();
+  setMockNestedListData();
   invalidateCache();
 });
 const alovaInst = createAlova({
@@ -2030,5 +2038,102 @@ describe('vue => usePagination', () => {
     expect(page.value).toBe(1);
     expect(pageCount.value).toBe(30);
     expect(total.value).toBe(300);
+  });
+
+  // https://github.com/alova-sc/alova/issues/742
+  // The response must be updated when a middleware replaces the method instance
+  // (usePagination is built on useWatcher where `abortLast` defaults to true).
+  test('should update response when middleware changes the method instance (#742)', async () => {
+    const successMockFn = vi.fn();
+    const completeMockFn = vi.fn();
+    const errorMockFn = vi.fn();
+
+    const { loading, data, error, page, total, pageCount, isLastPage } = usePagination(getter1, {
+      total: res => res.total,
+      data: res => res.list,
+      // Replace the actually-sent method with a request for page 2,
+      // so we can verify the replaced method is the one that responds.
+      middleware: (_, next) => next({ method: getter1(2, 10) })
+    })
+      .onSuccess(successMockFn)
+      .onComplete(completeMockFn)
+      .onError(errorMockFn);
+
+    await waitFor(() => {
+      // data should come from the replaced method (page 2 => [10..19])
+      expect(data.value).toStrictEqual(generateContinuousNumbers(19, 10));
+      expect(loading.value).toBeFalsy();
+      expect(total.value).toBe(300);
+      expect(pageCount.value).toBe(30);
+      expect(page.value).toBe(1);
+      expect(isLastPage.value).toBeFalsy();
+      expect(successMockFn).toHaveBeenCalledTimes(1);
+      expect(completeMockFn).toHaveBeenCalledTimes(1);
+    });
+    expect(errorMockFn).not.toHaveBeenCalled();
+    expect(error.value).toBeUndefined();
+  });
+
+  // https://github.com/alova-sc/alova/issues/810
+  // When the pagination data is NOT on the first level (e.g. res.data.records),
+  // calling `remove` triggers `resetCache`, which passes an empty object `{}`
+  // into the user's `data` getter. `res.data.records` throws on `{}` because
+  // `({}).data` is undefined. This reproduction expects NO error to be thrown.
+  interface NestedListResponse {
+    data: {
+      total: number;
+      records: number[];
+    };
+  }
+  const getterNested = (page: number, pageSize: number) =>
+    alovaInst.Get<NestedListResponse>('/list-nested', {
+      params: { page, pageSize }
+    });
+
+  test('nested data (res.data.records): remove should not throw after cache invalidation (#810)', async () => {
+    let exposure: ReturnType<typeof usePagination> | undefined;
+    render(Pagination, {
+      props: {
+        getter: getterNested,
+        paginationConfig: {
+          total: (res: any) => res.data.total,
+          data: (res: any) => res.data.records
+        },
+        handleExposure: (exp: any) => {
+          exposure = exp;
+        }
+      }
+    });
+
+    // initial page loaded: [0..9], total 300
+    await waitFor(() => {
+      expect(screen.getByRole('response')).toHaveTextContent(JSON.stringify(generateContinuousNumbers(9)));
+      expect(screen.getByRole('total')).toHaveTextContent('300');
+    });
+
+    // The next page (page 2) is prefetched by default, which registers its
+    // snapshot. Wait until that prefetch request has actually happened, then
+    // drop its cache so that `resetCache` later passes an empty object `{}`
+    // into the nested `data` getter and throws (before the fix).
+    await waitFor(() => {
+      expect(getNestedListRequestCount(2)).toBeGreaterThanOrEqual(1);
+    });
+    await invalidateCache(getterNested(2, 10));
+    const page2RequestsBeforeRemove = getNestedListRequestCount(2);
+
+    // remove an item on the current page -> resetCache runs afterwards
+    await exposure!.remove(0);
+
+    // remove always decrements the total by one
+    await waitFor(() => {
+      expect(screen.getByRole('total')).toHaveTextContent('299');
+    });
+
+    // Before the fix, resetCache throws on `res.data.records` (with `{}`) and
+    // therefore never reaches the re-fetch of the next page. After the fix the
+    // next page is re-fetched, so the page-2 request count increases.
+    await waitFor(() => {
+      expect(getNestedListRequestCount(2)).toBeGreaterThan(page2RequestsBeforeRemove);
+    });
   });
 });

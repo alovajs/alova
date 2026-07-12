@@ -78,7 +78,12 @@ export default <AG extends AlovaGenerics, FormData extends Record<string | symbo
   const initialMethod = ref(undefinedValue as Method | undefined);
   let storageContext = sharedState?.l2Cache;
   if (enableStore && !sharedState?.l2Cache) {
-    initialMethod.current = sloughConfig(methodHandler, [form.v]);
+    // Only get the method instance once to keep the storage key stable across renders in react.
+    // In react, useForm is called on every render, if initialMethod is regenerated each time,
+    // the storage key will change with the form data, causing the saved data to be unreadable on restore.
+    if (!initialMethod.current) {
+      initialMethod.current = sloughConfig(methodHandler, [form.v]);
+    }
     storageContext = getContext(initialMethod.current).l2Cache;
   }
   const storagedKey = getStoragedKey(id || initialMethod.current || '');

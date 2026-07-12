@@ -1,4 +1,10 @@
-import { accessAction, actionDelegationMiddleware, useWatcher } from '@/index';
+import {
+  accessAction,
+  actionDelegationMiddleware,
+  useActionDelegationMiddleware,
+  useRequest,
+  useWatcher
+} from '@/index';
 import ReactHook from '@/statesHook/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
@@ -153,6 +159,79 @@ describe('react => subscriber middleware', () => {
       expect(successFn2).toHaveBeenCalledTimes(4);
       expect(request1).toHaveBeenCalledWith(1);
       expect(request2).toHaveBeenCalledWith(2);
+    });
+  });
+
+  test('useActionDelegationMiddleware (use* alias) works in component render scope', async () => {
+    const requestFn = vi.fn();
+
+    function Page() {
+      const methodInstance = (params: any) =>
+        alovaInst.Get('/info-list', {
+          params,
+          cacheFor: 0
+        });
+
+      // The `use*`-prefixed alias is kept in the component render scope by the
+      // React Compiler (it is never hoisted), so its internal Hooks run safely.
+      const { send, loading } = useRequest(() => methodInstance({ name: 'a' }), {
+        immediate: false,
+        middleware: useActionDelegationMiddleware('delegate-use')
+      });
+      const [name, setName] = useState('init');
+      useWatcher(
+        () => {
+          requestFn(name);
+          return methodInstance({ name });
+        },
+        [name],
+        {
+          middleware: useActionDelegationMiddleware('delegate-use')
+        }
+      );
+
+      return (
+        <div role="wrap">
+          <span role="status">{loading ? 'loading' : 'loaded'}</span>
+          <span role="name">{name}</span>
+          <button
+            role="btnSend"
+            onClick={() => setName('updated')}>
+            send
+          </button>
+          <button
+            role="btnAccess"
+            onClick={() => send({ fetch: 'x' })}>
+            access
+          </button>
+        </div>
+      );
+    }
+
+    render(
+      (
+        <StrictModeReact>
+          <Page />
+        </StrictModeReact>
+      ) as ReactElement<any, any>
+    );
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('loaded');
+    });
+
+    fireEvent.click(screen.getByRole('btnSend'));
+    await waitFor(() => {
+      expect(screen.getByRole('name')).toHaveTextContent('updated');
+      expect(requestFn).toHaveBeenCalledWith('updated');
+    });
+
+    // accessAction should reach both the useRequest and useWatcher handlers
+    // registered via the `use*` alias.
+    accessAction('delegate-use', async ({ send: s }) => {
+      s({ fetch: 'delegate-use' });
+    });
+    await waitFor(() => {
+      expect(requestFn).toHaveBeenCalledTimes(2);
     });
   });
 });

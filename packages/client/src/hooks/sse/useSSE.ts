@@ -7,6 +7,7 @@ import {
   JSONStringify,
   UsePromiseExposure,
   buildCompletedURL,
+  cloneMethod,
   createAssert,
   createEventManager,
   falseValue,
@@ -330,39 +331,52 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     // Set up response interceptor
     setResponseHandler(methodInstance);
 
-    const { params, headers } = getConfig(methodInstance);
-    const { baseURL, url, data, type } = methodInstance;
-    const fullURL = buildCompletedURL(baseURL, url, params);
-
-    // Establish connection
-    const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
-    es = newInstance(EventSourceFetch, fullURL, reconnectionTime, {
-      credentials: withCredentials ? 'include' : 'same-origin',
-      method: type || 'GET',
-      headers,
-      body: isBodyData(data) ? data : JSONStringify(data),
-      ...fetchOptions
-    });
-    eventSource.current = es;
-    exposedEventSource.v = es;
+    // Mark as connecting immediately so the state reflects the in-flight request even while `beforeRequest` resolves.
     readyState.v = SSEHookReadyState.CONNECTING;
 
-    // * MARK: Register to handle events
-    // Register to handle event open error message
-    es.addEventListener(MessageType.Open, esOpen);
-    es.addEventListener(MessageType.Error, esError);
-    es.addEventListener(MessageType.Message, esMessage);
-    es.addEventListener(MessageType.Close, close);
+    // Call the global `beforeRequest` hook so that unified request handling (e.g. adding auth headers/params)
+    // also applies to SSE. This is consistent with the behavior in `sendRequest`.
+    // The method is cloned first so that any modifications made in `beforeRequest` apply to this connection
+    // without mutating the original instance (which may be reused across connects).
+    const { beforeRequest = noop } = getOptions(methodInstance);
+    const clonedMethod = cloneMethod(methodInstance, Method);
+    const beforeRequestPromise = promiseThen(promiseResolve(), () => beforeRequest(clonedMethod));
+    return promiseThen(beforeRequestPromise, () => {
+      // Use the (possibly modified) clone for the actual connection.
+      methodInstance = clonedMethod;
+      const { params, headers } = getConfig(methodInstance);
+      const { baseURL, url, data, type } = methodInstance;
+      const fullURL = buildCompletedURL(baseURL, url, params);
 
-    // and custom events
-    // If the on listener is used before connect (send), there will already be events in customEventMap.
-    customEventMap.current.forEach(([_, eventTrigger], eventName) => {
-      es?.addEventListener(eventName, event => {
-        promiseThen(createSSEEvent(eventName, event.data), sendSSEEvent(eventTrigger) as any);
+      // Establish connection
+      const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
+      es = newInstance(EventSourceFetch, fullURL, reconnectionTime, {
+        credentials: withCredentials ? 'include' : 'same-origin',
+        method: type || 'GET',
+        headers,
+        body: isBodyData(data) ? data : JSONStringify(data),
+        ...fetchOptions
       });
-    });
+      eventSource.current = es;
+      exposedEventSource.v = es;
 
-    return promiseObj!.promise;
+      // * MARK: Register to handle events
+      // Register to handle event open error message
+      es.addEventListener(MessageType.Open, esOpen);
+      es.addEventListener(MessageType.Error, esError);
+      es.addEventListener(MessageType.Message, esMessage);
+      es.addEventListener(MessageType.Close, close);
+
+      // and custom events
+      // If the on listener is used before connect (send), there will already be events in customEventMap.
+      customEventMap.current.forEach(([_, eventTrigger], eventName) => {
+        es?.addEventListener(eventName, event => {
+          promiseThen(createSSEEvent(eventName, event.data), sendSSEEvent(eventTrigger) as any);
+        });
+      });
+
+      return promiseObj!.promise;
+    });
   };
 
   onUnmounted(() => {

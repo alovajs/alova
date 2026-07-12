@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PaginationHookConfig } from '~/typings/clienthook';
 import { ReactHookExportType } from '~/typings/stateshook/react';
 
-type CollapsedAlovaGenerics = Omit<AlovaGenerics, 'StatesExport'> & {
+export type CollapsedAlovaGenerics = Omit<AlovaGenerics, 'StatesExport'> & {
   StatesExport: ReactHookExportType<unknown>;
 };
 interface Props {
