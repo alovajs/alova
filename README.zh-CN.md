@@ -1,7 +1,7 @@
 <img width="100%" src="https://alova.js.org/img/cover.jpg" />
 
 <p align="center">
-  alova完美兼容你最喜欢的HTTP client和UI框架，快速开发客户端和服务的应用的业务逻辑，同时让API信息与代码进行交互，像虫洞一样拉近后端协作距离，极致高效地集成你的APIs
+  alova 是 JavaScript 的请求策略层。停止手写分页、表单、上传和重试逻辑，alova 已经把它们做成开箱即用的策略，最多可减少 70% 的请求代码。
 </p>
 
 <p align="center"><a href="./README.md">📑English</a> | 中文 | <a href="./README.ja-JP.md">日本語</a></p>
@@ -20,18 +20,48 @@
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## 什么是 alova？
+
+alova（读作 /əˈləʊva/）是 JavaScript 的**请求策略层（request strategy layer）**。分页、表单、上传、重试这些逻辑你已经手写过无数遍，现在只需直接使用 20+ 个开箱即用的请求策略，最多可减少 **70% 的请求代码**。
+
+你不必扔掉已经用惯的 axios 或 fetch。alova 直接架在你现有的请求库之上，接管那些你每次都要重写一遍的请求逻辑。同一套 API 横跨 React、Vue、Svelte、Solid、小程序与服务端，一次学会，处处都能用，让你在客户端和服务端都能专心写业务逻辑。
+
 ## 特性
 
-- 简单易用，[观看视频](https://alova.js.org/video-tutorial)5分钟上手。
-- 完美兼容你最喜欢的技术栈。
-- 20+ 高性能的业务模块，帮助你快速开发性能更好的应用。
-- 更先进的 openAPI 解决方案，在代码中和API信息高效交互。
-- 请求共享和响应缓存，提升应用性能。
-- 类型安全。
+与其罗列 alova「是什么」，不如看它「替你解决什么」：
+
+| 你已经写腻的场景 | alova 给你的 | 具体收益 |
+| :--- | :--- | :--- |
+| 反复手写分页、表单、上传、SSE 状态 | `usePagination` / `useForm` / `useUploader` / `useSSE` | 最多减少 70% 样板代码 |
+| 服务端限流与重试（含分布式） | `alova/server` | React Query / SWR 完全不覆盖的能力 |
+| 每个框架都要重写一遍相同逻辑 | 同一套 API | 横跨 React / Vue / Svelte / Solid / 小程序 |
+| 手动维护缓存失效 | 多级缓存（L1/L2）+ 基于 `hitSource` 的声明式自动失效 | 缓存失效不再痛苦 |
+| 在文档与编辑器之间复制粘贴 API 信息 | `worma` | 接口提示与文档直接出现在编辑器里 |
+
+当然还有：
+
+- 简单易用，[观看视频](https://alova.js.org/video-tutorial) 5 分钟上手。
+- 完美兼容你最喜欢的 HTTP client 和 UI 框架。
+- 20+ 高性能业务模块（请求策略），帮助你快速开发性能更好的应用。
+- 请求共享与响应缓存，提升应用性能。
+- 端到端类型安全。
+- 先进的 OpenAPI 解决方案 `worma`：一份 OpenAPI 规范，一次性产出类型安全调用代码、TypeScript 类型、接口文档以及供 AI 编码助手读取的接口知识。
+
+## 什么时候该用 alova？
+
+alova 会坦诚地告诉你它在哪里出彩，以及在哪里更简单的工具就已足够：
+
+| 你的场景 | 建议 |
+| :--- | :--- |
+| 简单 CRUD + 缓存 | React Query / SWR 就够了 |
+| 复杂中后台 / 表单 / 分页 / 上传 | ✅ alova 明显领先一档 |
+| 跨端（Web + 小程序 / uni-app / Taro） | ✅ 同一套 API 全通吃 |
+| 服务端请求治理（限流 / 重试 / 分布式） | ✅ alova 几乎是唯一选择 |
+| OpenAPI → 类型安全代码 + AI 友好的接口知识 | ✅ 搭配 worma（对 alova 开箱即用） |
 
 ## 有什么不同吗？
 
-与 `@tanstack/react-query`、`swrjs`、`ahooks` 的 `useRequest` 等库不同，alova 旨在让API集成变得非常轻松高效，还能保持更高效的数据交互，为用户带来更流畅的体验。
+与 `@tanstack/react-query`、`swrjs`、`ahooks` 的 `useRequest` 等库不同，alova 旨在让 API 集成变得非常轻松高效，还能保持更高效的数据交互，为用户带来更流畅的体验。
 
 > 您还可以查看 [与其他请求库的比较](https://alova.js.org/about/comparison) 以详细了解 alova 的不同之处。
 
