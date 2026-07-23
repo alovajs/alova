@@ -105,6 +105,7 @@ export default function createRequestState<
     objectify,
     exposeProvider,
     transformState2Proxy,
+    onUnmounted,
     __referingObj: referingObject
   } = statesHookHelper<AG>(promiseStatesHook(), useHookConfig.__referingObj);
   const progress: Progress = {
@@ -228,16 +229,22 @@ export default function createRequestState<
     send: (sendCallingArgs?: [...Args, ...any[]], methodInstance?: Method<AG>) =>
       handleRequest(methodInstance, sendCallingArgs),
     onSuccess(handler: SuccessHandler<AG, Args>) {
-      eventManager.on(KEY_SUCCESS, handler);
+      const off = eventManager.on(KEY_SUCCESS, handler);
+      // Auto-unbind when the component calling `onSuccess` is unmounted,
+      // preventing handler accumulation (memory leak) when the same provider
+      // is shared across descendant components (e.g. via provide/inject + v-for).
+      onUnmounted(off);
     },
     onError(handler: ErrorHandler<AG, Args>) {
       // will not throw error when bindError is true.
       // it will reset in `exposeProvider` so that ignore the error binding in custom use hooks.
       referingObject.bindError = trueValue;
-      eventManager.on(KEY_ERROR, handler);
+      const off = eventManager.on(KEY_ERROR, handler);
+      onUnmounted(off);
     },
     onComplete(handler: CompleteHandler<AG, Args>) {
-      eventManager.on(KEY_COMPLETE, handler);
+      const off = eventManager.on(KEY_COMPLETE, handler);
+      onUnmounted(off);
     },
 
     /**

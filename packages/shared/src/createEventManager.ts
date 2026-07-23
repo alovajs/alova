@@ -1,5 +1,5 @@
 import { uuid } from './function';
-import { filterItem, mapItem, pushItem } from './vars';
+import { mapItem, pushItem } from './vars';
 
 export interface EventManager<E extends object> {
   on<K extends keyof E>(type: K, handler: (event: E[K]) => void): () => void;
@@ -23,8 +23,13 @@ export const createEventManager = <E extends object>() => {
       const eventTypeItem = (eventMap[type] = eventMap[type] || []);
       pushItem(eventTypeItem, handler);
       // return the off function
+      // Mutate the handler array in place instead of reassigning `eventMap[type]`
+      // to a new filtered array. Otherwise, when multiple handlers are removed,
+      // each `off` closure would keep referencing its own (stale) snapshot and
+      // re-introduce handlers that were already removed by other `off` calls.
       return () => {
-        eventMap[type] = filterItem(eventTypeItem, item => item !== handler);
+        const index = eventTypeItem.indexOf(handler);
+        index > -1 && eventTypeItem.splice(index, 1);
       };
     },
     off(type, handler) {
