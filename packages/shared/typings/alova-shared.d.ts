@@ -11,7 +11,9 @@ declare class AlovaError extends Error {
  * @param expression Judgment expression, true or false
  * @param message Assert message
  */
-declare const createAssert: (prefix?: string) => (expression: any, message: string, errorCode?: number) => asserts expression;
+declare const createAssert: (
+  prefix?: string
+) => (expression: any, message: string, errorCode?: number) => asserts expression;
 //#endregion
 //#region src/bridge.d.ts
 /**
@@ -32,9 +34,15 @@ declare const injectReferingObject: () => Record<string, any>;
  * method subclasses such as `HookedMethod`/`LimitedMethod` have their own
  * constructors that must not be instantiated here.
  */
-declare const _default: <T, C extends {
-  new (...args: any[]): T;
-}>(methodInstance: T, MethodCls: C) => T;
+declare const _default: <
+  T,
+  C extends {
+    new (...args: any[]): T;
+  }
+>(
+  methodInstance: T,
+  MethodCls: C
+) => T;
 //#endregion
 //#region src/createEventManager.d.ts
 interface EventManager<E extends object> {
@@ -48,9 +56,12 @@ interface EventManager<E extends object> {
   emit<K extends keyof E>(type: K, event: E[K]): any[];
   eventMap: EventMap<E>;
 }
-type EventMap<E extends object> = { [K in keyof E]?: ((event: E[K]) => void)[]; };
+type EventMap<E extends object> = { [K in keyof E]?: ((event: E[K]) => void)[] };
 declare const createEventManager: <E extends object>() => EventManager<E>;
-declare const decorateEvent: <OnEvent extends (handler: (event: any) => void) => any>(onEvent: OnEvent, decoratedHandler: (handler: Parameters<OnEvent>[0], event: Parameters<Parameters<OnEvent>[0]>[0]) => void) => (handler: Parameters<OnEvent>[0]) => any;
+declare const decorateEvent: <OnEvent extends (handler: (event: any) => void) => any>(
+  onEvent: OnEvent,
+  decoratedHandler: (handler: Parameters<OnEvent>[0], event: Parameters<Parameters<OnEvent>[0]>[0]) => void
+) => (handler: Parameters<OnEvent>[0]) => any;
 //#endregion
 //#region src/types.d.ts
 type GeneralFn = (...args: any[]) => any;
@@ -69,7 +80,7 @@ type IsAny<T, P, N> = 0 extends 1 & T ? P : N;
  */
 type IsUnknown<T, P, N> = IsAny<T, P, N> extends P ? N : unknown extends T ? P : N;
 type IsAssignable<T, T2> = T2 extends T ? true : false;
-type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? true : false;
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 type UsePromiseExposure<T> = {
   promise: Promise<T>;
   resolve: (value: T | PromiseLike<T>) => void;
@@ -118,7 +129,13 @@ declare class FrameworkReadableState<Data, Key extends string> {
 }
 declare class FrameworkState<Data, Key extends string> extends FrameworkReadableState<Data, Key> {
   private $upd;
-  constructor(state: GeneralState<Data>, key: Key, dehydrate: DehydrateFn<Data>, exportState: ExportFn<Data>, update: UpdateFn<Data>);
+  constructor(
+    state: GeneralState<Data>,
+    key: Key,
+    dehydrate: DehydrateFn<Data>,
+    exportState: ExportFn<Data>,
+    update: UpdateFn<Data>
+  );
   set v(newValue: Data);
   get v(): Data;
 }
@@ -200,38 +217,58 @@ declare const getTime: (date?: Date) => number;
 /**
  * Get the alova instance through the method instance alova example
  */
-declare const getContext: <T extends {
-  context: any;
-}>(methodInstance: T) => T["context"];
+declare const getContext: <
+  T extends {
+    context: any;
+  }
+>(
+  methodInstance: T
+) => T['context'];
 /**
  * Get method instance configuration data
  * @returns Configuration object
  */
-declare const getConfig: <T extends {
-  config: any;
-}>(methodInstance: T) => T["config"];
+declare const getConfig: <
+  T extends {
+    config: any;
+  }
+>(
+  methodInstance: T
+) => T['config'];
 /**
  * Get alova configuration data alova configuration object
  */
-declare const getContextOptions: <T extends {
-  options: any;
-}>(alovaInstance: T) => T["options"];
+declare const getContextOptions: <
+  T extends {
+    options: any;
+  }
+>(
+  alovaInstance: T
+) => T['options'];
 /**
  * Get alova configuration data through method instance alova configuration object
  */
-declare const getOptions: <T extends {
-  context: any;
-}>(methodInstance: T) => T["context"]["options"];
+declare const getOptions: <
+  T extends {
+    context: any;
+  }
+>(
+  methodInstance: T
+) => T['context']['options'];
 /**
  * Get the key value of the request method
  * @returns The key value of this request method
  */
-declare const key: <T extends {
-  config: any;
-  type: string;
-  url: string;
-  data?: any;
-}>(methodInstance: T) => string;
+declare const key: <
+  T extends {
+    config: any;
+    type: string;
+    url: string;
+    data?: any;
+  }
+>(
+  methodInstance: T
+) => string;
 /**
  * Create uuid simple version uuid
  */
@@ -240,30 +277,46 @@ declare const uuid: () => string;
  * Get the key value of the method instance method instance
  * @returns The key value of this method instance
  */
-declare const getMethodInternalKey: <T extends {
-  key: string;
-}>(methodInstance: T) => T["key"];
+declare const getMethodInternalKey: <
+  T extends {
+    key: string;
+  }
+>(
+  methodInstance: T
+) => T['key'];
 /**
  * Get the request method object
  * @param methodHandler Request method handle
  * @param args Method call parameters request method object
  */
-declare const getHandlerMethod: <T extends {
-  key: string;
-}>(methodHandler: T | ((...args: any[]) => T), assert: (expression: boolean, msg: string) => void, args?: any[]) => T;
+declare const getHandlerMethod: <
+  T extends {
+    key: string;
+  }
+>(
+  methodHandler: T | ((...args: any[]) => T),
+  assert: (expression: boolean, msg: string) => void,
+  args?: any[]
+) => T;
 /**
  * Is it special data
  * @param data Submit data
  * @returns Judgment result
  */
 declare const isSpecialRequestBody: (data: any) => boolean;
-declare const objAssign: <T extends Record<string, any>, U extends Record<string, any>[]>(target: T, ...sources: U) => T & U[number];
+declare const objAssign: <T extends Record<string, any>, U extends Record<string, any>[]>(
+  target: T,
+  ...sources: U
+) => T & U[number];
 type Omit$1<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /**
  * Excludes specified attributes from a data collection and returns a new data collection data collection
  * @param keys Excluded keys new data collection
  */
-declare const omit: <T extends Record<string, any>, K extends keyof T>(obj: T, ...keys: K[]) => Pick<T, Exclude<keyof T, K>>;
+declare const omit: <T extends Record<string, any>, K extends keyof T>(
+  obj: T,
+  ...keys: K[]
+) => Pick<T, Exclude<keyof T, K>>;
 /**
  * the same as `Promise.withResolvers`
  * @returns promise with resolvers.
@@ -279,9 +332,13 @@ declare function usePromise<T = any>(): UsePromiseExposure<T>;
  * @param methodInstance method instance
  * @returns Unified cache parameter object
  */
-declare const getLocalCacheConfigParam: <T extends {
-  config: any;
-}>(methodInstance: T) => {
+declare const getLocalCacheConfigParam: <
+  T extends {
+    config: any;
+  }
+>(
+  methodInstance: T
+) => {
   f: any;
   c: boolean;
   e: (mode: CacheMode) => ReturnType<(cacheExpire: CacheExpire) => number>;
@@ -294,9 +351,14 @@ declare const getLocalCacheConfigParam: <T extends {
  * @param Cls Constructor
  * @param args Constructor parameters class instance
  */
-declare const newInstance: <T extends {
-  new (...args: any[]): InstanceType<T>;
-}>(Cls: T, ...args: ConstructorParameters<T>) => InstanceType<T>;
+declare const newInstance: <
+  T extends {
+    new (...args: any[]): InstanceType<T>;
+  }
+>(
+  Cls: T,
+  ...args: ConstructorParameters<T>
+) => InstanceType<T>;
 /**
  * Unified configuration
  * @param data
@@ -322,7 +384,13 @@ declare const createAsyncQueue: (catchError?: boolean) => {
  * @param key The currently traversed key
  * @param parent The parent node currently traversed
  */
-declare const walkObject: (target: any, callback: (value: any, key: string | number | symbol, parent: any) => void, preorder?: boolean, key?: string | number | symbol, parent?: any) => any;
+declare const walkObject: (
+  target: any,
+  callback: (value: any, key: string | number | symbol, parent: any) => void,
+  preorder?: boolean,
+  key?: string | number | symbol,
+  parent?: any
+) => any;
 /**
  * build common cache key.
  */
@@ -341,7 +409,7 @@ declare const delayWithBackoff: (backoff: BackoffPolicy, retryTimes: number) => 
 /**
  * Build the complete url baseURL path url parameters complete url
  */
-declare const buildCompletedURL: (baseURL: string, url: string, params: MethodRequestConfig["params"]) => string;
+declare const buildCompletedURL: (baseURL: string, url: string, params: MethodRequestConfig['params']) => string;
 /**
  * Deep clone an object.
  *
@@ -391,11 +459,22 @@ declare const undefinedValue: undefined;
 declare const nullValue: null;
 declare const trueValue = true;
 declare const falseValue = false;
-declare const promiseThen: <T, TResult1 = T, TResult2 = never>(promise: Promise<T>, onFulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null) => Promise<TResult1 | TResult2>;
-declare const promiseCatch: <T, TResult = never>(promise: Promise<T>, onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null) => Promise<T | TResult>;
+declare const promiseThen: <T, TResult1 = T, TResult2 = never>(
+  promise: Promise<T>,
+  onFulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+  onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+) => Promise<TResult1 | TResult2>;
+declare const promiseCatch: <T, TResult = never>(
+  promise: Promise<T>,
+  onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
+) => Promise<T | TResult>;
 declare const promiseFinally: <T>(promise: Promise<T>, onfinally?: (() => void) | undefined | null) => Promise<T>;
 declare const promiseAll: <T>(values: (Promise<T> | T)[]) => Promise<T[]>;
-declare const JSONStringify: <T>(value: T, replacer?: (this: any, key: string, value: any) => any, space?: string | number) => string;
+declare const JSONStringify: <T>(
+  value: T,
+  replacer?: (this: any, key: string, value: any) => any,
+  space?: string | number
+) => string;
 declare const JSONParse: (value: string) => any;
 declare const setTimeoutFn: (fn: GeneralFn, delay?: number) => number;
 declare const clearTimeoutTimer: (timer: NodeJS.Timeout | string | number) => void;
@@ -411,17 +490,116 @@ declare const splice: <T>(ary: T[], start: number, deleteCount?: number, ...item
 declare const len: (data: any[] | Uint8Array | string) => number;
 declare const isArray: (arg: any) => arg is any[];
 declare const deleteAttr: <T extends Record<any, any>>(arg: T, attr: keyof T) => boolean;
-declare const typeOf: (arg: any) => "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function";
+declare const typeOf: (
+  arg: any
+) => 'string' | 'number' | 'bigint' | 'boolean' | 'symbol' | 'undefined' | 'object' | 'function';
 declare const regexpTest: (reg: RegExp, str: string | number) => boolean;
 declare const includes: <T>(ary: T[], target: T) => boolean;
-declare const valueObject: <T>(value: T, writable?: boolean) => {
+declare const valueObject: <T>(
+  value: T,
+  writable?: boolean
+) => {
   value: T;
   writable: boolean;
 };
 declare const defineProperty: (o: object, key: string | symbol, value: any, isDescriptor?: boolean) => object;
 declare const isSSR: boolean;
 /** cache mode */
-declare const MEMORY = "memory";
-declare const STORAGE_RESTORE = "restore";
+declare const MEMORY = 'memory';
+declare const STORAGE_RESTORE = 'restore';
 //#endregion
-export { $self, AlovaError, BackoffPolicy, CallbackFn, Equal, EventManager, FrameworkReadableState, FrameworkState, GeneralFn, GeneralState, IsAny, IsAssignable, IsUnknown, JSONParse, JSONStringify, MEMORY, ObjectCls, Omit$1 as Omit, PromiseCls, QueueCallback, RegExpCls, STORAGE_RESTORE, UsePromiseExposure, buildCompletedURL, buildNamespacedCacheKey, clearTimeoutTimer, _default as cloneMethod, createAssert, createAsyncQueue, createEventManager, createSyncOnceRunner, decorateEvent, deepClone, defineProperty, delayWithBackoff, deleteAttr, falseValue, filterItem, forEach, getConfig, getContext, getContextOptions, getHandlerMethod, getLocalCacheConfigParam, getMethodInternalKey, getOptions, getTime, globalToString, includes, injectReferingObject, instanceOf, isAlovaCacheKey, isArray, isFn, isNumber, isObject, isPlainObject, isSSR, isSpecialRequestBody, isString, key, len, mapItem, newInstance, noop, nullValue, objAssign, objectKeys, objectValues, omit, promiseAll, promiseCatch, promiseFinally, promiseReject, promiseResolve, promiseThen, provideReferingObject, pushItem, regexpTest, setTimeoutFn, shift, slice, sloughConfig, sloughFunction, splice, trueValue, type, typeOf, undefinedValue, usePromise, uuid, valueObject, walkObject };
+export {
+  $self,
+  AlovaError,
+  BackoffPolicy,
+  CallbackFn,
+  Equal,
+  EventManager,
+  FrameworkReadableState,
+  FrameworkState,
+  GeneralFn,
+  GeneralState,
+  IsAny,
+  IsAssignable,
+  IsUnknown,
+  JSONParse,
+  JSONStringify,
+  MEMORY,
+  ObjectCls,
+  Omit$1 as Omit,
+  PromiseCls,
+  QueueCallback,
+  RegExpCls,
+  STORAGE_RESTORE,
+  UsePromiseExposure,
+  buildCompletedURL,
+  buildNamespacedCacheKey,
+  clearTimeoutTimer,
+  _default as cloneMethod,
+  createAssert,
+  createAsyncQueue,
+  createEventManager,
+  createSyncOnceRunner,
+  decorateEvent,
+  deepClone,
+  defineProperty,
+  delayWithBackoff,
+  deleteAttr,
+  falseValue,
+  filterItem,
+  forEach,
+  getConfig,
+  getContext,
+  getContextOptions,
+  getHandlerMethod,
+  getLocalCacheConfigParam,
+  getMethodInternalKey,
+  getOptions,
+  getTime,
+  globalToString,
+  includes,
+  injectReferingObject,
+  instanceOf,
+  isAlovaCacheKey,
+  isArray,
+  isFn,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isSSR,
+  isSpecialRequestBody,
+  isString,
+  key,
+  len,
+  mapItem,
+  newInstance,
+  noop,
+  nullValue,
+  objAssign,
+  objectKeys,
+  objectValues,
+  omit,
+  promiseAll,
+  promiseCatch,
+  promiseFinally,
+  promiseReject,
+  promiseResolve,
+  promiseThen,
+  provideReferingObject,
+  pushItem,
+  regexpTest,
+  setTimeoutFn,
+  shift,
+  slice,
+  sloughConfig,
+  sloughFunction,
+  splice,
+  trueValue,
+  type,
+  typeOf,
+  undefinedValue,
+  usePromise,
+  uuid,
+  valueObject,
+  walkObject
+};

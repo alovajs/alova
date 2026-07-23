@@ -31,11 +31,9 @@ alova（读作 /əˈləʊva/）是 JavaScript 的**请求策略层（request str
 下面是一段分页列表代码，自带预加载、自动缓存与增删改自动同步 —— 大约 5 行：
 
 ```javascript
-const todoList = (page, size) =>
-  alova.Get('/api/todos', { params: { page, size } });
+const todoList = (page, size) => alova.Get('/api/todos', { params: { page, size } });
 
-const { loading, data, page, pageSize, pageCount, total } =
-  usePagination(todoList);
+const { loading, data, page, pageSize, pageCount, total } = usePagination(todoList);
 // 自动分页 · 预加载下一页 · 增删改自动同步缓存
 ```
 
@@ -43,13 +41,13 @@ const { loading, data, page, pageSize, pageCount, total } =
 
 与其罗列 alova「是什么」，不如看它「替你解决什么」：
 
-| 你已经写腻的场景 | alova 给你的 | 具体收益 |
-| :--- | :--- | :--- |
-| 反复手写分页、表单、上传、SSE 状态 | `usePagination` / `useForm` / `useUploader` / `useSSE` | 最多减少 70% 样板代码 |
-| 服务端限流与重试（含分布式） | `alova/server` | React Query / SWR 完全不覆盖的能力 |
-| 每个框架都要重写一遍相同逻辑 | 同一套 API | 横跨 React / Vue / Svelte / Solid / 小程序 |
-| 手动维护缓存失效 | 多级缓存（L1/L2）+ 基于 `hitSource` 的声明式自动失效 | 缓存失效不再痛苦 |
-| 在文档与编辑器之间复制粘贴 API 信息 | `worma` | 接口提示与文档直接出现在编辑器里 |
+| 你已经写腻的场景                    | alova 给你的                                           | 具体收益                                   |
+| :---------------------------------- | :----------------------------------------------------- | :----------------------------------------- |
+| 反复手写分页、表单、上传、SSE 状态  | `usePagination` / `useForm` / `useUploader` / `useSSE` | 最多减少 70% 样板代码                      |
+| 服务端限流与重试（含分布式）        | `alova/server`                                         | React Query / SWR 完全不覆盖的能力         |
+| 每个框架都要重写一遍相同逻辑        | 同一套 API                                             | 横跨 React / Vue / Svelte / Solid / 小程序 |
+| 手动维护缓存失效                    | 多级缓存（L1/L2）+ 基于 `hitSource` 的声明式自动失效   | 缓存失效不再痛苦                           |
+| 在文档与编辑器之间复制粘贴 API 信息 | `worma`                                                | 接口提示与文档直接出现在编辑器里           |
 
 当然还有：
 
@@ -64,12 +62,12 @@ const { loading, data, page, pageSize, pageCount, total } =
 
 alova 会坦诚地告诉你它在哪里出彩，以及在哪里更简单的工具就已足够：
 
-| 你的场景 | 建议 |
-| :--- | :--- |
-| 简单 CRUD + 缓存 | React Query / SWR 就够了 |
-| 复杂中后台 / 表单 / 分页 / 上传 | ✅ alova 明显领先一档 |
-| 跨端（Web + 小程序 / uni-app / Taro） | ✅ 同一套 API 全通吃 |
-| 服务端请求治理（限流 / 重试 / 分布式） | ✅ alova 几乎是唯一选择 |
+| 你的场景                                   | 建议                               |
+| :----------------------------------------- | :--------------------------------- |
+| 简单 CRUD + 缓存                           | React Query / SWR 就够了           |
+| 复杂中后台 / 表单 / 分页 / 上传            | ✅ alova 明显领先一档              |
+| 跨端（Web + 小程序 / uni-app / Taro）      | ✅ 同一套 API 全通吃               |
+| 服务端请求治理（限流 / 重试 / 分布式）     | ✅ alova 几乎是唯一选择            |
 | OpenAPI → 类型安全代码 + AI 友好的接口知识 | ✅ 搭配 worma（对 alova 开箱即用） |
 
 不确定 alova 是否适合你？先读一读[什么时候不该用 alova？](https://alova.js.org/about/comparison)，看看坦诚的「反向清单」再决定。
