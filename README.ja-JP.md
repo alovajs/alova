@@ -1,7 +1,8 @@
 <img width="100%" src="https://alova.js.org/img/cover.jpg" />
 
 <p align="center">
-  JavaScript のリクエスト戦略レイヤー。ページネーション、フォーム、アップロード、リトライのボイラープレートを手書きするのをやめて、alova が用意した使い捨て戦略をそのまま使えば、リクエストコードを最大 70% 削減できます。
+  <strong>Stop building request logic. Start shipping features.</strong><br/>
+  <em>JavaScript のリクエスト戦略レイヤー —— リクエストコードを最大 70% 削減。</em>
 </p>
 
 <p align="center"><a href="./README.md">English</a> | <a href="./README.zh-CN.md">中文</a> | 日本語</p>
@@ -19,6 +20,7 @@
 [![wechat](https://img.shields.io/badge/chat_with_CH-Wechat-07c160)](https://alova.js.org/img/wechat_qrcode.jpg)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
+![strategies](https://img.shields.io/badge/strategies-20%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## alova とは？
@@ -26,6 +28,17 @@
 alova（発音 /əˈləʊva/）は JavaScript の**リクエスト戦略レイヤー**です。ページネーション、フォーム、アップロード、リトライは何度も手書きしてきたはず。今は 20 以上の使い捨てリクエスト戦略をそのまま使うだけで、リクエストコードを最大 **70%** 削減できます。
 
 使い慣れた axios や fetch を捨てる必要はありません。alova は既存のリクエストライブラリの上にそのまま乗り、繰り返し書いていたロジックを引き継ぎます。1 つの API セットが React、Vue、Svelte、Solid、ミニプログラム、サーバーを横断 — 一度覚えればどこでも使え、クライアント側もサーバー側もビジネスロジックに集中できます。
+
+以下はページネーション付きリストのコードです。次ページの事前読み込み、自動キャッシュ、作成・更新・削除時の自動同期が組み込みで、わずか 5 行程度：
+
+```javascript
+const todoList = (page, size) =>
+  alova.Get('/api/todos', { params: { page, size } });
+
+const { loading, data, page, pageSize, pageCount, total } =
+  usePagination(todoList);
+// 自動ページネーション · 次ページ事前読み込み · 作成/更新/削除でキャッシュ自動同期
+```
 
 ## 特徴
 
@@ -60,9 +73,13 @@ alova はどこで輝き、どこでよりシンプルなツールで十分な�
 | サーバー側のリクエストガバナンス（レート制限 / リトライ / 分散） | ✅ alova がほぼ唯一の選択肢 |
 | OpenAPI → 型安全なコード + AI フレンドリーな API 知識 | ✅ `worma` と組み合わせ（alova にそのまま対応） |
 
+alova が本当に自分に合うか迷ったら、コミットする前に[いつ alova を使うべきではないか](https://alova.js.org/about/comparison)の正直な逆リストをお読みください。
+
 ## 何が違うのか？
 
 `@tanstack/react-query`、`swrjs`、`ahooks`の`useRequest`などのライブラリとは異なり、alovaはAPI統合を非常に簡単かつ効率的にすることを目指しており、より効率的なデータ通信を維持しながら、ユーザーによりスムーズな体験を提供します。
+
+同じページネーション付きリストで、React Query は約 25 行必要なのに対し、alova の `usePagination` は約 5 行です —— [脚色なしの比較](https://alova.js.org/about/comparison)をご覧ください。
 
 > alovaの違いについて詳しくは、[他のリクエストライブラリとの比較](https://alova.js.org/about/comparison)もご覧ください。
 

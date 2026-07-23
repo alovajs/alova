@@ -1,7 +1,8 @@
 <img width="100%" src="https://alova.js.org/img/cover.jpg" />
 
 <p align="center">
-  The request strategy layer for JavaScript. Stop hand-writing pagination, form, upload and retry boilerplate — alova ships them as ready-made strategies, cutting your request code by up to 70%.
+  <strong>Stop building request logic. Start shipping features.</strong><br/>
+  <em>The request strategy layer for JavaScript — cut your request code by up to 70%.</em>
 </p>
 
 <p align="center">English | <a href="./README.zh-CN.md">中文</a> | <a href="./README.ja-JP.md">日本語</a></p>
@@ -19,6 +20,7 @@
 [![wechat](https://img.shields.io/badge/chat_with_CH-Wechat-07c160)](https://alova.js.org/img/wechat_qrcode.jpg)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
+![strategies](https://img.shields.io/badge/strategies-20%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## What is alova?
@@ -26,6 +28,17 @@
 alova (pronounced /əˈləʊva/) is the **request strategy layer for JavaScript**. You've hand-written pagination, forms, uploads and retries countless times — now just pick one of 20+ ready-made request strategies and cut your request code by up to **70%**.
 
 You don't have to throw away the axios or fetch you already know. alova sits right on top of your existing request library and takes over the logic you keep rewriting. One API set spans React, Vue, Svelte, Solid, mini-programs and the server — learn once, use everywhere, so you can focus on business logic on both the client and the server.
+
+Here is a paginated list with prefetch, auto-cache and auto-sync on create/update/delete — about five lines of code:
+
+```javascript
+const todoList = (page, size) =>
+  alova.Get('/api/todos', { params: { page, size } });
+
+const { loading, data, page, pageSize, pageCount, total } =
+  usePagination(todoList);
+// auto pagination · prefetch next page · auto cache sync on create/update/delete
+```
 
 ## Features
 
@@ -60,9 +73,13 @@ alova is honest about where it shines — and where a simpler tool is enough:
 | Server-side request governance (rate limit / retry / distributed) | ✅ alova is almost the only choice |
 | OpenAPI → type-safe code + AI-friendly API knowledge | ✅ Pair with `worma` (works out of the box with alova) |
 
+Not sure alova is right for you? Read [When should you NOT use alova?](https://alova.js.org/about/comparison) for the honest reverse list before you commit.
+
 ## Is there any difference?
 
 Unlike libraries such as `@tanstack/react-query`, `swrjs`, and `ahooks`'s `useRequest`, alova aims to make API integration very easy and efficient, while maintaining more efficient data interaction and bringing a smoother experience to users.
+
+For the same paginated list, React Query needs roughly 25 lines while alova's `usePagination` takes about 5 — see the [no-BS comparison](https://alova.js.org/about/comparison).
 
 > You can also check [Comparison with other request libraries](https://alova.js.org/about/comparison) to learn more about the differences of alova.
 

@@ -1,7 +1,8 @@
 <img width="100%" src="https://alova.js.org/img/cover.jpg" />
 
 <p align="center">
-  alova 是 JavaScript 的请求策略层。停止手写分页、表单、上传和重试逻辑，alova 已经把它们做成开箱即用的策略，最多可减少 70% 的请求代码。
+  <strong>Stop building request logic. Start shipping features.</strong><br/>
+  <em>alova 是 JavaScript 的请求策略层 —— 最多可减少 70% 的请求代码。</em>
 </p>
 
 <p align="center"><a href="./README.md">📑English</a> | 中文 | <a href="./README.ja-JP.md">日本語</a></p>
@@ -18,6 +19,7 @@
 [![wechat](https://img.shields.io/badge/chat_with_CH-Wechat-07c160)](https://alova.js.org/img/wechat_qrcode.jpg)
 [![tree shaking](https://badgen.net/bundlephobia/tree-shaking/alova)](https://bundlephobia.com/package/alova)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
+![strategies](https://img.shields.io/badge/strategies-20%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## 什么是 alova？
@@ -25,6 +27,17 @@
 alova（读作 /əˈləʊva/）是 JavaScript 的**请求策略层（request strategy layer）**。分页、表单、上传、重试这些逻辑你已经手写过无数遍，现在只需直接使用 20+ 个开箱即用的请求策略，最多可减少 **70% 的请求代码**。
 
 你不必扔掉已经用惯的 axios 或 fetch。alova 直接架在你现有的请求库之上，接管那些你每次都要重写一遍的请求逻辑。同一套 API 横跨 React、Vue、Svelte、Solid、小程序与服务端，一次学会，处处都能用，让你在客户端和服务端都能专心写业务逻辑。
+
+下面是一段分页列表代码，自带预加载、自动缓存与增删改自动同步 —— 大约 5 行：
+
+```javascript
+const todoList = (page, size) =>
+  alova.Get('/api/todos', { params: { page, size } });
+
+const { loading, data, page, pageSize, pageCount, total } =
+  usePagination(todoList);
+// 自动分页 · 预加载下一页 · 增删改自动同步缓存
+```
 
 ## 特性
 
@@ -59,9 +72,13 @@ alova 会坦诚地告诉你它在哪里出彩，以及在哪里更简单的工�
 | 服务端请求治理（限流 / 重试 / 分布式） | ✅ alova 几乎是唯一选择 |
 | OpenAPI → 类型安全代码 + AI 友好的接口知识 | ✅ 搭配 worma（对 alova 开箱即用） |
 
+不确定 alova 是否适合你？先读一读[什么时候不该用 alova？](https://alova.js.org/about/comparison)，看看坦诚的「反向清单」再决定。
+
 ## 有什么不同吗？
 
 与 `@tanstack/react-query`、`swrjs`、`ahooks` 的 `useRequest` 等库不同，alova 旨在让 API 集成变得非常轻松高效，还能保持更高效的数据交互，为用户带来更流畅的体验。
+
+同样的分页列表，React Query 大约要写 25 行，而 alova 的 `usePagination` 只要约 5 行 —— 详见 [毫无水分的对比](https://alova.js.org/about/comparison)。
 
 > 您还可以查看 [与其他请求库的比较](https://alova.js.org/about/comparison) 以详细了解 alova 的不同之处。
 
