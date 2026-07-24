@@ -1,5 +1,11 @@
 # @alova/shared
 
+## 1.3.4
+
+### Patch Changes
+
+- [#834](https://github.com/alovajs/alova/pull/834) [`272aa3d`](https://github.com/alovajs/alova/commit/272aa3d4b94a0890abaa1f7ecbd85429bf412049) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - Fix a memory leak where `onSuccess`/`onError`/`onComplete` handlers registered by descendant components (e.g. via `v-for`) were not unbound when the component unmounted, causing them to accumulate in the event manager. Handlers are now automatically removed on unmount through the framework's `onUnmounted`. Also fixed `createEventManager.on` re-introducing already-removed handlers when multiple handlers of the same event type are removed.
+
 ## 1.3.3
 
 ### Patch Changes

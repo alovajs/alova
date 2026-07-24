@@ -1,5 +1,12 @@
 # @alova/mock
 
+## 2.0.22
+
+### Patch Changes
+
+- Updated dependencies [[`272aa3d`](https://github.com/alovajs/alova/commit/272aa3d4b94a0890abaa1f7ecbd85429bf412049)]:
+  - @alova/shared@1.3.4
+
 ## 2.0.21
 
 ### Patch Changes

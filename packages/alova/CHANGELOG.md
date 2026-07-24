@@ -1,5 +1,16 @@
 # alova
 
+## 3.5.3
+
+### Patch Changes
+
+- [#834](https://github.com/alovajs/alova/pull/834) [`272aa3d`](https://github.com/alovajs/alova/commit/272aa3d4b94a0890abaa1f7ecbd85429bf412049) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - Fix a memory leak where `onSuccess`/`onError`/`onComplete` handlers registered by descendant components (e.g. via `v-for`) were not unbound when the component unmounted, causing them to accumulate in the event manager. Handlers are now automatically removed on unmount through the framework's `onUnmounted`. Also fixed `createEventManager.on` re-introducing already-removed handlers when multiple handlers of the same event type are removed.
+
+- [`f515162`](https://github.com/alovajs/alova/commit/f515162826c4b81d795bd58df7f179a28f434077) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - Align package metadata and README with the official site messaging: update `description` and `keywords` in package.json, and refresh the root README (en/zh/ja) and npm README with the hero tagline, a `usePagination` code example, and a React Query comparison hook.
+
+- Updated dependencies [[`272aa3d`](https://github.com/alovajs/alova/commit/272aa3d4b94a0890abaa1f7ecbd85429bf412049)]:
+  - @alova/shared@1.3.4
+
 ## 3.5.2
 
 ### Patch Changes
