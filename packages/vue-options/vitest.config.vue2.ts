@@ -1,8 +1,11 @@
 import vue2 from '@vitejs/plugin-vue2';
 import compiler from '@vue2/compiler-sfc';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineProject, mergeConfig, Plugin } from 'vitest/config';
 import vitestConfigBase from '../../vitest.config.base';
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default mergeConfig(
   vitestConfigBase,
@@ -19,8 +22,8 @@ export default mergeConfig(
       },
       setupFiles: ['./test/setup.ts'],
       alias: {
-        vue: path.resolve('./node_modules/vue2'),
-        '@testing-library/vue': path.resolve('./node_modules/@testing-library/vue2')
+        vue: path.resolve(dirname, './node_modules/vue2'),
+        '@testing-library/vue': path.resolve(dirname, './node_modules/@testing-library/vue2')
       }
     }
   })

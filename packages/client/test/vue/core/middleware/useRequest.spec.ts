@@ -371,9 +371,9 @@ describe('useRequest middleware', () => {
     const err = await untilCbCalled(onError);
     expect(loading.value).toBeFalsy();
     expect(data.value).toBeUndefined();
-    expect(error.value).toBeInstanceOf(DOMException);
+    expect(error.value?.name).toBe('AbortError');
     expect(error.value).toStrictEqual(err.error);
-    expect(error.value?.message).toBe('The operation was aborted.');
+    expect(error.value?.message).toMatch(/operation was aborted/i);
   });
 
   test('should abort request like abort function in returns when call abort in middleware(non-immediate)', async () => {

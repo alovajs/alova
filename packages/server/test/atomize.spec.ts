@@ -49,6 +49,9 @@ const method = alovaInst.Get<Result>('/unit-test');
 describe('atomize hook', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    // 清除 mock 调用历史，避免 locker.lock/locker.unlock 的调用次数在用例间累积
+    // （Vitest 4 的 restoreAllMocks 不会清空 vi.fn() 的调用记录）
+    vi.clearAllMocks();
     returnLocker = true;
   });
 
@@ -116,7 +119,7 @@ describe('atomize hook', () => {
     const hookedMethod1 = atomize(method, { timeout: 500, interval: 100 });
     const hookedMethod2 = atomize(method, { timeout: 1200, interval: 100 });
 
-    // 并发执行三个请求
+    // 并发执行两个请求
     const results = await Promise.allSettled([hookedMethod1, hookedMethod2]);
 
     // 所有请求都应该成功

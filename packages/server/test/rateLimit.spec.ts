@@ -251,7 +251,11 @@ describe('reteLimit in server', () => {
     http.get(`${baseURL}/test`, () => HttpResponse.json({ name: 123 }))
   );
 
-  mockServer.listen();
+  // Listen inside beforeAll so this server's handlers are registered AFTER the
+  // global mock server (internal/mockServer) that listens in vitest.setup.ts.
+  // MSW's shared interceptor keeps only the handlers of the last server to call
+  // listen(), so the local 9527 handlers must win over the global 3000 ones.
+  beforeAll(() => mockServer.listen());
   beforeEach(() => {
     mockServer.resetHandlers();
     alova = getAlovaInstance(baseURL);

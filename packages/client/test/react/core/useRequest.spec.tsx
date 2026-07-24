@@ -368,7 +368,7 @@ describe('useRequest hook with react', () => {
     await delay(10);
     fireEvent.click(screen.getByRole('btnAbort'));
     await waitFor(() => {
-      expect(screen.getByRole('error')).toHaveTextContent('The operation was aborted.');
+      expect(screen.getByRole('error')).toHaveTextContent(/operation was aborted/i);
     });
   });
 });

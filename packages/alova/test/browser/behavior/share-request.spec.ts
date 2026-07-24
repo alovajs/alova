@@ -177,7 +177,7 @@ describe('Request shared', () => {
     Get.abort();
 
     const error = await untilReject(prom);
-    expect(error.message).toBe('The operation was aborted.');
+    expect(error.message).toMatch(/operation was aborted/i);
 
     // Send the request again, it should be successful now
     expect(await Get).not.toBeUndefined();

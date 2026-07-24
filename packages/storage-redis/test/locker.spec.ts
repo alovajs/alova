@@ -11,7 +11,7 @@ vi.mock('@sesamecare-oss/redlock', () => {
   const mockAcquire = vi.fn().mockResolvedValue(mockLock);
 
   // Create a proper Redlock mock constructor
-  const mockRedlock = vi.fn().mockImplementation((clients, options) => {
+  const mockRedlock = vi.fn().mockImplementation(function (clients, options) {
     const redlockInstance = {
       acquire: mockAcquire,
       clients,
@@ -35,12 +35,14 @@ vi.mock('@sesamecare-oss/redlock', () => {
 
 // Mock ioredis
 vi.mock('ioredis', () => {
-  const mockRedis = vi.fn(() => ({
-    status: 'ready',
-    options: { host: 'localhost', port: 6379 }
-  }));
+  const mockRedis = vi.fn(function () {
+    return {
+      status: 'ready',
+      options: { host: 'localhost', port: 6379 }
+    };
+  });
 
-  const mockCluster = vi.fn(() => {
+  const mockCluster = vi.fn(function () {
     const clusterInstance = {
       nodes: vi.fn(() => [
         { status: 'ready', options: { host: 'localhost', port: 6379 } },
@@ -78,7 +80,7 @@ describe('RedisLocker', () => {
     mockCluster = new Cluster([]);
 
     // Reset the mock implementations
-    mockRedlock.mockImplementation((clients: any[], options: any) => {
+    mockRedlock.mockImplementation(function (clients: any[], options: any) {
       const redlockInstance = {
         acquire: mockAcquire,
         clients,
