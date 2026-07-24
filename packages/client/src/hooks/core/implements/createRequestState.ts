@@ -229,10 +229,13 @@ export default function createRequestState<
     send: (sendCallingArgs?: [...Args, ...any[]], methodInstance?: Method<AG>) =>
       handleRequest(methodInstance, sendCallingArgs),
     onSuccess(handler: SuccessHandler<AG, Args>) {
-      const off = eventManager.on(KEY_SUCCESS, handler);
       // Auto-unbind when the component calling `onSuccess` is unmounted,
       // preventing handler accumulation (memory leak) when the same provider
       // is shared across descendant components (e.g. via provide/inject + v-for).
+      // Each binder registers its own `onUnmounted`, so the unbind is bound to the
+      // component instance that actually called the binder — parent and descendant
+      // handlers are removed independently on their own unmount.
+      const off = eventManager.on(KEY_SUCCESS, handler);
       onUnmounted(off);
     },
     onError(handler: ErrorHandler<AG, Args>) {

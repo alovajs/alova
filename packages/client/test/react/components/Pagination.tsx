@@ -1,6 +1,6 @@
 import { usePagination } from '@/index';
 import { AlovaGenerics, Method } from 'alova';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PaginationHookConfig } from '~/typings/clienthook';
 import { ReactHookExportType } from '~/typings/stateshook/react';
 
@@ -30,9 +30,11 @@ function Pagination({ getter, paginationConfig = {}, handleExposure = () => {} }
     getter,
     typeof paginationConfig === 'function' ? paginationConfig() : paginationConfig
   );
-  useEffect(() => {
-    handleExposure?.(exposure);
-  }, [exposure, handleExposure]);
+  // Call `handleExposure` during render (the component setup phase), so that any
+  // binder invoked inside it (e.g. `exposure.onSuccess(...)`) is registered within
+  // React's render phase — calling a hook such as `useEffect` outside of render
+  // (e.g. from a `useEffect`/`onMounted` callback) throws "Invalid hook call".
+  handleExposure?.(exposure);
 
   const {
     loading,
