@@ -32,15 +32,17 @@ function createIPC(id: string) {
 export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = AlovaIPCID) {
   const ipc = createIPC(`client-${uuid()}`);
   const queue = new QueueCallback(null, true);
+  // Resolve when the IPC connection is established and the message handlers
+  // are registered, so callers can wait before sending the first sync event.
+  const { promise: readyPromise, resolve: resolveReady } = usePromise<void>();
 
   ipc.connectTo(id, () => {
+    // `connectTo`'s callback fires once the client is connected, so the handlers
+    // registered via the queue and the `ready` promise can be resolved here.
     queue.tryRunQueueCallback();
-
+    resolveReady();
     ipc.of[id].on('disconnect', () => queue.setProcessingState(true));
-    ipc.of[id].on('connect', () => {
-      onConnect?.(() => ipc.disconnect(id));
-      queue.tryRunQueueCallback();
-    });
+    onConnect?.(() => ipc.disconnect(id));
   });
 
   // disconnect when the process is terminated.
@@ -56,7 +58,9 @@ export function NodeSyncAdapter(onConnect?: (stopFn: () => void) => void, id = A
       queue.queueCallback(() => {
         ipc.of[id]?.on(EventName.TO_CLIENT, payload => handler(payload));
       });
-    }
+    },
+    // exposed for callers/tests to await connection readiness
+    ready: readyPromise
   });
 }
 
@@ -72,6 +76,9 @@ export async function createNodePSCSynchronizer(id = AlovaIPCID) {
   const ipc = createIPC(id);
 
   const { promise, resolve } = usePromise<() => void>();
+  // `ipc.serve(cb)` triggers `cb` on the server's "start" event, i.e. after the
+  // server is actually listening — so the synchronizer is ready before any client
+  // (whose `send` is queued until its own `connect`) can emit an event.
   ipc.serve(() => {
     createPSCSynchronizer(
       createSyncAdapter({
@@ -89,8 +96,10 @@ export async function createNodePSCSynchronizer(id = AlovaIPCID) {
     );
     resolve(() => ipc.server.stop());
   });
-
+  // Explicitly start the server. In this node-ipc version `serve()` alone does
+  // not begin listening, so clients would never connect.
   ipc.server.start();
+
   process.on('SIGTERM', () => ipc.server.stop());
 
   return promise;

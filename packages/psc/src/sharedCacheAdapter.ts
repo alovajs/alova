@@ -21,6 +21,8 @@ export type SharedEventHandler = (
 export interface SyncAdapter {
   send(event: SharedCacheEvent): void | Promise<void>;
   receive(handler: SharedEventHandler): void;
+  /** Resolved once the underlying transport is connected and ready to sync. */
+  ready?: Promise<void>;
 }
 
 const myAssert: ReturnType<typeof createAssert> = createAssert('Shared Cache');
@@ -48,7 +50,7 @@ class ProcessSharedCacheAdapter implements AlovaGlobalCacheAdapter {
       set: (key: string, value?: any) => this.cacheAdapter.set(key, value),
       remove: (key: string) => this.cacheAdapter.remove(key),
       clear: () => this.cacheAdapter.clear(),
-      init: (key: string, value: any) => this.init(value)
+      init: (_key: string, value: any) => this.init(value)
     } as const;
 
     /**

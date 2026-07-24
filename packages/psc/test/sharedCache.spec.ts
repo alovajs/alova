@@ -1,10 +1,10 @@
 import { ElectronSyncAdapter, NodeSyncAdapter, createNodePSCSynchronizer } from '@/index';
 import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSyncAdapter } from '@/sharedCacheAdapter';
-import { forEach, key } from '@alova/shared';
+import { forEach, key, uuid } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, createAlova, queryCache } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import { IpcMain, IpcRenderer } from 'electron';
 import EventEmitter from 'events';
+import type { IpcMain, IpcRenderer } from '@/defaults/electronSyncAdapter';
 import { Result, delay } from 'root/testUtils';
 
 beforeEach(() => {
@@ -254,33 +254,52 @@ describe('shared cache', () => {
 
   test('should share cache between same scope in node', async () => {
     // simulate init operation in the main procress
-    const stopServer = await createNodePSCSynchronizer();
+    const channelId = `test-share-${uuid()}`;
+    const stopServer = await createNodePSCSynchronizer(channelId);
 
     const stopHandler: (() => void)[] = [];
+    const readyHandlers: Promise<void>[] = [];
+    const createNodeAdapter = () =>
+      NodeSyncAdapter(stop => {
+        stopHandler.push(stop);
+      }, channelId);
+
+    const adapterA = createNodeAdapter();
+    const adapterB = createNodeAdapter();
+    const adapterC = createNodeAdapter();
+    readyHandlers.push(adapterA.ready!, adapterB.ready!, adapterC.ready!);
 
     const alovaA = getAlovaInstance({
       id: 1,
-      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
+      l1Cache: createPSCAdapter(adapterA)
     });
     const alovaB = getAlovaInstance({
       id: 1,
-      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
+      l1Cache: createPSCAdapter(adapterB)
     });
     const alovaC = getAlovaInstance({
       id: 2,
-      l1Cache: createPSCAdapter(NodeSyncAdapter(stop => stopHandler.push(stop)))
+      l1Cache: createPSCAdapter(adapterC)
     });
+
+    // Wait until every adapter's IPC connection is established before sending
+    // the first sync event, so the server's initial `init` broadcast isn't missed.
+    await Promise.all(readyHandlers);
 
     const GetA = alovaA.Get('/unit-test', {
       transform: ({ data }: Result) => data
     });
     await GetA;
 
-    // waiting for cache sync.
-    await delay(50);
+    // Wait for the cache to be actually synced across processes.
+    await vi.waitFor(async () => {
+      expect(await queryCache(GetA)).not.toBeUndefined();
+    });
     const cache = await queryCache(GetA);
-    expect(cache).not.toBeUndefined();
-    expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
+    // B shares the same scope (id=1), so its cache must be synced from A.
+    await vi.waitFor(async () => {
+      expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
+    });
     expect(await queryCache(alovaC.Get('/unit-test'))).toBeUndefined();
 
     forEach(stopHandler, fn => fn());
@@ -289,14 +308,15 @@ describe('shared cache', () => {
 
   test('should trigger event handler with expect times in node', async () => {
     // simulate init operation in the main procress
-    const stopServer = await createNodePSCSynchronizer();
+    const channelId = `test-handler-${uuid()}`;
+    const stopServer = await createNodePSCSynchronizer(channelId);
 
     const stopHandler: (() => void)[] = [];
     const mockSend = vi.fn();
     const mockReceive = vi.fn();
 
     const createMockNodeSyncAdapter = () => {
-      const rawAdapter = NodeSyncAdapter(stop => stopHandler.push(stop));
+      const rawAdapter = NodeSyncAdapter(stop => stopHandler.push(stop), channelId);
 
       return createSyncAdapter({
         send(event) {
@@ -308,29 +328,34 @@ describe('shared cache', () => {
             handler(event);
             mockReceive(event);
           });
-        }
+        },
+        ready: rawAdapter.ready
       });
     };
 
+    const adapterA = createMockNodeSyncAdapter();
+    const adapterB = createMockNodeSyncAdapter();
+    const adapterC = createMockNodeSyncAdapter();
+
     const alovaA = getAlovaInstance({
       id: 1,
-      l1Cache: createPSCAdapter(createMockNodeSyncAdapter())
+      l1Cache: createPSCAdapter(adapterA)
     });
     const alovaB = getAlovaInstance({
       id: 1,
-      l1Cache: createPSCAdapter(createMockNodeSyncAdapter())
+      l1Cache: createPSCAdapter(adapterB)
     });
     const alovaC = getAlovaInstance({
       id: 2,
-      l1Cache: createPSCAdapter(createMockNodeSyncAdapter())
+      l1Cache: createPSCAdapter(adapterC)
     });
 
-    // waiting for cache sync.
-    await delay(50);
+    // Wait for connections to be ready so the initial `init` events are received.
+    await Promise.all([adapterA.ready!, adapterB.ready!, adapterC.ready!]);
 
-    // 3 init events
-    expect(mockSend).toHaveBeenCalledTimes(3);
-    expect(mockReceive).toHaveBeenCalledTimes(3);
+    // 3 init events (one per adapter) — wait for them to actually arrive.
+    await vi.waitFor(() => expect(mockSend).toHaveBeenCalledTimes(3), { interval: 50 });
+    await vi.waitFor(() => expect(mockReceive).toHaveBeenCalledTimes(3), { interval: 50 });
     expect(mockReceive).toHaveBeenLastCalledWith({ senderID: '', type: 'init', key: '', value: '{}' });
 
     const GetA = alovaA.Get('/unit-test', {
@@ -344,13 +369,11 @@ describe('shared cache', () => {
     });
     await GetB;
 
-    // waiting for cache sync.
-    await delay(50);
-
-    // 3 init events + 2 set event
-    expect(mockSend).toHaveBeenCalledTimes(5);
+    // 3 init events + 2 set events (A and C). The exact count depends on the
+    // de-duplication of `init`, so assert the lower bound is met.
+    await vi.waitFor(() => expect(mockSend).toHaveBeenCalledTimes(5), { interval: 50 });
     // 3 init events + 6 set events
-    expect(mockReceive).toHaveBeenCalledTimes(9);
+    await vi.waitFor(() => expect(mockReceive).toHaveBeenCalledTimes(9), { interval: 50 });
     expect(mockReceive.mock.lastCall?.[0].key).toStrictEqual('$a.2["GET","/unit-test",{"name":"test"},null,{}]');
     expect(mockReceive.mock.lastCall?.[0].value[0]).toStrictEqual({
       path: '/unit-test',
@@ -360,7 +383,9 @@ describe('shared cache', () => {
 
     const cache = await queryCache(GetA);
     expect(cache).not.toBeUndefined();
-    expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
+    await vi.waitFor(async () => {
+      expect(await queryCache(alovaB.Get('/unit-test'))).toStrictEqual(cache);
+    });
     expect(await queryCache(alovaC.Get('/unit-test'))).toBeUndefined();
 
     forEach(stopHandler, fn => fn());

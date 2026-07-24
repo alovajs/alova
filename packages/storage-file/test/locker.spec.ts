@@ -2,6 +2,7 @@ import FileLocker from '@/FileLocker';
 import { spawn } from 'child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 describe('FileLocker', () => {
   const tempDir = path.join(__dirname, 'temp');
@@ -65,7 +66,9 @@ describe('FileLocker', () => {
   test('should handle concurrent locks with multiple processes', async () => {
     const resource = 'concurrent-resource';
     const testFileDir = path.join(__dirname, 'temp');
-    const testScript = path.join(testFileDir, 'test-process.ts');
+    // 用预编译的 ESM 产物启动子进程，避免 Windows 下 `pnpm tsx` 冷启 TS 解释器导致的偶发启动失败
+    const distEntry = path.join(__dirname, '..', 'dist', 'index.esm.js');
+    const testScript = path.join(testFileDir, 'test-process.mjs');
     const trackingFile = path.join(testFileDir, 'execution-order.txt');
 
     // Clean up previous tracking file
@@ -75,25 +78,27 @@ describe('FileLocker', () => {
       // File doesn't exist, ignore
     }
 
+    // 子进程直接复用已导出的 FileStorageAdapter 的 locker（内部即 FileLocker），
+    // 通过 node 运行 .mjs，省去 tsx 冷启开销，跨进程文件锁语义不变。
+    // Windows 下 ESM import 必须使用 file:// URL，故对路径做 pathToFileURL 转换。
     const scriptContent = `
-      import FileLocker from '@/FileLocker';
+      import { pathToFileURL } from 'node:url';
+      import FileStorageAdapter from ${JSON.stringify(pathToFileURL(distEntry).href)};
       import fs from 'node:fs/promises';
-      import path from 'node:path';
-      
-      const locker = new FileLocker('${tempDir}');
+
+      const adapter = new FileStorageAdapter({ directory: ${JSON.stringify(tempDir)} });
+      const locker = adapter.locker;
       const resource = '${resource}';
       const processId = process.argv[2];
-      
+
       async function main() {
-        const trackingFile = path.join('${tempDir}', 'execution-order.txt');
-        const startTime = Date.now();
-        
+        const trackingFile = ${JSON.stringify(trackingFile)};
+
         try {
-          // Try to acquire lock with retry logic
           let lockAcquired = false;
           let attempts = 0;
           const maxAttempts = 50; // 5 seconds max wait
-          
+
           while (!lockAcquired && attempts < maxAttempts) {
             try {
               await locker.lock(resource);
@@ -101,28 +106,25 @@ describe('FileLocker', () => {
             } catch (lockError) {
               attempts++;
               if (attempts >= maxAttempts) {
-                // Write failed attempt to tracking file
                 await fs.appendFile(trackingFile, \`Process \${processId} failed to acquire lock after \${attempts} attempts at \${Date.now()}\\n\`);
                 process.exit(1);
               }
-              // Wait a bit before retrying
               await new Promise(resolve => setTimeout(resolve, 100));
             }
           }
-          
+
           const timestamp = Date.now();
           await fs.appendFile(trackingFile, \`Process \${processId} acquired lock at \${timestamp} after \${attempts} attempts\\n\`);
-          
-          // Simulate request processing
+
           await new Promise(resolve => setTimeout(resolve, 50));
-          
+
           await locker.unlock(resource);
           const releaseTimestamp = Date.now();
           await fs.appendFile(trackingFile, \`Process \${processId} released lock at \${releaseTimestamp}\\n\`);
-          
+
           process.exit(0);
         } catch (error) {
-          await fs.appendFile(trackingFile, \`Process \${processId} error: \${error.message} at \${Date.now()}\\n\`);
+          await fs.appendFile(trackingFile, \`Process \${processId} error: \${error && error.message} at \${Date.now()}\\n\`);
           process.exit(1);
         }
       }
@@ -137,7 +139,7 @@ describe('FileLocker', () => {
     const promises = [];
 
     for (let i = 0; i < 5; i += 1) {
-      const childProcess = spawn('pnpm', ['tsx', testScript, String(i)], {
+      const childProcess = spawn('node', [testScript, String(i)], {
         stdio: 'pipe',
         shell: true,
         cwd: path.join(__dirname, '..')

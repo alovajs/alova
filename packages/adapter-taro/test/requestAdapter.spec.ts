@@ -343,7 +343,12 @@ describe('request adapter', () => {
     });
 
     const { loading, data, downloading, error, onError, abort } = useRequest(Get);
-    await untilCbCalled(setTimeout, 150);
+    // 轮询等待首个下载进度事件触发后再中止，避免 Windows 计时抖动下 abort 早于进度回调（导致 downloading 仍为初始值）
+    let guard = 0;
+    while (downloading.value.loaded === 0 && guard < 50) {
+      await untilCbCalled(setTimeout, 20);
+      guard += 1;
+    }
     abort();
 
     await untilCbCalled(onError);

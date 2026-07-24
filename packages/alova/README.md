@@ -32,11 +32,9 @@ You don't have to throw away the axios or fetch you already know. alova sits rig
 Here is a paginated list with prefetch, auto-cache and auto-sync on create/update/delete — about five lines of code:
 
 ```javascript
-const todoList = (page, size) =>
-  alova.Get('/api/todos', { params: { page, size } });
+const todoList = (page, size) => alova.Get('/api/todos', { params: { page, size } });
 
-const { loading, data, page, pageSize, pageCount, total } =
-  usePagination(todoList);
+const { loading, data, page, pageSize, pageCount, total } = usePagination(todoList);
 // auto pagination · prefetch next page · auto cache sync on create/update/delete
 ```
 
@@ -44,13 +42,13 @@ const { loading, data, page, pageSize, pageCount, total } =
 
 Instead of listing what alova "is", here's what it solves for you:
 
-| The boilerplate you're tired of | What alova gives you | The payoff |
-| :--- | :--- | :--- |
-| Hand-writing pagination, forms, uploads, SSE states | `usePagination` / `useForm` / `useUploader` / `useSSE` | Up to 70% less boilerplate |
-| Server-side rate limiting & retries (incl. distributed) | `alova/server` | Capabilities React Query / SWR simply don't cover |
-| Rebuilding the same logic for every framework | One API set | Spans React / Vue / Svelte / Solid / mini-programs |
-| Manually maintaining cache invalidation | Multi-level cache (L1/L2) + declarative invalidation via `hitSource` | Cache invalidation is no longer painful |
-| Copy-pasting API info between docs and your editor | `worma` | API hints & docs show up right inside your editor |
+| The boilerplate you're tired of                         | What alova gives you                                                 | The payoff                                         |
+| :------------------------------------------------------ | :------------------------------------------------------------------- | :------------------------------------------------- |
+| Hand-writing pagination, forms, uploads, SSE states     | `usePagination` / `useForm` / `useUploader` / `useSSE`               | Up to 70% less boilerplate                         |
+| Server-side rate limiting & retries (incl. distributed) | `alova/server`                                                       | Capabilities React Query / SWR simply don't cover  |
+| Rebuilding the same logic for every framework           | One API set                                                          | Spans React / Vue / Svelte / Solid / mini-programs |
+| Manually maintaining cache invalidation                 | Multi-level cache (L1/L2) + declarative invalidation via `hitSource` | Cache invalidation is no longer painful            |
+| Copy-pasting API info between docs and your editor      | `worma`                                                              | API hints & docs show up right inside your editor  |
 
 And of course:
 
@@ -65,13 +63,13 @@ And of course:
 
 alova is honest about where it shines — and where a simpler tool is enough:
 
-| Your situation | Recommendation |
-| :--- | :--- |
-| Simple CRUD + caching | React Query / SWR are enough |
-| Complex admin / forms / pagination / uploads | ✅ alova is clearly a step ahead |
-| Cross-platform (Web + mini-program / uni-app / Taro) | ✅ One API set covers everything |
-| Server-side request governance (rate limit / retry / distributed) | ✅ alova is almost the only choice |
-| OpenAPI → type-safe code + AI-friendly API knowledge | ✅ Pair with `worma` (works out of the box with alova) |
+| Your situation                                                    | Recommendation                                         |
+| :---------------------------------------------------------------- | :----------------------------------------------------- |
+| Simple CRUD + caching                                             | React Query / SWR are enough                           |
+| Complex admin / forms / pagination / uploads                      | ✅ alova is clearly a step ahead                       |
+| Cross-platform (Web + mini-program / uni-app / Taro)              | ✅ One API set covers everything                       |
+| Server-side request governance (rate limit / retry / distributed) | ✅ alova is almost the only choice                     |
+| OpenAPI → type-safe code + AI-friendly API knowledge              | ✅ Pair with `worma` (works out of the box with alova) |
 
 Not sure alova is right for you? Read [When should you NOT use alova?](https://alova.js.org/about/comparison) for the honest reverse list before you commit.
 

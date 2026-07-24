@@ -80,6 +80,6 @@ export default {
     on(component, 'm', callback);
   },
   onUnmounted: (callback, { component }) => {
-    on(component, 'm', callback);
+    on(component, 'um', callback);
   }
 } as StatesHook<VueOptionExportType<unknown>>;
