@@ -133,5 +133,12 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "pnpm": {
+    "overrides": {
+      "alova": "workspace:*",
+      "@alova/mock": "workspace:*",
+      "@alova/psc": "workspace:*"
+    }
   }
 }

@@ -62,11 +62,9 @@
   "devDependencies": {
     "@alova/scripts": "workspace:*",
     "@types/node-ipc": "^9.2.3",
-    "alova": "workspace:*",
-    "electron": "^30.5.1"
+    "alova": "workspace:*"
   },
   "peerDependencies": {
-    "alova": "^3.0.20",
-    "electron": "^30.5.1"
+    "alova": "^3.0.20"
   }
 }

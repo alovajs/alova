@@ -3,8 +3,8 @@ import { ExplicitCacheAdapter, createPSCAdapter, createPSCSynchronizer, createSy
 import { forEach, key } from '@alova/shared';
 import { AlovaGlobalCacheAdapter, createAlova, queryCache } from 'alova';
 import GlobalFetch from 'alova/fetch';
-import { IpcMain, IpcRenderer } from 'electron';
 import EventEmitter from 'events';
+import type { IpcMain, IpcRenderer } from '@/defaults/electronSyncAdapter';
 import { Result, delay } from 'root/testUtils';
 
 beforeEach(() => {
