@@ -35,12 +35,10 @@ vi.mock('@sesamecare-oss/redlock', () => {
 
 // Mock ioredis
 vi.mock('ioredis', () => {
-  const mockRedis = vi.fn(() => {
-    return {
-      status: 'ready',
-      options: { host: 'localhost', port: 6379 }
-    };
-  });
+  const mockRedis = vi.fn(() => ({
+    status: 'ready',
+    options: { host: 'localhost', port: 6379 }
+  }));
 
   const mockCluster = vi.fn(() => {
     const clusterInstance = {
