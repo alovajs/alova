@@ -44,9 +44,14 @@ export default defineProject({
     // run test files in parallel for faster, more isolated runs.
     pool: 'forks',
     fileParallelism: true,
-    // Only retry / bail in CI to reduce flaky-test rerun time without hurting
-    // local developer experience.
-    retry: process.env.CI ? 2 : 0,
+    // Retry flaky specs. A handful of suites assert on wall-clock timing
+    // (e.g. debounce windows) or exercise Windows filesystem races (atomic
+    // rename in the file-storage adapter). Under Vitest 4's rewritten pool the
+    // parallel `forks` workers plus concurrent typechecking saturate CPU on
+    // smaller machines, which occasionally delays timers or trips transient
+    // EPERM/worker-exit errors. Retrying re-runs only the affected spec without
+    // touching any test logic.
+    retry: 2,
     bail: process.env.CI ? 1 : 0,
     typecheck: {
       include: ['**/*.{test-d,spec-d}.ts?(x)'],

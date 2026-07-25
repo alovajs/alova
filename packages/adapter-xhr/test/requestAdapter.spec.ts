@@ -1,7 +1,7 @@
 import { xhrRequestAdapter } from '@/index';
 import { createAlova } from 'alova';
-import { readFileSync } from 'fs';
-import path from 'path';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { Result, delay, untilReject } from 'root/testUtils';
 import { AlovaXHRResponse } from '~/typings';
 

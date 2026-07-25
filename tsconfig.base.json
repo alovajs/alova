@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "resolveJsonModule": true,
     "target": "es2021",
     "module": "esnext",
@@ -24,9 +23,9 @@
     "removeComments": false,
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
     "paths": {
-      "@alova/*": ["packages/*/src"],
+      "@alova/*": ["./packages/*/src"],
       "root/*": ["./internal/*"]
     }
   }

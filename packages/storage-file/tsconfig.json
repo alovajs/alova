@@ -1,17 +1,15 @@
-{
+﻿{
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "~/*": ["./*"],
-      "#/*": ["test/*"],
+      "#/*": ["./test/*"],
       "root/*": ["../../internal/*"]
     }
   },
   "ts-node": {
     "compilerOptions": {
-      "baseUrl": ".",
       "module": "nodenext",
       "moduleResolution": "nodenext",
       "esModuleInterop": true,

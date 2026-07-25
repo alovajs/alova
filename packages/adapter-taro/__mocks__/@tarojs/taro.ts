@@ -90,6 +90,15 @@ export default <TaroMockMap>{
     const timer = setTimeout(() => {
       clearInterval(progressTimer);
       if (!taroUploadConfig.error && options.success) {
+        // Emit a final 100% progress before completing. The interval above can
+        // be delayed or coalesced under CPU load, leaving `sent` short of (or
+        // beyond) `total`; this guarantees the last reported progress is exactly
+        // the completed state the tests assert on.
+        progressHandler.upload({
+          totalBytesExpectedToSend: total,
+          totalBytesSent: total,
+          progress: 1
+        });
         options.success({
           data: {
             url: options.url,
@@ -152,6 +161,12 @@ export default <TaroMockMap>{
     const timer = setTimeout(() => {
       clearInterval(progressTimer);
       if (!taroDownloadConfig.error && options.success) {
+        // Emit a final 100% progress before completing (see uploadFile above).
+        progressHandler.download({
+          totalBytesExpectedToWrite: total,
+          totalBytesWritten: total,
+          progress: 1
+        });
         options.success({
           filePath: 'test_path',
           tempFilePath: 'test_temp_path',

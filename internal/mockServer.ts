@@ -1,4 +1,4 @@
-import { DefaultBodyType, delay, http, HttpResponse, passthrough, StrictRequest } from 'msw';
+import { DefaultBodyType, delay, http, HttpResponse, StrictRequest } from 'msw';
 import { setupServer } from 'msw/node';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -25,7 +25,22 @@ async function result(code: number, req: StrictRequest<DefaultBodyType>, hasBody
         const formData = Object.fromEntries((await req.clone().formData()).entries());
         data.data = formData;
       } catch {
-        data.data = await (await req.blob()).text();
+        const bodyText = await (await req.clone().blob()).text();
+        // The XHR request adapter forwards a manually-set `content-type` header for
+        // string bodies, but the MSW XHR interceptor drops request headers on
+        // string-body requests. As a result an `application/x-www-form-urlencoded`
+        // payload arrives without a content type, so `req.formData()` rejects above.
+        // Parse the query-string body heuristically so the server echoes the decoded
+        // fields back (e.g. `{ post1: 'p1', post2: 'p2' }`).
+        if (/^[^=&?\s]*=[^&]*(&[^=&?\s]*=[^&]*)*$/.test(bodyText)) {
+          try {
+            data.data = Object.fromEntries(new URLSearchParams(bodyText));
+          } catch {
+            data.data = bodyText;
+          }
+        } else {
+          data.data = bodyText;
+        }
       }
     }
   }
@@ -63,8 +78,14 @@ const mockServer = setupServer(
   ),
   http.get(`${baseURL}/unit-test-error`, () => HttpResponse.error()),
   http.post(`${baseURL}/unit-test-error`, () => HttpResponse.error()),
-  http.options(`${baseURL}/unit-test-passthrough`, () => passthrough()),
-  http.get(`${baseURL}/unit-test-passthrough`, () => passthrough()),
+  // Backs the XHR adapter's cancellation tests (abort). The request is left
+  // pending forever; the adapter rejects the response promise directly when
+  // `abort()` is called (see `packages/adapter-xhr/src/requestAdapter.ts`).
+  // We intentionally do NOT use a real TCP server here: on Windows a pending
+  // connection at worker/thread exit trips a libuv `handle->reqs_pending == 0`
+  // assertion and crashes the run.
+  http.options(`${baseURL}/unit-test-passthrough`, () => new Promise(() => {})),
+  http.get(`${baseURL}/unit-test-passthrough`, () => new Promise(() => {})),
   http.post(`${baseURL}/unit-test`, ({ request }) => result(200, request, true)),
   http.delete(`${baseURL}/unit-test`, ({ request }) => result(200, request, true)),
   http.put(`${baseURL}/unit-test`, ({ request }) => result(200, request, true)),

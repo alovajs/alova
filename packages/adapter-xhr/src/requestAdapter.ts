@@ -28,7 +28,9 @@ export default function requestAdapter({ onCreate = noop }: AlovaXHRAdapterOptio
     let uploadHandler: ProgressUpdater = noop;
 
     let xhr: XMLHttpRequest;
+    let rejectResponse: (reason?: any) => void = noop;
     const responsePromise = new Promise<AlovaXHRResponse>((resolve, reject) => {
+      rejectResponse = reject;
       try {
         xhr = new XMLHttpRequest();
         xhr.open(type, url, trueValue, auth?.username, auth?.password);
@@ -135,7 +137,21 @@ export default function requestAdapter({ onCreate = noop }: AlovaXHRAdapterOptio
       response: () => responsePromise,
       headers: () => responsePromise.then(res => res.headers),
       abort: () => {
-        xhr.abort();
+        // `@mswjs/interceptors` (used by MSW under jsdom) only calls jsdom's
+        // native `XMLHttpRequest.send()` once the MSW request handler settles,
+        // so when a request is aborted while still `OPENED` (handler pending),
+        // jsdom's `send` flag is never set and its native `abort()` dispatches no
+        // `abort` event — leaving the response promise unsettled. Calling
+        // `abort()` is still a valid cancellation, so reject the promise directly
+        // to match the other adapters (axios/taro), which reject on abort
+        // regardless of how far the request has progressed. `xhr.abort()` is
+        // still invoked to close the underlying connection.
+        // (Newer `@mswjs/interceptors` (>=0.42) calls `send()` eagerly and fixes
+        // this, but is incompatible with the pinned `msw` for POST interception.)
+        if (!xhr || xhr.readyState <= 1 /* UNSENT or OPENED (not sent yet) */) {
+          rejectResponse(err('The user aborted a request.'));
+        }
+        xhr?.abort();
       },
       onDownload: handler => {
         downloadHandler = handler;

@@ -421,7 +421,7 @@ declare const deepClone: <T>(obj: T) => T;
 //#region src/queueCallback.d.ts
 type CallbackFn = () => void | Promise<void>;
 declare class QueueCallback {
-  protected limit?: (number | null) | undefined;
+  protected limit?: number | null | undefined;
   private callbackQueue;
   private isProcessing;
   private interrupt;
@@ -429,7 +429,7 @@ declare class QueueCallback {
    * @param [limit=null] no limit if set undefined or null
    * @param [initialProcessing=false]
    */
-  constructor(limit?: (number | null) | undefined, initialProcessing?: boolean);
+  constructor(limit?: number | null | undefined, initialProcessing?: boolean);
   /**
    * Adds a callback function to the callback queue.
    * If a limit is set and the queue has reached its limit, the callback will not be added.

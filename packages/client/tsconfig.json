@@ -1,11 +1,10 @@
-{
+﻿{
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "~/*": ["./*"],
-      "#/*": ["test/*"],
+      "#/*": ["./test/*"],
       "root/*": ["../../internal/*"]
     },
     "skipLibCheck": false
