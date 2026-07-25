@@ -1,3 +1,4 @@
+/* eslint-disable prefer-arrow-callback */
 import type { RedisClusterStorageAdapterOptions, RedisStorageInstance } from '@/RedisStorageAdapter';
 import RedisStorageAdapter from '@/RedisStorageAdapter';
 import { createAlova, queryCache } from 'alova';
@@ -8,23 +9,25 @@ import { Mock } from 'vitest';
 vi.mock('ioredis', () => {
   const data: Record<string, string> = {};
 
-  const RedisMock = vi.fn(() => ({
-    set: vi.fn((key: string, value: string) => {
-      data[key] = value;
-      return Promise.resolve('OK');
-    }),
-    get: vi.fn((key: string) => Promise.resolve(data[key] || null)),
-    del: vi.fn((key: string) => {
-      const count = key in data ? 1 : 0;
-      delete data[key];
-      return Promise.resolve(count);
-    }),
-    flushAll: vi.fn(() => {
-      Object.keys(data).forEach(key => delete data[key]);
-      return Promise.resolve('OK');
-    }),
-    getAll: vi.fn(() => Promise.resolve({ ...data }))
-  }));
+  const RedisMock = vi.fn().mockImplementation(function () {
+    return {
+      set: vi.fn((key: string, value: string) => {
+        data[key] = value;
+        return Promise.resolve('OK');
+      }),
+      get: vi.fn((key: string) => Promise.resolve(data[key] || null)),
+      del: vi.fn((key: string) => {
+        const count = key in data ? 1 : 0;
+        delete data[key];
+        return Promise.resolve(count);
+      }),
+      flushAll: vi.fn(() => {
+        Object.keys(data).forEach(key => delete data[key]);
+        return Promise.resolve('OK');
+      }),
+      getAll: vi.fn(() => Promise.resolve({ ...data }))
+    };
+  });
 
   return { default: RedisMock, Cluster: RedisMock };
 });
