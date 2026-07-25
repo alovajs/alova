@@ -4,7 +4,7 @@ import { createAlova } from 'alova';
 import GlobalFetch from 'alova/fetch';
 import VueHook from 'alova/vue';
 import { HttpResponse, http } from 'msw';
-import { setupServer } from 'msw/node';
+import mockServer from '../../../internal/mockServer';
 
 interface MockResponse {
   code: number;
@@ -197,67 +197,70 @@ describe('reteLimit in server', () => {
   let alova = getAlovaInstance(baseURL);
   let limiter = createDefaultRateLimiter();
 
-  const mockServer = setupServer(
-    http.post(`${baseURL}/login`, async ({ request }) => {
-      const { username, password } = (await request.json()) as any;
-      if (username === 'user' && password === 'password') {
-        return HttpResponse.json({
-          code: 0,
-          msg: 'success',
-          data: { token: '000-111-222-333-444' }
-        });
-      }
+  // Register the 9527 handlers on the SAME shared mock server that is already
+  // listening globally (internal/mockServer, see vitest.setup.ts). Creating a
+  // second setupServer and calling listen() no longer works under MSW 2.x +
+  // Vitest 4: the global interceptor intercepts first, finds no 9527 handler,
+  // and falls through to the real network (ECONNREFUSED). Adding handlers via
+  // mockServer.use() keeps them on the single active interceptor.
+  const loginHandler = http.post(`${baseURL}/login`, async ({ request }) => {
+    const { username, password } = (await request.clone().json()) as any;
+    if (username === 'user' && password === 'password') {
       return HttpResponse.json({
-        code: -1,
-        msg: 'failed',
+        code: 0,
+        msg: 'success',
+        data: { token: '000-111-222-333-444' }
+      });
+    }
+    return HttpResponse.json({
+      code: -1,
+      msg: 'failed',
+      data: null
+    });
+  });
+
+  const loginEntryHandler = http.post(`${baseURL}/login-entry`, async ({ request }) => {
+    const { username, password } = (await request.clone().json()) as any;
+    if (!username) {
+      return HttpResponse.json(
+        {
+          code: -1,
+          msg: 'lack of username',
+          data: null
+        },
+        { status: 403 }
+      );
+    }
+
+    const limitedGetter = limiter(alova.Post<MockResponse>('/login', { username, password }), {
+      key: () => username as string
+    });
+
+    const limitedResult = await limitedGetter.get();
+    if (limitedResult && limitedResult.remainingPoints <= 0) {
+      return HttpResponse.json({
+        code: -100,
+        msg: 'too many requests',
         data: null
       });
-    }),
+    }
 
-    http.post(`${baseURL}/login-entry`, async ({ request }) => {
-      const { username, password } = (await request.json()) as any;
-      if (!username) {
-        return HttpResponse.json(
-          {
-            code: -1,
-            msg: 'lack of username',
-            data: null
-          },
-          { status: 403 }
-        );
-      }
+    const res = await limitedGetter.send();
 
-      const limitedGetter = limiter(alova.Post<MockResponse>('/login', { username, password }), {
-        key: () => username as string
-      });
+    if (res.code === 0) {
+      await limitedGetter.delete();
+    }
 
-      const limitedResult = await limitedGetter.get();
-      if (limitedResult && limitedResult.remainingPoints <= 0) {
-        return HttpResponse.json({
-          code: -100,
-          msg: 'too many requests',
-          data: null
-        });
-      }
+    return HttpResponse.json(res);
+  });
 
-      const res = await limitedGetter.send();
+  const testHandler = http.get(`${baseURL}/test`, () => HttpResponse.json({ name: 123 }));
 
-      if (res.code === 0) {
-        await limitedGetter.delete();
-      }
-
-      return HttpResponse.json(res);
-    }),
-    http.get(`${baseURL}/test`, () => HttpResponse.json({ name: 123 }))
-  );
-
-  mockServer.listen();
   beforeEach(() => {
-    mockServer.resetHandlers();
     alova = getAlovaInstance(baseURL);
     limiter = createDefaultRateLimiter();
+    mockServer.use(loginHandler, loginEntryHandler, testHandler);
   });
-  afterAll(() => mockServer.close());
 
   test('should login', async () => {
     const alova = getAlovaInstance(baseURL);

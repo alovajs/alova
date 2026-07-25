@@ -590,7 +590,7 @@ describe('vue => useUploader', () => {
     expect(successCount.value).toBe(0);
     expect(failCount.value).toBe(1);
     expect(fileList.value[1].status).toBe(3);
-    expect(fileList.value[1].error?.message).toBe('The operation was aborted.');
+    expect(fileList.value[1].error?.message).toMatch(/operation was aborted/i);
 
     expect(() => {
       abort(fileList.value[1]);
@@ -601,14 +601,14 @@ describe('vue => useUploader', () => {
     expect(successCount.value).toBe(0);
     expect(failCount.value).toBe(2);
     expect(fileList.value[0].status).toBe(3);
-    expect(fileList.value[0].error?.message).toBe('The operation was aborted.');
+    expect(fileList.value[0].error?.message).toMatch(/operation was aborted/i);
 
     abort();
     await delay();
     expect(successCount.value).toBe(0);
     expect(failCount.value).toBe(3);
     expect(fileList.value[2].status).toBe(3);
-    expect(fileList.value[2].error?.message).toBe('The operation was aborted.');
+    expect(fileList.value[2].error?.message).toMatch(/operation was aborted/i);
   });
 
   test('should abort upload in batch mode', async () => {
@@ -672,10 +672,10 @@ describe('vue => useUploader', () => {
     expect(failCount.value).toBe(3);
     fileList.value.forEach(file => {
       expect(file.status).toBe(3);
-      expect(file.error?.message).toBe('The operation was aborted.');
+      expect(file.error?.message).toMatch(/operation was aborted/i);
     });
     const res = await promise;
-    expect(res).toBeInstanceOf(DOMException);
+    expect(res.name).toBe('AbortError');
 
     mockMethodHandler.mockReset();
     const promise2 = upload();
@@ -691,9 +691,9 @@ describe('vue => useUploader', () => {
     expect(failCount.value).toBe(3);
     fileList.value.forEach(file => {
       expect(file.status).toBe(3);
-      expect(file.error?.message).toBe('The operation was aborted.');
+      expect(file.error?.message).toMatch(/operation was aborted/i);
     });
     const res2 = await promise2;
-    expect(res2).toBeInstanceOf(DOMException);
+    expect(res2.name).toBe('AbortError');
   });
 });

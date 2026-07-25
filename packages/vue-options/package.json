@@ -41,10 +41,12 @@
   "devDependencies": {
     "@alova/mock": "workspace:*",
     "@alova/scripts": "workspace:*",
+    "@testing-library/vue": "^8.1.0",
     "@testing-library/vue2": "npm:@testing-library/vue@^5.9.0",
     "@vitejs/plugin-vue2": "^2.3.1",
     "@vue2/compiler-sfc": "npm:@vue/compiler-sfc@^2.7.16",
     "alova": "workspace:*",
+    "vue": "^3.5.13",
     "vue2": "npm:vue@^2.7.16"
   }
 }

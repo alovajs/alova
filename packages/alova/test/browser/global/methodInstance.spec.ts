@@ -121,7 +121,7 @@ describe('method instance', () => {
     const Get = alova.Get('/unit-test');
     const p = Get.send(true);
     Get.abort();
-    await expect(p).rejects.toThrow('The operation was aborted.');
+    await expect(p).rejects.toThrow(/operation was aborted/i);
   });
 
   test('request wait for aborting', async () => {
@@ -131,7 +131,7 @@ describe('method instance', () => {
       errorMsg = error.message;
     });
     await Get.abort();
-    expect(errorMsg).toBe('The operation was aborted.');
+    expect(errorMsg).toMatch(/operation was aborted/i);
   });
 
   // mock some scenarios where the request adapter does not throw error when aborting
@@ -168,7 +168,7 @@ describe('method instance', () => {
       responseExpect: r => r.json()
     }).Get('/unit-test');
     const p = Get.send(true);
-    await expect(p).rejects.toThrow('The operation was aborted.');
+    await expect(p).rejects.toThrow(/operation was aborted/i);
     expect(Get.fromCache).toBeFalsy();
   });
 

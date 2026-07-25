@@ -1,4 +1,5 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { svelteTesting } from '@testing-library/svelte/vite';
 import react from '@vitejs/plugin-react';
 import vue from '@vitejs/plugin-vue';
 import solid from 'vite-plugin-solid';
@@ -14,7 +15,10 @@ export default mergeConfig(
         include: /\.solid\.spec\.(t|j)sx/
       }),
       react(),
-      svelte()
+      svelte(),
+      // Adds @testing-library/svelte to ssr.noExternal so its rune-based
+      // (.svelte.js) modules are compiled by the svelte plugin under Vitest.
+      svelteTesting()
     ] as Plugin[],
     resolve: {
       conditions: ['development', 'browser']

@@ -284,8 +284,11 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
 
       uploadingMethod.onUpload(({ loaded, total }) => {
         forEach(filesToUpload, file => {
-          file.progress.uploaded = loaded;
-          file.progress.total = total;
+          // The upload progress reported by the request adapter (e.g. XHR) is measured in
+          // serialized request-body bytes, which differs from the actual file size stored in
+          // `file.progress.total`. Scale it back to file-size units so it stays consistent with
+          // batch mode and never exceeds `total`.
+          file.progress.uploaded = total > 0 ? loaded * (file.progress.total / total) : loaded;
         });
       });
 

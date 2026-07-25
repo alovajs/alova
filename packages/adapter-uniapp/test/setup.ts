@@ -82,6 +82,15 @@ const uniMockMap: UniMockMap = {
     const timer = setTimeout(() => {
       clearInterval(progressTimer);
       if (!uniUploadConfig.error && options.success) {
+        // Emit a final 100% progress before completing. The interval above can
+        // be delayed or coalesced under CPU load, leaving `sent` short of (or
+        // beyond) `total`; this guarantees the last reported progress is exactly
+        // the completed state the tests assert on.
+        progressHandler.upload({
+          totalBytesExpectedToSend: total,
+          totalBytesSent: total,
+          progress: 1
+        });
         options.success({
           data: 'success',
           statusCode: 200
@@ -131,6 +140,12 @@ const uniMockMap: UniMockMap = {
     const timer = setTimeout(() => {
       clearInterval(progressTimer);
       if (!uniDownloadConfig.error && options.success) {
+        // Emit a final 100% progress before completing (see uploadFile above).
+        progressHandler.download({
+          totalBytesExpectedToWrite: total,
+          totalBytesWritten: total,
+          progress: 1
+        });
         options.success({
           tempFilePath: 'test_path',
           statusCode: 200
