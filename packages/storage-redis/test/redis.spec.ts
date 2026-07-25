@@ -8,7 +8,7 @@ import { Mock } from 'vitest';
 vi.mock('ioredis', () => {
   const data: Record<string, string> = {};
 
-  const RedisMock = vi.fn(function () {
+  const RedisMock = vi.fn(() => {
     return {
       set: vi.fn((key: string, value: string) => {
         data[key] = value;
