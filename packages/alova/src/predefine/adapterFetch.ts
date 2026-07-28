@@ -30,6 +30,44 @@ export default function adapterFetch(
     const isContentTypeSet = /content-type/i.test(ObjectCls.keys(headers).join());
     const isFormData = data && data.toString() === '[object FormData]';
 
+    let cleaned = false;
+    let abortTimer: NodeJS.Timeout | number;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      if (abortTimer !== undefined) clearTimeoutTimer(abortTimer);
+      if (externalAbortHandler) {
+        externalSignal!.removeEventListener('abort', externalAbortHandler);
+        externalAbortHandler = null;
+      }
+    };
+
+    const doAbort = () => {
+      ctrl.abort();
+      cleanup();
+    };
+
+    // If the interruption time is set, the request will be interrupted after the specified time.
+    let isTimeout = falseValue;
+    if (timeout > 0) {
+      abortTimer = setTimeoutFn(() => {
+        isTimeout = trueValue;
+        doAbort();
+      }, timeout);
+    }
+
+    // If a signal is passed in, listen for its abort signal.
+    let externalAbortHandler: (() => void) | null = null;
+    const externalSignal = adapterConfig.signal;
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        doAbort();
+      } else {
+        externalAbortHandler = () => doAbort();
+        externalSignal.addEventListener('abort', externalAbortHandler, { once: true });
+      }
+    }
+
     // When the content type is not set and the data is not a form data object, the content type is set to application/json by default.
     if (!isContentTypeSet && !isFormData) {
       headers['Content-Type'] = 'application/json; charset=UTF-8';
@@ -50,23 +88,12 @@ export default function adapterFetch(
       body: isBodyData(data) ? data : JSONStringify(data)
     });
 
-    // If the interruption time is set, the request will be interrupted after the specified time.
-    let abortTimer: NodeJS.Timeout | number;
-    let isTimeout = falseValue;
-    if (timeout > 0) {
-      abortTimer = setTimeoutFn(() => {
-        isTimeout = trueValue;
-        ctrl.abort();
-      }, timeout);
-    }
+    fetchPromise.finally(cleanup);
 
     return {
       response: () =>
         fetchPromise.then(
           response => {
-            // Clear interrupt processing after successful request
-            clearTimeoutTimer(abortTimer);
-
             // Response's readable can only be read once and needs to be cloned before it can be reused.
             return response.clone();
           },
@@ -116,10 +143,7 @@ export default function adapterFetch(
         );
       },
       /* c8 ignore stop */
-      abort: () => {
-        ctrl.abort();
-        clearTimeoutTimer(abortTimer);
-      }
+      abort: doAbort
     };
   };
 }
