@@ -23,6 +23,20 @@
 ![strategies](https://img.shields.io/badge/strategies-20%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## Sponsors
+
+Thanks to these generous sponsors for supporting alova's development.
+
+<p align="center">
+  <a href="https://watchthis.dev" target="_blank" rel="noopener noreferrer">
+    <img src="https://alova.js.org/img/sponsors/watchthis-dev-500.png" alt="watchthis.dev" height="40" />
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://worma.js.org" target="_blank" rel="noopener noreferrer">
+    <img src="https://worma.js.org/img/logo.svg" alt="worma" height="40" />
+  </a>
+</p>
+
 ## What is alova?
 
 alova (pronounced /əˈləʊva/) is the **request strategy layer for JavaScript**. You've hand-written pagination, forms, uploads and retries countless times — now just pick one of 20+ ready-made request strategies and cut your request code by up to **70%**.
