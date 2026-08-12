@@ -20,6 +20,20 @@
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## 赞助商
+
+感谢以下慷慨的赞助商对 alova 开发的支持。
+
+<p align="center">
+  <a href="https://watchthis.dev" target="_blank" rel="noopener noreferrer">
+    <img src="https://alova.js.org/img/sponsors/watchthis-dev-500.png" alt="watchthis.dev" height="40" />
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://worma.js.org" target="_blank" rel="noopener noreferrer">
+    <img src="https://worma.js.org/img/logo.svg" alt="worma" height="40" />
+  </a>
+</p>
+
 ## 特性
 
 - 简单易用，[观看视频](https://alova.js.org/video-tutorial)5分钟上手。

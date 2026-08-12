@@ -22,6 +22,20 @@
 ![strategies](https://img.shields.io/badge/strategies-20%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## 赞助商
+
+感谢以下慷慨的赞助商对 alova 开发的支持。
+
+<p align="center">
+  <a href="https://watchthis.dev" target="_blank" rel="noopener noreferrer">
+    <img src="https://alova.js.org/img/sponsors/watchthis-dev-500.png" alt="watchthis.dev" height="40" />
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://worma.js.org" target="_blank" rel="noopener noreferrer">
+    <img src="https://worma.js.org/img/logo.svg" alt="worma" height="40" />
+  </a>
+</p>
+
 ## 什么是 alova？
 
 alova（读作 /əˈləʊva/）是 JavaScript 的**请求策略层（request strategy layer）**。分页、表单、上传、重试这些逻辑你已经手写过无数遍，现在只需直接使用 20+ 个开箱即用的请求策略，最多可减少 **70% 的请求代码**。
