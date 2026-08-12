@@ -1,5 +1,11 @@
 # alova
 
+## 3.5.4
+
+### Patch Changes
+
+- [#851](https://github.com/alovajs/alova/pull/851) [`6160c70`](https://github.com/alovajs/alova/commit/6160c701bd38896f90c30178a2642c01c3fdd795) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - docs: add sponsors section to README files
+
 ## 3.5.3
 
 ### Patch Changes
