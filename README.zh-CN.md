@@ -28,11 +28,11 @@
 
 <p align="center">
   <a href="https://watchthis.dev" target="_blank" rel="noopener noreferrer">
-    <img src="https://alova.js.org/img/sponsors/watchthis-dev-500.png" alt="watchthis.dev" height="40" />
+    <img src="https://alova.js.org/img/sponsors/watchthis-dev-500.png" alt="watchthis.dev" height="80" />
   </a>
   &nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://worma.js.org" target="_blank" rel="noopener noreferrer">
-    <img src="https://worma.js.org/img/logo.svg" alt="worma" height="40" />
+    <img src="https://worma.js.org/img/logo.svg" alt="worma" height="80" />
   </a>
 </p>
 
