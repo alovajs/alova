@@ -40,11 +40,10 @@ export default {
       component[dataKey][key] = newValue;
     });
   },
-  effectRequest({ handler, removeStates, immediate, watchingStates }, referingObject) {
+  effectRequest({ handler, immediate, watchingStates }, referingObject) {
     // It needs to be executed asynchronously, and the component and data key are injected into the config in the map alova hook.
     setTimeout(() => {
       const { component, dataKey } = referingObject;
-      on(component, 'um', removeStates);
       immediate && handler();
       let timer: NodeJS.Timeout | void;
       (watchingStates || []).forEach((state, i) => {
@@ -79,7 +78,11 @@ export default {
   onMounted: (callback, { component }) => {
     on(component, 'm', callback);
   },
-  onUnmounted: (callback, { component }) => {
-    on(component, 'um', callback);
+  onUnmounted: (callback, referingObject) => {
+    // In vue-options the `component` is injected into the refering object by the
+    // map alova hook. Bind directly when present; otherwise defer to the next
+    // tick so the unmount handler lands once `component` becomes available.
+    const bind = () => on(referingObject.component, 'um', callback);
+    referingObject.component ? bind() : setTimeout(bind);
   }
 } as StatesHook<VueOptionExportType<unknown>>;

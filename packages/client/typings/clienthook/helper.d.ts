@@ -39,6 +39,7 @@ export declare function statesHookHelper<AG extends AlovaGenerics>(
   watch: (source: (GeneralState | FrameworkReadableState<any, string>)[], callback: () => void) => void;
   onMounted: (callback: () => void) => void;
   onUnmounted: (callback: () => void) => void;
+  effectEvent: (setup: () => void | (() => void)) => void;
   /**
    * refering object that sharing some value with this object.
    */

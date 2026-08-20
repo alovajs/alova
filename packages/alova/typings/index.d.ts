@@ -239,7 +239,6 @@ export interface FrontRequestState<L = any, R = any, E = any, D = any, U = any> 
 export type MergedStatesMap = Record<string, FrameworkState<any, string>>;
 export interface EffectRequestParams<E> {
   handler: (...args: any[]) => void;
-  removeStates: () => void;
   frontStates: MergedStatesMap;
   watchingStates?: E[];
   immediate: boolean;
@@ -360,6 +359,22 @@ export interface StatesHook<SE extends StatesExport<any>> {
    * @param referingObject refering object
    */
   onUnmounted: (callback: () => void, referingObject: ReferingObject) => void;
+
+  /**
+   * Bind an effect that subscribes to a resource and returns a cleanup function,
+   * which is called when the component is unmounted.
+   *
+   * Unlike `onUnmounted`, this keeps the subscription (setup) and cleanup paired
+   * together so they can be re-run symmetrically. This is required by React
+   * Strict Mode, which double-invokes effects (mount → unmount → mount): the
+   * setup/cleanup pair must be able to re-subscribe after the simulated unmount.
+   * A bare `onUnmounted(off)` cannot re-subscribe, so handlers removed during
+   * the simulated unmount would be permanently lost.
+   * See https://github.com/alovajs/alova/issues/846
+   * @param setup a function that performs the subscription and returns an unsubscribe/cleanup function
+   * @param referingObject refering object
+   */
+  effectEvent?: (setup: () => void | (() => void), referingObject: ReferingObject) => void;
 }
 
 export type GlobalCacheConfig<AG extends AlovaGenerics> = Partial<Record<MethodType, CacheConfig<AG>>> | null;

@@ -11,11 +11,7 @@ export default {
   update: (newVal, state) => {
     state.value = newVal;
   },
-  effectRequest({ handler, removeStates, immediate, watchingStates }) {
-    // if call in component, remove current hook states when unmounting component
-    if (getCurrentInstance()) {
-      onUnmounted(removeStates);
-    }
+  effectRequest({ handler, immediate, watchingStates }) {
     immediate && handler();
 
     forEach(watchingStates || [], (state, i) => {

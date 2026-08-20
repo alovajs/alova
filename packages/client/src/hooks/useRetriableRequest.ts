@@ -39,9 +39,18 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
 ) => {
   const { retry = 3, backoff = { delay: 1000 }, middleware = noop } = config;
 
-  const { ref: useFlag$, exposeProvider, __referingObj: referingObject } = statesHookHelper(promiseStatesHook());
+  const {
+    ref: useFlag$,
+    exposeProvider,
+    effectEvent,
+    __referingObj: referingObject
+  } = statesHookHelper(promiseStatesHook());
 
-  const eventManager = createEventManager<RetriableEvents<AG, Args>>();
+  // Keep the eventManager stable across renders (via ref/useFlag$) so the retry/fail
+  // emit callbacks (captured in middleware/setTimeout) and the onRetry/onFail binders
+  // always operate on the same instance. Otherwise the emit callbacks would fire on an
+  // older eventManager while `effectEvent` re-subscribes handlers onto a fresh one.
+  const eventManager = useFlag$(createEventManager<RetriableEvents<AG, Args>>()).current;
   const retryTimes = useFlag$(0);
   const stopManuallyError = useFlag$(undefinedValue as Error | undefined); // Stop error object, has value when stop is triggered manually
   const methodInstanceLastest = useFlag$(undefinedValue as Method<AG> | undefined);
@@ -171,7 +180,8 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
    * @param handler Retry event callback
    */
   const onRetry = (handler: RetryHandler<AG, Args>) => {
-    eventManager.on(RetryEventKey, event => handler(event));
+    // Auto-unbind on the calling component's unmount (#834/#846).
+    effectEvent(() => eventManager.on(RetryEventKey, event => handler(event)));
   };
 
   /**
@@ -184,7 +194,8 @@ export default <AG extends AlovaGenerics, Args extends any[] = any[]>(
    * @param handler Failure event callback
    */
   const onFail = (handler: FailHandler<AG, Args>) => {
-    eventManager.on(FailEventKey, event => handler(event));
+    // Auto-unbind on the calling component's unmount (#834/#846).
+    effectEvent(() => eventManager.on(FailEventKey, event => handler(event)));
   };
 
   return exposeProvider({

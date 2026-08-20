@@ -227,6 +227,19 @@ export function statesHookHelper<AG extends AlovaGenerics>(
       statesHook.watch(mapDeps(source), callback, referingObject),
     onMounted: (callback: () => void) => statesHook.onMounted(callback, referingObject),
     onUnmounted: (callback: () => void) => statesHook.onUnmounted(callback, referingObject),
+    effectEvent: (setup: () => void | (() => void)) => {
+      // Prefer the framework-provided implementation, which keeps the
+      // subscription and cleanup paired symmetrically (required for React
+      // Strict Mode, see https://github.com/alovajs/alova/issues/846).
+      // Otherwise fall back to a synchronous subscription with an unmount
+      // cleanup (the original #834 behavior for Vue/Solid/Svelte/Nuxt):
+      // https://github.com/alovajs/alova/pull/834
+      if (isFn(statesHook.effectEvent)) {
+        return statesHook.effectEvent(setup, referingObject);
+      }
+      const cleanup = setup();
+      isFn(cleanup) && statesHook.onUnmounted(cleanup, referingObject);
+    },
     memorize,
 
     /**

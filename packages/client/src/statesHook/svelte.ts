@@ -19,9 +19,7 @@ export default {
   update: (newVal, state) => {
     state.set(newVal);
   },
-  effectRequest({ handler, removeStates, immediate, watchingStates }) {
-    // Remove the corresponding state when the component is unmounted
-    !isSSR && onDestroy(removeStates);
+  effectRequest({ handler, immediate, watchingStates }) {
     onMount(() => {
       immediate && handler();
     });

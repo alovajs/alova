@@ -85,7 +85,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
   } = config;
   // ! Temporarily does not support specifying abortLast
   const abortLast = trueValue;
-  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider, memorize } =
+  const { create, ref, onMounted, onUnmounted, objectify, exposeProvider, memorize, effectEvent } =
     statesHookHelper<AG>(promiseStatesHook());
 
   const usingArgs = ref<[...Args, ...any[]]>([] as any);
@@ -100,17 +100,25 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   let responseUnified: RespondedHandler<AG> | RespondedHandlerRecord<AG> | undefined;
 
-  const eventManager = createEventManager<SSEEvents<Data, AG, Args>>();
+  // Keep the eventManager stable across renders (via `ref`) so the memorized SSE
+  // event handlers (esOpen/esMessage/esError) and the onOpen/onMessage/onError
+  // binders always operate on the same instance. Otherwise esOpen (captured once
+  // by `memorize`/`useCallback`) would emit on the first render's eventManager,
+  // while `effectEvent` keeps re-subscribing handlers onto a freshly-created one.
+  const eventManager = ref(createEventManager<SSEEvents<Data, AG, Args>>()).current;
   // UseCallback object that stores custom events, where key is eventName
   const customEventMap = ref(new Map<string, ReturnType<typeof useCallback>>());
   const onOpen = (handler: (event: AlovaSSEEvent<AG, Args>) => void) => {
-    eventManager.on(SSEOpenEventKey, handler);
+    // Auto-unbind on the calling component's unmount (#834/#846).
+    effectEvent(() => eventManager.on(SSEOpenEventKey, handler));
   };
   const onMessage = (handler: <Data>(event: AlovaSSEMessageEvent<Data, AG, Args>) => void) => {
-    eventManager.on(SSEMessageEventKey, handler);
+    // Auto-unbind on the calling component's unmount (#834/#846).
+    effectEvent(() => eventManager.on(SSEMessageEventKey, handler));
   };
   const onError = (handler: (event: AlovaSSEErrorEvent<AG, Args>) => void) => {
-    eventManager.on(SSEErrorEventKey, handler);
+    // Auto-unbind on the calling component's unmount (#834/#846).
+    effectEvent(() => eventManager.on(SSEErrorEventKey, handler));
   };
 
   const responseSuccessHandler = ref<RespondedHandler<AG>>($self);
@@ -383,10 +391,9 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     close();
 
     // The above use of eventSource.removeEventListener just disconnects eventSource and trigger.
-    // Here is the cancellation of the event registration in the useCallback object
-    eventManager.off(SSEOpenEventKey);
-    eventManager.off(SSEMessageEventKey);
-    eventManager.off(SSEErrorEventKey);
+    // Here is the cancellation of the event registration in the useCallback object.
+    // Note: onOpen/onMessage/onError handlers are already unbound individually by their
+    // own `effectEvent` cleanup, so no full `eventManager.off(...)` is needed here.
     offCustomEvent();
   });
 
