@@ -355,4 +355,23 @@ describe('request adapter', () => {
     expect(downloading.value).toEqual({ total: 200, loaded: 60 });
     expect(error.value?.message).toBe('downloadFile:fail abort');
   });
+
+  test('progressThrottle throttles progress updates but flushes the final 100%', async () => {
+    const alovaInst = createAlova({
+      baseURL: 'http://xxx',
+      ...AdapterUniapp()
+    });
+
+    const Get = alovaInst.Get<UniNamespace.DownloadSuccessData>('/unit-test', {
+      requestType: 'download',
+      filePath: 'http://file_path'
+    });
+
+    // With an aggressive throttle window, intermediate frames are coalesced but
+    // the last (100%) frame must still be flushed so the progress bar can finish.
+    const { downloading, onSuccess } = useRequest(Get, { progressThrottle: 1000 });
+    await untilCbCalled(onSuccess);
+    await delay(1200);
+    expect(downloading.value).toEqual({ total: 200, loaded: 200 });
+  });
 });

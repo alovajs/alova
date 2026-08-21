@@ -253,7 +253,7 @@ describe('request adapter', () => {
 
     const { loading, data, uploading, downloading, error, onSuccess } = useRequest(Post);
     await untilCbCalled(onSuccess);
-    expect(mockFn).toBeCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledTimes(1);
     expect(loading.value).toBeFalsy();
     expect(data.value).toStrictEqual({ header: {}, url: 'http://xxx/unit-test' });
     expect(uploading.value).toEqual({ total: 200, loaded: 200 });
@@ -356,5 +356,24 @@ describe('request adapter', () => {
     expect(data.value).toBeUndefined();
     expect(downloading.value).toEqual({ total: 200, loaded: 40 });
     expect(error.value?.message).toBe('downloadFile:fail abort');
+  });
+
+  test('progressThrottle throttles progress updates but flushes the final 100%', async () => {
+    const alovaInst = createAlova({
+      baseURL: 'http://xxx',
+      ...AdapterTaro()
+    });
+
+    const Get = alovaInst.Get<Taro.downloadFile.FileSuccessCallbackResult>('/unit-test', {
+      requestType: 'download',
+      filePath: 'http://file_path'
+    });
+
+    // With an aggressive throttle window, intermediate frames are coalesced but
+    // the last (100%) frame must still be flushed so the progress bar can finish.
+    const { downloading, onSuccess } = useRequest(Get, { progressThrottle: 1000 });
+    await untilCbCalled(onSuccess);
+    await untilCbCalled(setTimeout, 1200);
+    expect(downloading.value).toEqual({ total: 200, loaded: 200 });
   });
 });

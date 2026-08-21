@@ -97,6 +97,13 @@ export interface UseHookConfig<AG extends AlovaGenerics, Args extends any[] = an
   __referingObj?: ReferingObject;
 
   /**
+   * Throttle window (ms) applied to `downloading`/`uploading` progress updates.
+   * The final 100% frame is always delivered. Set to `0` to disable throttling.
+   * @default 0
+   */
+  progressThrottle?: number;
+
+  /**
    * other attributes
    */
   [attr: string]: any;

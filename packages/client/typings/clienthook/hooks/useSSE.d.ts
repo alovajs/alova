@@ -78,6 +78,7 @@ export type SSEHookConfig = FetchRequestInit & {
 export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] = any[]> {
   readyState: ExportedState<SSEHookReadyState, AG['StatesExport']>;
   data: ExportedState<Data | undefined, AG['StatesExport']>;
+  loading: ExportedState<boolean, AG['StatesExport']>;
   eventSource: ExportedState<EventSource | undefined, AG['StatesExport']>;
   /**
    * Make the request manually. This method is automatically triggered when using `immediate: true`
@@ -117,6 +118,22 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
 }
 
 /**
+ * Constructor type for the EventSource implementation used internally by `useSSE`.
+ * Platform adapters (e.g. uniapp/taro) provide their own implementations.
+ */
+export interface EventSourceClass {
+  new (
+    url: string,
+    reconnectionTime: number | null,
+    options: EventSourceFetchInit
+  ): {
+    addEventListener(type: string, listener: (event: any) => void): void;
+    removeEventListener(type: string, listener: (event: any) => void): void;
+    close(): void;
+  };
+}
+
+/**
  * useSSE
  * Send requests using Server-sent events
  *
@@ -125,7 +142,15 @@ export interface SSEExposure<AG extends AlovaGenerics, Data, Args extends any[] 
  * @param config Configuration parameters
  * @return useSSE related data and operation functions
  */
-export declare function useSSE<AG extends AlovaGenerics, Data = any, Args extends any[] = any[]>(
-  handler: Method<AG> | AlovaMethodHandler<AG, Args>,
-  config?: SSEHookConfig
-): SSEExposure<AG, Data, Args>;
+export declare const useSSE: {
+  <AG extends AlovaGenerics, Data = any, Args extends any[] = any[]>(
+    handler: Method<AG> | AlovaMethodHandler<AG, Args>,
+    config?: SSEHookConfig
+  ): SSEExposure<AG, Data, Args>;
+  /**
+   * The EventSource implementation used internally by `useSSE`.
+   * Replace this (e.g. `useSSE.EventSource = UniappEventSource`) on platforms
+   * without `fetch` + `ReadableStream` so that SSE works.
+   */
+  EventSource: EventSourceClass;
+};

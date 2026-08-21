@@ -1,5 +1,5 @@
 import { AlovaCompleteEvent, AlovaErrorEvent, AlovaEventBase, AlovaSuccessEvent } from '@/event';
-import { EnumHookType } from '@/util/helper';
+import { EnumHookType, throttle } from '@/util/helper';
 import {
   falseValue,
   forEach,
@@ -48,9 +48,11 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
   const { fs: frontStates, ht: hookType, c: useHookConfig } = hookInstance;
   const { loading: loadingState, data: dataState, error: errorState } = frontStates;
   const isFetcher = hookType === EnumHookType.USE_FETCHER;
-  const { force: forceRequest = falseValue, middleware = defaultMiddleware } = useHookConfig as
-    | FrontRequestHookConfig<AG, Args>
-    | FetcherHookConfig<AG>;
+  const {
+    force: forceRequest = falseValue,
+    middleware = defaultMiddleware,
+    progressThrottle = 0
+  } = useHookConfig as FrontRequestHookConfig<AG, Args> | FetcherHookConfig<AG>;
   const alovaInstance = getContext(methodInstance);
   const { id } = alovaInstance;
   // If it is a silent request, on success will be called directly after the request, on error will not be triggered, and progress will not be updated.
@@ -86,14 +88,15 @@ export default function useHookToSendRequest<AG extends AlovaGenerics, Args exte
       const forceRequestFinally = sloughConfig(guardNextForceRequest, [
         newInstance(AlovaEventBase<AG, Args>, methodInstance, sendCallingArgs)
       ]);
-      const progressUpdater =
-        (stage: 'downloading' | 'uploading') =>
-        ({ loaded, total }: Progress) => {
+      const progressUpdater = (stage: 'downloading' | 'uploading') => {
+        const update = throttle(({ loaded, total }: Progress) => {
           frontStates[stage].v = {
             loaded,
             total
           };
-        };
+        }, progressThrottle);
+        return (progress: Progress) => update(progress);
+      };
 
       methodInstance = guardNextReplacingMethod;
       // Sync the actual method being sent to the hook instance.

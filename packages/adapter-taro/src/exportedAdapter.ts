@@ -1,6 +1,7 @@
 import l2CacheAdapter from '@/l2CacheAdapter';
 import requestAdapter from '@/requestAdapter';
 import { AdapterTaroOptions } from '~/typings';
+import { setupHooks } from './hooks';
 
 /**
  * 统一的taro参数配置
@@ -9,6 +10,9 @@ import { AdapterTaroOptions } from '~/typings';
  * @returns alova参数
  */
 export default function exportedAdapter<StatesHook>(statesHook: StatesHook, { mockRequest }: AdapterTaroOptions) {
+  // Inject platform-specific hook configs (useSSE EventSource, useUploader file
+  // selection/conversion, useAutoRequest network/focus/visibility listeners).
+  setupHooks();
   return {
     statesHook,
     requestAdapter: mockRequest || requestAdapter,

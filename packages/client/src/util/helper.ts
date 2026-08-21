@@ -24,7 +24,8 @@ import {
   objectKeys,
   pushItem,
   setTimeoutFn,
-  trueValue
+  trueValue,
+  undefinedValue
 } from '@alova/shared';
 import { Method } from 'alova';
 
@@ -87,6 +88,50 @@ export const debounce = (fn: GeneralFn, delay: number | ((...args: any[]) => num
       bindFn();
     }
   };
+};
+
+/**
+ * Throttle a function. The first call fires immediately. Subsequent calls
+ * within `wait` ms are throttled, but the LAST one (tail frame) is guaranteed
+ * to fire when the window ends. This is important for progress updates so that
+ * the final 100% frame is never swallowed by throttling.
+ * When `wait <= 0` throttling is disabled (passthrough).
+ * @param fn callback function
+ * @param wait throttle window in ms
+ * @returns throttled function
+ */
+export const throttle = <T extends GeneralFn>(fn: T, wait = 0): T => {
+  if (wait <= 0) {
+    return fn;
+  }
+  let lastCallTime = 0;
+  let timer: ReturnType<typeof setTimeoutFn> | undefined;
+  let lastArgs: Parameters<T> | null = null;
+
+  const invoke = () => {
+    lastCallTime = Date.now();
+    timer = undefinedValue;
+    if (lastArgs) {
+      const args = lastArgs;
+      lastArgs = nullValue;
+      fn(...args);
+    }
+  };
+
+  return ((...args: Parameters<T>) => {
+    const now = Date.now();
+    lastArgs = args;
+    const remaining = wait - (now - lastCallTime);
+    if (remaining <= 0) {
+      if (timer !== undefinedValue) {
+        clearTimeoutTimer(timer);
+        timer = undefinedValue;
+      }
+      invoke();
+    } else if (timer === undefinedValue) {
+      timer = setTimeoutFn(invoke, remaining);
+    }
+  }) as T;
 };
 
 /**

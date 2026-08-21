@@ -69,7 +69,7 @@ const enum MessageType {
   Close = 'close'
 }
 
-export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
+const useSSE = <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args extends any[] = any[]>(
   handler: Method<AG> | AlovaMethodHandler<AG, Args>,
   config: SSEHookConfig = {}
 ) => {
@@ -94,6 +94,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   const data = create(initialData as Data, 'data');
   const readyState = create(SSEHookReadyState.CLOSED, 'readyState');
+  const loading = create(falseValue, 'loading');
   const exposedEventSource = create(undefinedValue as EventSourceFetch | undefined, 'eventSource');
 
   let methodInstance = getHandlerMethod(handler);
@@ -264,6 +265,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
   const esOpen = memorize(() => {
     // resolve the promise returned when using send()
     readyState.v = SSEHookReadyState.OPEN;
+    loading.v = falseValue;
     promiseThen(createSSEEvent(MessageType.Open), event => eventManager.emit(SSEOpenEventKey, event));
     // ! Must be resolved after calling onOpen
     sendPromiseObject.current?.resolve();
@@ -271,6 +273,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
   const esError = memorize((event: EventSourceFetchEvent) => {
     readyState.v = SSEHookReadyState.CLOSED;
+    loading.v = falseValue;
     promiseThen(
       createSSEEvent(MessageType.Error, event.error || newInstance(Error, 'SSE Error')),
       sendSSEEvent(event => eventManager.emit(SSEMessageEventKey, event)) as any
@@ -306,6 +309,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     es.removeEventListener(MessageType.Message, esMessage);
     es.removeEventListener(MessageType.Close, close);
     readyState.v = SSEHookReadyState.CLOSED;
+    loading.v = falseValue;
     // After eventSource is closed, unregister all custom events
     // Otherwise it may cause memory leaks
     customEventMap.current.forEach(([_, eventTrigger], eventName) => {
@@ -341,6 +345,7 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
     // Mark as connecting immediately so the state reflects the in-flight request even while `beforeRequest` resolves.
     readyState.v = SSEHookReadyState.CONNECTING;
+    loading.v = trueValue;
 
     // Call the global `beforeRequest` hook so that unified request handling (e.g. adding auth headers/params)
     // also applies to SSE. This is consistent with the behavior in `sendRequest`.
@@ -358,22 +363,23 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
 
       // Establish connection
       const isBodyData = (data: any): data is BodyInit => isString(data) || isSpecialRequestBody(data);
-      es = newInstance(EventSourceFetch, fullURL, reconnectionTime, {
+      const esInstance = newInstance(useSSE.EventSource, fullURL, reconnectionTime, {
         credentials: withCredentials ? 'include' : 'same-origin',
         method: type || 'GET',
         headers,
         body: isBodyData(data) ? data : JSONStringify(data),
         ...fetchOptions
-      });
-      eventSource.current = es;
-      exposedEventSource.v = es;
+      }) as EventSourceFetch;
+      es = esInstance;
+      eventSource.current = esInstance;
+      exposedEventSource.v = esInstance;
 
       // * MARK: Register to handle events
       // Register to handle event open error message
-      es.addEventListener(MessageType.Open, esOpen);
-      es.addEventListener(MessageType.Error, esError);
-      es.addEventListener(MessageType.Message, esMessage);
-      es.addEventListener(MessageType.Close, close);
+      esInstance.addEventListener(MessageType.Open, esOpen);
+      esInstance.addEventListener(MessageType.Error, esError);
+      esInstance.addEventListener(MessageType.Message, esMessage);
+      esInstance.addEventListener(MessageType.Close, close);
 
       // and custom events
       // If the on listener is used before connect (send), there will already be events in customEventMap.
@@ -412,6 +418,17 @@ export default <Data = any, AG extends AlovaGenerics = AlovaGenerics, Args exten
     onMessage,
     onError,
     onOpen,
-    ...objectify([readyState, data, exposedEventSource])
+    ...objectify([readyState, data, loading, exposedEventSource])
   });
 };
+
+/**
+ * The EventSource implementation used by `useSSE`. It defaults to the
+ * browser/node implementation (`EventSourceFetch`) but can be replaced by
+ * platform adapters (e.g. `UniappEventSource` / `TaroEventSource`) so that SSE
+ * works on platforms without `fetch` + `ReadableStream`.
+ */
+useSSE.EventSource = EventSourceFetch;
+
+export default useSSE;
+export { useSSE };

@@ -79,6 +79,30 @@ describe('vue => useSSE', () => {
     close();
   }, 3000);
 
+  // ! The `loading` state should reflect the connection lifecycle
+  test('should toggle loading state during connection lifecycle', async () => {
+    const alovaInst = await prepareAlova();
+    const poster = (data?: any) => alovaInst.Get(`/${TriggerEventName}`, data);
+    const { loading, readyState, send, close } = useSSE(poster);
+
+    expect(loading.value).toBeFalsy();
+    expect(readyState.value).toStrictEqual(SSEHookReadyState.CLOSED);
+
+    const sendPromise = send();
+    // `loading` turns true synchronously while connecting
+    expect(loading.value).toBeTruthy();
+    expect(readyState.value).toStrictEqual(SSEHookReadyState.CONNECTING);
+
+    // after the connection opens, `loading` turns false
+    await sendPromise;
+    expect(loading.value).toBeFalsy();
+    expect(readyState.value).toStrictEqual(SSEHookReadyState.OPEN);
+
+    close();
+    expect(loading.value).toBeFalsy();
+    expect(readyState.value).toStrictEqual(SSEHookReadyState.CLOSED);
+  });
+
   // ! There is initial data and the request is not sent immediately
   test('should get the initial data and NOT send request immediately', async () => {
     const alovaInst = await prepareAlova();

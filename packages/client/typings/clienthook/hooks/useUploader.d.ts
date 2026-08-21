@@ -111,7 +111,7 @@ export interface AlovaRawFile<F = AlovaUploaderFileType[keyof AlovaUploaderFileT
   mimeType?: string;
 }
 
-interface FileAppendOptions {
+export interface FileAppendOptions {
   /**
    * The position in the fileList to start appending.
    */
@@ -236,6 +236,6 @@ export interface FileConverter {
   convert(file: any): any;
 }
 export declare namespace useUploader {
-  function selectFile(options: FileAppendOptions): AlovaRawFile[];
-  const converters: FileConverter[];
+  function selectFile(options: FileAppendOptions): Promise<AlovaRawFile[]>;
+  let converters: FileConverter[];
 }
