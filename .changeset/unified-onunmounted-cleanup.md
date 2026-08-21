@@ -1,5 +1,5 @@
 ---
-'@alova/client': patch
+'alova': patch
 '@alova/vue-options': patch
 ---
 
