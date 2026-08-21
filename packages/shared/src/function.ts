@@ -398,12 +398,13 @@ export const buildCompletedURL = (baseURL: string, url: string, params: MethodRe
   const completeURL = startsWithPrefix ? url : baseURL + url;
 
   // Convert params object to get string
-  // Filter out those whose value is undefined
+  // Filter out those whose value is undefined, and encode the value via encodeURIComponent
+  // so that special characters (e.g. spaces, non-ASCII) are safely transmitted.
   const paramsStr = isString(params)
     ? params
     : mapItem(
         filterItem(objectKeys(params), key => params[key] !== undefinedValue),
-        key => `${key}=${params[key]}`
+        key => `${key}=${encodeURIComponent(params[key])}`
       ).join('&');
   // Splice the get parameters behind the url. Note that the url may already have parameters.
   return paramsStr

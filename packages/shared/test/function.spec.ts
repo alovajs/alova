@@ -665,14 +665,14 @@ describe('shared functions', () => {
     result = buildCompletedURL('http://example.com', 'api/users space', {});
     expect(result).toBe('http://example.com/api/users space');
 
-    // should handle parameters with special characters and non-ASCII values
+    // should encode parameter values that contain special characters or non-ASCII via encodeURIComponent
     result = buildCompletedURL('http://example.com', '/api', {
       'special char': 'test space',
       chinese: '中文'
     });
-    expect(result).toBe('http://example.com/api?special char=test space&chinese=中文');
+    expect(result).toBe('http://example.com/api?special char=test%20space&chinese=%E4%B8%AD%E6%96%87');
 
-    // should handle string parameters
+    // should handle string parameters (passed-through, no double encoding)
     result = buildCompletedURL('http://example.com', '/api', 'param1=a&param2=b');
     expect(result).toBe('http://example.com/api?param1=a&param2=b');
 
@@ -683,6 +683,52 @@ describe('shared functions', () => {
     // should handle absolute URLs with query parameters
     result = buildCompletedURL('http://example.com', 'https://api.another.com/users?id=1', { extra: 'param' });
     expect(result).toBe('https://api.another.com/users?id=1&extra=param');
+
+    // should encode a variety of reserved/unsafe characters in values
+    result = buildCompletedURL('http://example.com', '/api', {
+      a: 'a&b=c',
+      b: 'a+b',
+      c: 'a/b',
+      d: 'a?b',
+      e: 'a#b',
+      f: 'a:b',
+      g: 'a;b',
+      h: "a'b",
+      i: 'a"b',
+      j: 'a,b',
+      k: '{}|\\^[]`'
+    });
+    expect(result).toBe(
+      "http://example.com/api?a=a%26b%3Dc&b=a%2Bb&c=a%2Fb&d=a%3Fb&e=a%23b&f=a%3Ab&g=a%3Bb&h=a'b&i=a%22b&j=a%2Cb&k=%7B%7D%7C%5C%5E%5B%5D%60"
+    );
+
+    // should encode numeric and boolean values (after implicit toString)
+    result = buildCompletedURL('http://example.com', '/api', { n: 123, b: true, f: false });
+    expect(result).toBe('http://example.com/api?n=123&b=true&f=false');
+
+    // should encode the literal string "null" when value is null
+    result = buildCompletedURL('http://example.com', '/api', { x: null });
+    expect(result).toBe('http://example.com/api?x=null');
+
+    // should encode array values via toString (joined with comma)
+    result = buildCompletedURL('http://example.com', '/api', { list: [1, 2, 3] });
+    expect(result).toBe('http://example.com/api?list=1%2C2%2C3');
+
+    // should encode object values to "[object Object]"
+    result = buildCompletedURL('http://example.com', '/api', { obj: { foo: 'bar' } });
+    expect(result).toBe('http://example.com/api?obj=%5Bobject%20Object%5D');
+
+    // should not re-encode already-encoded values (e.g. %20 stays as %20)
+    result = buildCompletedURL('http://example.com', '/api', { pre: 'a%20b' });
+    expect(result).toBe('http://example.com/api?pre=a%2520b');
+
+    // should combine encoded params with an existing query string in the url
+    result = buildCompletedURL('http://example.com/api?existing=1', '', { q: '中文' });
+    expect(result).toBe('http://example.com/api?existing=1&q=%E4%B8%AD%E6%96%87');
+
+    // should produce no trailing '?' when params object only contains undefined values
+    result = buildCompletedURL('http://example.com', '/api', { a: undefined, b: undefined });
+    expect(result).toBe('http://example.com/api');
   });
 
   test('deepClone', () => {
