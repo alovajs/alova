@@ -1,6 +1,6 @@
 {
   "name": "alova",
-  "version": "3.5.4",
+  "version": "3.5.5",
   "description": "The request strategy layer for JavaScript. 20+ ready-made strategies cut your request code by up to 70% — pagination, forms, uploads, retry, rate-limit and more. One API spans React, Vue, Svelte, Solid, mini-programs and the server.",
   "main": "dist/alova.common.cjs",
   "module": "dist/alova.esm.js",

@@ -1,5 +1,13 @@
 # alova
 
+## 3.5.5
+
+### Patch Changes
+
+- [#853](https://github.com/alovajs/alova/pull/853) [`0af0d95`](https://github.com/alovajs/alova/commit/0af0d95e4be46da6913e14e1fb5be6743acb9cb7) Thanks [@JOU-amjs](https://github.com/JOU-amjs)! - Unify the request state cache cleanup on component unmount into a single `onUnmounted` handler inside `createRequestState`, so every framework relies on the same lifecycle-based cleanup instead of `@alova/vue-options` registering it separately inside `effectRequest`.
+
+  This fixes the issue where `updateState` matched against stale hook instances after a component was unmounted (its callback was invoked 2-3 times instead of the expected 1).
+
 ## 3.5.4
 
 ### Patch Changes
