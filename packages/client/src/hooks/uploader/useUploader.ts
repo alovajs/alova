@@ -47,9 +47,12 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
   handler: (fileData: M extends 'each' ? UploadingFileData : UploadingFileData[]) => Method<AG>,
   { limit = 0, localLink, replaceSrc, mode }: UploadHookConfig<AG, M> = {}
 ) {
-  const { create, computed, exposeProvider, ref } = statesHookHelper<AG>(promiseStatesHook());
+  const { create, computed, exposeProvider, ref, effectEvent } = statesHookHelper<AG>(promiseStatesHook());
 
-  const eventManager = createEventManager<UploadEvents<AG, any[]>>();
+  // Keep the eventManager stable across renders (via `ref`) so the upload/send
+  // handlers (memorized via useCallback) and the onSuccess/onError/onComplete
+  // binders always operate on the same instance.
+  const eventManager = ref(createEventManager<UploadEvents<AG, any[]>>()).current;
 
   const fileList = create([] as AlovaFileItem[], 'fileList');
   const file = computed(() => fileList.v[0] as AlovaFileItem | undefined, [fileList], 'file');
@@ -351,13 +354,16 @@ function useUploader<AG extends AlovaGenerics = AlovaGenerics, M extends Mode = 
     upload,
     abort,
     onSuccess: (handler: (event: AlovaSuccessEvent<AG, any[]>) => void) => {
-      eventManager.on(KEY_SUCCESS, handler);
+      // Auto-unbind on the calling component's unmount (#834/#846).
+      effectEvent(() => eventManager.on(KEY_SUCCESS, handler));
     },
     onError: (handler: (event: AlovaErrorEvent<AG, any[]>) => void) => {
-      eventManager.on(KEY_ERROR, handler);
+      // Auto-unbind on the calling component's unmount (#834/#846).
+      effectEvent(() => eventManager.on(KEY_ERROR, handler));
     },
     onComplete: (handler: (event: AlovaCompleteEvent<AG, any[]>) => void) => {
-      eventManager.on(KEY_COMPLETE, handler);
+      // Auto-unbind on the calling component's unmount (#834/#846).
+      effectEvent(() => eventManager.on(KEY_COMPLETE, handler));
     }
   });
 }

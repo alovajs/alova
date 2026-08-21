@@ -12,9 +12,7 @@ export default {
   update: (newVal, state) => {
     state[1](newVal);
   },
-  effectRequest: ({ handler, removeStates, immediate, watchingStates = [] }) => {
-    // remove states when component unmounted
-    onCleanup(removeStates);
+  effectRequest: ({ handler, immediate, watchingStates = [] }) => {
     immediate && handler();
 
     forEach(watchingStates, (state: Accessor<unknown>, i) => {

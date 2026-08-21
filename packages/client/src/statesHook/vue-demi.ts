@@ -29,11 +29,7 @@ export default {
   update: (newVal, state) => {
     state.value = newVal;
   },
-  effectRequest({ handler, removeStates, immediate, watchingStates }) {
-    // When used inside a component, the corresponding state is removed when the component is unloaded.
-    if (getCurrentInstance()) {
-      onUnmounted(removeStates);
-    }
+  effectRequest({ handler, immediate, watchingStates }) {
     immediate && handler();
 
     forEach(watchingStates || [], (state, i) => {
@@ -53,7 +49,7 @@ export default {
     });
   },
   onMounted: callback => {
-    onMounted(callback);
+    getCurrentInstance() && onMounted(callback);
   },
   onUnmounted: callback => {
     onUnmounted(callback);

@@ -60,10 +60,7 @@ export default ({ nuxtApp: useNuxtApp, serializers = {} }: NuxtHookConfig) => {
       // serialize data in server, and deserialize in client ↑↑↑
       state.value = newVal;
     },
-    effectRequest({ handler, removeStates, immediate, watchingStates }, referingObject) {
-      if (getCurrentInstance()) {
-        onUnmounted(removeStates);
-      }
+    effectRequest({ handler, immediate, watchingStates }, referingObject) {
       const nuxtApp = useNuxtApp();
       const stateKey = getCounter('initialRequest');
       let initialRequestInServer = referingObject.initialRequest;

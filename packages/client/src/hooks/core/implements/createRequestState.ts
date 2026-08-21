@@ -105,6 +105,7 @@ export default function createRequestState<
     objectify,
     exposeProvider,
     transformState2Proxy,
+    effectEvent,
     onUnmounted,
     __referingObj: referingObject
   } = statesHookHelper<AG>(promiseStatesHook(), useHookConfig.__referingObj);
@@ -122,11 +123,20 @@ export default function createRequestState<
   const uploading = create({ ...progress }, 'uploading');
 
   const frontStates = objectify([data, loading, error, downloading, uploading]);
-  const eventManager = createEventManager<{
-    success: AlovaSuccessEvent<AG, Args>;
-    error: AlovaErrorEvent<AG, Args>;
-    complete: AlovaCompleteEvent<AG, Args>;
-  }>();
+  // Keep the eventManager stable across renders (via `ref`). In React each render
+  // recreates this function scope, so a plain `createEventManager()` would create a
+  // new instance on every render. That races with `effectEvent`'s subscribe/unsubscribe
+  // and async `emit` (e.g. useRetriableRequest's retry loop, where middleware triggers
+  // extra renders via controlLoading/setLoading) and can miss handlers. A stable instance
+  // keeps emit (hookInstance.em) and the onSuccess/onError/onComplete subscriptions in sync.
+  const eventManager =
+    ref(
+      createEventManager<{
+        success: AlovaSuccessEvent<AG, Args>;
+        error: AlovaErrorEvent<AG, Args>;
+        complete: AlovaCompleteEvent<AG, Args>;
+      }>()
+    ).current;
 
   const hookInstance = refCurrent(ref(createHook(hookType, useHookConfig, eventManager, referingObject)));
 
@@ -208,12 +218,18 @@ export default function createRequestState<
       hasWatchingStates
         ? (changedIndex: number) => debouncingSendHandler.current(changedIndex, referingObject, methodHandler)
         : () => wrapEffectRequest(referingObject),
-    removeStates: () => {
-      forEach(objectValues(hookInstance.rf), fn => fn());
-    },
     frontStates: { ...frontStates, ...managedStatesProxy },
     watchingStates,
     immediate: immediate ?? trueValue
+  });
+
+  // Unified removal of request state cache on unmount.
+  // Previously each framework's `effectRequest` handled this internally (e.g. Vue/Solid/Svelte
+  // registered an `onUnmounted`, React registered a `useEffect` cleanup). It's now moved here so
+  // the cleanup logic lives in a single place and every framework gets it via `onUnmounted`,
+  // whose implementation already maps to the correct lifecycle hook for each framework.
+  onUnmounted(() => {
+    forEach(objectValues(hookInstance.rf), fn => fn());
   });
 
   const hookProvider = exposeProvider({
@@ -232,22 +248,29 @@ export default function createRequestState<
       // Auto-unbind when the component calling `onSuccess` is unmounted,
       // preventing handler accumulation (memory leak) when the same provider
       // is shared across descendant components (e.g. via provide/inject + v-for).
-      // Each binder registers its own `onUnmounted`, so the unbind is bound to the
+      // See https://github.com/alovajs/alova/pull/834
+      // Each binder registers its own `effectEvent`, so the unbind is bound to the
       // component instance that actually called the binder — parent and descendant
       // handlers are removed independently on their own unmount.
-      const off = eventManager.on(KEY_SUCCESS, handler);
-      onUnmounted(off);
+      //
+      // Use `effectEvent` instead of a bare `onUnmounted(off)` so the subscribe
+      // and unsubscribe are paired symmetrically. In React Strict Mode, effects
+      // are double-invoked (mount → unmount → mount): `onUnmounted(off)` would
+      // run `off` during the simulated unmount and permanently drop the handler,
+      // while `effectEvent` re-subscribes on the following setup run.
+      // See https://github.com/alovajs/alova/issues/846
+      effectEvent(() => eventManager.on(KEY_SUCCESS, handler));
     },
     onError(handler: ErrorHandler<AG, Args>) {
       // will not throw error when bindError is true.
       // it will reset in `exposeProvider` so that ignore the error binding in custom use hooks.
+      // Same auto-unbind semantics as `onSuccess` above (#834/#846).
       referingObject.bindError = trueValue;
-      const off = eventManager.on(KEY_ERROR, handler);
-      onUnmounted(off);
+      effectEvent(() => eventManager.on(KEY_ERROR, handler));
     },
     onComplete(handler: CompleteHandler<AG, Args>) {
-      const off = eventManager.on(KEY_COMPLETE, handler);
-      onUnmounted(off);
+      // Same auto-unbind semantics as `onSuccess` above (#834/#846).
+      effectEvent(() => eventManager.on(KEY_COMPLETE, handler));
     },
 
     /**

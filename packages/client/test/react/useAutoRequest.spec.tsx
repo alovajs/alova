@@ -192,12 +192,14 @@ describe('react => useAutoRequest', () => {
       expect(pollingFn).toHaveBeenCalledTimes(1);
     });
 
-    tag = 'polling 1';
+    // use ASCII-only tag values to keep the test focused on polling behavior
+    // (params with special characters are covered by buildCompletedURL unit tests)
+    tag = 'polling-1';
     await waitFor(() => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag }));
     });
 
-    tag = 'polling 2';
+    tag = 'polling-2';
     await waitFor(() => {
       expect(screen.getByRole('data')).toHaveTextContent(JSON.stringify({ tag }));
     });

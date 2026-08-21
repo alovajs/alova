@@ -31,7 +31,7 @@ export default {
     refCurrent(refObj) === undefinedValue && setRef(refObj, initialValue);
     return refObj;
   },
-  effectRequest({ handler, removeStates, immediate, watchingStates = [] }) {
+  effectRequest({ handler, immediate, watchingStates = [] }) {
     // `handler` is called when some states change are detected
     const oldStates = useRef(watchingStates);
 
@@ -50,9 +50,6 @@ export default {
         handler(changedIndex);
       }
     }, watchingStates);
-
-    // remove states when component is unmounted
-    useEffect(() => removeStates, []);
   },
   computed: (getter, depList) => {
     const memo = useMemo(getter, depList);
@@ -70,5 +67,24 @@ export default {
   },
   onUnmounted: callback => {
     useEffect(() => callback, []);
+  },
+  effectEvent: setup => {
+    // Keep the subscription (setup) and its cleanup paired inside a single
+    // `useEffect` so they are symmetric. React Strict Mode double-invokes
+    // effects (setup → cleanup → setup); with this pairing the cleanup removes
+    // the handler and the re-run of setup subscribes it again, so the handler
+    // is never permanently lost.
+    // Fixes the `onSuccess` callback loss caused by `onUnmounted` cleanup in
+    // Strict Mode: https://github.com/alovajs/alova/issues/846
+    //
+    // No dependency array on purpose: `createRequestState` recreates the
+    // `eventManager` on every render (only the latest instance is used to emit
+    // events), so the subscription must be re-established on every render to
+    // keep handlers registered on the latest eventManager.
+    // Note: the handler subscription is not lost for the first (even synchronous)
+    // request because `em.emit` happens in a microtask (after `await`), while all
+    // `useEffect` callbacks are flushed synchronously on commit — so this setup
+    // always runs before the first `emit`.
+    useEffect(() => setup());
   }
 } as StatesHook<ReactHookExportType<unknown>>;

@@ -3,7 +3,7 @@ import { useRequest } from '@/index';
 import reactHook from '@/statesHook/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createAlova } from 'alova';
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, ReactElement, StrictMode, useContext, useMemo, useState } from 'react';
 import { delay } from 'root/testUtils';
 
 const alovaInst = createAlova({
@@ -202,5 +202,73 @@ describe('useRequest event auto-unbind on descendant unmount (react)', () => {
     expect(childSuccessB).toHaveBeenCalledTimes(2);
 
     unmount();
+  });
+});
+
+describe('useRequest event binders under React StrictMode (react)', () => {
+  test('onSuccess handler is not lost after StrictMode double-invokes effects', async () => {
+    const successHandler = vi.fn();
+
+    const Page = () => {
+      const Get = alovaInst.Get('/info-list', { cacheFor: 0 });
+      const { onSuccess } = useRequest(Get);
+      onSuccess(successHandler);
+      return <span>page</span>;
+    };
+
+    render(
+      (
+        <StrictMode>
+          <Page />
+        </StrictMode>
+      ) as ReactElement<any, any>
+    );
+
+    // The immediate request fires on mount. Even though StrictMode simulates an
+    // unmount (running the effect cleanup) and remounts, the onSuccess handler
+    // must survive and be invoked for the resolved request.
+    await waitFor(() => expect(successHandler).toHaveBeenCalled());
+  });
+
+  test('onComplete handler is not lost after StrictMode double-invokes effects', async () => {
+    const completeHandler = vi.fn();
+
+    const Page = () => {
+      const Get = alovaInst.Get('/info-list', { cacheFor: 0 });
+      const { onComplete } = useRequest(Get);
+      onComplete(completeHandler);
+      return <span>page</span>;
+    };
+
+    render(
+      (
+        <StrictMode>
+          <Page />
+        </StrictMode>
+      ) as ReactElement<any, any>
+    );
+
+    await waitFor(() => expect(completeHandler).toHaveBeenCalled());
+  });
+
+  test('onError handler is not lost after StrictMode double-invokes effects', async () => {
+    const errorHandler = vi.fn();
+
+    const Page = () => {
+      const Get = alovaInst.Get('/list-error', { cacheFor: 0 });
+      const { onError } = useRequest(Get);
+      onError(errorHandler);
+      return <span>page</span>;
+    };
+
+    render(
+      (
+        <StrictMode>
+          <Page />
+        </StrictMode>
+      ) as ReactElement<any, any>
+    );
+
+    await waitFor(() => expect(errorHandler).toHaveBeenCalled());
   });
 });
