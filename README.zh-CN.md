@@ -38,6 +38,10 @@
   <a href="https://sealedrose.com/verify-video" title="Sealed Rose — AI Deepfake Detector" target="_blank" rel="noopener noreferrer">
     <img src="https://alova.js.org/img/sponsors/mark-pure-white-wax.png" alt="Sealed Rose — AI Deepfake Detector" height="80" />
   </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://jamfeed.com/tools/instagram-account-analyzer-for-musicians/" title="JamFeed — Instagram Account Analyzer for Musicians" target="_blank" rel="noopener noreferrer">
+    <img src="https://alova.js.org/img/sponsors/jamfeed.png" alt="JamFeed — Instagram Account Analyzer for Musicians" height="80" />
+  </a>
 </p>
 
 ## 什么是 alova？
